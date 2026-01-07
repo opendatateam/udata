@@ -3,6 +3,7 @@ from flask import url_for
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
+from udata.core.pages.models import Page
 from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
@@ -44,6 +45,13 @@ class Post(db.Datetimed, Linkable, db.Document):
     content = field(
         db.StringField(required=True),
         markdown=True,
+    )
+    content_as_page = field(
+        db.ReferenceField("Page"),
+        nested_fields=Page.__read_fields__,
+        allow_null=True,
+        description="Reference to a Page when body_type is 'blocs'",
+        checks=[required_if(body_type="blocs")],
     )
     image_url = field(
         db.StringField(),
@@ -98,12 +106,6 @@ class Post(db.Datetimed, Linkable, db.Document):
     body_type = field(
         db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
         description="HTML or markdown body type",
-    )
-
-    page_id = field(
-        db.ReferenceField("Page"),
-        description="Reference to a Page when body_type is 'blocs'",
-        checks=[required_if(body_type="blocs")],
     )
 
     meta = {
