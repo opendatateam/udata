@@ -10,14 +10,15 @@ from udata.core.user.factories import UserFactory
 from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
 )
+from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.notifications import transfer_request_notifications
-from udata.features.notifications.models import Notification
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
+
 
 class TransferStartTest(PytestOnlyDBTestCase):
     def assert_transfer_started(self, subject, owner, recipient, comment):
