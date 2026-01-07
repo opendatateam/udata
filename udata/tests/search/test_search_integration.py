@@ -3,8 +3,9 @@ import time
 import pytest
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.reuse.factories import ReuseFactory
+from udata.core.reuse.factories import VisibleReuseFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -42,12 +43,15 @@ class SearchIntegrationTest(APITestCase):
         sent as literal 'None' strings (e.g. ?q=None&tag=None).
         """
         org = OrganizationFactory()
-        ReuseFactory(organization=org)
+        reuse = VisibleReuseFactory(organization=org)
 
         time.sleep(1)
 
         response = self.get(f"/api/2/reuses/search/?organization={org.id}")
         self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [r["id"] for r in response.json["data"]]
+        assert str(reuse.id) in ids
 
     def test_organization_search_with_badge_filter(self):
         """
@@ -56,5 +60,14 @@ class SearchIntegrationTest(APITestCase):
         When searching organizations with only a badge filter, other params should not be
         sent as literal 'None' strings (e.g. ?q=None&tag=None).
         """
+        org = OrganizationFactory()
+        org.add_badge(org_constants.PUBLIC_SERVICE)
+        org.save()
+
+        time.sleep(1)
+
         response = self.get("/api/2/organizations/search/?badge=public-service")
         self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert str(org.id) in ids
