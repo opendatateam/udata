@@ -14,7 +14,7 @@ org_ref_fields = api.inherit(
         "name": fields.String(description="The organization name", readonly=True),
         "acronym": fields.String(description="The organization acronym"),
         "slug": fields.String(
-            description="The organization string used as permalink", required=True
+            description="The organization string used as permalink", readonly=True
         ),
         "uri": fields.String(
             attribute=lambda o: o.self_api_url(),
@@ -122,12 +122,12 @@ member_fields = api.model(
 org_fields = api.model(
     "Organization",
     {
-        "id": fields.String(description="The organization identifier", required=True),
+        "id": fields.String(description="The organization identifier", readonly=True),
         "name": fields.String(description="The organization name", required=True),
         "acronym": fields.String(description="The organization acronym"),
         "url": fields.String(description="The organization website URL"),
         "slug": fields.String(
-            description="The organization string used as permalink", required=True
+            description="The organization string used as permalink", readonly=True
         ),
         "description": fields.Markdown(
             description="The organization description in Markdown", required=True

@@ -56,9 +56,13 @@ class PostsAPITest(APITestCase):
 
     def test_post_api_get(self):
         """It should fetch a post from the API"""
-        post = PostFactory()
+        admin = AdminFactory()
+        post = PostFactory(owner=admin)
         response = self.get(url_for("api.post", post=post))
         assert200(response)
+        owner = response.json["owner"]
+        assert isinstance(owner, dict)
+        assert owner["id"] == str(admin.id)
 
     def test_post_api_create(self):
         """It should create a post from the API"""

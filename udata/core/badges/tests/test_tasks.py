@@ -1,5 +1,3 @@
-import udata.core.dataservices.tasks  # noqa
-import udata.core.dataset.tasks  # noqa
 from udata.core.badges.tasks import update_badges
 from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory

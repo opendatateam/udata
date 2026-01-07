@@ -168,6 +168,8 @@ class Organization(
         "auto_create_index_on_save": True,
     }
 
+    verbose_name = _("organization")
+
     def __str__(self):
         return self.name or ""
 
