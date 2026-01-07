@@ -11,7 +11,7 @@ apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
 
 ns = apiv2.namespace("reuses", "Reuse related operations")
 
-search_parser = ReuseSearch.as_request_parser()
+search_parser = ReuseSearch.as_request_parser(store_missing=False)
 
 DEFAULT_SORTING = "-created_at"
 
