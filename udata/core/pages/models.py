@@ -84,6 +84,22 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
+class AccordionItemBloc(db.EmbeddedDocument):
+    title = field(db.StringField(required=True))
+    content = field(
+        db.EmbeddedDocumentListField(Bloc),
+        generic=True,
+    )
+
+
+@generate_fields()
+class AccordionBloc(Bloc):
+    title = field(db.StringField())
+    description = field(db.StringField())
+    items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
+
+
+@generate_fields()
 class Page(Auditable, Owned, Datetimed, db.Document):
     blocs = field(
         db.EmbeddedDocumentListField(Bloc),
