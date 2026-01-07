@@ -684,6 +684,19 @@ def field(
         return inner
 
 
+def run_check(check, value, key, obj, data):
+    check(
+        value,
+        **{
+            "is_creation": obj._created,
+            "is_update": not obj._created,
+            "field": key,
+            "obj": obj,
+            "data": data,
+        },
+    )
+
+
 def patch(obj, request) -> type:
     """Patch the object with the data from the request.
 
@@ -761,43 +774,29 @@ def patch(obj, request) -> type:
 
                 value = objects
 
-            # Run checks if value is modified
+            # Run checks if value is modified.
+            # We run checks here (before setattr) to compare old vs new value.
             checks = info.get("checks", [])
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
-                    check(
-                        value,
-                        **{
-                            "is_creation": obj._created,
-                            "is_update": not obj._created,
-                            "field": key,
-                            "obj": obj,
-                            "data": data,
-                        },
-                    )
+                    run_check(check, value, key, obj, data)
 
             setattr(obj, key, value)
 
-    # Run checks with run_even_if_missing on fields not in request
-    for key, model_field in obj._fields.items():
+    # Run checks marked with `run_even_if_missing` on fields not in request.
+    # Some checks (like `required_if`) need to run even when their field is absent
+    # from the request, because they validate cross-field constraints based on
+    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    for key, _, info in get_fields(obj.__class__):
         if key in data:
             continue
-        info = getattr(model_field, "__additional_field_info__", {})
         checks = info.get("checks", [])
         value = getattr(obj, key, None)
 
         for check in checks:
-            if getattr(check, "run_even_if_missing", False):
-                check(
-                    value,
-                    **{
-                        "is_creation": obj._created,
-                        "is_update": not obj._created,
-                        "field": key,
-                        "obj": obj,
-                        "data": data,
-                    },
-                )
+            if not getattr(check, "run_even_if_missing", False):
+                continue
+            run_check(check, value, key, obj, data)
 
     return obj
 
