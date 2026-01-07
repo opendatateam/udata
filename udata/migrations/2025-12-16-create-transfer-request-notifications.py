@@ -62,6 +62,5 @@ def migrate(db):
                         f"Error creating notification for user {recipient_user.id} "
                         f"and transfer {transfer.id}: {e}"
                     )
-                    continue
 
     log.info(f"Created {created_count} TransferRequestNotifications")
