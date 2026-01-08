@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 12:59\n"
+"PO-Revision-Date: 2026-01-08 10:27\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: es-ES\n"
 "X-Crowdin-File: /main/udata/translations/udata.pot\n"
-"X-Crowdin-File-ID: 6\n"
+"X-Crowdin-File-ID: 86\n"
 
 #: udata/settings.py:127
 msgid "Welcome"
@@ -736,7 +736,7 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:90 udata/harvest/forms.py:84
 msgid "URL"
-msgstr "URL"
+msgstr ""
 
 #: udata/core/dataset/forms.py:92
 msgid "Format"
@@ -1544,7 +1544,7 @@ msgstr "ha seguido una organización "
 
 #: udata/core/user/forms.py:22
 msgid "Avatar"
-msgstr "Avatar"
+msgstr ""
 
 #: udata/core/user/forms.py:24
 msgid "About"
@@ -1914,3 +1914,4 @@ msgstr ""
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
+
