@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 12:59\n"
+"PO-Revision-Date: 2026-01-08 10:27\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: ar\n"
 "X-Crowdin-File: /main/udata/translations/udata.pot\n"
-"X-Crowdin-File-ID: 6\n"
+"X-Crowdin-File-ID: 86\n"
 
 #: udata/settings.py:127
 msgid "Welcome"
@@ -1914,3 +1914,4 @@ msgstr "مستخدم بشكل كبير"
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
+
