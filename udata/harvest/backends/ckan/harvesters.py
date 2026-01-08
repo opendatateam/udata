@@ -3,6 +3,8 @@ import logging
 from urllib.parse import urljoin
 from uuid import UUID
 
+from dateutil.parser import ParserError
+
 from udata import uris
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
@@ -202,10 +204,16 @@ class CkanBackend(BaseBackend):
                         log.debug("frequency value not handled: %s", value)
             # Temporal coverage start
             elif key == "temporal_start":
-                temporal_start = daterange_start(value)
+                try:
+                    temporal_start = daterange_start(value)
+                except ParserError:
+                    log.warning(f"Unparseable temporal_start value: '{value}'")
             # Temporal coverage end
             elif key == "temporal_end":
-                temporal_end = daterange_end(value)
+                try:
+                    temporal_end = daterange_end(value)
+                except ParserError:
+                    log.warning(f"Unparseable temporal_end value: '{value}'")
             else:
                 dataset.extras[extra["key"]] = value
 
