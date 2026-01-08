@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 12:59\n"
+"PO-Revision-Date: 2026-01-08 10:27\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: sr\n"
 "X-Crowdin-File: /main/udata/translations/udata.pot\n"
-"X-Crowdin-File-ID: 6\n"
+"X-Crowdin-File-ID: 86\n"
 
 #: udata/settings.py:127
 msgid "Welcome"
@@ -675,7 +675,7 @@ msgstr "Ажурирање"
 
 #: udata/core/dataset/constants.py:154 udata/core/reuse/constants.py:4
 msgid "API"
-msgstr "API"
+msgstr ""
 
 #: udata/core/dataset/constants.py:155
 msgid "Code repository"
@@ -736,7 +736,7 @@ msgstr "Тип ресурса (документација, API...)"
 
 #: udata/core/dataset/forms.py:90 udata/harvest/forms.py:84
 msgid "URL"
-msgstr "URL"
+msgstr ""
 
 #: udata/core/dataset/forms.py:92
 msgid "Format"
@@ -1391,7 +1391,7 @@ msgstr "Број елемената у фидовима"
 
 #: udata/core/spatial/constants.py:4
 msgid "POI"
-msgstr "POI"
+msgstr ""
 
 #: udata/core/spatial/forms.py:48
 #, python-brace-format
@@ -1917,3 +1917,4 @@ msgstr "Популарно"
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
+
