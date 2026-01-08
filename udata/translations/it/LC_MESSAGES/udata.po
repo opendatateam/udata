@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 12:59\n"
+"PO-Revision-Date: 2026-01-08 10:27\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: it\n"
 "X-Crowdin-File: /main/udata/translations/udata.pot\n"
-"X-Crowdin-File-ID: 6\n"
+"X-Crowdin-File-ID: 86\n"
 
 #: udata/settings.py:127
 msgid "Welcome"
@@ -95,7 +95,7 @@ msgstr "Errore di convalida: i tuoi dati non possono essere aggiornati per il mo
 
 #: udata/api/oauth2.py:56
 msgid "Bearer Token"
-msgstr "Bearer Token"
+msgstr ""
 
 #: udata/api/oauth2.py:59
 msgid "Default scope"
@@ -365,7 +365,7 @@ msgstr "Nome"
 
 #: udata/core/contact_point/forms.py:15 udata/core/user/forms.py:21
 msgid "Email"
-msgstr "Email"
+msgstr ""
 
 #: udata/core/contact_point/forms.py:17
 msgid "Contact form"
@@ -675,7 +675,7 @@ msgstr "Aggiornamento"
 
 #: udata/core/dataset/constants.py:154 udata/core/reuse/constants.py:4
 msgid "API"
-msgstr "API"
+msgstr ""
 
 #: udata/core/dataset/constants.py:155
 msgid "Code repository"
@@ -736,7 +736,7 @@ msgstr "Tipo di file (documentazione, API…)"
 
 #: udata/core/dataset/forms.py:90 udata/harvest/forms.py:84
 msgid "URL"
-msgstr "URL"
+msgstr ""
 
 #: udata/core/dataset/forms.py:92
 msgid "Format"
@@ -904,7 +904,7 @@ msgstr ""
 
 #: udata/core/dataset/models.py:646
 msgid "dataset"
-msgstr "dataset"
+msgstr ""
 
 #: udata/core/dataset/rdf.py:594 udata/tests/dataset/test_dataset_rdf.py:882
 #: udata/tests/dataset/test_dataset_rdf.py:899
@@ -1000,7 +1000,7 @@ msgstr "Amministratore"
 
 #: udata/core/organization/constants.py:5
 msgid "Editor"
-msgstr "Editor"
+msgstr ""
 
 #: udata/core/organization/constants.py:11 udata/features/transfer/models.py:13
 #: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:88
@@ -1050,7 +1050,7 @@ msgstr "URL del sito web dell'organizzazione"
 
 #: udata/core/organization/forms.py:55
 msgid "Logo"
-msgstr "Logo"
+msgstr ""
 
 #: udata/core/organization/forms.py:57
 msgid "Business id"
@@ -1182,11 +1182,11 @@ msgstr ""
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
-msgstr "Markdown"
+msgstr ""
 
 #: udata/core/post/constants.py:10
 msgid "HTML"
-msgstr "HTML"
+msgstr ""
 
 #: udata/core/post/forms.py:16
 msgid "Headline"
@@ -1274,7 +1274,7 @@ msgstr "Applicazione"
 
 #: udata/core/reuse/constants.py:6
 msgid "Idea"
-msgstr "Idea"
+msgstr ""
 
 #: udata/core/reuse/constants.py:7
 msgid "News Article"
@@ -1282,11 +1282,11 @@ msgstr "Articolo di notizie"
 
 #: udata/core/reuse/constants.py:8
 msgid "Paper"
-msgstr "Paper"
+msgstr ""
 
 #: udata/core/reuse/constants.py:9
 msgid "Post"
-msgstr "Post"
+msgstr ""
 
 #: udata/core/reuse/constants.py:10
 msgid "Visualization"
@@ -1391,7 +1391,7 @@ msgstr "Numero di elementi nei feed"
 
 #: udata/core/spatial/constants.py:4
 msgid "POI"
-msgstr "POI"
+msgstr ""
 
 #: udata/core/spatial/forms.py:48
 #, python-brace-format
@@ -1544,7 +1544,7 @@ msgstr "ha seguito un'organizzazione"
 
 #: udata/core/user/forms.py:22
 msgid "Avatar"
-msgstr "Avatar"
+msgstr ""
 
 #: udata/core/user/forms.py:24
 msgid "About"
@@ -1692,7 +1692,7 @@ msgstr "Alcuni dettagli opzionali su questo harvester"
 
 #: udata/harvest/forms.py:86
 msgid "Backend"
-msgstr "Backend"
+msgstr ""
 
 #: udata/harvest/models.py:19
 msgid "Manual"
@@ -1914,3 +1914,4 @@ msgstr ""
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
+
