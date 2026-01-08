@@ -85,6 +85,9 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
 
 @generate_fields()
 class MarkdownBloc(Bloc):
+    # Not using BlocWithTitleMixin because title should be optional here
+    title = field(db.StringField())
+    subtitle = field(db.StringField())
     content = field(
         db.StringField(required=True),
         markdown=True,
