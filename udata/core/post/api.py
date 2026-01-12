@@ -76,7 +76,7 @@ class PostsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        posts: list[Post] = Post.objects().published().order_by("-published").limit(15)
+        posts: list[Post] = Post.objects(kind="news").published().order_by("-published").limit(15)
         for post in posts:
             feed.add_item(
                 post.name,

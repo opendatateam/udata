@@ -11,3 +11,10 @@ BODY_TYPES = OrderedDict(
         ("blocs", _("Blocs")),
     ]
 )
+
+POST_KINDS = OrderedDict(
+    [
+        ("news", _("News")),
+        ("page", _("Page")),
+    ]
+)

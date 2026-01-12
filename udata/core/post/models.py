@@ -10,7 +10,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 from udata.uris import cdata_url
 
-from .constants import BODY_TYPES, IMAGE_SIZES
+from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 
 __all__ = ("Post",)
 
@@ -104,6 +104,12 @@ class Post(db.Datetimed, Linkable, db.Document):
 
     body_type = field(
         db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
+    )
+
+    kind = field(
+        db.StringField(choices=list(POST_KINDS), default="news", required=False),
+        filterable={},
+        description="Post kind (news or page)",
     )
 
     meta = {
