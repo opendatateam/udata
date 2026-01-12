@@ -178,3 +178,14 @@ class PostsAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(page_post.id)
+
+    def test_rss_feed_only_returns_news(self):
+        """RSS feed should only return posts with kind=news"""
+        news_post = PostFactory(kind="news")
+        page_post = PostFactory(kind="page")
+
+        response = self.get(url_for("api.recent_posts_atom_feed"))
+        assert200(response)
+        content = response.data.decode("utf-8")
+        assert news_post.name in content
+        assert page_post.name not in content
