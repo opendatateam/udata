@@ -2,7 +2,7 @@ from flask import url_for
 
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.pages.models import AccordionBloc, AccordionItemBloc, Page
+from udata.core.pages.models import AccordionItemBloc, AccordionListBloc, Page
 from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
 
@@ -145,7 +145,7 @@ class PageAPITest(APITestCase):
             {
                 "blocs": [
                     {
-                        "class": "AccordionBloc",
+                        "class": "AccordionListBloc",
                         "title": "FAQ",
                         "description": "Frequently asked questions",
                         "items": [
@@ -182,7 +182,7 @@ class PageAPITest(APITestCase):
         self.assert201(response)
 
         bloc = response.json["blocs"][0]
-        self.assertEqual("AccordionBloc", bloc["class"])
+        self.assertEqual("AccordionListBloc", bloc["class"])
         self.assertEqual("FAQ", bloc["title"])
         self.assertEqual("Frequently asked questions", bloc["description"])
         self.assertEqual(2, len(bloc["items"]))
@@ -196,13 +196,13 @@ class PageAPITest(APITestCase):
         self.assertEqual(2, len(bloc["items"][1]["content"][0]["datasets"]))
 
         page = Page.objects().first()
-        self.assertIsInstance(page.blocs[0], AccordionBloc)
+        self.assertIsInstance(page.blocs[0], AccordionListBloc)
         self.assertIsInstance(page.blocs[0].items[0], AccordionItemBloc)
         self.assertEqual("What is udata?", page.blocs[0].items[0].title)
 
         response = self.get(url_for("api.page", page=page))
         self.assert200(response)
-        self.assertEqual("AccordionBloc", response.json["blocs"][0]["class"])
+        self.assertEqual("AccordionListBloc", response.json["blocs"][0]["class"])
         self.assertEqual(2, len(response.json["blocs"][0]["items"]))
 
         response = self.put(
@@ -210,7 +210,7 @@ class PageAPITest(APITestCase):
             {
                 "blocs": [
                     {
-                        "class": "AccordionBloc",
+                        "class": "AccordionListBloc",
                         "title": "Updated FAQ",
                         "items": [
                             {
@@ -227,3 +227,31 @@ class PageAPITest(APITestCase):
         self.assertIsNone(response.json["blocs"][0]["description"])
         self.assertEqual(1, len(response.json["blocs"][0]["items"]))
         self.assertEqual("Single question", response.json["blocs"][0]["items"][0]["title"])
+
+    def test_accordion_bloc_cannot_be_nested(self):
+        self.login()
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "title": "FAQ",
+                        "items": [
+                            {
+                                "title": "Question",
+                                "content": [
+                                    {
+                                        "class": "AccordionListBloc",
+                                        "title": "Nested accordion",
+                                        "items": [],
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+        self.assert400(response)

@@ -93,17 +93,29 @@ class HeroBloc(Bloc):
     color = field(db.StringField(choices=HERO_COLORS))
 
 
+BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc",)
+
+
+def check_no_recursive_blocs(blocs, **kwargs):
+    for bloc in blocs:
+        if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
+            raise db.ValidationError(
+                f"{bloc.__class__.__name__} cannot be nested inside an accordion"
+            )
+
+
 @generate_fields()
 class AccordionItemBloc(db.EmbeddedDocument):
     title = field(db.StringField(required=True))
     content = field(
         db.EmbeddedDocumentListField(Bloc),
         generic=True,
+        checks=[check_no_recursive_blocs],
     )
 
 
 @generate_fields()
-class AccordionBloc(Bloc):
+class AccordionListBloc(Bloc):
     title = field(db.StringField())
     description = field(db.StringField())
     items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
