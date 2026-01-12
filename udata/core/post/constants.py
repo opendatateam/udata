@@ -8,6 +8,7 @@ BODY_TYPES = OrderedDict(
     [
         ("markdown", _("Markdown")),
         ("html", _("HTML")),
+        ("blocs", _("Blocs")),
     ]
 )
 

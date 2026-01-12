@@ -40,6 +40,32 @@ from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
+
+def required_if(**conditions):
+    """Check helper that makes a field required when other fields have specific values.
+
+    Usage:
+        page_id = field(
+            db.ReferenceField("Page"),
+            checks=[required_if(body_type="blocs")],
+        )
+    """
+
+    def check(value, data, field, obj, **_kwargs):
+        if value is not None:
+            return
+        for condition_field, condition_value in conditions.items():
+            actual_condition = data.get(condition_field, getattr(obj, condition_field, None))
+            if actual_condition == condition_value:
+                raise FieldValidationError(
+                    f"'{field}' is required when '{condition_field}' is '{condition_value}'",
+                    field=field,
+                )
+
+    check.run_even_if_missing = True
+    return check
+
+
 lazy_reference = api.model(
     "LazyReference",
     {
@@ -681,6 +707,19 @@ def field(
         return inner
 
 
+def run_check(check, value, key, obj, data):
+    check(
+        value,
+        **{
+            "is_creation": obj._created,
+            "is_update": not obj._created,
+            "field": key,
+            "obj": obj,
+            "data": data,
+        },
+    )
+
+
 def patch(obj, request) -> type:
     """Patch the object with the data from the request.
 
@@ -690,6 +729,7 @@ def patch(obj, request) -> type:
     from udata.mongo.engine import db
 
     data = request.json if isinstance(request, Request) else request
+
     for key, value in data.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
@@ -757,22 +797,29 @@ def patch(obj, request) -> type:
 
                 value = objects
 
-            # `checks` field attribute allows to do validation from the request before setting
-            # the attribute
+            # Run checks if value is modified.
+            # We run checks here (before setattr) to compare old vs new value.
             checks = info.get("checks", [])
-
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
-                    check(
-                        value,
-                        **{
-                            "is_creation": obj._created,
-                            "is_update": not obj._created,
-                            "field": key,
-                        },
-                    )  # TODO add other model attributes in function parameters
+                    run_check(check, value, key, obj, data)
 
             setattr(obj, key, value)
+
+    # Run checks marked with `run_even_if_missing` on fields not in request.
+    # Some checks (like `required_if`) need to run even when their field is absent
+    # from the request, because they validate cross-field constraints based on
+    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    for key, _, info in get_fields(obj.__class__):
+        if key in data:
+            continue
+        checks = info.get("checks", [])
+        value = getattr(obj, key, None)
+
+        for check in checks:
+            if not getattr(check, "run_even_if_missing", False):
+                continue
+            run_check(check, value, key, obj, data)
 
     return obj
 
