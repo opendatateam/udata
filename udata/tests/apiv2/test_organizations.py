@@ -4,6 +4,15 @@ from udata.core.organization.factories import Member, OrganizationFactory
 from udata.tests.api import APITestCase
 
 
+class OrganizationSearchAPIV2Test(APITestCase):
+    def test_organization_search_with_model_query_param(self):
+        """Searching organizations with 'model' as query param should not crash."""
+        OrganizationFactory.create_batch(3)
+
+        response = self.get("/api/2/organizations/search/?model=malicious")
+        self.assert200(response)
+
+
 class OrganizationExtrasAPITest(APITestCase):
     def setUp(self):
         self.login()

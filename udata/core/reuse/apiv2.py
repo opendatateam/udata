@@ -1,9 +1,6 @@
-from flask import request
-
 from udata import search
 from udata.api import API, apiv2
 from udata.core.reuse.models import Reuse
-from udata.utils import multi_to_dict
 
 from .api_fields import reuse_permissions_fields
 from .search import ReuseSearch
@@ -14,7 +11,7 @@ apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
 
 ns = apiv2.namespace("reuses", "Reuse related operations")
 
-search_parser = ReuseSearch.as_request_parser()
+search_parser = ReuseSearch.as_request_parser(store_missing=False)
 
 DEFAULT_SORTING = "-created_at"
 
@@ -28,5 +25,5 @@ class ReuseSearchAPI(API):
     @apiv2.marshal_with(Reuse.__page_fields__)
     def get(self):
         """Search all reuses"""
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+        args = search_parser.parse_args()
+        return search.query(ReuseSearch, **args)

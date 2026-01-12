@@ -104,6 +104,38 @@ class PageAPITest(APITestCase):
         response = self.get(url_for("api.page", page=page_id))
         self.assert200(response)
 
+    def test_hero_bloc(self):
+        self.login()
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "HeroBloc",
+                        "title": "Welcome to our portal",
+                        "description": "Discover our datasets",
+                        "color": "primary",
+                    }
+                ],
+            },
+        )
+        self.assert201(response)
+
+        self.assertEqual("HeroBloc", response.json["blocs"][0]["class"])
+        self.assertEqual("Welcome to our portal", response.json["blocs"][0]["title"])
+        self.assertEqual("Discover our datasets", response.json["blocs"][0]["description"])
+        self.assertEqual("primary", response.json["blocs"][0]["color"])
+
+        page = Page.objects().first()
+        response = self.get(url_for("api.page", page=page))
+        self.assert200(response)
+
+        self.assertEqual("HeroBloc", response.json["blocs"][0]["class"])
+        self.assertEqual("Welcome to our portal", response.json["blocs"][0]["title"])
+        self.assertEqual("Discover our datasets", response.json["blocs"][0]["description"])
+        self.assertEqual("primary", response.json["blocs"][0]["color"])
+
     def test_accordion_bloc(self):
         self.login()
         datasets = DatasetFactory.create_batch(2)

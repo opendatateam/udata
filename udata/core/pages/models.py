@@ -83,6 +83,16 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
     links = field(db.EmbeddedDocumentListField(LinkInBloc))
 
 
+HERO_COLORS = ("primary", "green", "purple")
+
+
+@generate_fields()
+class HeroBloc(Bloc):
+    title = field(db.StringField(required=True))
+    description = field(db.StringField())
+    color = field(db.StringField(choices=HERO_COLORS))
+
+
 @generate_fields()
 class AccordionItemBloc(db.EmbeddedDocument):
     title = field(db.StringField(required=True))
