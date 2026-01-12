@@ -47,7 +47,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         markdown=True,
     )
     content_as_page = field(
-        db.ReferenceField("Page"),
+        db.ReferenceField("Page", reverse_delete_rule=db.DENY),
         nested_fields=Page.__read_fields__,
         allow_null=True,
         description="Reference to a Page when body_type is 'blocs'",
