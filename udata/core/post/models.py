@@ -1,6 +1,6 @@
 from flask import url_for
 
-from udata.api_fields import field, generate_fields, required_if
+from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.pages.models import Page
@@ -43,7 +43,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         sortable=True,
     )
     content = field(
-        db.StringField(required=True),
+        db.StringField(),
         markdown=True,
     )
     content_as_page = field(
@@ -51,7 +51,6 @@ class Post(db.Datetimed, Linkable, db.Document):
         nested_fields=Page.__read_fields__,
         allow_null=True,
         description="Reference to a Page when body_type is 'blocs'",
-        checks=[required_if(body_type="blocs")],
     )
     image_url = field(
         db.StringField(),
@@ -105,7 +104,6 @@ class Post(db.Datetimed, Linkable, db.Document):
 
     body_type = field(
         db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
-        description="HTML or markdown body type",
     )
 
     meta = {
@@ -123,6 +121,16 @@ class Post(db.Datetimed, Linkable, db.Document):
     }
 
     verbose_name = _("post")
+
+    def clean(self):
+        if self.body_type == "blocs":
+            if not self.content_as_page:
+                raise db.ValidationError("content_as_page is required when body_type is 'blocs'")
+        else:
+            if not self.content:
+                raise db.ValidationError(
+                    "content is required when body_type is 'markdown' or 'html'"
+                )
 
     def __str__(self):
         return self.name or ""
