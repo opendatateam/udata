@@ -105,13 +105,15 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
     user-supplied overrides, setting the readonly flag…), it's easier to have to do this only once at the end of the function.
 
     """
+    from udata.mongo.engine import db
+
     params: dict = {}
     params["required"] = field.required
 
     read_params: dict = {}
     write_params: dict = {}
 
-    constructor: Callable
+    constructor: Callable | None = None
     constructor_read: Callable | None = None
     constructor_write: Callable | None = None
 
@@ -230,12 +232,33 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
 
-    elif isinstance(
-        field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
-    ):
+    elif isinstance(field, mongoengine.fields.GenericLazyReferenceField):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
+
+    elif isinstance(field, mongo_fields.GenericReferenceField):
+        if field.choices:
+            generic_fields = {}
+            for cls in field.choices:
+                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                generic_fields[cls.__name__] = convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericReferenceField() we'll create fields for each
+                    # of the subclasses with ReferenceField(Organization)…
+                    mongoengine.fields.ReferenceField(cls),
+                    info,
+                )
+
+            def constructor_read(**kwargs):
+                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+
+            def constructor_write(**kwargs):
+                return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+        else:
+
+            def constructor(**kwargs):
+                return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.

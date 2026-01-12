@@ -3,6 +3,8 @@ import time
 import pytest
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import VisibleReuseFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -31,3 +33,38 @@ class SearchIntegrationTest(APITestCase):
 
         titles = [d["title"] for d in response.json["data"]]
         assert "Données spectaculaires sur les transports" in titles
+
+    def test_reuse_search_with_organization_filter(self):
+        """
+        Regression test for: 500 Server Error when None values are passed to search service.
+
+        When searching reuses with only an organization filter, other params should not be
+        sent as literal 'None' strings (e.g. ?q=None&tag=None).
+        """
+        org = OrganizationFactory()
+        reuse = VisibleReuseFactory(organization=org)
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/reuses/search/?organization={org.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [r["id"] for r in response.json["data"]]
+        assert str(reuse.id) in ids
+
+    def test_organization_search_with_query(self):
+        """
+        Regression test for: 500 Server Error when None values are passed to search service.
+
+        When searching organizations, other params should not be sent as literal
+        'None' strings (e.g. ?badge=None).
+        """
+        org = OrganizationFactory(name="Organisation Unique Test")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/organizations/search/?q=unique")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert str(org.id) in ids

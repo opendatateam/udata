@@ -15,7 +15,7 @@ apiv2.inherit("ContactPoint", contact_point_fields)
 
 
 ns = apiv2.namespace("organizations", "Organization related operations")
-search_parser = OrganizationSearch.as_request_parser()
+search_parser = OrganizationSearch.as_request_parser(store_missing=False)
 
 DEFAULT_SORTING = "-created_at"
 
