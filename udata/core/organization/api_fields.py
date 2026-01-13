@@ -5,7 +5,7 @@ from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.fields import badge_fields
 from udata.core.organization.permissions import OrganizationPrivatePermission
 
-from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES
+from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
 
 org_ref_fields = api.inherit(
     "OrganizationReference",
@@ -93,12 +93,33 @@ request_fields = api.model(
     "MembershipRequest",
     {
         "id": fields.String(readonly=True),
-        "user": fields.Nested(member_user_with_email_fields),
+        "user": fields.Nested(member_user_with_email_fields, allow_null=True),
+        "email": fields.String(description="Email for non-registered user invitations"),
+        "kind": fields.String(
+            description="The request kind (request or invitation)",
+            enum=list(REQUEST_TYPES),
+            default="request",
+        ),
         "created": fields.ISODateTime(description="The request creation date", readonly=True),
         "status": fields.String(
             description="The current request status", required=True, enum=list(MEMBERSHIP_STATUS)
         ),
-        "comment": fields.String(description="A request comment from the user", required=True),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="A request comment from the user"),
+    },
+)
+
+invite_fields = api.model(
+    "MembershipInvite",
+    {
+        "user": fields.String(description="User ID to invite"),
+        "email": fields.String(description="Email to invite (if user not registered)"),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="Invitation message"),
     },
 )
 
