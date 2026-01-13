@@ -1,5 +1,10 @@
 # Changelog
 
+## 14.7.1 (2026-01-13)
+
+- fix: try to fix transfer migration ([#3616](https://github.com/opendatateam/udata/pull/3616))
+
+
 ## 14.7.0 (2026-01-13)
 
 - feat: add accordion bloc ([#3608](https://github.com/opendatateam/udata/pull/3608))
