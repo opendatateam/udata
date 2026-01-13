@@ -135,6 +135,18 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    # Two-Factor Authentication settings
+    SECURITY_TWO_FACTOR = True
+    SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
+    SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
+    SECURITY_TOTP_ISSUER = "udata"
+    SECURITY_TWO_FACTOR_AUTHENTICATOR_VALIDITY = 30
+    SECURITY_TWO_FACTOR_ALWAYS_VALIDATE = False
+    SECURITY_TWO_FACTOR_RESCUE_EMAIL = False  # We won't send a rescue code by mail
+    SECURITY_TWO_FACTOR_RESCUE_MAIL = (
+        "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
+    )
+
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30

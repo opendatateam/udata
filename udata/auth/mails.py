@@ -49,6 +49,8 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
             mail_message = reset_notice(**kwargs)
         case "change_notice":
             mail_message = change_notice(**kwargs)
+        case "two_factor_rescue":
+            mail_message = two_factor_rescue(**kwargs)
         case _:
             raise Exception(f"Unknown mail message template: {name}")
 
@@ -142,5 +144,16 @@ def change_notice(**kwargs) -> MailMessage:
             ),
             _("If you did not change your password, please reset it."),
             MailCTA(_("Reset your password"), cdata_url("/reset/")),
+        ],
+    )
+
+
+def two_factor_rescue(**kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
+    return MailMessage(
+        subject=_("User can't access mail account"),
+        paragraphs=[
+            _("%(email)s can not access mail account", email=kwargs.get("user").email),
         ],
     )
