@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2026-01-08 10:27\n"
+"POT-Creation-Date: 2026-01-13 10:28+0100\n"
+"PO-Revision-Date: 2026-01-13 10:12\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /main/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 86\n"
 
-#: udata/settings.py:127
+#: udata/settings.py:129
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:128
+#: udata/settings.py:130
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:129
+#: udata/settings.py:131
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/auth/mails.py:125 udata/settings.py:130
+#: udata/auth/mails.py:125 udata/settings.py:132
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/auth/mails.py:137 udata/settings.py:131
+#: udata/auth/mails.py:137 udata/settings.py:133
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:132
+#: udata/settings.py:134
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:542
+#: udata/settings.py:553
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -51,41 +51,41 @@ msgstr "Ce jeu de données a été archivé"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:1174 udata/tests/test_model.py:402
+#: udata/tests/api/test_datasets_api.py:1187 udata/tests/test_model.py:402
 #: udata/uris.py:56
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
 
-#: udata/uris.py:130
+#: udata/uris.py:128
 #, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr "Schéma invalide {0}, schémas autorisés : {1}"
 
-#: udata/uris.py:133
+#: udata/uris.py:131
 msgid "Credentials in URL are not allowed"
 msgstr "Les identifiants dans l'URL ne sont pas autorisés"
 
-#: udata/uris.py:137
+#: udata/uris.py:135
 #, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr "Domaine invalide {0}"
 
-#: udata/uris.py:146
+#: udata/uris.py:144
 #, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr "{0} est une IP multicast"
 
-#: udata/uris.py:148
+#: udata/uris.py:146
 #, python-brace-format
 msgid "{0} is a mask IP"
 msgstr "{0} est une IP de masque"
 
-#: udata/uris.py:152
+#: udata/uris.py:150
 msgid "is a local URL"
 msgstr "est une URL locale"
 
-#: udata/tests/test_model.py:420 udata/uris.py:159
+#: udata/tests/test_model.py:420 udata/uris.py:157
 msgid "is a private URL"
 msgstr "est une URL privée"
 
@@ -95,7 +95,7 @@ msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour
 
 #: udata/api/oauth2.py:56
 msgid "Bearer Token"
-msgstr ""
+msgstr "Jeton d'authentification"
 
 #: udata/api/oauth2.py:59
 msgid "Default scope"
@@ -144,7 +144,7 @@ msgid "J'accepte les conditions générales d'utilisation"
 msgstr "J'accepte les conditions générales d'utilisation"
 
 #: udata/auth/forms.py:52
-msgid "Vous devez accepter les CGU pour continuer."
+msgid "You must accept the terms of use to continue."
 msgstr ""
 
 #: udata/auth/forms.py:75 udata/tests/forms/test_current_user_field.py:192
@@ -358,14 +358,14 @@ msgid "An existing contact point already exists with these informations."
 msgstr "Un point de contact existe déjà avec ces informations."
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
-#: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
-#: udata/core/topic/forms.py:37 udata/harvest/forms.py:80
+#: udata/core/organization/forms.py:46 udata/core/topic/forms.py:37
+#: udata/harvest/forms.py:80
 msgid "Name"
 msgstr "Nom"
 
 #: udata/core/contact_point/forms.py:15 udata/core/user/forms.py:21
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: udata/core/contact_point/forms.py:17
 msgid "Contact form"
@@ -388,7 +388,7 @@ msgstr "Rôle"
 
 #: udata/core/contact_point/models.py:9
 msgid "Contact"
-msgstr ""
+msgstr "Contact"
 
 #: udata/core/contact_point/models.py:10
 msgid "Creator"
@@ -446,7 +446,7 @@ msgstr "a mis à jour une API"
 msgid "deleted a dataservice"
 msgstr "a supprimé une API"
 
-#: udata/core/dataservices/api.py:62
+#: udata/core/dataservices/api.py:63
 msgid "Latest APIs"
 msgstr "Dernières APIs"
 
@@ -458,12 +458,12 @@ msgstr "API servant des jeux de données de haute valeur"
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:266 udata/core/dataset/models.py:580
+#: udata/core/dataservices/models.py:269 udata/core/dataset/models.py:595
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:272 udata/core/dataset/models.py:585
+#: udata/core/dataservices/models.py:275 udata/core/dataset/models.py:600
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -492,7 +492,16 @@ msgstr "a mis à jour une ressource"
 msgid "removed a resource from a dataset"
 msgstr "a supprimé une ressource d'un jeu de données"
 
-#: udata/core/dataset/api.py:332
+#: udata/core/dataset/api.py:344
+#, python-brace-format
+msgid "Datasets search: {q}"
+msgstr ""
+
+#: udata/core/dataset/api.py:346
+msgid "Filtered datasets"
+msgstr ""
+
+#: udata/core/dataset/api.py:348
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
@@ -648,7 +657,7 @@ msgstr "Jamais"
 msgid "Not planned"
 msgstr "Non planifié"
 
-#: udata/core/dataset/constants.py:73 udata/core/dataset/constants.py:156
+#: udata/core/dataset/constants.py:73 udata/core/dataset/constants.py:149
 #: udata/core/spatial/constants.py:5
 msgid "Other"
 msgstr "Autre"
@@ -661,31 +670,31 @@ msgstr "Autre"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: udata/core/dataset/constants.py:151
+#: udata/core/dataset/constants.py:144
 msgid "Main file"
 msgstr "Fichier principal"
 
-#: udata/core/dataset/constants.py:152
+#: udata/core/dataset/constants.py:145
 msgid "Documentation"
-msgstr ""
+msgstr "Documentation"
 
-#: udata/core/dataset/constants.py:153
+#: udata/core/dataset/constants.py:146
 msgid "Update"
 msgstr "Mise à jour"
 
-#: udata/core/dataset/constants.py:154 udata/core/reuse/constants.py:4
+#: udata/core/dataset/constants.py:147 udata/core/reuse/constants.py:4
 msgid "API"
-msgstr ""
+msgstr "API"
 
-#: udata/core/dataset/constants.py:155
+#: udata/core/dataset/constants.py:148
 msgid "Code repository"
 msgstr "Dépôt de code"
 
-#: udata/core/dataset/constants.py:163
+#: udata/core/dataset/constants.py:156
 msgid "Uploaded file"
 msgstr "Fichier uploadé"
 
-#: udata/core/dataset/constants.py:164
+#: udata/core/dataset/constants.py:157
 msgid "Remote file"
 msgstr "Fichier distant"
 
@@ -716,7 +725,7 @@ msgstr "Titre"
 #: udata/core/topic/forms.py:14 udata/core/topic/forms.py:38
 #: udata/harvest/forms.py:82
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: udata/core/dataset/forms.py:77
 msgid "File type"
@@ -728,7 +737,7 @@ msgstr "Est-ce que la ressource est un fichier uploadé, un fichier distant ou u
 
 #: udata/core/dataset/forms.py:84
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: udata/core/dataset/forms.py:88
 msgid "Resource type (documentation, API...)"
@@ -736,11 +745,11 @@ msgstr "Type de ressource (documentation, API...)"
 
 #: udata/core/dataset/forms.py:90 udata/harvest/forms.py:84
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata/core/dataset/forms.py:92
 msgid "Format"
-msgstr ""
+msgstr "Format"
 
 #: udata/core/dataset/forms.py:97
 msgid "Mime type"
@@ -762,7 +771,7 @@ msgstr "La taille du fichier en octets"
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1086
+#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1099
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
 
@@ -831,9 +840,8 @@ msgstr "Couverture spatiale"
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:211 udata/core/post/forms.py:26
-#: udata/core/site/forms.py:13 udata/core/topic/forms.py:15
-#: udata/core/topic/forms.py:89
+#: udata/core/dataset/forms.py:211 udata/core/site/forms.py:13
+#: udata/core/topic/forms.py:15 udata/core/topic/forms.py:89
 msgid "Tags"
 msgstr "Mots-clés"
 
@@ -849,65 +857,65 @@ msgstr "Privé"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
-#: udata/core/dataset/models.py:69
+#: udata/core/dataset/models.py:71
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:70
+#: udata/core/dataset/models.py:72
 msgid "Reference data public service"
 msgstr "Service public de la donnée de référence"
 
-#: udata/core/dataset/models.py:71
+#: udata/core/dataset/models.py:73
 msgid "Inspire"
 msgstr "INSPIRE"
 
-#: udata/core/dataset/models.py:72
+#: udata/core/dataset/models.py:74
 msgid "High value datasets"
 msgstr "Données de forte valeur"
 
-#: udata/core/dataset/models.py:73
+#: udata/core/dataset/models.py:75
 msgid "Certified statistic series"
 msgstr "Séries statistiques labellisées"
 
-#: udata/core/dataset/models.py:74
+#: udata/core/dataset/models.py:76
 msgid "Statistical series of general interest"
 msgstr "Séries statistiques reconnues d’intérêt général"
 
-#: udata/core/dataset/models.py:154
+#: udata/core/dataset/models.py:158
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:1182
-#: udata/tests/api/test_datasets_api.py:1193
+#: udata/core/dataset/models.py:190 udata/tests/api/test_datasets_api.py:1195
+#: udata/tests/api/test_datasets_api.py:1206
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/models.py:205 udata/tests/api/test_datasets_api.py:1205
+#: udata/core/dataset/models.py:209 udata/tests/api/test_datasets_api.py:1218
 #, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:454 udata/core/dataset/rdf.py:596
-#: udata/tests/dataset/test_dataset_rdf.py:912
-#: udata/tests/dataset/test_dataset_rdf.py:925
+#: udata/core/dataset/models.py:458 udata/core/dataset/rdf.py:596
+#: udata/tests/dataset/test_dataset_rdf.py:1007
+#: udata/tests/dataset/test_dataset_rdf.py:1020
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:559
+#: udata/core/dataset/models.py:568
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:591
+#: udata/core/dataset/models.py:606
 msgid "Last update of the dataset resources"
 msgstr "Dernière mise à jour des ressources de ce jeu de données"
 
-#: udata/core/dataset/models.py:646
+#: udata/core/dataset/models.py:661
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:594 udata/tests/dataset/test_dataset_rdf.py:882
-#: udata/tests/dataset/test_dataset_rdf.py:899
+#: udata/core/dataset/rdf.py:594 udata/tests/dataset/test_dataset_rdf.py:977
+#: udata/tests/dataset/test_dataset_rdf.py:994
 #, python-brace-format
 msgid "{format} resource"
 msgstr "Ressource {format}"
@@ -968,6 +976,14 @@ msgstr "La discussion à laquelle vous avez participé sur %(type)s %(object)s a
 msgid "View the discussion"
 msgstr "Voir la discussion"
 
+#: udata/core/discussions/models.py:18
+msgid "message"
+msgstr ""
+
+#: udata/core/discussions/models.py:76
+msgid "discussion"
+msgstr ""
+
 #: udata/core/jobs/forms.py:29
 msgid "Tasks"
 msgstr "Tâches"
@@ -986,6 +1002,43 @@ msgstr "chaque {0.period_singular}"
 msgid "every {0.every} {0.period}"
 msgstr "chaque {0.every} {0.period}"
 
+#: udata/core/legal/mails.py:81
+#, python-format
+msgid "Our %(terms_link)s specify in point %(article)s that the platform is not \"intended to disseminate advertising content, promotions of private interests, content contrary to public order, illegal content, spam and any contribution violating the applicable legal framework. The Editor reserves the right, without prior notice, to remove or make inaccessible content published on the Platform that has no connection with its Purpose. The Editor does not carry out \"a priori\" control over publications. As soon as the Editor becomes aware of content contrary to these terms of use, it acts quickly to remove or make it inaccessible\"."
+msgstr ""
+
+#: udata/core/legal/mails.py:95
+msgid "The platform is not \"intended to disseminate advertising content, promotions of private interests, content contrary to public order, illegal content, spam and any contribution violating the applicable legal framework. The Editor reserves the right, without prior notice, to remove or make inaccessible content published on the Platform that has no connection with its Purpose. The Editor does not carry out \"a priori\" control over publications. As soon as the Editor becomes aware of content contrary to these terms of use, it acts quickly to remove or make it inaccessible\"."
+msgstr ""
+
+#: udata/core/legal/mails.py:107
+#, python-format
+msgid "You may contest this decision within two months of its notification by filing an administrative appeal (recours gracieux ou hiérarchique). You may also bring the matter before the administrative court via the \"%(telerecours_link)s\" application."
+msgstr ""
+
+#: udata/core/legal/mails.py:114
+msgid "You may contest this decision by contacting us."
+msgstr ""
+
+#: udata/core/legal/mails.py:117
+#, python-format
+msgid "Your %(content_type)s has been deleted."
+msgstr ""
+
+#: udata/core/legal/mails.py:120
+msgid "Best regards,"
+msgstr ""
+
+#: udata/core/legal/mails.py:122
+#, python-format
+msgid "%(site)s team member"
+msgstr ""
+
+#: udata/core/legal/mails.py:126
+#, python-format
+msgid "Deletion of your %(content_type)s"
+msgstr ""
+
 #: udata/core/organization/activities.py:18
 msgid "created an organization"
 msgstr "a mis à jour une organisation"
@@ -1002,18 +1055,18 @@ msgstr "Administrateur"
 msgid "Editor"
 msgstr "Éditeur"
 
-#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:13
-#: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:88
+#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:16
+#: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:89
 msgid "Pending"
 msgstr "En attente"
 
-#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:89
+#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:17
+#: udata/harvest/models.py:90
 msgid "Accepted"
 msgstr "Acceptée"
 
-#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:90
+#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:18
+#: udata/harvest/models.py:91
 msgid "Refused"
 msgstr "Refusée"
 
@@ -1050,7 +1103,7 @@ msgstr "L'URL du site web de votre organisation"
 
 #: udata/core/organization/forms.py:55
 msgid "Logo"
-msgstr ""
+msgstr "Logo"
 
 #: udata/core/organization/forms.py:57
 msgid "Business id"
@@ -1156,75 +1209,55 @@ msgstr "Votre organisation a été identifiée comme une association"
 msgid "Your organization %(org)s has been identified by our team as an association. A badge is now associated with your organization."
 msgstr "Votre organisation %(org)s a été identifiée par notre équipe comme une association. Un badge est maintenant associé à votre organisation."
 
-#: udata/core/organization/models.py:39
+#: udata/core/organization/models.py:40
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:40
+#: udata/core/organization/models.py:41
 msgid "Certified"
 msgstr "Certifié"
 
-#: udata/core/organization/models.py:41
-msgid "Association"
-msgstr ""
-
 #: udata/core/organization/models.py:42
+msgid "Association"
+msgstr "Association"
+
+#: udata/core/organization/models.py:43
 msgid "Company"
 msgstr "Entreprise"
 
-#: udata/core/organization/models.py:43
+#: udata/core/organization/models.py:44
 msgid "Local authority"
 msgstr "Collectivité territoriale"
 
-#: udata/core/post/api.py:118
+#: udata/core/organization/models.py:183
+msgid "organization"
+msgstr ""
+
+#: udata/core/post/api.py:73
 msgid "Latests posts"
 msgstr "Derniers articles"
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: udata/core/post/constants.py:10
 msgid "HTML"
+msgstr "HTML"
+
+#: udata/core/post/constants.py:11
+msgid "Blocs"
 msgstr ""
 
-#: udata/core/post/forms.py:16
-msgid "Headline"
-msgstr "Entête"
-
-#: udata/core/post/forms.py:17
-msgid "Content"
-msgstr "Contenu"
-
-#: udata/core/post/forms.py:19
-msgid "Associated datasets"
-msgstr "Jeux de données associés"
-
-#: udata/core/post/forms.py:20
-msgid "Associated reuses"
-msgstr "Réutilisations associées"
-
-#: udata/core/post/forms.py:22
-msgid "Image"
+#: udata/core/post/constants.py:17
+msgid "News"
 msgstr ""
 
-#: udata/core/post/forms.py:23
-msgid "Image credits"
-msgstr "Crédits de l'image"
+#: udata/core/post/constants.py:18
+msgid "Page"
+msgstr ""
 
-#: udata/core/post/forms.py:24
-msgid "Credit URL"
-msgstr "URL des crédits"
-
-#: udata/core/post/forms.py:29
-msgid "body type"
-msgstr "type du contenu"
-
-#: udata/core/post/forms.py:29
-msgid "Specify your body type (HTML or markdown)"
-msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
-
-#: udata/core/post/models.py:55
+#: udata/core/post/models.py:129
 msgid "post"
 msgstr "article"
 
@@ -1250,7 +1283,7 @@ msgstr "Sécurité"
 
 #: udata/core/reports/constants.py:27
 msgid "Spam"
-msgstr ""
+msgstr "Spam"
 
 #: udata/core/reuse/activities.py:18
 msgid "created a reuse"
@@ -1264,13 +1297,13 @@ msgstr "a mis à jour une réutilisation"
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
 
-#: udata/core/reuse/api.py:141
+#: udata/core/reuse/api.py:142
 msgid "Latests reuses"
 msgstr "Dernières réutilisations"
 
 #: udata/core/reuse/constants.py:5
 msgid "Application"
-msgstr ""
+msgstr "Application"
 
 #: udata/core/reuse/constants.py:6
 msgid "Idea"
@@ -1544,7 +1577,7 @@ msgstr "a suivi une organisation"
 
 #: udata/core/user/forms.py:22
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #: udata/core/user/forms.py:24
 msgid "About"
@@ -1595,6 +1628,10 @@ msgstr "Sans connexion de votre part, votre compte va être supprimé d'ici %(no
 #, python-format
 msgid "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary."
 msgstr "Ce compte n'est pas relié à vos autres comptes de l'administration et vous aurez toujours la possibilité de recréer un compte sur la plateforme %(site)s."
+
+#: udata/core/user/models.py:130
+msgid "account"
+msgstr ""
 
 #: udata/core/user/permissions.py:5
 msgid "System administrator"
@@ -1682,9 +1719,9 @@ msgstr "Vous devez être authentifié"
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ce champ requiert la définition de \"%(name)s\""
 
-#: udata/frontend/markdown.py:27
+#: udata/frontend/markdown.py:28
 msgid "Source"
-msgstr ""
+msgstr "Source"
 
 #: udata/harvest/forms.py:82
 msgid "Some optional details about this harvester"
@@ -1734,27 +1771,27 @@ msgstr "Ignoré"
 msgid "Archived"
 msgstr "Archivé"
 
-#: udata/harvest/backends/dcat.py:434
+#: udata/harvest/backends/dcat.py:437
 msgid "Remote URL prefix"
 msgstr "Préfixe d'URL distante"
 
-#: udata/harvest/backends/dcat.py:437
+#: udata/harvest/backends/dcat.py:440
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
 
-#: udata/harvest/backends/ckan/harvesters.py:31
+#: udata/harvest/backends/ckan/harvesters.py:33
 msgid "Organization"
 msgstr "Organisation"
 
-#: udata/harvest/backends/ckan/harvesters.py:31
+#: udata/harvest/backends/ckan/harvesters.py:33
 msgid "A CKAN Organization name"
 msgstr "Un nom d'organisation CKAN"
 
-#: udata/harvest/backends/ckan/harvesters.py:32
+#: udata/harvest/backends/ckan/harvesters.py:34
 msgid "Tag"
 msgstr "Mot-clé"
 
-#: udata/harvest/backends/ckan/harvesters.py:32
+#: udata/harvest/backends/ckan/harvesters.py:34
 msgid "A CKAN tag name"
 msgstr "Un nom de mot-clé CKAN"
 
@@ -1782,32 +1819,19 @@ msgstr "Ce jeu de données a été archivé par notre équipe d'administration.\
 "Il n'apparaît pas dans les résultats de recherche et une mise en page spéciale sur la page du jeu de données avertit les visiteurs.\n\n"
 "Si vous pensez que c'est une erreur, vous pouvez répondre à ce message ou nous écrire à validation@data.gouv.fr."
 
-#: udata/templates/mail/base.html:45
-msgid "on your browser."
-msgstr "dans votre navigateur."
-
-#: udata/templates/mail/base.html:48
-#, python-format
-msgid "View this email %(link)s"
-msgstr "Voir cet email %(link)s"
-
-#: udata/templates/mail/base.html:76 udata/templates/mail/message.html:41
+#: udata/templates/mail/message.html:15
 #, python-format
 msgid "Hi %(user)s"
 msgstr "Bonjour %(user)s"
 
-#: udata/templates/mail/base.html:87
-msgid "See you soon on the platform"
-msgstr "A bientôt sur la plateforme"
+#: udata/templates/mail/message.html:36
+msgid "Have a great day"
+msgstr "Très bonne journée"
 
-#: udata/templates/mail/base.html:88 udata/templates/mail/message.html:63
+#: udata/templates/mail/message.html:37
 #, python-format
 msgid "The %(site)s team"
 msgstr "L'équipe de %(site)s"
-
-#: udata/templates/mail/message.html:62
-msgid "Have a great day"
-msgstr "Très bonne journée"
 
 #: udata/templates/security/change_password.html:9
 #: udata/templates/security/change_password.html:16
