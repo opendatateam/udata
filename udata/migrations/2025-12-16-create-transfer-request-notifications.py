@@ -23,6 +23,7 @@ def migrate(db):
 
     with click.progressbar(transfers, length=transfers.count()) as transfer_list:
         for transfer in transfer_list:
+          try:
             # Get the recipient (could be a user or an organization)
             recipient = transfer.recipient
 
@@ -62,5 +63,9 @@ def migrate(db):
                         f"Error creating notification for user {recipient_user.id} "
                         f"and transfer {transfer.id}: {e}"
                     )
+          except Exception as e:
+              log.error(
+                  f"Error creating notification for transfer {transfer.id}: {e}"
+              )
 
     log.info(f"Created {created_count} TransferRequestNotifications")
