@@ -1,48 +1,44 @@
+
 msgid ""
 msgstr ""
-"Project-Id-Version: udata\n"
+"Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 13:03\n"
+"POT-Creation-Date: 2026-01-13 10:28+0100\n"
+"PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
-"X-Crowdin-Project: udata\n"
-"X-Crowdin-Project-ID: 291291\n"
-"X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /main/udata/translations/udata.pot\n"
-"X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:127
+#: udata/settings.py:129
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:128
+#: udata/settings.py:130
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:129
+#: udata/settings.py:131
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/auth/mails.py:125 udata/settings.py:130
+#: udata/auth/mails.py:125 udata/settings.py:132
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/auth/mails.py:137 udata/settings.py:131
+#: udata/auth/mails.py:137 udata/settings.py:133
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:132
+#: udata/settings.py:134
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:542
+#: udata/settings.py:553
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -51,47 +47,52 @@ msgstr "Ce jeu de données a été archivé"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:1174 udata/tests/test_model.py:402
+#: udata/tests/api/test_datasets_api.py:1187 udata/tests/test_model.py:402
 #: udata/uris.py:56
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
 
-#: udata/uris.py:130
+#: udata/uris.py:128
 #, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr "Schéma invalide {0}, schémas autorisés : {1}"
 
-#: udata/uris.py:133
+#: udata/uris.py:131
 msgid "Credentials in URL are not allowed"
 msgstr "Les identifiants dans l'URL ne sont pas autorisés"
 
-#: udata/uris.py:137
+#: udata/uris.py:135
 #, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr "Domaine invalide {0}"
 
-#: udata/uris.py:146
+#: udata/uris.py:144
 #, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr "{0} est une IP multicast"
 
-#: udata/uris.py:148
+#: udata/uris.py:146
 #, python-brace-format
 msgid "{0} is a mask IP"
 msgstr "{0} est une IP de masque"
 
-#: udata/uris.py:152
+#: udata/uris.py:150
 msgid "is a local URL"
 msgstr "est une URL locale"
 
-#: udata/tests/test_model.py:420 udata/uris.py:159
+#: udata/tests/test_model.py:420 udata/uris.py:157
 msgid "is a private URL"
 msgstr "est une URL privée"
 
 #: udata/api/errors.py:4
-msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
-msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour l'instant, nous avons été avertis de cette erreur et la corrigeons dans les plus brefs délais."
+msgid ""
+"Validation error: your data cannot be updated for now, we have been "
+"notified of the error and we will fix it as soon as possible."
+msgstr ""
+"Erreur de validation : vos données ne peuvent être sauvegardées pour "
+"l'instant, nous avons été avertis de cette erreur et la corrigeons dans "
+"les plus brefs délais."
 
 #: udata/api/oauth2.py:56
 msgid "Bearer Token"
@@ -144,12 +145,14 @@ msgid "J'accepte les conditions générales d'utilisation"
 msgstr "J'accepte les conditions générales d'utilisation"
 
 #: udata/auth/forms.py:52
-msgid "Vous devez accepter les CGU pour continuer."
-msgstr "Vous devez accepter les CGU pour continuer."
+msgid "You must accept the terms of use to continue."
+msgstr ""
 
 #: udata/auth/forms.py:75 udata/tests/forms/test_current_user_field.py:192
 msgid "Password must be changed for security reasons"
-msgstr "Le mot de passe doit être modifié pour des raisons de sécurité. Veuillez utiliser la récupération de mot de passe afin d’en définir un nouveau"
+msgstr ""
+"Le mot de passe doit être modifié pour des raisons de sécurité. Veuillez "
+"utiliser la récupération de mot de passe afin d’en définir un nouveau"
 
 #: udata/auth/forms.py:106
 msgid "New email"
@@ -189,7 +192,9 @@ msgstr "Votre adresse e-mail est déjà associée à un compte"
 #: udata/auth/mails.py:83
 #, python-format
 msgid "Someone (you?) tried to create an account on %(site)s with your email."
-msgstr "Quelqu'un (vous? ) a essayé de créer un compte sur %(site)s avec votre email."
+msgstr ""
+"Quelqu'un (vous? ) a essayé de créer un compte sur %(site)s avec votre "
+"email."
 
 #: udata/auth/mails.py:86
 msgid "If you forgot your password, you can reset it."
@@ -203,7 +208,9 @@ msgstr "Réinitialisez votre mot de passe"
 #: udata/auth/mails.py:112
 #, python-format
 msgid "Someone requested a password reset for your %(site)s account."
-msgstr "Quelqu'un a demandé une réinitialisation du mot de passe pour votre compte %(site)s."
+msgstr ""
+"Quelqu'un a demandé une réinitialisation du mot de passe pour votre "
+"compte %(site)s."
 
 #: udata/auth/mails.py:115
 msgid "If this wasn't you, please ignore this email."
@@ -310,36 +317,96 @@ msgid "Environmental protection"
 msgstr "Protection de l'environnement"
 
 #: udata/core/access_type/constants.py:66
-msgid "Public access to datasets and services would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
-msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des procédures des autorités publiques, lorsque cette confidentialité est prévue par la loi."
+msgid ""
+"Public access to datasets and services would adversely affect the "
+"confidentiality of the proceedings of public authorities, where such "
+"confidentiality is provided for by law."
+msgstr ""
+"L'accès du public aux jeux de données et aux services nuirait à la "
+"confidentialité des procédures des autorités publiques, lorsque cette "
+"confidentialité est prévue par la loi."
 
 #: udata/core/access_type/constants.py:70
-msgid "Public access to datasets and services would adversely affect international relations, public security or national defence."
-msgstr "L'accès du public aux jeux de données et aux services aurait des répercussions négatives sur les relations internationales, la sécurité publique ou la défense nationale."
+msgid ""
+"Public access to datasets and services would adversely affect "
+"international relations, public security or national defence."
+msgstr ""
+"L'accès du public aux jeux de données et aux services aurait des "
+"répercussions négatives sur les relations internationales, la sécurité "
+"publique ou la défense nationale."
 
 #: udata/core/access_type/constants.py:74
-msgid "Public access to datasets and services would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
-msgstr "L'accès du public aux jeux de données et aux services aurait un impact négatif sur le cours de la justice, la capacité de toute personne de recevoir un procès équitable ou la capacité d'une autorité publique à mener une enquête à caractère criminel ou disciplinaire."
+msgid ""
+"Public access to datasets and services would adversely affect the course "
+"of justice, the ability of any person to receive a fair trial or the "
+"ability of a public authority to conduct an enquiry of a criminal or "
+"disciplinary nature."
+msgstr ""
+"L'accès du public aux jeux de données et aux services aurait un impact "
+"négatif sur le cours de la justice, la capacité de toute personne de "
+"recevoir un procès équitable ou la capacité d'une autorité publique à "
+"mener une enquête à caractère criminel ou disciplinaire."
 
 #: udata/core/access_type/constants.py:78
-msgid "Public access to datasets and services would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
-msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des informations commerciales ou industrielles, lorsque cette confidentialité est prévue par le droit national ou communautaire pour protéger un intérêt économique légitime, y compris l'intérêt du public pour le maintien de la confidentialité statistique et du secret fiscal."
+msgid ""
+"Public access to datasets and services would adversely affect the "
+"confidentiality of commercial or industrial information, where such "
+"confidentiality is provided for by national or Community law to protect a"
+" legitimate economic interest, including the public interest in "
+"maintaining statistical confidentiality and tax secrecy."
+msgstr ""
+"L'accès du public aux jeux de données et aux services nuirait à la "
+"confidentialité des informations commerciales ou industrielles, lorsque "
+"cette confidentialité est prévue par le droit national ou communautaire "
+"pour protéger un intérêt économique légitime, y compris l'intérêt du "
+"public pour le maintien de la confidentialité statistique et du secret "
+"fiscal."
 
 #: udata/core/access_type/constants.py:82
-msgid "Public access to datasets and services would adversely affect intellectual property rights."
-msgstr "L'accès du public aux jeux de données et aux services aurait des répercussions négatives sur les droits de propriété intellectuelle."
+msgid ""
+"Public access to datasets and services would adversely affect "
+"intellectual property rights."
+msgstr ""
+"L'accès du public aux jeux de données et aux services aurait des "
+"répercussions négatives sur les droits de propriété intellectuelle."
 
 #: udata/core/access_type/constants.py:86
-msgid "Public access to datasets and services would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
-msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des données à caractère personnel et/ou des fichiers relatifs à une personne physique où cette personne n'a pas consenti à la divulgation de l'information au public, lorsque cette confidentialité est prévue par le droit national ou communautaire."
+msgid ""
+"Public access to datasets and services would adversely affect the "
+"confidentiality of personal data and/or files relating to a natural "
+"person where that person has not consented to the disclosure of the "
+"information to the public, where such confidentiality is provided for by "
+"national or Community law."
+msgstr ""
+"L'accès du public aux jeux de données et aux services nuirait à la "
+"confidentialité des données à caractère personnel et/ou des fichiers "
+"relatifs à une personne physique où cette personne n'a pas consenti à la "
+"divulgation de l'information au public, lorsque cette confidentialité est"
+" prévue par le droit national ou communautaire."
 
 #: udata/core/access_type/constants.py:90
-msgid "Public access to datasets and services would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
-msgstr "L'accès du public aux jeux de données et aux services nuirait aux intérêts ou à la protection de toute personne qui a fourni les informations demandées sur une base volontaire sans être souscrite, ou pouvant être soumis, une obligation légale de le faire, à moins que cette personne ait consenti à la divulgation des renseignements concernés."
+msgid ""
+"Public access to datasets and services would adversely affect the "
+"interests or protection of any person who supplied the information "
+"requested on a voluntary basis without being under, or capable of being "
+"put under, a legal obligation to do so, unless that person has consented "
+"to the release of the information concerned."
+msgstr ""
+"L'accès du public aux jeux de données et aux services nuirait aux "
+"intérêts ou à la protection de toute personne qui a fourni les "
+"informations demandées sur une base volontaire sans être souscrite, ou "
+"pouvant être soumis, une obligation légale de le faire, à moins que cette"
+" personne ait consenti à la divulgation des renseignements concernés."
 
 #: udata/core/access_type/constants.py:94
-msgid "Public access to datasets and services would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
-msgstr "L'accès du public aux jeux de données et aux services nuirait à la protection de l'environnement auquel ces informations se rapportent, comme l'emplacement d'espèces rares."
+msgid ""
+"Public access to datasets and services would adversely affect the "
+"protection of the environment to which such information relates, such as "
+"the location of rare species."
+msgstr ""
+"L'accès du public aux jeux de données et aux services nuirait à la "
+"protection de l'environnement auquel ces informations se rapportent, "
+"comme l'emplacement d'espèces rares."
 
 #: udata/core/access_type/models.py:25
 msgid "You can only set one condition for a given access audience role"
@@ -358,8 +425,8 @@ msgid "An existing contact point already exists with these informations."
 msgstr "Un point de contact existe déjà avec ces informations."
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
-#: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
-#: udata/core/topic/forms.py:37 udata/harvest/forms.py:80
+#: udata/core/organization/forms.py:46 udata/core/topic/forms.py:37
+#: udata/harvest/forms.py:80
 msgid "Name"
 msgstr "Nom"
 
@@ -430,9 +497,12 @@ msgstr "Fournisseur"
 msgid "User"
 msgstr "Utilisateur"
 
-#: udata/core/contact_point/models.py:34 udata/tests/api/test_contact_points.py:136
+#: udata/core/contact_point/models.py:34
+#: udata/tests/api/test_contact_points.py:136
 msgid "At least an email or a contact form is required for a contact point"
-msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point de contact"
+msgstr ""
+"Au moins un e-mail ou un formulaire de contact est requis pour un point "
+"de contact"
 
 #: udata/core/dataservices/activities.py:23
 msgid "created a dataservice"
@@ -446,7 +516,7 @@ msgstr "a mis à jour une API"
 msgid "deleted a dataservice"
 msgstr "a supprimé une API"
 
-#: udata/core/dataservices/api.py:62
+#: udata/core/dataservices/api.py:63
 msgid "Latest APIs"
 msgstr "Dernières APIs"
 
@@ -458,12 +528,12 @@ msgstr "API servant des jeux de données de haute valeur"
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:266 udata/core/dataset/models.py:580
+#: udata/core/dataservices/models.py:269 udata/core/dataset/models.py:595
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:272 udata/core/dataset/models.py:585
+#: udata/core/dataservices/models.py:275 udata/core/dataset/models.py:600
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -492,7 +562,16 @@ msgstr "a mis à jour une ressource"
 msgid "removed a resource from a dataset"
 msgstr "a supprimé une ressource d'un jeu de données"
 
-#: udata/core/dataset/api.py:332
+#: udata/core/dataset/api.py:344
+#, python-brace-format
+msgid "Datasets search: {q}"
+msgstr ""
+
+#: udata/core/dataset/api.py:346
+msgid "Filtered datasets"
+msgstr ""
+
+#: udata/core/dataset/api.py:348
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
@@ -648,7 +727,7 @@ msgstr "Jamais"
 msgid "Not planned"
 msgstr "Non planifié"
 
-#: udata/core/dataset/constants.py:73 udata/core/dataset/constants.py:156
+#: udata/core/dataset/constants.py:73 udata/core/dataset/constants.py:149
 #: udata/core/spatial/constants.py:5
 msgid "Other"
 msgstr "Autre"
@@ -661,31 +740,31 @@ msgstr "Autre"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: udata/core/dataset/constants.py:151
+#: udata/core/dataset/constants.py:144
 msgid "Main file"
 msgstr "Fichier principal"
 
-#: udata/core/dataset/constants.py:152
+#: udata/core/dataset/constants.py:145
 msgid "Documentation"
 msgstr "Documentation"
 
-#: udata/core/dataset/constants.py:153
+#: udata/core/dataset/constants.py:146
 msgid "Update"
 msgstr "Mise à jour"
 
-#: udata/core/dataset/constants.py:154 udata/core/reuse/constants.py:4
+#: udata/core/dataset/constants.py:147 udata/core/reuse/constants.py:4
 msgid "API"
 msgstr "API"
 
-#: udata/core/dataset/constants.py:155
+#: udata/core/dataset/constants.py:148
 msgid "Code repository"
 msgstr "Dépôt de code"
 
-#: udata/core/dataset/constants.py:163
+#: udata/core/dataset/constants.py:156
 msgid "Uploaded file"
 msgstr "Fichier uploadé"
 
-#: udata/core/dataset/constants.py:164
+#: udata/core/dataset/constants.py:157
 msgid "Remote file"
 msgstr "Fichier distant"
 
@@ -724,7 +803,9 @@ msgstr "Type de fichier"
 
 #: udata/core/dataset/forms.py:81
 msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr "Est-ce que la ressource est un fichier uploadé, un fichier distant ou une API"
+msgstr ""
+"Est-ce que la ressource est un fichier uploadé, un fichier distant ou une"
+" API"
 
 #: udata/core/dataset/forms.py:84
 msgid "Type"
@@ -762,9 +843,11 @@ msgstr "La taille du fichier en octets"
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1086
+#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1099
 msgid "Wrong contact point id or contact point ownership mismatch"
-msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
+msgstr ""
+"Mauvais ID de point de contact ou incompatibilité de possession du point "
+"de contact"
 
 #: udata/core/dataset/forms.py:164 udata/core/organization/forms.py:48
 msgid "Acronym"
@@ -776,7 +859,9 @@ msgstr "Un acronyme facultatif"
 
 #: udata/core/dataset/forms.py:168
 msgid "The details about the dataset (collection process, specifics...)."
-msgstr "Les détails sur le jeu de données (processus de collecte, spécificités...)."
+msgstr ""
+"Les détails sur le jeu de données (processus de collecte, "
+"spécificités...)."
 
 #: udata/core/dataset/forms.py:171
 msgid "Short description"
@@ -831,9 +916,8 @@ msgstr "Couverture spatiale"
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:211 udata/core/post/forms.py:26
-#: udata/core/site/forms.py:13 udata/core/topic/forms.py:15
-#: udata/core/topic/forms.py:89
+#: udata/core/dataset/forms.py:211 udata/core/site/forms.py:13
+#: udata/core/topic/forms.py:15 udata/core/topic/forms.py:89
 msgid "Tags"
 msgstr "Mots-clés"
 
@@ -847,67 +931,75 @@ msgstr "Privé"
 
 #: udata/core/dataset/forms.py:214
 msgid "Restrict the dataset visibility to you or your organization only."
-msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
+msgstr ""
+"Restreint la visibilité du jeu de données à vous ou votre organisation "
+"seulement."
 
-#: udata/core/dataset/models.py:69
+#: udata/core/dataset/models.py:71
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:70
+#: udata/core/dataset/models.py:72
 msgid "Reference data public service"
 msgstr "Service public de la donnée de référence"
 
-#: udata/core/dataset/models.py:71
+#: udata/core/dataset/models.py:73
 msgid "Inspire"
 msgstr "INSPIRE"
 
-#: udata/core/dataset/models.py:72
+#: udata/core/dataset/models.py:74
 msgid "High value datasets"
 msgstr "Données de forte valeur"
 
-#: udata/core/dataset/models.py:73
+#: udata/core/dataset/models.py:75
 msgid "Certified statistic series"
 msgstr "Séries statistiques labellisées"
 
-#: udata/core/dataset/models.py:74
+#: udata/core/dataset/models.py:76
 msgid "Statistical series of general interest"
 msgstr "Séries statistiques reconnues d’intérêt général"
 
-#: udata/core/dataset/models.py:154
+#: udata/core/dataset/models.py:158
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:1182
-#: udata/tests/api/test_datasets_api.py:1193
+#: udata/core/dataset/models.py:190 udata/tests/api/test_datasets_api.py:1195
+#: udata/tests/api/test_datasets_api.py:1206
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
-msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
+msgstr ""
+"Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs "
+"autorisées : {values}"
 
-#: udata/core/dataset/models.py:205 udata/tests/api/test_datasets_api.py:1205
+#: udata/core/dataset/models.py:209 udata/tests/api/test_datasets_api.py:1218
 #, python-brace-format
-msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
-msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
+msgid ""
+"Version \"{version}\" is not an allowed value for the schema \"{name}\". "
+"Allowed versions: {values}"
+msgstr ""
+"La version \"{version}\" n'est pas une valeur autorisée pour le schéma "
+"\"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:454 udata/core/dataset/rdf.py:596
-#: udata/tests/dataset/test_dataset_rdf.py:912
-#: udata/tests/dataset/test_dataset_rdf.py:925
+#: udata/core/dataset/models.py:458 udata/core/dataset/rdf.py:596
+#: udata/tests/dataset/test_dataset_rdf.py:1007
+#: udata/tests/dataset/test_dataset_rdf.py:1020
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:559
+#: udata/core/dataset/models.py:568
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:591
+#: udata/core/dataset/models.py:606
 msgid "Last update of the dataset resources"
 msgstr "Dernière mise à jour des ressources de ce jeu de données"
 
-#: udata/core/dataset/models.py:646
+#: udata/core/dataset/models.py:661
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:594 udata/tests/dataset/test_dataset_rdf.py:882
-#: udata/tests/dataset/test_dataset_rdf.py:899
+#: udata/core/dataset/rdf.py:594 udata/tests/dataset/test_dataset_rdf.py:977
+#: udata/tests/dataset/test_dataset_rdf.py:994
 #, python-brace-format
 msgid "{format} resource"
 msgstr "Ressource {format}"
@@ -930,7 +1022,9 @@ msgstr "Une nouvelle discussion a été ouverte sur votre %(type)s"
 #: udata/core/discussions/mails.py:15
 #, python-format
 msgid "You have a new discussion from %(user_or_org)s on your %(type)s %(object)s"
-msgstr "Vous avez une nouvelle discussion de %(user_or_org)s sur votre %(type)s %(object)s"
+msgstr ""
+"Vous avez une nouvelle discussion de %(user_or_org)s sur votre %(type)s "
+"%(object)s"
 
 #: udata/core/discussions/mails.py:21 udata/core/discussions/mails.py:40
 #: udata/core/discussions/mails.py:59
@@ -953,7 +1047,9 @@ msgstr "Un nouveau commentaire a été ajouté à une discussion"
 #: udata/core/discussions/mails.py:34
 #, python-format
 msgid "You have a new comment from %(user_or_org)s on your %(type)s %(object)s"
-msgstr "Vous avez un nouveau commentaire de %(user_or_org)s sur votre %(type)s %(object)s"
+msgstr ""
+"Vous avez un nouveau commentaire de %(user_or_org)s sur votre %(type)s "
+"%(object)s"
 
 #: udata/core/discussions/mails.py:49
 msgid "A discussion has been closed"
@@ -961,12 +1057,24 @@ msgstr "Une discussion a été clôturée"
 
 #: udata/core/discussions/mails.py:53
 #, python-format
-msgid "The discussion you participated in on the %(type)s %(object)s has been closed by %(user_or_org)s."
-msgstr "La discussion à laquelle vous avez participé sur %(type)s %(object)s a été clôturée par %(user_or_org)s."
+msgid ""
+"The discussion you participated in on the %(type)s %(object)s has been "
+"closed by %(user_or_org)s."
+msgstr ""
+"La discussion à laquelle vous avez participé sur %(type)s %(object)s a "
+"été clôturée par %(user_or_org)s."
 
 #: udata/core/discussions/mails.py:61
 msgid "View the discussion"
 msgstr "Voir la discussion"
+
+#: udata/core/discussions/models.py:18
+msgid "message"
+msgstr ""
+
+#: udata/core/discussions/models.py:76
+msgid "discussion"
+msgstr ""
 
 #: udata/core/jobs/forms.py:29
 msgid "Tasks"
@@ -986,6 +1094,65 @@ msgstr "chaque {0.period_singular}"
 msgid "every {0.every} {0.period}"
 msgstr "chaque {0.every} {0.period}"
 
+#: udata/core/legal/mails.py:81
+#, python-format
+msgid ""
+"Our %(terms_link)s specify in point %(article)s that the platform is not "
+"\"intended to disseminate advertising content, promotions of private "
+"interests, content contrary to public order, illegal content, spam and "
+"any contribution violating the applicable legal framework. The Editor "
+"reserves the right, without prior notice, to remove or make inaccessible "
+"content published on the Platform that has no connection with its "
+"Purpose. The Editor does not carry out \"a priori\" control over "
+"publications. As soon as the Editor becomes aware of content contrary to "
+"these terms of use, it acts quickly to remove or make it inaccessible\"."
+msgstr ""
+
+#: udata/core/legal/mails.py:95
+msgid ""
+"The platform is not \"intended to disseminate advertising content, "
+"promotions of private interests, content contrary to public order, "
+"illegal content, spam and any contribution violating the applicable legal"
+" framework. The Editor reserves the right, without prior notice, to "
+"remove or make inaccessible content published on the Platform that has no"
+" connection with its Purpose. The Editor does not carry out \"a priori\" "
+"control over publications. As soon as the Editor becomes aware of content"
+" contrary to these terms of use, it acts quickly to remove or make it "
+"inaccessible\"."
+msgstr ""
+
+#: udata/core/legal/mails.py:107
+#, python-format
+msgid ""
+"You may contest this decision within two months of its notification by "
+"filing an administrative appeal (recours gracieux ou hiérarchique). You "
+"may also bring the matter before the administrative court via the "
+"\"%(telerecours_link)s\" application."
+msgstr ""
+
+#: udata/core/legal/mails.py:114
+msgid "You may contest this decision by contacting us."
+msgstr ""
+
+#: udata/core/legal/mails.py:117
+#, python-format
+msgid "Your %(content_type)s has been deleted."
+msgstr ""
+
+#: udata/core/legal/mails.py:120
+msgid "Best regards,"
+msgstr ""
+
+#: udata/core/legal/mails.py:122
+#, python-format
+msgid "%(site)s team member"
+msgstr ""
+
+#: udata/core/legal/mails.py:126
+#, python-format
+msgid "Deletion of your %(content_type)s"
+msgstr ""
+
 #: udata/core/organization/activities.py:18
 msgid "created an organization"
 msgstr "a mis à jour une organisation"
@@ -1002,18 +1169,19 @@ msgstr "Administrateur"
 msgid "Editor"
 msgstr "Éditeur"
 
-#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:13
-#: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:88
+#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:16
+#: udata/harvest/models.py:28 udata/harvest/models.py:40
+#: udata/harvest/models.py:89
 msgid "Pending"
 msgstr "En attente"
 
-#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:89
+#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:17
+#: udata/harvest/models.py:90
 msgid "Accepted"
 msgstr "Acceptée"
 
-#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:90
+#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:18
+#: udata/harvest/models.py:91
 msgid "Refused"
 msgstr "Refusée"
 
@@ -1066,8 +1234,12 @@ msgstr "Nouvelle demande d'adhésion"
 
 #: udata/core/organization/mails.py:13
 #, python-format
-msgid "You received a membership request from %(user)s for your organization %(org)s"
-msgstr "Vous avez reçu une demande d'adhésion de %(user)s pour votre organisation %(org)s"
+msgid ""
+"You received a membership request from %(user)s for your organization "
+"%(org)s"
+msgstr ""
+"Vous avez reçu une demande d'adhésion de %(user)s pour votre organisation"
+" %(org)s"
 
 #: udata/core/organization/mails.py:18
 msgid "Reason for the request:"
@@ -1092,8 +1264,12 @@ msgstr "Votre invitation à rejoindre une organisation a été acceptée"
 
 #: udata/core/organization/mails.py:44
 #, python-format
-msgid "Good news! Your request to join the organization %(org)s has been approved."
-msgstr "Bonne nouvelle ! Votre demande d'adhésion à l'organisation %(org)s a été approuvée."
+msgid ""
+"Good news! Your request to join the organization %(org)s has been "
+"approved."
+msgstr ""
+"Bonne nouvelle ! Votre demande d'adhésion à l'organisation %(org)s a été "
+"approuvée."
 
 #: udata/core/organization/mails.py:49 udata/core/organization/mails.py:66
 #: udata/core/organization/mails.py:82 udata/core/organization/mails.py:97
@@ -1117,8 +1293,12 @@ msgstr "Votre organisation a été certifiée"
 
 #: udata/core/organization/mails.py:78
 #, python-format
-msgid "Good news! Your organization %(org)s has been certified by our team. A badge is now associated with your organization."
-msgstr "Bonne nouvelle ! Votre organisation %(org)s a été certifiée par notre équipe. Un badge est maintenant associé à votre organisation."
+msgid ""
+"Good news! Your organization %(org)s has been certified by our team. A "
+"badge is now associated with your organization."
+msgstr ""
+"Bonne nouvelle ! Votre organisation %(org)s a été certifiée par notre "
+"équipe. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:89
 msgid "Your organization has been identified as a public service"
@@ -1126,17 +1306,29 @@ msgstr "Votre organisation a été identifiée comme un service public"
 
 #: udata/core/organization/mails.py:93
 #, python-format
-msgid "Good news! Your organization %(org)s has been identified by our team as a public service. A badge is now associated with your organization."
-msgstr "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme un service public. Un badge est maintenant associé à votre organisation."
+msgid ""
+"Good news! Your organization %(org)s has been identified by our team as a"
+" public service. A badge is now associated with your organization."
+msgstr ""
+"Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre "
+"équipe comme un service public. Un badge est maintenant associé à votre "
+"organisation."
 
 #: udata/core/organization/mails.py:104
 msgid "Your organization has been identified as a local authority"
-msgstr "Votre organisation a été identifiée comme étant une collectivité territoriale"
+msgstr ""
+"Votre organisation a été identifiée comme étant une collectivité "
+"territoriale"
 
 #: udata/core/organization/mails.py:108
 #, python-format
-msgid "Good news! Your organization %(org)s has been identified by our team as a local authority. A badge is now associated with your organization."
-msgstr "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme une collectivité territoriale. Un badge est maintenant associé à votre organisation."
+msgid ""
+"Good news! Your organization %(org)s has been identified by our team as a"
+" local authority. A badge is now associated with your organization."
+msgstr ""
+"Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre "
+"équipe comme une collectivité territoriale. Un badge est maintenant "
+"associé à votre organisation."
 
 #: udata/core/organization/mails.py:119
 msgid "Your organization has been identified as a company"
@@ -1144,8 +1336,12 @@ msgstr "Votre organisation a été identifiée comme entreprise"
 
 #: udata/core/organization/mails.py:123
 #, python-format
-msgid "Your organization %(org)s has been identified by our team as a company. A badge is now associated with your organization."
-msgstr "Votre organisation %(org)s a été identifiée par notre équipe comme une entreprise. Un badge est maintenant associé à votre organisation."
+msgid ""
+"Your organization %(org)s has been identified by our team as a company. A"
+" badge is now associated with your organization."
+msgstr ""
+"Votre organisation %(org)s a été identifiée par notre équipe comme une "
+"entreprise. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:134
 msgid "Your organization has been identified as an association"
@@ -1153,30 +1349,38 @@ msgstr "Votre organisation a été identifiée comme une association"
 
 #: udata/core/organization/mails.py:138
 #, python-format
-msgid "Your organization %(org)s has been identified by our team as an association. A badge is now associated with your organization."
-msgstr "Votre organisation %(org)s a été identifiée par notre équipe comme une association. Un badge est maintenant associé à votre organisation."
+msgid ""
+"Your organization %(org)s has been identified by our team as an "
+"association. A badge is now associated with your organization."
+msgstr ""
+"Votre organisation %(org)s a été identifiée par notre équipe comme une "
+"association. Un badge est maintenant associé à votre organisation."
 
-#: udata/core/organization/models.py:39
+#: udata/core/organization/models.py:40
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:40
+#: udata/core/organization/models.py:41
 msgid "Certified"
 msgstr "Certifié"
 
-#: udata/core/organization/models.py:41
+#: udata/core/organization/models.py:42
 msgid "Association"
 msgstr "Association"
 
-#: udata/core/organization/models.py:42
+#: udata/core/organization/models.py:43
 msgid "Company"
 msgstr "Entreprise"
 
-#: udata/core/organization/models.py:43
+#: udata/core/organization/models.py:44
 msgid "Local authority"
 msgstr "Collectivité territoriale"
 
-#: udata/core/post/api.py:118
+#: udata/core/organization/models.py:183
+msgid "organization"
+msgstr ""
+
+#: udata/core/post/api.py:73
 msgid "Latests posts"
 msgstr "Derniers articles"
 
@@ -1188,43 +1392,19 @@ msgstr "Markdown"
 msgid "HTML"
 msgstr "HTML"
 
-#: udata/core/post/forms.py:16
-msgid "Headline"
-msgstr "Entête"
+#: udata/core/post/constants.py:11
+msgid "Blocs"
+msgstr ""
 
-#: udata/core/post/forms.py:17
-msgid "Content"
-msgstr "Contenu"
+#: udata/core/post/constants.py:17
+msgid "News"
+msgstr ""
 
-#: udata/core/post/forms.py:19
-msgid "Associated datasets"
-msgstr "Jeux de données associés"
+#: udata/core/post/constants.py:18
+msgid "Page"
+msgstr ""
 
-#: udata/core/post/forms.py:20
-msgid "Associated reuses"
-msgstr "Réutilisations associées"
-
-#: udata/core/post/forms.py:22
-msgid "Image"
-msgstr "Image"
-
-#: udata/core/post/forms.py:23
-msgid "Image credits"
-msgstr "Crédits de l'image"
-
-#: udata/core/post/forms.py:24
-msgid "Credit URL"
-msgstr "URL des crédits"
-
-#: udata/core/post/forms.py:29
-msgid "body type"
-msgstr "type du contenu"
-
-#: udata/core/post/forms.py:29
-msgid "Specify your body type (HTML or markdown)"
-msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
-
-#: udata/core/post/models.py:55
+#: udata/core/post/models.py:129
 msgid "post"
 msgstr "article"
 
@@ -1264,7 +1444,7 @@ msgstr "a mis à jour une réutilisation"
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
 
-#: udata/core/reuse/api.py:141
+#: udata/core/reuse/api.py:142
 msgid "Latests reuses"
 msgstr "Dernières réutilisations"
 
@@ -1358,8 +1538,12 @@ msgstr "Nouvelle réutilisation de votre jeu de données"
 
 #: udata/core/reuse/mails.py:13
 #, python-format
-msgid "A new reuse has been published by %(user_or_org)s on your dataset %(dataset)s"
-msgstr "Une nouvelle réutilisation a été publiée par %(user_or_org)s sur votre jeu de données %(dataset)s"
+msgid ""
+"A new reuse has been published by %(user_or_org)s on your dataset "
+"%(dataset)s"
+msgstr ""
+"Une nouvelle réutilisation a été publiée par %(user_or_org)s sur votre "
+"jeu de données %(dataset)s"
 
 #: udata/core/reuse/mails.py:18
 msgid "Reuse title:"
@@ -1579,22 +1763,43 @@ msgstr "Inactivité de votre compte {site}"
 
 #: udata/core/user/mails.py:36
 #, python-format
-msgid "We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more on %(site)s, the open platform for public data."
-msgstr "Nous avons constaté que votre compte associé à l'adresse (%(user_email)s) est inactif depuis plus de %(inactivity_years)d ans sur %(site)s, la plateforme des données publiques."
+msgid ""
+"We have noticed that your account associated to (%(user_email)s) has been"
+" inactive for %(inactivity_years)d years or more on %(site)s, the open "
+"platform for public data."
+msgstr ""
+"Nous avons constaté que votre compte associé à l'adresse (%(user_email)s)"
+" est inactif depuis plus de %(inactivity_years)d ans sur %(site)s, la "
+"plateforme des données publiques."
 
 #: udata/core/user/mails.py:42
 msgid "If you want to keep your account, please log in with your account."
-msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte."
+msgstr ""
+"Si vous souhaitez conserver votre compte, veuillez vous connecter avec "
+"votre compte."
 
 #: udata/core/user/mails.py:46
 #, python-format
-msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
-msgstr "Sans connexion de votre part, votre compte va être supprimé d'ici %(notify_delay)d jours."
+msgid ""
+"Without logging in, your account will be deleted within %(notify_delay)d "
+"days."
+msgstr ""
+"Sans connexion de votre part, votre compte va être supprimé d'ici "
+"%(notify_delay)d jours."
 
 #: udata/core/user/mails.py:50
 #, python-format
-msgid "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary."
-msgstr "Ce compte n'est pas relié à vos autres comptes de l'administration et vous aurez toujours la possibilité de recréer un compte sur la plateforme %(site)s."
+msgid ""
+"This account is not tied to your other administration accounts and you "
+"can always re-create an account on the %(site)s platform if necessary."
+msgstr ""
+"Ce compte n'est pas relié à vos autres comptes de l'administration et "
+"vous aurez toujours la possibilité de recréer un compte sur la plateforme"
+" %(site)s."
+
+#: udata/core/user/models.py:130
+msgid "account"
+msgstr ""
 
 #: udata/core/user/permissions.py:5
 msgid "System administrator"
@@ -1671,7 +1876,9 @@ msgstr "Incapable de comprendre la date"
 #: udata/forms/fields.py:752 udata/forms/fields.py:784
 #: udata/tests/forms/test_publish_as_field.py:212
 msgid "Cannot change owner after creation. Please use transfer feature."
-msgstr "Impossible de modifier le propriétaire après la création. Veuillez utiliser la fonctionnalité de transfert."
+msgstr ""
+"Impossible de modifier le propriétaire après la création. Veuillez "
+"utiliser la fonctionnalité de transfert."
 
 #: udata/forms/fields.py:757 udata/forms/fields.py:789
 msgid "You must be authenticated"
@@ -1682,7 +1889,7 @@ msgstr "Vous devez être authentifié"
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ce champ requiert la définition de \"%(name)s\""
 
-#: udata/frontend/markdown.py:27
+#: udata/frontend/markdown.py:28
 msgid "Source"
 msgstr "Source"
 
@@ -1734,27 +1941,27 @@ msgstr "Ignoré"
 msgid "Archived"
 msgstr "Archivé"
 
-#: udata/harvest/backends/dcat.py:434
+#: udata/harvest/backends/dcat.py:437
 msgid "Remote URL prefix"
 msgstr "Préfixe d'URL distante"
 
-#: udata/harvest/backends/dcat.py:437
+#: udata/harvest/backends/dcat.py:440
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
 
-#: udata/harvest/backends/ckan/harvesters.py:31
+#: udata/harvest/backends/ckan/harvesters.py:33
 msgid "Organization"
 msgstr "Organisation"
 
-#: udata/harvest/backends/ckan/harvesters.py:31
+#: udata/harvest/backends/ckan/harvesters.py:33
 msgid "A CKAN Organization name"
 msgstr "Un nom d'organisation CKAN"
 
-#: udata/harvest/backends/ckan/harvesters.py:32
+#: udata/harvest/backends/ckan/harvesters.py:34
 msgid "Tag"
 msgstr "Mot-clé"
 
-#: udata/harvest/backends/ckan/harvesters.py:32
+#: udata/harvest/backends/ckan/harvesters.py:34
 msgid "A CKAN tag name"
 msgstr "Un nom de mot-clé CKAN"
 
@@ -1773,41 +1980,39 @@ msgid "Back to home"
 msgstr "Retour à la page d'accueil"
 
 #: udata/templates/comments/dataset_archived.txt:1
-msgid "This dataset has been archived by our administration team.\n\n"
-"An archived dataset is considered out of date by a combination of factors.\n"
-"It does not appear in the search results and has a special layout warning the site's users.\n\n"
+msgid ""
+"This dataset has been archived by our administration team.\n"
+"\n"
+"An archived dataset is considered out of date by a combination of "
+"factors.\n"
+"It does not appear in the search results and has a special layout warning"
+" the site's users.\n"
+"\n"
 "If you think this is a mistake, you can contact the site administrator."
-msgstr "Ce jeu de données a été archivé par notre équipe d'administration.\n\n"
-"Un jeu de données archivé est considéré comme obsolète selon une combinaison de facteurs.\n"
-"Il n'apparaît pas dans les résultats de recherche et une mise en page spéciale sur la page du jeu de données avertit les visiteurs.\n\n"
-"Si vous pensez que c'est une erreur, vous pouvez répondre à ce message ou nous écrire à validation@data.gouv.fr."
+msgstr ""
+"Ce jeu de données a été archivé par notre équipe d'administration.\n"
+"\n"
+"Un jeu de données archivé est considéré comme obsolète selon une "
+"combinaison de facteurs.\n"
+"Il n'apparaît pas dans les résultats de recherche et une mise en page "
+"spéciale sur la page du jeu de données avertit les visiteurs.\n"
+"\n"
+"Si vous pensez que c'est une erreur, vous pouvez répondre à ce message ou"
+" nous écrire à validation@data.gouv.fr."
 
-#: udata/templates/mail/base.html:45
-msgid "on your browser."
-msgstr "dans votre navigateur."
-
-#: udata/templates/mail/base.html:48
-#, python-format
-msgid "View this email %(link)s"
-msgstr "Voir cet email %(link)s"
-
-#: udata/templates/mail/base.html:76 udata/templates/mail/message.html:41
+#: udata/templates/mail/message.html:15
 #, python-format
 msgid "Hi %(user)s"
 msgstr "Bonjour %(user)s"
 
-#: udata/templates/mail/base.html:87
-msgid "See you soon on the platform"
-msgstr "A bientôt sur la plateforme"
+#: udata/templates/mail/message.html:36
+msgid "Have a great day"
+msgstr "Très bonne journée"
 
-#: udata/templates/mail/base.html:88 udata/templates/mail/message.html:63
+#: udata/templates/mail/message.html:37
 #, python-format
 msgid "The %(site)s team"
 msgstr "L'équipe de %(site)s"
-
-#: udata/templates/mail/message.html:62
-msgid "Have a great day"
-msgstr "Très bonne journée"
 
 #: udata/templates/security/change_password.html:9
 #: udata/templates/security/change_password.html:16
@@ -1822,8 +2027,13 @@ msgid "Reset Password"
 msgstr "Réinitialiser le mot de passe"
 
 #: udata/templates/security/forgot_password.html:10
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr "Vous avez oublié votre mot de passe ? Saisissez votre adresse email ci-dessous et nous vous enverrons les instructions pour en définir un nouveau."
+msgid ""
+"Forgotten your password? Enter your email address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
+"Vous avez oublié votre mot de passe ? Saisissez votre adresse email ci-"
+"dessous et nous vous enverrons les instructions pour en définir un "
+"nouveau."
 
 #: udata/templates/security/login_user.html:13
 msgid "Sign In"
@@ -1917,3 +2127,43 @@ msgstr "Souvent réutilisé"
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr "Suppression de votre compte {site} inactif"
+
+#~ msgid "Vous devez accepter les CGU pour continuer."
+#~ msgstr "Vous devez accepter les CGU pour continuer."
+
+#~ msgid "Headline"
+#~ msgstr "Entête"
+
+#~ msgid "Content"
+#~ msgstr "Contenu"
+
+#~ msgid "Associated datasets"
+#~ msgstr "Jeux de données associés"
+
+#~ msgid "Associated reuses"
+#~ msgstr "Réutilisations associées"
+
+#~ msgid "Image"
+#~ msgstr "Image"
+
+#~ msgid "Image credits"
+#~ msgstr "Crédits de l'image"
+
+#~ msgid "Credit URL"
+#~ msgstr "URL des crédits"
+
+#~ msgid "body type"
+#~ msgstr "type du contenu"
+
+#~ msgid "Specify your body type (HTML or markdown)"
+#~ msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
+
+#~ msgid "on your browser."
+#~ msgstr "dans votre navigateur."
+
+#~ msgid "View this email %(link)s"
+#~ msgstr "Voir cet email %(link)s"
+
+#~ msgid "See you soon on the platform"
+#~ msgstr "A bientôt sur la plateforme"
+
