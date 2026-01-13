@@ -8,6 +8,7 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
+from .notifications import CertifiedNotificationDetails
 
 log = get_logger(__name__)
 
@@ -86,8 +87,6 @@ def notify_badge_certified(org_id):
     """
     Send an email and create notifications when a `CERTIFIED` badge is added to an `Organization`
     """
-    from udata.core.organization.notifications import CertifiedNotificationDetails
-
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
 
