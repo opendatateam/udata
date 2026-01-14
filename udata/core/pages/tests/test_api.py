@@ -174,6 +174,15 @@ class PageAPITest(APITestCase):
                                     }
                                 ],
                             },
+                            {
+                                "title": "What is markdown?",
+                                "content": [
+                                    {
+                                        "class": "MarkdownBloc",
+                                        "content": "# Hello\n\nThis is **bold** text.",
+                                    }
+                                ],
+                            },
                         ],
                     }
                 ],
@@ -185,7 +194,7 @@ class PageAPITest(APITestCase):
         self.assertEqual("AccordionListBloc", bloc["class"])
         self.assertEqual("FAQ", bloc["title"])
         self.assertEqual("Frequently asked questions", bloc["description"])
-        self.assertEqual(2, len(bloc["items"]))
+        self.assertEqual(3, len(bloc["items"]))
 
         self.assertEqual("What is udata?", bloc["items"][0]["title"])
         self.assertEqual("LinksListBloc", bloc["items"][0]["content"][0]["class"])
@@ -195,6 +204,9 @@ class PageAPITest(APITestCase):
         self.assertEqual("DatasetsListBloc", bloc["items"][1]["content"][0]["class"])
         self.assertEqual(2, len(bloc["items"][1]["content"][0]["datasets"]))
 
+        self.assertEqual("What is markdown?", bloc["items"][2]["title"])
+        self.assertEqual("MarkdownBloc", bloc["items"][2]["content"][0]["class"])
+
         page = Page.objects().first()
         self.assertIsInstance(page.blocs[0], AccordionListBloc)
         self.assertIsInstance(page.blocs[0].items[0], AccordionItemBloc)
@@ -203,7 +215,7 @@ class PageAPITest(APITestCase):
         response = self.get(url_for("api.page", page=page))
         self.assert200(response)
         self.assertEqual("AccordionListBloc", response.json["blocs"][0]["class"])
-        self.assertEqual(2, len(response.json["blocs"][0]["items"]))
+        self.assertEqual(3, len(response.json["blocs"][0]["items"]))
 
         response = self.put(
             url_for("api.page", page=page),
