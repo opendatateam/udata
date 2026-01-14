@@ -30,6 +30,7 @@ jobs:
           node.name: es01
           cluster.name: es-docker-cluster
           cluster.initial_master_nodes: es01
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
@@ -106,6 +107,16 @@ jobs:
             export ELASTICSEARCH_URL=http://localhost:9200
             export UDATA_INSTANCE_NAME=udata-test
             uv run udata-search-service init-es
+      - run:
+          name: Verify Elasticsearch is still available
+          command: |
+            status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
+            echo "Elasticsearch status before tests: $status"
+            if [ "$status" != "green" ] && [ "$status" != "yellow" ]; then
+              echo "Elasticsearch is not healthy!"
+              curl -s http://localhost:9200/_cluster/health || echo "ES not reachable"
+              exit 1
+            fi
       - run:
           name: Run tests
           environment:
