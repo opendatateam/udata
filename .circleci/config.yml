@@ -108,16 +108,6 @@ jobs:
             export UDATA_INSTANCE_NAME=udata-test
             uv run udata-search-service init-es
       - run:
-          name: Verify Elasticsearch is still available
-          command: |
-            status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
-            echo "Elasticsearch status before tests: $status"
-            if [ "$status" != "green" ] && [ "$status" != "yellow" ]; then
-              echo "Elasticsearch is not healthy!"
-              curl -s http://localhost:9200/_cluster/health || echo "ES not reachable"
-              exit 1
-            fi
-      - run:
           name: Run tests
           environment:
             SEARCH_SERVICE_API_URL: "http://localhost:5000/api/1/"
