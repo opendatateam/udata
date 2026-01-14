@@ -71,10 +71,14 @@ jobs:
       - run:
           name: Wait for Elasticsearch
           command: |
-            apt-get update && apt-get install -y curl
+            apt-get update && apt-get install -y curl jq
             for i in $(seq 1 60); do
-              curl -s http://localhost:9200/_cluster/health && exit 0
-              echo "Waiting for Elasticsearch... ($i/60)"
+              status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
+              if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
+                echo "Elasticsearch is ready (status: $status)"
+                exit 0
+              fi
+              echo "Waiting for Elasticsearch... ($i/60) - status: $status"
               sleep 2
             done
             echo "Elasticsearch failed to start"
