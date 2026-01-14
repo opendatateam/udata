@@ -1,5 +1,6 @@
 import hashlib
 import itertools
+import logging
 import math
 import re
 from collections import Counter
@@ -13,6 +14,7 @@ from xml.sax.saxutils import escape
 import factory
 from bson import ObjectId
 from bson.errors import InvalidId
+from dateutil.parser import ParserError
 from dateutil.parser import parse as parse_dt
 from dateutil.relativedelta import relativedelta
 from faker import Faker
@@ -214,6 +216,27 @@ def to_naive_datetime(given_date: Any) -> datetime:
     elif isinstance(given_date, datetime):
         return given_date.replace(tzinfo=None)
     return given_date
+
+
+log = logging.getLogger(__name__)
+
+
+def safe_harvest_datetime(value: Any, field: str, refuse_future: bool = False) -> datetime | None:
+    """
+    Safely parse a date/datetime value from harvested data.
+    Returns None and logs a warning if the value cannot be parsed or is in the future.
+    """
+    if value is None:
+        return None
+    try:
+        parsed = to_naive_datetime(value)
+    except ParserError:
+        log.warning(f"Unparseable {field} value: '{value}'")
+        return None
+    if refuse_future and parsed and parsed > datetime.utcnow():
+        log.warning(f"Future {field} value: '{value}'")
+        return None
+    return parsed
 
 
 def to_iso(dt: date | datetime) -> str | None:

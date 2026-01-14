@@ -1,12 +1,14 @@
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.pages.factories import PageFactory
+from udata.core.pages.models import DatasetsListBloc
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
-from udata.tests.helpers import assert200, assert201, assert204
+from udata.tests.helpers import assert200, assert201, assert204, assert400
 
 
 class PostsAPITest(APITestCase):
@@ -163,3 +165,111 @@ class PostsAPITest(APITestCase):
         response = self.get(url_for("api.posts", with_drafts=True))
         assert200(response)
         assert len(response.json["data"]) == 3
+
+    def test_post_api_create_with_blocs_body_type_and_page(self):
+        """It should create a post with body_type='blocs' when content_as_page is provided"""
+        page = PageFactory()
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["body_type"] = "blocs"
+        data["content_as_page"] = str(page.id)
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert Post.objects.count() == 1
+        post = Post.objects.first()
+        assert post.body_type == "blocs"
+        assert post.content_as_page.id == page.id
+
+    def test_post_api_create_with_blocs_body_type_without_page(self):
+        """It should fail to create a post with body_type='blocs' without content_as_page"""
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["body_type"] = "blocs"
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert400(response)
+
+    def test_post_api_get_with_blocs_returns_page_blocs(self):
+        """It should return blocs from the associated page when fetching a post"""
+        datasets = DatasetFactory.create_batch(2)
+        bloc = DatasetsListBloc(title="Featured datasets", datasets=datasets)
+        page = PageFactory(blocs=[bloc])
+        post = PostFactory(body_type="blocs", content_as_page=page)
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        assert response.json["body_type"] == "blocs"
+        assert "content_as_page" in response.json
+        page_data = response.json["content_as_page"]
+        assert "blocs" in page_data
+        assert len(page_data["blocs"]) == 1
+        assert page_data["blocs"][0]["class"] == "DatasetsListBloc"
+        assert page_data["blocs"][0]["title"] == "Featured datasets"
+        assert len(page_data["blocs"][0]["datasets"]) == 2
+
+    def test_post_api_update_to_blocs_without_content_as_page(self):
+        """It should fail to update body_type to 'blocs' without providing content_as_page"""
+        post = PostFactory(body_type="markdown")
+        self.login(AdminFactory())
+        response = self.put(url_for("api.post", post=post), {"body_type": "blocs"})
+        assert400(response)
+
+    def test_post_api_update_to_blocs_with_content_as_page(self):
+        """It should update body_type to 'blocs' when content_as_page is provided"""
+        post = PostFactory(body_type="markdown")
+        page = PageFactory()
+        self.login(AdminFactory())
+        response = self.put(
+            url_for("api.post", post=post), {"body_type": "blocs", "content_as_page": str(page.id)}
+        )
+        assert200(response)
+        post.reload()
+        assert post.body_type == "blocs"
+        assert post.content_as_page.id == page.id
+
+    def test_post_api_update_remove_content_as_page_from_blocs_post(self):
+        """It should fail to remove content_as_page from a post with body_type='blocs'"""
+        page = PageFactory()
+        post = PostFactory(body_type="blocs", content_as_page=page)
+        self.login(AdminFactory())
+        response = self.put(url_for("api.post", post=post), {"content_as_page": None})
+        assert400(response)
+
+    def test_post_api_update_body_type_preserves_content_as_page(self):
+        """Switching from 'blocs' to 'markdown' preserves content_as_page so user can switch back"""
+        page = PageFactory()
+        post = PostFactory(body_type="blocs", content_as_page=page)
+        self.login(AdminFactory())
+        response = self.put(url_for("api.post", post=post), {"body_type": "markdown"})
+        assert200(response)
+        post.reload()
+        assert post.body_type == "markdown"
+        assert post.content_as_page.id == page.id
+
+    def test_post_api_filter_by_kind(self):
+        """It should filter posts by kind"""
+        news_post = PostFactory(kind="news")
+        page_post = PostFactory(kind="page")
+
+        response = self.get(url_for("api.posts", kind="news"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(news_post.id)
+
+        response = self.get(url_for("api.posts", kind="page"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(page_post.id)
+
+    def test_rss_feed_only_returns_news(self):
+        """RSS feed should only return posts with kind=news"""
+        news_post = PostFactory(kind="news")
+        page_post = PostFactory(kind="page")
+
+        response = self.get(url_for("api.recent_posts_atom_feed"))
+        assert200(response)
+        content = response.data.decode("utf-8")
+        assert news_post.name in content
+        assert page_post.name not in content

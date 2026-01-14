@@ -1,5 +1,26 @@
 # Changelog
 
+## 14.7.1 (2026-01-13)
+
+- fix: try to fix transfer migration ([#3616](https://github.com/opendatateam/udata/pull/3616))
+
+
+## 14.7.0 (2026-01-13)
+
+- feat: add accordion bloc ([#3608](https://github.com/opendatateam/udata/pull/3608))
+- feat: add blocs body_type to posts ([#3604](https://github.com/opendatateam/udata/pull/3604))
+- feat: add hero bloc ([#3609](https://github.com/opendatateam/udata/pull/3609))
+- feat: add markdown bloc ([#3581](https://github.com/opendatateam/udata/pull/3581))
+- feat: add post kind of news or page ([#3603](https://github.com/opendatateam/udata/pull/3603))
+- feat: add transfer notification ([#3582](https://github.com/opendatateam/udata/pull/3582))
+- feat: deny deletion of page if a post is using it ([#3614](https://github.com/opendatateam/udata/pull/3614))
+- feat: update translations ([#3615](https://github.com/opendatateam/udata/pull/3615))
+- feat: upgrade dependencies ([#3613](https://github.com/opendatateam/udata/pull/3613))
+- fix: parsing dates in RDF ([#3605](https://github.com/opendatateam/udata/pull/3605))
+-  fix: sending wrong params to search endpoints ([#3606](https://github.com/opendatateam/udata/pull/3606))
+- Revert "fix: sending wrong params to search endpoints ([#3585](https://github.com/opendatateam/udata/pull/3585))"
+
+
 ## 14.6.0 (2026-01-06)
 
 - chore: add progress bar to old migration for re-run ([#3595](https://github.com/opendatateam/udata/pull/3595))

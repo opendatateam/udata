@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date, datetime
+from datetime import date
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -51,7 +51,7 @@ from udata.rdf import (
     themes_from_rdf,
     url_from_rdf,
 )
-from udata.utils import get_by, safe_unicode, to_naive_datetime
+from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
 from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
@@ -729,12 +729,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
 
-    # In the past, we've encountered future `modified_at` during harvesting
-    # do not save it. :FutureHarvestModifiedAt
-    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
-        log.warning(f"Future `DCT.modified` date '{modified_at}' in resource")
-    else:
-        resource.harvest.modified_at = modified_at
+    # :FutureHarvestModifiedAt
+    resource.harvest.modified_at = safe_harvest_datetime(
+        modified_at, "DCT.modified (resource)", refuse_future=True
+    )
 
     resource.harvest.dct_identifier = identifier
     resource.harvest.uri = uri
@@ -845,12 +843,10 @@ def dataset_from_rdf(
     dataset.harvest.created_at = created_at
     dataset.harvest.issued_at = issued_at
 
-    # In the past, we've encountered future `modified_at` during harvesting
-    # do not save it. :FutureHarvestModifiedAt
-    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
-        log.warning(f"Future `DCT.modified` date '{modified_at}' in dataset")
-    else:
-        dataset.harvest.modified_at = modified_at
+    # :FutureHarvestModifiedAt
+    dataset.harvest.modified_at = safe_harvest_datetime(
+        modified_at, "DCT.modified (dataset)", refuse_future=True
+    )
 
     return dataset
 
