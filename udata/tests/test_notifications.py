@@ -34,16 +34,14 @@ class NotificationsAPITest(APITestCase):
 
     def test_read_notification(self):
         """Test marking a notification as read"""
-        # Create a membership request which should create a notification
+        # Create a certified organization which should create a notification
         admin = self.login()
-        self.login()
         organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
-        data = {"comment": "a comment"}
+        
+        # Add CERTIFIED badge to organization to trigger notification
+        organization.add_badge("certified")
+        organization.save()
 
-        response = self.post(url_for("api.request_membership", org=organization), data)
-        self.assert201(response)
-
-        self.login(admin)
         # Get the notification first
         response = self.get(url_for("api.notifications"))
         self.assert200(response)
@@ -58,6 +56,6 @@ class NotificationsAPITest(APITestCase):
         self.assertIsNotNone(response.json["handled_at"])
         
         # Verify that the notification no longer appears in the list of pending notifications
-        response = self.get(url_for("api.notifications"))
+        response = self.get(url_for("api.notifications", handled=False))
         self.assert200(response)
         self.assertEqual(response.json["total"], 0)
