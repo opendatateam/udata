@@ -36,6 +36,7 @@ def accept_transfer(transfer, comment=None):
     transfer.status = "accepted"
     transfer.response_comment = comment
     transfer.save()
+    Transfer.after_handle.send(transfer)
 
     subject = transfer.subject
     recipient = transfer.recipient
@@ -59,5 +60,6 @@ def refuse_transfer(transfer, comment=None):
     transfer.status = "refused"
     transfer.response_comment = comment
     transfer.save()
+    Transfer.after_handle.send(transfer)
 
     return transfer
