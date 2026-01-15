@@ -137,6 +137,7 @@ class Defaults(object):
 
     # Two-Factor Authentication settings
     SECURITY_TWO_FACTOR = True
+    SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
