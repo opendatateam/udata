@@ -8,7 +8,7 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
-from .notifications import CertifiedNotificationDetails
+from .notifications import CertifiedNotificationDetails, PublicServiceNotificationDetails
 
 log = get_logger(__name__)
 
@@ -105,12 +105,21 @@ def notify_badge_certified(org_id):
 @notify_new_badge(Organization, PUBLIC_SERVICE)
 def notify_badge_public_service(org_id):
     """
-    Send an email when a `PUBLIC_SERVICE` badge is added to an `Organization`
+    Send an email and create notifications when a `PUBLIC_SERVICE` badge is added to an `Organization`
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
 
+    # Send email notifications
     mails.badge_added_public_service(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=PublicServiceNotificationDetails(organization=org),
+        )
+        notification.save()
 
 
 @notify_new_badge(Organization, COMPANY)

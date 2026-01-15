@@ -5,6 +5,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.organization.notifications import (
     CertifiedNotificationDetails,
     MembershipRequestNotificationDetails,
+    PublicServiceNotificationDetails,
 )
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
@@ -58,7 +59,7 @@ class Notification(Datetimed, db.Document):
     )
     details = field(
         db.GenericEmbeddedDocumentField(
-            choices=(MembershipRequestNotificationDetails, TransferRequestNotificationDetails, CertifiedNotificationDetails)
+            choices=(MembershipRequestNotificationDetails, TransferRequestNotificationDetails, CertifiedNotificationDetails, PublicServiceNotificationDetails)
         ),
         generic=True,
     )
