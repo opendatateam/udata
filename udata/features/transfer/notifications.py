@@ -85,14 +85,14 @@ def on_transfer_created(transfer, **kwargs):
 def on_handle_transfer(transfer, **kwargs):
     """Update handled_at timestamp on related notifications when a transfer is handled"""
     from udata.features.notifications.models import Notification
-    
+
     # Find all notifications related to this transfer
     notifications = Notification.objects(
         details__transfer_subject=transfer.subject,
         details__transfer_owner=transfer.owner,
-        details__transfer_recipient=transfer.recipient
+        details__transfer_recipient=transfer.recipient,
     )
-    
+
     # Update handled_at for all matching notifications
     for notification in notifications:
         notification.handled_at = datetime.utcnow()
