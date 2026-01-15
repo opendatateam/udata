@@ -56,11 +56,13 @@ def on_transfer_created(transfer, **kwargs):
 
     for user in users:
         try:
+            # we don't want notifications for the same transfer, if the previous one is stil no handled
             existing = Notification.objects(
                 user=user,
                 details__transfer_recipient=recipient,
                 details__transfer_owner=owner,
                 details__transfer_subject=transfer.subject,
+                handled_at=None,
             ).first()
 
             if not existing:
@@ -86,11 +88,12 @@ def on_handle_transfer(transfer, **kwargs):
     """Update handled_at timestamp on related notifications when a transfer is handled"""
     from udata.features.notifications.models import Notification
 
-    # Find all notifications related to this transfer
+    # Find all non handled notifications related to this transfer
     notifications = Notification.objects(
         details__transfer_subject=transfer.subject,
         details__transfer_owner=transfer.owner,
         details__transfer_recipient=transfer.recipient,
+        handled_at=None,
     )
 
     # Update handled_at for all matching notifications
