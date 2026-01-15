@@ -34,6 +34,7 @@ class Transfer(db.Document):
     response_comment = db.StringField()
 
     on_create = Signal()
+    after_handle = Signal()
 
     meta = {
         "indexes": [
