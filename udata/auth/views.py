@@ -19,6 +19,7 @@ from flask_security.views import (
     send_confirmation,
     send_login,
     token_login,
+    two_factor_rescue,
     two_factor_setup,
     two_factor_token_validation,
 )
@@ -224,6 +225,11 @@ def create_security_blueprint(app, state, import_name):
             methods=["GET", "POST"],
             endpoint="two_factor_token_validation",
         )(two_factor_token_validation)
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_RESCUE_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_rescue",
+        )(two_factor_rescue)
 
     return bp
 
