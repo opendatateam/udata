@@ -302,7 +302,6 @@ class TransferRequestNotificationTest(DBTestCase):
         self.assertIn(dataset1, subjects)
         self.assertIn(dataset2, subjects)
 
-
     def test_notification_not_created_if_previous_exists(self):
         """Notification is created when transferring from org to user"""
         admin = UserFactory()
@@ -320,7 +319,6 @@ class TransferRequestNotificationTest(DBTestCase):
 
         notifications = Notification.objects.all()
         assert len(notifications) == 1
-
 
     def test_notification_created_if_previous_handled(self):
         """Notification is created when transferring from org to user"""
@@ -344,7 +342,6 @@ class TransferRequestNotificationTest(DBTestCase):
         notifications = Notification.objects.all()
         assert len(notifications) == 2
 
-
     def test_notification_created_for_org_to_user_transfer(self):
         """Notification is created when transferring from org to user"""
         admin = UserFactory()
@@ -365,7 +362,6 @@ class TransferRequestNotificationTest(DBTestCase):
         assert notification.details.transfer_subject == dataset
         assert_equal_dates(notification.created_at, transfer.created)
 
-
     def test_notification_handled_when_transfer_accepted(self):
         """Notification's handled_at is updated when transfer is accepted"""
         owner = UserFactory()
@@ -383,7 +379,6 @@ class TransferRequestNotificationTest(DBTestCase):
         notifications = Notification.objects.all()
         assert len(notifications) == 1
         assert notifications[0].handled_at is not None
-
 
     def test_notification_handled_when_transfer_refused(self):
         """Notification's handled_at is updated when transfer is refused"""
