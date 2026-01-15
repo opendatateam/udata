@@ -93,7 +93,18 @@ class HeroBloc(Bloc):
     color = field(db.StringField(choices=HERO_COLORS))
 
 
-BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc",)
+@generate_fields()
+class MarkdownBloc(Bloc):
+    # Not using BlocWithTitleMixin because title should be optional here
+    title = field(db.StringField())
+    subtitle = field(db.StringField())
+    content = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+
+
+BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
 
 
 def check_no_recursive_blocs(blocs, **kwargs):
@@ -119,17 +130,6 @@ class AccordionListBloc(Bloc):
     title = field(db.StringField())
     description = field(db.StringField())
     items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
-
-
-@generate_fields()
-class MarkdownBloc(Bloc):
-    # Not using BlocWithTitleMixin because title should be optional here
-    title = field(db.StringField())
-    subtitle = field(db.StringField())
-    content = field(
-        db.StringField(required=True),
-        markdown=True,
-    )
 
 
 @generate_fields()
