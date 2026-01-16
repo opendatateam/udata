@@ -99,20 +99,21 @@ jobs:
             start_time=$(date +%s)
             elapsed() { echo $(($(date +%s) - start_time)); }
             echo "[$(elapsed)s] Waiting for search-service to be ready..."
-            # Try immediately, then retry once after 3 seconds if needed
-            for attempt in 1 2; do
+            # Wait a bit for service to start, then retry up to 10 times
+            sleep 2
+            for i in $(seq 1 10); do
               output=$(curl -s -w "\n%{http_code}" --max-time 5 http://localhost:5000/api/1/datasets/?page=1&page_size=1 2>&1 || echo -e "\n000")
               http_code=$(echo "$output" | tail -n1 | grep -oE '[0-9]{3}$' || echo "000")
               if [ "$http_code" = "200" ] || [ "$http_code" = "500" ]; then
                 echo "[$(elapsed)s] Search-service is ready (HTTP $http_code) - indices will be initialized next"
                 exit 0
               fi
-              if [ $attempt -eq 1 ]; then
-                echo "[$(elapsed)s] Service not ready yet (HTTP $http_code), retrying in 3 seconds..."
-                sleep 3
+              if [ $i -lt 10 ]; then
+                echo "[$(elapsed)s] Service not ready yet (HTTP $http_code), retrying in 2 seconds..."
+                sleep 2
               fi
             done
-            echo "[$(elapsed)s] Search-service failed to start (last HTTP code: $http_code)"
+            echo "[$(elapsed)s] Search-service failed to start after ~20 seconds (last HTTP code: $http_code)"
             exit 1
       - run:
           name: Initialize Elasticsearch indices
