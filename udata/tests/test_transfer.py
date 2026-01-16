@@ -11,7 +11,7 @@ from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
 )
 from udata.features.notifications.models import Notification
-from udata.features.transfer.actions import accept_transfer, request_transfer
+from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
@@ -302,6 +302,46 @@ class TransferRequestNotificationTest(DBTestCase):
         self.assertIn(dataset1, subjects)
         self.assertIn(dataset2, subjects)
 
+    def test_notification_not_created_if_previous_exists(self):
+        """Notification is created when transferring from org to user"""
+        admin = UserFactory()
+        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        dataset = DatasetFactory(organization=org)
+        recipient = UserFactory()
+
+        login_user(admin)
+        request_transfer(dataset, recipient, faker.sentence())
+
+        notifications = Notification.objects.all()
+        assert len(notifications) == 1
+
+        request_transfer(dataset, recipient, faker.sentence())
+
+        notifications = Notification.objects.all()
+        assert len(notifications) == 1
+
+    def test_notification_created_if_previous_handled(self):
+        """Notification is created when transferring from org to user"""
+        admin = UserFactory()
+        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        dataset = DatasetFactory(organization=org)
+        recipient = UserFactory()
+
+        login_user(admin)
+        transfer = request_transfer(dataset, recipient, faker.sentence())
+
+        login_user(recipient)
+        refuse_transfer(transfer)
+
+        notifications = Notification.objects.all()
+        assert len(notifications) == 1
+
+        login_user(admin)
+        request_transfer(dataset, recipient, faker.sentence())
+
+        notifications = Notification.objects.all()
+        assert len(notifications) == 2
+
     def test_notification_created_for_org_to_user_transfer(self):
         """Notification is created when transferring from org to user"""
         admin = UserFactory()
@@ -321,3 +361,39 @@ class TransferRequestNotificationTest(DBTestCase):
         assert notification.details.transfer_recipient == recipient
         assert notification.details.transfer_subject == dataset
         assert_equal_dates(notification.created_at, transfer.created)
+
+    def test_notification_handled_when_transfer_accepted(self):
+        """Notification's handled_at is updated when transfer is accepted"""
+        owner = UserFactory()
+        recipient = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        login_user(owner)
+        # First create the notification by requesting the transfer
+        transfer = request_transfer(dataset, recipient, faker.sentence())
+        # Then accept the transfer
+        login_user(recipient)
+        accept_transfer(transfer)
+
+        # Check that the notification has been handled
+        notifications = Notification.objects.all()
+        assert len(notifications) == 1
+        assert notifications[0].handled_at is not None
+
+    def test_notification_handled_when_transfer_refused(self):
+        """Notification's handled_at is updated when transfer is refused"""
+        owner = UserFactory()
+        recipient = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        login_user(owner)
+        # First create the notification by requesting the transfer
+        transfer = request_transfer(dataset, recipient, faker.sentence())
+        # Then refuse the transfer
+        login_user(recipient)
+        refuse_transfer(transfer)
+
+        # Check that the notification has been handled
+        notifications = Notification.objects.all()
+        assert len(notifications) == 1
+        assert notifications[0].handled_at is not None

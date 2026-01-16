@@ -1,5 +1,12 @@
 # Changelog
 
+## 14.7.2 (2026-01-15)
+
+- chore: add MongoDB 7.0 in CI ([#3593](https://github.com/opendatateam/udata/pull/3593))
+- fix: add default kind to posts in migration ([#3617](https://github.com/opendatateam/udata/pull/3617))
+- fix: allow markdown inside accordions ([#3618](https://github.com/opendatateam/udata/pull/3618))
+
+
 ## 14.7.1 (2026-01-13)
 
 - fix: try to fix transfer migration ([#3616](https://github.com/opendatateam/udata/pull/3616))
