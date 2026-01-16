@@ -19,6 +19,9 @@ from flask_security.views import (
     send_confirmation,
     send_login,
     token_login,
+    two_factor_rescue,
+    two_factor_setup,
+    two_factor_token_validation,
 )
 from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
@@ -210,6 +213,23 @@ def create_security_blueprint(app, state, import_name):
 
     bp.route("/change-email", methods=["GET", "POST"], endpoint="change_email")(change_email)
     bp.route("/get-csrf", methods=["GET"], endpoint="get_csrf")(get_csrf)
+
+    if state.two_factor:
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_SETUP_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_setup",
+        )(two_factor_setup)
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_token_validation",
+        )(two_factor_token_validation)
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_RESCUE_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_rescue",
+        )(two_factor_rescue)
 
     return bp
 
