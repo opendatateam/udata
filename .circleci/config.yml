@@ -230,7 +230,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.11", "3.13"]
-              mongo-version: ["6.0.4", "7.0.28"]
+              mongo-version: ["7.0.28"]
       - dist:
           requires:
             - python
