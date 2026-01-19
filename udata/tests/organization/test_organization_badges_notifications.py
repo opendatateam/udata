@@ -1,4 +1,10 @@
-from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
+from udata.core.organization.constants import (
+    ASSOCIATION,
+    CERTIFIED,
+    COMPANY,
+    LOCAL_AUTHORITY,
+    PUBLIC_SERVICE,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
@@ -102,6 +108,165 @@ class NotifyBadgePublicServiceTest(APITestCase):
         with capture_mails():
             # Add PUBLIC_SERVICE badge to organization
             organization.add_badge(PUBLIC_SERVICE)
+
+        # Get the notification
+        notification = Notification.objects.first()
+
+        # Verify notification details
+        assert notification is not None
+        assert notification.details.organization.id == organization.id
+        assert notification.details.organization.name == organization.name
+        assert notification.user == user
+
+
+class NotifyBadgeLocalAuthorityTest(APITestCase):
+    def test_notify_badge_local_authority_creates_notifications(self):
+        """
+        Test that notify_badge_local_authority creates in-app notifications for organization members
+        """
+        # Create users and organization
+        user1 = UserFactory()
+        user2 = UserFactory()
+
+        # Create organization with members
+        organization = OrganizationFactory(
+            members=[Member(user=user1, role="admin"), Member(user=user2, role="editor")]
+        )
+        org_mails = [user1.email, user2.email]
+
+        with capture_mails() as mails:
+            # Add LOCAL_AUTHORITY badge to organization
+            organization.add_badge(LOCAL_AUTHORITY)
+            self.assertEqual(len(mails), 2)
+            self.assertIn(mails[0].recipients[0], org_mails)
+            self.assertIn(mails[1].recipients[0], org_mails)
+
+        # Verify that notifications were created for each member
+        notifications = Notification.objects(user__in=[user1, user2])
+        assert len(notifications) == 2
+
+        # Verify that notifications are for the correct organization
+        for notification in notifications:
+            assert notification.details.organization.id == organization.id
+            assert notification.details.organization.name == organization.name
+
+    def test_notify_badge_local_authority_notification_details(self):
+        """
+        Test that notifications have correct details for LOCAL_AUTHORITY badge
+        """
+        # Create users and organization
+        user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        with capture_mails():
+            # Add LOCAL_AUTHORITY badge to organization
+            organization.add_badge(LOCAL_AUTHORITY)
+
+        # Get the notification
+        notification = Notification.objects.first()
+
+        # Verify notification details
+        assert notification is not None
+        assert notification.details.organization.id == organization.id
+        assert notification.details.organization.name == organization.name
+        assert notification.user == user
+
+
+class NotifyBadgeCompanyTest(APITestCase):
+    def test_notify_badge_company_creates_notifications(self):
+        """
+        Test that notify_badge_company creates in-app notifications for organization members
+        """
+        # Create users and organization
+        user1 = UserFactory()
+        user2 = UserFactory()
+
+        # Create organization with members
+        organization = OrganizationFactory(
+            members=[Member(user=user1, role="admin"), Member(user=user2, role="editor")]
+        )
+        org_mails = [user1.email, user2.email]
+
+        with capture_mails() as mails:
+            # Add COMPANY badge to organization
+            organization.add_badge(COMPANY)
+            self.assertEqual(len(mails), 2)
+            self.assertIn(mails[0].recipients[0], org_mails)
+            self.assertIn(mails[1].recipients[0], org_mails)
+
+        # Verify that notifications were created for each member
+        notifications = Notification.objects(user__in=[user1, user2])
+        assert len(notifications) == 2
+
+        # Verify that notifications are for the correct organization
+        for notification in notifications:
+            assert notification.details.organization.id == organization.id
+            assert notification.details.organization.name == organization.name
+
+    def test_notify_badge_company_notification_details(self):
+        """
+        Test that notifications have correct details for COMPANY badge
+        """
+        # Create users and organization
+        user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        with capture_mails():
+            # Add COMPANY badge to organization
+            organization.add_badge(COMPANY)
+
+        # Get the notification
+        notification = Notification.objects.first()
+
+        # Verify notification details
+        assert notification is not None
+        assert notification.details.organization.id == organization.id
+        assert notification.details.organization.name == organization.name
+        assert notification.user == user
+
+
+class NotifyBadgeAssociationTest(APITestCase):
+    def test_notify_badge_association_creates_notifications(self):
+        """
+        Test that notify_badge_association creates in-app notifications for organization members
+        """
+        # Create users and organization
+        user1 = UserFactory()
+        user2 = UserFactory()
+
+        # Create organization with members
+        organization = OrganizationFactory(
+            members=[Member(user=user1, role="admin"), Member(user=user2, role="editor")]
+        )
+        org_mails = [user1.email, user2.email]
+
+        with capture_mails() as mails:
+            # Add ASSOCIATION badge to organization
+            organization.add_badge(ASSOCIATION)
+            self.assertEqual(len(mails), 2)
+            self.assertIn(mails[0].recipients[0], org_mails)
+            self.assertIn(mails[1].recipients[0], org_mails)
+
+        # Verify that notifications were created for each member
+        notifications = Notification.objects(user__in=[user1, user2])
+        assert len(notifications) == 2
+
+        # Verify that notifications are for the correct organization
+        for notification in notifications:
+            assert notification.details.organization.id == organization.id
+            assert notification.details.organization.name == organization.name
+
+    def test_notify_badge_association_notification_details(self):
+        """
+        Test that notifications have correct details for ASSOCIATION badge
+        """
+        # Create users and organization
+        user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        with capture_mails():
+            # Add ASSOCIATION badge to organization
+            organization.add_badge(ASSOCIATION)
 
         # Get the notification
         notification = Notification.objects.first()
