@@ -3,7 +3,10 @@ from mongoengine import NULLIFY, Q
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.notifications import (
+    AssociationNotificationDetails,
     CertifiedNotificationDetails,
+    CompanyNotificationDetails,
+    LocalAuthorityNotificationDetails,
     MembershipRequestNotificationDetails,
     PublicServiceNotificationDetails,
 )
@@ -59,7 +62,15 @@ class Notification(Datetimed, db.Document):
     )
     details = field(
         db.GenericEmbeddedDocumentField(
-            choices=(MembershipRequestNotificationDetails, TransferRequestNotificationDetails, CertifiedNotificationDetails, PublicServiceNotificationDetails)
+            choices=(
+                MembershipRequestNotificationDetails,
+                TransferRequestNotificationDetails,
+                CertifiedNotificationDetails,
+                PublicServiceNotificationDetails,
+                LocalAuthorityNotificationDetails,
+                CompanyNotificationDetails,
+                AssociationNotificationDetails,
+            )
         ),
         generic=True,
     )

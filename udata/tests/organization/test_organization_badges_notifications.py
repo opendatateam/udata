@@ -18,19 +18,16 @@ class NotifyBadgeCertifiedTest(APITestCase):
 
         # Create organization with members
         organization = OrganizationFactory(
-            members=[
-                Member(user=user1, role="admin"),
-                Member(user=user2, role="editor")
-            ]
+            members=[Member(user=user1, role="admin"), Member(user=user2, role="editor")]
         )
         org_mails = [user1.email, user2.email]
 
         with capture_mails() as mails:
-          # Add CERTIFIED badge to organization
-          organization.add_badge(CERTIFIED)
-          self.assertEqual(len(mails), 2)
-          self.assertIn(mails[0].recipients[0], org_mails)
-          self.assertIn(mails[1].recipients[0], org_mails)
+            # Add CERTIFIED badge to organization
+            organization.add_badge(CERTIFIED)
+            self.assertEqual(len(mails), 2)
+            self.assertIn(mails[0].recipients[0], org_mails)
+            self.assertIn(mails[1].recipients[0], org_mails)
 
         # Verify that notifications were created for each member
         notifications = Notification.objects(user__in=[user1, user2])
@@ -47,13 +44,11 @@ class NotifyBadgeCertifiedTest(APITestCase):
         """
         # Create users and organization
         user = UserFactory()
-        organization = OrganizationFactory(
-            members=[Member(user=user, role="admin")]
-        )
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
 
         with capture_mails():
-          # Add PUBLIC_SERVICE badge to organization
-          organization.add_badge(CERTIFIED)
+            # Add PUBLIC_SERVICE badge to organization
+            organization.add_badge(CERTIFIED)
 
         # Get the notification
         notification = Notification.objects.first()
@@ -76,19 +71,16 @@ class NotifyBadgePublicServiceTest(APITestCase):
 
         # Create organization with members
         organization = OrganizationFactory(
-            members=[
-                Member(user=user1, role="admin"),
-                Member(user=user2, role="editor")
-            ]
+            members=[Member(user=user1, role="admin"), Member(user=user2, role="editor")]
         )
         org_mails = [user1.email, user2.email]
 
         with capture_mails() as mails:
-          # Add PUBLIC_SERVICE badge to organization
-          organization.add_badge(PUBLIC_SERVICE)
-          self.assertEqual(len(mails), 2)
-          self.assertIn(mails[0].recipients[0], org_mails)
-          self.assertIn(mails[1].recipients[0], org_mails)
+            # Add PUBLIC_SERVICE badge to organization
+            organization.add_badge(PUBLIC_SERVICE)
+            self.assertEqual(len(mails), 2)
+            self.assertIn(mails[0].recipients[0], org_mails)
+            self.assertIn(mails[1].recipients[0], org_mails)
 
         # Verify that notifications were created for each member
         notifications = Notification.objects(user__in=[user1, user2])
@@ -105,13 +97,11 @@ class NotifyBadgePublicServiceTest(APITestCase):
         """
         # Create users and organization
         user = UserFactory()
-        organization = OrganizationFactory(
-            members=[Member(user=user, role="admin")]
-        )
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
 
         with capture_mails():
-          # Add PUBLIC_SERVICE badge to organization
-          organization.add_badge(PUBLIC_SERVICE)
+            # Add PUBLIC_SERVICE badge to organization
+            organization.add_badge(PUBLIC_SERVICE)
 
         # Get the notification
         notification = Notification.objects.first()

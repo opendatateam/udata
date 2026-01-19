@@ -171,6 +171,7 @@ class CertifiedBadgeNotificationTest(APITestCase):
 
         # Mark org1 as deleted and purge it
         from datetime import datetime
+
         org1.deleted = datetime.utcnow()
         org1.save()
         purge_organizations()

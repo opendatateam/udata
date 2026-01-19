@@ -8,7 +8,13 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
-from .notifications import CertifiedNotificationDetails, PublicServiceNotificationDetails
+from .notifications import (
+    AssociationNotificationDetails,
+    CertifiedNotificationDetails,
+    CompanyNotificationDetails,
+    LocalAuthorityNotificationDetails,
+    PublicServiceNotificationDetails,
+)
 
 log = get_logger(__name__)
 
@@ -131,6 +137,14 @@ def notify_badge_company(org_id):
     recipients = [member.user for member in org.members]
     mails.badge_added_company(org).send(recipients)
 
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=CompanyNotificationDetails(organization=org),
+        )
+        notification.save()
+
 
 @notify_new_badge(Organization, ASSOCIATION)
 def notify_badge_association(org_id):
@@ -141,6 +155,14 @@ def notify_badge_association(org_id):
     recipients = [member.user for member in org.members]
     mails.badge_added_association(org).send(recipients)
 
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=AssociationNotificationDetails(organization=org),
+        )
+        notification.save()
+
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
 def notify_badge_local_authority(org_id):
@@ -150,3 +172,11 @@ def notify_badge_local_authority(org_id):
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
     mails.badge_added_local_authority(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=LocalAuthorityNotificationDetails(organization=org),
+        )
+        notification.save()

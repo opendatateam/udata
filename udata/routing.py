@@ -171,7 +171,6 @@ class ReportConverter(ModelConverter):
     model = models.Report
 
 
-
 class NotificationConverter(ModelConverter):
     model = Notification
 

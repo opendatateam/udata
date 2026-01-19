@@ -37,7 +37,7 @@ class NotificationsAPITest(APITestCase):
         # Create a certified organization which should create a notification
         admin = self.login()
         organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
-        
+
         # Add CERTIFIED badge to organization to trigger notification
         organization.add_badge("certified")
         organization.save()
@@ -54,7 +54,7 @@ class NotificationsAPITest(APITestCase):
 
         # Verify the notification is marked as handled
         self.assertIsNotNone(response.json["handled_at"])
-        
+
         # Verify that the notification no longer appears in the list of pending notifications
         response = self.get(url_for("api.notifications", handled=False))
         self.assert200(response)
