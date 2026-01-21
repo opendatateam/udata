@@ -71,6 +71,7 @@ class DataserviceSearch(ModelSearchAdapter):
         "organization": ModelTermsFilter(model=Organization),
         "archived": BoolFilter(),
         "featured": BoolFilter(),
+        "is_restricted": BoolFilter(),
     }
 
     @classmethod

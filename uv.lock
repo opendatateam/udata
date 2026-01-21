@@ -834,7 +834,7 @@ wheels = [
 
 [[package]]
 name = "flask-storage"
-version = "1.4.2"
+version = "1.4.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -843,9 +843,9 @@ dependencies = [
     { name = "pillow" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/0a/f49044f3c0322912b527906a0a99968a364d1779244c934bd61e6e5a127d/flask_storage-1.4.2.tar.gz", hash = "sha256:d8a5ac22a3e24a8b54ba2ef8302ec8e69592da62553680723640d4689317fe8a", size = 315133, upload-time = "2025-11-26T10:06:45.436Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/84/b3d98106b428484a5440c2fc33492653d863e2f1f640c81acfd629a97d56/flask_storage-1.4.3.tar.gz", hash = "sha256:4a3f9f3031d13ceb0e198112a6c4825b2e4a6dfc46f711a603e02b20bbdf4d5a", size = 315220, upload-time = "2026-01-21T10:44:17.731Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/9f/dc2bb3d386e687c81eadd89498751aad06b4df3273a19b85c8e3824da2bc/flask_storage-1.4.2-py3-none-any.whl", hash = "sha256:45b7dad0b64afb637233a6e0b032a335c869e4928ce17de5742b0c4c7cd827e2", size = 17700, upload-time = "2025-11-26T10:06:44.148Z" },
+    { url = "https://files.pythonhosted.org/packages/90/09/62362b25411c76e6a44a093d48fb36e21dbb131eb75bf3f7f5f5e06902a4/flask_storage-1.4.3-py3-none-any.whl", hash = "sha256:3533f1a418b467175879d413bce96b4a314d5fac612418ba58a427fe4635c4c1", size = 17717, upload-time = "2026-01-21T10:44:16.185Z" },
 ]
 
 [[package]]
