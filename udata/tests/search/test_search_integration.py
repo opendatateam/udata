@@ -87,12 +87,12 @@ class SearchIntegrationTest(APITestCase):
 
         response = self.get("/api/2/dataservices/search/?is_restricted=true")
         self.assert200(response)
-        assert response.json["total"] == 2
+        assert response.json["total"] == 1
         ids = [o["id"] for o in response.json["data"]]
         assert set([str(restricted_dataservice.id)]) == set(ids)
 
         response = self.get("/api/2/dataservices/search/?is_restricted=false")
         self.assert200(response)
-        assert response.json["total"] == 1
+        assert response.json["total"] == 2
         ids = [o["id"] for o in response.json["data"]]
         assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)
