@@ -2,6 +2,8 @@ import time
 
 import pytest
 
+from udata.core.access_type.constants import AccessType
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import VisibleReuseFactory
@@ -68,3 +70,29 @@ class SearchIntegrationTest(APITestCase):
         assert response.json["total"] >= 1
         ids = [o["id"] for o in response.json["data"]]
         assert str(org.id) in ids
+
+    def test_dataservice_search_with_query(self):
+        """
+        Regression test for is_restricted filter when  passed to search service.
+        """
+        restricted_dataservice = DataserviceFactory(access_type=AccessType.RESTRICTED)
+        open_dataservice = DataserviceFactory(access_type=AccessType.OPEN)
+        open_with_account_dataservice = DataserviceFactory(access_type=AccessType.OPEN_WITH_ACCOUNT)
+
+        time.sleep(1)
+
+        response = self.get("/api/2/dataservices/search/")
+        self.assert200(response)
+        assert response.json["total"] == 3
+
+        response = self.get("/api/2/dataservices/search/?is_restricted=true")
+        self.assert200(response)
+        assert response.json["total"] == 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert set([str(restricted_dataservice.id)]) == set(ids)
+
+        response = self.get("/api/2/dataservices/search/?is_restricted=false")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        ids = [o["id"] for o in response.json["data"]]
+        assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)
