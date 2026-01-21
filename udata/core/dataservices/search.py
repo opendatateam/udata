@@ -83,6 +83,7 @@ class DataserviceSearch(ModelSearchAdapter):
         "access_type": Filter(),
         "producer_type": Filter(choices=list(PRODUCER_TYPES)),
         "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
+        "is_restricted": BoolFilter(),
     }
 
     @classmethod

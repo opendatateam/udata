@@ -2,6 +2,7 @@ import time
 
 import pytest
 
+from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -174,3 +175,64 @@ class SearchIntegrationTest(APITestCase):
         self.assert200(response)
         titles = [d["title"] for d in response.json["data"]]
         assert "Dataset with both tags" in titles
+
+    def test_reuse_search_with_organization_filter(self):
+        """
+        Regression test for: 500 Server Error when None values are passed to search service.
+
+        When searching reuses with only an organization filter, other params should not be
+        sent as literal 'None' strings (e.g. ?q=None&tag=None).
+        """
+        org = OrganizationFactory()
+        reuse = VisibleReuseFactory(organization=org)
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/reuses/search/?organization={org.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [r["id"] for r in response.json["data"]]
+        assert str(reuse.id) in ids
+
+    def test_organization_search_with_query(self):
+        """
+        Regression test for: 500 Server Error when None values are passed to search service.
+
+        When searching organizations, other params should not be sent as literal
+        'None' strings (e.g. ?badge=None).
+        """
+        org = OrganizationFactory(name="Organisation Unique Test")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/organizations/search/?q=unique")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert str(org.id) in ids
+
+    def test_dataservice_search_with_is_restricted_filter(self):
+        """
+        Regression test for is_restricted filter when passed to search service.
+        """
+        restricted_dataservice = DataserviceFactory(access_type=AccessType.RESTRICTED)
+        open_dataservice = DataserviceFactory(access_type=AccessType.OPEN)
+        open_with_account_dataservice = DataserviceFactory(access_type=AccessType.OPEN_WITH_ACCOUNT)
+
+        time.sleep(1)
+
+        response = self.get("/api/2/dataservices/search/")
+        self.assert200(response)
+        assert response.json["total"] == 3
+
+        response = self.get("/api/2/dataservices/search/?is_restricted=true")
+        self.assert200(response)
+        assert response.json["total"] == 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert set([str(restricted_dataservice.id)]) == set(ids)
+
+        response = self.get("/api/2/dataservices/search/?is_restricted=false")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        ids = [o["id"] for o in response.json["data"]]
+        assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)

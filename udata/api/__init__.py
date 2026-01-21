@@ -121,6 +121,8 @@ class UDataApi(Api):
         if "application/json" not in request.headers.get("Content-Type", ""):
             errors = {"Content-Type": "expecting application/json"}
             self.abort(400, errors=errors)
+        if not isinstance(request.json, dict):
+            self.abort(400, errors={"request": "expecting a JSON object"})
         form = form_cls.from_json(request.json, obj=obj, instance=obj, meta={"csrf": False})
         if not form.validate():
             self.abort(400, errors=form.errors)

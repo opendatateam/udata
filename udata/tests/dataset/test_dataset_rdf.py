@@ -518,6 +518,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
 
+    def test_unparseable_modified_at(self):
+        """Regression test: template strings like {{modified:toISO}} should not crash parsing."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCT.modified, Literal("{{modified:toISO}}")))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.harvest.modified_at is None
+
     def test_contact_point_individual_vcard(self):
         g = Graph()
         node = URIRef("https://test.org/dataset")
@@ -755,6 +771,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
 
+    def test_keyword_as_uriref(self):
+        """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.keyword, Literal("literal-tag")))
+        g.add((node, DCAT.keyword, URIRef("http://example.org/keyword/uriref-tag")))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert "literal-tag" in dataset.tags
+
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None
 
@@ -847,6 +879,39 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
         assert resource.format == "csv"
+
+    def test_resource_future_modified_at(self):
+        node = BNode()
+        g = Graph()
+
+        modified = faker.future_datetime()
+
+        g.add((node, RDF.type, DCAT.Distribution))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.downloadURL, Literal(faker.uri())))
+        g.add((node, DCT.modified, Literal(modified)))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.harvest.modified_at is None
+
+    def test_resource_unparseable_modified_at(self):
+        """Regression test: template strings like {{modified:toISO}} should not crash parsing."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Distribution))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.downloadURL, Literal(faker.uri())))
+        g.add((node, DCT.modified, Literal("{{modified:toISO}}")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.harvest.modified_at is None
 
     def test_download_url_over_access_url(self):
         node = BNode()

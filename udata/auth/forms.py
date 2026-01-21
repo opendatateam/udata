@@ -49,7 +49,7 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
     accept_conditions = fields.BooleanField(
         _("J'accepte les conditions générales d'utilisation"),
         validators=[
-            validators.DataRequired(message=_("Vous devez accepter les CGU pour continuer."))
+            validators.DataRequired(message=_("You must accept the terms of use to continue."))
         ],
     )
 

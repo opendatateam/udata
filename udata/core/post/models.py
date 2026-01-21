@@ -3,12 +3,14 @@ from flask import url_for
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
+from udata.core.pages.models import Page
 from udata.core.storages import default_image_basename, images
+from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 from udata.uris import cdata_url
 
-from .constants import BODY_TYPES, IMAGE_SIZES
+from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 
 __all__ = ("Post",)
 
@@ -41,8 +43,14 @@ class Post(db.Datetimed, Linkable, db.Document):
         sortable=True,
     )
     content = field(
-        db.StringField(required=True),
+        db.StringField(),
         markdown=True,
+    )
+    content_as_page = field(
+        db.ReferenceField("Page", reverse_delete_rule=db.DENY),
+        nested_fields=Page.__read_fields__,
+        allow_null=True,
+        description="Reference to a Page when body_type is 'blocs'",
     )
     image_url = field(
         db.StringField(),
@@ -82,6 +90,7 @@ class Post(db.Datetimed, Linkable, db.Document):
 
     owner = field(
         db.ReferenceField("User"),
+        nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,
         description="The owner user",
@@ -95,7 +104,12 @@ class Post(db.Datetimed, Linkable, db.Document):
 
     body_type = field(
         db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
-        description="HTML or markdown body type",
+    )
+
+    kind = field(
+        db.StringField(choices=list(POST_KINDS), default="news", required=False),
+        filterable={},
+        description="Post kind (news or page)",
     )
 
     meta = {
@@ -113,6 +127,16 @@ class Post(db.Datetimed, Linkable, db.Document):
     }
 
     verbose_name = _("post")
+
+    def clean(self):
+        if self.body_type == "blocs":
+            if not self.content_as_page:
+                raise db.ValidationError("content_as_page is required when body_type is 'blocs'")
+        else:
+            if not self.content:
+                raise db.ValidationError(
+                    "content is required when body_type is 'markdown' or 'html'"
+                )
 
     def __str__(self):
         return self.name or ""

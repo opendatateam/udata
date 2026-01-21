@@ -7,7 +7,7 @@ from flask_babel import LazyString
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.linkable import Linkable
@@ -21,6 +21,7 @@ from udata.uris import cdata_url
 
 from .constants import (
     ASSOCIATION,
+    BIGGEST_LOGO_SIZE,
     CERTIFIED,
     COMPANY,
     DEFAULT_ROLE,
@@ -44,6 +45,7 @@ BADGES: dict[str, LazyString] = {
 }
 
 
+@generate_fields()
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
     slug = db.SlugField(
@@ -54,6 +56,7 @@ class Team(db.EmbeddedDocument):
     members = db.ListField(db.ReferenceField("User"))
 
 
+@generate_fields()
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField("User")
     role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
@@ -64,6 +67,7 @@ class Member(db.EmbeddedDocument):
         return ORG_ROLES[self.role]
 
 
+@generate_fields()
 class MembershipRequest(db.EmbeddedDocument):
     """
     Pending organization membership requests
@@ -113,18 +117,22 @@ class OrganizationBadge(Badge):
 
 
 class OrganizationBadgeMixin(BadgeMixin):
-    badges = field(BadgesList(OrganizationBadge), **BadgeMixin.default_badges_list_params)
+    badges = field(
+        BadgesList(OrganizationBadge), show_as_ref=True, **BadgeMixin.default_badges_list_params
+    )
     __badges__ = BADGES
 
 
+@generate_fields()
 class Organization(
     Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
 ):
-    name = field(db.StringField(required=True))
-    acronym = field(db.StringField(max_length=128))
+    name = field(db.StringField(required=True), show_as_ref=True)
+    acronym = field(db.StringField(max_length=128), show_as_ref=True)
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
+        show_as_ref=True,
     )
     description = field(
         db.StringField(required=True),
@@ -138,7 +146,11 @@ class Organization(
             basename=default_image_basename,
             max_size=LOGO_MAX_SIZE,
             thumbnails=LOGO_SIZES,
-        )
+        ),
+        show_as_ref=True,
+        thumbnail_info={
+            "size": BIGGEST_LOGO_SIZE,
+        },
     )
     business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
 
@@ -167,6 +179,8 @@ class Organization(
         "queryset_class": OrganizationQuerySet,
         "auto_create_index_on_save": True,
     }
+
+    verbose_name = _("organization")
 
     def __str__(self):
         return self.name or ""
@@ -262,6 +276,14 @@ class Organization(
             if request.user == user and request.status == "pending":
                 return request
         return None
+
+    @field(description="Link to the API endpoint for this organization", show_as_ref=True)
+    def uri(self, *args, **kwargs):
+        return self.self_api_url(*args, **kwargs)
+
+    @field(description="Link to the udata web page for this organization", show_as_ref=True)
+    def page(self, *args, **kwargs):
+        return self.self_web_url(*args, **kwargs)
 
     @classmethod
     def get(cls, id_or_slug):

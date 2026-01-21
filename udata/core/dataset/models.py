@@ -15,17 +15,19 @@ from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field
+from udata.api_fields import field, generate_fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
 from udata.core.constants import HVD
+from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
@@ -89,6 +91,7 @@ def get_json_ld_extra(key, value):
     }
 
 
+@generate_fields()
 class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
@@ -114,6 +117,7 @@ class HarvestResourceMetadata(db.EmbeddedDocument):
     dct_identifier = db.StringField()
 
 
+@generate_fields()
 class Schema(db.EmbeddedDocument):
     """
     Schema can only be two things right now:
@@ -482,6 +486,7 @@ class ResourceMixin(object):
         return result
 
 
+@generate_fields()
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     """
     Local file, remote file or API provided by the original provider of the
@@ -533,6 +538,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
+@generate_fields()
 class Dataset(
     Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
 ):
@@ -560,8 +566,14 @@ class Dataset(
 
     frequency = field(db.EnumField(UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
-    temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
-    spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
+    temporal_coverage = field(
+        db.EmbeddedDocumentField(db.DateRange),
+        nested_fields=temporal_coverage_fields,
+    )
+    spatial = field(
+        db.EmbeddedDocumentField(SpatialCoverage),
+        nested_fields=spatial_coverage_fields,
+    )
     schema = field(db.EmbeddedDocumentField(Schema))
 
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()), auditable=False)
@@ -1149,9 +1161,6 @@ class ResourceSchema(object):
             response.raise_for_status()
             data = response.json()
         except requests.exceptions.RequestException as err:
-            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
-            schemas = cache.get(cache_key)
-        except requests.exceptions.JSONDecodeError as err:
             log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
             schemas = cache.get(cache_key)
         else:
