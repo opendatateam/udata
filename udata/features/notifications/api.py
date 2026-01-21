@@ -26,7 +26,6 @@ class NotificationsAPI(API):
 class NotificationsReadAPI(API):
     @api.secure
     @api.doc("read_notification", responses={400: "Validation error"})
-    @api.expect(Notification.__write_fields__)
     @api.marshal_with(Notification.__read_fields__)
     def post(self, notification: Notification):
         """Read a notification."""
