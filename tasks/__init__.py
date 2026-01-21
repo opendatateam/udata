@@ -69,7 +69,9 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run("pybabel update -D udata -d udata/translations -i udata/translations/udata.pot")
+            ctx.run(
+                "pybabel update --no-fuzzy-matching -D udata -d udata/translations -i udata/translations/udata.pot"
+            )
 
 
 @task

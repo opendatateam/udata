@@ -83,6 +83,55 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
     links = field(db.EmbeddedDocumentListField(LinkInBloc))
 
 
+HERO_COLORS = ("primary", "green", "purple")
+
+
+@generate_fields()
+class HeroBloc(Bloc):
+    title = field(db.StringField(required=True))
+    description = field(db.StringField())
+    color = field(db.StringField(choices=HERO_COLORS))
+
+
+@generate_fields()
+class MarkdownBloc(Bloc):
+    # Not using BlocWithTitleMixin because title should be optional here
+    title = field(db.StringField())
+    subtitle = field(db.StringField())
+    content = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+
+
+BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
+
+
+def check_no_recursive_blocs(blocs, **kwargs):
+    for bloc in blocs:
+        if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
+            raise db.ValidationError(
+                f"{bloc.__class__.__name__} cannot be nested inside an accordion"
+            )
+
+
+@generate_fields()
+class AccordionItemBloc(db.EmbeddedDocument):
+    title = field(db.StringField(required=True))
+    content = field(
+        db.EmbeddedDocumentListField(Bloc),
+        generic=True,
+        checks=[check_no_recursive_blocs],
+    )
+
+
+@generate_fields()
+class AccordionListBloc(Bloc):
+    title = field(db.StringField())
+    description = field(db.StringField())
+    items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
+
+
 @generate_fields()
 class Page(Auditable, Owned, Datetimed, db.Document):
     blocs = field(

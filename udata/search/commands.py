@@ -64,26 +64,28 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
         r = requests.post(url, json=payload)
         r.raise_for_status()
 
-    docs = iter_qs(qs, adapter)
-    for indexable, doc in docs:
-        with requests.Session() as session:
-            try:
-                if indexable:
-                    payload = {"document": doc, "index": index_name}
-                    url = f"{search_service_url}/{model_name}s/index"
-                    r = session.post(url, json=payload)
-                    r.raise_for_status()
-                elif not indexable and not reindex:
-                    url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
-                    r = session.delete(url)
-                    if r.status_code != 404:  # We don't want to raise on 404
+    count = qs.count()
+    label = f"Indexing {model.__name__}"
+    with click.progressbar(iter_qs(qs, adapter), length=count, label=label) as docs:
+        for indexable, doc in docs:
+            with requests.Session() as session:
+                try:
+                    if indexable:
+                        payload = {"document": doc, "index": index_name}
+                        url = f"{search_service_url}/{model_name}s/index"
+                        r = session.post(url, json=payload)
                         r.raise_for_status()
-                else:
-                    continue
-            except Exception as e:
-                log.error(
-                    'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
-                )
+                    elif not indexable and not reindex:
+                        url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
+                        r = session.delete(url)
+                        if r.status_code != 404:  # We don't want to raise on 404
+                            r.raise_for_status()
+                    else:
+                        continue
+                except Exception as e:
+                    log.error(
+                        'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
+                    )
 
 
 def finalize_reindex(models, start):
