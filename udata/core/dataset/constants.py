@@ -203,9 +203,7 @@ class FormatFamily(StrEnum):
 
 
 # Mapping of file formats (lowercase) to their family
-TABULAR_FORMATS = frozenset(
-    {"csv", "parquet", "xls", "xlsx", "ods", "tsv", "parquet", "ods", "csv.gz"}
-)
+TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
 MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
 GEOGRAPHICAL_FORMATS = frozenset(
     {

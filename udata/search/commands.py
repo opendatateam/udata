@@ -32,6 +32,16 @@ def iter_adapters():
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
+def get_date_property(model_name: str) -> str:
+    """Get the date property used for filtering modified objects by model name."""
+    date_properties = {
+        "dataset": "last_modified_internal",
+        "discussion": "created",
+        "dataservice": "metadata_modified_at",
+    }
+    return date_properties.get(model_name, "last_modified")
+
+
 def iter_qs(qs, adapter):
     """Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)"""
     for obj in qs.no_cache().timeout(False):
@@ -52,14 +62,7 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     model_name = adapter.model.__name__.lower()
     qs = model.objects
     if from_datetime:
-        if model_name == "dataset":
-            date_property = "last_modified_internal"
-        elif model_name == "discussion":
-            date_property = "created"
-        elif model_name == "dataservice":
-            date_property = "metadata_modified_at"
-        else:
-            date_property = "last_modified"
+        date_property = get_date_property(model_name)
         qs = qs.filter(**{f"{date_property}__gte": from_datetime})
     index_name = model_name
     if reindex:
@@ -106,14 +109,7 @@ def finalize_reindex(models, start):
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
             model_name = adapter.model.__name__.lower()
-            if model_name == "dataset":
-                date_property = "last_modified_internal"
-            elif model_name == "discussion":
-                date_property = "created"
-            elif model_name == "dataservice":
-                date_property = "metadata_modified_at"
-            else:
-                date_property = "last_modified"
+            date_property = get_date_property(model_name)
             modified_since_reindex += adapter.model.objects(
                 **{f"{date_property}__gte": start}
             ).count()
