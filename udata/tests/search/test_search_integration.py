@@ -103,7 +103,7 @@ class SearchIntegrationTest(APITestCase):
 
     def test_dataservice_search(self):
         """Test dataservice search endpoint."""
-        DataserviceFactory(title="API des transports en commun")
+        dataservice = DataserviceFactory(title="API des transports en commun")
 
         time.sleep(1)
 
@@ -112,6 +112,17 @@ class SearchIntegrationTest(APITestCase):
         assert response.json["total"] >= 1
         titles = [d["title"] for d in response.json["data"]]
         assert "API des transports en commun" in titles
+
+        # TODO: Temporary workaround until udata-search-service is migrated into udata.
+        # drop_database doesn't trigger MongoEngine signals, so we need to manually delete
+        # to trigger unindex and avoid polluting ES for subsequent tests.
+        # There's no HTTP endpoint to trigger clean-es remotely on the search service.
+        dataservice.delete()
+        time.sleep(1)
+
+        response = self.get("/api/2/dataservices/search/?q=transports")
+        self.assert200(response)
+        assert response.json["total"] == 0
 
     def test_organization_search(self):
         """Test organization search endpoint."""
