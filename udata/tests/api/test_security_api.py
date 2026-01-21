@@ -108,6 +108,74 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         assert mails[0].recipients[0] == "jane2@example.org"
         assert mails[0].subject == _("Confirm your email address")
 
+
+class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
+    """Test 2FA requirement enforcement."""
+
+    def test_2fa_routes_requires_authentication(self):
+        """Test that 2FA setup, validation and rescue require user to be logged in."""
+        response = self.get(url_for("security.two_factor_setup"))
+        assert response.status_code == 302
+        assert response.location == url_for("security.login")
+
+        response = self.get(url_for("security.two_factor_rescue"))
+        assert response.status_code == 302
+        assert response.location == url_for("security.login")
+
+        response = self.get(url_for("security.two_factor_token_validation"))
+        assert response.status_code == 302
+        assert response.location == url_for("security.login")
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=False)
+    def test_2fa_disabled_by_default(self):
+        """Test that 2FA is not required by default."""
+        today = datetime.utcnow()
+        user = UserFactory(password="password123", confirmed_at=today)
+
+        # Should be able to login without 2FA
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert "tf_required" not in response.json["response"]
+        assert "tf_state" not in response.json["response"]
+
+        # Should be None by default (2FA not set up)
+        assert user.tf_primary_method is None
+        assert user.tf_totp_secret is None
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=True)
+    def test_2fa_required_by_default(self):
+        """Test that 2FA is not required by default."""
+        today = datetime.utcnow()
+        user = UserFactory(password="password123", confirmed_at=today)
+
+        # Should require 2FA setup
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is True
+        assert response.json["response"]["tf_state"] == "setup_from_login"
+
+    def test_user_with_2fa_fields_need_to_validate_token(self):
+        """Test that user with 2FA fields can still login via session."""
+        today = datetime.utcnow()
+        user = UserFactory(
+            password="password123",
+            confirmed_at=today,
+            tf_primary_method="authenticator",
+            tf_totp_secret="test_secret",
+        )
+
+        # Should require 2FA token validation
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        assert response.json["response"]["tf_required"] is True
+        assert response.json["response"]["tf_state"] == "ready"
+        assert response.json["response"]["tf_primary_method"] == "authenticator"
+
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
     def test_reset_password(self):
         user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())

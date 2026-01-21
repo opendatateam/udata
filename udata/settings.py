@@ -142,7 +142,7 @@ class Defaults(object):
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
     SECURITY_TWO_FACTOR_AUTHENTICATOR_VALIDITY = 30
-    SECURITY_TWO_FACTOR_ALWAYS_VALIDATE = False
+    SECURITY_TWO_FACTOR_ALWAYS_VALIDATE = True
     SECURITY_TWO_FACTOR_RESCUE_EMAIL = False  # We won't send a rescue code by mail
     SECURITY_TWO_FACTOR_RESCUE_MAIL = (
         "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
