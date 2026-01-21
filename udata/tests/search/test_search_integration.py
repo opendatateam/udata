@@ -6,6 +6,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
+from udata.core.organization import constants as org_constants
 from udata.core.organization.constants import PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
@@ -175,6 +176,20 @@ class SearchIntegrationTest(APITestCase):
         self.assert200(response)
         titles = [d["title"] for d in response.json["data"]]
         assert "Dataset with both tags" in titles
+
+    def test_organization_search_with_badge_filter(self):
+        """Test that organization search with badge filter returns matching organizations."""
+        org = OrganizationFactory()
+        org.add_badge(org_constants.PUBLIC_SERVICE)
+        org.save()
+
+        time.sleep(2)
+
+        response = self.get("/api/2/organizations/search/?badge=public-service")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        ids = [o["id"] for o in response.json["data"]]
+        assert str(org.id) in ids
 
     def test_reuse_search_with_organization_filter(self):
         """
