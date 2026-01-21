@@ -8,13 +8,7 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
-from .notifications import (
-    AssociationNotificationDetails,
-    CertifiedNotificationDetails,
-    CompanyNotificationDetails,
-    LocalAuthorityNotificationDetails,
-    PublicServiceNotificationDetails,
-)
+from .notifications import NewBadgeNotificationDetails
 
 log = get_logger(__name__)
 
@@ -103,7 +97,7 @@ def notify_badge_certified(org_id):
     for member in org.members:
         notification = Notification(
             user=member.user,
-            details=CertifiedNotificationDetails(organization=org),
+            details=NewBadgeNotificationDetails(organization=org, kind=CERTIFIED),
         )
         notification.save()
 
@@ -123,7 +117,7 @@ def notify_badge_public_service(org_id):
     for member in org.members:
         notification = Notification(
             user=member.user,
-            details=PublicServiceNotificationDetails(organization=org),
+            details=NewBadgeNotificationDetails(organization=org, kind=PUBLIC_SERVICE),
         )
         notification.save()
 
@@ -141,7 +135,7 @@ def notify_badge_company(org_id):
     for member in org.members:
         notification = Notification(
             user=member.user,
-            details=CompanyNotificationDetails(organization=org),
+            details=NewBadgeNotificationDetails(organization=org, kind=COMPANY),
         )
         notification.save()
 
@@ -159,7 +153,7 @@ def notify_badge_association(org_id):
     for member in org.members:
         notification = Notification(
             user=member.user,
-            details=AssociationNotificationDetails(organization=org),
+            details=NewBadgeNotificationDetails(organization=org, kind=ASSOCIATION),
         )
         notification.save()
 
@@ -177,6 +171,6 @@ def notify_badge_local_authority(org_id):
     for member in org.members:
         notification = Notification(
             user=member.user,
-            details=LocalAuthorityNotificationDetails(organization=org),
+            details=NewBadgeNotificationDetails(organization=org, kind=LOCAL_AUTHORITY),
         )
         notification.save()

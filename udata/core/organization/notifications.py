@@ -32,7 +32,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
 
 
 @generate_fields()
-class CertifiedNotificationDetails(db.EmbeddedDocument):
+class NewBadgeNotificationDetails(db.EmbeddedDocument):
     organization = field(
         db.ReferenceField(Organization),
         readonly=True,
@@ -41,50 +41,9 @@ class CertifiedNotificationDetails(db.EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-
-
-@generate_fields()
-class PublicServiceNotificationDetails(db.EmbeddedDocument):
-    organization = field(
-        db.ReferenceField(Organization),
+    kind = field(
+        db.StringField(),
         readonly=True,
-        nested_fields=org_ref_fields,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-
-
-@generate_fields()
-class LocalAuthorityNotificationDetails(db.EmbeddedDocument):
-    organization = field(
-        db.ReferenceField(Organization),
-        readonly=True,
-        nested_fields=org_ref_fields,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-
-
-@generate_fields()
-class CompanyNotificationDetails(db.EmbeddedDocument):
-    organization = field(
-        db.ReferenceField(Organization),
-        readonly=True,
-        nested_fields=org_ref_fields,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-
-
-@generate_fields()
-class AssociationNotificationDetails(db.EmbeddedDocument):
-    organization = field(
-        db.ReferenceField(Organization),
-        readonly=True,
-        nested_fields=org_ref_fields,
         auditable=False,
         allow_null=True,
         filterable={},
