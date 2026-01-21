@@ -16,7 +16,9 @@ from udata.tests.helpers import capture_mails
 
 
 class NotifyBadgeTest(PytestOnlyAPITestCase):
-    @pytest.mark.parametrize("badge_type", [CERTIFIED, PUBLIC_SERVICE, LOCAL_AUTHORITY, COMPANY, ASSOCIATION])
+    @pytest.mark.parametrize(
+        "badge_type", [CERTIFIED, PUBLIC_SERVICE, LOCAL_AUTHORITY, COMPANY, ASSOCIATION]
+    )
     def test_notify_badge_creates_notifications(self, badge_type):
         """
         Test that notify_badge_* creates in-app notifications for organization members
@@ -48,7 +50,9 @@ class NotifyBadgeTest(PytestOnlyAPITestCase):
             assert notification.details.organization.name == organization.name
             assert notification.details.kind == badge_type
 
-    @pytest.mark.parametrize("badge_type", [CERTIFIED, PUBLIC_SERVICE, LOCAL_AUTHORITY, COMPANY, ASSOCIATION])
+    @pytest.mark.parametrize(
+        "badge_type", [CERTIFIED, PUBLIC_SERVICE, LOCAL_AUTHORITY, COMPANY, ASSOCIATION]
+    )
     def test_notify_badge_notification_details(self, badge_type):
         """
         Test that notifications have correct details for organization badge
