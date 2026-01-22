@@ -91,6 +91,8 @@ class HeroBloc(Bloc):
     title = field(db.StringField(required=True))
     description = field(db.StringField())
     color = field(db.StringField(choices=HERO_COLORS))
+    main_link_url = field(db.StringField())
+    main_link_title = field(db.StringField())
 
 
 @generate_fields()
