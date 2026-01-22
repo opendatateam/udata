@@ -1,5 +1,18 @@
 # Changelog
 
+## 14.8.0 (2026-01-22)
+
+- chore: add vscode configs for debug and tests ([#3624](https://github.com/opendatateam/udata/pull/3624))
+- chore(CI): remove mongo 6 in CI ([#3622](https://github.com/opendatateam/udata/pull/3622))
+- chore: remove trailing slashes in changelog entries ([#3594](https://github.com/opendatateam/udata/pull/3594))
+- feat: add progress bar to search index command ([#3625](https://github.com/opendatateam/udata/pull/3625))
+- feat: add transfer notification handling ([#3619](https://github.com/opendatateam/udata/pull/3619))
+- feat(notification): add organization badges notifications ([#3628](https://github.com/opendatateam/udata/pull/3628))
+- feat(storage): upgrade flask storage to use S3 backend ([#3629](https://github.com/opendatateam/udata/pull/3629))
+- fix(search): forward is_restricted filter in dataservices search ([#3627](https://github.com/opendatateam/udata/pull/3627))
+- fix: search org by badge ([#3607](https://github.com/opendatateam/udata/pull/3607))
+
+
 ## 14.7.2 (2026-01-15)
 
 - chore: add MongoDB 7.0 in CI ([#3593](https://github.com/opendatateam/udata/pull/3593))
