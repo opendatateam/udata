@@ -28,7 +28,9 @@ class NotificationsAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.notifications"))
         self.assert200(response)
         assert response.json["total"] == 1
-        assert response.json["data"][0]["details"]["request_organization"]["id"] == str(organization.id)
+        assert response.json["data"][0]["details"]["request_organization"]["id"] == str(
+            organization.id
+        )
 
     def test_read_notification(self):
         """Test marking a notification as read"""
