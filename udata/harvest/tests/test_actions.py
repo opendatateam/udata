@@ -19,7 +19,7 @@ from udata.harvest.backends import get_enabled_backends
 from udata.harvest.backends.base import BaseBackend
 from udata.models import Dataset, PeriodicTask
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
+from udata.tests.helpers import assert_emit, assert_not_emit
 from udata.utils import faker
 
 from .. import actions, signals
@@ -343,9 +343,9 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
             enabled=True,
             crontab=PeriodicTask.Crontab(),
         )
-        now = datetime.utcnow()
-        to_delete = HarvestSourceFactory.create_batch(2, deleted=now)
-        to_delete.append(HarvestSourceFactory(periodic_task=periodic_task, deleted=now))
+        deleted_at = datetime.utcnow()
+        to_delete = HarvestSourceFactory.create_batch(2, deleted=deleted_at)
+        to_delete.append(HarvestSourceFactory(periodic_task=periodic_task, deleted=deleted_at))
         to_keep = HarvestSourceFactory.create_batch(2)
         harvest_job = HarvestJobFactory(source=to_delete[0])
         dataset_to_archive = DatasetFactory(
@@ -355,7 +355,9 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
             harvest=HarvestDataserviceMetadata(source_id=str(to_delete[0].id))
         )
 
+        before = datetime.utcnow()
         result = actions.purge_sources()
+        after = datetime.utcnow()
         dataset_to_archive.reload()
         dataservice_to_archive.reload()
 
@@ -365,12 +367,12 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
-        assert_equal_dates(dataset_to_archive.harvest.archived_at, now)
-        assert_equal_dates(dataset_to_archive.archived, now)
+        assert before <= dataset_to_archive.harvest.archived_at <= after
+        assert before <= dataset_to_archive.archived <= after
 
         assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
-        assert_equal_dates(dataservice_to_archive.harvest.archived_at, now)
-        assert_equal_dates(dataservice_to_archive.archived_at, now)
+        assert before <= dataservice_to_archive.harvest.archived_at <= after
+        assert before <= dataservice_to_archive.archived_at <= after
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
