@@ -63,12 +63,6 @@ udata is a customizable and skinnable social platform dedicated to (open) data. 
   - `Testing`: Test overrides
   - `Debug`: Development settings
 
-### Extension Pattern
-
-- Plugins discovered via `udata.plugins` entry point group
-- Plugins must expose `init_app(app)` function
-- Extensions initialized in `register_extensions()` in app.py
-
 ### Database
 
 - MongoDB via MongoEngine ODM
@@ -96,23 +90,6 @@ udata db migrate
 udata import-fixtures
 ```
 
-### Running the Application
-
-```bash
-# Start development server (default port 7000)
-inv serve
-# or with custom host/port
-inv serve --host localhost --port 7001
-
-# Start Celery worker (required for async tasks like search indexing)
-inv work
-# with custom log level
-inv work --loglevel debug
-
-# Start Celery beat scheduler (for periodic tasks)
-inv beat
-```
-
 ### Testing
 
 ```bash
@@ -131,15 +108,6 @@ pytest udata/core/dataset/tests/test_models.py
 
 # Run specific test
 pytest udata/core/dataset/tests/test_models.py::DatasetModelTest::test_create
-
-# Run tests with verbose output
-inv test --verbose
-
-# Fast fail (stop on first failure)
-inv test --fast
-
-# Test with CI mode (no color, no sugar)
-inv test --ci
 ```
 
 ### Code Quality
@@ -162,9 +130,6 @@ inv qa
 # Extract translatable strings from code
 inv i18n
 
-# Update existing translation files
-inv i18n --update
-
 # Compile translations (required before running)
 inv i18nc
 ```
@@ -180,28 +145,6 @@ inv dist
 
 # Build without cleaning
 inv pydist
-```
-
-### Documentation
-
-```bash
-# Serve documentation locally with live reload
-inv doc
-# Opens mkdocs server at http://127.0.0.1:8000
-```
-
-### Infrastructure Services
-
-```bash
-# Start MongoDB, Redis, and Mailpit with Docker Compose
-docker compose up
-# Services:
-# - MongoDB: localhost:27017
-# - Redis: localhost:6379
-# - Mailpit (email testing): http://localhost:8025 (web UI), localhost:1025 (SMTP)
-
-# Stop services
-docker compose down
 ```
 
 ## Testing Patterns
@@ -314,8 +257,8 @@ Key settings for local development:
 
 ## Related Projects
 
-- **udata-front**: Frontend application (separate repository)
-- **datagouv-components**: Component library (imported as `@datagouv/components-next` outside datagouv-components folder)
+- **cdata**: Frontend application (separate repository)
+- **datagouv-components**: Component library (separate repository)
 
 ## Entry Points
 
