@@ -8,7 +8,7 @@ See [getting-started](getting-started.md) for installation instructions.
 
 ### Dependency management
 
-Dependencies are defined in `pyproject.toml` using a `dev` dependency group.
+Dependencies are defined in [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml) using a `dev` dependency group.
 The `dev` group includes all development dependencies:
 - Development tools (ruff, pre-commit, invoke, etc.)
 - Testing dependencies (pytest, mock, etc.)
@@ -34,7 +34,7 @@ $ pip install --group dev -e .
 
 Note: `dependency-groups` are defined in [PEP 735](https://peps.python.org/pep-0735/). Both uv and pip (25.1+) support them.
 
-If you need to add or modify a dependency, edit the `pyproject.toml` file directly in the appropriate section.
+If you need to add or modify a dependency, edit the [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml) file directly in the appropriate section.
 
 
 ### Optimizing performances with Cython

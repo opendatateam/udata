@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] >=3.11,<3.14 (see `requires-python` in `pyproject.toml`), its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] >=3.11,<3.14 (see `requires-python` in [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml)), its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
