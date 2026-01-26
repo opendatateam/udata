@@ -30,8 +30,7 @@ $UDATA_WORKSPACE
 │   ├── pyproject.toml
 │	└── udata.cfg
 └── udata-front
-    ├── ...
-    └── pyproject.toml
+    └── ...
 ```
 
 ## Get udata
@@ -192,8 +191,7 @@ $UDATA_WORKSPACE
 │   ├── pyproject.toml
 │	└── udata.cfg
 └── udata-front
-    ├── ...
-    └── pyproject.toml
+    └── ...
 ```
 
 First, clone udata-front in your workspace.
