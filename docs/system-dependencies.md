@@ -46,7 +46,7 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB and Redis
 
-The project requires [MongoDB][] 6.0 or later and [Redis][].
+The project requires [MongoDB][] 7.0 or later and [Redis][].
 
 !!! warning
     Please ensure you install compatible versions. Using unsupported versions may cause issues.
@@ -70,10 +70,10 @@ For a quick setup on Ubuntu 22.04+ or Debian 12+ (as root):
 
 ```shell
 # Import the MongoDB public GPG key
-$ curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+$ curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
 
 # Add MongoDB repository (Ubuntu 22.04 example)
-$ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+$ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 
 $ apt-get update
 $ apt-get install -y mongodb-org

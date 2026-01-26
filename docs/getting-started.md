@@ -68,7 +68,7 @@ With [uv](https://docs.astral.sh/uv/) (recommended):
 uv sync
 ```
 
-With pip (requires pip 25.1+):
+...or with pip (requires pip 25.1+):
 ```shell
 python3 -m venv .venv
 source .venv/bin/activate
