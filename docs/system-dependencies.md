@@ -66,13 +66,13 @@ $ apt-get install redis-server
 
 For Debian/Ubuntu, follow the [official MongoDB installation guide][mongo-install-instructions] for your distribution.
 
-For a quick setup on Debian/Ubuntu (as root):
+For a quick setup on Ubuntu 22.04+ or Debian 12+ (as root):
 
 ```shell
 # Import the MongoDB public GPG key
 $ curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
 
-# Add MongoDB repository (adjust for your distribution)
+# Add MongoDB repository (Ubuntu 22.04 example)
 $ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 
 $ apt-get update
@@ -82,7 +82,7 @@ $ systemctl enable mongod
 ```
 
 !!! note
-    The repository URL above is for Ubuntu 22.04 (Jammy). For other distributions, see the [official MongoDB installation instructions][mongo-install-instructions].
+    Adjust the repository URL for your specific distribution. See the [official MongoDB installation instructions][mongo-install-instructions] for details.
 
 [mongodb]: https://www.mongodb.org/
 [redis]: http://redis.io/
