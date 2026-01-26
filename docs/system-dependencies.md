@@ -28,9 +28,9 @@ The full dependencies list is:
 On any Debian-like system you can install the development tools and libraries with:
 
 ```shell
-$ apt-get install build-essential pkg-config python python-dev python-pip python-virtualenv\
+$ apt-get install build-essential pkg-config python3.11-dev python3-pip\
     libjpeg-dev zlib1g-dev libtiff5-dev libfreetype6-dev \
-    liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev \
+    liblcms2-dev libopenjpeg-dev libwebp-dev libpng-dev \
     libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev libffi-dev
 ```
 
