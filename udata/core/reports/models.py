@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bson import DBRef
 from flask import url_for
@@ -68,7 +68,7 @@ class Report(db.Document):
     )
 
     reported_at = field(
-        db.DateTimeField(default=datetime.utcnow, required=True),
+        db.DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
         sortable=True,
     )
@@ -98,7 +98,7 @@ class Report(db.Document):
         """
         if hasattr(document, "deleted") and document.deleted:
             Report.objects(subject=document, subject_deleted_at=None).update(
-                subject_deleted_at=datetime.utcnow
+                subject_deleted_at=datetime.now(UTC)
             )
 
     @classmethod
@@ -110,7 +110,7 @@ class Report(db.Document):
         # because the document doesn't exist anymore…
         Report.objects(
             subject=DBRef(sender.__name__.lower(), document.id), subject_deleted_at=None
-        ).update(subject_deleted_at=datetime.utcnow)
+        ).update(subject_deleted_at=datetime.now(UTC))
 
 
 for model in REPORTABLE_MODELS:

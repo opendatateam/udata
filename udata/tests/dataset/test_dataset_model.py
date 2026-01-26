@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import uuid4
 
 import pytest
@@ -162,7 +162,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         if freq is None or freq.delta is None:
             assert dataset.next_update is None
         else:
-            assert_equal_dates(dataset.next_update, freq.next_update(datetime.utcnow()))
+            assert_equal_dates(dataset.next_update, freq.next_update(datetime.now(UTC)))
 
     def test_quality_default(self):
         dataset = DatasetFactory(description="")
@@ -190,7 +190,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(
             description="",
             frequency=UpdateFrequency.DAILY,
-            last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1),
+            last_modified_internal=datetime.now(UTC) - timedelta(days=1, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
         assert dataset.quality["update_fulfilled_in_time"] is True
@@ -200,7 +200,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(
             description="",
             frequency=UpdateFrequency.DAILY,
-            last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1),
+            last_modified_internal=datetime.now(UTC) - timedelta(days=2, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
         assert dataset.quality["update_fulfilled_in_time"] is False
@@ -291,7 +291,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
     def test_send_on_delete(self):
         dataset = DatasetFactory()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.utcnow()
+            dataset.deleted = datetime.now(UTC)
             dataset.save()
 
     def test_ignore_post_save_signal(self):
@@ -380,7 +380,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
                 mock_resouce_removed.assert_called()
 
             with assert_emit(Dataset.on_delete):
-                dataset.deleted = datetime.utcnow()
+                dataset.deleted = datetime.now(UTC)
                 dataset.save()
                 mock_deleted.assert_called()
 
@@ -398,7 +398,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
             dataservice = DataserviceFactory(datasets=[dataset])
         with assert_emit(on_follow):
             follow = Follow.objects.create(
-                following=dataset, follower=UserFactory(), since=datetime.utcnow()
+                following=dataset, follower=UserFactory(), since=datetime.now(UTC)
             )
 
         dataset.reload()
@@ -408,13 +408,13 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
         # Delete related elements
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.utcnow()
+            reuse.deleted = datetime.now(UTC)
             reuse.save()
         with assert_emit(Dataservice.on_delete):
-            dataservice.deleted_at = datetime.utcnow()
+            dataservice.deleted_at = datetime.now(UTC)
             dataservice.save()
         with assert_emit(on_unfollow):
-            follow.until = datetime.utcnow()
+            follow.until = datetime.now(UTC)
             follow.save()
 
         dataset.reload()
@@ -809,16 +809,16 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
 
         harvest_metadata = HarvestDatasetMetadata(
             backend="DCAT",
-            created_at=datetime.utcnow(),
-            modified_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
+            modified_at=datetime.now(UTC),
             source_id="source_id",
             remote_id="remote_id",
             domain="domain.gouv.fr",
-            last_update=datetime.utcnow(),
+            last_update=datetime.now(UTC),
             remote_url="http://domain.gouv.fr/dataset/remote_url",
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
-            archived_at=datetime.utcnow(),
+            archived_at=datetime.now(UTC),
             archived="not-on-remote",
         )
         dataset.harvest = harvest_metadata
@@ -835,8 +835,8 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory()
 
         harvest_metadata = HarvestDatasetMetadata(
-            created_at=datetime.utcnow(),
-            modified_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
+            modified_at=datetime.now(UTC),
         )
         dataset.harvest = harvest_metadata
         dataset.save()
@@ -846,8 +846,8 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         resource = ResourceFactory()
 
         harvest_metadata = HarvestResourceMetadata(
-            issued_at=datetime.utcnow(),
-            modified_at=datetime.utcnow(),
+            issued_at=datetime.now(UTC),
+            modified_at=datetime.now(UTC),
             uri="http://domain.gouv.fr/dataset/uri",
         )
         resource.harvest = harvest_metadata
@@ -863,7 +863,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
     def test_harvest_resource_metadata_future_modifed_at(self):
         resource = ResourceFactory()
         harvest_metadata = HarvestResourceMetadata(
-            modified_at=datetime.utcnow() + timedelta(days=1)
+            modified_at=datetime.now(UTC) + timedelta(days=1)
         )
         resource.harvest = harvest_metadata
         resource.validate()
@@ -872,7 +872,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
 
     def test_harvest_resource_metadata_past_modifed_at(self):
         resource = ResourceFactory()
-        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow())
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.now(UTC))
         resource.harvest = harvest_metadata
         resource.validate()
 

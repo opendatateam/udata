@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson import ObjectId
@@ -118,7 +118,7 @@ class DataserviceAPI(API):
         dataservice.permissions["edit"].test()
 
         patch(dataservice, request)
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.now(UTC)
         if dataservice.access_type != AccessType.RESTRICTED:
             dataservice.access_audiences = []
 
@@ -137,8 +137,8 @@ class DataserviceAPI(API):
         dataservice.permissions["delete"].test()
         send_legal_notice_on_deletion(dataservice, args)
 
-        dataservice.deleted_at = datetime.utcnow()
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.deleted_at = datetime.now(UTC)
+        dataservice.metadata_modified_at = datetime.now(UTC)
         dataservice.save()
         return "", 204
 
@@ -207,7 +207,7 @@ class DataserviceDatasetsAPI(API):
 
         if diff:
             dataservice.datasets += [ObjectId(did) for did in diff]
-            dataservice.metadata_modified_at = datetime.utcnow()
+            dataservice.metadata_modified_at = datetime.now(UTC)
             dataservice.save()
 
         return dataservice, 201
@@ -231,7 +231,7 @@ class DataserviceDatasetAPI(API):
         if dataset not in dataservice.datasets:
             api.abort(404, "Dataset not found in dataservice")
         dataservice.datasets = [d for d in dataservice.datasets if d.id != dataset.id]
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.now(UTC)
         dataservice.save()
 
         return None, 204

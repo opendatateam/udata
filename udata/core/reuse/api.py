@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -216,7 +216,7 @@ class ReuseAPI(API):
         reuse.permissions["delete"].test()
         send_legal_notice_on_deletion(reuse, args)
 
-        reuse.deleted = datetime.utcnow()
+        reuse.deleted = datetime.now(UTC)
         reuse.save()
         return "", 204
 

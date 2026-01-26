@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
@@ -120,9 +120,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
-        before = datetime.utcnow()
+        before = datetime.now(UTC)
         job = backend.harvest()
-        after = datetime.utcnow()
+        after = datetime.now(UTC)
 
         assert len(job.items) == nb_datasets
         assert Dataset.objects.count() == nb_datasets
@@ -244,7 +244,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         dataset = Dataset.objects.first()
 
         assert_equal_dates(dataset.last_modified_internal, last_modified)
-        assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
+        assert_equal_dates(dataset.harvest.last_update, datetime.now(UTC))
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
@@ -259,7 +259,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         dataset = Dataset.objects.first()
 
         assert_equal_dates(dataset.last_modified_internal, last_modified)
-        assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
+        assert_equal_dates(dataset.harvest.last_update, datetime.now(UTC))
 
     def test_autoarchive(self, app):
         nb_datasets = 3
@@ -274,7 +274,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         # create a dangling dataset to be archived
         limit = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
-        last_update = datetime.utcnow() - timedelta(days=limit + 1)
+        last_update = datetime.now(UTC) - timedelta(days=limit + 1)
         dataset_arch = DatasetFactory(
             harvest={
                 "domain": source.domain,
@@ -294,7 +294,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         # create a dangling dataset that _won't_ be archived because of grace period
         limit = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
-        last_update = datetime.utcnow() - timedelta(days=limit - 1)
+        last_update = datetime.now(UTC) - timedelta(days=limit - 1)
         dataset_no_arch = DatasetFactory(
             harvest={
                 "domain": source.domain,
@@ -349,15 +349,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         # test unarchive: archive manually then relaunch harvest
         dataset = Dataset.objects.get(**{"harvest__remote_id": "dataset-fake-1"})
-        dataset.archived = datetime.utcnow()
+        dataset.archived = datetime.now(UTC)
         dataset.harvest.archived = "not-on-remote"
-        dataset.harvest.archived_at = datetime.utcnow()
+        dataset.harvest.archived_at = datetime.now(UTC)
         dataset.save()
 
         dataservice = Dataservice.objects.get(**{"harvest__remote_id": "dataservice-fake-1"})
-        dataservice.archived_at = datetime.utcnow()
+        dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_reason = "not-on-remote"
-        dataservice.harvest.archived_at = datetime.utcnow()
+        dataservice.harvest.archived_at = datetime.now(UTC)
         dataservice.save()
 
         backend.harvest()

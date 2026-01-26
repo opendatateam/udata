@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, request
@@ -129,7 +129,7 @@ class PublishPostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def post(self, post):
         """Publish an existing post"""
-        post.modify(published=datetime.utcnow())
+        post.modify(published=datetime.now(UTC))
         return post
 
     @api.secure(admin_permission)

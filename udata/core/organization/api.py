@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
@@ -184,7 +184,7 @@ class OrganizationAPI(API):
         EditOrganizationPermission(org).test()
         send_legal_notice_on_deletion(org, args)
 
-        org.deleted = datetime.utcnow()
+        org.deleted = datetime.now(UTC)
         org.save()
         return "", 204
 
@@ -427,7 +427,7 @@ class MembershipAcceptAPI(MembershipAPI):
 
         membership_request.status = "accepted"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
+        membership_request.handled_on = datetime.now(UTC)
         member = Member(user=membership_request.user, role="editor")
 
         org.members.append(member)
@@ -452,7 +452,7 @@ class MembershipRefuseAPI(MembershipAPI):
         form = api.validate(MembershipRefuseForm)
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
+        membership_request.handled_on = datetime.now(UTC)
         membership_request.refusal_comment = form.comment.data
 
         org.save()

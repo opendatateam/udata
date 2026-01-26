@@ -1,5 +1,5 @@
 from copy import copy
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
@@ -427,21 +427,21 @@ class DatetimedTest(PytestOnlyDBTestCase):
         assert isinstance(DatetimedTester.last_modified, db.DateTimeField)
 
     def test_new_instance(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         datetimed = DatetimedTester()
 
-        assert now <= datetimed.created_at <= datetime.utcnow()
-        assert now <= datetimed.last_modified <= datetime.utcnow()
+        assert now <= datetimed.created_at <= datetime.now(UTC)
+        assert now <= datetimed.last_modified <= datetime.now(UTC)
 
     def test_save_new_instance(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         datetimed = DatetimedTester.objects.create()
 
-        assert now <= datetimed.created_at <= datetime.utcnow()
-        assert now <= datetimed.last_modified <= datetime.utcnow()
+        assert now <= datetimed.created_at <= datetime.now(UTC)
+        assert now <= datetimed.last_modified <= datetime.now(UTC)
 
     def test_save_last_modified_instance(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         earlier = now - timedelta(days=1)
         datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
 
@@ -452,7 +452,7 @@ class DatetimedTest(PytestOnlyDBTestCase):
         assert_equal_dates(datetimed.last_modified, now)
 
     def test_save_last_modified_instance_manually_set(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         manual = now - timedelta(days=1)
         earlier = now - timedelta(days=2)
         datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
@@ -465,7 +465,7 @@ class DatetimedTest(PytestOnlyDBTestCase):
         assert_equal_dates(datetimed.last_modified, manual)
 
     def test_save_last_modified_instance_manually_set_same_value(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         manual = now - timedelta(days=1)
         earlier = now - timedelta(days=2)
         datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
@@ -487,7 +487,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
         class Tester(db.Document):
             extras = db.ExtrasField()
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         today = date.today()
 
         tester = Tester(
@@ -515,7 +515,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
             (db.IntField, 42),
             (db.FloatField, 0.42),
             (db.BooleanField, True),
-            (db.DateTimeField, datetime.utcnow()),
+            (db.DateTimeField, datetime.now(UTC)),
             (db.DateField, date.today()),
         ],
     )
@@ -530,8 +530,8 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "dbtype,value",
         [
-            (db.IntField, datetime.utcnow()),
-            (db.FloatField, datetime.utcnow()),
+            (db.IntField, datetime.now(UTC)),
+            (db.FloatField, datetime.now(UTC)),
             (db.BooleanField, 42),
             (db.DateTimeField, 42),
             (db.DateField, 42),

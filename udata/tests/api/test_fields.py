@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 import pytz
 
@@ -28,7 +28,7 @@ class NextPageUrlTest(APITestCase):
 
 class FieldTest(APITestCase):
     def test_iso_date_time_field_format(self):
-        datetime_date_naive = datetime.utcnow()
+        datetime_date_naive = datetime.now(UTC)
         datetime_date_aware = pytz.utc.localize(datetime_date_naive)
         datetime_date_aware_string = datetime_date_aware.isoformat()
         date_date = date.today()

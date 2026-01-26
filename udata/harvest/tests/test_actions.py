@@ -1,6 +1,6 @@
 import csv
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -63,7 +63,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_sources_exclude_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         sources = HarvestSourceFactory.create_batch(3)
         deleted_sources = HarvestSourceFactory.create_batch(2, deleted=now)
 
@@ -79,7 +79,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_sources_include_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         sources = HarvestSourceFactory.create_batch(3)
         sources.extend(HarvestSourceFactory.create_batch(2, deleted=now))
 
@@ -343,7 +343,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
             enabled=True,
             crontab=PeriodicTask.Crontab(),
         )
-        deleted_at = datetime.utcnow()
+        deleted_at = datetime.now(UTC)
         to_delete = HarvestSourceFactory.create_batch(2, deleted=deleted_at)
         to_delete.append(HarvestSourceFactory(periodic_task=periodic_task, deleted=deleted_at))
         to_keep = HarvestSourceFactory.create_batch(2)
@@ -355,9 +355,9 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
             harvest=HarvestDataserviceMetadata(source_id=str(to_delete[0].id))
         )
 
-        before = datetime.utcnow()
+        before = datetime.now(UTC)
         result = actions.purge_sources()
-        after = datetime.utcnow()
+        after = datetime.now(UTC)
         dataset_to_archive.reload()
         dataservice_to_archive.reload()
 
@@ -376,7 +376,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         retention = now - timedelta(days=2)
         too_old = retention - timedelta(days=1)
         to_delete = HarvestJobFactory.create_batch(3, created=too_old)
@@ -417,7 +417,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         for i in range(2):
             dataset = DatasetFactory.build()
             dataset.harvest = HarvestDatasetMetadata(domain="test.org", remote_id=str(i))
-            dataset.last_modified_internal = datetime.utcnow()
+            dataset.last_modified_internal = datetime.now(UTC)
             dataset.save()
             attached_datasets.append(dataset)
 

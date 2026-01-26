@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 from flask_login import current_user
@@ -19,7 +19,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
 
     id = db.AutoUUIDField()
     content = db.StringField(required=True)
-    posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
+    posted_on = db.DateTimeField(default=lambda: datetime.now(UTC), required=True)
     posted_by = db.ReferenceField("User")
     posted_by_organization = db.ReferenceField("Organization")
     last_modified_at = db.DateTimeField()
@@ -81,7 +81,7 @@ class Discussion(SpamMixin, Linkable, db.Document):
     subject = db.GenericReferenceField()
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
+    created = db.DateTimeField(default=lambda: datetime.now(UTC), required=True)
     closed = db.DateTimeField()
     closed_by = db.ReferenceField("User")
     closed_by_organization = db.ReferenceField("Organization")

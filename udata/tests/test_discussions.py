@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from flask import url_for
@@ -348,7 +348,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title="test discussion {}".format(i),
                 discussion=[message],
-                closed=datetime.utcnow(),
+                closed=datetime.now(UTC),
                 closed_by=user,
             )
             closed_discussions.append(discussion)
@@ -380,7 +380,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title="test discussion {}".format(i),
                 discussion=[message],
-                closed=datetime.utcnow(),
+                closed=datetime.now(UTC),
                 closed_by=user,
             )
             closed_discussions.append(discussion)
@@ -1036,7 +1036,7 @@ class DiscussionsNotificationsTest(DBTestCase):
             user=user,
             title=faker.sentence(),
             discussion=[message],
-            closed=datetime.utcnow(),
+            closed=datetime.now(UTC),
             closed_by=user,
         )
 
@@ -1072,7 +1072,7 @@ class DiscussionsNotificationsTest(DBTestCase):
             user=user,
             title=faker.sentence(),
             discussion=[message],
-            closed=datetime.utcnow(),
+            closed=datetime.now(UTC),
             closed_by=user,
         )
 
@@ -1144,7 +1144,7 @@ class DiscussionsMailsTest(APITestCase):
             user=poster,
             title=faker.sentence(),
             discussion=[message, second_message, closing_message],
-            closed=datetime.utcnow(),
+            closed=datetime.now(UTC),
             closed_by=owner,
         )
 

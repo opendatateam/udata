@@ -8,7 +8,7 @@ import logging
 import os
 import queue
 import traceback
-from datetime import datetime
+from datetime import UTC, datetime
 from logging.handlers import QueueHandler
 
 from mongoengine.connection import get_db
@@ -95,7 +95,7 @@ class Record(dict):
                 {
                     "$push": {
                         "ops": {
-                            "date": datetime.utcnow(),
+                            "date": datetime.now(UTC),
                             "type": _type,
                             "script": script,
                             "output": output,
@@ -196,7 +196,7 @@ class Migration:
                 {
                     "$push": {
                         "ops": {
-                            "date": datetime.utcnow(),
+                            "date": datetime.now(UTC),
                             "type": type,
                             "script": script,
                             "output": output,

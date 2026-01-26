@@ -16,7 +16,7 @@ As well as a sample application:
 
 import fnmatch
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
 from authlib.integrations.flask_oauth2.errors import (
@@ -140,7 +140,7 @@ class OAuth2Token(db.Document):
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True, sparse=True)
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    created_at = db.DateTimeField(default=lambda: datetime.now(UTC), required=True)
     expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
     scope = db.StringField(default="")
     revoked = db.BooleanField(default=False)
@@ -177,7 +177,7 @@ class OAuth2Token(db.Document):
             return False
         expired_at = datetime.fromtimestamp(self.get_expires_at())
         expired_at += timedelta(days=REFRESH_EXPIRATION)
-        return expired_at > datetime.utcnow()
+        return expired_at > datetime.now(UTC)
 
 
 class OAuth2Code(db.Document):
@@ -199,7 +199,7 @@ class OAuth2Code(db.Document):
         return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
 
     def is_expired(self):
-        return self.expires < datetime.utcnow()
+        return self.expires < datetime.now(UTC)
 
     def get_redirect_uri(self):
         return self.redirect_uri
@@ -214,7 +214,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get("code_challenge")
         code_challenge_method = request.data.get("code_challenge_method")
-        expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
+        expires = datetime.now(UTC) + timedelta(seconds=GRANT_EXPIRATION)
         auth_code = OAuth2Code.objects.create(
             code=code,
             client=ObjectId(request.client.client_id),

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from flask import current_app
@@ -65,7 +65,7 @@ class ReuseModelTest(DBTestCase):
     def test_send_on_delete(self):
         reuse = ReuseFactory()
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.utcnow()
+            reuse.deleted = datetime.now(UTC)
             reuse.save()
 
     def test_reuse_metrics(self):
@@ -109,9 +109,9 @@ class ReuseModelTest(DBTestCase):
         self.assertEqual(reuse.topic_label, _("Health"))
 
     def test_reuse_archived(self):
-        reuse = ReuseFactory(archived=datetime.utcnow())
+        reuse = ReuseFactory(archived=datetime.now(UTC))
         reuse.save()
-        self.assertLess(reuse.archived, datetime.utcnow())
+        self.assertLess(reuse.archived, datetime.now(UTC))
 
         reuse.archived = None
         reuse.save()

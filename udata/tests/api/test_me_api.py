@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 
@@ -32,7 +32,7 @@ class MeAPITest(APITestCase):
         user = self.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
-        deleted_org = OrganizationFactory(members=[member], deleted=datetime.utcnow())
+        deleted_org = OrganizationFactory(members=[member], deleted=datetime.now(UTC))
         response = self.get(url_for("api.me"))
         self.assert200(response)
         orgs = [o["id"] for o in response.json["organizations"]]

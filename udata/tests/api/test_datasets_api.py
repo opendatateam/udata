@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from uuid import uuid4
 
@@ -344,10 +344,10 @@ class DatasetAPITest(APITestCase):
         public_datasets = [DatasetFactory() for i in range(2)]
         private_datasets = [DatasetFactory(organization=org, private=True) for i in range(3)]
         archived_datasets = [
-            DatasetFactory(organization=org, archived=datetime.utcnow()) for i in range(4)
+            DatasetFactory(organization=org, archived=datetime.now(UTC)) for i in range(4)
         ]
         deleted_datasets = [
-            DatasetFactory(organization=org, deleted=datetime.utcnow()) for i in range(5)
+            DatasetFactory(organization=org, deleted=datetime.now(UTC)) for i in range(5)
         ]
         total_datasets = (
             len(public_datasets)
@@ -498,7 +498,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         """It should not fetch a deleted dataset from the API and raise 410"""
-        dataset = DatasetFactory(deleted=datetime.utcnow())
+        dataset = DatasetFactory(deleted=datetime.now(UTC))
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert410(response)
@@ -506,7 +506,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_get_deleted_but_authorized(self):
         """It should fetch a deleted dataset from the API if user is authorized"""
         self.login()
-        dataset = DatasetFactory(owner=self.user, deleted=datetime.utcnow())
+        dataset = DatasetFactory(owner=self.user, deleted=datetime.now(UTC))
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
@@ -992,7 +992,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_deleted(self):
         """It should not update a deleted dataset from the API and raise 401"""
         user = self.login()
-        dataset = DatasetFactory(owner=user, deleted=datetime.utcnow())
+        dataset = DatasetFactory(owner=user, deleted=datetime.now(UTC))
         data = dataset.to_dict()
         data["description"] = "new description"
         response = self.put(url_for("api.dataset", dataset=dataset), data)
@@ -1119,7 +1119,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete_deleted(self):
         """It should delete a deleted dataset from the API and raise 410"""
         user = self.login()
-        dataset = DatasetFactory(owner=user, deleted=datetime.utcnow(), nb_resources=1)
+        dataset = DatasetFactory(owner=user, deleted=datetime.now(UTC), nb_resources=1)
         response = self.delete(url_for("api.dataset", dataset=dataset))
 
         self.assert410(response)
@@ -1459,27 +1459,27 @@ class DatasetsFeedAPItest(APITestCase):
         certified_org = OrganizationFactory(badges=[OrganizationBadge(kind="certified")])
         # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DatasetFactory(
-            title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
+            title="A", resources=[ResourceFactory()], created_at_internal=datetime.now(UTC)
         )
         # Except in the case of a new dataset published by a certified organization
         DatasetFactory(
             title="B",
-            created_at_internal=datetime.utcnow(),
+            created_at_internal=datetime.now(UTC),
             organization=certified_org,
         )
         DatasetFactory(
             title="C",
-            created_at_internal=datetime.utcnow() - timedelta(days=2),
+            created_at_internal=datetime.now(UTC) - timedelta(days=2),
         )
         DatasetFactory(
             title="D",
-            created_at_internal=datetime.utcnow() - timedelta(days=1),
+            created_at_internal=datetime.now(UTC) - timedelta(days=1),
         )
         # Even if dataset E is created more recently than D, it should appear after in the feed, since it doesn't have a delay
         # before appearing in the field because it is published by a certified organization
         DatasetFactory(
             title="E",
-            created_at_internal=datetime.utcnow() - timedelta(hours=23),
+            created_at_internal=datetime.now(UTC) - timedelta(hours=23),
             organization=certified_org,
         )
 
@@ -2306,7 +2306,7 @@ class DatasetArchivedAPITest(APITestCase):
     def test_dataset_api_search_archived(self):
         """It should search datasets from the API, excluding archived ones"""
         DatasetFactory(archived=None)
-        dataset = DatasetFactory(archived=datetime.utcnow())
+        dataset = DatasetFactory(archived=datetime.now(UTC))
 
         response = self.get(url_for("api.datasets", q=""))
         self.assert200(response)
@@ -2315,7 +2315,7 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_get_archived(self):
         """It should fetch an archived dataset from the API and return 200"""
-        dataset = DatasetFactory(archived=datetime.utcnow())
+        dataset = DatasetFactory(archived=datetime.now(UTC))
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
 
