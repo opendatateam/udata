@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import feedparser
 import pytest
-import pytz
 import requests_mock
 from flask import url_for
 from werkzeug.test import TestResponse
@@ -2637,7 +2636,7 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
 
 class HarvestMetadataAPITest(PytestOnlyAPITestCase):
     def test_dataset_with_harvest_metadata(self):
-        date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        date = datetime(2022, 2, 22, tzinfo=UTC)
         harvest_metadata = HarvestDatasetMetadata(
             backend="DCAT",
             created_at=date,
@@ -2672,7 +2671,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         }
 
     def test_dataset_with_resource_harvest_metadata(self):
-        date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        date = datetime(2022, 2, 22, tzinfo=UTC)
 
         harvest_metadata = HarvestResourceMetadata(
             issued_at=date,
@@ -2691,9 +2690,9 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
 
     def test_dataset_with_harvest_computed_dates(self):
         # issued_date takes precedence over internal creation date and harvest created_at on dataset
-        issued_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
-        creation_date = datetime(2022, 2, 23, tzinfo=pytz.UTC)
-        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        issued_date = datetime(2022, 2, 22, tzinfo=UTC)
+        creation_date = datetime(2022, 2, 23, tzinfo=UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             issued_at=issued_date,
@@ -2706,7 +2705,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert response.json["last_modified"] == modification_date.isoformat()
 
         # without issuance date, creation_date takes precedence over internal creation date on dataset
-        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             modified_at=modification_date,

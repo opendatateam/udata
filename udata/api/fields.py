@@ -1,8 +1,8 @@
 import datetime
 import inspect
 import logging
+from datetime import UTC
 
-import pytz
 from dateutil.parser import parse
 from flask import request, url_for
 
@@ -55,7 +55,7 @@ class ISODateTime(String):
             return value.isoformat()
         # If naive datetime, localize it to UTC
         if isinstance(value, datetime.datetime) and not value.tzinfo:
-            return pytz.utc.localize(value).isoformat()
+            return value.replace(tzinfo=UTC).isoformat()
         return value.isoformat()
 
 
