@@ -2,7 +2,7 @@
 
 ### *What is udata?*
 
-[udata](https://github.com/opendatateam/udata) is the free software that provides the core features of [data.gouv.fr, the French government open data portal](https://www.data.gouv.fr/). It has been developed in the open since 2013 and is freely reused and customized by a few countries (Luxembourg, Serbia, Portugal), some government agencies and at least one NGO.
+[udata](https://github.com/opendatateam/udata) is the free software that provides the core features of [data.gouv.fr, the French government Open Data portal](https://www.data.gouv.fr/). It has been developed in the open since 2013 and is freely reused and customized by a few countries (Luxembourg, Serbia, Portugal), some government agencies and at least one NGO.
 
 That latest major breaking release, [udata 2](https://github.com/opendatateam/udata/blob/main/CHANGELOG.md#200-2020-03-11), focused mainly on the migration to python 3, right before the deadline of python 2 support being dropped. Since then, we shipped six minor releases and more patches.
 

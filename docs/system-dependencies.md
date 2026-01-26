@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] 3.7, its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] >=3.11,<3.14 (see `requires-python` in [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml)), its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
@@ -20,27 +20,23 @@ The full dependencies list is:
     * libxslt
 * Misc dependencies
     * liblzma (required to load GeoZones)
-    * libyaml (not mandatory but speed up the yaml processing)
+    * libyaml (not mandatory but speeds up the yaml processing)
     * libffi (required by bcrypt)
-
-!!! note
-    By the time this project was started, Python 3 did not have great third dependencies support
-    and some requirements weren't suported yet so it was started with Python 2.7.
 
 ### Debian/Ubuntu
 
 On any Debian-like system you can install the development tools and libraries with:
 
 ```shell
-$ apt-get install build-essential pkg-config python python-dev python-pip python-virtualenv\
+$ apt-get install build-essential pkg-config python3.11-dev python3-pip\
     libjpeg-dev zlib1g-dev libtiff5-dev libfreetype6-dev \
-    liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev \
+    liblcms2-dev libopenjpeg-dev libwebp-dev libpng-dev \
     libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev libffi-dev
 ```
 
-### OSX/Homebrew
+### MacOS/Homebrew
 
-On Mac OSX with [Homebrew][], you can install the development tools and libraries with:
+On MacOS with [Homebrew][], you can install the development tools and libraries with:
 
 ```shell
 $ brew install automake autoconf libtool pkg-config python \
@@ -50,11 +46,13 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB and Redis
 
-The project depends on [MongoDB][] 7+, and [Redis][]
-(beware of the version, it will not work well if they are not respected).
+The project requires [MongoDB][] 7.0 or later and [Redis][].
 
-The installation process is very specific to your operating system
-and will depend on your configuration, join us via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions] if you have any issue.
+!!! warning
+    Please ensure you install compatible versions. Using unsupported versions may cause issues.
+
+Installation steps vary depending on your operating system and configuration.
+If you encounter any problems during installation, please reach out via [a GitHub issue][github-new-issue] or [a GitHub discussion][github-discussions].
 
 ### Redis
 
@@ -66,20 +64,30 @@ $ apt-get install redis-server
 
 ### MongoDB
 
-On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root:
+For Debian/Ubuntu, follow the [official MongoDB installation guide][mongo-install-instructions] for your distribution.
 
-```
-$ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" > /etc/apt/sources.list.d/mongodb-org-3.6.list
+For a quick setup on Ubuntu 22.04+ or Debian 12+ (as root):
+
+```shell
+# Import the MongoDB public GPG key
+$ curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+
+# Add MongoDB repository (Ubuntu 22.04 example)
+$ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
 $ apt-get update
 $ apt-get install -y mongodb-org
-$ service mongod start
+$ systemctl start mongod
+$ systemctl enable mongod
 ```
+
+!!! note
+    Adjust the repository URL for your specific distribution. See the [official MongoDB installation instructions][mongo-install-instructions] for details.
 
 [mongodb]: https://www.mongodb.org/
 [redis]: http://redis.io/
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
-[mongo-install-instructions]: https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
+[mongo-install-instructions]: https://www.mongodb.com/docs/manual/installation/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new

@@ -1,6 +1,6 @@
 # Governance
 
-The project has been initiated by the [French government open data team][opendatateam] and is now used by other countries (Luxembourg, Serbia, you?). In May 2016, we have moved the project to its [own dedicated GiHub organization](https://github.com/opendatateam) to reflect the fact that it’s an international effort and as such should be fully developed in the open.
+The project has been initiated by the [French government Open Data team][opendatateam] and is now used by other countries (Luxembourg, Serbia, you?). In May 2016, we have moved the project to its [own dedicated GiHub organization](https://github.com/opendatateam) to reflect the fact that it’s an international effort and as such should be fully developed in the open.
 
 ## Bugs
 
