@@ -75,7 +75,6 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -e ".[dev,test]"
 ```
-```
 
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
