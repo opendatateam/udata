@@ -160,7 +160,7 @@ parser.add_argument(
 
 
 @ns.route("/<id>/spam/", endpoint="discussion_spam")
-@ns.doc(delete={"id": "unspam"})
+@ns.doc(delete={"id": "unspam_discussion"})
 class DiscussionSpamAPI(SpamAPIMixin):
     model = Discussion
 
@@ -255,7 +255,7 @@ class DiscussionAPI(API):
 
 
 @ns.route("/<id>/comments/<int:cidx>/spam/", endpoint="discussion_comment_spam")
-@ns.doc(delete={"id": "unspam"})
+@ns.doc(delete={"id": "unspam_discussion_comment"})
 class DiscussionCommentSpamAPI(SpamAPIMixin):
     def get_model(self, id, cidx):
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
