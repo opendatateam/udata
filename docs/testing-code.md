@@ -14,10 +14,10 @@ the alternate urls in your `udata.cfg` with `MONGODB_HOST_TEST`.
 MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'
 ```
 
-And then start docker compose with the extra file:
+And then start docker compose with the test profile:
 
 ```shell
-$ docker compose -f docker-compose.yml -f docker-compose.test.yml up
+$ docker compose --profile test up
 ```
 
 This will start a MongoDB extra service, tmpfs based and your tests will
