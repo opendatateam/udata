@@ -63,19 +63,19 @@ Replace `udata_plugin` with your actual package name.
 
 You can extract translations from your own templates using:
 
-```bash
+```shell
 uv run pybabel extract -F babel.cfg -o udata_plugin/translations/udata-plugin.pot .
 ```
 
 Then you can either add a new supported locale:
 
-```bash
+```shell
 uv run pybabel init -l xx -i udata_plugin/translations/udata-plugin.pot -d udata_plugin/translations  # where xx is the locale you want to add. ex: fr
 ```
 
 or update the existing ones:
 
-```bash
+```shell
 uv run pybabel update -i udata_plugin/translations/udata-plugin.pot -d udata_plugin/translations
 ```
 
@@ -84,7 +84,7 @@ You could take a look at [Poedit][] or set up a Crowdin project if you want.
 
 When translation is done, you can compile translations catalogs using:
 
-```bash
+```shell
 uv run pybabel compile -d udata_plugin/translations
 ```
 

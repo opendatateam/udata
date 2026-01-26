@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] 3.7, its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] 3.11, 3.12, or 3.13 (see `requires-python` in `pyproject.toml`), its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
@@ -20,12 +20,8 @@ The full dependencies list is:
     * libxslt
 * Misc dependencies
     * liblzma (required to load GeoZones)
-    * libyaml (not mandatory but speed up the yaml processing)
+    * libyaml (not mandatory but speeds up the yaml processing)
     * libffi (required by bcrypt)
-
-!!! note
-    By the time this project was started, Python 3 did not have great third dependencies support
-    and some requirements weren't suported yet so it was started with Python 2.7.
 
 ### Debian/Ubuntu
 
@@ -38,9 +34,9 @@ $ apt-get install build-essential pkg-config python python-dev python-pip python
     libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev libffi-dev
 ```
 
-### OSX/Homebrew
+### macOS/Homebrew
 
-On Mac OSX with [Homebrew][], you can install the development tools and libraries with:
+On macOS with [Homebrew][], you can install the development tools and libraries with:
 
 ```shell
 $ brew install automake autoconf libtool pkg-config python \
@@ -50,7 +46,7 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB and Redis
 
-The project depends on [MongoDB][] 3.6+, and [Redis][]
+The project depends on [MongoDB][] 6+, and [Redis][]
 (beware of the version, it will not work well if they are not respected).
 
 The installation process is very specific to your operating system
@@ -68,7 +64,7 @@ $ apt-get install redis-server
 
 On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root:
 
-```
+```shell
 $ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
 $ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" > /etc/apt/sources.list.d/mongodb-org-3.6.list
 $ apt-get update

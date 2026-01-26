@@ -248,7 +248,7 @@ setup(
 The easiest way is to start from the
 [dedicated cookiecutter template][cookiecutter-template]:
 
-```bash
+```shell
 pip install cookiecutter
 cookiecutter gh:opendatateam/cookiecutter-udata-harvester
 ```

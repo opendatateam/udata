@@ -77,17 +77,16 @@ We’re trying to develop this project in the open as much as possible. We creat
 
 ### Python style guide
 
-We follow the PEP-0008 and PEP-0257 as much as possible in the respect of PEP-0020.
+We follow the [PEP-0008](https://www.python.org/dev/peps/pep-0008/) and [PEP-0257](https://www.python.org/dev/peps/pep-0257/) as much as possible in the respect of PEP-0020. On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 
-On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 Linting, formatting and import sorting are done automatically by [Ruff](https://docs.astral.sh/ruff/) launched by a pre-commit hook. So, before contributing to the repository, it is necessary to initialize the pre-commit hooks:
-```bash
+```shell
 pre-commit install
 ```
 Once this is done, code formatting and linting, as well as import sorting, will be automatically checked before each commit.
 
 If you cannot use pre-commit, it is necessary to format, lint, and sort imports with [Ruff](https://docs.astral.sh/ruff/) before committing:
-```bash
+```shell
 ruff check --fix .
 ruff format .
 ```

@@ -22,7 +22,7 @@ udata requires a directory to contain the project, its plugins and all associate
 The recommended layout for this directory is displayed in the following schema.
 We’ll make all this together.
 
-```bash
+```shell
 $UDATA_WORKSPACE
 ├── fs
 ├── udata
@@ -38,7 +38,7 @@ $UDATA_WORKSPACE
 
 Make a new directory. You can name it as you like :
 
-```bash
+```shell
 mkdir udata-workspace
 cd udata-workspace
 export UDATA_WORKSPACE=`pwd`  # we'll use UDATA_WORKSPACE env in the instructions
@@ -46,13 +46,13 @@ export UDATA_WORKSPACE=`pwd`  # we'll use UDATA_WORKSPACE env in the instruction
 
 In this new directory, clone udata :
 
-```bash
+```shell
 git clone git@github.com:opendatateam/udata.git
 ```
 
 You can start your local development environment with docker compose.
 
-```bash
+```shell
 cd udata
 docker compose up
 ```
@@ -65,16 +65,15 @@ docker compose up
 
 With [uv](https://docs.astral.sh/uv/) (recommended):
 
-```bash
-uv sync --extra dev --extra test
+```shell
+uv sync
 ```
 
-...or with pip:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -e ".[dev,test]"
-```
+With pip (requires pip 25.1+):
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --group dev -e .
 ```
 
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
@@ -86,7 +85,7 @@ You can find [common errors and workarounds for Macos on udata documentation](ht
 
 udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.
 
-```bash
+```shell
 $UDATA_WORKSPACE
 ├── fs
 └── udata
@@ -97,7 +96,7 @@ $UDATA_WORKSPACE
 
 A sample content of `udata.cfg` for local development is shown below.
 
-```bash
+```shell
 from udata.settings import Defaults
 
 DEBUG = True
@@ -117,7 +116,7 @@ SESSION_COOKIE_SECURE = False
 
 This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
 
-```bash
+```shell
 127.0.0.1       dev.local
 ```
 
@@ -128,20 +127,20 @@ This define `dev.local:7000` as the URL for your local setup. You’ll have to e
 ## Running the project for the first time
 
 You need to initialize some data before being able to use udata. The following command
-will initalize database, indexes, create fixtures, etc.
+will initialize database, indexes, create fixtures, etc.
 
-```bash
+```shell
 udata init
 ```
 
 !!! note "Fixtures loading"
-    Loading fixtures is done hunder the hood using the `import-fixtures` command,
+    Loading fixtures is done under the hood using the `import-fixtures` command,
     which relies on the [udata-fixtures][] repository, and will import the fixtures
     declared in the `FIXTURE_DATASET_SLUGS` config.
 
 You can then start udata server with the `serve` subcommand.
 
-```bash
+```shell
 inv serve
 ```
 
@@ -150,13 +149,13 @@ inv serve
     have a `SERVER_NAME=dev.local:7001`, use the following command instead, and make sure to use the port `7001` throughout the rest
     of the documentation and examples.
 
-    ```bash
+    ```shell
     inv serve --port 7001
     ```
 
 Now, you can use your udata api !
 
-```bash
+```shell
 curl http://dev.local:7000/api/1/datasets/
 ```
 
@@ -164,7 +163,7 @@ You can see API endpoints by going to [http://dev.local:7000/api/1/](http://dev.
 your browser.
 
 Workers are required for tasks to execute (search indexation, etc.).
-```bash
+```shell
 source $UDATA_WORKSPACE/udata/venv/bin/activate  # Make sure your virtualenv is activated
 inv work
 ```
@@ -174,9 +173,9 @@ inv work
 
 # Install udata-front
 
-With a valid udata environment, you can start the udata-front installation.
+With a valid udata environment, you can start the udata-front installation:
 
-```bash
+```shell
 $UDATA_WORKSPACE
 ├── fs
 ├── udata
@@ -190,33 +189,33 @@ $UDATA_WORKSPACE
 
 First, clone udata-front in your workspace.
 
-```bash
+```shell
 cd $UDATA_WORKSPACE
 git clone git@github.com:datagouv/udata-front.git
 ```
 
 Modify your `udata.cfg` with the following lines.
 
-```bash
+```shell
 THEME = 'gouvfr'
 ```
 
 udata-front uses the same virtualenv as udata. You can activate it from your udata-front directory if it’s not the case anymore.
 
-```bash
+```shell
 source $UDATA_WORKSPACE/udata/venv/bin/activate
 ```
 
 Then, you can install the requirements with:
-```bash
+```shell
 cd udata-front
-uv sync --extra dev --extra test
+uv sync
 ```
 
 ...or, with pip:
-```bash
+```shell
 cd udata-front
-pip install -e ".[test,dev]"
+pip install -e ".[dev]"
 ```
 
 The last thing to do is to install udata-front NPM packages.
@@ -224,7 +223,7 @@ The last thing to do is to install udata-front NPM packages.
 !!! info
     udata and udata-front use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
 
-```bash
+```shell
 nvm install
 nvm use
 
@@ -233,7 +232,7 @@ npm install
 
 Once it's done, you should be able to run the build commands for JS and CSS.
 
-```bash
+```shell
 inv assets-build
 ```
 
@@ -241,7 +240,7 @@ inv assets-build
 
 To start udata, the inv command is the same.
 
-```bash
+```shell
 cd $UDATA_WORKSPACE/udata
 inv serve
 ```
@@ -250,7 +249,7 @@ You can now visit `dev.local:7000/` in your browser and start playing with your 
 
 You can use parcel to watch for file changes in udata or udata-front directory with
 
-```bash
+```shell
 inv assets-watch
 ```
 
@@ -262,7 +261,7 @@ inv assets-watch
 
 You can rebuild the search index with the following command.
 
-```bash
+```shell
 udata search index
 ```
 
