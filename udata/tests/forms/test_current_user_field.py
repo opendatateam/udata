@@ -1,4 +1,4 @@
-import datetime
+from datetime import UTC, datetime
 
 from bson import ObjectId
 from werkzeug.datastructures import MultiDict
@@ -180,7 +180,7 @@ class CurrentUserFieldTest(DBTestCase):
         self.assertEqual(len(form.errors["owner"]), 1)
 
     def test_password_rotation(self):
-        today = datetime.datetime.now(datetime.UTC)
+        today = datetime.now(UTC)
         user = UserFactory(
             password="password", password_rotation_demanded=today, confirmed_at=today
         )
@@ -214,7 +214,7 @@ class CurrentUserFieldTest(DBTestCase):
         form.validate()
         self.assertIn(security_gettext("Invalid email address"), form.errors["email"])
 
-        today = datetime.datetime.now(datetime.UTC)
+        today = datetime.now(UTC)
         user = UserFactory(email="b@fake.com", password="password", confirmed_at=today)
         form = ExtendedLoginForm.from_json({"email": user.email, "password": "password"})
         form.validate()
