@@ -223,7 +223,7 @@ uv sync
 ...or, with pip:
 ```shell
 cd udata-front
-pip install -e ".[dev]"
+pip install --group dev -e"
 ```
 
 The last thing to do is to install udata-front NPM packages.
