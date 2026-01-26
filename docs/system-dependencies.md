@@ -50,7 +50,7 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB and Redis
 
-The project depends on [MongoDB][] 3.6+, and [Redis][]
+The project depends on [MongoDB][] 7+, and [Redis][]
 (beware of the version, it will not work well if they are not respected).
 
 The installation process is very specific to your operating system
