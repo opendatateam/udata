@@ -231,18 +231,11 @@ class RandomBackend(BaseBackend):
 
 ```
 
-You need to properly expose the harvester as a `udata.harvesters` entrypoint in your `setup.py`:
+You need to properly expose the harvester as a `udata.harvesters` entrypoint in your `pyproject.toml`:
 
-```python
-setup(
-    '...'
-    entry_points={
-        'udata.harvesters': [
-            'random = canonical.path.to_the:RandomBackend',
-        ]
-    },
-    '...'
-)
+```toml
+[project.entry-points."udata.harvesters"]
+random = "canonical.path.to_the:RandomBackend"
 ```
 
 The easiest way is to start from the
