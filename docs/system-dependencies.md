@@ -34,9 +34,9 @@ $ apt-get install build-essential pkg-config python python-dev python-pip python
     libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev libffi-dev
 ```
 
-### macOS/Homebrew
+### MacOS/Homebrew
 
-On macOS with [Homebrew][], you can install the development tools and libraries with:
+On MacOS with [Homebrew][], you can install the development tools and libraries with:
 
 ```shell
 $ brew install automake autoconf libtool pkg-config python \
@@ -46,11 +46,13 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB and Redis
 
-The project depends on [MongoDB][] 6+, and [Redis][]
-(beware of the version, it will not work well if they are not respected).
+The project requires [MongoDB][] 6.0 or later and [Redis][].
 
-The installation process is very specific to your operating system
-and will depend on your configuration, join us via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions] if you have any issue.
+!!! warning
+    Please ensure you install compatible versions. Using unsupported versions may cause issues.
+
+Installation steps vary depending on your operating system and configuration.
+If you encounter any problems during installation, please reach out via [a GitHub issue][github-new-issue] or [a GitHub discussion][github-discussions].
 
 ### Redis
 
@@ -62,20 +64,30 @@ $ apt-get install redis-server
 
 ### MongoDB
 
-On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root:
+For Debian/Ubuntu, follow the [official MongoDB installation guide][mongo-install-instructions] for your distribution.
+
+For a quick setup on Debian/Ubuntu (as root):
 
 ```shell
-$ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" > /etc/apt/sources.list.d/mongodb-org-3.6.list
+# Import the MongoDB public GPG key
+$ curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+
+# Add MongoDB repository (adjust for your distribution)
+$ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+
 $ apt-get update
 $ apt-get install -y mongodb-org
-$ service mongod start
+$ systemctl start mongod
+$ systemctl enable mongod
 ```
+
+!!! note
+    The repository URL above is for Ubuntu 22.04 (Jammy). For other distributions, see the [official MongoDB installation instructions][mongo-install-instructions].
 
 [mongodb]: https://www.mongodb.org/
 [redis]: http://redis.io/
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
-[mongo-install-instructions]: https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
+[mongo-install-instructions]: https://www.mongodb.com/docs/manual/installation/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
