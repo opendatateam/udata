@@ -233,9 +233,12 @@ def safe_harvest_datetime(value: Any, field: str, refuse_future: bool = False) -
     except ParserError:
         log.warning(f"Unparseable {field} value: '{value}'")
         return None
-    if refuse_future and parsed and parsed > datetime.now(UTC):
-        log.warning(f"Future {field} value: '{value}'")
-        return None
+    if refuse_future and parsed:
+        # Compare with naive datetime (MongoEngine stores naive datetimes)
+        now_naive = datetime.now(UTC).replace(tzinfo=None)
+        if parsed > now_naive:
+            log.warning(f"Future {field} value: '{value}'")
+            return None
     return parsed
 
 

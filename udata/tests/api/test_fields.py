@@ -1,7 +1,5 @@
 from datetime import UTC, date, datetime
 
-import pytz
-
 from udata.api.fields import ISODateTime
 from udata.core.dataset.factories import DatasetFactory
 
@@ -28,19 +26,20 @@ class NextPageUrlTest(APITestCase):
 
 class FieldTest(APITestCase):
     def test_iso_date_time_field_format(self):
-        datetime_date_naive = datetime.now(UTC)
-        datetime_date_aware = pytz.utc.localize(datetime_date_naive)
-        datetime_date_aware_string = datetime_date_aware.isoformat()
+        # Use a fixed datetime to avoid microsecond differences
+        fixed_naive = datetime(2022, 2, 22, 12, 30, 45)
+        fixed_aware = datetime(2022, 2, 22, 12, 30, 45, tzinfo=UTC)
+        datetime_date_aware_string = fixed_aware.isoformat()
         date_date = date.today()
 
-        result = ISODateTime().format(str(datetime_date_naive))
-        self.assertEqual(result, datetime_date_aware.isoformat())
+        result = ISODateTime().format(str(fixed_naive))
+        self.assertEqual(result, fixed_aware.isoformat())
 
-        result = ISODateTime().format(datetime_date_naive)
-        self.assertEqual(result, datetime_date_aware.isoformat())
+        result = ISODateTime().format(fixed_naive)
+        self.assertEqual(result, fixed_aware.isoformat())
 
-        result = ISODateTime().format(datetime_date_aware)
-        self.assertEqual(result, datetime_date_aware.isoformat())
+        result = ISODateTime().format(fixed_aware)
+        self.assertEqual(result, fixed_aware.isoformat())
 
         result = ISODateTime().format(datetime_date_aware_string)
         self.assertEqual(result, datetime_date_aware_string)

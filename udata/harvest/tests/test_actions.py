@@ -367,12 +367,35 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
-        assert before <= dataset_to_archive.harvest.archived_at <= after
-        assert before <= dataset_to_archive.archived <= after
+        # MongoEngine returns naive datetimes, so normalize before comparison
+        archived_at_naive = (
+            dataset_to_archive.harvest.archived_at.replace(tzinfo=None)
+            if dataset_to_archive.harvest.archived_at.tzinfo
+            else dataset_to_archive.harvest.archived_at
+        )
+        archived_naive = (
+            dataset_to_archive.archived.replace(tzinfo=None)
+            if dataset_to_archive.archived and dataset_to_archive.archived.tzinfo
+            else dataset_to_archive.archived
+        )
+        before_naive = before.replace(tzinfo=None)
+        after_naive = after.replace(tzinfo=None)
+        assert before_naive <= archived_at_naive <= after_naive
+        assert before_naive <= archived_naive <= after_naive
 
         assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
-        assert before <= dataservice_to_archive.harvest.archived_at <= after
-        assert before <= dataservice_to_archive.archived_at <= after
+        dataservice_archived_at_naive = (
+            dataservice_to_archive.harvest.archived_at.replace(tzinfo=None)
+            if dataservice_to_archive.harvest.archived_at.tzinfo
+            else dataservice_to_archive.harvest.archived_at
+        )
+        assert before_naive <= dataservice_archived_at_naive <= after_naive
+        dataservice_archived_naive = (
+            dataservice_to_archive.archived_at.replace(tzinfo=None)
+            if dataservice_to_archive.archived_at and dataservice_to_archive.archived_at.tzinfo
+            else dataservice_to_archive.archived_at
+        )
+        assert before_naive <= dataservice_archived_naive <= after_naive
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):

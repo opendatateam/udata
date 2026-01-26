@@ -126,12 +126,25 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         assert len(job.items) == nb_datasets
         assert Dataset.objects.count() == nb_datasets
+        before_naive = before.replace(tzinfo=None)
+        after_naive = after.replace(tzinfo=None)
         for dataset in Dataset.objects():
-            assert before <= dataset.last_modified <= after
+            # MongoEngine returns naive datetimes, so normalize before comparison
+            last_modified_naive = (
+                dataset.last_modified.replace(tzinfo=None)
+                if dataset.last_modified.tzinfo
+                else dataset.last_modified
+            )
+            last_update_naive = (
+                dataset.harvest.last_update.replace(tzinfo=None)
+                if dataset.harvest.last_update.tzinfo
+                else dataset.harvest.last_update
+            )
+            assert before_naive <= last_modified_naive <= after_naive
             assert dataset.harvest.source_id == str(source.id)
             assert dataset.harvest.domain == source.domain
             assert dataset.harvest.remote_id.startswith("fake-")
-            assert before <= dataset.harvest.last_update <= after
+            assert before_naive <= last_update_naive <= after_naive
 
     def test_has_feature_defaults(self):
         source = HarvestSourceFactory()

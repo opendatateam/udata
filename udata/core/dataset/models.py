@@ -407,7 +407,7 @@ class ResourceMixin(object):
         if (
             self.harvest
             and self.harvest.modified_at
-            and to_naive_datetime(self.harvest.modified_at) < datetime.now(UTC)
+            and to_naive_datetime(self.harvest.modified_at) < datetime.now(UTC).replace(tzinfo=None)
         ):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
@@ -852,7 +852,12 @@ class Dataset(
         if next_update:
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
-            quality["update_fulfilled_in_time"] = (next_update - datetime.now(UTC)).days >= -1
+            # Normalize to naive for comparison (MongoEngine returns naive datetimes)
+            now_naive = datetime.now(UTC).replace(tzinfo=None)
+            next_update_naive = (
+                next_update.replace(tzinfo=None) if next_update.tzinfo else next_update
+            )
+            quality["update_fulfilled_in_time"] = (next_update_naive - now_naive).days >= -1
         elif self.has_frequency and self.frequency.delta is None:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.

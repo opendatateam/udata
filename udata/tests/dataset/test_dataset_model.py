@@ -162,7 +162,9 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         if freq is None or freq.delta is None:
             assert dataset.next_update is None
         else:
-            assert_equal_dates(dataset.next_update, freq.next_update(datetime.now(UTC)))
+            # dataset.last_update is naive after save, so compare with naive datetime
+            now_naive = datetime.now(UTC).replace(tzinfo=None)
+            assert_equal_dates(dataset.next_update, freq.next_update(now_naive))
 
     def test_quality_default(self):
         dataset = DatasetFactory(description="")
@@ -840,7 +842,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         )
         dataset.harvest = harvest_metadata
         dataset.save()
-        assert dataset.last_modified == harvest_metadata.modified_at
+        assert_equal_dates(dataset.last_modified, harvest_metadata.modified_at)
 
     def test_harvest_resource_metadata_validate_success(self):
         resource = ResourceFactory()
@@ -868,7 +870,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         resource.harvest = harvest_metadata
         resource.validate()
 
-        assert resource.last_modified == resource.last_modified_internal
+        assert_equal_dates(resource.last_modified, resource.last_modified_internal)
 
     def test_harvest_resource_metadata_past_modifed_at(self):
         resource = ResourceFactory()
@@ -876,14 +878,14 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         resource.harvest = harvest_metadata
         resource.validate()
 
-        assert resource.last_modified == harvest_metadata.modified_at
+        assert_equal_dates(resource.last_modified, harvest_metadata.modified_at)
 
     def test_resource_metadata_extra_modifed_at(self):
         resource = ResourceFactory(filetype="remote")
         resource.extras.update({"analysis:last-modified-at": datetime(2023, 1, 1)})
         resource.validate()
 
-        assert resource.last_modified == resource.extras["analysis:last-modified-at"]
+        assert_equal_dates(resource.last_modified, resource.extras["analysis:last-modified-at"])
 
     def test_quality_cached_next_update_with_date_last_update(self):
         """Test that quality_cached with date (not datetime) last_update can be saved to MongoDB.

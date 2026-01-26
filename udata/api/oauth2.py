@@ -177,7 +177,8 @@ class OAuth2Token(db.Document):
             return False
         expired_at = datetime.fromtimestamp(self.get_expires_at())
         expired_at += timedelta(days=REFRESH_EXPIRATION)
-        return expired_at > datetime.now(UTC)
+        # expired_at is naive (fromtimestamp), so compare with naive datetime
+        return expired_at > datetime.now(UTC).replace(tzinfo=None)
 
 
 class OAuth2Code(db.Document):
@@ -199,7 +200,8 @@ class OAuth2Code(db.Document):
         return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
 
     def is_expired(self):
-        return self.expires < datetime.now(UTC)
+        # MongoEngine returns naive datetimes, so compare with naive datetime
+        return self.expires < datetime.now(UTC).replace(tzinfo=None)
 
     def get_redirect_uri(self):
         return self.redirect_uri
