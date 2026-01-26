@@ -79,7 +79,7 @@ pip install --group dev -e .
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
 !!! info
-    You need to make sure that your virtualenv is activated for the entire development process.
+    With `uv`, the virtual environment is managed automatically. With `pip`, you need to activate the virtualenv manually: `source .venv/bin/activate`.
 
 ## Configure udata
 
@@ -163,8 +163,17 @@ You can see API endpoints by going to [http://dev.local:7000/api/1/](http://dev.
 your browser.
 
 Workers are required for tasks to execute (search indexation, etc.).
+
+With `uv`:
 ```shell
-source $UDATA_WORKSPACE/udata/venv/bin/activate  # Make sure your virtualenv is activated
+cd $UDATA_WORKSPACE/udata
+uv run inv work
+```
+
+With `pip` (if not already activated):
+```shell
+cd $UDATA_WORKSPACE/udata
+source .venv/bin/activate
 inv work
 ```
 
@@ -203,7 +212,8 @@ THEME = 'gouvfr'
 udata-front uses the same virtualenv as udata. You can activate it from your udata-front directory if it’s not the case anymore.
 
 ```shell
-source $UDATA_WORKSPACE/udata/venv/bin/activate
+cd $UDATA_WORKSPACE/udata
+source .venv/bin/activate
 ```
 
 Then, you can install the requirements with:
