@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from blinker import Signal
 from flask import url_for
@@ -266,13 +266,17 @@ class Dataservice(
     )
 
     created_at = field(
-        db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        db.DateTimeField(
+            verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True
+        ),
         readonly=True,
         sortable="created",
     )
     metadata_modified_at = field(
         db.DateTimeField(
-            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+            verbose_name=_("Last modification date"),
+            default=lambda: datetime.now(UTC),
+            required=True,
         ),
         readonly=True,
         sortable="last_modified",

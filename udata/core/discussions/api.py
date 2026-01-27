@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bson import ObjectId
 from flask_restx.inputs import boolean
@@ -216,7 +216,7 @@ class DiscussionAPI(API):
             discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
             discussion.closed_by_organization = form.organization.data
-            discussion.closed = datetime.utcnow()
+            discussion.closed = datetime.now(UTC)
 
         discussion.save()
         if close:
@@ -291,7 +291,7 @@ class DiscussionCommentAPI(API):
         form = api.validate(DiscussionEditCommentForm)
 
         discussion.discussion[cidx].content = form.comment.data
-        discussion.discussion[cidx].last_modified_at = datetime.utcnow()
+        discussion.discussion[cidx].last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
 

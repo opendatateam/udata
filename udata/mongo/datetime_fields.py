@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from dateutil.parser import parse
 from mongoengine import EmbeddedDocument
@@ -57,13 +57,17 @@ class DateRange(EmbeddedDocument):
 
 class Datetimed(object):
     created_at = field(
-        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        DateTimeField(
+            verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True
+        ),
         sortable="created",
         readonly=True,
     )
     last_modified = field(
         DateTimeField(
-            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+            verbose_name=_("Last modification date"),
+            default=lambda: datetime.now(UTC),
+            required=True,
         ),
         sortable=True,
         readonly=True,
@@ -75,4 +79,4 @@ class Datetimed(object):
 def set_modified_datetime(sender, document, **kwargs):
     changed = document._get_changed_fields()
     if isinstance(document, Datetimed) and "last_modified" not in changed:
-        document.last_modified = datetime.utcnow()
+        document.last_modified = datetime.now(UTC)

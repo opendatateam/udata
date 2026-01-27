@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from blinker import Signal
 from flask import g
@@ -42,7 +42,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     actor = db.ReferenceField("User", required=True)
     organization = db.ReferenceField("Organization")
     related_to = db.ReferenceField(db.DomainModel, required=True)
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    created_at = db.DateTimeField(default=lambda: datetime.now(UTC), required=True)
     changes = db.ListField(db.StringField())
 
     extras = db.ExtrasField()

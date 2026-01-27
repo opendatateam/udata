@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import feedparser
 import pytest
@@ -38,14 +38,14 @@ class DataserviceAPITest(APITestCase):
 
     def test_dataservice_api_get_deleted(self):
         """It should not fetch a deleted dataservice from the API and raise 410"""
-        dataservice = DataserviceFactory(deleted_at=datetime.utcnow())
+        dataservice = DataserviceFactory(deleted_at=datetime.now(UTC))
         response = self.get(url_for("api.dataservice", dataservice=dataservice))
         assert410(response)
 
     def test_dataservice_api_get_deleted_but_authorized(self):
         """It should fetch a deleted dataservice from the API if authorized"""
         user = self.login()
-        dataservice = DataserviceFactory(deleted_at=datetime.utcnow(), owner=user)
+        dataservice = DataserviceFactory(deleted_at=datetime.now(UTC), owner=user)
         response = self.get(url_for("api.dataservice", dataservice=dataservice))
         assert200(response)
 
@@ -687,9 +687,9 @@ class DataservicesFeedAPItest(APITestCase):
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
         # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
-        DataserviceFactory(title="A", created_at=datetime.utcnow())
-        DataserviceFactory(title="B", created_at=datetime.utcnow() - timedelta(days=2))
-        DataserviceFactory(title="C", created_at=datetime.utcnow() - timedelta(days=1))
+        DataserviceFactory(title="A", created_at=datetime.now(UTC))
+        DataserviceFactory(title="B", created_at=datetime.now(UTC) - timedelta(days=2))
+        DataserviceFactory(title="C", created_at=datetime.now(UTC) - timedelta(days=1))
 
         response = self.get(url_for("api.recent_dataservices_atom_feed"))
         self.assert200(response)
