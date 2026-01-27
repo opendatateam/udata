@@ -1,6 +1,8 @@
 import datetime
 
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
+from udata.core.dataset.constants import FormatFamily, get_format_family
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
 from udata.core.topic.models import TopicElement
@@ -42,20 +44,40 @@ class DatasetSearch(ModelSearchAdapter):
         "badge": Filter(choices=list(Dataset.__badges__)),
         "organization": ModelTermsFilter(model=Organization),
         "organization_badge": Filter(choices=list(Organization.__badges__)),
+        "organization_name": Filter(),
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
-        "granularity": Filter(),
-        "format": Filter(),
-        "schema": Filter(),
+        "granularity": ListFilter(),
+        "format": ListFilter(),
+        "schema": ListFilter(),
         "temporal_coverage": TemporalCoverageFilter(),
         "featured": BoolFilter(),
         "topic": ModelTermsFilter(model=Topic),
+        "access_type": Filter(),
+        "format_family": Filter(choices=list(FormatFamily)),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod
     def is_indexable(cls, dataset: Dataset):
         return dataset.is_visible
+
+    @classmethod
+    def _compute_format_family(cls, dataset: Dataset) -> list[str]:
+        """
+        Compute the format families present in the dataset's resources.
+
+        Returns a list of unique format family values based on the formats
+        of all resources in the dataset.
+        """
+        families = set()
+        for resource in dataset.resources:
+            if resource.format:
+                family = get_format_family(resource.format)
+                families.add(family.value)
+        return list(families) if families else [FormatFamily.OTHER.value]
 
     @classmethod
     def mongo_search(cls, args):
@@ -73,6 +95,7 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         organization = None
         owner = None
+        org = None
 
         topic_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
@@ -112,10 +135,14 @@ class DatasetSearch(ModelSearchAdapter):
                 for res in dataset.resources[:MAX_NUMBER_OF_RESOURCES_TO_INDEX]
             ],
             "organization": organization,
+            "organization_name": org.name if org else None,
             "owner": str(owner.id) if owner else None,
             "format": [r.format.lower() for r in dataset.resources if r.format],
             "schema": [r.schema.name for r in dataset.resources if r.schema],
             "topics": [str(tid) for tid in topic_ids],
+            "access_type": dataset.access_type,
+            "format_family": cls._compute_format_family(dataset),
+            "producer_type": get_producer_type(org, owner),
         }
         extras = {}
         for key, value in dataset.extras.items():
