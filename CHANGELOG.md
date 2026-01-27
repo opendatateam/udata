@@ -1,5 +1,17 @@
 # Changelog
 
+## 14.9.0 (2026-01-27)
+
+- docs: fix documentation for outdated instructions and typos ([#3634](https://github.com/opendatateam/udata/pull/3634))
+- docs: fix formatting issue
+- feat: add AGENTS.md ([#3623](https://github.com/opendatateam/udata/pull/3623))
+- feat: add CTA to HeroBloc ([#3630](https://github.com/opendatateam/udata/pull/3630))
+- feat: use MongoDB 7 in docker compose files to be consistent ([#3632](https://github.com/opendatateam/udata/pull/3632))
+- fix: deduplicate endpoint id in swagger ([#3631](https://github.com/opendatateam/udata/pull/3631))
+- fix: pagination URLs should not forward all arguments to url_for() ([#3584](https://github.com/opendatateam/udata/pull/3584))
+- test: use before/after timestamps instead of exact date comparison for flaky harvest tests ([#3587](https://github.com/opendatateam/udata/pull/3587))
+
+
 ## 14.8.0 (2026-01-22)
 
 - chore: add vscode configs for debug and tests ([#3624](https://github.com/opendatateam/udata/pull/3624))
