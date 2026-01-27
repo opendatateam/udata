@@ -25,11 +25,3 @@ services:
         environment:
             MP_SMTP_AUTH_ACCEPT_ANY: 1
             MP_SMTP_AUTH_ALLOW_INSECURE: 1
-
-    db_test:
-        image: mongo:7.0.28
-        tmpfs: /data/db/
-        ports:
-          - "27018:27017"
-        profiles:
-          - test
