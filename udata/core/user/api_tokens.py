@@ -33,7 +33,7 @@ class ApiToken(db.Document):
         description="User-given label for this token",
     )
     scope = field(
-        db.StringField(choices=["normal"], default="normal"),
+        db.StringField(choices=["admin"], default="admin"),
         readonly=True,
         description="Token scope",
     )

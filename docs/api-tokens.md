@@ -64,7 +64,7 @@ Response: 204 on success, 404 if the token doesn't exist or is already revoked.
 | `token_prefix` | First 8 chars of the random part, for display/identification |
 | `user` | Reference to the User (not exposed via API) |
 | `name` | User-given label |
-| `scope` | Token scope (currently: `normal`) |
+| `scope` | Token scope (currently: `admin` — full access) |
 | `kind` | Token type (currently: `api_key`) |
 | `created_at` | Creation timestamp |
 | `last_used_at` | Last authentication timestamp |
@@ -86,10 +86,10 @@ The migration is idempotent (checks for existing hashes before inserting).
 
 ## Future work
 
-### Scope enforcement (phase 2)
+### Restricted scopes (phase 2)
 
-The `scope` field currently only has the value `normal`. Planned additions:
-- `admin` scope: required for admin-only endpoints
+The `scope` field currently defaults to `admin` (full access, matching user permissions). Planned additions:
+- `normal` scope: restricted to non-admin endpoints
 - Store the scope in `flask.g.token_scope` during authentication
 - Enforce in `_apply_secure`: admin routes require `scope="admin"` + user `is_admin`
 - Admins with a `normal`-scoped token should not bypass ownership checks
