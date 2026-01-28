@@ -87,8 +87,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_header_auth(self):
         """Should handle header API Key authentication"""
-        with self.api_user() as user:  # API Key auth
-            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        with self.api_user():
+            response = self.post(url_for("api.fake"))
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -148,8 +148,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
     def test_inactive_user(self):
         """Should raise a HTTP 401 if the user is inactive"""
         user = UserFactory(active=False)
-        with self.api_user(user) as user:
-            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        with self.api_user(user):
+            response = self.post(url_for("api.fake"))
 
         assert401(response)
         assert response.content_type == "application/json"
@@ -157,10 +157,12 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_deleted_user(self):
         """Should raise a HTTP 401 if the user is deleted"""
+        from udata.core.user.api_tokens import ApiToken
+
         user = UserFactory()
+        token, plaintext = ApiToken.generate(user)
         user.mark_as_deleted()
-        with self.api_user(user) as user:
-            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        response = self.post(url_for("api.fake"), headers={"X-API-KEY": plaintext})
 
         assert401(response)
         assert response.content_type == "application/json"

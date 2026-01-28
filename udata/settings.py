@@ -185,6 +185,9 @@ class Defaults(object):
 
     STATIC_DIRS = []
 
+    # API Token settings
+    API_TOKEN_PREFIX = "udata_"
+
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"
     OAUTH2_REFRESH_TOKEN_GENERATOR = True

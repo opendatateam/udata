@@ -7,6 +7,7 @@ from udata.core.badges.models import *  # noqa
 from udata.core.discussions.models import *  # noqa
 from udata.core.followers.models import *  # noqa
 from udata.core.user.models import *  # noqa
+from udata.core.user.api_tokens import *  # noqa
 from udata.core.organization.models import *  # noqa
 from udata.core.contact_point.models import *  # noqa
 from udata.core.site.models import *  # noqa
