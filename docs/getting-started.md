@@ -134,8 +134,8 @@ udata init
 
 !!! note "Fixtures loading"
     Loading fixtures is done under the hood using the `import-fixtures` command,
-    which relies on the [udata-fixtures][] repository, and will import the fixtures
-    declared in the `FIXTURE_DATASET_SLUGS` config.
+    which imports sample data (datasets, posts, pages, site) from the bundled
+    fixture file.
 
 You can then start udata server with the `serve` subcommand.
 
@@ -282,4 +282,4 @@ Once the project is up and running, it’s time to customize it! Take a look at 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
-[udata-fixtures]: https://github.com/opendatateam/udata-fixtures
+
