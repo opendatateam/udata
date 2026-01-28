@@ -28,15 +28,15 @@ def notify_new_discussion(discussion_id):
         recipients = owner_recipients(discussion)
         mails.new_discussion(discussion).send(recipients)
         for recipient in recipients:
-          notification = Notification(
-              user=recipient,
-              details=DiscussionNotificationDetails(
-                  status=DiscussionStatus.NEW_DISCUSSION,
-                  discussion=discussion,
-              ),
-          )
-          notification.created_at = discussion.created
-          notification.save()
+            notification = Notification(
+                user=recipient,
+                details=DiscussionNotificationDetails(
+                    status=DiscussionStatus.NEW_DISCUSSION,
+                    discussion=discussion,
+                ),
+            )
+            notification.created_at = discussion.created
+            notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
 
@@ -51,22 +51,21 @@ def notify_new_discussion_comment(discussion_id, message=None):
         mails.new_discussion_comment(discussion, message).send(recipients)
 
         previous_notifications = Notification.objects.get(
-          user=message.posted_by,
-          details__discussion=discussion
+            user=message.posted_by, details__discussion=discussion
         )
         previous_notifications.handled_at = datetime.now(UTC)
         previous_notifications.save()
 
         for recipient in recipients:
-          notification = Notification(
-              user=recipient,
-              details=DiscussionNotificationDetails(
-                  status=DiscussionStatus.NEW_COMMENT,
-                  discussion=discussion,
-              ),
-          )
-          notification.created_at = discussion.created
-          notification.save()
+            notification = Notification(
+                user=recipient,
+                details=DiscussionNotificationDetails(
+                    status=DiscussionStatus.NEW_COMMENT,
+                    discussion=discussion,
+                ),
+            )
+            notification.created_at = discussion.created
+            notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
 
@@ -81,21 +80,20 @@ def notify_discussion_closed(discussion_id, message=None):
         mails.discussion_closed(discussion, message).send(recipients)
 
         previous_notifications = Notification.objects.get(
-          user=message.posted_by,
-          details__discussion=discussion
+            user=message.posted_by, details__discussion=discussion
         )
         previous_notifications.handled_at = datetime.now(UTC)
         previous_notifications.save()
 
         for recipient in recipients:
-          notification = Notification(
-              user=recipient,
-              details=DiscussionNotificationDetails(
-                  status=DiscussionStatus.CLOSED,
-                  discussion=discussion,
-              ),
-          )
-          notification.created_at = discussion.created
-          notification.save()
+            notification = Notification(
+                user=recipient,
+                details=DiscussionNotificationDetails(
+                    status=DiscussionStatus.CLOSED,
+                    discussion=discussion,
+                ),
+            )
+            notification.created_at = discussion.created
+            notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))

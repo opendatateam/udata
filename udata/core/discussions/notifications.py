@@ -10,21 +10,21 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
+
 class DiscussionStatus(StrEnum):
     NEW_DISCUSSION = auto()
     NEW_COMMENT = auto()
     CLOSED = auto()
 
 
-
 @generate_fields()
 class DiscussionNotificationDetails(db.EmbeddedDocument):
     status = field(
-      db.EnumField(DiscussionStatus),
-      readonly=True,
-      auditable=False,
-      allow_null=True,
-      filterable={},
+        db.EnumField(DiscussionStatus),
+        readonly=True,
+        auditable=False,
+        allow_null=True,
+        filterable={},
     )
     discussion = field(
         db.ReferenceField(Discussion),
