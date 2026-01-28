@@ -2,109 +2,60 @@
 
 ## Overview
 
-API tokens are opaque, randomly generated strings that authenticate API requests via the `X-API-KEY` header. Tokens are stored as HMAC-SHA256 hashes (keyed with `API_TOKEN_SECRET`) in a dedicated `api_token` MongoDB collection. The plaintext token is returned only once at creation and cannot be retrieved afterwards.
+Opaque, randomly generated tokens that authenticate API requests via the `X-API-KEY` header. Each user can have multiple active tokens. The plaintext is returned only once at creation.
 
-Each user can have multiple active tokens simultaneously.
+Tokens are stored as HMAC-SHA256 hashes in a dedicated `api_token` MongoDB collection. Revoked tokens are kept for audit (soft-delete via `revoked_at`).
 
-## Architecture
+## Previous system
 
-### Token generation
+The old system stored a single JWS (JSON Web Signature) token as a field (`apikey`) directly on the `User` document. This had several limitations:
 
-1. A random token is generated using `secrets.token_urlsafe(48)`
-2. A configurable prefix is prepended (setting `API_TOKEN_PREFIX`, default: `udata_`)
-3. The full plaintext token is hashed with HMAC-SHA256 using `API_TOKEN_SECRET` as key
-4. The hash, a display prefix (first 8 chars of the random part), and metadata are stored in the `api_token` collection
-5. The plaintext is returned once in the creation response and never stored
+- **One key per user**: generating a new key invalidated the previous one, breaking any integration still using it.
+- **Plaintext stored in DB**: the token was stored as-is, so a database leak directly exposed all API keys.
+- **No revocation or expiration**: the only way to invalidate a key was to generate a new one or delete it, with no audit trail.
+- **No usage tracking**: no way to know when or by what a key was last used.
 
-### Authentication flow
+## Design decisions
 
-1. Client sends `X-API-KEY: <plaintext_token>` header
-2. Server computes HMAC-SHA256 of the token using `API_TOKEN_SECRET`
-3. Lookup in `api_token` collection by hash (must not be revoked or expired)
-4. If found, `login_user(token.user)` and update usage metadata (last_used_at, user_agents)
+### HMAC-SHA256 instead of plain SHA-256
 
-HMAC-SHA256 is used instead of plain SHA-256 so that a database leak alone is not enough to verify token candidates — the attacker also needs `API_TOKEN_SECRET`. A slow hash (bcrypt/argon2) is unnecessary because the tokens have high entropy (48 bytes from `secrets.token_urlsafe`), making brute-force infeasible regardless.
+A plain hash would let an attacker who obtains a database dump verify token candidates offline. HMAC-SHA256 with a server-side secret (`API_TOKEN_SECRET`) means the DB alone is not enough — the attacker also needs the secret.
+
+A slow hash (bcrypt/argon2) is unnecessary here: tokens have 48 bytes of entropy from `secrets.token_urlsafe`, making brute-force infeasible regardless of hash speed.
+
+### Separate `API_TOKEN_SECRET` instead of reusing `SECRET_KEY`
+
+`SECRET_KEY` is used by Flask for session signing and by Flask-Security for password reset tokens. If a token hash secret needs to be rotated (e.g. suspected leak), rotating `SECRET_KEY` would invalidate all sessions and pending password resets. A dedicated secret allows independent rotation.
+
+### `API_TOKEN_PREFIX`
+
+A configurable prefix (default: `udata_`) is prepended to every generated token. This serves two purposes: secret scanning tools (GitHub, GitLeaks, etc.) can detect leaked tokens via pattern matching, and different prefixes per environment (e.g. `udata_prod_`, `udata_demo_`) let users identify which environment a token belongs to.
+
+### Scope defaults to `admin`
+
+Tokens currently grant full access matching the user's permissions. The scope is `admin` to reflect this reality. When restricted scopes are added (phase 2), new values like `normal` will be introduced with the corresponding permission checks.
+
+### Revocation as soft-delete
+
+Deleting a token marks it as revoked (`revoked_at` timestamp) rather than removing the record from the database. This keeps an audit trail (who created what, when it was revoked). No cleanup job for now (see Future work).
 
 ## Configuration
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `API_TOKEN_PREFIX` | `udata_` | Prefix prepended to generated tokens. Useful for secret scanning tools (e.g., GitHub, GitLeaks) to identify leaked tokens. |
-| `API_TOKEN_SECRET` | *(empty – must be set)* | HMAC key used to hash tokens before storage. Must be set to a unique, random value per environment. The app will refuse to start if this is not configured. |
-
-## API Endpoints
-
-### `GET /api/1/me/tokens/`
-
-List all active (non-revoked) tokens for the authenticated user.
-
-Response: array of token objects (without plaintext or hash).
-
-### `POST /api/1/me/tokens/`
-
-Create a new API token. The plaintext token is included in the response **only this one time**.
-
-Request body (all optional):
-- `name`: a label to identify the token (e.g., "CI pipeline")
-- `expires_at`: ISO 8601 expiration date
-
-Response (201): token object with additional `token` field containing the plaintext.
-
-### `DELETE /api/1/me/tokens/<id>/`
-
-Revoke a token. The token record is kept in database for audit purposes but is marked as revoked and will no longer authenticate.
-
-Response: 204 on success, 404 if the token doesn't exist or is already revoked.
-
-## ApiToken model fields
-
-| Field | Description |
-|-------|-------------|
-| `token_hash` | HMAC-SHA256 hash (not exposed via API) |
-| `token_prefix` | First 8 chars of the random part, for display/identification |
-| `user` | Reference to the User (not exposed via API) |
-| `name` | User-given label |
-| `scope` | Token scope (currently: `admin` — full access) |
-| `kind` | Token type (currently: `api_key`) |
-| `created_at` | Creation timestamp |
-| `last_used_at` | Last authentication timestamp |
-| `user_agents` | List of User-Agent strings that used this token (capped at 20) |
-| `revoked_at` | Revocation timestamp (null if active) |
-| `expires_at` | Expiration timestamp (null if no expiration) |
+| `API_TOKEN_PREFIX` | `udata_` | Prefix for secret scanning tool detection. |
+| `API_TOKEN_SECRET` | *(empty — must be set)* | HMAC key for token hashing. The app refuses to start without it. |
 
 ## Migration
 
-The migration `2026-01-28-migrate-apikeys-to-api-tokens.py`:
+The migration `2026-01-28-migrate-apikeys-to-api-tokens.py` hashes each existing `User.apikey` with HMAC-SHA256 into the new collection, then removes the `apikey` field from all user documents.
 
-1. Hashes each existing `user.apikey` (JWS token) with HMAC-SHA256 (using `API_TOKEN_SECRET`)
-2. Creates a corresponding `api_token` document with `name="Migrated API key"`
-3. Removes the `apikey` field from all user documents
-
-The migration is idempotent (checks for existing hashes before inserting).
-
-**Important**: existing API keys continue to work after migration because the same plaintext sent in `X-API-KEY` will produce the same HMAC-SHA256 hash (as long as `API_TOKEN_SECRET` hasn't changed).
+The migration is idempotent (checks for existing hashes before inserting). Existing API keys continue to work after migration because the same plaintext produces the same HMAC hash.
 
 ## Future work
 
-### Restricted scopes (phase 2)
-
-The `scope` field currently defaults to `admin` (full access, matching user permissions). Planned additions:
-- `normal` scope: restricted to non-admin endpoints
-- Store the scope in `flask.g.token_scope` during authentication
-- Enforce in `_apply_secure`: admin routes require `scope="admin"` + user `is_admin`
-- Admins with a `normal`-scoped token should not bypass ownership checks
-
-### Refresh tokens (phase 2+)
-
-The `kind` field currently only has `api_key`. Planned:
-- `refresh` kind for short-lived JWT access tokens in the SPA
-- Refresh token flow: exchange refresh token for a new short-lived JWT
-
-### Bulk revocation
-
-- `DELETE /api/1/me/tokens/` (without id): revoke all tokens for current user
-- Admin endpoint `DELETE /api/1/users/<id>/tokens/`: revoke all tokens for a given user
-
-### Default expiration
-
-Configurable default expiration duration in settings, applied when no explicit `expires_at` is provided.
+- **Restricted scopes (phase 2)**: add `normal` scope with permission enforcement, so that admin-only endpoints require `scope="admin"` + `is_admin`
+- **Refresh tokens**: add `refresh` kind for short-lived JWT access tokens in the SPA
+- **Bulk revocation**: `DELETE /api/1/me/tokens/` (all my tokens), admin endpoint for revoking a user's tokens
+- **Default expiration**: configurable duration applied when no explicit `expires_at` is provided
+- **Token cleanup**: background job to purge revoked and/or expired tokens after a retention period (similar to GitLab's daily cleanup)
