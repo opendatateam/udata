@@ -187,6 +187,7 @@ class Defaults(object):
 
     # API Token settings
     API_TOKEN_PREFIX = "udata_"
+    API_TOKEN_SECRET = "change-me-in-production"
 
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"

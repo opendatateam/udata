@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import secrets
 from datetime import datetime
 
@@ -11,6 +12,11 @@ from udata.models import db
 TOKEN_BYTE_LENGTH = 48
 PREFIX_DISPLAY_LENGTH = 8
 MAX_USER_AGENTS = 20
+
+
+def _hash_token(plaintext):
+    key = current_app.config["API_TOKEN_SECRET"].encode()
+    return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
 
 
 @generate_fields()
@@ -77,7 +83,7 @@ class ApiToken(db.Document):
         prefix = current_app.config.get("API_TOKEN_PREFIX", "udata_")
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
         plaintext = f"{prefix}{raw}"
-        token_hash = hashlib.sha256(plaintext.encode()).hexdigest()
+        token_hash = _hash_token(plaintext)
         display_prefix = raw[:PREFIX_DISPLAY_LENGTH]
         token = cls(
             token_hash=token_hash,

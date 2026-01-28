@@ -1,12 +1,16 @@
 """
 Migrate existing User.apikey values to the new ApiToken collection.
-Each existing apikey is hashed with SHA-256 and stored in the new api_token table.
+Each existing apikey is hashed with HMAC-SHA256 (keyed on SECRET_KEY)
+and stored in the new api_token table.
 The old apikey field is then removed from all user documents.
 """
 
 import hashlib
+import hmac
 import logging
 from datetime import datetime
+
+from flask import current_app
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +29,8 @@ def migrate(db):
         if not apikey:
             continue
 
-        token_hash = hashlib.sha256(apikey.encode()).hexdigest()
+        key = current_app.config["API_TOKEN_SECRET"].encode()
+        token_hash = hmac.new(key, apikey.encode(), hashlib.sha256).hexdigest()
 
         if api_token_collection.find_one({"token_hash": token_hash}):
             skipped += 1
