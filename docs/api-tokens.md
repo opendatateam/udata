@@ -8,7 +8,7 @@ Tokens are stored as HMAC-SHA256 hashes in a dedicated `api_token` MongoDB colle
 
 ## Previous system
 
-The old system stored a single JWS (JSON Web Signature) token as a field (`apikey`) directly on the `User` document. This had several limitations:
+The old system generated a JWS (JSON Web Signature) token but never actually verified or decoded it — authentication was a simple string comparison against the `apikey` field stored in plaintext on the `User` document. The JWS format added no security value since it was treated as an opaque string.
 
 - **One key per user**: generating a new key invalidated the previous one, breaking any integration still using it.
 - **Plaintext stored in DB**: the token was stored as-is, so a database leak directly exposed all API keys.
@@ -27,9 +27,11 @@ A slow hash (bcrypt/argon2) is unnecessary here: tokens have 48 bytes of entropy
 
 `SECRET_KEY` is used by Flask for session signing and by Flask-Security for password reset tokens. If a token hash secret needs to be rotated (e.g. suspected leak), rotating `SECRET_KEY` would invalidate all sessions and pending password resets. A dedicated secret allows independent rotation.
 
-### `API_TOKEN_PREFIX`
+### `API_TOKEN_PREFIX` and display prefix
 
 A configurable prefix (default: `udata_`) is prepended to every generated token. This serves two purposes: secret scanning tools (GitHub, GitLeaks, etc.) can detect leaked tokens via pattern matching, and different prefixes per environment (e.g. `udata_prod_`, `udata_demo_`) let users identify which environment a token belongs to.
+
+Since the plaintext is never stored, we also save a `token_prefix`: the first 8 characters of the random part (after the global prefix). This lets users identify which token is which in the UI. The global prefix is not included in `token_prefix` because it's the same for all tokens of a given environment and wouldn't help distinguish them.
 
 ### Scope defaults to `admin`
 
