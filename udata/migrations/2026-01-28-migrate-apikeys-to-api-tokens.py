@@ -1,7 +1,7 @@
 """
 Migrate existing User.apikey values to the new ApiToken collection.
-Each existing apikey is hashed with HMAC-SHA256 (keyed on SECRET_KEY)
-and stored in the new api_token table.
+Each existing apikey is hashed with HMAC-SHA256 (keyed on API_TOKEN_SECRET)
+and stored in the new api_token collection.
 The old apikey field is then removed from all user documents.
 """
 
@@ -45,7 +45,7 @@ def migrate(db):
                 "user": user["_id"],
                 "name": "Migrated API key",
                 "scope": "normal",
-                "type": "api_key",
+                "kind": "api_key",
                 "created_at": datetime.utcnow(),
                 "last_used_at": None,
                 "user_agents": [],

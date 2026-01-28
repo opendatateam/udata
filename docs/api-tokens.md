@@ -30,7 +30,7 @@ HMAC-SHA256 is used instead of plain SHA-256 so that a database leak alone is no
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `API_TOKEN_PREFIX` | `udata_` | Prefix prepended to generated tokens. Useful for secret scanning tools (e.g., GitHub, GitLeaks) to identify leaked tokens. |
-| `API_TOKEN_SECRET` | `change-me-in-production` | HMAC key used to hash tokens before storage. Must be set to a unique, random value per environment. |
+| `API_TOKEN_SECRET` | *(empty – must be set)* | HMAC key used to hash tokens before storage. Must be set to a unique, random value per environment. The app will refuse to start if this is not configured. |
 
 ## API Endpoints
 
@@ -65,7 +65,7 @@ Response: 204 on success, 404 if the token doesn't exist or is already revoked.
 | `user` | Reference to the User (not exposed via API) |
 | `name` | User-given label |
 | `scope` | Token scope (currently: `normal`) |
-| `type` | Token type (currently: `api_key`) |
+| `kind` | Token type (currently: `api_key`) |
 | `created_at` | Creation timestamp |
 | `last_used_at` | Last authentication timestamp |
 | `user_agents` | List of User-Agent strings that used this token (capped at 20) |
@@ -96,8 +96,8 @@ The `scope` field currently only has the value `normal`. Planned additions:
 
 ### Refresh tokens (phase 2+)
 
-The `type` field currently only has `api_key`. Planned:
-- `refresh` type for short-lived JWT access tokens in the SPA
+The `kind` field currently only has `api_key`. Planned:
+- `refresh` kind for short-lived JWT access tokens in the SPA
 - Refresh token flow: exchange refresh token for a new short-lived JWT
 
 ### Bulk revocation

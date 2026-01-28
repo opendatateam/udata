@@ -37,7 +37,7 @@ class ApiToken(db.Document):
         readonly=True,
         description="Token scope",
     )
-    type = field(
+    kind = field(
         db.StringField(choices=["api_key"], default="api_key"),
         readonly=True,
         description="Token type",
@@ -98,7 +98,7 @@ class ApiToken(db.Document):
     @classmethod
     def authenticate(cls, plaintext_token):
         """Lookup a token by hashing the plaintext. Returns ApiToken or None."""
-        token_hash = hashlib.sha256(plaintext_token.encode()).hexdigest()
+        token_hash = _hash_token(plaintext_token)
         token = cls.objects(token_hash=token_hash, revoked_at=None).first()
         if token is None:
             return None
