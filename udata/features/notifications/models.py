@@ -2,6 +2,7 @@ from flask_restx.inputs import boolean
 from mongoengine import NULLIFY, Q
 
 from udata.api_fields import field, generate_fields
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.notifications import (
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
@@ -62,6 +63,7 @@ class Notification(Datetimed, db.Document):
                 MembershipRequestNotificationDetails,
                 TransferRequestNotificationDetails,
                 NewBadgeNotificationDetails,
+                DiscussionNotificationDetails,
             )
         ),
         generic=True,
