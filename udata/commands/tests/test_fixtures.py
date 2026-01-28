@@ -67,8 +67,8 @@ class FixturesTest(PytestOnlyAPITestCase):
             ]
         )
         PostFactory(name="Test Post", headline="A test post", owner=user, content="Some content")
-        SiteFactory(
-            id="test-site",
+        site = SiteFactory(
+            id=self.app.config["SITE_ID"],
             title="Test Site",
             datasets_page=page,
         )
@@ -143,7 +143,7 @@ class FixturesTest(PytestOnlyAPITestCase):
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        assert result_site.id == "test-site"
+        assert result_site.id == site.id
         assert result_site.datasets_page == page
 
     def test_import_fixtures_from_default_file(self):

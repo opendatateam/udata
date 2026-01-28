@@ -7,7 +7,6 @@ When "importing" the fixtures, massage them so they can be loaded properly.
 import json
 import logging
 import pathlib
-from importlib import resources
 
 import click
 import requests
@@ -60,7 +59,9 @@ SITE_URL = "/api/1/site"
 PAGE_URL = "/api/1/pages"
 
 
-DEFAULT_FIXTURE_FILE: str = str(resources.files("udata") / "fixtures" / "results.json")
+DEFAULT_FIXTURE_FILE: str = str(
+    pathlib.Path(__file__).resolve().parent.parent / "fixtures" / "results.json"
+)
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
 
@@ -434,8 +435,15 @@ def import_fixtures(source):
     for post_data in json_fixtures.get("posts", []):
         post_data = remove_unwanted_keys(post_data, "post")
         user = UserFactory()
-        content_as_page = None
-        if post_data.get("content_as_page"):
-            content_as_page = Page.objects(id=post_data.pop("content_as_page")).first()
+        content_as_page_id = post_data.pop("content_as_page", None)
+        content_as_page = (
+            Page.objects(id=content_as_page_id).first() if content_as_page_id else None
+        )
         if not Post.objects(id=post_data["id"]).first():
-            PostFactory(**post_data, owner=user, content_as_page=content_as_page)
+            PostFactory(
+                **post_data,
+                owner=user,
+                content_as_page=content_as_page,
+                datasets=[],
+                reuses=[],
+            )
