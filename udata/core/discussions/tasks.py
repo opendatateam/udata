@@ -50,11 +50,12 @@ def notify_new_discussion_comment(discussion_id, message=None):
         recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         mails.new_discussion_comment(discussion, message).send(recipients)
 
-        previous_notifications = Notification.objects.get(
+        previous_notifications = Notification.objects.filter(
             user=message.posted_by, details__discussion=discussion
         )
-        previous_notifications.handled_at = datetime.now(UTC)
-        previous_notifications.save()
+        for notification in previous_notifications:
+            notification.handled_at = datetime.now(UTC)
+            notification.save()
 
         for recipient in recipients:
             notification = Notification(
@@ -79,11 +80,12 @@ def notify_discussion_closed(discussion_id, message=None):
         recipients = list({u.id: u for u in recipients if u != discussion.closed_by}.values())
         mails.discussion_closed(discussion, message).send(recipients)
 
-        previous_notifications = Notification.objects.get(
-            user=message.posted_by, details__discussion=discussion
+        previous_notifications = Notification.objects.filter(
+            user=discussion.closed_by, details__discussion=discussion
         )
-        previous_notifications.handled_at = datetime.now(UTC)
-        previous_notifications.save()
+        for notification in previous_notifications:
+            notification.handled_at = datetime.now(UTC)
+            notification.save()
 
         for recipient in recipients:
             notification = Notification(
