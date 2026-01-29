@@ -219,6 +219,8 @@ GEOGRAPHICAL_FORMATS = frozenset(
         "mbtiles",
         "wms",
         "wfs",
+        "ogc:wms",
+        "ogc:wfs",
     }
 )
 DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
