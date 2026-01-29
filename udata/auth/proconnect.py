@@ -101,7 +101,7 @@ class ProconnectAuthAPI(API):
             response = current_app.extensions["security"].two_factor_plugins.tf_enter(
                 user=user,
                 remember_me=False,
-                primary_authn_via="password",  # TODO: what are other values?
+                primary_authn_via="password",
                 next_loc=homepage_url(flash="connected"),
             )
             if response:
