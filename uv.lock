@@ -2512,7 +2512,7 @@ requires-dist = [
     { name = "pymongo", specifier = ">=4.11.3,<5.0.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0,<3.0.0" },
     { name = "pytz" },
-    { name = "qrcode", specifier = ">=8.2" },
+    { name = "qrcode", specifier = ">=8.2,<9.0" },
     { name = "rdflib", specifier = ">=7.1.3,<8.0.0" },
     { name = "redis", specifier = ">=5.0.0,<8.0.0" },
     { name = "requests", specifier = ">=2.32.4,<3.0.0" },
