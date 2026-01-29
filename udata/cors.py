@@ -37,15 +37,18 @@ def is_allowed_cors_route():
     # Allow to keep clean CORS when `udata` and the frontend are on the same domain
     # (as it's the case in data.gouv with cdata/udata).
     if not current_app.config["SECURITY_SPA_ON_SAME_DOMAIN"] and (
-        path.startswith("/login")
-        or path.startswith("/logout")
-        or path.startswith("/reset")
-        or path.startswith("/register")
-        or path.startswith("/confirm")
-        or path.startswith("/change")
-        or path.startswith("/change-email")
+        path.startswith(current_app.config["SECURITY_LOGIN_URL"])
+        or path.startswith(current_app.config["SECURITY_LOGOUT_URL"])
+        or path.startswith(current_app.config["SECURITY_RESET_URL"])
+        or path.startswith(current_app.config["SECURITY_REGISTER_URL"])
+        or path.startswith(current_app.config["SECURITY_CONFIRM_URL"])
+        or path.startswith(current_app.config["SECURITY_CHANGE_URL"])
+        or path.startswith(current_app.config["SECURITY_CHANGE_EMAIL_URL"])
+        or path.startswith(current_app.config["SECURITY_GET_CSRF"])
+        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_SETUP_URL"])
+        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"])
+        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_RESCUE_URL"])
         or path.startswith("/oauth")
-        or path.startswith("/get-csrf")
     ):
         return True
 
