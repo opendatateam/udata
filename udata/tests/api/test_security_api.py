@@ -128,7 +128,6 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=False)
     def test_2fa_disabled_by_default(self):
-        """Test that 2FA is not required by default."""
         today = datetime.now(UTC)
         user = UserFactory(password="password123", confirmed_at=today)
 
@@ -146,7 +145,6 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=True)
     def test_2fa_required_by_default(self):
-        """Test that 2FA is not required by default."""
         today = datetime.now(UTC)
         user = UserFactory(password="password123", confirmed_at=today)
 
@@ -159,7 +157,6 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
         assert response.json["response"]["tf_state"] == "setup_from_login"
 
     def test_user_with_2fa_fields_need_to_validate_token(self):
-        """Test that user with 2FA fields can still login via session."""
         today = datetime.now(UTC)
         user = UserFactory(
             password="password123",
