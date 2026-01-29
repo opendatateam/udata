@@ -8,7 +8,8 @@ from flask_restx.inputs import boolean
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.access_type.constants import AccessType
-from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
+from udata.core.organization.constants import PRODUCER_TYPES
+from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic, TopicElement
 from udata.models import Dataservice, Organization, User
 from udata.search import (
@@ -21,8 +22,8 @@ from udata.search import (
 )
 from udata.utils import to_iso_datetime
 
-# Maximum size in bytes for fetched documentation content
-MAX_DOCUMENTATION_SIZE = 1000 * 1024  # 1 MB
+# Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
+MAX_DOCUMENTATION_SIZE = 100 * 1024
 
 __all__ = ("DataserviceSearch",)
 

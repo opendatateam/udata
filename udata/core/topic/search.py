@@ -1,6 +1,7 @@
 import datetime
 
-from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
+from udata.core.organization.constants import PRODUCER_TYPES
+from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic
 from udata.models import Organization, User
 from udata.search import (

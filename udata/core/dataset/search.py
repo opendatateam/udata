@@ -2,7 +2,8 @@ import datetime
 
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.dataset.constants import FormatFamily, get_format_family
-from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
+from udata.core.organization.constants import PRODUCER_TYPES
+from udata.core.organization.helpers import get_producer_type
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
 from udata.core.topic.models import TopicElement

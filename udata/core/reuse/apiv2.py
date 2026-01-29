@@ -8,7 +8,9 @@ from .search import ReuseSearch
 apiv2.inherit("ReusePermissions", reuse_permissions_fields)
 apiv2.inherit("ReusePage", Reuse.__page_fields__)
 apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
-reuse_search_page_fields = apiv2.model("ReuseSearchPage", fields.search_pager(Reuse.__read_fields__))
+reuse_search_page_fields = apiv2.model(
+    "ReuseSearchPage", fields.search_pager(Reuse.__read_fields__)
+)
 
 ns = apiv2.namespace("reuses", "Reuse related operations")
 
