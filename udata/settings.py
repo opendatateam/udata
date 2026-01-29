@@ -137,7 +137,7 @@ class Defaults(object):
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
     # Two-Factor Authentication settings
-    SECURITY_TWO_FACTOR = True
+    SECURITY_TWO_FACTOR = False
     SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
@@ -678,6 +678,7 @@ class Testing(object):
     SECURITY_EMAIL_VALIDATOR_ARGS = {
         "check_deliverability": False
     }  # Disables deliverability for email domain name
+    SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
     SEARCH_SERVICE_API_URL = None
