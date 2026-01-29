@@ -3,7 +3,6 @@ import datetime
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic
-from udata.models import Organization, User
 from udata.search import (
     BoolFilter,
     Filter,
@@ -64,18 +63,6 @@ class TopicSearch(ModelSearchAdapter):
         """
         Serialize a Topic into a flat document suitable for the search-service.
         """
-        organization_id = None
-        organization_name = None
-        org = None
-        owner = None
-
-        if topic.organization:
-            org = Organization.objects(id=topic.organization.id).first()
-            organization_id = str(org.id)
-            organization_name = org.name
-        elif topic.owner:
-            owner = User.objects(id=topic.owner.id).first()
-
         return {
             "id": str(topic.id),
             "name": topic.name,
@@ -90,7 +77,7 @@ class TopicSearch(ModelSearchAdapter):
             if hasattr(topic, "last_modified")
             and isinstance(topic.last_modified, (datetime.datetime, datetime.date))
             else None,
-            "organization": organization_id,
-            "organization_name": organization_name,
-            "producer_type": get_producer_type(org, owner),
+            "organization": str(topic.organization.id) if topic.organization else None,
+            "organization_name": topic.organization.name if topic.organization else None,
+            "producer_type": get_producer_type(topic),
         }

@@ -95,24 +95,19 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def serialize(cls, dataset):
         organization = None
-        owner = None
-        org = None
 
         topic_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
         )
 
         if dataset.organization:
-            org = Organization.objects(id=dataset.organization.id).first()
             organization = {
-                "id": str(org.id),
-                "name": org.name,
-                "public_service": 1 if org.public_service else 0,
-                "followers": org.metrics.get("followers", 0),
-                "badges": [badge.kind for badge in org.badges],
+                "id": str(dataset.organization.id),
+                "name": dataset.organization.name,
+                "public_service": 1 if dataset.organization.public_service else 0,
+                "followers": dataset.organization.metrics.get("followers", 0),
+                "badges": [badge.kind for badge in dataset.organization.badges],
             }
-        elif dataset.owner:
-            owner = User.objects(id=dataset.owner.id).first()
 
         document = {
             "id": str(dataset.id),
@@ -136,14 +131,14 @@ class DatasetSearch(ModelSearchAdapter):
                 for res in dataset.resources[:MAX_NUMBER_OF_RESOURCES_TO_INDEX]
             ],
             "organization": organization,
-            "organization_name": org.name if org else None,
-            "owner": str(owner.id) if owner else None,
+            "organization_name": dataset.organization.name if dataset.organization else None,
+            "owner": str(dataset.owner.id) if dataset.owner else None,
             "format": [r.format.lower() for r in dataset.resources if r.format],
             "schema": [r.schema.name for r in dataset.resources if r.schema],
             "topics": [str(tid) for tid in topic_ids],
             "access_type": dataset.access_type,
             "format_family": cls._compute_format_family(dataset),
-            "producer_type": get_producer_type(org, owner),
+            "producer_type": get_producer_type(dataset),
         }
         extras = {}
         for key, value in dataset.extras.items():

@@ -11,7 +11,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic, TopicElement
-from udata.models import Dataservice, Organization, User
+from udata.models import Dataservice, Organization
 from udata.search import (
     BoolFilter,
     Filter,
@@ -144,23 +144,18 @@ class DataserviceSearch(ModelSearchAdapter):
     @classmethod
     def serialize(cls, dataservice: Dataservice) -> dict:
         organization = None
-        owner = None
-        org = None
 
         topic_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
         )
 
         if dataservice.organization:
-            org = Organization.objects(id=dataservice.organization.id).first()
             organization = {
-                "id": str(org.id),
-                "name": org.name,
-                "public_service": 1 if org.public_service else 0,
-                "followers": org.metrics.get("followers", 0),
+                "id": str(dataservice.organization.id),
+                "name": dataservice.organization.name,
+                "public_service": 1 if dataservice.organization.public_service else 0,
+                "followers": dataservice.organization.metrics.get("followers", 0),
             }
-        elif dataservice.owner:
-            owner = User.objects(id=dataservice.owner.id).first()
         extras = {}
         for key, value in dataservice.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
@@ -180,7 +175,10 @@ class DataserviceSearch(ModelSearchAdapter):
             else None,
             "featured": 1 if dataservice.featured else 0,
             "organization": organization,
-            "owner": str(owner.id) if owner else None,
+            "organization_name": dataservice.organization.name
+            if dataservice.organization
+            else None,
+            "owner": str(dataservice.owner.id) if dataservice.owner else None,
             "tags": dataservice.tags,
             "topics": [str(tid) for tid in topic_ids],
             "extras": extras,
@@ -188,6 +186,6 @@ class DataserviceSearch(ModelSearchAdapter):
             "is_restricted": dataservice.access_type == AccessType.RESTRICTED,
             "views": dataservice.metrics.get("views", 0),
             "access_type": dataservice.access_type,
-            "producer_type": get_producer_type(org, owner),
+            "producer_type": get_producer_type(dataservice),
             "documentation_content": documentation_content,
         }

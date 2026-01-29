@@ -63,24 +63,19 @@ class ReuseSearch(ModelSearchAdapter):
     @classmethod
     def serialize(cls, reuse: Reuse) -> dict:
         organization = None
-        owner = None
-        org = None
 
         topic_object_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=reuse) if te.topic)
         )
 
         if reuse.organization:
-            org = Organization.objects(id=reuse.organization.id).first()
             organization = {
-                "id": str(org.id),
-                "name": org.name,
-                "public_service": 1 if org.public_service else 0,
-                "followers": org.metrics.get("followers", 0),
-                "badges": [badge.kind for badge in org.badges],
+                "id": str(reuse.organization.id),
+                "name": reuse.organization.name,
+                "public_service": 1 if reuse.organization.public_service else 0,
+                "followers": reuse.organization.metrics.get("followers", 0),
+                "badges": [badge.kind for badge in reuse.organization.badges],
             }
-        elif reuse.owner:
-            owner = User.objects(id=reuse.owner.id).first()
 
         extras = {}
         for key, value in reuse.extras.items():
@@ -98,7 +93,7 @@ class ReuseSearch(ModelSearchAdapter):
             "datasets": reuse.metrics.get("datasets", 0),
             "featured": 1 if reuse.featured else 0,
             "organization": organization,
-            "owner": str(owner.id) if owner else None,
+            "owner": str(reuse.owner.id) if reuse.owner else None,
             "type": reuse.type,
             "topic": reuse.topic,  # Metadata topic (health, transport, etc.)
             "topic_object": [
@@ -107,5 +102,5 @@ class ReuseSearch(ModelSearchAdapter):
             "tags": reuse.tags,
             "badges": [badge.kind for badge in reuse.badges],
             "extras": extras,
-            "producer_type": get_producer_type(org, owner),
+            "producer_type": get_producer_type(reuse),
         }
