@@ -99,7 +99,8 @@ class Defaults(object):
     SECURITY_CONFIRM_URL = "/confirm/"
     SECURITY_CHANGE_URL = "/change/"
     SECURITY_RESET_URL = "/reset/"
-    SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+    SECURITY_CHANGE_EMAIL_URL = "/change-email"
+    SECURITY_GET_CSRF = "/get-csrf"
 
     # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
     # We do not define all the URLs requested in the documentation because most of the time we do JSON requests in cdata

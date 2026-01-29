@@ -211,8 +211,10 @@ def create_security_blueprint(app, state, import_name):
         "/confirm-change-email/<token>", methods=["GET", "POST"], endpoint="confirm_change_email"
     )(confirm_change_email)
 
-    bp.route("/change-email", methods=["GET", "POST"], endpoint="change_email")(change_email)
-    bp.route("/get-csrf", methods=["GET"], endpoint="get_csrf")(get_csrf)
+    bp.route(
+        app.config["SECURITY_CHANGE_EMAIL_URL"], methods=["GET", "POST"], endpoint="change_email"
+    )(change_email)
+    bp.route(app.config["SECURITY_GET_CSRF"], methods=["GET"], endpoint="get_csrf")(get_csrf)
 
     if state.two_factor:
         bp.route(
