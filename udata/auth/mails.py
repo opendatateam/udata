@@ -148,12 +148,12 @@ def change_notice(**kwargs) -> MailMessage:
     )
 
 
-def two_factor_rescue(**kwargs) -> MailMessage:
+def two_factor_rescue(user, **kwargs) -> MailMessage:
     from udata.i18n import lazy_gettext as _
 
     return MailMessage(
         subject=_("User can't access mail account"),
         paragraphs=[
-            _("%(email)s can not access mail account", email=kwargs.get("user").email),
+            _("%(email)s can not access mail account", email=user.email),
         ],
     )
