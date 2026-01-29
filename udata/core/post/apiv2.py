@@ -25,7 +25,7 @@ apiv2.inherit("ReuseReference", Reuse.__ref_fields__)
 apiv2.inherit("PagePermissions", page_permissions_fields)
 apiv2.inherit("Page (read)", Page.__read_fields__)
 apiv2.inherit("Post (read)", Post.__read_fields__)
-post_page_fields = apiv2.model("PostPage", fields.pager(Post.__read_fields__))
+post_page_fields = apiv2.model("PostPage", fields.search_pager(Post.__read_fields__))
 
 
 @ns.route("/search/", endpoint="post_search")

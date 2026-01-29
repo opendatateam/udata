@@ -26,7 +26,7 @@ apiv2.inherit("DiscussionMessagePermissions", message_permissions_fields)
 apiv2.inherit("DiscussionMessage", message_fields)
 apiv2.inherit("DiscussionPermissions", discussion_permissions_fields)
 apiv2.inherit("Discussion", discussion_fields)
-discussion_page_fields = apiv2.model("DiscussionPage", fields.pager(discussion_fields))
+discussion_page_fields = apiv2.model("DiscussionPage", fields.search_pager(discussion_fields))
 
 
 @ns.route("/search/", endpoint="discussion_search")

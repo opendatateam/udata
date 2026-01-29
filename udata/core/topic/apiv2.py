@@ -13,6 +13,7 @@ from udata.core.topic.api_fields import (
     topic_fields,
     topic_input_fields,
     topic_page_fields,
+    topic_search_page_fields,
 )
 from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
@@ -43,7 +44,7 @@ class TopicSearchAPI(API):
 
     @apiv2.doc("search_topics")
     @apiv2.expect(search_parser)
-    @apiv2.marshal_with(topic_page_fields)
+    @apiv2.marshal_with(topic_search_page_fields)
     def get(self):
         """List or search all topics"""
         args = search_parser.parse_args()

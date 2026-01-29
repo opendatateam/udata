@@ -63,8 +63,6 @@ class TopicSearch(ModelSearchAdapter):
         """
         Serialize a Topic into a flat document suitable for the search-service.
         """
-        from udata.core.topic.models import TopicElement
-
         organization_id = None
         organization_name = None
         org = None
@@ -76,12 +74,6 @@ class TopicSearch(ModelSearchAdapter):
             organization_name = org.name
         elif topic.owner:
             owner = User.objects(id=topic.owner.id).first()
-
-        nb_datasets = TopicElement.objects(topic=topic, __raw__={"element._cls": "Dataset"}).count()
-        nb_reuses = TopicElement.objects(topic=topic, __raw__={"element._cls": "Reuse"}).count()
-        nb_dataservices = TopicElement.objects(
-            topic=topic, __raw__={"element._cls": "Dataservice"}
-        ).count()
 
         return {
             "id": str(topic.id),
@@ -100,7 +92,4 @@ class TopicSearch(ModelSearchAdapter):
             "organization": organization_id,
             "organization_name": organization_name,
             "producer_type": get_producer_type(org, owner),
-            "nb_datasets": nb_datasets,
-            "nb_reuses": nb_reuses,
-            "nb_dataservices": nb_dataservices,
         }
