@@ -202,33 +202,12 @@ class FormatFamily(StrEnum):
     OTHER = auto()
 
 
-# Mapping of file formats (lowercase) to their family
-TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
-MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
-GEOGRAPHICAL_FORMATS = frozenset(
-    {
-        "shp",
-        "kml",
-        "kmz",
-        "gpx",
-        "shx",
-        "ovr",
-        "geojson",
-        "gpkg",
-        "pmtiles",
-        "mbtiles",
-        "wms",
-        "wfs",
-        "ogc:wms",
-        "ogc:wfs",
-    }
-)
-DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
-
-
 def get_format_family(format_str: str | None) -> FormatFamily:
     """
     Determine the format family for a given format string.
+
+    Format lists are configurable via settings (TABULAR_FORMATS, MACHINE_READABLE_FORMATS,
+    GEOGRAPHICAL_FORMATS, DOCUMENTS_FORMATS).
 
     Args:
         format_str: The format string (e.g., "csv", "JSON", "PDF")
@@ -236,18 +215,20 @@ def get_format_family(format_str: str | None) -> FormatFamily:
     Returns:
         The corresponding FormatFamily enum value
     """
+    from flask import current_app
+
     if not format_str:
         return FormatFamily.OTHER
 
     fmt = format_str.lower().strip()
 
-    if fmt in TABULAR_FORMATS:
+    if fmt in current_app.config["TABULAR_FORMATS"]:
         return FormatFamily.TABULAR
-    elif fmt in MACHINE_READABLE_FORMATS:
+    elif fmt in current_app.config["MACHINE_READABLE_FORMATS"]:
         return FormatFamily.MACHINE_READABLE
-    elif fmt in GEOGRAPHICAL_FORMATS:
+    elif fmt in current_app.config["GEOGRAPHICAL_FORMATS"]:
         return FormatFamily.GEOGRAPHICAL
-    elif fmt in DOCUMENTS_FORMATS:
+    elif fmt in current_app.config["DOCUMENTS_FORMATS"]:
         return FormatFamily.DOCUMENTS
     else:
         return FormatFamily.OTHER

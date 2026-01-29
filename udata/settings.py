@@ -633,6 +633,30 @@ class Defaults(object):
     ###########################################################################
     METRICS_API = None
 
+    # Format families for search filtering
+    ###########################################################################
+    TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
+    MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
+    GEOGRAPHICAL_FORMATS = frozenset(
+        {
+            "shp",
+            "kml",
+            "kmz",
+            "gpx",
+            "shx",
+            "ovr",
+            "geojson",
+            "gpkg",
+            "pmtiles",
+            "mbtiles",
+            "wms",
+            "wfs",
+            "ogc:wms",
+            "ogc:wfs",
+        }
+    )
+    DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
+
 
 class Testing(object):
     """Sane values for testing. Should be applied as override"""
