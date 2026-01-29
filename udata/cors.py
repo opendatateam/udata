@@ -48,6 +48,7 @@ def is_allowed_cors_route():
         or path.startswith("/get-csrf")
         or path.startswith("/tf-setup")
         or path.startswith("/tf-validate")
+        or path.startswith("/tf-rescue")
     ):
         return True
 
