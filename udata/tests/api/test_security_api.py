@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from flask import url_for
@@ -129,7 +129,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=False)
     def test_2fa_disabled_by_default(self):
         """Test that 2FA is not required by default."""
-        today = datetime.utcnow()
+        today = datetime.now(UTC)
         user = UserFactory(password="password123", confirmed_at=today)
 
         # Should be able to login without 2FA
@@ -147,7 +147,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=True)
     def test_2fa_required_by_default(self):
         """Test that 2FA is not required by default."""
-        today = datetime.utcnow()
+        today = datetime.now(UTC)
         user = UserFactory(password="password123", confirmed_at=today)
 
         # Should require 2FA setup
@@ -160,7 +160,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
 
     def test_user_with_2fa_fields_need_to_validate_token(self):
         """Test that user with 2FA fields can still login via session."""
-        today = datetime.utcnow()
+        today = datetime.now(UTC)
         user = UserFactory(
             password="password123",
             confirmed_at=today,
