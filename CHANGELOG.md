@@ -1,5 +1,13 @@
 # Changelog
 
+## 14.10.0 (2026-01-29)
+
+- chore: remove docker compose testing ([#3633](https://github.com/opendatateam/udata/pull/3633))
+- feat(2fa): add two factor authentification ([#3620](https://github.com/opendatateam/udata/pull/3620))
+- feat: search improvements ([#3583](https://github.com/opendatateam/udata/pull/3583))
+- fix: remove reindex topic ([#3639](https://github.com/opendatateam/udata/pull/3639))
+
+
 ## 14.9.0 (2026-01-27)
 
 - docs: fix documentation for outdated instructions and typos ([#3634](https://github.com/opendatateam/udata/pull/3634))
