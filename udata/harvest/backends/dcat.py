@@ -25,9 +25,8 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
-from udata.utils import to_bool
 
-from .base import BaseBackend, HarvestExtraConfig
+from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
 log = logging.getLogger(__name__)
 
@@ -357,7 +356,7 @@ class BaseCswDcatBackend(DcatBackend):
 
     @property
     @abstractmethod
-    def output_schema(self):
+    def output_schema(self) -> str:
         """
         Return the CSW `outputSchema` property.
         """
@@ -452,23 +451,20 @@ class CswDcatBackend(BaseCswDcatBackend):
     name = "csw-dcat"
     display_name = "CSW-DCAT"
 
-    extra_configs = (
-        *BaseCswDcatBackend.extra_configs,
-        HarvestExtraConfig(
+    features = (
+        *BaseCswDcatBackend.features,
+        HarvestFeature(
+            "geodcatap",
             _("GeoDCAT-AP"),
-            "enable_geodcat",
-            str,
             _("Request GeoDCAT-AP to the CSW server (must be supported by the server)."),
+            default=False,
         ),
     )
 
     @property
     @override
-    def output_schema(self):
-        if to_bool(self.get_extra_config_value("enable_geodcat")):
-            return str(GEODCAT)
-        else:
-            return str(DCAT)
+    def output_schema(self) -> str:
+        return GEODCAT if self.has_feature("geodcatap") else DCAT
 
     @override
     def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
@@ -495,7 +491,7 @@ class CswIso19139DcatBackend(BaseCswDcatBackend):
 
     @property
     @override
-    def output_schema(self):
+    def output_schema(self) -> str:
         return "http://www.isotc211.org/2005/gmd"
 
     @override

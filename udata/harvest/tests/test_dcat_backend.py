@@ -1058,7 +1058,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         source = HarvestSourceFactory(
             backend="csw-dcat",
             url=url,
-            config={"extra_configs": [{"key": "enable_geodcat", "value": "true"}]},
+            config={"features": {"geodcatap": True}},
         )
 
         backend = get_backend(source.backend)(source)
