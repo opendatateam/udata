@@ -175,6 +175,19 @@ class Discussion(SpamMixin, Linkable, db.Document):
 
         return message
 
+    def owner_recipients(self, sender=None):
+        """Return the list of users that should be notified about this discussion."""
+        recipients = {m.posted_by.id: m.posted_by for m in self.discussion}
+        if getattr(self.subject, "organization", None):
+            for member in self.subject.organization.members:
+                recipients[member.user.id] = member.user
+        elif getattr(self.subject, "owner", None):
+            recipients[self.subject.owner.id] = self.subject.owner
+
+        if sender:
+            recipients.pop(sender.id, None)
+        return list(recipients.values())
+
     @spam_protected()
     def signal_new(self):
         on_new_discussion.send(self)
