@@ -5,6 +5,9 @@ parameters:
   python-version:
     type: string
     default: "3.11"
+  udata-search-service-package:
+    type: string
+    default: "udata-search-service"
   publish-branch:
     type: string
     default: "main"
@@ -53,7 +56,7 @@ jobs:
           name: Install Python dependencies
           command: |
             uv sync --frozen
-            uv pip install udata-search-service
+            uv pip install << pipeline.parameters.udata-search-service-package >>
       - save_cache:
           key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:

@@ -120,3 +120,12 @@ def pager(page_fields):
         "previous_page": PreviousPageUrl(description="The previous page URL if exists"),
     }
     return pager_fields
+
+
+def search_pager(page_fields):
+    """Pager with facets for search endpoints."""
+    pager_fields = pager(page_fields)
+    pager_fields["facets"] = Raw(
+        description="Facets/aggregations for filtering", attribute="facets"
+    )
+    return pager_fields
