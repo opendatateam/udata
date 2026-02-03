@@ -80,10 +80,6 @@ $ inv serve         # Start the development server
 
 $ inv work          # Start a worker process
 $ inv beat          # Start a scheduler process
-
-$ inv assets-watch  # Continuously watch and build assets
-$ inv widgets-watch # Continuously watch and build widgets
-$ inv oembed-watch # Continuously watch and build oembed
 ```
 
 ## Common tasks
@@ -95,7 +91,7 @@ You can get the documentation related to all tasks with:
 $ inv -l
 ```
 
-It might be required to update your Python and JavaScript dependencies to ensure compatibility.
+It might be required to update your Python dependencies to ensure compatibility.
 A task is provided to automate it:
 
 ```shell

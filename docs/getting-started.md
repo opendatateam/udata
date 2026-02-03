@@ -1,11 +1,11 @@
 # udata setup instructions
 
-This guide is about starting a udata and udata-front environment for local development.
+This guide is about starting a udata and cdata (formerly udata-front) environment for local development.
 
 We’ll use the following repositories:
 
 - [https://github.com/opendatateam/udata](https://github.com/opendatateam/udata)
-- [https://github.com/datagouv/udata-front](https://github.com/datagouv/udata-front)
+- [https://github.com/datagouv/cdata](https://github.com/datagouv/cdata)
 
 # Check the system requirements
 
@@ -29,7 +29,7 @@ $UDATA_WORKSPACE
 │   ├── ...
 │   ├── pyproject.toml
 │	└── udata.cfg
-└── udata-front
+└── cdata
     └── ...
 ```
 
@@ -179,9 +179,9 @@ inv work
 !!! info
     You now have a working udata instance but no frontend for the platform.
 
-# Install udata-front
+# Install cdata (formerly udata-front)
 
-With a valid udata environment, you can start the udata-front installation:
+With a valid udata environment, you can start the cdata installation:
 
 ```shell
 $UDATA_WORKSPACE
@@ -190,15 +190,15 @@ $UDATA_WORKSPACE
 │   ├── ...
 │   ├── pyproject.toml
 │	└── udata.cfg
-└── udata-front
+└── cdata
     └── ...
 ```
 
-First, clone udata-front in your workspace.
+First, clone cdata in your workspace.
 
 ```shell
 cd $UDATA_WORKSPACE
-git clone git@github.com:datagouv/udata-front.git
+git clone git@github.com:datagouv/cdata.git
 ```
 
 Modify your `udata.cfg` with the following lines.
@@ -207,7 +207,7 @@ Modify your `udata.cfg` with the following lines.
 THEME = 'gouvfr'
 ```
 
-udata-front uses the same virtualenv as udata. You can activate it from your udata-front directory if it’s not the case anymore.
+cdata uses the same virtualenv as udata. You can activate it from your cdata directory if it’s not the case anymore.
 
 ```shell
 cd $UDATA_WORKSPACE/udata
@@ -216,20 +216,20 @@ source .venv/bin/activate
 
 Then, you can install the requirements with:
 ```shell
-cd udata-front
+cd cdata
 uv sync
 ```
 
 ...or, with pip:
 ```shell
-cd udata-front
+cd cdata
 pip install --group dev -e"
 ```
 
-The last thing to do is to install udata-front NPM packages.
+The last thing to do is to install cdata NPM packages.
 
 !!! info
-    udata and udata-front use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
+    udata and cdata use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
 
 ```shell
 nvm install
@@ -239,12 +239,9 @@ npm install
 ```
 
 Once it's done, you should be able to run the build commands for JS and CSS.
+Check the cdata repository documentation for the specific build commands.
 
-```shell
-inv assets-build
-```
-
-## Start udata with udata-front
+## Start udata with cdata
 
 To start udata, the inv command is the same.
 
@@ -255,11 +252,7 @@ inv serve
 
 You can now visit `dev.local:7000/` in your browser and start playing with your udata instance.
 
-You can use parcel to watch for file changes in udata or udata-front directory with
-
-```shell
-inv assets-watch
-```
+For watching and building frontend assets, check the cdata repository documentation for the specific commands.
 
 !!! note "Tell us what you think"
     You are always welcome to tell us about your experience _installing udata_.

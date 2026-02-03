@@ -88,7 +88,7 @@ class OrganizationModelTest(DBTestCase):
 
 
 class OrganizationBadgeTest(DBTestCase):
-    # Model badges can be extended in plugins, for example in udata-front
+    # Model badges can be extended in plugins, for example in cdata (formerly udata-front)
     # for french only badges.
     Organization.__badges__["new"] = "new"
 
