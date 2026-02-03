@@ -1,6 +1,6 @@
 # Adding translations
 
-There are translatable strings from both JS an Python.
+There are translatable strings from Python in udata.
 
 We use [Crowdin][crowdin] for translations on the project.
 First, you have to create an account.
@@ -14,12 +14,12 @@ After that you'll be able to reach the [udata crowdin page][crowdin-udata] and i
 
 ## Existing languages
 
-The command `inv i18n` extract all these strings locally.
+The command `inv i18n` extracts all these strings locally.
 Pushing the changes on any branch will automatically update translatable strings on Crowdin.
 
-Crowdin will submit pull requests on github each time translations are updated.
+Crowdin will submit pull requests on GitHub each time translations are updated.
 
-When pulling new translation in .po files, you should recompile translations with `inv i18nc` to generate .mo files.
+When pulling new translations in .po files, you should recompile translations with `inv i18nc` to generate .mo files.
 
 ## Proposing a new language
 

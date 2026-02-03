@@ -1,11 +1,11 @@
 # udata setup instructions
 
-This guide is about starting a udata and cdata (formerly udata-front) environment for local development.
+This guide is about starting a udata backend and [cdata][] (formerly udata-front) frontend environment for local development.
 
 We’ll use the following repositories:
 
-- [https://github.com/opendatateam/udata](https://github.com/opendatateam/udata)
-- [https://github.com/datagouv/cdata](https://github.com/datagouv/cdata)
+- [udata][] - The backend API and core platform
+- [cdata][] - The frontend repository
 
 # Check the system requirements
 
@@ -35,7 +35,7 @@ $UDATA_WORKSPACE
 
 ## Get udata
 
-Make a new directory. You can name it as you like :
+Make a new directory. You can name it as you like:
 
 ```shell
 mkdir udata-workspace
@@ -43,7 +43,7 @@ cd udata-workspace
 export UDATA_WORKSPACE=`pwd`  # we'll use UDATA_WORKSPACE env in the instructions
 ```
 
-In this new directory, clone udata :
+In this new directory, clone udata:
 
 ```shell
 git clone git@github.com:opendatateam/udata.git
@@ -75,14 +75,14 @@ source .venv/bin/activate
 pip install --group dev -e .
 ```
 
-You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
+You can find [common errors and workarounds for macOS on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
 !!! info
     With `uv`, the virtual environment is managed automatically. With `pip`, you need to activate the virtualenv manually: `source .venv/bin/activate`.
 
 ## Configure udata
 
-udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.
+udata uses a config file called `udata.cfg` and a custom directory as a base for its filesystem, we’ll call it `fs`. You can put them as shown below.
 
 ```shell
 $UDATA_WORKSPACE
@@ -113,7 +113,7 @@ FS_ROOT = 'fs'
 SESSION_COOKIE_SECURE = False
 ```
 
-This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
+This defines `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
 
 ```shell
 127.0.0.1       dev.local
@@ -152,7 +152,7 @@ inv serve
     inv serve --port 7001
     ```
 
-Now, you can use your udata api !
+Now, you can use your udata API!
 
 ```shell
 curl http://dev.local:7000/api/1/datasets/
@@ -161,7 +161,7 @@ curl http://dev.local:7000/api/1/datasets/
 You can see API endpoints by going to [http://dev.local:7000/api/1/](http://dev.local:7000/api/1/) in
 your browser.
 
-Workers are required for tasks to execute (search indexation, etc.).
+Workers are required to execute tasks (search indexation, etc.).
 
 With `uv`:
 ```shell
@@ -179,7 +179,7 @@ inv work
 !!! info
     You now have a working udata instance but no frontend for the platform.
 
-# Install cdata (formerly udata-front)
+# Install cdata frontend (formerly udata-front)
 
 With a valid udata environment, you can start the cdata installation:
 
@@ -223,13 +223,13 @@ uv sync
 ...or, with pip:
 ```shell
 cd cdata
-pip install --group dev -e"
+pip install --group dev -e .
 ```
 
-The last thing to do is to install cdata packages.
+The last thing to do is to install the frontend [cdata][] packages using [pnpm][].
 
 !!! info
-    udata and cdata use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
+    cdata uses Node.js, so make sure you have the correct Node.js version installed. Don't forget to run `nvm use` when switching to the cdata directory.
 
 ```shell
 nvm install
@@ -238,8 +238,8 @@ nvm use
 pnpm install
 ```
 
-Once it's done, you should be able to run the build commands for JS and CSS.
-Check the cdata repository documentation for the specific build commands.
+Once it's done, you should be able to run the build commands for JavaScript and CSS in cdata.
+Check the [cdata repository][cdata] documentation for the specific build commands.
 
 ## Start udata with cdata
 
@@ -252,7 +252,7 @@ inv serve
 
 You can now visit `dev.local:7000/` in your browser and start playing with your udata instance.
 
-For watching and building frontend assets, check the cdata repository documentation for the specific commands.
+For watching and building frontend assets, check the [cdata repository][cdata] documentation for the specific commands.
 
 !!! note "Tell us what you think"
     You are always welcome to tell us about your experience _installing udata_.
@@ -272,7 +272,10 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
+[cdata]: https://github.com/datagouv/cdata
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
+[pnpm]: https://pnpm.io/
+[udata]: https://github.com/opendatateam/udata
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
 [udata-fixtures]: https://github.com/opendatateam/udata-fixtures
