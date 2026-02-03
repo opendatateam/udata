@@ -226,7 +226,7 @@ cd cdata
 pip install --group dev -e"
 ```
 
-The last thing to do is to install cdata NPM packages.
+The last thing to do is to install cdata packages.
 
 !!! info
     udata and cdata use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
@@ -235,7 +235,7 @@ The last thing to do is to install cdata NPM packages.
 nvm install
 nvm use
 
-npm install
+pnpm install
 ```
 
 Once it's done, you should be able to run the build commands for JS and CSS.
