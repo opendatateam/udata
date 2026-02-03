@@ -207,31 +207,13 @@ Modify your `udata.cfg` with the following lines.
 THEME = 'gouvfr'
 ```
 
-cdata uses the same virtualenv as udata. You can activate it from your cdata directory if it’s not the case anymore.
-
-```shell
-cd $UDATA_WORKSPACE/udata
-source .venv/bin/activate
-```
-
-Then, you can install the requirements with:
-```shell
-cd cdata
-uv sync
-```
-
-...or, with pip:
-```shell
-cd cdata
-pip install --group dev -e .
-```
-
 The last thing to do is to install the frontend [cdata][] packages using [pnpm][].
 
 !!! info
     cdata uses Node.js, so make sure you have the correct Node.js version installed. Don't forget to run `nvm use` when switching to the cdata directory.
 
 ```shell
+cd cdata
 nvm install
 nvm use
 
