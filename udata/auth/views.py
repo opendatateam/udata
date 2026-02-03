@@ -19,6 +19,9 @@ from flask_security.views import (
     send_confirmation,
     send_login,
     token_login,
+    two_factor_rescue,
+    two_factor_setup,
+    two_factor_token_validation,
 )
 from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
@@ -57,11 +60,15 @@ def confirm_change_email_token_status(token):
         token, "confirm", get_within_delta("CONFIRM_EMAIL_WITHIN")
     )
     new_email = None
+    user = None
 
     if not invalid and token_data:
-        user, token_email_hash, new_email = token_data
-        user = _datastore.find_user(fs_uniquifier=user)
-        invalid = not verify_hash(token_email_hash, user.email)
+        user_uniquifier, token_email_hash, new_email = token_data
+        user = _datastore.find_user(fs_uniquifier=user_uniquifier)
+        if user is None:
+            invalid = True
+        else:
+            invalid = not verify_hash(token_email_hash, user.email)
 
     return expired, invalid, user, new_email
 
@@ -204,8 +211,27 @@ def create_security_blueprint(app, state, import_name):
         "/confirm-change-email/<token>", methods=["GET", "POST"], endpoint="confirm_change_email"
     )(confirm_change_email)
 
-    bp.route("/change-email", methods=["GET", "POST"], endpoint="change_email")(change_email)
-    bp.route("/get-csrf", methods=["GET"], endpoint="get_csrf")(get_csrf)
+    bp.route(
+        app.config["SECURITY_CHANGE_EMAIL_URL"], methods=["GET", "POST"], endpoint="change_email"
+    )(change_email)
+    bp.route(app.config["SECURITY_GET_CSRF"], methods=["GET"], endpoint="get_csrf")(get_csrf)
+
+    if state.two_factor:
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_SETUP_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_setup",
+        )(two_factor_setup)
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_token_validation",
+        )(two_factor_token_validation)
+        bp.route(
+            app.config["SECURITY_TWO_FACTOR_RESCUE_URL"],
+            methods=["GET", "POST"],
+            endpoint="two_factor_rescue",
+        )(two_factor_rescue)
 
     return bp
 

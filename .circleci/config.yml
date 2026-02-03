@@ -5,6 +5,9 @@ parameters:
   python-version:
     type: string
     default: "3.11"
+  udata-search-service-package:
+    type: string
+    default: "udata-search-service"
   publish-branch:
     type: string
     default: "main"
@@ -19,15 +22,18 @@ jobs:
     parameters:
       python-version:
         type: string
+      mongo-version:
+        type: string
     docker:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
-      - image: mongo:6.0.4
+      - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
       - image: udata/elasticsearch:7.16.2
         environment:
           node.name: es01
           cluster.name: es-docker-cluster
           cluster.initial_master_nodes: es01
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
@@ -50,7 +56,7 @@ jobs:
           name: Install Python dependencies
           command: |
             uv sync --frozen
-            uv pip install udata-search-service
+            uv pip install << pipeline.parameters.udata-search-service-package >>
       - save_cache:
           key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
@@ -69,10 +75,14 @@ jobs:
       - run:
           name: Wait for Elasticsearch
           command: |
-            apt-get update && apt-get install -y curl
+            apt-get update && apt-get install -y curl jq
             for i in $(seq 1 60); do
-              curl -s http://localhost:9200/_cluster/health && exit 0
-              echo "Waiting for Elasticsearch... ($i/60)"
+              status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
+              if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
+                echo "Elasticsearch is ready (status: $status)"
+                exit 0
+              fi
+              echo "Waiting for Elasticsearch... ($i/60) - status: $status"
               sleep 2
             done
             echo "Elasticsearch failed to start"
@@ -223,6 +233,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.11", "3.13"]
+              mongo-version: ["7.0.28"]
       - dist:
           requires:
             - python

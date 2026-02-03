@@ -32,6 +32,16 @@ def iter_adapters():
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
+def get_date_property(model_name: str) -> str:
+    """Get the date property used for filtering modified objects by model name."""
+    date_properties = {
+        "dataset": "last_modified_internal",
+        "discussion": "created",
+        "dataservice": "metadata_modified_at",
+    }
+    return date_properties.get(model_name, "last_modified")
+
+
 def iter_qs(qs, adapter):
     """Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)"""
     for obj in qs.no_cache().timeout(False):
@@ -49,13 +59,11 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     model = adapter.model
     search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
     log.info("Indexing %s objects", model.__name__)
+    model_name = adapter.model.__name__.lower()
     qs = model.objects
     if from_datetime:
-        date_property = (
-            "last_modified_internal" if model.__name__.lower() in ["dataset"] else "last_modified"
-        )
+        date_property = get_date_property(model_name)
         qs = qs.filter(**{f"{date_property}__gte": from_datetime})
-    model_name = adapter.model.__name__.lower()
     index_name = model_name
     if reindex:
         index_name += "-" + default_index_suffix_name(start)
@@ -64,26 +72,28 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
         r = requests.post(url, json=payload)
         r.raise_for_status()
 
-    docs = iter_qs(qs, adapter)
-    for indexable, doc in docs:
-        with requests.Session() as session:
-            try:
-                if indexable:
-                    payload = {"document": doc, "index": index_name}
-                    url = f"{search_service_url}/{model_name}s/index"
-                    r = session.post(url, json=payload)
-                    r.raise_for_status()
-                elif not indexable and not reindex:
-                    url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
-                    r = session.delete(url)
-                    if r.status_code != 404:  # We don't want to raise on 404
+    count = qs.count()
+    label = f"Indexing {model.__name__}"
+    with click.progressbar(iter_qs(qs, adapter), length=count, label=label) as docs:
+        for indexable, doc in docs:
+            with requests.Session() as session:
+                try:
+                    if indexable:
+                        payload = {"document": doc, "index": index_name}
+                        url = f"{search_service_url}/{model_name}s/index"
+                        r = session.post(url, json=payload)
                         r.raise_for_status()
-                else:
-                    continue
-            except Exception as e:
-                log.error(
-                    'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
-                )
+                    elif not indexable and not reindex:
+                        url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
+                        r = session.delete(url)
+                        if r.status_code != 404:  # We don't want to raise on 404
+                            r.raise_for_status()
+                    else:
+                        continue
+                except Exception as e:
+                    log.error(
+                        'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
+                    )
 
 
 def finalize_reindex(models, start):
@@ -98,11 +108,8 @@ def finalize_reindex(models, start):
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            date_property = (
-                "last_modified_internal"
-                if adapter.model.__name__.lower() in ["dataset"]
-                else "last_modified"
-            )
+            model_name = adapter.model.__name__.lower()
+            date_property = get_date_property(model_name)
             modified_since_reindex += adapter.model.objects(
                 **{f"{date_property}__gte": start}
             ).count()

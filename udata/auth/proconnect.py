@@ -2,7 +2,8 @@ from datetime import datetime
 
 from authlib.common.urls import add_params_to_uri
 from authlib.integrations.flask_client import OAuth
-from flask import abort, redirect, request, session, url_for
+from flask import abort, current_app, redirect, request, session, url_for
+from flask_security.tf_plugin import tf_clean_session
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
@@ -55,6 +56,11 @@ def get_logout_url():
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
+        if current_app.config["SECURITY_TWO_FACTOR"]:
+            # Clean out any potential old session info - in case of previous
+            # aborted 2FA attempt.
+            tf_clean_session()
+
         redirect_uri = url_for("api.proconnect_auth", _external=True)
         return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
 
@@ -90,6 +96,16 @@ class ProconnectAuthAPI(API):
                 last_name=proconnect_user.get("usual_name"),
                 confirmed_at=datetime.now(),
             )
+        if current_app.config["SECURITY_TWO_FACTOR"]:
+            # Enter 2FA check if required
+            response = current_app.extensions["security"].two_factor_plugins.tf_enter(
+                user=user,
+                remember_me=False,
+                primary_authn_via="password",
+                next_loc=homepage_url(flash="connected"),
+            )
+            if response:
+                return response
 
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401

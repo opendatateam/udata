@@ -99,7 +99,8 @@ class Defaults(object):
     SECURITY_CONFIRM_URL = "/confirm/"
     SECURITY_CHANGE_URL = "/change/"
     SECURITY_RESET_URL = "/reset/"
-    SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+    SECURITY_CHANGE_EMAIL_URL = "/change-email"
+    SECURITY_GET_CSRF = "/get-csrf"
 
     # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
     # We do not define all the URLs requested in the documentation because most of the time we do JSON requests in cdata
@@ -134,6 +135,19 @@ class Defaults(object):
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _("Password reset instructions")
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
+
+    # Two-Factor Authentication settings
+    SECURITY_TWO_FACTOR = False
+    SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
+    SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
+    SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
+    SECURITY_TOTP_ISSUER = "udata"
+    SECURITY_TWO_FACTOR_AUTHENTICATOR_VALIDITY = 30
+    SECURITY_TWO_FACTOR_ALWAYS_VALIDATE = True
+    SECURITY_TWO_FACTOR_RESCUE_EMAIL = False  # We won't send a rescue code by mail
+    SECURITY_TWO_FACTOR_RESCUE_MAIL = (
+        "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
+    )
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
@@ -173,6 +187,10 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
+
+    TERMS_OF_USE_URL = None
+    TERMS_OF_USE_DELETION_ARTICLE = None
+    TELERECOURS_URL = None
 
     UDATA_INSTANCE_NAME = "udata"
 
@@ -629,6 +647,30 @@ class Defaults(object):
     ###########################################################################
     METRICS_API = None
 
+    # Format families for search filtering
+    ###########################################################################
+    TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
+    MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
+    GEOGRAPHICAL_FORMATS = frozenset(
+        {
+            "shp",
+            "kml",
+            "kmz",
+            "gpx",
+            "shx",
+            "ovr",
+            "geojson",
+            "gpkg",
+            "pmtiles",
+            "mbtiles",
+            "wms",
+            "wfs",
+            "ogc:wms",
+            "ogc:wfs",
+        }
+    )
+    DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
+
 
 class Testing(object):
     """Sane values for testing. Should be applied as override"""
@@ -660,6 +702,7 @@ class Testing(object):
     SECURITY_EMAIL_VALIDATOR_ARGS = {
         "check_deliverability": False
     }  # Disables deliverability for email domain name
+    SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
     SEARCH_SERVICE_API_URL = None

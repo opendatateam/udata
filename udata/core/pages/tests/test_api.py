@@ -2,7 +2,7 @@ from flask import url_for
 
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.pages.models import Page
+from udata.core.pages.models import AccordionItemBloc, AccordionListBloc, Page
 from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
 
@@ -103,3 +103,167 @@ class PageAPITest(APITestCase):
 
         response = self.get(url_for("api.page", page=page_id))
         self.assert200(response)
+
+    def test_hero_bloc(self):
+        self.login()
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "HeroBloc",
+                        "title": "Welcome to our portal",
+                        "description": "Discover our datasets",
+                        "color": "primary",
+                    }
+                ],
+            },
+        )
+        self.assert201(response)
+
+        self.assertEqual("HeroBloc", response.json["blocs"][0]["class"])
+        self.assertEqual("Welcome to our portal", response.json["blocs"][0]["title"])
+        self.assertEqual("Discover our datasets", response.json["blocs"][0]["description"])
+        self.assertEqual("primary", response.json["blocs"][0]["color"])
+
+        page = Page.objects().first()
+        response = self.get(url_for("api.page", page=page))
+        self.assert200(response)
+
+        self.assertEqual("HeroBloc", response.json["blocs"][0]["class"])
+        self.assertEqual("Welcome to our portal", response.json["blocs"][0]["title"])
+        self.assertEqual("Discover our datasets", response.json["blocs"][0]["description"])
+        self.assertEqual("primary", response.json["blocs"][0]["color"])
+
+    def test_accordion_bloc(self):
+        self.login()
+        datasets = DatasetFactory.create_batch(2)
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "title": "FAQ",
+                        "description": "Frequently asked questions",
+                        "items": [
+                            {
+                                "title": "What is udata?",
+                                "content": [
+                                    {
+                                        "class": "LinksListBloc",
+                                        "title": "Related links",
+                                        "links": [
+                                            {
+                                                "title": "Documentation",
+                                                "url": "https://doc.data.gouv.fr",
+                                            },
+                                        ],
+                                    }
+                                ],
+                            },
+                            {
+                                "title": "How to use datasets?",
+                                "content": [
+                                    {
+                                        "class": "DatasetsListBloc",
+                                        "title": "Example datasets",
+                                        "datasets": [str(d.id) for d in datasets],
+                                    }
+                                ],
+                            },
+                            {
+                                "title": "What is markdown?",
+                                "content": [
+                                    {
+                                        "class": "MarkdownBloc",
+                                        "content": "# Hello\n\nThis is **bold** text.",
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+        self.assert201(response)
+
+        bloc = response.json["blocs"][0]
+        self.assertEqual("AccordionListBloc", bloc["class"])
+        self.assertEqual("FAQ", bloc["title"])
+        self.assertEqual("Frequently asked questions", bloc["description"])
+        self.assertEqual(3, len(bloc["items"]))
+
+        self.assertEqual("What is udata?", bloc["items"][0]["title"])
+        self.assertEqual("LinksListBloc", bloc["items"][0]["content"][0]["class"])
+        self.assertEqual("Documentation", bloc["items"][0]["content"][0]["links"][0]["title"])
+
+        self.assertEqual("How to use datasets?", bloc["items"][1]["title"])
+        self.assertEqual("DatasetsListBloc", bloc["items"][1]["content"][0]["class"])
+        self.assertEqual(2, len(bloc["items"][1]["content"][0]["datasets"]))
+
+        self.assertEqual("What is markdown?", bloc["items"][2]["title"])
+        self.assertEqual("MarkdownBloc", bloc["items"][2]["content"][0]["class"])
+
+        page = Page.objects().first()
+        self.assertIsInstance(page.blocs[0], AccordionListBloc)
+        self.assertIsInstance(page.blocs[0].items[0], AccordionItemBloc)
+        self.assertEqual("What is udata?", page.blocs[0].items[0].title)
+
+        response = self.get(url_for("api.page", page=page))
+        self.assert200(response)
+        self.assertEqual("AccordionListBloc", response.json["blocs"][0]["class"])
+        self.assertEqual(3, len(response.json["blocs"][0]["items"]))
+
+        response = self.put(
+            url_for("api.page", page=page),
+            {
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "title": "Updated FAQ",
+                        "items": [
+                            {
+                                "title": "Single question",
+                                "content": [],
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+        self.assert200(response)
+        self.assertEqual("Updated FAQ", response.json["blocs"][0]["title"])
+        self.assertIsNone(response.json["blocs"][0]["description"])
+        self.assertEqual(1, len(response.json["blocs"][0]["items"]))
+        self.assertEqual("Single question", response.json["blocs"][0]["items"][0]["title"])
+
+    def test_accordion_bloc_cannot_be_nested(self):
+        self.login()
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "title": "FAQ",
+                        "items": [
+                            {
+                                "title": "Question",
+                                "content": [
+                                    {
+                                        "class": "AccordionListBloc",
+                                        "title": "Nested accordion",
+                                        "items": [],
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            },
+        )
+        self.assert400(response)

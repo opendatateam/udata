@@ -12,17 +12,18 @@ from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field
+from udata.api_fields import field, generate_fields
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
+from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
 from udata.uris import cdata_url
 
 from . import mails
-from .constants import AVATAR_SIZES
+from .constants import AVATAR_SIZES, BIGGEST_AVATAR_SIZE
 
 __all__ = ("User", "Role", "datastore")
 
@@ -44,9 +45,12 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
+@generate_fields()
 class User(WithMetrics, UserMixin, Linkable, db.Document):
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
+        db.SlugField(max_length=255, required=True, populate_from="fullname"),
+        auditable=False,
+        show_as_ref=True,
     )
     email = field(db.StringField(max_length=255, required=True, unique=True))
     password = field(db.StringField())
@@ -54,12 +58,16 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     fs_uniquifier = field(db.StringField(max_length=64, unique=True, sparse=True))
     roles = field(db.ListField(db.ReferenceField(Role), default=[]))
 
-    first_name = field(db.StringField(max_length=255, required=True))
-    last_name = field(db.StringField(max_length=255, required=True))
+    first_name = field(db.StringField(max_length=255, required=True), show_as_ref=True)
+    last_name = field(db.StringField(max_length=255, required=True), show_as_ref=True)
 
     avatar_url = field(db.URLField())
     avatar = field(
-        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
+        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
+        show_as_ref=True,
+        thumbnail_info={
+            "size": BIGGEST_AVATAR_SIZE,
+        },
     )
     website = field(db.URLField())
     about = field(
@@ -87,6 +95,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     last_login_ip = field(db.StringField(), auditable=False)
     current_login_ip = field(db.StringField(), auditable=False)
     login_count = field(db.IntField(), auditable=False)
+
+    # Two-Factor authentification fields
+    tf_primary_method = field(db.StringField(), auditable=False)
+    tf_totp_secret = field(db.StringField(), auditable=False)
 
     deleted = field(db.DateTimeField())
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
@@ -118,6 +130,8 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
     }
+
+    verbose_name = _("account")
 
     __metrics_keys__ = [
         "datasets",
@@ -195,6 +209,14 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     def followers_count(self):
         """Return the number of followers of the user."""
         return self.metrics.get("followers", 0)
+
+    @field(description="Link to the API endpoint for this user", show_as_ref=True)
+    def uri(self, *args, **kwargs):
+        return self.self_api_url(*args, **kwargs)
+
+    @field(description="Link to the udata web page for this user", show_as_ref=True)
+    def page(self, *args, **kwargs):
+        return self.self_web_url(*args, **kwargs)
 
     def generate_api_key(self):
         payload = {

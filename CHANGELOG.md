@@ -1,5 +1,98 @@
 # Changelog
 
+## 14.10.0 (2026-01-29)
+
+- chore: remove docker compose testing ([#3633](https://github.com/opendatateam/udata/pull/3633))
+- feat(2fa): add two factor authentification ([#3620](https://github.com/opendatateam/udata/pull/3620))
+- feat: search improvements ([#3583](https://github.com/opendatateam/udata/pull/3583))
+- fix: remove reindex topic ([#3639](https://github.com/opendatateam/udata/pull/3639))
+
+
+## 14.9.0 (2026-01-27)
+
+- docs: fix documentation for outdated instructions and typos ([#3634](https://github.com/opendatateam/udata/pull/3634))
+- docs: fix formatting issue
+- feat: add AGENTS.md ([#3623](https://github.com/opendatateam/udata/pull/3623))
+- feat: add CTA to HeroBloc ([#3630](https://github.com/opendatateam/udata/pull/3630))
+- feat: use MongoDB 7 in docker compose files to be consistent ([#3632](https://github.com/opendatateam/udata/pull/3632))
+- fix: deduplicate endpoint id in swagger ([#3631](https://github.com/opendatateam/udata/pull/3631))
+- fix: pagination URLs should not forward all arguments to url_for() ([#3584](https://github.com/opendatateam/udata/pull/3584))
+- test: use before/after timestamps instead of exact date comparison for flaky harvest tests ([#3587](https://github.com/opendatateam/udata/pull/3587))
+
+
+## 14.8.0 (2026-01-22)
+
+- chore: add vscode configs for debug and tests ([#3624](https://github.com/opendatateam/udata/pull/3624))
+- chore(CI): remove mongo 6 in CI ([#3622](https://github.com/opendatateam/udata/pull/3622))
+- chore: remove trailing slashes in changelog entries ([#3594](https://github.com/opendatateam/udata/pull/3594))
+- feat: add progress bar to search index command ([#3625](https://github.com/opendatateam/udata/pull/3625))
+- feat: add transfer notification handling ([#3619](https://github.com/opendatateam/udata/pull/3619))
+- feat(notification): add organization badges notifications ([#3628](https://github.com/opendatateam/udata/pull/3628))
+- feat(storage): upgrade flask storage to use S3 backend ([#3629](https://github.com/opendatateam/udata/pull/3629))
+- fix(search): forward is_restricted filter in dataservices search ([#3627](https://github.com/opendatateam/udata/pull/3627))
+- fix: search org by badge ([#3607](https://github.com/opendatateam/udata/pull/3607))
+
+
+## 14.7.2 (2026-01-15)
+
+- chore: add MongoDB 7.0 in CI ([#3593](https://github.com/opendatateam/udata/pull/3593))
+- fix: add default kind to posts in migration ([#3617](https://github.com/opendatateam/udata/pull/3617))
+- fix: allow markdown inside accordions ([#3618](https://github.com/opendatateam/udata/pull/3618))
+
+
+## 14.7.1 (2026-01-13)
+
+- fix: try to fix transfer migration ([#3616](https://github.com/opendatateam/udata/pull/3616))
+
+
+## 14.7.0 (2026-01-13)
+
+- feat: add accordion bloc ([#3608](https://github.com/opendatateam/udata/pull/3608))
+- feat: add blocs body_type to posts ([#3604](https://github.com/opendatateam/udata/pull/3604))
+- feat: add hero bloc ([#3609](https://github.com/opendatateam/udata/pull/3609))
+- feat: add markdown bloc ([#3581](https://github.com/opendatateam/udata/pull/3581))
+- feat: add post kind of news or page ([#3603](https://github.com/opendatateam/udata/pull/3603))
+- feat: add transfer notification ([#3582](https://github.com/opendatateam/udata/pull/3582))
+- feat: deny deletion of page if a post is using it ([#3614](https://github.com/opendatateam/udata/pull/3614))
+- feat: update translations ([#3615](https://github.com/opendatateam/udata/pull/3615))
+- feat: upgrade dependencies ([#3613](https://github.com/opendatateam/udata/pull/3613))
+- fix: parsing dates in RDF ([#3605](https://github.com/opendatateam/udata/pull/3605))
+-  fix: sending wrong params to search endpoints ([#3606](https://github.com/opendatateam/udata/pull/3606))
+- Revert "fix: sending wrong params to search endpoints ([#3585](https://github.com/opendatateam/udata/pull/3585))"
+
+
+## 14.6.0 (2026-01-06)
+
+- chore: add progress bar to old migration for re-run ([#3595](https://github.com/opendatateam/udata/pull/3595))
+- chore(swagger): clean required fields in swagger ([#3596](https://github.com/opendatateam/udata/pull/3596))
+- feat: add appeal mail on delete ([#3576](https://github.com/opendatateam/udata/pull/3576))
+- feat(datasets): add filtering support to datasets Atom feed ([#3578](https://github.com/opendatateam/udata/pull/3578))
+- feat: upgrade dependencies and downgrade werkzeug ([#3598](https://github.com/opendatateam/udata/pull/3598))
+- fix: do not create contact point if dryrun ([#3589](https://github.com/opendatateam/udata/pull/3589))
+- fix: forms always expect dicts ([#3590](https://github.com/opendatateam/udata/pull/3590))
+- fix: import dataservices tasks in init to purge dataservices ([#3602](https://github.com/opendatateam/udata/pull/3602))
+- fix: negative page size in pagination ([#3591](https://github.com/opendatateam/udata/pull/3591))
+- fix: RDF Resource in tags ([#3599](https://github.com/opendatateam/udata/pull/3599))
+- fix: remove dead code in except ([#3586](https://github.com/opendatateam/udata/pull/3586))
+- fix: wrong owner response for post API ([#3601](https://github.com/opendatateam/udata/pull/3601))
+
+
+## 14.5.0 (2026-01-05)
+
+- chore: add mailpit ([#3575](https://github.com/opendatateam/udata/pull/3575))
+-  feat(harvest): combine agent and organization names when contact point has both ([#3497](https://github.com/opendatateam/udata/pull/3497))
+- feat: support Python 3.13 ([#3573](https://github.com/opendatateam/udata/pull/3573))
+- fix: activities on private object not visible by owner ([#3567](https://github.com/opendatateam/udata/pull/3567))
+- fix: add missing markdown=True for fields ([#3580](https://github.com/opendatateam/udata/pull/3580))
+- fix: confirm change email after password change ([#3592](https://github.com/opendatateam/udata/pull/3592))
+- fix: no_cache() conflict with with_badge() ([#3572](https://github.com/opendatateam/udata/pull/3572))
+- fix: purge all HarvestItem when purging datasets ([#3579](https://github.com/opendatateam/udata/pull/3579))
+- fix: sending wrong params to search endpoints ([#3585](https://github.com/opendatateam/udata/pull/3585))
+- fix: use external logo in mails ([#3574](https://github.com/opendatateam/udata/pull/3574))
+- refactor(posts): convert Post to new API system ([#3440](https://github.com/opendatateam/udata/pull/3440))
+- test: add search service integration tests ([#3588](https://github.com/opendatateam/udata/pull/3588))
+
+
 ## 14.4.0 (2025-12-16)
 
 - chore: adapt CI and docs to main branch ([#3559](https://github.com/opendatateam/udata/pull/3559))

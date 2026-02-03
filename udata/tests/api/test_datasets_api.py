@@ -1555,6 +1555,44 @@ class DatasetsFeedAPItest(APITestCase):
         entry = feed.entries[0]
         assert uris.validate(entry["id"])
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_organization_filter(self):
+        org1 = OrganizationFactory()
+        org2 = OrganizationFactory()
+        DatasetFactory(title="Dataset Org1", organization=org1, resources=[ResourceFactory()])
+        DatasetFactory(title="Dataset Org2", organization=org2, resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", organization=str(org1.id)))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "Dataset Org1")
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_tag_filter(self):
+        DatasetFactory(title="Tagged", tags=["transport"], resources=[ResourceFactory()])
+        DatasetFactory(title="Not Tagged", tags=["other"], resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", tag="transport"))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "Tagged")
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_search_query(self):
+        DatasetFactory(title="Transport public", resources=[ResourceFactory()])
+        DatasetFactory(title="Environnement", resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", q="transport"))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "Transport public")
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
@@ -1705,6 +1743,12 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
+
+    def test_create_with_list_returns_400(self):
+        """It should return 400 when sending a list instead of a dict"""
+        data = [ResourceFactory.as_dict()]
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
 
     def test_create_with_file(self):
         """It should create a resource from the API with a file"""
