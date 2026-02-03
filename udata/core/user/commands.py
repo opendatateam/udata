@@ -70,7 +70,7 @@ def activate():
 def delete():
     """Delete an existing user"""
     email = click.prompt("Email")
-    user = User.objects(email=email).first()
+    user: User = User.objects(email=email).first()
     if not user:
         exit_with_error("Invalid user")
     user.mark_as_deleted()
@@ -81,20 +81,21 @@ def delete():
 @click.argument("email")
 def set_admin(email):
     """Set an user as administrator"""
-    user = datastore.find_user(email=email)
+    user: User = datastore.find_user(email=email)
     log.info("Adding admin role to user %s (%s)", user.fullname, user.email)
     role = datastore.find_or_create_role("admin")
     datastore.add_role_to_user(user, role)
-    success("User %s (%s) is now administrator" % (user.fullname, user.email))
+    success(f"User {user.fullname} {user.email}] is now administrator")
 
 
 @grp.command()
 @click.argument("email")
 def password(email):
-    user = datastore.find_user(email=email)
+    user: User = datastore.find_user(email=email)
     password = click.prompt("Enter new password", hide_input=True)
     user.password = hash_password(password)
     user.save()
+    success(msg=f"New password set for user {email}")
 
 
 @grp.command()
@@ -103,8 +104,19 @@ def rotate_password(email):
     """
     Ask user for password rotation on next login and reset any current session
     """
-    user = datastore.find_user(email=email)
+    user: User = datastore.find_user(email=email)
     user.password_rotation_demanded = datetime.now(UTC)
     user.save()
     # Reset ongoing sessions by uniquifier
     datastore.set_uniquifier(user)
+    success(f"Password rotated for user {email}")
+
+
+@grp.command()
+@click.argument("email")
+def unset_two_factor(email):
+    user: User = datastore.find_user(email=email)
+    user.tf_primary_method = None
+    user.tf_totp_secret = None
+    user.save()
+    success(f"2FA has been unset for user {email}")

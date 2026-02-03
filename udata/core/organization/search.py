@@ -2,6 +2,7 @@ import datetime
 
 from udata import search
 from udata.core.organization.api import DEFAULT_SORTING, OrgApiParser
+from udata.core.organization.constants import PRODUCER_BADGE_TYPES
 from udata.models import Organization
 from udata.search.fields import ModelTermsFilter
 from udata.utils import to_iso_datetime
@@ -49,6 +50,13 @@ class OrganizationSearch(search.ModelSearchAdapter):
         extras = {}
         for key, value in organization.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+
+        producer_types = []
+        if hasattr(organization, "badges") and organization.badges:
+            producer_types = [
+                badge.kind for badge in organization.badges if badge.kind in PRODUCER_BADGE_TYPES
+            ]
+
         return {
             "id": str(organization.id),
             "name": organization.name,
@@ -56,6 +64,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             "description": organization.description,
             "url": organization.url,
             "badges": [badge.kind for badge in organization.badges],
+            "producer_type": producer_types,
             "created_at": to_iso_datetime(organization.created_at),
             "orga_sp": 1 if organization.public_service else 0,
             "followers": organization.metrics.get("followers", 0),

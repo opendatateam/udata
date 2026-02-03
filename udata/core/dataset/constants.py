@@ -182,3 +182,53 @@ DESCRIPTION_SIZE_LIMIT = 100000
 DESCRIPTION_SHORT_SIZE_LIMIT = 200
 
 FULL_OBJECTS_HEADER = "X-Get-Datasets-Full-Objects"
+
+
+class FormatFamily(StrEnum):
+    """
+    Classification of resource formats into families for search filtering.
+
+    - TABULAR: Structured data formats optimized for tabular/spreadsheet data
+    - MACHINE_READABLE: Formats designed for machine-to-machine data exchange
+    - GEOGRAPHICAL: Geographical data formats
+    - DOCUMENTS: Document formats (PDF, Word, Markdown, etc.)
+    - OTHER: All other formats
+    """
+
+    TABULAR = auto()
+    MACHINE_READABLE = auto()
+    GEOGRAPHICAL = auto()
+    DOCUMENTS = auto()
+    OTHER = auto()
+
+
+def get_format_family(format_str: str | None) -> FormatFamily:
+    """
+    Determine the format family for a given format string.
+
+    Format lists are configurable via settings (TABULAR_FORMATS, MACHINE_READABLE_FORMATS,
+    GEOGRAPHICAL_FORMATS, DOCUMENTS_FORMATS).
+
+    Args:
+        format_str: The format string (e.g., "csv", "JSON", "PDF")
+
+    Returns:
+        The corresponding FormatFamily enum value
+    """
+    from flask import current_app
+
+    if not format_str:
+        return FormatFamily.OTHER
+
+    fmt = format_str.lower().strip()
+
+    if fmt in current_app.config["TABULAR_FORMATS"]:
+        return FormatFamily.TABULAR
+    elif fmt in current_app.config["MACHINE_READABLE_FORMATS"]:
+        return FormatFamily.MACHINE_READABLE
+    elif fmt in current_app.config["GEOGRAPHICAL_FORMATS"]:
+        return FormatFamily.GEOGRAPHICAL
+    elif fmt in current_app.config["DOCUMENTS_FORMATS"]:
+        return FormatFamily.DOCUMENTS
+    else:
+        return FormatFamily.OTHER

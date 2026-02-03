@@ -98,6 +98,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     current_login_ip = field(db.StringField(), auditable=False)
     login_count = field(db.IntField(), auditable=False)
 
+    # Two-Factor authentification fields
+    tf_primary_method = field(db.StringField(), auditable=False)
+    tf_totp_secret = field(db.StringField(), auditable=False)
+
     deleted = field(db.DateTimeField())
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
     extras = field(db.ExtrasField(), auditable=False)
