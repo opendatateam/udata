@@ -48,7 +48,7 @@ $ uv add Cython
 $ uv sync
 ```
 
-### macOS caveats
+### MacOS caveats
 
 #### Package installation fails
 

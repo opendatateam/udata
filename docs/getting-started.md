@@ -75,7 +75,7 @@ source .venv/bin/activate
 pip install --group dev -e .
 ```
 
-You can find [common errors and workarounds for macOS on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
+You can find [common errors and workarounds for MacOS on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
 !!! info
     With `uv`, the virtual environment is managed automatically. With `pip`, you need to activate the virtualenv manually: `source .venv/bin/activate`.
