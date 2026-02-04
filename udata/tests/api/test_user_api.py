@@ -513,6 +513,8 @@ class OrgInvitationsAPITest(APITestCase):
         member = organization.member(user)
         assert member.role == "editor"
         assert organization.requests[0].status == "accepted"
+        assert organization.requests[0].handled_by == user
+        assert organization.requests[0].handled_on is not None
 
     def test_accept_org_invitation_not_found(self):
         """Test accepting a non-existent invitation."""
@@ -555,6 +557,8 @@ class OrgInvitationsAPITest(APITestCase):
         organization.reload()
         assert not organization.is_member(user)
         assert organization.requests[0].status == "refused"
+        assert organization.requests[0].handled_by == user
+        assert organization.requests[0].handled_on is not None
 
     def test_cannot_accept_other_user_invitation(self):
         """Test that a user cannot accept another user's invitation."""

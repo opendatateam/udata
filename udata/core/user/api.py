@@ -271,6 +271,7 @@ class AcceptOrgInvitationAPI(API):
                         api.abort(400, "Invitation is not pending")
 
                     req.status = "accepted"
+                    req.handled_by = user
                     req.handled_on = datetime.utcnow()
 
                     member = Member(user=user, role=req.role)
@@ -303,6 +304,7 @@ class RefuseOrgInvitationAPI(API):
                         api.abort(400, "Invitation is not pending")
 
                     req.status = "refused"
+                    req.handled_by = user
                     req.handled_on = datetime.utcnow()
                     org.save()
 
