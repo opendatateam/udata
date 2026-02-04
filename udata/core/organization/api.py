@@ -478,7 +478,6 @@ class MemberInviteAPI(API):
     @api.doc("invite_organization_member")
     @api.response(403, "Not Authorized")
     @api.response(400, "Bad Request")
-    @api.response(409, "User is already member or invitation pending")
     def post(self, org):
         """Invite a user or email to join the organization."""
         from udata.core.user.models import User

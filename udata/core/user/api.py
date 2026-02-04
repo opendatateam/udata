@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_security import current_user, logout_user
 from slugify import slugify
 
@@ -258,8 +260,6 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
-        from datetime import datetime
-
         from udata.core.organization.models import Member, Organization
 
         user = current_user._get_current_object()
@@ -292,8 +292,6 @@ class RefuseOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Refuse an organization invitation."""
-        from datetime import datetime
-
         from udata.core.organization.models import Organization
 
         user = current_user._get_current_object()
