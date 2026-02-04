@@ -48,6 +48,7 @@ def is_allowed_cors_route():
         or path.startswith(current_app.config["SECURITY_TWO_FACTOR_SETUP_URL"])
         or path.startswith(current_app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"])
         or path.startswith(current_app.config["SECURITY_TWO_FACTOR_RESCUE_URL"])
+        or path.startswith(current_app.config["SECURITY_VERIFY_URL"])
         or path.startswith("/oauth")
     ):
         return True
