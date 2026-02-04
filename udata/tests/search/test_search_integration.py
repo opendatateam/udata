@@ -90,16 +90,28 @@ class SearchIntegrationTest(APITestCase):
 
     def test_reuse_filter_by_producer_type(self):
         """Test filtering reuses by producer_type."""
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
         user = UserFactory()
+
+        VisibleReuseFactory(title="Reuse public service", organization=org)
         VisibleReuseFactory(title="Reuse by user", owner=user, organization=None)
 
         time.sleep(1)
+
+        response = self.get("/api/2/reuses/search/?producer_type=public-service")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [r["title"] for r in response.json["data"]]
+        assert "Reuse public service" in titles
+        assert "Reuse by user" not in titles
 
         response = self.get("/api/2/reuses/search/?producer_type=user")
         self.assert200(response)
         assert response.json["total"] >= 1
         titles = [r["title"] for r in response.json["data"]]
         assert "Reuse by user" in titles
+        assert "Reuse public service" not in titles
 
     def test_dataservice_search(self):
         """Test dataservice search endpoint."""
