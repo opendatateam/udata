@@ -12,6 +12,7 @@ from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -276,6 +277,7 @@ class AcceptOrgInvitationAPI(API):
                     org.count_members()
                     org.save()
                     MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
 
                     return {"message": "Invitation accepted"}, 200
 
@@ -306,6 +308,7 @@ class RefuseOrgInvitationAPI(API):
                     req.handled_on = datetime.utcnow()
                     org.save()
                     MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
 
                     return {"message": "Invitation refused"}, 200
 

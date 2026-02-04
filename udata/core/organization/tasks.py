@@ -86,6 +86,20 @@ def notify_membership_invitation(org_id, invitation_id):
 
 
 @task(route="high.mail")
+def notify_membership_invitation_response(org_id, invitation_id):
+    org = Organization.objects.get(pk=org_id)
+    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
+
+    if invitation is None or invitation.created_by is None:
+        return
+
+    if invitation.status == "accepted":
+        mails.membership_invitation_accepted(org, invitation).send(invitation.created_by)
+    elif invitation.status == "refused":
+        mails.membership_invitation_refused(org, invitation).send(invitation.created_by)
+
+
+@task(route="high.mail")
 def notify_membership_invitation_canceled(org_id, invitation_id):
     org = Organization.objects.get(pk=org_id)
     invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
