@@ -44,9 +44,9 @@ The site identifier. It is used to attached some database configuration, metrics
 
 ### THEME
 
-**default**: ``'default'``
+**default**: ``None``
 
-The enabled theme name.
+The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
 
 ### TEMPLATE_CACHE_DURATION
 

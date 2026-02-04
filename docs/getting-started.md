@@ -1,11 +1,11 @@
 # udata setup instructions
 
-This guide is about starting a udata and udata-front environment for local development.
+This guide is about starting a udata backend and [cdata][] (formerly udata-front) frontend environment for local development.
 
 We’ll use the following repositories:
 
-- [https://github.com/opendatateam/udata](https://github.com/opendatateam/udata)
-- [https://github.com/datagouv/udata-front](https://github.com/datagouv/udata-front)
+- [udata][] - The backend API and core platform
+- [cdata][] - The frontend repository
 
 # Check the system requirements
 
@@ -29,13 +29,13 @@ $UDATA_WORKSPACE
 │   ├── ...
 │   ├── pyproject.toml
 │	└── udata.cfg
-└── udata-front
+└── cdata
     └── ...
 ```
 
 ## Get udata
 
-Make a new directory. You can name it as you like :
+Make a new directory. You can name it as you like:
 
 ```shell
 mkdir udata-workspace
@@ -43,7 +43,7 @@ cd udata-workspace
 export UDATA_WORKSPACE=`pwd`  # we'll use UDATA_WORKSPACE env in the instructions
 ```
 
-In this new directory, clone udata :
+In this new directory, clone udata:
 
 ```shell
 git clone git@github.com:opendatateam/udata.git
@@ -75,14 +75,14 @@ source .venv/bin/activate
 pip install --group dev -e .
 ```
 
-You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
+You can find [common errors and workarounds for MacOS on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
 !!! info
     With `uv`, the virtual environment is managed automatically. With `pip`, you need to activate the virtualenv manually: `source .venv/bin/activate`.
 
 ## Configure udata
 
-udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.
+udata uses a config file called `udata.cfg` and a custom directory as a base for its filesystem, we’ll call it `fs`. You can put them as shown below.
 
 ```shell
 $UDATA_WORKSPACE
@@ -113,7 +113,7 @@ FS_ROOT = 'fs'
 SESSION_COOKIE_SECURE = False
 ```
 
-This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
+This defines `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
 
 ```shell
 127.0.0.1       dev.local
@@ -152,7 +152,7 @@ inv serve
     inv serve --port 7001
     ```
 
-Now, you can use your udata api !
+Now, you can use your udata API!
 
 ```shell
 curl http://dev.local:7000/api/1/datasets/
@@ -161,7 +161,7 @@ curl http://dev.local:7000/api/1/datasets/
 You can see API endpoints by going to [http://dev.local:7000/api/1/](http://dev.local:7000/api/1/) in
 your browser.
 
-Workers are required for tasks to execute (search indexation, etc.).
+Workers are required to execute tasks (search indexation, etc.).
 
 With `uv`:
 ```shell
@@ -179,9 +179,9 @@ inv work
 !!! info
     You now have a working udata instance but no frontend for the platform.
 
-# Install udata-front
+# Install cdata frontend (formerly udata-front)
 
-With a valid udata environment, you can start the udata-front installation:
+With a valid udata environment, you can start the cdata installation:
 
 ```shell
 $UDATA_WORKSPACE
@@ -190,15 +190,15 @@ $UDATA_WORKSPACE
 │   ├── ...
 │   ├── pyproject.toml
 │	└── udata.cfg
-└── udata-front
+└── cdata
     └── ...
 ```
 
-First, clone udata-front in your workspace.
+First, clone cdata in your workspace.
 
 ```shell
 cd $UDATA_WORKSPACE
-git clone git@github.com:datagouv/udata-front.git
+git clone git@github.com:datagouv/cdata.git
 ```
 
 Modify your `udata.cfg` with the following lines.
@@ -207,44 +207,23 @@ Modify your `udata.cfg` with the following lines.
 THEME = 'gouvfr'
 ```
 
-udata-front uses the same virtualenv as udata. You can activate it from your udata-front directory if it’s not the case anymore.
-
-```shell
-cd $UDATA_WORKSPACE/udata
-source .venv/bin/activate
-```
-
-Then, you can install the requirements with:
-```shell
-cd udata-front
-uv sync
-```
-
-...or, with pip:
-```shell
-cd udata-front
-pip install --group dev -e"
-```
-
-The last thing to do is to install udata-front NPM packages.
+The last thing to do is to install the frontend [cdata][] packages using [pnpm][].
 
 !!! info
-    udata and udata-front use different node versions so don’t forget to run `nvm use` when you switch from one to the other.
+    cdata uses Node.js, so make sure you have the correct Node.js version installed. Don't forget to run `nvm use` when switching to the cdata directory.
 
 ```shell
+cd cdata
 nvm install
 nvm use
 
-npm install
+pnpm install
 ```
 
-Once it's done, you should be able to run the build commands for JS and CSS.
+Once it's done, you should be able to run the build commands for JavaScript and CSS in cdata.
+Check the [cdata repository][cdata] documentation for the specific build commands.
 
-```shell
-inv assets-build
-```
-
-## Start udata with udata-front
+## Start udata with cdata
 
 To start udata, the inv command is the same.
 
@@ -255,11 +234,7 @@ inv serve
 
 You can now visit `dev.local:7000/` in your browser and start playing with your udata instance.
 
-You can use parcel to watch for file changes in udata or udata-front directory with
-
-```shell
-inv assets-watch
-```
+For watching and building frontend assets, check the [cdata repository][cdata] documentation for the specific commands.
 
 !!! note "Tell us what you think"
     You are always welcome to tell us about your experience _installing udata_.
@@ -279,7 +254,10 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
+[cdata]: https://github.com/datagouv/cdata
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
+[pnpm]: https://pnpm.io/
+[udata]: https://github.com/opendatateam/udata
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
 [udata-fixtures]: https://github.com/opendatateam/udata-fixtures

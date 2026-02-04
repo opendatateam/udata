@@ -157,7 +157,7 @@ class BadgeMixinTest(DBTestCase):
 
     def test_validation(self):
         """It should validate default badges as well as extended ones"""
-        # Model badges can be extended in plugins, for example in udata-front
+        # Model badges can be extended in plugins, for example in our previous plugin udata-front
         # for french only badges.
         Fake.__badges__["new"] = "new"
 
