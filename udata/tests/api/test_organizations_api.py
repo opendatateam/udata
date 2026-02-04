@@ -670,6 +670,63 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert len(organization.requests) == 0
 
+    def test_cancel_invitation(self):
+        """Test that an admin can cancel a pending invitation."""
+        user = self.login()
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=invited_user, created_by=user, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[invitation]
+        )
+
+        api_url = url_for("api.cancel_membership", org=organization, id=invitation.id)
+        response = self.post(api_url)
+
+        assert200(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "canceled"
+
+    def test_cancel_invitation_not_pending(self):
+        """Test that canceling an already handled invitation fails."""
+        user = self.login()
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=invited_user,
+            created_by=user,
+            role="editor",
+            status="accepted",
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin"), Member(user=invited_user, role="editor")],
+            requests=[invitation],
+        )
+
+        api_url = url_for("api.cancel_membership", org=organization, id=invitation.id)
+        response = self.post(api_url)
+
+        assert400(response)
+
+    def test_cancel_request_not_allowed(self):
+        """Test that a membership request (not invitation) cannot be canceled."""
+        user = self.login()
+        requesting_user = UserFactory()
+        request = MembershipRequest(kind="request", user=requesting_user, comment="Please add me")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[request]
+        )
+
+        api_url = url_for("api.cancel_membership", org=organization, id=request.id)
+        response = self.post(api_url)
+
+        assert400(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "pending"
+
     def test_update_member(self):
         user = self.login()
         updated_user = UserFactory()

@@ -127,6 +127,20 @@ def badge_added_association(org: Organization) -> MailMessage:
     )
 
 
+def membership_invitation_canceled(org: Organization) -> MailMessage:
+    return MailMessage(
+        subject=_("An organization invitation has been canceled"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "The invitation to join the organization %(org)s has been canceled.",
+                    org=org,
+                )
+            ),
+        ],
+    )
+
+
 def membership_invitation(org: Organization, invitation: MembershipRequest) -> MailMessage:
     paragraphs = [
         ParagraphWithLinks(
@@ -139,7 +153,7 @@ def membership_invitation(org: Organization, invitation: MembershipRequest) -> M
     if invitation.comment:
         paragraphs.append(LabelledContent(_("Message:"), invitation.comment))
     paragraphs.append(
-        MailCTA(_("View and respond to invitation"), cdata_url("/admin/me/org_invitations"))
+        MailCTA(_("View and respond to invitation"), cdata_url("/admin/me/profile"))
     )
     return MailMessage(
         subject=_("You have been invited to join an organization"),

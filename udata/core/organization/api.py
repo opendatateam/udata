@@ -55,6 +55,7 @@ from .permissions import EditOrganizationPermission, OrganizationPrivatePermissi
 from .rdf import build_org_catalog
 from .tasks import (
     notify_membership_invitation,
+    notify_membership_invitation_canceled,
     notify_membership_request,
     notify_membership_response,
 )
@@ -466,6 +467,33 @@ class MembershipRefuseAPI(MembershipAPI):
         MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
+
+        return {}, 200
+
+
+@ns.route("/<org:org>/membership/<uuid:id>/cancel/", endpoint="cancel_membership")
+class MembershipCancelAPI(MembershipAPI):
+    @api.secure
+    @api.doc("cancel_membership", **common_doc)
+    @api.response(400, "Membership request is not pending")
+    def post(self, org, id):
+        """Cancel a pending invitation for a given organization."""
+        EditOrganizationPermission(org).test()
+        membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind != "invitation":
+            api.abort(400, "Only invitations can be canceled")
+
+        if membership_request.status != "pending":
+            api.abort(400, "Only pending invitations can be canceled")
+
+        membership_request.status = "canceled"
+        membership_request.handled_by = current_user._get_current_object()
+        membership_request.handled_on = datetime.utcnow()
+
+        org.save()
+
+        notify_membership_invitation_canceled.delay(str(org.id), str(membership_request.id))
 
         return {}, 200
 

@@ -11,6 +11,7 @@ MEMBERSHIP_STATUS = {
     "pending": _("Pending"),
     "accepted": _("Accepted"),
     "refused": _("Refused"),
+    "canceled": _("Canceled"),
 }
 
 REQUEST_TYPES = {
