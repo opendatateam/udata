@@ -14,6 +14,7 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.models import Notification
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
 from udata.tests.api import PytestOnlyAPITestCase
@@ -530,6 +531,25 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.requests[0].kind == "invitation"
         assert organization.requests[0].user == invited_user
 
+    def test_invite_member_creates_notification_for_invited_user(self):
+        """Test that inviting a user creates a notification for the invited user, not the admins."""
+        user = self.login()
+        invited_user = UserFactory()
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+        )
+
+        api_url = url_for("api.invite_member", org=organization)
+        self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+
+        notifications = Notification.objects(user=invited_user)
+        assert notifications.count() == 1
+        assert notifications.first().details.request_organization == organization
+        assert notifications.first().details.kind == "invitation"
+
+        admin_notifications = Notification.objects(user=user)
+        assert admin_notifications.count() == 0
+
     def test_invite_member_by_email(self):
         """Test inviting by email when user doesn't exist yet."""
         user = self.login()
@@ -726,6 +746,32 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         organization.reload()
         assert organization.requests[0].status == "pending"
+
+    def test_cancel_invitation_marks_notification_as_handled(self):
+        """Test that canceling an invitation marks the related notification as handled."""
+        from udata.core.organization.notifications import MembershipRequestNotificationDetails
+
+        user = self.login()
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=invited_user, created_by=user, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[invitation]
+        )
+        notification = Notification(
+            user=invited_user,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization, request_user=invited_user
+            ),
+        )
+        notification.save()
+
+        api_url = url_for("api.cancel_membership", org=organization, id=invitation.id)
+        self.post(api_url)
+
+        notification.reload()
+        assert notification.handled_at is not None
 
     def test_update_member(self):
         user = self.login()

@@ -4,6 +4,8 @@ from udata.core import storages
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.features.notifications.models import Notification
 from udata.models import Discussion, Follow, Member, MembershipRequest
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
@@ -559,6 +561,52 @@ class OrgInvitationsAPITest(APITestCase):
         assert organization.requests[0].status == "refused"
         assert organization.requests[0].handled_by == user
         assert organization.requests[0].handled_on is not None
+
+    def test_accept_org_invitation_marks_notification_as_handled(self):
+        """Test that accepting an invitation marks the related notification as handled."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+        notification = Notification(
+            user=user,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization, request_user=user
+            ),
+        )
+        notification.save()
+
+        self.post(url_for("api.accept_org_invitation", id=invitation.id))
+
+        notification.reload()
+        assert notification.handled_at is not None
+
+    def test_refuse_org_invitation_marks_notification_as_handled(self):
+        """Test that refusing an invitation marks the related notification as handled."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+        notification = Notification(
+            user=user,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization, request_user=user
+            ),
+        )
+        notification.save()
+
+        self.post(url_for("api.refuse_org_invitation", id=invitation.id))
+
+        notification.reload()
+        assert notification.handled_at is not None
 
     def test_cannot_accept_other_user_invitation(self):
         """Test that a user cannot accept another user's invitation."""

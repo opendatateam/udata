@@ -492,6 +492,7 @@ class MembershipCancelAPI(MembershipAPI):
         membership_request.handled_on = datetime.utcnow()
 
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_invitation_canceled.delay(str(org.id), str(membership_request.id))
 

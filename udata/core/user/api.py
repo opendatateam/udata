@@ -260,7 +260,7 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
-        from udata.core.organization.models import Member, Organization
+        from udata.core.organization.models import Member, MembershipRequest, Organization
 
         user = current_user._get_current_object()
 
@@ -278,6 +278,7 @@ class AcceptOrgInvitationAPI(API):
                     org.members.append(member)
                     org.count_members()
                     org.save()
+                    MembershipRequest.after_handle.send(req, org=org)
 
                     return {"message": "Invitation accepted"}, 200
 
@@ -293,7 +294,7 @@ class RefuseOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Refuse an organization invitation."""
-        from udata.core.organization.models import Organization
+        from udata.core.organization.models import MembershipRequest, Organization
 
         user = current_user._get_current_object()
 
@@ -307,6 +308,7 @@ class RefuseOrgInvitationAPI(API):
                     req.handled_by = user
                     req.handled_on = datetime.utcnow()
                     org.save()
+                    MembershipRequest.after_handle.send(req, org=org)
 
                     return {"message": "Invitation refused"}, 200
 
