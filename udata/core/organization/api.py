@@ -430,6 +430,9 @@ class MembershipAcceptAPI(MembershipAPI):
         EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
 
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
+
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
@@ -457,6 +460,10 @@ class MembershipRefuseAPI(MembershipAPI):
         """Refuse user membership to a given organization."""
         EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
+
         form = api.validate(MembershipRefuseForm)
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()

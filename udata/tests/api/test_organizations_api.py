@@ -506,6 +506,44 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert response.json["message"] == "Unknown membership request id"
 
+    def test_accept_membership_rejects_invitation(self):
+        """Test that accept_membership rejects invitations."""
+        user = self.login()
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=invited_user, created_by=user, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[invitation]
+        )
+
+        api_url = url_for("api.accept_membership", org=organization, id=invitation.id)
+        response = self.post(api_url)
+
+        assert400(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "pending"
+
+    def test_refuse_membership_rejects_invitation(self):
+        """Test that refuse_membership rejects invitations."""
+        user = self.login()
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=invited_user, created_by=user, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[invitation]
+        )
+
+        api_url = url_for("api.refuse_membership", org=organization, id=invitation.id)
+        response = self.post(api_url)
+
+        assert400(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "pending"
+
     def test_invite_member_by_user_id(self):
         """Test inviting a user by their user ID creates an invitation."""
         user = self.login()
