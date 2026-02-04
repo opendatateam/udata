@@ -123,6 +123,19 @@ invite_fields = api.model(
     },
 )
 
+pending_invitation_fields = api.model(
+    "PendingInvitation",
+    {
+        "id": fields.String(readonly=True),
+        "organization": fields.Nested(org_ref_fields),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="Invitation message"),
+        "created": fields.ISODateTime(description="The invitation creation date", readonly=True),
+    },
+)
+
 member_fields = api.model(
     "Member",
     {

@@ -11,6 +11,7 @@ from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
+from udata.core.organization.api_fields import pending_invitation_fields
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -221,6 +222,7 @@ class ApiKeyAPI(API):
 class MyOrgInvitationsAPI(API):
     @api.secure
     @api.doc("list_org_invitations")
+    @api.marshal_list_with(pending_invitation_fields)
     def get(self):
         """List pending organization invitations for current user."""
         from udata.core.organization.models import Organization
@@ -236,15 +238,10 @@ class MyOrgInvitationsAPI(API):
                     invitations.append(
                         {
                             "id": str(req.id),
-                            "organization": {
-                                "id": str(org.id),
-                                "name": org.name,
-                                "slug": org.slug,
-                                "logo": org.logo.url if org.logo else None,
-                            },
+                            "organization": org,
                             "role": req.role,
                             "comment": req.comment,
-                            "created": req.created.isoformat() if req.created else None,
+                            "created": req.created,
                         }
                     )
 
