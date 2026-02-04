@@ -3,8 +3,8 @@ from flask import url_for
 from udata.core import storages
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.models import Discussion, Follow, Member, MembershipRequest
 from udata.tests.helpers import capture_mails, create_test_image
