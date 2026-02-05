@@ -14,8 +14,8 @@ MEMBERSHIP_STATUS = {
 }
 
 LOGO_MAX_SIZE = 500
-LOGO_SIZES = [100, 60, 25]
-BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
+LOGO_SIZES = [200, 100, 60, 25]
+BIGGEST_LOGO_SIZE = 100  # Keep 100 until migration is complete, then switch to 200
 
 PUBLIC_SERVICE = "public-service"
 CERTIFIED = "certified"
