@@ -191,7 +191,7 @@ def membership_invitation(
     if user_exists:
         url = cdata_url("/admin/me/profile")
     else:
-        url = cdata_url("/register?next=/admin/me/profile")
+        url = cdata_url("/register", next="/admin/me/profile", email=invitation.email)
 
     paragraphs.append(MailCTA(_("View and respond to invitation"), url))
     return MailMessage(
