@@ -41,17 +41,17 @@ def migrate(db):
                             )
                             notification.save()
                             created_count += 1
-                else:
-                    # Add NEW_DISCUSSION notifications if no reply yet
-                    recipients = discussion.owner_recipients(sender=discussion.user)
+                    else:
+                        # Add NEW_DISCUSSION notifications if no reply yet
+                        recipients = discussion.owner_recipients(sender=discussion.user)
 
-                    for user in recipients:
-                        notification = Notification(user=user)
-                        notification.details = DiscussionNotificationDetails(
-                            status=DiscussionStatus.NEW_DISCUSSION, discussion=discussion
-                        )
-                        notification.save()
-                        created_count += 1
+                        for user in recipients:
+                            notification = Notification(user=user)
+                            notification.details = DiscussionNotificationDetails(
+                                status=DiscussionStatus.NEW_DISCUSSION, discussion=discussion
+                            )
+                            notification.save()
+                            created_count += 1
             except Exception as e:
                 log.error(f"Error creating notification for discussion {discussion.id}: {e}")
 
