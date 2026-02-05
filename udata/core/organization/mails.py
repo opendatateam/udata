@@ -174,7 +174,9 @@ def membership_invitation_refused(org: Organization, invitation: MembershipReque
     )
 
 
-def membership_invitation(org: Organization, invitation: MembershipRequest) -> MailMessage:
+def membership_invitation(
+    org: Organization, invitation: MembershipRequest, user_exists: bool
+) -> MailMessage:
     paragraphs = [
         ParagraphWithLinks(
             _(
@@ -185,7 +187,13 @@ def membership_invitation(org: Organization, invitation: MembershipRequest) -> M
     ]
     if invitation.comment:
         paragraphs.append(LabelledContent(_("Message:"), invitation.comment))
-    paragraphs.append(MailCTA(_("View and respond to invitation"), cdata_url("/admin/me/profile")))
+
+    if user_exists:
+        url = cdata_url("/admin/me/profile")
+    else:
+        url = cdata_url("/register?next=/admin/me/profile")
+
+    paragraphs.append(MailCTA(_("View and respond to invitation"), url))
     return MailMessage(
         subject=_("You have been invited to join an organization"),
         paragraphs=paragraphs,

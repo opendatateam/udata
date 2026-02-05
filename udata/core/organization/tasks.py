@@ -80,9 +80,9 @@ def notify_membership_invitation(org_id, invitation_id):
         return
 
     if invitation.user:
-        mails.membership_invitation(org, invitation).send(invitation.user)
+        mails.membership_invitation(org, invitation, user_exists=True).send(invitation.user)
     elif invitation.email:
-        mails.membership_invitation(org, invitation).send(invitation.email)
+        mails.membership_invitation(org, invitation, user_exists=False).send(invitation.email)
 
 
 @task(route="high.mail")
