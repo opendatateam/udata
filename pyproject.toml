@@ -186,7 +186,7 @@ line-length = 100
 packages = ["udata"]
 
 [tool.setuptools.package-data]
-udata = ["templates/*", "translations/*"]
+udata = ["templates/*", "translations/*", "fixtures/*"]
 
 [tool.wheel]
 universal = true
