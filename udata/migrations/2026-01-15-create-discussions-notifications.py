@@ -20,11 +20,14 @@ def migrate(db):
     created_count = 0
 
     # Only process discussions created after 01/01/2026
-    discussions = Discussion.objects(closed=None, created__gte=datetime(2026, 1, 1))
+    discussions = Discussion.objects(closed=None, created__gte=datetime(2026, 1, 1)).order_by(
+        "-discussion.posted_on"
+    )
     count = discussions.count()
 
-    with click.progressbar(discussions, length=count) as progress:
+    with click.progressbar(reversed(discussions), length=count) as progress:
         for discussion in progress:
+            print(discussion)
             try:
                 existing = Notification.objects(details__discussion=discussion).first()
                 if not existing:
