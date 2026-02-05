@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from itertools import chain
 
 from blinker import Signal
@@ -280,7 +280,9 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         self.save()
         from udata.core.user.api_tokens import ApiToken
 
-        ApiToken.objects(user=self, revoked_at=None).update(set__revoked_at=datetime.utcnow())
+        ApiToken.objects(user=self, revoked_at=None).update(
+            set__revoked_at=datetime.now(timezone.utc)
+        )
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self

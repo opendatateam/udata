@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -43,7 +43,7 @@ class ApiToken(db.Document):
         description="Token type",
     )
     created_at = field(
-        db.DateTimeField(default=datetime.utcnow, required=True),
+        db.DateTimeField(default=lambda: datetime.now(timezone.utc), required=True),
         readonly=True,
         description="Token creation date",
     )
@@ -102,21 +102,18 @@ class ApiToken(db.Document):
         token = cls.objects(token_hash=token_hash, revoked_at=None).first()
         if token is None:
             return None
-        if token.expires_at and token.expires_at < datetime.utcnow():
+        if token.expires_at and token.expires_at < datetime.now(timezone.utc):
             return None
         return token
 
     def revoke(self):
-        self.revoked_at = datetime.utcnow()
+        self.revoked_at = datetime.now(timezone.utc)
         self.save()
 
     def update_usage(self, user_agent=None):
-        update_kwargs = {"set__last_used_at": datetime.utcnow()}
-        if (
-            user_agent
-            and user_agent not in (self.user_agents or [])
-            and len(self.user_agents or []) < MAX_USER_AGENTS
-        ):
+        update_kwargs = {"set__last_used_at": datetime.now(timezone.utc)}
+        agents = self.user_agents or []
+        if user_agent and user_agent not in agents and len(agents) < MAX_USER_AGENTS:
             update_kwargs["push__user_agents"] = user_agent
         type(self).objects(id=self.id).update_one(**update_kwargs)
 
