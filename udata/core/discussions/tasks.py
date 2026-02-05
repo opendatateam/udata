@@ -49,7 +49,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
 
         for recipient in recipients:
             notification = Notification(
-                created_at=discussion.posted_on,
+                created_at=message.posted_on,
                 user=recipient,
                 details=DiscussionNotificationDetails(
                     status=DiscussionStatus.NEW_COMMENT,
