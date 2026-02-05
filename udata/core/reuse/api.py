@@ -270,7 +270,7 @@ class ReuseDataservicesAPI(API):
 
 
 @ns.route("/badges/", endpoint="available_reuse_badges")
-class AvailableDatasetBadgesAPI(API):
+class AvailableReuseBadgesAPI(API):
     @api.doc("available_reuse_badges")
     def get(self):
         """List all available reuse badges and their labels"""

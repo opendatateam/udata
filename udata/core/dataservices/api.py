@@ -145,7 +145,7 @@ class DataserviceAPI(API):
 
 @ns.route("/<dataservice:dataservice>/featured/", endpoint="dataservice_featured")
 @api.doc(**common_doc)
-class ReuseFeaturedAPI(API):
+class DataserviceFeaturedAPI(API):
     @api.doc("feature_dataservice")
     @api.secure(admin_permission)
     @api.marshal_with(Dataservice.__read_fields__)
