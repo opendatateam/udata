@@ -35,9 +35,12 @@ def migrate(db):
                         recipients = discussion.owner_recipients(sender=last_comment.posted_by)
 
                         for user in recipients:
-                            notification = Notification(user=user)
-                            notification.details = DiscussionNotificationDetails(
-                                status=DiscussionStatus.NEW_COMMENT, discussion=discussion
+                            notification = Notification(
+                                user=user,
+                                details=DiscussionNotificationDetails(
+                                    status=DiscussionStatus.NEW_COMMENT,
+                                    discussion=discussion,
+                                ),
                             )
                             notification.save()
                             created_count += 1
@@ -46,9 +49,12 @@ def migrate(db):
                         recipients = discussion.owner_recipients(sender=discussion.user)
 
                         for user in recipients:
-                            notification = Notification(user=user)
-                            notification.details = DiscussionNotificationDetails(
-                                status=DiscussionStatus.NEW_DISCUSSION, discussion=discussion
+                            notification = Notification(
+                                user=user,
+                                details=DiscussionNotificationDetails(
+                                    status=DiscussionStatus.NEW_DISCUSSION,
+                                    discussion=discussion,
+                                ),
                             )
                             notification.save()
                             created_count += 1
