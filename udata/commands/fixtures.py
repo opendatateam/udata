@@ -289,17 +289,11 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     # Fetch all referenced pages
     json_pages = []
     for page_id in page_ids:
-        response = requests.get(f"{data_source}{PAGE_URL}/{page_id}/")
-        if response.ok:
-            page = response.json()
-            remove_unwanted_keys(page, "page")
-            for bloc in page.get("blocs", []):
-                clean_bloc_for_generate(bloc)
-            json_pages.append(page)
-        else:
-            print(
-                f"Got a status code {response.status_code} while getting page {page_id}, skipping"
-            )
+        page = requests.get(f"{data_source}{PAGE_URL}/{page_id}/").json()
+        remove_unwanted_keys(page, "page")
+        for bloc in page.get("blocs", []):
+            clean_bloc_for_generate(bloc)
+        json_pages.append(page)
 
     json_output = {
         "datasets": json_datasets,
