@@ -23,7 +23,6 @@ class DiscussionNotificationDetails(db.EmbeddedDocument):
         db.EnumField(DiscussionStatus),
         readonly=True,
         auditable=False,
-        allow_null=True,
         filterable={},
     )
     discussion = field(
