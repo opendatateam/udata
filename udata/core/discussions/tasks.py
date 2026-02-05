@@ -20,13 +20,13 @@ def notify_new_discussion(discussion_id):
         mails.new_discussion(discussion).send(recipients)
         for recipient in recipients:
             notification = Notification(
+                created_at=discussion.created,
                 user=recipient,
                 details=DiscussionNotificationDetails(
                     status=DiscussionStatus.NEW_DISCUSSION,
                     discussion=discussion,
                 ),
             )
-            notification.created_at = discussion.created
             notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
@@ -49,13 +49,13 @@ def notify_new_discussion_comment(discussion_id, message=None):
 
         for recipient in recipients:
             notification = Notification(
+                created_at=discussion.posted_on,
                 user=recipient,
                 details=DiscussionNotificationDetails(
                     status=DiscussionStatus.NEW_COMMENT,
                     discussion=discussion,
                 ),
             )
-            notification.created_at = discussion.created
             notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
@@ -78,13 +78,13 @@ def notify_discussion_closed(discussion_id, message=None):
 
         for recipient in recipients:
             notification = Notification(
+                created_at=discussion.closed,
                 user=recipient,
                 details=DiscussionNotificationDetails(
                     status=DiscussionStatus.CLOSED,
                     discussion=discussion,
                 ),
             )
-            notification.created_at = discussion.created
             notification.save()
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
