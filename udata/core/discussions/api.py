@@ -225,6 +225,7 @@ class DiscussionAPI(API):
             discussion.signal_comment(message=message_idx)
         return discussion
 
+    @api.secure
     @api.doc("update_discussion")
     @api.response(403, "Not allowed to update this discussion")
     @api.expect(edit_comment_discussion_fields)
@@ -239,6 +240,7 @@ class DiscussionAPI(API):
 
         return discussion
 
+    @api.secure
     @api.doc("delete_discussion")
     @api.expect(discussion_delete_parser)
     @api.response(403, "Not allowed to delete this discussion")
@@ -275,6 +277,7 @@ class DiscussionCommentAPI(API):
     Base class for a comment in a discussion thread.
     """
 
+    @api.secure
     @api.doc("edit_discussion_comment")
     @api.response(403, "Not allowed to edit this comment")
     @api.expect(edit_comment_discussion_fields)
@@ -295,6 +298,7 @@ class DiscussionCommentAPI(API):
         discussion.save()
         return discussion
 
+    @api.secure
     @api.doc("delete_discussion_comment")
     @api.expect(message_delete_parser)
     @api.response(403, "Not allowed to delete this comment")
