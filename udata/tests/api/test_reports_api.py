@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 
@@ -197,7 +197,7 @@ class ReportsAPITest(APITestCase):
         spam_dataset = DatasetFactory.create(owner=user)
         report = Report(subject=spam_dataset, reason="spam").save()
 
-        dismiss_time = datetime.utcnow().isoformat()
+        dismiss_time = datetime.now(UTC).isoformat()
 
         # Should require admin
         response = self.patch(url_for("api.report", report=report), {"dismissed_at": dismiss_time})
@@ -227,7 +227,7 @@ class ReportsAPITest(APITestCase):
         report = Report(
             subject=spam_dataset,
             reason="spam",
-            dismissed_at=datetime.utcnow(),
+            dismissed_at=datetime.now(UTC),
             dismissed_by=admin,
         ).save()
 
@@ -267,7 +267,7 @@ class ReportsAPITest(APITestCase):
 
         # Handled report (dismissed)
         dismissed_report = Report(
-            subject=dataset2, reason="spam", dismissed_at=datetime.utcnow(), dismissed_by=admin
+            subject=dataset2, reason="spam", dismissed_at=datetime.now(UTC), dismissed_by=admin
         ).save()
 
         self.login(admin)

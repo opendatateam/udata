@@ -4,7 +4,7 @@ import signal
 import sys
 from collections import Counter
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from textwrap import dedent
 
 import click
@@ -104,7 +104,7 @@ def load(geozones_file, levels_file, drop=False):
         with open(levels_file) as f:
             json_levels = json.load(f)
 
-    ts = datetime.utcnow().isoformat().replace("-", "").replace(":", "").split(".")[0]
+    ts = datetime.now(UTC).isoformat().replace("-", "").replace(":", "").split(".")[0]
     if drop and GeoLevel.objects.count():
         name = "_".join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()

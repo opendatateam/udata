@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
@@ -98,7 +98,7 @@ def on_handle_transfer(transfer, **kwargs):
 
     # Update handled_at for all matching notifications
     for notification in notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
 

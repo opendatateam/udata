@@ -1,6 +1,6 @@
 import logging
 import traceback
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import requests
@@ -165,7 +165,7 @@ class BaseBackend(object):
     def harvest(self):
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
-        self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
+        self.job = factory(status="initialized", started=datetime.now(UTC), source=self.source)
         self.remote_ids = set()
 
         before_harvest_job.send(self)
@@ -231,7 +231,7 @@ class BaseBackend(object):
         log.debug(f"Processing dataset {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -279,7 +279,7 @@ class BaseBackend(object):
             item.errors.append(error)
         finally:
             current_app.logger.removeHandler(log_catcher)
-            item.ended = datetime.utcnow()
+            item.ended = datetime.now(UTC)
             item.logs = [
                 HarvestLog(level=record.levelname, message=record.getMessage())
                 for record in log_catcher.records
@@ -298,7 +298,7 @@ class BaseBackend(object):
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -342,7 +342,7 @@ class BaseBackend(object):
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             item.errors.append(error)
         finally:
-            item.ended = datetime.utcnow()
+            item.ended = datetime.now(UTC)
             self.save_job()
 
     def ensure_unique_remote_id(self, item):
@@ -359,7 +359,7 @@ class BaseBackend(object):
         harvest.source_id = str(self.source.id)
         harvest.remote_id = remote_id
         harvest.domain = self.source.domain
-        harvest.last_update = datetime.utcnow()
+        harvest.last_update = datetime.now(UTC)
         harvest.archived_at = None
         harvest.archived = None
 
@@ -380,7 +380,7 @@ class BaseBackend(object):
         harvest.source_url = str(self.source.url)
 
         harvest.remote_id = remote_id
-        harvest.last_update = datetime.utcnow()
+        harvest.last_update = datetime.now(UTC)
 
         harvest.archived_at = None
         harvest.archived_reason = None
@@ -392,7 +392,7 @@ class BaseBackend(object):
             self.job.save()
 
     def end_job(self):
-        self.job.ended = datetime.utcnow()
+        self.job.ended = datetime.now(UTC)
         if not self.dryrun:
             self.job.save()
 
