@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<csw:GetRecordsResponse 
-  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
-  <csw:SearchStatus timestamp="2023-03-03T16:33:45.887333Z" />
+<csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2026-02-06T15:03:35.418284Z" />
   <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
-    <rdf:RDF 
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
-      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
-      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
-      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
-      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
-      xmlns:void="http://www.w3.org/TR/void/" 
-      xmlns:dct="http://purl.org/dc/terms/" 
-      xmlns:dcat="http://www.w3.org/ns/dcat#">
-      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848">
-        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/fr-238000038-oise-ortho-vis-2008" />
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:void="http://www.w3.org/TR/void/" xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gmd="http://www.isotc211.org/2005/gmd">
+      <dcat:CatalogRecord rdf:about="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf">
+        <foaf:primaryTopic rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/0ae299e7-10d6-4290-944e-c6c62e2aeabf" />
         <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
-        <dct:issued>2021-02-03</dct:issued>
-        <dct:modified>2021-02-03</dct:modified>
+        <dct:issued>2025-08-21</dct:issued>
+        <dct:modified>2025-08-21</dct:modified>
         <dct:references>
-          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/formatters/xml">
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/api/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf/formatters/xml">
             <dct:format>
               <dct:IMT>
                 <rdf:value>application/xml</rdf:value>
@@ -30,7 +19,7 @@
           </rdf:Description>
         </dct:references>
         <dct:references>
-          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848">
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/0ae299e7-10d6-4290-944e-c6c62e2aeabf">
             <dct:format>
               <dct:IMT>
                 <rdf:value>text/html</rdf:value>
@@ -40,114 +29,109 @@
           </rdf:Description>
         </dct:references>
       </dcat:CatalogRecord>
-      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/fr-238000038-oise-ortho-vis-2008">
-        <dct:identifier>fr-238000038-oise-ortho-vis-2008</dct:identifier>
-        <dct:title>Orthophotographie de l'Oise (2008-2009) - rayonnement visible</dct:title>
-        <dct:abstract>Photographies aériennes ortho-rectifiées de 2008-2009 couvrant l'ensemble du département de l'Oise (rayonnement dans le domaine visible).
+      <dcat:Dataset rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/0ae299e7-10d6-4290-944e-c6c62e2aeabf">
+        <dct:identifier>0ae299e7-10d6-4290-944e-c6c62e2aeabf</dct:identifier>
+        <dcat:landingPage>https://www.geo2france.fr/geonetwork/srv/resources/0ae299e7-10d6-4290-944e-c6c62e2aeabf</dcat:landingPage>
+        <dct:title>Territoires d'exercice de la compétence "Collecte des déchets ménagers"</dct:title>
+        <dct:abstract>L'article L2224-13 du Code général des collectivités territoriales autorise un transfère partiel de la compétence de collecte et de traitement des déchets des ménages. Il est ainsi possible pour les EPCI à fiscalité propre, de ne transférer que la partie de la compétence comprenant le traitement, ou seulement celle comportant la collecte. La gestion des déchetteries étant à l'interface entre la collecte et le traitement, elle peut être rattachée à l'une ou l'autre de ces missions.
+Ainsi, on distingue 3 types de territoires différents : les territoires de collecte, les territoires de traitement, et les territoires de gestion des déchetteries.
+Ces contours ne correspondent pas nécessairement aux contours des EPCI ou syndicats mixtes.
 
-La résolution des images est de 34 cm.
-La taille équivalente des pixels une fois projetés sur le sol est de 20 cm.
-
-Cette orthophotographie est cofinancée par l’Union européenne. L’Europe s’engage en Picardie avec le Fonds européen de développement régional.</dct:abstract>
-        <dcat:keyword>orthophotographies</dcat:keyword>
-        <dcat:keyword>images aériennes</dcat:keyword>
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE%20%2860%29" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie" />
-        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
-        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/attachments/apercu_ortho_oise_2008_vis_s.png" />
-        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/attachments/apercu_ortho_oise_2008_vis.png" />
+GEMET : déchets.
+GEMET : déchets assimilés aux ordures ménagères.
+GEMET : collecte des déchets.
+Territoires : Hauts-de-France (Région).
+Granularité territoriale : .</dct:abstract>
+        <dcat:keyword>odema</dcat:keyword>
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/d%C3%A9chets" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/d%C3%A9chets%20assimil%C3%A9s%20aux%20ordures%20m%C3%A9nag%C3%A8res" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/collecte%20des%20d%C3%A9chets" />
+        <dcat:theme rdf:resource="http://geonetwork-opensource.org/administrativeAreaFr#REG_32" />
+        <dcat:theme rdf:resource="" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf/attachments/Capture%20d%E2%80%99%C3%A9cran%20du%202024-08-09%2014-00-43.png" />
         <dct:spatial>
-          <ogc:Polygon 
-            xmlns:ogc="http://www.opengis.net/rdf#">
-            <geo:asWKT 
-              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.64053 49.01243, 1.64053 49.774767884053, 3.19423 49.774767884053, 3.19423 49.01243, 1.64053 49.01243))
-            </geo:asWKT>
+          <ogc:Polygon xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.3802175217118144 48.83720744013672, 1.3802175217118144 51.088989439843324, 4.25583684779586 51.088989439843324, 4.25583684779586 48.83720744013672, 1.3802175217118144 48.83720744013672))</geo:asWKT>
           </ogc:Polygon>
         </dct:spatial>
-        <dct:issued>2009-04-24</dct:issued>
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France" />
-        <dct:license>license</dct:license>
-        <dct:license>license</dct:license>
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWMS-oise_ortho_2008_vis" />
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWCS-cr_hdf%3Aoise_ortho_2008_vis" />
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#WWW%3ALINK-1.0-http--link-Tableau%20des%20licences%20d%27InterAtlas%20%28licence%20L.O.P%203%29" />
-        <dcat:dataQuality>Caractéristiques des images sources :
-- capteur : Caméra Vexcel UltracamX - Focale : 100 mm
-- prise de vue : 29, 28 septembre 2004 et 24 avril 2009
-- résolution native : 34 cm
-- résolution des images livrées : 20 cm (soit 1/800°)
-- précision planimétrique : tolérance 2 pixels (centrale inertielle embarquée)
-- aérotriangulation avec les points GPS sur la couverture de votre zone
-- mosaïquage avec recouvrement 80/30
-- radiométrie : nivellement et homogénéisation des couleurs
-- MNT utilisé pour l'orthorectification : production automatique à partir des images</dcat:dataQuality>
+        <dct:issued>2023</dct:issued>
+        <dct:publisher rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/organizations/Odema" />
+        <dct:publisher rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:accrualPeriodicity>ANNUAL</dct:accrualPeriodicity>
+        <dcat:granularity>50000</dcat:granularity>
+        <dct:license rdf:resource="http://inspire.ec.europa.eu/metadatacodelist/LimitationsOnPublicAccess/noLimitations">Pas de restriction d’accès public</dct:license>
+        <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadatacodelist/LimitationsOnPublicAccess/noLimitations">Pas de restriction d’accès public</dct:accessRights>
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf#OGC%3AWMS-territoires_collecte" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf#OGC%3AWFS-odema%3Aterritoires_collecte" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf#WWW%3ALINK-1.0-http--link-Visionneuse%20cartographique%20Odema" />
+        <dcat:contactPoint>
+          <vcard:Kind xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/Odema">
+            <vcard:fn>Odema</vcard:fn>
+            <vcard:hasEmail rdf:resource="mailto:odema@cerdd.org" />
+          </vcard:Kind>
+        </dcat:contactPoint>
+        <dcat:contactPoint>
+          <vcard:Kind xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </vcard:Kind>
+        </dcat:contactPoint>
+        <dcat:dataQuality>Consolidation des informations Sinoe, avec veille locale de l'Observatoire déchets-matières des Hauts-de-France (Odema).</dcat:dataQuality>
       </dcat:Dataset>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE%20%2860%29">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
-        <skos:prefLabel>OISE (60)</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/d%C3%A9chets">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET" />
+        <skos:prefLabel>déchets</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes" />
-        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/d%C3%A9chets%20assimil%C3%A9s%20aux%20ordures%20m%C3%A9nag%C3%A8res">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET" />
+        <skos:prefLabel>déchets assimilés aux ordures ménagères</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
-        <skos:prefLabel>photographie aérienne</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET/concepts/collecte%20des%20d%C3%A9chets">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET" />
+        <skos:prefLabel>collecte des déchets</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
-        <skos:prefLabel>photographie</skos:prefLabel>
+      <skos:Concept rdf:about="http://geonetwork-opensource.org/administrativeAreaFr#REG_32">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/catalogue/administrativeEntities" />
+        <skos:prefLabel>Hauts-de-France (Région)</skos:prefLabel>
       </skos:Concept>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWMS-oise_ortho_2008_vis">
-        <dcat:accessURL>https://www.geo2france.fr/geoserver/cr_hdf/ows?service=WMS&amp;request=GetCapabilities</dcat:accessURL>
-        <dct:title>oise_ortho_2008_vis</dct:title>
+      <skos:Concept rdf:about="http://geonetwork-opensource.org/granularite_territoriale/concepts/">
+        <skos:inScheme rdf:resource="http://geonetwork-opensource.org/granularite_territoriale" />
+        <skos:prefLabel />
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf#OGC%3AWMS-territoires_collecte">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/odema/ows</dcat:accessURL>
+        <dct:title>territoires_collecte</dct:title>
+        <dct:description>Territoires de collecte</dct:description>
         <dct:format>OGC:WMS</dct:format>
       </dcat:Distribution>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWCS-cr_hdf%3Aoise_ortho_2008_vis">
-        <dcat:accessURL>https://www.geo2france.fr/geoserver/cr_hdf/ows?service=WCS&amp;request=GetCapabilities</dcat:accessURL>
-        <dct:title>cr_hdf:oise_ortho_2008_vis</dct:title>
-        <dct:format>OGC:WCS</dct:format>
-      </dcat:Distribution>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#WWW%3ALINK-1.0-http--link-Tableau%20des%20licences%20d%27InterAtlas%20%28licence%20L.O.P%203%29">
-        <dcat:accessURL>https://www.geo2france.fr/portail/espace-documentaire/tableau-des-licences-interatlas</dcat:accessURL>
-        <dct:title>Tableau des licences d'InterAtlas (licence L.O.P 3)</dct:title>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf#WWW%3ALINK-1.0-http--link-Visionneuse%20cartographique%20Odema">
+        <dcat:accessURL>https://www.geo2france.fr/mviewer/?config=apps/odema/obs_dechet.xml</dcat:accessURL>
+        <dct:title>Visionneuse cartographique Odema</dct:title>
         <dct:format>WWW:LINK-1.0-http--link</dct:format>
       </dcat:Distribution>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
         <foaf:name>Géo2France</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
       </foaf:Organization>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France">
-        <foaf:name>Région Hauts-de-France</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr" />
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/Odema">
+        <foaf:name>Odema</foaf:name>
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/odema%40cerdd.org" />
       </foaf:Organization>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr">
         <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
       </foaf:Agent>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr">
-        <foaf:mbox rdf:resource="mailto:sig@hautsdefrance.fr" />
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/odema%40cerdd.org">
+        <foaf:mbox rdf:resource="mailto:odema@cerdd.org" />
       </foaf:Agent>
     </rdf:RDF>
-    <rdf:RDF 
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
-      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
-      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
-      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
-      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
-      xmlns:void="http://www.w3.org/TR/void/" 
-      xmlns:dct="http://purl.org/dc/terms/" 
-      xmlns:dcat="http://www.w3.org/ns/dcat#">
-      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974">
-        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Fgeonetwork%2Fsrv%2Ffre%2Fcatalog.search%23%2Fmetadata%2F4635b9cc-bc9a-4f25-851e-040cf647d974" />
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:void="http://www.w3.org/TR/void/" xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gmd="http://www.isotc211.org/2005/gmd">
+      <dcat:CatalogRecord rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc">
+        <foaf:primaryTopic rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/fr-200053742%2F2022%2Fsociete%2Fplage_sans_plastique" />
         <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
-        <dct:issued>2019-11-21</dct:issued>
-        <dct:modified>2019-11-21</dct:modified>
+        <dct:issued>2023-04-26</dct:issued>
+        <dct:modified>2023-04-26</dct:modified>
         <dct:references>
-          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/formatters/xml">
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/api/records/0c232513-cb8c-473a-bbdd-8435eb3987cc/formatters/xml">
             <dct:format>
               <dct:IMT>
                 <rdf:value>application/xml</rdf:value>
@@ -157,7 +141,7 @@ Cette orthophotographie est cofinancée par l’Union européenne. L’Europe s�
           </rdf:Description>
         </dct:references>
         <dct:references>
-          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974">
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/0c232513-cb8c-473a-bbdd-8435eb3987cc">
             <dct:format>
               <dct:IMT>
                 <rdf:value>text/html</rdf:value>
@@ -167,102 +151,119 @@ Cette orthophotographie est cofinancée par l’Union européenne. L’Europe s�
           </rdf:Description>
         </dct:references>
       </dcat:CatalogRecord>
-      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974">
-        <dct:identifier>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974</dct:identifier>
-        <dct:title>Orthophotographie du Département de l'Aisne (2009) - rayonnement infrarouge</dct:title>
-        <dct:abstract>Orthophotographies du Département de l'Aisne réalisée à partir de prises de vues aériennes numériques (pixel 25 cm, rayonnement infrarouge) de 2009 dans le système de projection Lambert 93.
+      <dcat:Dataset rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/0c232513-cb8c-473a-bbdd-8435eb3987cc">
+        <dct:identifier>fr-200053742/2022/societe/plage_sans_plastique</dct:identifier>
+        <dcat:landingPage>https://www.geo2france.fr/geonetwork/srv/resources/fr-200053742/2022/societe/plage_sans_plastique</dcat:landingPage>
+        <dct:title>Plages sans plastique en Hauts-de-France en 2022</dct:title>
+        <dct:abstract>Localisation des plages en région Hauts-de-France signataires de la charte d'engagement nationale "plages sans déchets plastique"
+Dernière données disponibles au 01/07/2022
+Plus de renseignements : https://www.ecologie.gouv.fr/plages-sans-dechet-plastique-charte-communes-eco-exemplaires
 
-Ces données sont cofinancées par l’Union européenne. L’Europe s’engage en Picardie avec le Fonds européen de développement régional.</dct:abstract>
-        <dcat:keyword>orthophotographies</dcat:keyword>
-        <dcat:keyword>images aériennes</dcat:keyword>
-        <dcat:keyword>ortho-imagerie</dcat:keyword>
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE%20%2802%29" />
-        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie" />
-        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
-        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/attachments/apercu_ortho_aisne_2009_ir_s.png" />
-        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/attachments/apercu_ortho_aisne_2009_ir.png" />
+Thèmes - SIG - HdF : SOCIETE.
+GEMET - INSPIRE themes, version 1.0 : Services d'utilité publique et services publics.
+Région : HAUTS-DE-FRANCE.
+Départements : PAS-DE-CALAIS.</dct:abstract>
+        <dcat:keyword>DECHET</dcat:keyword>
+        <dcat:keyword>PLAGE</dcat:keyword>
+        <dcat:keyword>PARLEMENT DE LA MER</dcat:keyword>
+        <dcat:keyword>ENVIRONNEMENT</dcat:keyword>
+        <dcat:keyword>PLASTIQUE</dcat:keyword>
+        <dcat:keyword>ECOLOGIE</dcat:keyword>
+        <dcat:keyword>LABEL ACCUEIL QUALITE BIEN-ETRE</dcat:keyword>
+        <dcat:keyword>DONNEE OUVERTE</dcat:keyword>
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF/concepts/SOCIETE" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Services%20d%27utilit%C3%A9%20publique%20et%20services%20publics" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/society" />
+        <foaf:thumbnail rdf:resource="https://sig.hautsdefrance.fr/ext/vignettes_metadonnees/sans_plastique.jpg" />
         <dct:spatial>
-          <ogc:Polygon 
-            xmlns:ogc="http://www.opengis.net/rdf#">
-            <geo:asWKT 
-              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((2.9587567567822513 48.838486155984086, 2.9587567567822513 50.06928644841888, 4.2557525169036525 50.06928644841888, 4.2557525169036525 48.838486155984086, 2.9587567567822513 48.838486155984086))
-            </geo:asWKT>
+          <ogc:Polygon xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.36 48.827, 1.36 51.0911, 4.086 51.0911, 4.086 48.827, 1.36 48.827))</geo:asWKT>
           </ogc:Polygon>
         </dct:spatial>
-        <dct:issued>2011-01-20</dct:issued>
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/%C3%89tat" />
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/D%C3%A9partement%20de%20l%27Aisne" />
-        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France" />
-        <dct:language>fre</dct:language>
-        <dct:license>license</dct:license>
-        <dct:license>license</dct:license>
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWMS-aisne_ortho_2009_ir" />
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWCS-aisne_ortho_2009_ir" />
-        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine" />
-        <dcat:dataQuality>Orthophotographies du Département de l'Aisne réalisée à partir de prises de vues aériennes numériques (pixel 25 cm, rayonnement visible et proche infrarouge) de 2009.</dcat:dataQuality>
+        <dct:issued>2022-10-17</dct:issued>
+        <dct:updated>2023-02-15</dct:updated>
+        <dct:publisher rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:accrualPeriodicity>PUNCTUAL</dct:accrualPeriodicity>
+        <dcat:granularity>25000</dcat:granularity>
+        <dct:license />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Tableau%20de%20donn%C3%A9es%20%28csv%29" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#OGC%3AWMS-plage_sans_plastique" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#OGC%3AWFS-plage_sans_plastique" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-geojson" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Label%20Plage%20sans%20plastique%20%28shapefile%29" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Visualisation%20de%20la%20donn%C3%A9e" />
+        <dcat:contactPoint>
+          <vcard:Kind xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </vcard:Kind>
+        </dcat:contactPoint>
+        <dcat:dataQuality>Données Ministère de la transition écologique et solidaire
+BD TOPO. 2020-11</dcat:dataQuality>
       </dcat:Dataset>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
-        <skos:prefLabel>photographie aérienne</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF/concepts/SOCIETE">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF" />
+        <skos:prefLabel>SOCIETE</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
-        <skos:prefLabel>photographie</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Services%20d%27utilit%C3%A9%20publique%20et%20services%20publics">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0" />
+        <skos:prefLabel>Services d'utilité publique et services publics</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE%20%2802%29">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
-        <skos:prefLabel>AISNE (02)</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
       </skos:Concept>
-      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie">
-        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes" />
-        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>PAS-DE-CALAIS</skos:prefLabel>
       </skos:Concept>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWMS-aisne_ortho_2009_ir">
-        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WMS&amp;request=GetCapabilities</dcat:accessURL>
-        <dct:title>aisne_ortho_2009_ir</dct:title>
-        <dct:format>OGC:WMS</dct:format>
-      </dcat:Distribution>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWCS-aisne_ortho_2009_ir">
-        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WCS&amp;request=GetCapabilities</dcat:accessURL>
-        <dct:title>aisne_ortho_2009_ir</dct:title>
-        <dct:format>OGC:WCS</dct:format>
-      </dcat:Distribution>
-      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine">
-        <dcat:accessURL>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974</dcat:accessURL>
-        <dct:title>Lien vers la fiche de métadonnées d'origine</dct:title>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Tableau%20de%20donn%C3%A9es%20%28csv%29">
+        <dcat:accessURL>https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=csv&amp;service=WFS</dcat:accessURL>
+        <dct:title>Tableau de données (csv)</dct:title>
+        <dct:description>Données brutes au format Csv (Plage sans plastique) et encodage UTF-8</dct:description>
         <dct:format>WWW:LINK-1.0-http--link</dct:format>
       </dcat:Distribution>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
-        <foaf:name>Géo2France</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
-      </foaf:Organization>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/%C3%89tat">
-        <foaf:name>État</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/d3884010e222" />
-      </foaf:Organization>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/D%C3%A9partement%20de%20l%27Aisne">
-        <foaf:name>Département de l'Aisne</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40aisne.fr" />
-      </foaf:Organization>
-      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France">
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#OGC%3AWMS-plage_sans_plastique">
+        <dcat:accessURL>https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz</dcat:accessURL>
+        <dct:title>plage_sans_plastique</dct:title>
+        <dct:description>plage sans plastique</dct:description>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-geojson">
+        <dcat:accessURL>https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=geojson&amp;service=WFS</dcat:accessURL>
+        <dct:title>geojson</dct:title>
+        <dct:description>Données format Geojson (plage sans plastique)</dct:description>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Label%20Plage%20sans%20plastique%20%28shapefile%29">
+        <dcat:accessURL>https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=SHP&amp;service=WFS</dcat:accessURL>
+        <dct:title>Label Plage sans plastique (shapefile)</dct:title>
+        <dct:description>Données format Shapefile Plage sans plastique</dct:description>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/0c232513-cb8c-473a-bbdd-8435eb3987cc#WWW%3ALINK-1.0-http--link-Visualisation%20de%20la%20donn%C3%A9e">
+        <dcat:accessURL>https://sig.hautsdefrance.fr/ext/mv/?x=703407&amp;y=6995164&amp;z=9&amp;l=plage_sans_plastique*plage_sans_plastique&amp;lb=osmgp2&amp;config=apps/parlement_mer.xml&amp;mode=d</dcat:accessURL>
+        <dct:title>Visualisation de la donnée</dct:title>
+        <dct:description>Visionneuse cartographique Plages sans plastique</dct:description>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France">
         <foaf:name>Région Hauts-de-France</foaf:name>
-        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr" />
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr" />
       </foaf:Organization>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
-        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
-      </foaf:Agent>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/d3884010e222">
-        <foaf:mbox rdf:resource="mailto:" />
-      </foaf:Agent>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40aisne.fr">
-        <foaf:mbox rdf:resource="mailto:sig@aisne.fr" />
-      </foaf:Agent>
-      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr">
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr">
         <foaf:mbox rdf:resource="mailto:sig@hautsdefrance.fr" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
       </foaf:Agent>
     </rdf:RDF>
   </csw:SearchResults>
 </csw:GetRecordsResponse>
+

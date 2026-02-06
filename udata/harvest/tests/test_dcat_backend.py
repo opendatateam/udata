@@ -1001,69 +1001,25 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
-    def test_geonetwork_dcat(self, rmock):
-        url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
-        org = OrganizationFactory()
-        source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
+    @pytest.mark.parametrize(
+        "schema_name, schema_uri",
+        [("dcat", "http://www.w3.org/ns/dcat#"), ("geodcatap", "http://data.europa.eu/930/")],
+    )
+    def test_geonetwork(self, rmock, schema_name, schema_uri):
+        geodcatap = schema_name == "geodcatap"
 
-        backend = get_backend(source.backend)(source)
-        assert isinstance(backend, CswDcatBackend)
-        assert backend.output_schema == "http://www.w3.org/ns/dcat#"
-
-        actions.run(source)
-        source.reload()
-
-        job = source.get_last_job()
-        assert len(job.items) == 6
-
-        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
-
-        assert len(datasets) == 6
-
-        # First dataset
-        dataset = datasets["https://www.geo2france.fr/2017/accidento"]
-        assert dataset.title == "Localisation des accidents de la circulation routière en 2017"
-        assert (
-            dataset.description == "Accidents corporels de la circulation en Hauts de France (2017)"
-        )
-        assert set(dataset.tags) == set(
-            [
-                "donnee-ouverte",
-                "accidentologie",
-                "accident",
-                "reseaux-de-transport",
-                "accident-de-la-route",
-                "hauts-de-france",
-                "nord",
-                "pas-de-calais",
-                "oise",
-                "somme",
-                "aisne",
-                # "inspire",  TODO: the geonetwork v4 examples use broken URI as theme resources, check if this is still a problem or not
-            ]
-        )
-        assert dataset.harvest.issued_at.date() == date(2017, 1, 1)
-        assert dataset.harvest.created_at is None
-        assert len(dataset.resources) == 1
-        resource = dataset.resources[0]
-        assert resource.title == "accidento_hdf_L93"
-        assert resource.url == "https://www.geo2france.fr/geoserver/cr_hdf/ows"
-        assert resource.format == "ogc:wms"
-        assert resource.type == "main"
-
-    def test_geonetwork_geodcatap(self, rmock):
         url = mock_csw_pagination(
-            rmock, "geonetwork/srv/fre/csw", "geonetwork-geodcatap-page-{}.xml"
+            rmock, "geonetwork/srv/fre/csw", f"geonetwork-{schema_name}-page-{{}}.xml"
         )
         source = HarvestSourceFactory(
             backend="csw-dcat",
             url=url,
-            config={"features": {"geodcatap": True}},
+            config={"features": {"geodcatap": geodcatap}},
         )
 
         backend = get_backend(source.backend)(source)
         assert isinstance(backend, CswDcatBackend)
-        assert backend.output_schema == "http://data.europa.eu/930/"
+        assert backend.output_schema == schema_uri
 
         actions.run(source)
         source.reload()
@@ -1083,26 +1039,37 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.description.startswith(
             "Part des ménages présents depuis 5 ans ou plus dans leur logement actuel"
         )
-        assert set(dataset.tags) == set(
-            [
-                "logement",
-                "institut-national-de-la-statistique-et-des-etudes-economiques",
-                "menage",
-                "population",
-                "insee",
-                "donnee-ouverte",
-                "hauts-de-france",
-                "population-et-societe",
-            ]
-        )
+
+        keywords = {
+            "logement",
+            "institut-national-de-la-statistique-et-des-etudes-economiques",
+            "menage",
+            "population",
+            "insee",
+            "donnee-ouverte",
+            "hauts-de-france",
+        }
+        topic_category = {"population-et-societe"}
+        if geodcatap:
+            assert set(dataset.tags) == keywords | topic_category
+        else:
+            assert set(dataset.tags) == keywords
+
         assert dataset.harvest.issued_at.date() == date(2020, 9, 22)
         assert dataset.harvest.created_at is None
-        # FIXME: len(resources) should be 2 but they have the same url => last wins
-        assert len(dataset.resources) == 1
-        resource = dataset.resources[0]
-        assert resource.title == "insee:rectangles_200m_menage_erbm"
-        assert resource.url == "https://www.geo2france.fr/geoserver/insee/ows"
-        assert resource.type == "api"
+
+        resources = {r.url: r for r in dataset.resources}
+        # FIXME: len(resources) should be 2 in geodcatap, but they have the same url => last wins
+        assert len(resources) == 1 if geodcatap else 5
+        resource = resources["https://www.geo2france.fr/geoserver/insee/ows"]
+        assert resource.description == "INSEE - Part des ménages présents depuis plus de 5 ans"
+        if geodcatap:
+            assert resource.title == "insee:rectangles_200m_menage_erbm"
+            assert resource.type == "api"
+        else:
+            assert resource.title == "rectangles_200m_menage_erbm"
+            assert resource.type == "main"
+            assert resource.format == "ogc:wms"
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")

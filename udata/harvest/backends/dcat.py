@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from datetime import date
 from typing import ClassVar, Generator
 
@@ -256,7 +256,7 @@ class DcatBackend(BaseBackend):
         raise ValueError(f"Unable to find dataset with DCT.identifier:{item.remote_id}")
 
 
-class BaseCswDcatBackend(DcatBackend):
+class BaseCswDcatBackend(DcatBackend, ABC):
     """
     Abstract base CSW to DCAT harvester.
 
