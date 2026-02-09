@@ -1070,7 +1070,7 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
-        self.assertEqual(notifications[0].details.message_id, str(new_message.id))
+        self.assertEqual(notifications[0].details.message_id, new_message.id)
 
     def test_new_discussion_comment_handle_previous_notifications(self):
         owner = UserFactory()
