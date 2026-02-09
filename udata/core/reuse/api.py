@@ -227,9 +227,11 @@ class ReuseDatasetsAPI(API):
     @api.doc("reuse_add_dataset", **common_doc)
     @api.expect(dataset_ref_fields)
     @api.response(200, "The dataset is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataset to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataset identifier")
         try:
@@ -251,9 +253,11 @@ class ReuseDataservicesAPI(API):
     @api.doc("reuse_add_dataservice", **common_doc)
     @api.expect(Dataservice.__ref_fields__)
     @api.response(200, "The dataservice is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataservice to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataservice identifier")
         try:
