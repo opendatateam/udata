@@ -1060,7 +1060,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
         resources = {r.url: r for r in dataset.resources}
         # FIXME: len(resources) should be 2 in geodcatap, but they have the same url => last wins
-        assert len(resources) == 1 if geodcatap else 5
+        assert len(resources) == (1 if geodcatap else 5)
         resource = resources["https://www.geo2france.fr/geoserver/insee/ows"]
         assert resource.description == "INSEE - Part des ménages présents depuis plus de 5 ans"
         if geodcatap:
