@@ -43,6 +43,19 @@ class BadgeMixin:
     # The following field should be overloaded in descendants.
     badges = field(BadgesList(Badge), **DEFAULT_BADGES_LIST_PARAMS)
 
+    @classmethod
+    def available_badges(cls):
+        from flask import current_app
+
+        try:
+            setting = f"{cls.__name__.upper()}_HIDDEN_BADGES"
+            hidden = current_app.config.get(setting, [])
+        except RuntimeError:
+            return cls.__badges__
+        if hidden:
+            return {k: v for k, v in cls.__badges__.items() if k not in hidden}
+        return cls.__badges__
+
     def get_badge(self, kind):
         """Get a badge given its kind if present"""
         candidates = [b for b in self.badges if b.kind == kind]
@@ -53,7 +66,7 @@ class BadgeMixin:
         badge = self.get_badge(kind)
         if badge:
             return badge
-        if kind not in getattr(self, "__badges__", {}):
+        if kind not in self.available_badges():
             msg = "Unknown badge type for {model}: {kind}"
             raise db.ValidationError(msg.format(model=self.__class__.__name__, kind=kind))
         badge = self._fields["badges"].field.document_type(kind=kind)

@@ -69,6 +69,8 @@ class OrgApiParser(ModelApiParser):
 
     def __init__(self):
         super().__init__()
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "badge",
             type=str,
@@ -279,7 +281,7 @@ class AvailableOrganizationBadgesAPI(API):
     @api.doc("available_organization_badges")
     def get(self):
         """List all available organization badges and their labels"""
-        return Organization.__badges__
+        return Organization.available_badges()
 
 
 @ns.route("/<org:org>/badges/", endpoint="organization_badges")

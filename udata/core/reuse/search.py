@@ -30,6 +30,8 @@ class ReuseSearch(ModelSearchAdapter):
         "views": "metrics.views",
     }
 
+    # Uses __badges__ (not available_badges) so that users can still filter
+    # by any existing badge, even hidden ones.
     filters = {
         "tag": ListFilter(),
         "organization": ModelTermsFilter(model=Organization),

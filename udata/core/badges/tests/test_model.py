@@ -178,3 +178,27 @@ class BadgeMixinTest(DBTestCase):
         assert fake.badge_label(TEST) == "Test"
         badge = fake.badges[0]
         assert fake.badge_label(badge) == "Test"
+
+    def test_available_badges_returns_all_by_default(self):
+        """available_badges() returns all badges when no setting hides any"""
+        assert Fake.available_badges() == BADGES
+
+    def test_available_badges_excludes_hidden(self):
+        """available_badges() filters out badges listed in the hidden setting"""
+        self.app.config["FAKE_HIDDEN_BADGES"] = [OTHER]
+        assert Fake.available_badges() == {TEST: "Test"}
+
+    def test_available_badges_with_empty_hidden_list(self):
+        """available_badges() returns all badges when hidden list is empty"""
+        self.app.config["FAKE_HIDDEN_BADGES"] = []
+        assert Fake.available_badges() == BADGES
+
+    def test_add_hidden_badge_is_rejected(self):
+        """add_badge() should reject a badge that is hidden via settings"""
+        self.app.config["FAKE_HIDDEN_BADGES"] = [TEST]
+        fake = Fake.objects.create()
+
+        with self.assertRaises(db.ValidationError):
+            fake.add_badge(TEST)
+
+        self.assertEqual(len(fake.badges), 0)

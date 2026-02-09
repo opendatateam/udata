@@ -54,6 +54,8 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument("dataset", type=str, location="args")
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "organization_badge",
             type=str,
@@ -274,7 +276,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc("available_reuse_badges")
     def get(self):
         """List all available reuse badges and their labels"""
-        return Reuse.__badges__
+        return Reuse.available_badges()
 
 
 @ns.route("/<reuse:reuse>/badges/", endpoint="reuse_badges")
