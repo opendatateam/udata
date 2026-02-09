@@ -47,11 +47,7 @@ class BadgeMixin:
     def available_badges(cls):
         from flask import current_app
 
-        try:
-            setting = f"{cls.__name__.upper()}_HIDDEN_BADGES"
-            hidden = current_app.config.get(setting, [])
-        except RuntimeError:
-            return cls.__badges__
+        hidden = current_app.config.get(f"{cls.__name__.upper()}_HIDDEN_BADGES", [])
         if hidden:
             return {k: v for k, v in cls.__badges__.items() if k not in hidden}
         return cls.__badges__
@@ -96,6 +92,8 @@ class BadgeMixin:
 
     def badge_label(self, badge):
         """Display the badge label for a given kind"""
+        # Uses __badges__ (not available_badges) so that existing badges
+        # still have a displayable label even if hidden via settings.
         badge_model = self._fields["badges"].field.document_type
         kind = badge.kind if isinstance(badge, badge_model) else badge
         return self.__badges__[kind]
