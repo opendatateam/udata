@@ -48,9 +48,7 @@ class BadgeMixin:
         from flask import current_app
 
         hidden = current_app.config.get(f"{cls.__name__.upper()}_HIDDEN_BADGES", [])
-        if hidden:
-            return {k: v for k, v in cls.__badges__.items() if k not in hidden}
-        return cls.__badges__
+        return {k: v for k, v in cls.__badges__.items() if k not in hidden}
 
     def get_badge(self, kind):
         """Get a badge given its kind if present"""
