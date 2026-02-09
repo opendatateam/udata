@@ -160,13 +160,6 @@ class DatasetApiParser(ModelApiParser):
 
     @staticmethod
     def parse_filters(datasets, args):
-        if args.get("q"):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            datasets = datasets.search_text(phrase_query)
         if args.get("tag"):
             datasets = datasets.filter(tags__all=args["tag"])
         if args.get("license"):
@@ -256,7 +249,29 @@ class DatasetApiParser(ModelApiParser):
             if current_user.is_anonymous:
                 abort(401)
             datasets = datasets.filter(private=args["private"])
+        if args.get("q"):
+            datasets = DatasetApiParser._apply_search(datasets, args["q"])
         return datasets
+
+    @staticmethod
+    def _apply_search(datasets, query):
+        """Apply text search using multi-query approach to combine MongoDB full text and contains queries."""
+        # Get text search results
+        phrase_query = " ".join([f'"{elem}"' for elem in query.split(" ")])
+        text_ids = {str(dataset.id) for dataset in datasets.search_text(phrase_query)}
+
+        # Get contains search results for title field
+        tokens = [t for t in query.split(" ") if t]
+        contains_ids = set()
+        if tokens:
+            contains_query = Q(title__icontains=tokens[0])
+            for token in tokens[1:]:
+                contains_query &= Q(title__icontains=token)
+            contains_ids = {str(dataset.id) for dataset in datasets.filter(contains_query)}
+
+        # Combine results
+        combined_ids = text_ids | contains_ids
+        return datasets.filter(id__in=combined_ids)
 
 
 log = logging.getLogger(__name__)
