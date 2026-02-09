@@ -25,6 +25,13 @@ class DiscussionNotificationDetails(db.EmbeddedDocument):
         auditable=False,
         filterable={},
     )
+    # keep track of the message to show in the notification
+    message_id = field(
+        db.StringField(),
+        readonly=True,
+        auditable=False,
+        filterable={},
+    )
     discussion = field(
         db.ReferenceField(Discussion),
         readonly=True,
