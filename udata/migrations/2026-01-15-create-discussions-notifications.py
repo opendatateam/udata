@@ -27,7 +27,6 @@ def migrate(db):
 
     with click.progressbar(reversed(discussions), length=count) as progress:
         for discussion in progress:
-            print(discussion)
             try:
                 existing = Notification.objects(details__discussion=discussion).first()
                 if not existing:
