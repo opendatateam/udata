@@ -36,6 +36,7 @@ message_permissions_fields = api.model(
 message_fields = api.model(
     "DiscussionMessage",
     {
+        "id": fields.String(description="The message identifier"),
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_by_organization": fields.Nested(
