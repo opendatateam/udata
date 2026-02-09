@@ -1,5 +1,18 @@
 # Changelog
 
+## 14.11.0 (2026-02-09)
+
+- feat(harvest): add remote URL prefix option to csw-dcat harvester ([#3466](https://github.com/opendatateam/udata/pull/3466))
+- feat: move fixtures to udata ([#3637](https://github.com/opendatateam/udata/pull/3637))
+- feat(notifications): add discussions notifications ([#3640](https://github.com/opendatateam/udata/pull/3640))
+- feat(security): add security verify route ([#3644](https://github.com/opendatateam/udata/pull/3644))
+- fix: add missing @api.secure ([#3646](https://github.com/opendatateam/udata/pull/3646))
+- fix(dataservice): purge dataservice related activities ([#3647](https://github.com/opendatateam/udata/pull/3647))
+- fix: docs ([#3641](https://github.com/opendatateam/udata/pull/3641))
+- fix: permissions on reuses ([#3650](https://github.com/opendatateam/udata/pull/3650))
+- test: add producer_type test on reuses ([#3643](https://github.com/opendatateam/udata/pull/3643))
+
+
 ## 14.10.0 (2026-01-29)
 
 - chore: remove docker compose testing ([#3633](https://github.com/opendatateam/udata/pull/3633))
