@@ -48,7 +48,6 @@ def notify_new_discussion_comment(discussion_id, message=None):
             notification.save()
 
         for recipient in recipients:
-            print(str(message.id))
             notification = Notification(
                 created_at=message.posted_on,
                 user=recipient,
