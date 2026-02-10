@@ -1,104 +1,5 @@
 # Système de permissions udata
 
-## 1. Audit du système actuel
-
-### Architecture
-
-Le système repose sur **Flask-Principal 0.4.0** (release 2013, ~486 lignes) utilisé indirectement via **Flask-Security-Too 5.7.1**.
-
-```
-Requête authentifiée
-  → Flask-Security charge l'identité
-  → Signal identity_loaded → inject_organization_needs()
-      → Query MongoDB: toutes les orgs du user
-      → Pour chaque org: ajoute OrganizationNeed(role, org_id) à l'identité
-  → La requête accède à l'endpoint
-  → @api.secure vérifie l'authentification
-  → permission.test() compare les needs de la permission avec les provides de l'identité
-```
-
-**Modèle mental Flask-Principal :** les permissions sont des ensembles de "needs". L'identité de l'utilisateur fournit des "provides". Si l'intersection est non-vide, l'accès est accordé. C'est un modèle push : toutes les permissions sont pré-calculées au chargement de l'identité.
-
-### Rôles
-
-**Système** (champ `roles` du User) :
-
-| Rôle | Effet réel |
-|------|-----------|
-| `admin` | Bypass universel de toutes les permissions |
-| `editor` | **Aucun** — jamais vérifié dans le code |
-| `moderator` | **Aucun** — jamais vérifié dans le code |
-
-**Organisation** (embedded dans `Member`) :
-
-| Rôle | Droits |
-|------|--------|
-| `admin` | Gère l'org (membres, settings) + édite tout le contenu de l'org |
-| `editor` | Édite tout le contenu de l'org, ne gère pas l'org elle-même |
-
-### Classe `Permission` (udata)
-
-```python
-# udata/auth/__init__.py
-class Permission(BasePermission):
-    def __init__(self, *needs):
-        # Ajoute automatiquement le bypass admin à TOUTES les permissions
-        super().__init__(RoleNeed("admin"), *needs)
-```
-
-Toutes les permissions héritant de cette classe accordent automatiquement l'accès aux sysadmins. C'est le mécanisme central du bypass admin.
-
-### Matrice d'accès actuelle
-
-| Entité | Qui peut créer | Qui peut éditer | Qui peut supprimer |
-|--------|---------------|-----------------|-------------------|
-| Dataset | tout authentifié | owner / org admin / org editor | idem |
-| Reuse | tout authentifié | owner / org admin / org editor | idem |
-| Dataservice | tout authentifié | owner / org admin / org editor | idem |
-| Organization | tout authentifié | org admin | org admin |
-| Discussion | tout authentifié | auteur / org auteur | auteur / org auteur |
-| Fermer discussion | — | auteur discussion OU owner du sujet | — |
-| Harvest source | tout authentifié | org admin / owner (pas editor) | idem |
-| Page | tout authentifié | owner / org admin / org editor | idem |
-| Post | admin système | admin système | admin système |
-| Badge (CRUD) | admin système | admin système | admin système |
-| Featured | admin système | admin système | admin système |
-| User (admin CRUD) | admin système | admin système | admin système |
-
-### Problèmes identifiés
-
-**Architecture :**
-
-1. **Granularité trop grossière.** La permission est binaire par organisation : soit on peut tout éditer, soit rien. Pas de permission par objet.
-
-2. **Pre-loading systématique.** `inject_organization_needs` query toutes les orgs du user à chaque requête authentifiée, même si la requête ne vérifie aucune permission (GET public, etc.). Pas de `.only()` → documents complets chargés.
-
-3. **Rôles système `editor`/`moderator` inutilisés.** Définis dans `ROLES` mais jamais vérifiés par aucune permission. Dead config.
-
-4. **`PostEditPermission` est du dead code.** `Permission()` sans needs = admin only. Tous les endpoints post utilisent déjà `@api.secure(admin_permission)`. La classe n'est jamais appelée.
-
-**Code :**
-
-5. **Booléen implicite sur `admin_permission`.** Dans `owned.py`, `if admin_permission:` fonctionne car Flask-Principal définit `__bool__` → `.can()`. Mais c'est un piège de lisibilité.
-
-6. **Duplication.** `ReuseEditPermission` réimplémente `OwnablePermission` au lieu d'en hériter. 15+ classes de permission pour ~3 logiques distinctes.
-
-7. **`TransferPermission` : variable potentiellement non définie.** Si `subject.organization` et `subject.owner` sont tous deux `None`, `need` est undefined → `NameError`.
-
-8. **`BadgePermission` cassé pour les user-owned objects.** Utilise `subject.id` comme `organization_id` quand il n'y a pas d'org → aucun user ne matche. Mais dead code car les endpoints utilisent `admin_permission` directement.
-
-9. **Discussion close : hack `.union()`.** Fonction qui simule une classe car l'héritage multiple ne fonctionne pas avec les permissions Flask-Principal. Fragile.
-
-**Flask-Principal lui-même :**
-
-10. **Dernière release : 2013.** Maintenu sous perfusion par le fork pallets-eco, uniquement parce que Flask-Security-Too en dépend. 486 lignes. Pas d'évolution prévue.
-
-11. **Modèle inadapté aux permissions par objet.** Le système needs/provides est conçu pour des rôles globaux ou par organisation, pas pour des ACL par objet. Ajouter des permissions granulaires demanderait soit d'injecter des centaines de needs par requête, soit de contourner Flask-Principal.
-
----
-
-## 2. Nouveau système proposé
-
 ### Principes
 
 1. **Les permissions sont des prédicats composables.** Une permission = une question "le user courant peut-il faire X ?", évaluée paresseusement.
@@ -107,6 +8,7 @@ Toutes les permissions héritant de cette classe accordent automatiquement l'acc
 4. **Admin bypass intégré dans `can()`.** Chaque permission accorde automatiquement l'accès aux sysadmins.
 5. **Aucune dépendance à Flask-Principal.** Flask-Principal reste installé (Flask-Security-Too en a besoin) mais on n'utilise plus ses classes Permission/Need.
 6. **Même interface publique.** `permission.can()`, `.test()`, `bool(permission)` fonctionnent comme avant. La sérialisation API (`fields.Permission` appelle `.can()`) ne change pas.
+7. **`AccessPolicy` = source de vérité unique.** Un seul objet par modèle définit les règles d'accès. Il génère à la fois les permissions per-object (prédicats Python) et les filtres queryset (MongoDB Q / Elasticsearch DSL).
 
 ### Implémentation
 
@@ -125,16 +27,8 @@ class PermissionDenied(Exception):
 
 
 class Permission(ABC):
-    """A composable authorization predicate."""
-
     @abstractmethod
-    def check(self) -> bool:
-        """Raw permission logic. Override this.
-
-        Does not include admin bypass — that's handled by can().
-        Used internally by AnyOf/AllOf for composition.
-        """
-        ...
+    def check(self) -> bool: ...
 
     def can(self) -> bool:
         if current_user.is_authenticated and current_user.sysadmin:
@@ -145,8 +39,8 @@ class Permission(ABC):
         if not self.can():
             raise PermissionDenied("You do not have the permission to modify that object.")
 
-    # Flask-Principal compatibility: permission.require() is used by api.secure
     def require(self):
+        """Compatibility with @api.secure which does `with permission.require():`"""
         return _PermissionContext(self)
 
     def __bool__(self) -> bool:
@@ -167,21 +61,12 @@ class Permission(ABC):
 
 
 class _PermissionContext:
-    """Minimal context manager for api.secure compatibility.
-
-    Replaces Flask-Principal's IdentityContext. api.secure does:
-        with permission.require():
-            return func(...)
-    """
-
     def __init__(self, permission: Permission):
         self._permission = permission
 
     def __enter__(self):
         if not self._permission.can():
-            raise PermissionDenied(
-                "You do not have the permission to modify that object."
-            )
+            raise PermissionDenied("You do not have the permission to modify that object.")
         return self
 
     def __exit__(self, *args):
@@ -195,15 +80,11 @@ class _PermissionContext:
 
 
 class Allow(Permission):
-    """Always granted, even for anonymous users."""
-
     def check(self) -> bool:
         return True
 
 
 class Deny(Permission):
-    """Only admins pass (via the bypass in can())."""
-
     def check(self) -> bool:
         return False
 
@@ -236,8 +117,6 @@ class HasRole(Permission):
 
 
 class HasOrgRole(Permission):
-    """Granted if the current user is a member of the org with one of the given roles."""
-
     def __init__(self, organization, *roles: str):
         self._organization = organization
         self._roles = set(roles)
@@ -253,10 +132,8 @@ class HasOrgRole(Permission):
 
 
 class HasObjectPermission(Permission):
-    """Granted if the current user has an explicit per-object permission.
-
-    This is the building block for partial editors: users who can only
-    edit a specific list of objects within an organization.
+    """For partial editors: checks if the user has an explicit
+    per-object permission stored in the database.
     """
 
     def __init__(self, obj):
@@ -281,8 +158,6 @@ class HasObjectPermission(Permission):
 
 
 class AnyOf(Permission):
-    """Granted if ANY sub-permission passes."""
-
     def __init__(self, *permissions: Permission):
         self._permissions = permissions
 
@@ -294,8 +169,6 @@ class AnyOf(Permission):
 
 
 class AllOf(Permission):
-    """Granted if ALL sub-permissions pass."""
-
     def __init__(self, *permissions: Permission):
         self._permissions = permissions
 
@@ -311,10 +184,117 @@ class AllOf(Permission):
 admin_permission = HasRole("admin")
 ```
 
+#### `udata/auth/policies.py` — `AccessPolicy`
+
+Source de vérité unique : porte les règles d'accès et sait générer les permissions per-object ET les filtres queryset (MongoDB, et plus tard Elasticsearch).
+
+```python
+from mongoengine import Q
+
+from udata.auth.permissions import (
+    Allow,
+    Deny,
+    HasObjectPermission,
+    HasOrgRole,
+    IsUser,
+    Permission,
+)
+
+
+class AccessPolicy:
+    def __init__(self, org_roles, public_filter=None):
+        self._org_roles = org_roles
+        self._public_filter = public_filter or Q()
+
+    # --- Per-object (API views, .test(), sérialisation frontend) ---
+
+    def permission(self, obj) -> Permission:
+        if obj.organization:
+            return HasOrgRole(obj.organization, *self._org_roles) | HasObjectPermission(obj)
+        if obj.owner:
+            return IsUser(obj.owner)
+        return Deny()
+
+    def read_permission(self, obj) -> Permission:
+        """Visibility check for a single object.
+
+        Public objects → Allow (everyone, including anonymous).
+        Private objects → same rules as permission().
+        """
+        if not getattr(obj, "private", False):
+            return Allow()
+        return self.permission(obj)
+
+    # --- Queryset (listings, exports) ---
+
+    def queryset(self, qs, user=None):
+        """Filter a queryset. Replaces both visible() and visible_by_user().
+
+        - No user / anonymous → public items only (applies public_filter)
+        - Sysadmin → everything
+        - Authenticated → public items + items the user can access
+        """
+        if user is None or user.is_anonymous:
+            return qs(self._public_filter)
+        if user.sysadmin:
+            return qs
+
+        q = Q(owner=user.id)
+
+        org_ids = self._org_ids_for_user(user)
+        if org_ids:
+            q |= Q(organization__in=org_ids)
+
+        assigned_ids = self._assigned_ids_for_user(user, qs._document)
+        if assigned_ids:
+            q |= Q(id__in=assigned_ids)
+
+        return qs(self._public_filter | q)
+
+    # --- Elasticsearch (search) ---
+
+    def es_filter(self, user, document_class):
+        """Elasticsearch filter. Same logic as queryset(), different output format."""
+        if user is None or user.is_anonymous:
+            return None  # ES adapter already applies public filters
+        if user.sysadmin:
+            return {"match_all": {}}
+
+        should = [
+            {"term": {"owner": str(user.id)}},
+        ]
+
+        org_ids = self._org_ids_for_user(user)
+        if org_ids:
+            should.append({"terms": {"organization": [str(id) for id in org_ids]}})
+
+        assigned_ids = self._assigned_ids_for_user(user, document_class)
+        if assigned_ids:
+            should.append({"ids": {"values": [str(id) for id in assigned_ids]}})
+
+        return {"bool": {"should": should, "minimum_should_match": 1}}
+
+    # --- Shared logic ---
+
+    def _org_ids_for_user(self, user):
+        return [
+            org.id
+            for org in user.organizations
+            if (m := org.member(user)) and m.role in self._org_roles
+        ]
+
+    def _assigned_ids_for_user(self, user, document_class):
+        from udata.core.object_permissions.models import ObjectPermission
+
+        return ObjectPermission.objects(
+            user=user.id,
+            subject_class=document_class.__name__,
+        ).distinct("subject_id")
+```
+
 #### `udata/core/object_permissions/models.py` — Le modèle pour les permissions par objet
 
 ```python
-from bson import ObjectId
 from mongoengine import fields as db
 
 from udata.mongo import UDataDocument
@@ -341,103 +321,103 @@ class ObjectPermission(UDataDocument):
     }
 ```
 
-#### Permissions composées par domaine
+#### Déclaration des policies sur les modèles
 
-Chaque module remplace sa classe de permission par une fonction retournant un `Permission`. L'interface pour les modèles (`.permissions` property) ne change pas.
+Chaque modèle déclare ses policies. Les rôles, le filtre public, tout est au même endroit.
 
 ```python
-# udata/core/dataset/permissions.py
+# udata/core/dataset/models.py
+from udata.auth.policies import AccessPolicy
 
-from udata.auth.permissions import (
-    Allow,
-    Deny,
-    HasObjectPermission,
-    HasOrgRole,
-    IsUser,
-    Permission,
-)
+class Dataset(Owned, db.Document):
+    read_policy = AccessPolicy(
+        org_roles=("admin", "editor", "partial_editor"),
+        public_filter=Q(private__ne=True, deleted=None, archived=None),
+    )
+    edit_policy = AccessPolicy(
+        org_roles=("admin", "editor"),
+    )
 
-
-def ownable_permission(obj) -> Permission:
-    """Permission to edit an owned object (dataset, reuse, dataservice, page, topic, etc.)."""
-    if obj.organization:
-        return (
-            HasOrgRole(obj.organization, "admin", "editor")
-            | HasObjectPermission(obj)
-        )
-    if obj.owner:
-        return IsUser(obj.owner)
-    return Deny()
-
-
-def ownable_read_permission(obj) -> Permission:
-    """Permission to read a potentially private object.
-
-    Public objects are visible by everyone. Private objects require
-    ownership, org membership, or explicit assignment.
-    """
-    if not getattr(obj, "private", False):
-        return Allow()
-    if obj.organization:
-        return (
-            HasOrgRole(obj.organization, "admin", "editor", "partial_editor")
-            | HasObjectPermission(obj)
-        )
-    if obj.owner:
-        return IsUser(obj.owner)
-    return Deny()
-
-
-# Aliases for clarity in models — same logic, distinct names for distinct intent.
-def dataset_edit_permission(dataset) -> Permission:
-    return ownable_permission(dataset)
-
-
-def resource_edit_permission(dataset) -> Permission:
-    return ownable_permission(dataset)
+    @property
+    def permissions(self):
+        return {
+            "edit": self.edit_policy.permission(self),
+            "delete": self.edit_policy.permission(self),
+        }
 ```
 
 ```python
-# udata/core/reuse/permissions.py
-
-from udata.core.dataset.permissions import ownable_permission, Permission
-
-
-def reuse_edit_permission(reuse) -> Permission:
-    return ownable_permission(reuse)
+# udata/core/reuse/models.py
+class Reuse(Owned, db.Document):
+    read_policy = AccessPolicy(
+        org_roles=("admin", "editor", "partial_editor"),
+        public_filter=Q(private__ne=True, datasets__0__exists=True, deleted=None),
+    )
+    edit_policy = AccessPolicy(
+        org_roles=("admin", "editor"),
+    )
 ```
 
 ```python
-# udata/core/dataservices/permissions.py
-
-from udata.core.dataset.permissions import ownable_permission, Permission
-
-
-def dataservice_edit_permission(dataservice) -> Permission:
-    return ownable_permission(dataservice)
+# udata/core/dataservices/models.py
+class Dataservice(Owned, db.Document):
+    read_policy = AccessPolicy(
+        org_roles=("admin", "editor", "partial_editor"),
+        public_filter=Q(private__ne=True, deleted_at=None, archived_at=None),
+    )
+    edit_policy = AccessPolicy(
+        org_roles=("admin", "editor"),
+    )
 ```
+
+#### Usage unifié — ce qui remplace quoi
 
 ```python
-# udata/core/organization/permissions.py
+# AVANT — la visibilité est définie à 3 endroits
 
-from udata.auth.permissions import HasOrgRole, Permission
+# 1. Le queryset custom (par modèle)
+class DatasetQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(private__ne=True, deleted=None, archived=None)
+
+# 2. Le queryset Owned (générique)
+class OwnedQuerySet:
+    def visible_by_user(self, user, visible_query):
+        ...
+
+# 3. La permission per-object
+class DatasetEditPermission(OwnablePermission):
+    pass
 
 
-def org_edit_permission(org) -> Permission:
-    """Only org admins can manage the organization itself."""
-    return HasOrgRole(org, "admin")
+# APRÈS — tout vient de la policy
 
+# Listings publics (remplace visible())
+Dataset.read_policy.queryset(Dataset.objects)
 
-def org_private_permission(org) -> Permission:
-    """Any org member can see private org assets."""
-    return HasOrgRole(org, "admin", "editor", "partial_editor")
+# Listings par user (remplace visible_by_user())
+Dataset.read_policy.queryset(Dataset.objects, current_user)
+
+# Listings éditables (nouveau)
+Dataset.edit_policy.queryset(Dataset.objects, current_user)
+
+# Per-object check (API views)
+Dataset.edit_policy.permission(dataset).test()
+
+# Sérialisation frontend
+dataset.permissions["edit"].can()  # → True/False
+
+# Elasticsearch
+Dataset.read_policy.es_filter(current_user, Dataset)
 ```
+
+#### Permissions composées hors `AccessPolicy`
+
+Les cas spéciaux (discussions, harvest, transfer, notifications) qui ne suivent pas le pattern `Owned` restent des fonctions simples :
 
 ```python
 # udata/core/discussions/permissions.py
-
 from udata.auth.permissions import HasOrgRole, IsUser, Permission
-from udata.core.dataset.permissions import ownable_permission
 
 
 def discussion_author_permission(discussion) -> Permission:
@@ -447,7 +427,7 @@ def discussion_author_permission(discussion) -> Permission:
 
 
 def discussion_close_permission(discussion) -> Permission:
-    return discussion_author_permission(discussion) | ownable_permission(discussion.subject)
+    return discussion_author_permission(discussion) | discussion.subject.edit_policy.permission(discussion.subject)
 
 
 def message_edit_permission(message) -> Permission:
@@ -457,35 +437,41 @@ def message_edit_permission(message) -> Permission:
 ```
 
 ```python
-# udata/harvest/permissions.py
+# udata/core/organization/permissions.py
+from udata.auth.permissions import HasOrgRole, Permission
 
-from udata.auth.permissions import HasOrgRole, IsUser, Permission
-from udata.core.dataset.permissions import ownable_permission
+
+def org_edit_permission(org) -> Permission:
+    return HasOrgRole(org, "admin")
+
+
+def org_private_permission(org) -> Permission:
+    return HasOrgRole(org, "admin", "editor", "partial_editor")
+```
+
+```python
+# udata/harvest/permissions.py
+from udata.auth.permissions import HasOrgRole, IsUser, Deny, Permission
 
 
 def harvest_source_permission(source) -> Permission:
-    """Basic ops (preview). Editors included."""
-    return ownable_permission(source)
+    return source.edit_policy.permission(source)
 
 
 def harvest_admin_permission(source) -> Permission:
-    """Sensitive ops (edit, delete, run). Editors excluded."""
     if source.organization:
         return HasOrgRole(source.organization, "admin")
     if source.owner:
         return IsUser(source.owner)
-    from udata.auth.permissions import Deny
     return Deny()
 ```
 
 ```python
 # udata/features/transfer/permissions.py
-
 from udata.auth.permissions import Deny, HasOrgRole, IsUser, Permission
 
 
 def transfer_permission(subject) -> Permission:
-    """Who can initiate a transfer (org admins and direct owners only)."""
     if subject.organization:
         return HasOrgRole(subject.organization, "admin")
     if subject.owner:
@@ -494,7 +480,6 @@ def transfer_permission(subject) -> Permission:
 
 
 def transfer_response_permission(transfer) -> Permission:
-    """Who can accept/refuse a transfer."""
     from udata.models import Organization
 
     if isinstance(transfer.recipient, Organization):
@@ -504,47 +489,11 @@ def transfer_response_permission(transfer) -> Permission:
 
 ```python
 # udata/features/notifications/permissions.py
-
 from udata.auth.permissions import IsUser, Permission
 
 
 def notification_edit_permission(notification) -> Permission:
     return IsUser(notification.user)
-```
-
-#### Utilisation dans les modèles
-
-L'interface ne change pas. Seul l'import change.
-
-```python
-# Avant (dataset/models.py)
-@property
-def permissions(self):
-    from .permissions import DatasetEditPermission, ResourceEditPermission
-    return {
-        "delete": DatasetEditPermission(self),
-        "edit": DatasetEditPermission(self),
-        "edit_resources": ResourceEditPermission(self),
-    }
-
-# Après
-@property
-def permissions(self):
-    from .permissions import dataset_edit_permission, resource_edit_permission
-    return {
-        "delete": dataset_edit_permission(self),
-        "edit": dataset_edit_permission(self),
-        "edit_resources": resource_edit_permission(self),
-    }
-```
-
-La sérialisation API ne change pas : `fields.Permission` appelle `.can()` sur l'objet retourné.
-
-```python
-# udata/api/fields.py — AUCUN CHANGEMENT
-class Permission(Boolean):
-    def format(self, field):
-        return field.can()
 ```
 
 #### Intégration avec `@api.secure`
@@ -580,31 +529,6 @@ class UDataApi(Api):
 
 `_apply_secure` utilise `permission.require()` qui fonctionne grâce à `_PermissionContext`.
 
-#### Intégration avec les querysets
-
-```python
-# udata/core/owned.py
-class OwnedQuerySet(UDataQuerySet):
-    def visible_by_user(self, user: User, visible_query: Q):
-        if user.is_anonymous:
-            return self(visible_query)
-        if user.sysadmin:
-            return self()
-
-        owners: list[User | Organization] = list(user.organizations) + [user.id]
-        owned_qs = self.__class__(self._document, self._collection_obj).owned_by(*owners)
-
-        # Objects explicitly assigned to this user (partial editors)
-        from udata.core.object_permissions.models import ObjectPermission
-
-        assigned_ids = ObjectPermission.objects(
-            user=user.id,
-            subject_class=self._document.__name__,
-        ).distinct("subject_id")
-
-        return self(visible_query | owned_qs._query_obj | Q(id__in=assigned_ids))
-```
-
 #### Nouveau rôle `partial_editor`
 
 ```python
@@ -624,7 +548,7 @@ Gain : plus de query MongoDB systématique à chaque requête authentifiée.
 
 ---
 
-## 3. Ce qui change, ce qui ne change pas
+## 2. Ce qui change, ce qui ne change pas
 
 ### Change
 
@@ -633,9 +557,11 @@ Gain : plus de query MongoDB systématique à chaque requête authentifiée.
 | Base permission | Flask-Principal `Permission` + needs/provides | `Permission` ABC avec `check()` |
 | Bypass admin | `RoleNeed("admin")` injecté dans le constructeur | `can()` vérifie `sysadmin` directement |
 | Org permissions | `OrganizationNeed` injecté à chaque requête | `HasOrgRole` vérifie lazily |
-| Classes permission | 15+ classes, la plupart identiques | ~10 fonctions d'une ligne |
+| Classes permission | 15+ classes, la plupart identiques | `AccessPolicy` sur le modèle + fonctions pour les cas spéciaux |
+| Visibilité queryset | `visible()` par modèle + `visible_by_user()` générique | `policy.queryset(qs, user)` unifié |
 | Discussion close | Hack `.union()` | `author_perm \| subject_perm` |
 | Per-object | Impossible | `HasObjectPermission` + `ObjectPermission` |
+| Elasticsearch | Filtres séparés dans les search adapters | `policy.es_filter(user, Model)` |
 
 ### Ne change pas
 
@@ -644,34 +570,36 @@ Gain : plus de query MongoDB systématique à chaque requête authentifiée.
 | `fields.Permission` (API) | Appelle `.can()` → fonctionne |
 | `@api.secure` / `@api.secure(perm)` | Utilise `.require()` → `_PermissionContext` assure la compatibilité |
 | `model.permissions` property | Retourne toujours un dict de Permission → `.can()` |
-| `OwnedQuerySet.visible_by_user()` | Même logique + ajout des assigned_ids |
 | Flask-Security-Too | Reste installé, continue à gérer auth/login |
 | Flask-Principal (package) | Reste installé (dépendance de Flask-Security-Too), mais plus importé par udata |
 
 ---
 
-## 4. Migration
+## 3. Migration
 
 ### Phase 1 : Ajouter le nouveau système à côté de l'ancien
 
 1. Créer `udata/auth/permissions.py` (les primitives)
-2. Créer `udata/core/object_permissions/models.py` (le modèle)
-3. Ajouter `partial_editor` à `ORG_ROLES`
-4. Garder les anciens fichiers de permissions intacts
+2. Créer `udata/auth/policies.py` (`AccessPolicy`)
+3. Créer `udata/core/object_permissions/models.py` (le modèle)
+4. Ajouter `partial_editor` à `ORG_ROLES`
+5. Garder les anciens fichiers de permissions intacts
 
 ### Phase 2 : Migrer module par module
 
 Pour chaque module (dataset, reuse, dataservices, organization, discussions, harvest, transfer, notifications, pages, topics) :
 
-1. Réécrire `permissions.py` avec les nouvelles fonctions
-2. Mettre à jour les imports dans `api.py` et `models.py`
-3. Vérifier que les tests passent
+1. Ajouter `read_policy` / `edit_policy` sur le modèle
+2. Réécrire `permissions.py` avec les nouvelles fonctions
+3. Mettre à jour les imports dans `api.py` et `models.py`
+4. Remplacer les appels à `visible()` / `visible_by_user()` par `policy.queryset()`
+5. Vérifier que les tests passent
 
 ### Phase 3 : Nettoyage
 
 1. Supprimer `inject_organization_needs` de `organization/permissions.py`
-2. Mettre à jour `api/__init__.py` pour importer depuis `udata.auth.permissions`
-3. Mettre à jour `owned.py` : remplacer `OrganizationPrivatePermission` par `org_private_permission`, ajouter le query `ObjectPermission` dans `visible_by_user`
+2. Supprimer les querysets custom (`DatasetQuerySet.visible()`, `ReuseQuerySet.visible()`, etc.)
+3. Mettre à jour `api/__init__.py` pour importer depuis `udata.auth.permissions`
 4. Supprimer les imports Flask-Principal de tout le codebase sauf `udata/auth/__init__.py` (qui peut rester comme re-export pour Flask-Security)
 5. Supprimer `PostEditPermission`, `BadgePermission` et autres dead code
 
