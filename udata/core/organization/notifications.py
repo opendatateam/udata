@@ -93,6 +93,7 @@ def on_new_membership_request(request: MembershipRequest, **kwargs):
             # Check if notification already exists
             existing = Notification.objects(
                 user=admin_user,
+                handled_at=None,
                 details__request_organization=organization,
                 details__request_user=request.user,
             ).first()
