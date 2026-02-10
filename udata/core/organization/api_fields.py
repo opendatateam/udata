@@ -119,6 +119,18 @@ member_fields = api.model(
     },
 )
 
+org_permissions_fields = api.model(
+    "OrganizationSourcePermissions",
+    {
+        "edit": fields.Permission(),
+        "delete": fields.Permission(),
+        "members": fields.Permission(),
+        "harvest": fields.Permission(),
+        "private": fields.Permission(),
+    },
+)
+
+
 org_fields = api.model(
     "Organization",
     {
@@ -172,6 +184,7 @@ org_fields = api.model(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )

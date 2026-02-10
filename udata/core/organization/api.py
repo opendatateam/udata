@@ -48,7 +48,6 @@ from .forms import (
     OrganizationForm,
 )
 from .models import Member, MembershipRequest, Organization
-from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .rdf import build_org_catalog
 from .tasks import notify_membership_request, notify_membership_response, notify_new_member
 
@@ -151,7 +150,7 @@ class OrganizationAPI(API):
     @api.marshal_with(org_fields)
     def get(self, org):
         """Get a organization given its identifier"""
-        if org.deleted and not OrganizationPrivatePermission(org).can():
+        if org.deleted and not org.permissions["private"].can():
             api.abort(410, "Organization has been deleted")
         return org
 
@@ -170,7 +169,7 @@ class OrganizationAPI(API):
         request_deleted = request.json.get("deleted", True)
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         form = api.validate(OrganizationForm, org)
         return form.save()
 
@@ -183,9 +182,8 @@ class OrganizationAPI(API):
         args = org_delete_parser.parse_args()
         if org.deleted:
             api.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["delete"].test()
         send_legal_notice_on_deletion(org, args)
-
         org.deleted = datetime.utcnow()
         org.save()
         return "", 204
@@ -355,7 +353,7 @@ requests_parser.add_argument(
 @ns.route("/<org:org>/membership/", endpoint="request_membership", doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
-    @api.doc("list_membership_requests")
+    @api.doc("membership_requests")
     @api.expect(requests_parser)
     @api.response(403, "Not Authorized")
     @api.marshal_list_with(request_fields)
@@ -364,8 +362,7 @@ class MembershipRequestAPI(API):
         args = requests_parser.parse_args()
         if args["user"]:
             if not current_user.is_authenticated or (
-                str(current_user.id) != args["user"]
-                and not OrganizationPrivatePermission(org).can()
+                str(current_user.id) != args["user"] and not org.permissions["members"].can()
             ):
                 api.abort(
                     403,
@@ -378,7 +375,7 @@ class MembershipRequestAPI(API):
                     if (r.status == args["status"] and str(r.user.id) == args["user"])
                 ]
             return [r for r in org.requests if str(r.user.id) == args["user"]]
-        OrganizationPrivatePermission(org).test()
+        org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
         else:
@@ -421,7 +418,7 @@ class MembershipAcceptAPI(MembershipAPI):
     @api.marshal_with(member_fields)
     def post(self, org, id):
         """Accept user membership to a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
 
         if org.is_member(membership_request.user):
@@ -449,7 +446,7 @@ class MembershipRefuseAPI(MembershipAPI):
     @api.doc("refuse_membership", **common_doc)
     def post(self, org, id):
         """Refuse user membership to a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
         membership_request.status = "refused"
@@ -475,7 +472,7 @@ class MemberAPI(API):
     @api.response(409, "User is already member", member_fields)
     def post(self, org, user):
         """Add a member into a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         if org.is_member(user):
             return org.member(user), 409
         member = Member(user=user)
@@ -495,7 +492,7 @@ class MemberAPI(API):
     @api.doc("update_organization_member", responses={403: "Not Authorized"})
     def put(self, org, user):
         """Update member status into a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         member = org.member(user)
         form = api.validate(MemberForm, member)
         form.populate_obj(member)
@@ -507,7 +504,7 @@ class MemberAPI(API):
     @api.doc("delete_organization_member", responses={403: "Not Authorized"})
     def delete(self, org, user):
         """Delete member from an organization"""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
@@ -561,7 +558,7 @@ class AvatarAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def post(self, org):
         """Upload a new logo"""
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         org.save()
         return {"image": org.logo}
@@ -572,7 +569,7 @@ class AvatarAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def put(self, org):
         """Set the logo BBox"""
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         return {"image": org.logo}
 
@@ -589,7 +586,7 @@ class OrgDatasetsAPI(API):
         """List organization datasets (including private ones when member)"""
         args = dataset_parser.parse()
         qs = Dataset.objects.owned_by(org)
-        if not OrganizationPrivatePermission(org).can():
+        if not org.permissions["private"].can():
             qs = qs(private__ne=True)
         return qs.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
@@ -601,7 +598,7 @@ class OrgReusesAPI(API):
     def get(self, org):
         """List organization reuses (including private ones when member)"""
         qs = Reuse.objects.owned_by(org)
-        if not OrganizationPrivatePermission(org).can():
+        if not org.permissions["private"].can():
             qs = qs(private__ne=True)
         return list(qs)
 
