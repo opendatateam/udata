@@ -40,6 +40,8 @@ class DatasetSearch(ModelSearchAdapter):
         "views": "metrics.views",
     }
 
+    # Uses __badges__ (not available_badges) so that users can still filter
+    # by any existing badge, even hidden ones.
     filters = {
         "tag": ListFilter(),
         "badge": Filter(choices=list(Dataset.__badges__)),

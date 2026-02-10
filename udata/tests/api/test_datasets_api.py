@@ -1615,6 +1615,13 @@ class DatasetBadgeAPITest(APITestCase):
             self.assertIn(kind, response.json)
             self.assertEqual(response.json[kind], label)
 
+    def test_list_excludes_hidden_badges(self):
+        self.app.config["DATASET_HIDDEN_BADGES"] = ["test-1"]
+        response = self.get(url_for("api.available_dataset_badges"))
+        self.assertStatus(response, 200)
+        self.assertNotIn("test-1", response.json)
+        self.assertIn("test-2", response.json)
+
     def test_create(self):
         data = self.factory.as_dict()
         response = self.post(url_for("api.dataset_badges", dataset=self.dataset), data)
