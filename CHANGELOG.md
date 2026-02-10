@@ -1,5 +1,11 @@
 # Changelog
 
+## 14.12.0 (2026-02-10)
+
+- feat(harvest): add GeoDCAT-AP option to csw-dcat backend ([#3648](https://github.com/opendatateam/udata/pull/3648))
+- fix(notifications): comment notification ([#3651](https://github.com/opendatateam/udata/pull/3651))
+
+
 ## 14.11.0 (2026-02-09)
 
 - feat(harvest): add remote URL prefix option to csw-dcat harvester ([#3466](https://github.com/opendatateam/udata/pull/3466))
