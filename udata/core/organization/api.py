@@ -353,7 +353,7 @@ requests_parser.add_argument(
 @ns.route("/<org:org>/membership/", endpoint="request_membership", doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
-    @api.doc("membership_requests")
+    @api.doc("list_membership_requests")
     @api.expect(requests_parser)
     @api.response(403, "Not Authorized")
     @api.marshal_list_with(request_fields)

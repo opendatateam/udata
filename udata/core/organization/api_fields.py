@@ -3,7 +3,6 @@ from flask import request
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.fields import badge_fields
-from udata.core.organization.permissions import OrganizationPrivatePermission
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES
 
@@ -52,7 +51,7 @@ def check_can_access_user_private_info():
     if org is None:
         return False
 
-    return OrganizationPrivatePermission(org).can()
+    return org.permissions["private"].can()
 
 
 def member_email_with_visibility_check(email):
