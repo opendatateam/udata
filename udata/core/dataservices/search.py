@@ -170,6 +170,7 @@ class DataserviceSearch(ModelSearchAdapter):
             "description": dataservice.description,
             "base_api_url": dataservice.base_api_url,
             "created_at": to_iso_datetime(dataservice.created_at),
+            "metadata_modified_at": to_iso_datetime(dataservice.metadata_modified_at),
             "archived": to_iso_datetime(dataservice.archived_at)
             if dataservice.archived_at
             else None,

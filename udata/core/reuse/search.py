@@ -87,6 +87,7 @@ class ReuseSearch(ModelSearchAdapter):
             "description": reuse.description,
             "url": reuse.url,
             "created_at": to_iso_datetime(reuse.created_at),
+            "last_modified": to_iso_datetime(reuse.last_modified),
             "archived": to_iso_datetime(reuse.archived) if reuse.archived else None,
             "views": reuse.metrics.get("views", 0),
             "followers": reuse.metrics.get("followers", 0),
