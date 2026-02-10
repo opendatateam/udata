@@ -4,6 +4,8 @@ from mongoengine import NULLIFY, Q
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.notifications import (
+    MembershipAcceptedNotificationDetails,
+    MembershipRefusedNotificationDetails,
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
 )
@@ -24,7 +26,7 @@ class NotificationQuerySet(UDataQuerySet):
 
     def with_user_in_details(self, user):
         """This function must be updated to handle new details cases"""
-        return self(details__request_user=user)
+        return self.filter(details__request_user=user)
 
 
 def is_handled(base_query, filter_value):
@@ -64,6 +66,8 @@ class Notification(Datetimed, db.Document):
                 TransferRequestNotificationDetails,
                 NewBadgeNotificationDetails,
                 DiscussionNotificationDetails,
+                MembershipAcceptedNotificationDetails,
+                MembershipRefusedNotificationDetails,
             )
         ),
         generic=True,

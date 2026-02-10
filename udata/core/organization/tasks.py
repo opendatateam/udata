@@ -8,7 +8,11 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
-from .notifications import NewBadgeNotificationDetails
+from .notifications import (
+    MembershipAcceptedNotificationDetails,
+    MembershipRefusedNotificationDetails,
+    NewBadgeNotificationDetails,
+)
 
 log = get_logger(__name__)
 
@@ -67,8 +71,22 @@ def notify_membership_response(org_id, request_id):
 
     if request.status == "accepted":
         mails.membership_accepted(org).send(request.user)
+        notification = Notification(
+            user=request.user,
+            details=MembershipAcceptedNotificationDetails(
+                organization=org,
+            ),
+        )
+        notification.save()
     else:
         mails.membership_refused(org).send(request.user)
+        notification = Notification(
+            user=request.user,
+            details=MembershipRefusedNotificationDetails(
+                organization=org,
+            ),
+        )
+        notification.save()
 
 
 @task
