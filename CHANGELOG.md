@@ -1,5 +1,11 @@
 # Changelog
 
+## 14.13.0 (2026-02-10)
+
+- feat: allow badges filtering with settings ([#3649](https://github.com/opendatateam/udata/pull/3649))
+- fix: last_update dates missing in indexing ([#3653](https://github.com/opendatateam/udata/pull/3653))
+
+
 ## 14.12.0 (2026-02-10)
 
 - feat(harvest): add GeoDCAT-AP option to csw-dcat backend ([#3648](https://github.com/opendatateam/udata/pull/3648))
