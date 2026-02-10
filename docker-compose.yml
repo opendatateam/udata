@@ -7,6 +7,10 @@ services:
           - "27017"
         ports:
         - "27017:27017"
+        ulimits:
+          nofile:
+            soft: 4096
+            hard: 4096
 
     broker:
         image: redis

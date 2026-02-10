@@ -53,6 +53,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
                 user=recipient,
                 details=DiscussionNotificationDetails(
                     status=DiscussionStatus.NEW_COMMENT,
+                    message_id=str(message.id),
                     discussion=discussion,
                 ),
             )
