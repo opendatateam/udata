@@ -53,7 +53,7 @@ def unindex(classname, id):
     adapter_class = adapter_catalog.get(model)
     log.info("Unindexing %s (%s)", model.__name__, id)
     try:
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(id)}/unindex"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}{str(id)}/unindex"
         r = requests.delete(url)
         if r.status_code == 404:
             # Unindexed already, we don't want to raise
@@ -114,3 +114,6 @@ def init_app(app):
     import udata.core.dataset.search  # noqa
     import udata.core.reuse.search  # noqa
     import udata.core.organization.search  # noqa
+    import udata.core.topic.search  # noqa
+    import udata.core.discussions.search  # noqa
+    import udata.core.post.search  # noqa

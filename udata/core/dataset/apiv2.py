@@ -108,7 +108,7 @@ dataset_fields = apiv2.model(
         "id": fields.String(description="The dataset identifier", readonly=True),
         "title": fields.String(description="The dataset title", required=True),
         "acronym": fields.String(description="An optional dataset acronym"),
-        "slug": fields.String(description="The dataset permalink string", required=True),
+        "slug": fields.String(description="The dataset permalink string", readonly=True),
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
         ),
@@ -258,6 +258,11 @@ resource_page_fields = apiv2.model(
 dataset_page_fields = apiv2.model(
     "DatasetPage", fields.pager(dataset_fields), mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2)
 )
+dataset_search_page_fields = apiv2.model(
+    "DatasetSearchPage",
+    fields.search_pager(dataset_fields),
+    mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2),
+)
 
 specific_resource_fields = apiv2.model(
     "SpecificResource",
@@ -292,7 +297,7 @@ class DatasetSearchAPI(API):
 
     @apiv2.doc("search_datasets")
     @apiv2.expect(search_parser)
-    @apiv2.marshal_with(dataset_page_fields)
+    @apiv2.marshal_with(dataset_search_page_fields)
     def get(self):
         """List or search all datasets"""
         args = search_parser.parse_args()

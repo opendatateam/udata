@@ -1,6 +1,7 @@
 from celery.utils.log import get_task_logger
 from flask import current_app
 
+from udata.core.activity.models import Activity
 from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
@@ -23,8 +24,14 @@ def purge_dataservices(self):
         Follow.objects(following=dataservice).delete()
         # Remove discussions
         Discussion.objects(subject=dataservice).delete()
-        # Remove HarvestItem references
-        HarvestJob.objects(items__dataservice=dataservice).update(set__items__S__dataservice=None)
+        # Remove HarvestItem references (using update_many with array_filters to update all matching items)
+        HarvestJob._get_collection().update_many(
+            {"items.dataservice": dataservice.id},
+            {"$set": {"items.$[item].dataservice": None}},
+            array_filters=[{"item.dataservice": dataservice.id}],
+        )
+        # Remove activity
+        Activity.objects(related_to=dataservice).delete()
         # Remove associated Transfers
         Transfer.objects(subject=dataservice).delete()
         # Remove dataservices references in Topics

@@ -13,6 +13,7 @@ from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
+    ORG,
     RDF,
     RDFS,
     SKOS,
@@ -355,12 +356,24 @@ def theme_labels_from_rdf(rdf):
 
 
 def themes_from_rdf(rdf):
-    tags = [tag.toPython() for tag in rdf.objects(DCAT.keyword)]
+    tags = []
+    for tag in rdf.objects(DCAT.keyword):
+        if isinstance(tag, RdfResource):
+            # dcat:keyword should be Literal, not a Resource/URIRef
+            log.warning(f"Ignoring dcat:keyword with URI value: {tag.identifier}")
+            continue
+        tags.append(tag.toPython())
     tags += theme_labels_from_rdf(rdf)
     return list(set(tags))
 
 
-def contact_points_from_rdf(rdf, prop, role, dataset):
+def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
+    if agent_name and org_name:
+        return f"{agent_name} ({org_name})"
+    return agent_name or org_name or ""
+
+
+def contact_points_from_rdf(rdf, prop, role, dataset, dryrun=False):
     if not dataset.organization and not dataset.owner:
         return
     for contact_point in rdf.objects(prop):
@@ -371,7 +384,10 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = None
             contact_form = None
         elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
-            name = rdf_value(contact_point, VCARD.fn) or ""
+            name = contact_point_name(
+                rdf_value(contact_point, VCARD.fn),
+                rdf_value(contact_point, VCARD["organization-name"]),
+            )
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
                 or rdf_value(contact_point, VCARD.email)
@@ -380,12 +396,16 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = rdf_value(contact_point, VCARD.hasUrl)
         else:
-            name = (
-                rdf_value(contact_point, FOAF.name)
-                or rdf_value(contact_point, SKOS.prefLabel)
-                or ""
+            contact_point_org = contact_point.value(ORG.memberOf)
+            name = contact_point_name(
+                rdf_value(contact_point, FOAF.name) or rdf_value(contact_point, SKOS.prefLabel),
+                rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
             )
-            email = rdf_value(contact_point, FOAF.mbox)
+            email = (
+                rdf_value(contact_point, FOAF.mbox)
+                or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
+                or None
+            )
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = None
 
@@ -400,9 +420,18 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
         else:
             org_or_owner = {"owner": dataset.owner}
         try:
-            contact, _ = ContactPoint.objects.get_or_create(
-                name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
-            )
+            if dryrun:
+                # In dryrun mode, only reuse existing contact points, don't create new ones.
+                # Mongoengine doesn't allow referencing unsaved documents.
+                contact = ContactPoint.objects.filter(
+                    name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
+                ).first()
+                if not contact:
+                    continue
+            else:
+                contact, _ = ContactPoint.objects.get_or_create(
+                    name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
+                )
         except mongoengine.errors.ValidationError as validation_error:
             log.warning(f"Unable to validate contact point: {validation_error}", exc_info=True)
             continue

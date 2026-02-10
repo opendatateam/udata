@@ -1,9 +1,8 @@
 from flask import request
 
 from udata import search
-from udata.api import API, apiv2
+from udata.api import API, apiv2, fields
 from udata.core.contact_point.api_fields import contact_point_fields
-from udata.utils import multi_to_dict
 
 from .api_fields import member_fields, org_fields, org_page_fields
 from .permissions import EditOrganizationPermission
@@ -13,10 +12,11 @@ apiv2.inherit("OrganizationPage", org_page_fields)
 apiv2.inherit("Organization", org_fields)
 apiv2.inherit("Member", member_fields)
 apiv2.inherit("ContactPoint", contact_point_fields)
+org_search_page_fields = apiv2.model("OrganizationSearchPage", fields.search_pager(org_fields))
 
 
 ns = apiv2.namespace("organizations", "Organization related operations")
-search_parser = OrganizationSearch.as_request_parser()
+search_parser = OrganizationSearch.as_request_parser(store_missing=False)
 
 DEFAULT_SORTING = "-created_at"
 
@@ -27,11 +27,11 @@ class OrganizationSearchAPI(API):
 
     @apiv2.doc("search_organizations")
     @apiv2.expect(search_parser)
-    @apiv2.marshal_with(org_page_fields)
+    @apiv2.marshal_with(org_search_page_fields)
     def get(self):
         """Search all organizations"""
-        search_parser.parse_args()
-        return search.query(OrganizationSearch, **multi_to_dict(request.args))
+        args = search_parser.parse_args()
+        return search.query(OrganizationSearch, **args)
 
 
 @ns.route("/<org:org>/extras/", endpoint="organization_extras")

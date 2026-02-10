@@ -44,9 +44,9 @@ The site identifier. It is used to attached some database configuration, metrics
 
 ### THEME
 
-**default**: ``'default'``
+**default**: ``None``
 
-The enabled theme name.
+The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
 
 ### TEMPLATE_CACHE_DURATION
 
@@ -487,7 +487,7 @@ The default page size for post listing
 The Sentry DSN associated to this udata instance.
 If defined, the Sentry support is automatically activated.
 
-`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `pyproject.toml`.
+`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml).
 
 ### SENTRY_TAGS
 

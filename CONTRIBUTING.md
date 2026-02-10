@@ -27,20 +27,17 @@ This project operates under the W3C's
 > practice. It also provides a benchmark for self evaluation and acts as a
 > vehicle for better identity of the organization.
 
-We hope that our community group act according to these guidelines, and that
-participants hold each other to these high standards. If you have any questions
-or are worried that the code isn't being followed, please contact the owner of the repository.
+We hope that our community group act according to these guidelines, and that participants hold each other to these high standards. If you have any questions or are worried that the code isn't being followed, please contact the owner of the repository.
 
 ## Language
 
-The development language is English. All comments and documentation should be written in English, so that we don't end up with “frenghish” methods, and so we can share our learnings with developers around the world.
+The development language is English. All comments and documentation should be written in English, so that we don't end up with “frenglish” methods, and so we can share our learnings with developers around the world.
 
 ## Process
 
 We’re really happy to accept contributions from the community, that’s the main reason why we open-sourced it! There are many ways to contribute, even if you’re not a technical person.
 
-We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally),
-basically you’ll have to:
+We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally), basically you’ll have to:
 
 * create an issue related to the problem you want to fix (good for traceability and cross-reference)
 * fork the repository
@@ -56,18 +53,11 @@ We’ll take care of tagging your issue with the appropriated labels and answer 
 
 If you’re not familiar with open-source workflows or our set of technologies, do not hesitate to ask for help! We can mentor you or propose good first bugs.
 
-**NOTE**: If you are fixing an existing issue,
-don't forget to end your commit message with `(fix #XXX)`
-where `XXX` is the original issue number. You can also add
-`fix #XXX` in the PR description. This will improve the tracability
-and will magicaly close the issue as soon as the commit is merged.
+**NOTE**: If you are fixing an existing issue, don't forget to end your commit message with `(fix #XXX)` where `XXX` is the original issue number. You can also add `fix #XXX` in the PR description. This will improve the tracability and will magicaly close the issue as soon as the commit is merged.
 
 ### Merging
 
-When the PR has been approved (at least once), you are free to merge it
-in main. We have a squash & merge strategy and pay attention to having
-a clean commit message. You can then delete the branch. If linked with
-an issue, the issue should be closed automatically.
+When the PR has been approved (at least once), you are free to merge it in main. We have a squash & merge strategy and pay attention to having a clean commit message. You can then delete the branch. If linked with an issue, the issue should be closed automatically.
 
 ## Discussing strategies
 
@@ -77,17 +67,16 @@ We’re trying to develop this project in the open as much as possible. We creat
 
 ### Python style guide
 
-We follow the PEP-0008 and PEP-0257 as much as possible in the respect of PEP-0020.
+We follow the [PEP-0008](https://www.python.org/dev/peps/pep-0008/) and [PEP-0257](https://www.python.org/dev/peps/pep-0257/) as much as possible in the respect of PEP-0020. On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 
-On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 Linting, formatting and import sorting are done automatically by [Ruff](https://docs.astral.sh/ruff/) launched by a pre-commit hook. So, before contributing to the repository, it is necessary to initialize the pre-commit hooks:
-```bash
+```shell
 pre-commit install
 ```
 Once this is done, code formatting and linting, as well as import sorting, will be automatically checked before each commit.
 
 If you cannot use pre-commit, it is necessary to format, lint, and sort imports with [Ruff](https://docs.astral.sh/ruff/) before committing:
-```bash
+```shell
 ruff check --fix .
 ruff format .
 ```

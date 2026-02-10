@@ -80,6 +80,10 @@ class DataserviceQuerySet(OwnedQuerySet):
         return self(dataservices_filter)
 
 
+# Uses __badges__ (not available_badges) so that existing badges in DB
+# remain valid even if they are hidden via settings.
+# Uses a standalone function (not a model method) because DataserviceBadge is
+# defined before Dataservice in the file — Dataservice is resolved lazily at call time.
 def validate_badge(value):
     if value not in Dataservice.__badges__.keys():
         raise db.ValidationError("Unknown badge type")
@@ -201,7 +205,10 @@ class Dataservice(
         ),
         readonly=True,
     )
-    description = field(db.StringField(default=""), description="In markdown")
+    description = field(
+        db.StringField(default=""),
+        markdown=True,
+    )
     base_api_url = field(db.URLField(), sortable=True)
 
     machine_documentation_url = field(

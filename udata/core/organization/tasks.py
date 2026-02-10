@@ -8,6 +8,7 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
+from .notifications import NewBadgeNotificationDetails
 
 log = get_logger(__name__)
 
@@ -84,23 +85,41 @@ def notify_new_member(org_id, email):
 @notify_new_badge(Organization, CERTIFIED)
 def notify_badge_certified(org_id):
     """
-    Send an email when a `CERTIFIED` badge is added to an `Organization`
+    Send an email and create notifications when a `CERTIFIED` badge is added to an `Organization`
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
 
+    # Send email notifications
     mails.badge_added_certified(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=NewBadgeNotificationDetails(organization=org, kind=CERTIFIED),
+        )
+        notification.save()
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)
 def notify_badge_public_service(org_id):
     """
-    Send an email when a `PUBLIC_SERVICE` badge is added to an `Organization`
+    Send an email and create notifications when a `PUBLIC_SERVICE` badge is added to an `Organization`
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
 
+    # Send email notifications
     mails.badge_added_public_service(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=NewBadgeNotificationDetails(organization=org, kind=PUBLIC_SERVICE),
+        )
+        notification.save()
 
 
 @notify_new_badge(Organization, COMPANY)
@@ -112,6 +131,14 @@ def notify_badge_company(org_id):
     recipients = [member.user for member in org.members]
     mails.badge_added_company(org).send(recipients)
 
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=NewBadgeNotificationDetails(organization=org, kind=COMPANY),
+        )
+        notification.save()
+
 
 @notify_new_badge(Organization, ASSOCIATION)
 def notify_badge_association(org_id):
@@ -122,6 +149,14 @@ def notify_badge_association(org_id):
     recipients = [member.user for member in org.members]
     mails.badge_added_association(org).send(recipients)
 
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=NewBadgeNotificationDetails(organization=org, kind=ASSOCIATION),
+        )
+        notification.save()
+
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
 def notify_badge_local_authority(org_id):
@@ -131,3 +166,11 @@ def notify_badge_local_authority(org_id):
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
     mails.badge_added_local_authority(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=NewBadgeNotificationDetails(organization=org, kind=LOCAL_AUTHORITY),
+        )
+        notification.save()

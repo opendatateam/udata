@@ -1,6 +1,0 @@
-services:
-    db_test:
-        image: mongo:6.0.4
-        tmpfs: /data/db/
-        ports:
-          - "27018:27017"

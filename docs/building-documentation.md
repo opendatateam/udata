@@ -1,9 +1,14 @@
 # Building the documentation
 
-So meta. First of, activate your virtualenv and install dedicated dependencies:
+So meta. First of all, activate your virtualenv and install dedicated dependencies:
 
 ```shell
-$ pip install -e ".[doc]"
+$ uv sync
+```
+
+With pip (requires pip 25.1+):
+```shell
+$ pip install --group dev -e .
 ```
 
 Then you should be able to build and serve the documentation using the dedicated invoke task:

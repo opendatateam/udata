@@ -4,12 +4,18 @@ from datetime import timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
 
+import pytest
 from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
 
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.mail import mail_sent
+
+requires_search_service = pytest.mark.skipif(
+    not os.environ.get("UDATA_TEST_SEARCH_INTEGRATION"),
+    reason="Set UDATA_TEST_SEARCH_INTEGRATION=1 to run search integration tests",
+)
 
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.

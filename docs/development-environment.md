@@ -8,65 +8,55 @@ See [getting-started](getting-started.md) for installation instructions.
 
 ### Dependency management
 
-We're using `pyproject.toml` to manage our dependencies with optional dependency groups for different use cases.
-
-**This is not mandatory unless you're actively contributing to the project.**
-
-```shell
-$ pre-commit install
-```
-
-Dependencies are defined in `pyproject.toml` with the following optional groups:
-- `dev`: Development tools (ruff, pre-commit, invoke, etc.)
-- `test`: Testing dependencies (pytest, mock, etc.)
-- `doc`: Documentation dependencies (mkdocs, etc.)
-- `report`: Reporting dependencies (coverage, flake8, etc.)
+Dependencies are defined in [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml) using a `dev` dependency group.
+The `dev` group includes all development dependencies:
+- Development tools (ruff, pre-commit, invoke, etc.)
+- Testing dependencies (pytest, mock, etc.)
+- Documentation dependencies (mkdocs, etc.)
+- Reporting dependencies (coverage, flake8, etc.)
 
 To install the project with all development dependencies:
+
+With [uv](https://docs.astral.sh/uv/) (recommended):
 ```shell
-uv sync --extra dev
-```
-...or, with pip:
-```shell
-pip install -e ".[dev]"
+$ uv sync
 ```
 
-To install with specific optional dependencies:
+The `dev` group is included by default. You can also be explicit:
 ```shell
-uv sync --extra test         # For testing
-uv sync --extra doc          # For documentation
-uv sync --extra report       # For reporting
-```
-...or, with pip:
-```shell
-pip install -e ".[test]"     # For testing
-pip install -e ".[doc]"      # For documentation
-pip install -e ".[report]"   # For reporting
+$ uv sync --group dev
 ```
 
-If you need to add or modify a dependency, edit the `pyproject.toml` file directly in the appropriate section.
+With pip (requires pip 25.1+):
+```shell
+$ pip install --group dev -e .
+```
+
+Note: `dependency-groups` are defined in [PEP 735](https://peps.python.org/pep-0735/). Both uv and pip (25.1+) support them.
+
+If you need to add or modify a dependency, edit the [`pyproject.toml`](https://github.com/opendatateam/udata/blob/main/pyproject.toml) file directly in the appropriate section.
 
 
-### Optmizing performances with Cython
+### Optimizing performances with Cython
 
 Some dependencies have an optional compilation support for Cython
 resulting in better performances (mostly XML harvesting).
 To enable it, you need to install Cython before all other dependencies:
 
 ```shell
-$ pip install Cython
-$ pip install -e ".[dev]"
+$ uv add Cython
+$ uv sync
 ```
 
-### Mac OS caveats
+### MacOS caveats
 
 #### Package installation fails
 
 If installing `Pillow` fails:
 
-```
+```shell
 brew install libjpeg
-pip install -e ".[dev]"
+uv sync
 ```
 
 #### Local web server is slow
@@ -83,17 +73,13 @@ If you're using `{something}.local` as your `SITE_NAME`, you need to add an ipv6
 ## Running the project
 
 You can use [invoke][] to launch the application services
-(you might want to have each one runnning in a terminal):
+(you might want to have each one running in a terminal):
 
 ```shell
 $ inv serve         # Start the development server
 
 $ inv work          # Start a worker process
 $ inv beat          # Start a scheduler process
-
-$ inv assets-watch  # Continously watch and build assets
-$ inv widgets-watch # Continously watch and build widgets
-$ inv oembed-watch # Continously watch and build oembed
 ```
 
 ## Common tasks
@@ -105,7 +91,7 @@ You can get the documentation related to all tasks with:
 $ inv -l
 ```
 
-It might be required to update your Python and JavaScript dependencies to ensure compatibility.
+It might be required to update your Python dependencies to ensure compatibility.
 A task is provided to automate it:
 
 ```shell
@@ -124,7 +110,7 @@ $ inv update -m i18nc
 ```
 
 Now check out our advanced documentation for a focus on some specific tasks.
-You may want to be able to [run the tests](testing-code.md) to for a backend contribution,
+You may want to be able to [run the tests](testing-code.md) for a backend contribution,
 simply provide some fixes to [the translations](adding-translations.md)
 or [the documentation](building-documentation.md).
 

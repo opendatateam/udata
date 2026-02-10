@@ -8,5 +8,13 @@ BODY_TYPES = OrderedDict(
     [
         ("markdown", _("Markdown")),
         ("html", _("HTML")),
+        ("blocs", _("Blocs")),
+    ]
+)
+
+POST_KINDS = OrderedDict(
+    [
+        ("news", _("News")),
+        ("page", _("Page")),
     ]
 )

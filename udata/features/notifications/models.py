@@ -1,10 +1,15 @@
 from flask_restx.inputs import boolean
-from mongoengine import NULLIFY
+from mongoengine import NULLIFY, Q
 
 from udata.api_fields import field, generate_fields
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.discussions.notifications import DiscussionNotificationDetails
+from udata.core.organization.notifications import (
+    MembershipRequestNotificationDetails,
+    NewBadgeNotificationDetails,
+)
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
+from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.queryset import UDataQuerySet
@@ -13,7 +18,9 @@ from udata.mongo.queryset import UDataQuerySet
 class NotificationQuerySet(UDataQuerySet):
     def with_organization_in_details(self, organization):
         """This function must be updated to handle new details cases"""
-        return self(details__request_organization=organization)
+        return self.filter(
+            Q(details__request_organization=organization) | Q(details__organization=organization)
+        )
 
     def with_user_in_details(self, user):
         """This function must be updated to handle new details cases"""
@@ -51,6 +58,13 @@ class Notification(Datetimed, db.Document):
         filterable={},
     )
     details = field(
-        db.GenericEmbeddedDocumentField(choices=(MembershipRequestNotificationDetails,)),
+        db.GenericEmbeddedDocumentField(
+            choices=(
+                MembershipRequestNotificationDetails,
+                TransferRequestNotificationDetails,
+                NewBadgeNotificationDetails,
+                DiscussionNotificationDetails,
+            )
+        ),
         generic=True,
     )

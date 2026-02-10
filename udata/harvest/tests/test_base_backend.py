@@ -116,21 +116,22 @@ class HarvestFilterTest:
 
 class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
-        now = datetime.utcnow()
         nb_datasets = 3
         source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
+        before = datetime.utcnow()
         job = backend.harvest()
+        after = datetime.utcnow()
 
         assert len(job.items) == nb_datasets
         assert Dataset.objects.count() == nb_datasets
         for dataset in Dataset.objects():
-            assert_equal_dates(dataset.last_modified, now)
+            assert before <= dataset.last_modified <= after
             assert dataset.harvest.source_id == str(source.id)
             assert dataset.harvest.domain == source.domain
             assert dataset.harvest.remote_id.startswith("fake-")
-            assert_equal_dates(dataset.harvest.last_update, now)
+            assert before <= dataset.harvest.last_update <= after
 
     def test_has_feature_defaults(self):
         source = HarvestSourceFactory()

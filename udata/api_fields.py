@@ -29,7 +29,7 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
-from flask import Request
+from flask import Request, request
 from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
@@ -39,6 +39,32 @@ import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+
+
+def required_if(**conditions):
+    """Check helper that makes a field required when other fields have specific values.
+
+    Usage:
+        page_id = field(
+            db.ReferenceField("Page"),
+            checks=[required_if(body_type="blocs")],
+        )
+    """
+
+    def check(value, data, field, obj, **_kwargs):
+        if value is not None:
+            return
+        for condition_field, condition_value in conditions.items():
+            actual_condition = data.get(condition_field, getattr(obj, condition_field, None))
+            if actual_condition == condition_value:
+                raise FieldValidationError(
+                    f"'{field}' is required when '{condition_field}' is '{condition_value}'",
+                    field=field,
+                )
+
+    check.run_even_if_missing = True
+    return check
+
 
 lazy_reference = api.model(
     "LazyReference",
@@ -79,13 +105,15 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
     user-supplied overrides, setting the readonly flag…), it's easier to have to do this only once at the end of the function.
 
     """
+    from udata.mongo.engine import db
+
     params: dict = {}
     params["required"] = field.required
 
     read_params: dict = {}
     write_params: dict = {}
 
-    constructor: Callable
+    constructor: Callable | None = None
     constructor_read: Callable | None = None
     constructor_write: Callable | None = None
 
@@ -204,12 +232,33 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
 
-    elif isinstance(
-        field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
-    ):
+    elif isinstance(field, mongoengine.fields.GenericLazyReferenceField):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
+
+    elif isinstance(field, mongo_fields.GenericReferenceField):
+        if field.choices:
+            generic_fields = {}
+            for cls in field.choices:
+                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                generic_fields[cls.__name__] = convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericReferenceField() we'll create fields for each
+                    # of the subclasses with ReferenceField(Organization)…
+                    mongoengine.fields.ReferenceField(cls),
+                    info,
+                )
+
+            def constructor_read(**kwargs):
+                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+
+            def constructor_write(**kwargs):
+                return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+        else:
+
+            def constructor(**kwargs):
+                return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
@@ -339,6 +388,7 @@ def generate_fields(**kwargs) -> Callable:
         write_fields: dict = {}
         ref_fields: dict = {}
         sortables: list = kwargs.get("additional_sorts", [])
+        default_sort: list = kwargs.get("default_sort", None)
 
         filterables: list[dict] = kwargs.get("standalone_filters", [])
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
@@ -488,6 +538,7 @@ def generate_fields(**kwargs) -> Callable:
                 type=str,
                 location="args",
                 choices=choices,
+                default=default_sort,
                 help="The field (and direction) on which sorting apply",
             )
 
@@ -526,6 +577,9 @@ def generate_fields(**kwargs) -> Callable:
             if searchable and args.get("q"):
                 phrase_query: str = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
                 base_query = base_query.search_text(phrase_query)
+
+                if "sort" not in request.args:
+                    base_query = base_query.order_by("$text_score")
 
             for filterable in filterables:
                 # If it's from an `nested_filter`, use the custom label instead of the key,
@@ -653,6 +707,19 @@ def field(
         return inner
 
 
+def run_check(check, value, key, obj, data):
+    check(
+        value,
+        **{
+            "is_creation": obj._created,
+            "is_update": not obj._created,
+            "field": key,
+            "obj": obj,
+            "data": data,
+        },
+    )
+
+
 def patch(obj, request) -> type:
     """Patch the object with the data from the request.
 
@@ -662,11 +729,15 @@ def patch(obj, request) -> type:
     from udata.mongo.engine import db
 
     data = request.json if isinstance(request, Request) else request
+
     for key, value in data.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
+
+            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+                value = None
 
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
@@ -726,22 +797,29 @@ def patch(obj, request) -> type:
 
                 value = objects
 
-            # `checks` field attribute allows to do validation from the request before setting
-            # the attribute
+            # Run checks if value is modified.
+            # We run checks here (before setattr) to compare old vs new value.
             checks = info.get("checks", [])
-
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
-                    check(
-                        value,
-                        **{
-                            "is_creation": obj._created,
-                            "is_update": not obj._created,
-                            "field": key,
-                        },
-                    )  # TODO add other model attributes in function parameters
+                    run_check(check, value, key, obj, data)
 
             setattr(obj, key, value)
+
+    # Run checks marked with `run_even_if_missing` on fields not in request.
+    # Some checks (like `required_if`) need to run even when their field is absent
+    # from the request, because they validate cross-field constraints based on
+    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    for key, _, info in get_fields(obj.__class__):
+        if key in data:
+            continue
+        checks = info.get("checks", [])
+        value = getattr(obj, key, None)
+
+        for check in checks:
+            if not getattr(check, "run_even_if_missing", False):
+                continue
+            run_check(check, value, key, obj, data)
 
     return obj
 

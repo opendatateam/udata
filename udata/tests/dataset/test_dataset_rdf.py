@@ -518,6 +518,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
 
+    def test_unparseable_modified_at(self):
+        """Regression test: template strings like {{modified:toISO}} should not crash parsing."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCT.modified, Literal("{{modified:toISO}}")))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.harvest.modified_at is None
+
     def test_contact_point_individual_vcard(self):
         g = Graph()
         node = URIRef("https://test.org/dataset")
@@ -643,10 +659,10 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "contact"
-        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].name == "foo (bar)"
         assert dataset.contact_points[0].email == "foo@example.com"
 
-    def test_contact_point_organization_member_foaf(self):
+    def test_contact_point_organization_member_foaf_both_mails(self):
         g = Graph()
         node = URIRef("https://test.org/dataset")
         g.set((node, RDF.type, DCAT.Dataset))
@@ -673,10 +689,10 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].name == "foo (bar)"
         assert dataset.contact_points[0].email == "foo@example.com"
 
-    def test_contact_point_organization_member_foaf_no_mail(self):
+    def test_contact_point_organization_member_foaf_no_org_mail(self):
         g = Graph()
         node = URIRef("https://test.org/dataset")
         g.set((node, RDF.type, DCAT.Dataset))
@@ -703,8 +719,38 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].name == "foo (bar)"
         assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_foaf_no_agent_mail(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        org = BNode()
+        g.add((org, RDF.type, FOAF.Organization))
+        g.add((org, FOAF.name, Literal("bar")))
+        g.add((org, FOAF.mbox, Literal("bar@example.com")))
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, Literal("foo")))
+        # no agent email
+        g.add((contact, ORG.memberOf, org))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo (bar)"
+        assert dataset.contact_points[0].email == "bar@example.com"
 
     def test_theme_and_tags(self):
         node = BNode()
@@ -724,6 +770,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
+
+    def test_keyword_as_uriref(self):
+        """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.keyword, Literal("literal-tag")))
+        g.add((node, DCAT.keyword, URIRef("http://example.org/keyword/uriref-tag")))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert "literal-tag" in dataset.tags
 
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None
@@ -817,6 +879,39 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
         assert resource.format == "csv"
+
+    def test_resource_future_modified_at(self):
+        node = BNode()
+        g = Graph()
+
+        modified = faker.future_datetime()
+
+        g.add((node, RDF.type, DCAT.Distribution))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.downloadURL, Literal(faker.uri())))
+        g.add((node, DCT.modified, Literal(modified)))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.harvest.modified_at is None
+
+    def test_resource_unparseable_modified_at(self):
+        """Regression test: template strings like {{modified:toISO}} should not crash parsing."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Distribution))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.downloadURL, Literal(faker.uri())))
+        g.add((node, DCT.modified, Literal("{{modified:toISO}}")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.harvest.modified_at is None
 
     def test_download_url_over_access_url(self):
         node = BNode()

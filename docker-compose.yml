@@ -1,12 +1,16 @@
 services:
     db:
-        image: mongo:6.0.4
+        image: mongo:7.0.28
         volumes:
           - ./data/db:/data/db
         expose:
           - "27017"
         ports:
         - "27017:27017"
+        ulimits:
+          nofile:
+            soft: 4096
+            hard: 4096
 
     broker:
         image: redis
@@ -16,3 +20,12 @@ services:
           - "6379"
         ports:
           - "6379:6379"
+
+    mailpit:
+        image: axllent/mailpit
+        ports:
+            - 8025:8025
+            - 1025:1025
+        environment:
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1

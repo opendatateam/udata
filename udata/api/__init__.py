@@ -121,6 +121,8 @@ class UDataApi(Api):
         if "application/json" not in request.headers.get("Content-Type", ""):
             errors = {"Content-Type": "expecting application/json"}
             self.abort(400, errors=errors)
+        if not isinstance(request.json, dict):
+            self.abort(400, errors={"request": "expecting a JSON object"})
         form = form_cls.from_json(request.json, obj=obj, instance=obj, meta={"csrf": False})
         if not form.validate():
             self.abort(400, errors=form.errors)
@@ -341,6 +343,7 @@ def init_app(app):
     import udata.core.dataservices.api  # noqa
     import udata.core.dataservices.apiv2  # noqa
     import udata.core.discussions.api  # noqa
+    import udata.core.discussions.apiv2  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
@@ -353,6 +356,7 @@ def init_app(app):
     import udata.core.tags.api  # noqa
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.post.apiv2  # noqa
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa

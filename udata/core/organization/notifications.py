@@ -6,7 +6,7 @@ from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
-from udata.models import db
+from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +24,25 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     request_user = field(
         db.ReferenceField(User),
         nested_fields=user_ref_fields,
+        readonly=True,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
+@generate_fields()
+class NewBadgeNotificationDetails(db.EmbeddedDocument):
+    organization = field(
+        db.ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+    kind = field(
+        db.StringField(),
         readonly=True,
         auditable=False,
         allow_null=True,

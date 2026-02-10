@@ -15,6 +15,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
@@ -53,6 +54,8 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument("dataset", type=str, location="args")
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "organization_badge",
             type=str,
@@ -170,6 +173,9 @@ class ReusesAtomFeedAPI(API):
         return response
 
 
+reuse_delete_parser = add_send_legal_notice_argument(api.parser())
+
+
 @ns.route("/<reuse:reuse>/", endpoint="reuse", doc=common_doc)
 @api.response(404, "Reuse not found")
 @api.response(410, "Reuse has been deleted")
@@ -202,12 +208,16 @@ class ReuseAPI(API):
 
     @api.secure
     @api.doc("delete_reuse")
+    @api.expect(reuse_delete_parser)
     @api.response(204, "Reuse deleted")
     def delete(self, reuse):
         """Delete a given reuse"""
+        args = reuse_delete_parser.parse_args()
         if reuse.deleted:
             api.abort(410, "This reuse has been deleted")
         reuse.permissions["delete"].test()
+        send_legal_notice_on_deletion(reuse, args)
+
         reuse.deleted = datetime.utcnow()
         reuse.save()
         return "", 204
@@ -219,9 +229,11 @@ class ReuseDatasetsAPI(API):
     @api.doc("reuse_add_dataset", **common_doc)
     @api.expect(dataset_ref_fields)
     @api.response(200, "The dataset is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataset to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataset identifier")
         try:
@@ -243,9 +255,11 @@ class ReuseDataservicesAPI(API):
     @api.doc("reuse_add_dataservice", **common_doc)
     @api.expect(Dataservice.__ref_fields__)
     @api.response(200, "The dataservice is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataservice to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataservice identifier")
         try:
@@ -266,7 +280,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc("available_reuse_badges")
     def get(self):
         """List all available reuse badges and their labels"""
-        return Reuse.__badges__
+        return Reuse.available_badges()
 
 
 @ns.route("/<reuse:reuse>/badges/", endpoint="reuse_badges")

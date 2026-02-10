@@ -188,7 +188,7 @@ feature_fields = api.model(
         "label": fields.String(description="A localized human-readable and descriptive label"),
         "key": fields.String(description="The feature key"),
         "description": fields.String(description="Some details about the behavior"),
-        "default": fields.String(description="The feature default state (true is enabled)"),
+        "default": fields.Boolean(description="The feature default state (true is enabled)"),
     },
 )
 
