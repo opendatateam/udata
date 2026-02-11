@@ -119,7 +119,7 @@ member_fields = api.model(
 )
 
 org_permissions_fields = api.model(
-    "OrganizationSourcePermissions",
+    "OrganizationPermissions",
     {
         "edit": fields.Permission(),
         "delete": fields.Permission(),
