@@ -156,12 +156,6 @@ parser.add_argument(
 )
 
 
-@ns.route("/<id>/spam/", endpoint="discussion_spam")
-@ns.doc(delete={"id": "unspam_discussion"})
-class DiscussionSpamAPI(SpamAPIMixin):
-    model = Discussion
-
-
 discussion_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
@@ -251,18 +245,6 @@ class DiscussionAPI(API):
         discussion.delete()
         on_discussion_deleted.send(discussion)
         return "", 204
-
-
-@ns.route("/<id>/comments/<int:cidx>/spam/", endpoint="discussion_comment_spam")
-@ns.doc(delete={"id": "unspam_discussion_comment"})
-class DiscussionCommentSpamAPI(SpamAPIMixin):
-    def get_model(self, id, cidx):
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-        elif cidx == 0:
-            api.abort(400, "You cannot unspam the first comment of a discussion")
-        return discussion, discussion.discussion[cidx]
 
 
 message_delete_parser = add_send_legal_notice_argument(api.parser())
