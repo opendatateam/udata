@@ -71,7 +71,7 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
     if org is None:
         raise FieldValidationError(_("Unknown organization"), field="organization")
 
-    if current_user.is_authenticated and org and org.permissions["private"].can():
+    if current_user.is_authenticated and org and not org.permissions["private"].can():
         raise FieldValidationError(
             _("Permission denied for this organization"), field="organization"
         )
