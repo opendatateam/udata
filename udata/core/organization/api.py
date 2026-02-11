@@ -29,9 +29,11 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.models import ContactPoint
+from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .api_fields import (
+    invite_fields,
     member_fields,
     org_fields,
     org_page_fields,
@@ -40,16 +42,22 @@ from .api_fields import (
     refuse_membership_fields,
     request_fields,
 )
-from .constants import ORG_ROLES
+from .constants import DEFAULT_ROLE, ORG_ROLES
 from .forms import (
     MemberForm,
+    MembershipInviteForm,
     MembershipRefuseForm,
     MembershipRequestForm,
     OrganizationForm,
 )
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
-from .tasks import notify_membership_request, notify_membership_response, notify_new_member
+from .tasks import (
+    notify_membership_invitation,
+    notify_membership_invitation_canceled,
+    notify_membership_request,
+    notify_membership_response,
+)
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
@@ -421,6 +429,9 @@ class MembershipAcceptAPI(MembershipAPI):
         org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
 
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
+
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
@@ -448,6 +459,10 @@ class MembershipRefuseAPI(MembershipAPI):
         """Refuse user membership to a given organization."""
         org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
+
         form = api.validate(MembershipRefuseForm)
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
@@ -462,30 +477,113 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
+@ns.route("/<org:org>/membership/<uuid:id>/cancel/", endpoint="cancel_membership")
+class MembershipCancelAPI(MembershipAPI):
+    @api.secure
+    @api.doc("cancel_membership", **common_doc)
+    @api.response(400, "Membership request is not pending")
+    def post(self, org, id):
+        """Cancel a pending invitation for a given organization."""
+        EditOrganizationPermission(org).test()
+        membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind != "invitation":
+            api.abort(400, "Only invitations can be canceled")
+
+        if membership_request.status != "pending":
+            api.abort(400, "Only pending invitations can be canceled")
+
+        membership_request.status = "canceled"
+        membership_request.handled_by = current_user._get_current_object()
+        membership_request.handled_on = datetime.utcnow()
+
+        org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
+
+        notify_membership_invitation_canceled.delay(str(org.id), str(membership_request.id))
+
+        return {}, 200
+
+
+@ns.route("/<org:org>/member/", endpoint="invite_member", doc=common_doc)
+class MemberInviteAPI(API):
+    @api.secure
+    @api.expect(invite_fields)
+    @api.marshal_with(request_fields, code=201)
+    @api.doc("invite_organization_member")
+    @api.response(403, "Not Authorized")
+    @api.response(400, "Bad Request")
+    def post(self, org):
+        """Invite a user or email to join the organization."""
+        from udata.core.user.models import User
+
+        org.permissions["members"].test()
+        form = api.validate(MembershipInviteForm)
+
+        user_id = form.user.data
+        email = form.email.data
+        role = form.role.data or DEFAULT_ROLE
+        comment = form.comment.data
+
+        if user_id and email:
+            raise FieldValidationError(field="user", message="Cannot provide both user and email")
+
+        user = None
+
+        # If user ID provided, get user
+        if user_id:
+            user = User.objects(id=user_id).first()
+            if not user:
+                raise FieldValidationError(field="user", message=f"Unknown user '{user_id}'")
+
+        # If email provided (and no user), check if it matches an existing user
+        if email and not user:
+            user = User.objects(email=email.lower()).first()
+            if user:
+                email = None  # User found, use user instead of email
+
+        # Validate we have either user or email
+        if not user and not email:
+            raise FieldValidationError(field="user", message="Either user or email is required")
+
+        # Check if user is already a member or has a pending request/invitation
+        email_lower = email.lower() if email else None
+        for member in org.members:
+            if user and member.user == user:
+                raise FieldValidationError(field="user", message="User is already a member")
+
+        for req in org.requests:
+            if req.status != "pending":
+                continue
+            if user and req.user == user:
+                raise FieldValidationError(
+                    field="user", message="A request or invitation is already pending for this user"
+                )
+            if email_lower and req.email and req.email.lower() == email_lower:
+                raise FieldValidationError(
+                    field="email", message="An invitation is already pending for this email"
+                )
+
+        # Create invitation
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=user,
+            email=email.lower() if email else None,
+            created_by=current_user._get_current_object(),
+            role=role,
+            comment=comment,
+        )
+        org.requests.append(invitation)
+        org.save()
+        MembershipRequest.after_create.send(invitation, org=org)
+
+        notify_membership_invitation.delay(str(org.id), str(invitation.id))
+
+        return invitation, 201
+
+
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
-    @api.secure
-    @api.expect(member_fields)
-    @api.marshal_with(member_fields, code=201)
-    @api.doc("create_organization_member")
-    @api.response(403, "Not Authorized")
-    @api.response(409, "User is already member", member_fields)
-    def post(self, org, user):
-        """Add a member into a given organization."""
-        org.permissions["members"].test()
-        if org.is_member(user):
-            return org.member(user), 409
-        member = Member(user=user)
-        form = api.validate(MemberForm, member)
-        form.populate_obj(member)
-        org.members.append(member)
-        org.count_members()
-        org.save()
-
-        notify_new_member.delay(str(org.id), str(member.user.email))
-
-        return member, 201
-
     @api.secure
     @api.expect(member_fields)
     @api.marshal_with(member_fields)
