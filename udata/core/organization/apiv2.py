@@ -11,7 +11,7 @@ from .search import OrganizationSearch
 apiv2.inherit("OrganizationPage", org_page_fields)
 apiv2.inherit("Organization", org_fields)
 apiv2.inherit("Member", member_fields)
-apiv2.inherit("ContactPoint", ContactPoint.__read_fields__)
+apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 org_search_page_fields = apiv2.model("OrganizationSearchPage", fields.search_pager(org_fields))
 
 
