@@ -182,6 +182,20 @@ while IFS= read -r hash; do
     fi
 done <<< "$COMMIT_HASHES"
 
+# Warn if breaking changes detected without a major version bump
+if [ -n "$BREAKING_CHANGES_RAW" ] && [ -n "$LAST_TAG" ]; then
+    LAST_MAJOR=$(echo "$LAST_TAG" | sed -E 's/^v?([0-9]+)\..*/\1/')
+    NEW_MAJOR=$(echo "$VERSION" | sed -E 's/^([0-9]+)\..*/\1/')
+    if [ "$LAST_MAJOR" = "$NEW_MAJOR" ]; then
+        echo "Warning: breaking changes detected but major version is unchanged ($LAST_MAJOR → $NEW_MAJOR)"
+        read -p "Continue anyway? [y/N] " confirm
+        if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+            echo "Aborted."
+            exit 1
+        fi
+    fi
+fi
+
 # Sort breaking changes (sort by first line only, keep blocks together)
 BREAKING_CHANGES=""
 if [ -n "$BREAKING_CHANGES_RAW" ]; then
