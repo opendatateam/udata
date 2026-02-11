@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Script to create a git tag and update CHANGELOG.md
-# Usage: ./tag-version.sh <version> [--dry-run]
+# Usage: ./tag-version.sh <version> [--dry-run] [--breaking PR1,PR2,...]
 
 set -e
 
 DRY_RUN=false
+BREAKING_PRS=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -13,6 +14,10 @@ while [[ $# -gt 0 ]]; do
         --dry-run)
             DRY_RUN=true
             shift
+            ;;
+        --breaking)
+            BREAKING_PRS="$2"
+            shift 2
             ;;
         *)
             VERSION="$1"
@@ -22,9 +27,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version> [--dry-run]"
+    echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
     echo "Example: $0 11.0.1"
     echo "Example: $0 11.0.1 --dry-run"
+    echo "Example: $0 11.0.1 --breaking 3649,3651"
     exit 1
 fi
 
@@ -141,8 +147,20 @@ while IFS= read -r hash; do
         body=$(echo "$body" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
     fi
 
-    # Check if it's a breaking change (contains ! before :)
-    if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
+    # Check if this commit's PR was manually marked as breaking
+    is_forced_breaking=false
+    if [ -n "$BREAKING_PRS" ]; then
+        IFS=',' read -ra pr_numbers <<< "$BREAKING_PRS"
+        for pr in "${pr_numbers[@]}"; do
+            if [[ "$subject" =~ \#$pr\) ]] || [[ "$subject" =~ \#$pr\] ]]; then
+                is_forced_breaking=true
+                break
+            fi
+        done
+    fi
+
+    # Check if it's a breaking change (contains ! before : OR manually marked)
+    if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]] || [ "$is_forced_breaking" = true ]; then
         # Make subject bold in markdown
         commit_entry="- **$subject**"
 
