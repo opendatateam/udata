@@ -484,7 +484,7 @@ class MembershipCancelAPI(MembershipAPI):
     @api.response(400, "Membership request is not pending")
     def post(self, org, id):
         """Cancel a pending invitation for a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
 
         if membership_request.kind != "invitation":
