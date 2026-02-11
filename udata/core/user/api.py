@@ -434,20 +434,18 @@ class UserAPI(API):
 
 
 # These imports are not at the top of the file to avoid circular imports
-from udata.core.contact_point.api import ContactPointApiParser  # noqa
-from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
 from udata.models import ContactPoint  # noqa
 
-contact_point_parser = ContactPointApiParser()
+contact_point_parser = ContactPoint.__index_parser__
 
 
 @ns.route("/<user:user>/contacts/", endpoint="user_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_user_contact_point")
-    @api.marshal_with(contact_point_page_fields)
+    @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, user):
         """List all user contact points"""
-        args = contact_point_parser.parse()
+        args = contact_point_parser.parse_args()
         contact_points = ContactPoint.objects.owned_by(user)
         return contact_points.paginate(args["page"], args["page_size"])
 

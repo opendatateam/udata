@@ -1,7 +1,7 @@
 from udata.api import api, base_reference, fields
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.fields import badge_fields
-from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.spatial.api_fields import spatial_coverage_fields
@@ -428,7 +428,7 @@ dataset_fields = api.model(
             description="Site internal and specific object's data",
         ),
         "contact_points": fields.List(
-            fields.Nested(contact_point_fields, description="The dataset contact points"),
+            fields.Nested(ContactPoint.__read_fields__, description="The dataset contact points"),
         ),
         "permissions": fields.Nested(dataset_permissions_fields),
     },

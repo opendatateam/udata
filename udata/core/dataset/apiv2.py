@@ -8,7 +8,7 @@ from flask_restx import marshal
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.access_type.models import AccessAudience
-from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
@@ -233,7 +233,7 @@ dataset_fields = apiv2.model(
             description="Site internal and specific object's data",
         ),
         "contact_points": fields.List(
-            fields.Nested(contact_point_fields),
+            fields.Nested(ContactPoint.__read_fields__),
             required=False,
             description="The dataset contact points",
         ),
@@ -285,7 +285,7 @@ apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
 apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
-apiv2.inherit("ContactPoint", contact_point_fields)
+apiv2.inherit("ContactPoint", ContactPoint.__read_fields__)
 apiv2.inherit("Schema", schema_fields)
 apiv2.inherit("CatalogSchema", catalog_schema_fields)
 apiv2.inherit("DatasetPermissions", dataset_permissions_fields)
