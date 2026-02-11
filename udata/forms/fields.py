@@ -13,7 +13,6 @@ from wtforms_json import flatten_json
 
 from udata import tags, uris
 from udata.auth import admin_permission, current_user
-from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.core.storages import tmp
 from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectField
 from udata.forms import ModelForm
@@ -787,7 +786,7 @@ class PublishAsField(ModelFieldMixin, Field):
         if self.data:
             if not current_user.is_authenticated:
                 raise validators.ValidationError(_("You must be authenticated"))
-            elif not OrganizationPrivatePermission(self.data).can():
+            elif not self.data.permissions["private"].can():
                 raise validators.ValidationError(_("Permission denied for this organization"))
 
             if self.owner_field:

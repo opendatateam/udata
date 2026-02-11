@@ -6,6 +6,17 @@ from udata.core.badges.fields import badge_fields
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
 
+org_permissions_fields = api.model(
+    "OrganizationPermissions",
+    {
+        "edit": fields.Permission(),
+        "delete": fields.Permission(),
+        "members": fields.Permission(),
+        "harvest": fields.Permission(),
+        "private": fields.Permission(),
+    },
+)
+
 org_ref_fields = api.inherit(
     "OrganizationReference",
     base_reference,
@@ -35,6 +46,7 @@ org_ref_fields = api.inherit(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
     },
 )
 
@@ -149,17 +161,6 @@ member_fields = api.model(
         "since": fields.ISODateTime(
             description="The date the user joined the organization", readonly=True
         ),
-    },
-)
-
-org_permissions_fields = api.model(
-    "OrganizationPermissions",
-    {
-        "edit": fields.Permission(),
-        "delete": fields.Permission(),
-        "members": fields.Permission(),
-        "harvest": fields.Permission(),
-        "private": fields.Permission(),
     },
 )
 
