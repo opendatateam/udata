@@ -160,12 +160,12 @@ while IFS= read -r hash; do
     fi
 
     # Inject ! before : for forced breaking changes that don't already have it
-    if [ "$is_forced_breaking" = true ] && ! [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
+    if [ "$is_forced_breaking" = true ]; then
         subject=$(echo "$subject" | sed -E 's/^([a-z]+(\([^\)]+\))?): /\1!: /')
     fi
 
-    # Check if it's a breaking change (contains ! before : OR manually marked)
-    if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]] || [ "$is_forced_breaking" = true ]; then
+    # Check if it's a breaking change (contains ! before :)
+    if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
         # Make subject bold in markdown
         commit_entry="- **$subject**"
 
