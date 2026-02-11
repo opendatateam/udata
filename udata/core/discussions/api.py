@@ -11,8 +11,6 @@ from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_no
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.core.spam.api import SpamAPIMixin
-from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.utils import id_or_404
 
@@ -44,7 +42,6 @@ message_fields = api.model(
         ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
         "last_modified_at": fields.ISODateTime(description="The message last edit date"),
-        "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(message_permissions_fields),
     },
 )
@@ -83,7 +80,6 @@ discussion_fields = api.model(
             attribute=lambda d: d.self_web_url(), description="The discussion web URL"
         ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
-        "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(discussion_permissions_fields),
     },
 )
@@ -158,12 +154,6 @@ parser.add_argument("page", type=int, default=1, location="args", help="The page
 parser.add_argument(
     "page_size", type=int, default=20, location="args", help="The page size to fetch"
 )
-
-
-@ns.route("/<id>/spam/", endpoint="discussion_spam")
-@ns.doc(delete={"id": "unspam_discussion"})
-class DiscussionSpamAPI(SpamAPIMixin):
-    model = Discussion
 
 
 discussion_delete_parser = add_send_legal_notice_argument(api.parser())
@@ -255,18 +245,6 @@ class DiscussionAPI(API):
         discussion.delete()
         on_discussion_deleted.send(discussion)
         return "", 204
-
-
-@ns.route("/<id>/comments/<int:cidx>/spam/", endpoint="discussion_comment_spam")
-@ns.doc(delete={"id": "unspam_discussion_comment"})
-class DiscussionCommentSpamAPI(SpamAPIMixin):
-    def get_model(self, id, cidx):
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-        elif cidx == 0:
-            api.abort(400, "You cannot unspam the first comment of a discussion")
-        return discussion, discussion.discussion[cidx]
 
 
 message_delete_parser = add_send_legal_notice_argument(api.parser())

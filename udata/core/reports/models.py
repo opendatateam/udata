@@ -82,6 +82,19 @@ class Report(db.Document):
         allow_null=True,
     )
 
+    subject_embed_id = field(
+        db.UUIDField(),
+        allow_null=True,
+        description="UUID of the embedded document within the subject (e.g., a Message within a Discussion)",
+    )
+
+    # Callbacks to execute when report is dismissed (for auto-spam reports)
+    # Format: {"method_name": {"args": [...], "kwargs": {...}}}
+    callbacks = field(
+        db.DictField(default=dict),
+        readonly=True,
+    )
+
     meta = {
         "queryset_class": ReportQuerySet,
     }
