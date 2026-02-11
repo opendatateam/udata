@@ -1594,7 +1594,6 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(feed.entries[0].title, "Transport public")
 
 
-@pytest.mark.options(DATASET_HIDDEN_BADGES=[])
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
     def setUpClass(cls):

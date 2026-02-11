@@ -26,20 +26,11 @@ class ContactPointsListAPI(API):
         contact_point = patch(ContactPoint(), request)
         if not contact_point.owner and not contact_point.organization:
             contact_point.owner = current_user._get_current_object()
-        query = {
-            "name": contact_point.name,
-            "email": contact_point.email,
-            "contact_form": contact_point.contact_form,
-            "role": contact_point.role,
-            "owner": contact_point.owner,
-            "organization": contact_point.organization,
-        }
-        existing = ContactPoint.objects(**query).first()
-        if existing:
-            return existing, 200
-
-        contact_point.save()
-        return contact_point, 201
+        # Atomic get_or_create to avoid duplicates from concurrent requests.
+        # Build the query from __write_fields__ to automatically include any new field.
+        query = {name: getattr(contact_point, name) for name in ContactPoint.__write_fields__}
+        contact_point, created = ContactPoint.objects.get_or_create(**query)
+        return contact_point, 201 if created else 200
 
 
 @ns.route("/<contact_point:contact_point>/", endpoint="contact_point")
@@ -61,14 +52,9 @@ class ContactPointAPI(API):
         OwnablePermission(contact_point).test()
 
         contact_point = patch(contact_point, request)
-        query = {
-            "name": contact_point.name,
-            "email": contact_point.email,
-            "contact_form": contact_point.contact_form,
-            "role": contact_point.role,
-            "owner": contact_point.owner,
-            "organization": contact_point.organization,
-        }
+        # Reject if another contact point already has the exact same field values.
+        # Build the query from __write_fields__ to automatically include any new field.
+        query = {name: getattr(contact_point, name) for name in ContactPoint.__write_fields__}
         if ContactPoint.objects(**query).filter(id__ne=contact_point.id).count():
             raise FieldValidationError(
                 _("An existing contact point already exists with these informations."),

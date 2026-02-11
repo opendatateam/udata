@@ -27,7 +27,7 @@ CONTACT_ROLES = {
 
 _url_extractor = URLExtract()
 
-# Simple email regex matching WTForms' Email validator behavior
+# Basic email format check (something@something.something)
 _email_re = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
 
 MASK_FIELDS = ("id", "name", "email", "contact_form", "role")
