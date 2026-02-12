@@ -3,9 +3,19 @@ from flask import request
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.fields import badge_fields
-from udata.core.organization.permissions import OrganizationPrivatePermission
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+
+org_permissions_fields = api.model(
+    "OrganizationPermissions",
+    {
+        "edit": fields.Permission(),
+        "delete": fields.Permission(),
+        "members": fields.Permission(),
+        "harvest": fields.Permission(),
+        "private": fields.Permission(),
+    },
+)
 
 org_ref_fields = api.inherit(
     "OrganizationReference",
@@ -36,6 +46,7 @@ org_ref_fields = api.inherit(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
     },
 )
 
@@ -52,7 +63,7 @@ def check_can_access_user_private_info():
     if org is None:
         return False
 
-    return OrganizationPrivatePermission(org).can()
+    return org.permissions["private"].can()
 
 
 def member_email_with_visibility_check(email):
@@ -153,6 +164,7 @@ member_fields = api.model(
     },
 )
 
+
 org_fields = api.model(
     "Organization",
     {
@@ -206,6 +218,7 @@ org_fields = api.model(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )
