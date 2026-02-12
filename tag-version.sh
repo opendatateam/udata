@@ -231,7 +231,7 @@ fi
 # Sort regular commits
 REGULAR_COMMITS=""
 if [ -n "$REGULAR_COMMITS_RAW" ]; then
-    REGULAR_COMMITS=$(echo "$REGULAR_COMMITS_RAW" | sed "s/${COMMIT_DELIMITER}//g" | sort)$'\n'
+    REGULAR_COMMITS=$(echo "$REGULAR_COMMITS_RAW" | sed "s/${COMMIT_DELIMITER}//g" | sed '/^$/d' | sort)$'\n'
 fi
 
 # Combine: breaking changes first, then regular commits
@@ -245,6 +245,7 @@ fi
 
 # Prepare the new changelog entry
 NEW_ENTRY="## $VERSION ($DATE)
+
 $SORTED_COMMITS
 "
 
