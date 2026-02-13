@@ -9,6 +9,7 @@ from flask import current_app
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.features.notifications.models import Notification
 from udata.models import Dataset, Organization, PeriodicTask, User
 from udata.storage.s3 import delete_file
 
@@ -147,6 +148,13 @@ def purge_sources():
         dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
         for dataservice in dataservices:
             archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
+
+        # Clean up notifications before deleting the source
+        try:
+            Notification.objects(details__source=source).delete()
+        except Exception as e:
+            log.error(f"Error cleaning up notifications for purged harvest source {source.id}: {e}")
+
         source.delete()
     return count
 

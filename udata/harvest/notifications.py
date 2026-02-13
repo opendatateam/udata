@@ -14,7 +14,12 @@ from .models import (
     VALIDATION_STATES,
     HarvestSource,
 )
-from .signals import harvest_source_created, harvest_source_refused, harvest_source_validated
+from .signals import (
+    harvest_source_created,
+    harvest_source_deleted,
+    harvest_source_refused,
+    harvest_source_validated,
+)
 
 log = logging.getLogger(__name__)
 
@@ -168,3 +173,14 @@ def validate_harvester_notifications(user):
         )
 
     return notifications
+
+
+@harvest_source_deleted.connect
+def on_harvest_source_deleted(source, **kwargs):
+    """Clean up notifications when a harvest source is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        Notification.objects(details__source=source).delete()
+    except Exception as e:
+        log.error(f"Error cleaning up notifications for deleted harvest source {source.id}: {e}")
