@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
@@ -85,6 +86,14 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
     """Create notification for source owner/org admins when a harvest source is validated"""
     recipients = _get_source_recipients(source)
 
+    # Update existing VALIDATION_PENDING notifications to mark them as handled
+    pending_notifications = Notification.objects(
+        details__source=source, details__status=VALIDATION_PENDING, handled_at=None
+    )
+    for notification in pending_notifications:
+        notification.handled_at = datetime.utcnow()
+        notification.save()
+
     for recipient in recipients:
         try:
             notification = Notification(
@@ -108,6 +117,14 @@ def on_harvest_source_refused(source: HarvestSource, **kwargs):
 
     """Create notification for source owner/org admins when a harvest source is refused"""
     recipients = _get_source_recipients(source)
+
+    # Update existing VALIDATION_PENDING notifications to mark them as handled
+    pending_notifications = Notification.objects(
+        details__source=source, details__status=VALIDATION_PENDING, handled_at=None
+    )
+    for notification in pending_notifications:
+        notification.handled_at = datetime.utcnow()
+        notification.save()
 
     for recipient in recipients:
         try:

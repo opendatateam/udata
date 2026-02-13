@@ -128,3 +128,135 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         notifications = Notification.objects(user=org_admin)
         assert notifications.count() == 1
         assert notifications[0].details.status == VALIDATION_REFUSED
+
+    def test_validate_source_handles_existing_pending_notifications(self):
+        """Test that existing VALIDATION_PENDING notifications are marked as handled when source is validated"""
+        owner = UserFactory()
+        source = HarvestSourceFactory(owner=owner)
+
+        # Create a VALIDATION_PENDING notification manually
+        pending_notification = Notification(
+            user=owner,
+            details=ValidateHarvesterNotificationDetails(
+                source=source,
+                status=VALIDATION_PENDING,
+            ),
+        )
+        pending_notification.save()
+
+        # Verify the notification exists and is not handled
+        assert Notification.objects(user=owner, handled_at=None).count() == 1
+        assert Notification.objects(user=owner, details__status=VALIDATION_PENDING).count() == 1
+
+        # Validate the source
+        actions.validate_source(source)
+
+        # Check that the pending notification is now marked as handled
+        handled_notifications = Notification.objects(user=owner, handled_at__exists=True)
+        assert handled_notifications.count() == 1
+        assert handled_notifications[0].details.status == VALIDATION_PENDING
+
+        # Check that a new VALIDATION_ACCEPTED notification was created
+        accepted_notifications = Notification.objects(
+            user=owner, details__status=VALIDATION_ACCEPTED
+        )
+        assert accepted_notifications.count() == 1
+
+    def test_refuse_source_handles_existing_pending_notifications(self):
+        """Test that existing VALIDATION_PENDING notifications are marked as handled when source is refused"""
+        owner = UserFactory()
+        source = HarvestSourceFactory(owner=owner)
+
+        # Create a VALIDATION_PENDING notification manually
+        pending_notification = Notification(
+            user=owner,
+            details=ValidateHarvesterNotificationDetails(
+                source=source,
+                status=VALIDATION_PENDING,
+            ),
+        )
+        pending_notification.save()
+
+        # Verify the notification exists and is not handled
+        assert Notification.objects(user=owner, handled_at=None).count() == 1
+        assert Notification.objects(user=owner, details__status=VALIDATION_PENDING).count() == 1
+
+        # Refuse the source
+        actions.reject_source(source, comment="Invalid source")
+
+        # Check that the pending notification is now marked as handled
+        handled_notifications = Notification.objects(user=owner, handled_at__exists=True)
+        assert handled_notifications.count() == 1
+        assert handled_notifications[0].details.status == VALIDATION_PENDING
+
+        # Check that a new VALIDATION_REFUSED notification was created
+        refused_notifications = Notification.objects(user=owner, details__status=VALIDATION_REFUSED)
+        assert refused_notifications.count() == 1
+
+    def test_validate_source_with_org_handles_existing_pending_notifications(self):
+        """Test that existing VALIDATION_PENDING notifications are handled for org admins when source is validated"""
+        org_admin = UserFactory()
+        org = OrganizationFactory(members=[{"user": org_admin, "role": "admin"}])
+        source = HarvestSourceFactory(organization=org)
+
+        # Create a VALIDATION_PENDING notification manually
+        pending_notification = Notification(
+            user=org_admin,
+            details=ValidateHarvesterNotificationDetails(
+                source=source,
+                status=VALIDATION_PENDING,
+            ),
+        )
+        pending_notification.save()
+
+        # Verify the notification exists and is not handled
+        assert Notification.objects(user=org_admin, handled_at=None).count() == 1
+        assert Notification.objects(user=org_admin, details__status=VALIDATION_PENDING).count() == 1
+
+        # Validate the source
+        actions.validate_source(source)
+
+        # Check that the pending notification is now marked as handled
+        handled_notifications = Notification.objects(user=org_admin, handled_at__exists=True)
+        assert handled_notifications.count() == 1
+        assert handled_notifications[0].details.status == VALIDATION_PENDING
+
+        # Check that a new VALIDATION_ACCEPTED notification was created
+        accepted_notifications = Notification.objects(
+            user=org_admin, details__status=VALIDATION_ACCEPTED
+        )
+        assert accepted_notifications.count() == 1
+
+    def test_refuse_source_with_org_handles_existing_pending_notifications(self):
+        """Test that existing VALIDATION_PENDING notifications are handled for org admins when source is refused"""
+        org_admin = UserFactory()
+        org = OrganizationFactory(members=[{"user": org_admin, "role": "admin"}])
+        source = HarvestSourceFactory(organization=org)
+
+        # Create a VALIDATION_PENDING notification manually
+        pending_notification = Notification(
+            user=org_admin,
+            details=ValidateHarvesterNotificationDetails(
+                source=source,
+                status=VALIDATION_PENDING,
+            ),
+        )
+        pending_notification.save()
+
+        # Verify the notification exists and is not handled
+        assert Notification.objects(user=org_admin, handled_at=None).count() == 1
+        assert Notification.objects(user=org_admin, details__status=VALIDATION_PENDING).count() == 1
+
+        # Refuse the source
+        actions.reject_source(source, comment="Invalid source")
+
+        # Check that the pending notification is now marked as handled
+        handled_notifications = Notification.objects(user=org_admin, handled_at__exists=True)
+        assert handled_notifications.count() == 1
+        assert handled_notifications[0].details.status == VALIDATION_PENDING
+
+        # Check that a new VALIDATION_REFUSED notification was created
+        refused_notifications = Notification.objects(
+            user=org_admin, details__status=VALIDATION_REFUSED
+        )
+        assert refused_notifications.count() == 1
