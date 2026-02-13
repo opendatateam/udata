@@ -207,6 +207,18 @@ class Organization(
     def __str__(self):
         return self.name or ""
 
+    @property
+    def permissions(self):
+        from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+
+        return {
+            "edit": EditOrganizationPermission(self),
+            "delete": EditOrganizationPermission(self),
+            "members": EditOrganizationPermission(self),
+            "harvest": EditOrganizationPermission(self),
+            "private": OrganizationPrivatePermission(self),
+        }
+
     __metrics_keys__ = [
         "dataservices",
         "dataservices_by_months",
