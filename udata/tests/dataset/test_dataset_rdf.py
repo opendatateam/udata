@@ -8,6 +8,7 @@ from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import FOAF, ORG, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
@@ -28,6 +29,7 @@ from udata.core.dataset.rdf import (
     dataset_to_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
+    infer_dataset_access_rights,
     licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
@@ -1576,3 +1578,73 @@ class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
             ]
         )
         assert expected_licences == licences
+
+    def test_access_rights_from_rdf(self, app):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal("Test dataset")))
+        g.add((node, DCT.accessRights, Literal("Pas de restriction d'accès public selon INSPIRE")))
+
+        dataset = g.resource(node)
+        resources_access_rights = [{"resource rights 1"}, {"resource rights 2"}]
+
+        access_rights, access_type, inspire_category = infer_dataset_access_rights(
+            dataset, resources_access_rights
+        )
+
+        assert access_rights == {"Pas de restriction d'accès public selon INSPIRE"}
+        assert access_type is None
+        assert inspire_category is None
+
+    def test_with_inspire_support_enabled_matches_category(self, app):
+        app.config["INSPIRE_SUPPORT"] = True
+        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
+
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal("Test dataset")))
+        g.add(
+            (
+                node,
+                DCT.accessRights,
+                Literal(
+                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                ),
+            )
+        )
+
+        dataset = g.resource(node)
+        resources_access_rights = []
+
+        access_rights, access_type, inspire_category = infer_dataset_access_rights(
+            dataset, resources_access_rights
+        )
+
+        assert access_rights == {
+            "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+        }
+        assert access_type == AccessType.RESTRICTED
+        assert inspire_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+
+    def test_with_inspire_support_enabled_no_match(self, app):
+        app.config["INSPIRE_SUPPORT"] = True
+        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
+
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal("Test dataset")))
+        g.add((node, DCT.accessRights, Literal("Some unknown rights")))
+
+        dataset = g.resource(node)
+        resources_access_rights = []
+
+        access_rights, access_type, inspire_category = infer_dataset_access_rights(
+            dataset, resources_access_rights
+        )
+
+        assert access_rights == {"Some unknown rights"}
+        assert access_type is None
+        assert inspire_category is None

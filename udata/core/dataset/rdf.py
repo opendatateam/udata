@@ -16,6 +16,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
+from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
@@ -630,8 +631,8 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
 
 
 def infer_dataset_access_rights(
-    dataset: RdfResource, resources_access_rights: list[set]
-) -> set | None:
+    dataset: RdfResource, resources_access_rights: list[set[str]]
+) -> tuple[set[str], AccessType | None, InspireLimitationCategory | None]:
     """
     Infer the dataset access rights from a RDF dataset or a list of resources access rights.
     If the dataset does not have access rights and all resources have the same set of access rights return it.
@@ -640,7 +641,20 @@ def infer_dataset_access_rights(
     if not dataset_access_rights and resources_access_rights:
         if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
             dataset_access_rights = resources_access_rights[0]
-    return dataset_access_rights
+
+    if current_app.config["INSPIRE_SUPPORT"]:
+        # Try to match access rights to known inspire access rights limitation categories
+        country = current_app.config["DEFAULT_COUNTRY_CODE"]
+        if access_right_category := next(
+            (
+                InspireLimitationCategory.get_category_from_localized_label(access_right, country)
+                for access_right in dataset_access_rights
+            ),
+            None,
+        ):
+            return dataset_access_rights, AccessType.RESTRICTED, access_right_category
+
+    return dataset_access_rights, None, None
 
 
 def add_dcat_extra(
@@ -808,9 +822,15 @@ def dataset_from_rdf(
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    dataset_access_rights = infer_dataset_access_rights(d, resources_access_rights)
-    if dataset_access_rights:
-        add_dcat_extra(dataset, "accessRights", dataset_access_rights)
+    access_rights, access_type, access_right_category = infer_dataset_access_rights(
+        d, resources_access_rights
+    )
+    if access_rights:
+        add_dcat_extra(dataset, "accessRights", access_rights)
+    if access_type:
+        dataset.access_type = access_type
+    if access_right_category:
+        dataset.access_type_reason_category = access_right_category
 
     default_license = dataset.license or License.default()
     dataset_licenses = licenses_from_rdf(d)
