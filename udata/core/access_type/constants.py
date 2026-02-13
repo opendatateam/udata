@@ -11,6 +11,19 @@ class AccessType(StrEnum):
     OPEN_WITH_ACCOUNT = auto()
     RESTRICTED = auto()
 
+    @property
+    def url(self):
+        """Returns the european url for this access type."""
+        match self:
+            case AccessType.OPEN | AccessType.OPEN_WITH_ACCOUNT:
+                return "http://publications.europa.eu/resource/authority/access-right/PUBLIC"
+            case AccessType.RESTRICTED:
+                # Actually map to NON_PUBLIC and not restricted following the definition in the EU vocabulary:
+                # https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/access-right.
+                return "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC"
+            case _:
+                assert_never(self)
+
 
 class AccessAudienceType(StrEnum):
     ADMINISTRATION = "local_authority_and_administration"
@@ -124,36 +137,59 @@ class InspireLimitationCategory(StrEnum):
         match self:
             case InspireLimitationCategory.PUBLIC_AUTHORITIES:
                 return _(
-                    "Public access to datasets and services would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
+                    "Public access to dataset and service would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
                 )
             case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
                 return _(
-                    "Public access to datasets and services would adversely affect international relations, public security or national defence."
+                    "Public access to dataset and service would adversely affect international relations, public security or national defence."
                 )
             case InspireLimitationCategory.COURSE_OF_JUSTICE:
                 return _(
-                    "Public access to datasets and services would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
+                    "Public access to dataset and service would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
                 )
             case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
                 return _(
-                    "Public access to datasets and services would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
+                    "Public access to dataset and service would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
                 )
             case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
                 return _(
-                    "Public access to datasets and services would adversely affect intellectual property rights."
+                    "Public access to dataset and service would adversely affect intellectual property rights."
                 )
             case InspireLimitationCategory.PERSONAL_DATA:
                 return _(
-                    "Public access to datasets and services would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
+                    "Public access to dataset and service would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
                 )
             case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
                 return _(
-                    "Public access to datasets and services would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
+                    "Public access to dataset and service would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
                 )
             case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
                 return _(
-                    "Public access to datasets and services would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
+                    "Public access to dataset and service would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
                 )
+            case _:
+                assert_never(self)
+
+    @property
+    def url(self):
+        """Returns the INSPIRE url for this limitation category."""
+        match self:
+            case InspireLimitationCategory.PUBLIC_AUTHORITIES:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1a"
+            case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b"
+            case InspireLimitationCategory.COURSE_OF_JUSTICE:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1c"
+            case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1d"
+            case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
+            case InspireLimitationCategory.PERSONAL_DATA:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1f"
+            case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1g"
+            case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1h"
             case _:
                 assert_never(self)
 
