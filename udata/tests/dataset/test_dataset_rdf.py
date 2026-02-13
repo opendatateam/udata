@@ -12,7 +12,7 @@ from udata.core.access_type.constants import AccessType, InspireLimitationCatego
 from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.constants import DEFAULT_LICENSE, UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -33,6 +33,7 @@ from udata.core.dataset.rdf import (
     licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
+    rights_to_rdf,
     temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -55,7 +56,6 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
-from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -1526,7 +1526,7 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         )
 
 
-class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
+class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
     def test_licenses_from_rdf(self):
         """Test a bunch of cases of licenses detection from RDF"""
         rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1648,3 +1648,52 @@ class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
         assert access_rights == {"Some unknown rights"}
         assert access_type is None
         assert inspire_category is None
+
+    def test_rights_to_rdf_with_license_and_access_type_open(self, app):
+        dataset = DatasetFactory(
+            license=LicenseFactory(title="the license title"), access_type=AccessType.OPEN
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+
+        assert len(rights) == 2
+        access_rights = {r[0] for r in rights}
+        predicates = {r[1] for r in rights}
+        assert Literal("the license title") in access_rights
+        assert DCT.rights in predicates
+
+    def test_rights_to_rdf_with_notspecified_license_and_access_type_open(self, app):
+        dataset = DatasetFactory(
+            license=LicenseFactory(id=DEFAULT_LICENSE["id"]), access_type=AccessType.OPEN
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+
+        assert len(rights) == 1
+        access_right, predicate = rights[0]
+        assert predicate == DCT.accessRights
+        assert access_right.identifier == URIRef(AccessType.OPEN.url)
+
+    def test_rights_to_rdf_with_access_type_restricted(self, app):
+        dataset = DatasetFactory(license=None, access_type=AccessType.RESTRICTED)
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+
+        assert len(rights) == 1
+        access_right, predicate = rights[0]
+        assert predicate == DCT.accessRights
+        assert access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+
+    def test_rights_to_rdf_with_access_type_restricted_and_reason_category(self, app):
+        dataset = DatasetFactory(
+            license=None,
+            access_type=AccessType.RESTRICTED,
+            access_type_reason_category=InspireLimitationCategory.PUBLIC_AUTHORITIES,
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+
+        assert len(rights) == 2
+        predicates = {r[1] for r in rights}
+        assert DCT.accessRights in predicates
+        assert DCT.rights in predicates

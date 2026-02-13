@@ -54,7 +54,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
-from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import DEFAULT_LICENSE, OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -159,7 +159,7 @@ def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
         node = graph.resource(URIRef(AccessType(dataset.access_type).url))
         node.set(RDF.type, DCT.RightsStatement)
         yield node, DCT.accessRights
-    if dataset.license:
+    if dataset.license and dataset.license.id != DEFAULT_LICENSE["id"]:
         yield Literal(dataset.license.title), DCT.rights
     if dataset.access_type_reason_category:
         node = graph.resource(
