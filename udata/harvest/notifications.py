@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class ValidateHarvesterNotificationDetails(db.EmbeddedDocument):
-    harvest_source = field(
+    source = field(
         db.ReferenceField(HarvestSource),
         readonly=True,
         nested_fields=source_fields,
@@ -51,14 +51,14 @@ def on_harvest_source_created(source: HarvestSource, **kwargs):
         try:
             existing = Notification.objects(
                 user=admin,
-                details__harvest_source=source,
+                details__source=source,
             ).first()
 
             if not existing:
                 notification = Notification(
                     user=admin,
                     details=ValidateHarvesterNotificationDetails(
-                        harvest_source=source,
+                        source=source,
                     ),
                 )
                 notification.save()
@@ -90,7 +90,7 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
             notification = Notification(
                 user=recipient,
                 details=ValidateHarvesterNotificationDetails(
-                    harvest_source=source,
+                    source=source,
                     status=VALIDATION_ACCEPTED,
                 ),
             )
@@ -114,7 +114,7 @@ def on_harvest_source_refused(source: HarvestSource, **kwargs):
             notification = Notification(
                 user=recipient,
                 details=ValidateHarvesterNotificationDetails(
-                    harvest_source=source,
+                    source=source,
                     status=VALIDATION_REFUSED,
                 ),
             )

@@ -44,7 +44,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         admin1_notifications = Notification.objects(user=admin1)
         assert admin1_notifications.count() == 1
         assert isinstance(admin1_notifications[0].details, ValidateHarvesterNotificationDetails)
-        assert admin1_notifications[0].details.harvest_source == source
+        assert admin1_notifications[0].details.source == source
         assert admin1_notifications[0].details.status == VALIDATION_PENDING
 
         admin2_notifications = Notification.objects(user=admin2)
@@ -81,7 +81,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         notifications = Notification.objects(user=owner)
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
-        assert notifications[0].details.harvest_source == source
+        assert notifications[0].details.source == source
         assert notifications[0].details.status == VALIDATION_ACCEPTED
 
     def test_validate_source_creates_notification_for_org_admins(self):
@@ -115,7 +115,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         notifications = Notification.objects(user=owner)
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
-        assert notifications[0].details.harvest_source == source
+        assert notifications[0].details.source == source
         assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_refuse_source_creates_notification_for_org_admins(self):
