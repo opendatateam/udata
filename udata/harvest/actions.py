@@ -101,6 +101,7 @@ def validate_source(source: HarvestSource, comment=None):
     source.save()
     schedule(source, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
     launch(source)
+    signals.harvest_source_validated.send(source)
     return source
 
 
@@ -112,6 +113,7 @@ def reject_source(source: HarvestSource, comment):
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
+    signals.harvest_source_refused.send(source)
     return source
 
 

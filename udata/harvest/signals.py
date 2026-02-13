@@ -15,6 +15,12 @@ harvest_source_updated = ns.signal("harvest:source-updated")
 #: Sent when a HarvestSource is deleted
 harvest_source_deleted = ns.signal("harvest:source-deleted")
 
+#: Sent when a HarvestSource is validated
+harvest_source_validated = ns.signal("harvest:source-validated")
+
+#: Sent when a HarvestSource is refused
+harvest_source_refused = ns.signal("harvest:source-refused")
+
 #: Run before each harvest job
 before_harvest_job = ns.signal("harvest:before-job")
 
