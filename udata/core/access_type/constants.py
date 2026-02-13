@@ -1,6 +1,8 @@
 from enum import StrEnum, auto
 from typing import assert_never
 
+from slugify import slugify
+
 from udata.i18n import lazy_gettext as _
 
 
@@ -57,6 +59,65 @@ class InspireLimitationCategory(StrEnum):
             case _:
                 assert_never(self)
 
+    def localized_label(self, country: str):
+        """
+        Returns the technical label that should be used.
+        At the INSPIRE level, the labels are the following: https://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess
+        Make sure that localization match national labels standard. Example in France, where metadata follow the CNIG INSPIRE recommendation guide:
+        https://cnig.gouv.fr/IMG/pdf/guide-de-saisie-des-elements-de-metadonnees-inspire-v2.0-1.pdf
+        """
+        match self:
+            case InspireLimitationCategory.PUBLIC_AUTHORITIES:
+                match country:
+                    case "fr":
+                        return "L124-4-I-1 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.a)"
+                    case _:
+                        return "public access limited according to Article 13(1)(a) of the INSPIRE Directive"
+            case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
+                match country:
+                    case "fr":
+                        return "L124-5-II-1 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                    case _:
+                        return "public access limited according to Article 13(1)(b) of the INSPIRE Directive"
+            case InspireLimitationCategory.COURSE_OF_JUSTICE:
+                match country:
+                    case "fr":
+                        return "L124-5-II-2 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)"
+                    case _:
+                        return "public access limited according to Article 13(1)(c) of the INSPIRE Directive"
+            case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
+                match country:
+                    case "fr":
+                        return "L124-4-I-1 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
+                    case _:
+                        return "public access limited according to Article 13(1)(d) of the INSPIRE Directive"
+            case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
+                match country:
+                    case "fr":
+                        return "L124-5-II-3 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.e)"
+                    case _:
+                        return "public access limited according to Article 13(1)(e) of the INSPIRE Directive"
+            case InspireLimitationCategory.PERSONAL_DATA:
+                match country:
+                    case "fr":
+                        return "L124-4-I-1 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.f)"
+                    case _:
+                        return "public access limited according to Article 13(1)(f) of the INSPIRE Directive"
+            case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
+                match country:
+                    case "fr":
+                        return "L124-4-I-3 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.g)"
+                    case _:
+                        return "public access limited according to Article 13(1)(g) of the INSPIRE Directive"
+            case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
+                match country:
+                    case "fr":
+                        return "L124-4-I-2 du code de l’environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.h)"
+                    case _:
+                        return "public access limited according to Article 13(1)(h) of the INSPIRE Directive"
+            case _:
+                assert_never(self)
+
     @property
     def definition(self):
         """Returns the definition for this limitation category."""
@@ -100,3 +161,9 @@ class InspireLimitationCategory(StrEnum):
     def get_labels(cls):
         """Returns a dictionary of all INSPIRE limitation category labels."""
         return {member: member.label for member in cls}
+
+    @classmethod
+    def get_category_from_localized_label(cls, label: str, country: str):
+        for member in cls:
+            if slugify(member.localized_label(country)) == slugify(label):
+                return member
