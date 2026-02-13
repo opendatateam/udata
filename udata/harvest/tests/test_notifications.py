@@ -1,8 +1,8 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
+from udata.harvest.models import VALIDATION_ACCEPTED, VALIDATION_PENDING, VALIDATION_REFUSED
 from udata.harvest.notifications import (
-    HarvesterValidationStatus,
     ValidateHarvesterNotificationDetails,
     validate_harvester_notifications,
 )
@@ -45,7 +45,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert admin1_notifications.count() == 1
         assert isinstance(admin1_notifications[0].details, ValidateHarvesterNotificationDetails)
         assert admin1_notifications[0].details.harvest_source == source
-        assert admin1_notifications[0].details.status == HarvesterValidationStatus.PENDING
+        assert admin1_notifications[0].details.status == VALIDATION_PENDING
 
         admin2_notifications = Notification.objects(user=admin2)
         assert admin2_notifications.count() == 1
@@ -82,7 +82,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.harvest_source == source
-        assert notifications[0].details.status == HarvesterValidationStatus.VALIDATED
+        assert notifications[0].details.status == VALIDATION_ACCEPTED
 
     def test_validate_source_creates_notification_for_org_admins(self):
         org_admin = UserFactory()
@@ -100,7 +100,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Org admin should receive notification
         admin_notifications = Notification.objects(user=org_admin)
         assert admin_notifications.count() == 1
-        assert admin_notifications[0].details.status == HarvesterValidationStatus.VALIDATED
+        assert admin_notifications[0].details.status == VALIDATION_ACCEPTED
 
         # Org editor should not receive notification
         member_notifications = Notification.objects(user=org_member)
@@ -116,7 +116,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.harvest_source == source
-        assert notifications[0].details.status == HarvesterValidationStatus.REFUSED
+        assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_refuse_source_creates_notification_for_org_admins(self):
         org_admin = UserFactory()
@@ -127,4 +127,4 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
         notifications = Notification.objects(user=org_admin)
         assert notifications.count() == 1
-        assert notifications[0].details.status == HarvesterValidationStatus.REFUSED
+        assert notifications[0].details.status == VALIDATION_REFUSED

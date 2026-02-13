@@ -1,5 +1,4 @@
 import logging
-from enum import StrEnum, auto
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
@@ -7,16 +6,16 @@ from udata.features.notifications.actions import notifier
 from udata.mongo import db
 
 from .api import source_fields
-from .models import VALIDATION_PENDING, HarvestSource
+from .models import (
+    VALIDATION_ACCEPTED,
+    VALIDATION_PENDING,
+    VALIDATION_REFUSED,
+    VALIDATION_STATES,
+    HarvestSource,
+)
 from .signals import harvest_source_created, harvest_source_refused, harvest_source_validated
 
 log = logging.getLogger(__name__)
-
-
-class HarvesterValidationStatus(StrEnum):
-    PENDING = auto()
-    VALIDATED = auto()
-    REFUSED = auto()
 
 
 @generate_fields()
@@ -30,7 +29,7 @@ class ValidateHarvesterNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     status = field(
-        db.EnumField(HarvesterValidationStatus, default=HarvesterValidationStatus.PENDING),
+        db.StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
         readonly=True,
         auditable=False,
         filterable={},
@@ -92,7 +91,7 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
                 user=recipient,
                 details=ValidateHarvesterNotificationDetails(
                     harvest_source=source,
-                    status=HarvesterValidationStatus.VALIDATED,
+                    status=VALIDATION_ACCEPTED,
                 ),
             )
             notification.save()
@@ -116,7 +115,7 @@ def on_harvest_source_refused(source: HarvestSource, **kwargs):
                 user=recipient,
                 details=ValidateHarvesterNotificationDetails(
                     harvest_source=source,
-                    status=HarvesterValidationStatus.REFUSED,
+                    status=VALIDATION_REFUSED,
                 ),
             )
             notification.save()
