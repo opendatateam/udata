@@ -11,6 +11,19 @@ class AccessType(StrEnum):
     OPEN_WITH_ACCOUNT = auto()
     RESTRICTED = auto()
 
+    @property
+    def url(self):
+        """Returns the european url for this access type."""
+        match self:
+            case AccessType.OPEN | AccessType.OPEN_WITH_ACCOUNT:
+                return "http://publications.europa.eu/resource/authority/access-right/PUBLIC"
+            case AccessType.RESTRICTED:
+                # Actually map to NON_PUBLIC and not restricted following the definition in the EU vocabulary:
+                # https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/access-right.
+                return "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC"
+            case _:
+                assert_never(self)
+
 
 class AccessAudienceType(StrEnum):
     ADMINISTRATION = "local_authority_and_administration"
@@ -154,6 +167,29 @@ class InspireLimitationCategory(StrEnum):
                 return _(
                     "Public access to datasets and services would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
                 )
+            case _:
+                assert_never(self)
+
+    @property
+    def url(self):
+        """Returns the INSPIRE url for this limitation category."""
+        match self:
+            case InspireLimitationCategory.PUBLIC_AUTHORITIES:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1a"
+            case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b"
+            case InspireLimitationCategory.COURSE_OF_JUSTICE:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1c"
+            case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1d"
+            case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
+            case InspireLimitationCategory.PERSONAL_DATA:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1f"
+            case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1g"
+            case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
+                return "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1h"
             case _:
                 assert_never(self)
 
