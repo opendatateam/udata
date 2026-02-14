@@ -23,7 +23,6 @@ from .forms import (
     DiscussionEditForm,
 )
 from .models import Discussion, Message
-from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
 
@@ -253,7 +252,6 @@ class DiscussionAPI(API):
         send_legal_notice_on_deletion(discussion, args)
 
         discussion.delete()
-        on_discussion_deleted.send(discussion)
         return "", 204
 
 

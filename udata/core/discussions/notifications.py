@@ -5,6 +5,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
+from udata.core.discussions.signals import on_discussion_deleted
 from udata.features.notifications.actions import notifier
 from udata.models import db
 
@@ -69,3 +70,14 @@ def discussions_notifications(user):
         )
 
     return notifications
+
+
+@on_discussion_deleted.connect
+def cleanup_discussion_notifications(discussion, **kwargs):
+    """Clean up notifications when a discussion is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        Notification.objects(details__discussion=discussion).delete()
+    except Exception as e:
+        log.error(f"Error cleaning up notifications for discussion {discussion.id}: {e}")
