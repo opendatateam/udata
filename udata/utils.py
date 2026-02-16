@@ -403,7 +403,7 @@ class UnicodeLoremProvider(LoremProvider):
     word_list = [w + "é" for w in LoremProvider.word_list]
 
 
-def safe_unicode(string: bytes) -> str | None:
+def safe_unicode(string: bytes | str | None) -> str | None:
     """Safely transform any object into utf8 decoded str"""
     if string is None:
         return None
