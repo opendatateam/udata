@@ -3,14 +3,14 @@ from factory.mongoengine import MongoEngineFactory
 from mongoengine.fields import BooleanField, ListField, StringField
 
 from udata import search
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 
 #############################################################################
 #                           Fake object for testing                         #
 #############################################################################
 
 
-class FakeSearchable(db.Document):
+class FakeSearchable(Document):
     title = StringField()
     description = StringField()
     tags = ListField(StringField())

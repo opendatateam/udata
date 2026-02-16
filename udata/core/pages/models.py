@@ -1,3 +1,5 @@
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
 
 from udata.api import api, fields
@@ -7,8 +9,8 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
-from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.uuid_fields import AutoUUIDField
 
 page_permissions_fields = api.model(
@@ -21,7 +23,7 @@ page_permissions_fields = api.model(
 
 
 @generate_fields()
-class Bloc(db.EmbeddedDocument):
+class Bloc(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
     id = field(AutoUUIDField(primary_key=True))
@@ -71,7 +73,7 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
-class LinkInBloc(db.EmbeddedDocument):
+class LinkInBloc(EmbeddedDocument):
     title = field(StringField(required=True))
     color = field(StringField())
     url = field(StringField())
@@ -115,13 +117,11 @@ BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
 def check_no_recursive_blocs(blocs, **kwargs):
     for bloc in blocs:
         if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
-            raise db.ValidationError(
-                f"{bloc.__class__.__name__} cannot be nested inside an accordion"
-            )
+            raise ValidationError(f"{bloc.__class__.__name__} cannot be nested inside an accordion")
 
 
 @generate_fields()
-class AccordionItemBloc(db.EmbeddedDocument):
+class AccordionItemBloc(EmbeddedDocument):
     title = field(StringField(required=True))
     content = field(
         EmbeddedDocumentListField(Bloc),
@@ -138,7 +138,7 @@ class AccordionListBloc(Bloc):
 
 
 @generate_fields()
-class Page(Auditable, Owned, Datetimed, db.Document):
+class Page(Auditable, Owned, Datetimed, Document):
     blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,

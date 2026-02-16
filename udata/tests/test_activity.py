@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from blinker import Signal
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import EmbeddedDocumentField, ListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
@@ -9,22 +10,22 @@ from udata.auth import login_user
 from udata.core.activity.models import Activity, Auditable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.models import db
 from udata.mongo.datetime_fields import DateField, DateRange
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.taglist_field import TagListField
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
 
-class FakeSubject(db.Document):
+class FakeSubject(Document):
     name = StringField()
 
 
-class FakeEmbedded(db.EmbeddedDocument):
+class FakeEmbedded(EmbeddedDocument):
     name = StringField()
 
 
-class FakeAuditableSubject(Auditable, db.Document):
+class FakeAuditableSubject(Auditable, Document):
     name = field(StringField())
     tags = field(TagListField())
     some_date = field(DateField())

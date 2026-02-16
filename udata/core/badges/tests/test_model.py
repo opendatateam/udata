@@ -1,9 +1,10 @@
+from mongoengine.errors import ValidationError
 from mongoengine.fields import StringField
 
 from udata.api_fields import field
 from udata.auth import login_user
 from udata.core.user.factories import UserFactory
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import DBTestCase
 
 from ..models import Badge, BadgeMixin, BadgesList
@@ -19,7 +20,7 @@ BADGES = {
 
 def validate_badge(value):
     if value not in Fake.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise ValidationError("Unknown badge type")
 
 
 class FakeBadge(Badge):
@@ -31,7 +32,7 @@ class FakeBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Fake(db.Document, FakeBadgeMixin):
+class Fake(Document, FakeBadgeMixin):
     pass
 
 
@@ -102,7 +103,7 @@ class BadgeMixinTest(DBTestCase):
         """It should not allow to add an unknown badge kind"""
         fake = Fake.objects.create()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             fake.add_badge("unknown")
 
         self.assertEqual(len(fake.badges), 0)
@@ -153,7 +154,7 @@ class BadgeMixinTest(DBTestCase):
 
     def test_create_disallow_unknown_badges(self):
         """It should not allow object creation with unknown badges"""
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             fake = Fake.objects.create()
             fake.add_badge("unknown")
 
@@ -169,7 +170,7 @@ class BadgeMixinTest(DBTestCase):
         fake = FakeBadge(kind="new")
         fake.validate()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             fake = FakeBadge(kind="doesnotexist")
             fake.validate()
 
@@ -200,7 +201,7 @@ class BadgeMixinTest(DBTestCase):
         self.app.config["FAKE_HIDDEN_BADGES"] = [TEST]
         fake = Fake.objects.create()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             fake.add_badge(TEST)
 
         self.assertEqual(len(fake.badges), 0)

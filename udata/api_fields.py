@@ -357,10 +357,10 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
 
 
 def save_class_by_parents(cls):
-    from udata.mongo.engine import db
+    from udata.mongo.document import UDataDocument
 
     for parent in cls.__bases__:
-        if parent == db.Document:
+        if parent == UDataDocument:
             return
 
         classes_by_parents[parent] = (
@@ -383,8 +383,6 @@ def generate_fields(**kwargs) -> Callable:
     """
 
     def wrapper(cls) -> Callable:
-        from udata.models import db
-
         read_fields: dict = {}
         write_fields: dict = {}
         ref_fields: dict = {}
@@ -395,7 +393,7 @@ def generate_fields(**kwargs) -> Callable:
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
             kwargs.get("nested_filters", {})
         )
-        if issubclass(cls, db.Document) or issubclass(cls, db.DynamicDocument):
+        if issubclass(cls, mongoengine.Document) or issubclass(cls, mongoengine.DynamicDocument):
             read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         classes_by_names[cls.__name__] = cls
@@ -422,7 +420,7 @@ def generate_fields(**kwargs) -> Callable:
                 ):
                     raise Exception("Cannot use nested_filters on a field that is not a ref.")
 
-                ref_model: db.Document = field.document_type
+                ref_model: mongoengine.Document = field.document_type
 
                 for child in nested_filter.get("children", []):
                     inner_field: str = getattr(ref_model, child["key"])
@@ -1041,12 +1039,12 @@ def validation_to_type(validation: Callable) -> Callable:
     In mongo, a field's validation function cannot return anything, so this
     helper wraps the mongo field's validation to return the value if it validated.
     """
-    from udata.models import db
+    from mongoengine.errors import ValidationError
 
     def wrapper(value: str) -> str:
         try:
             validation(value)
-        except db.ValidationError:
+        except ValidationError:
             raise
         return value
 

@@ -3,13 +3,15 @@ from datetime import datetime
 
 from blinker import Signal
 from flask import g
+from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.errors import DoesNotExist
 from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
 from udata.auth import current_user
-from udata.mongo import db
+from udata.mongo.document import DomainModel
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.utils import filter_changed_fields, get_field_value_from_path
 
@@ -23,7 +25,7 @@ log = logging.getLogger(__name__)
 _registered_activities = {}
 
 
-class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
+class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
     """Ensure any child class dispatches the on_new signal"""
 
     def __new__(cls, name, bases, attrs):
@@ -38,12 +40,12 @@ class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
         sender.on_new.send(sender, activity=document)
 
 
-class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
+class Activity(Document, metaclass=EmitNewActivityMetaClass):
     """Store the activity entries for a single related object"""
 
     actor = ReferenceField("User", required=True)
     organization = ReferenceField("Organization")
-    related_to = ReferenceField(db.DomainModel, required=True)
+    related_to = ReferenceField(DomainModel, required=True)
     created_at = DateTimeField(default=datetime.utcnow, required=True)
     changes = ListField(StringField())
 

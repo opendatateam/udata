@@ -7,7 +7,7 @@ from flask_storage.mongo import ImageField as MongoImageField
 from udata.core.storages import tmp
 from udata.forms import Form
 from udata.forms.fields import ImageField
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import data_path
 
@@ -27,7 +27,7 @@ class PostData(dict):
 
 
 class ImageFieldTest(PytestOnlyDBTestCase):
-    class D(db.Document):
+    class D(Document):
         image = MongoImageField(fs=storage)
         thumbnail = MongoImageField(fs=storage, thumbnails=SIZES)
 

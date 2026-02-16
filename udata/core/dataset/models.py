@@ -10,6 +10,7 @@ import requests
 from blinker import signal
 from flask import current_app, url_for
 from flask_babel import LazyString
+from mongoengine import NULLIFY, PULL, EmbeddedDocument, Q
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import (
     BooleanField,
@@ -42,8 +43,9 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
+from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics
 from udata.mongo.datetime_fields import DateRange
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
@@ -110,7 +112,7 @@ def get_json_ld_extra(key, value):
 
 
 @generate_fields()
-class HarvestDatasetMetadata(db.EmbeddedDocument):
+class HarvestDatasetMetadata(EmbeddedDocument):
     backend = StringField()
     created_at = DateTimeField()
     issued_at = DateTimeField()
@@ -128,7 +130,7 @@ class HarvestDatasetMetadata(db.EmbeddedDocument):
     ckan_source = StringField()
 
 
-class HarvestResourceMetadata(db.EmbeddedDocument):
+class HarvestResourceMetadata(EmbeddedDocument):
     issued_at = DateTimeField()
     modified_at = DateTimeField()
     uri = StringField()
@@ -136,7 +138,7 @@ class HarvestResourceMetadata(db.EmbeddedDocument):
 
 
 @generate_fields()
-class Schema(db.EmbeddedDocument):
+class Schema(EmbeddedDocument):
     """
     Schema can only be two things right now:
     - Known schema: url is not set, name is set, version is maybe set
@@ -233,7 +235,7 @@ class Schema(db.EmbeddedDocument):
                     return
 
 
-class License(db.Document):
+class License(Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
     id = StringField(primary_key=True)
@@ -297,10 +299,7 @@ class License(db.Document):
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
         license = qs(
-            db.Q(id__iexact=text)
-            | db.Q(slug=slug)
-            | db.Q(url__iexact=text)
-            | db.Q(alternate_urls__iexact=text)
+            Q(id__iexact=text) | Q(slug=slug) | Q(url__iexact=text) | Q(alternate_urls__iexact=text)
         ).first()
 
         if license is None:
@@ -314,9 +313,7 @@ class License(db.Document):
                 parsed = urlparse(url)
                 path = parsed.path.rstrip("/")
                 query = f"{parsed.netloc}{path}"
-                license = qs(
-                    db.Q(url__icontains=query) | db.Q(alternate_urls__contains=query)
-                ).first()
+                license = qs(Q(url__icontains=query) | Q(alternate_urls__contains=query)).first()
 
         if license is None:
             # Try to single match `slug` with a low Damerau-Levenshtein distance
@@ -365,13 +362,13 @@ class DatasetQuerySet(OwnedQuerySet):
         return self(private__ne=True, deleted=None, archived=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
+        return self(Q(private=True) | Q(deleted__ne=None) | Q(archived__ne=None))
 
     def with_badge(self, kind):
         return self(badges__kind=kind)
 
 
-class Checksum(db.EmbeddedDocument):
+class Checksum(EmbeddedDocument):
     type = StringField(choices=CHECKSUM_TYPES, required=True)
     value = StringField(required=True)
 
@@ -505,7 +502,7 @@ class ResourceMixin(object):
 
 
 @generate_fields()
-class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
     """
     Local file, remote file or API provided by the original provider of the
     dataset
@@ -548,7 +545,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 # defined before Dataset in the file — Dataset is resolved lazily at call time.
 def validate_badge(value):
     if value not in Dataset.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise MongoEngineValidationError("Unknown badge type")
 
 
 class DatasetBadge(Badge):
@@ -561,9 +558,7 @@ class DatasetBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Dataset(
-    Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
-):
+class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, Document):
     title = field(StringField(required=True))
     acronym = field(StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -607,7 +602,7 @@ class Dataset(
         auditable=False,
     )
 
-    contact_points = field(ListField(ReferenceField("ContactPoint", reverse_delete_rule=db.PULL)))
+    contact_points = field(ListField(ReferenceField("ContactPoint", reverse_delete_rule=PULL)))
 
     created_at_internal = field(
         DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
@@ -1122,13 +1117,13 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
+class CommunityResource(ResourceMixin, WithMetrics, Owned, Document):
     """
     Local file, remote file or API added by the community of the users to the
     original dataset
     """
 
-    dataset = ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
+    dataset = ReferenceField(Dataset, reverse_delete_rule=NULLIFY)
 
     __metrics_keys__ = [
         "views",

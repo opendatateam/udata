@@ -32,6 +32,7 @@ from bson import ObjectId
 from flask import abort, current_app, jsonify, render_template, request
 from flask_security.utils import verify_password
 from flask_storage.mongo import ImageField
+from mongoengine import NULLIFY, Q
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -48,7 +49,8 @@ from udata.core.organization.models import Organization
 from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.utils import wants_json
 
 blueprint = I18nBlueprint("oauth", __name__, url_prefix="/oauth")
@@ -68,14 +70,14 @@ TOKEN_TYPES = {
 SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights")}
 
 
-class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
+class OAuth2Client(ClientMixin, Datetimed, Document):
     secret = StringField(default=None)
 
     name = StringField(required=True)
     description = StringField()
 
     owner = ReferenceField("User")
-    organization = ReferenceField(Organization, reverse_delete_rule=db.NULLIFY)
+    organization = ReferenceField(Organization, reverse_delete_rule=NULLIFY)
     image = ImageField(fs=images, basename=default_image_basename, thumbnails=[150, 25])
 
     redirect_uris = ListField(StringField())
@@ -140,7 +142,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return bool(self.secret)
 
 
-class OAuth2Token(db.Document):
+class OAuth2Token(Document):
     client = ReferenceField("OAuth2Client", required=True)
     user = ReferenceField("User")
 
@@ -189,7 +191,7 @@ class OAuth2Token(db.Document):
         return expired_at > datetime.utcnow()
 
 
-class OAuth2Code(db.Document):
+class OAuth2Code(Document):
     user = ReferenceField("User", required=True)
     client = ReferenceField("OAuth2Client", required=True)
 
@@ -283,7 +285,7 @@ class RevokeToken(RevocationEndpoint):
         elif token_type_hint == "refresh_token":
             return qs.filter(refresh_token=token_string).first()
         else:
-            qs = qs(db.Q(access_token=token_string) | db.Q(refresh_token=token_string))
+            qs = qs(Q(access_token=token_string) | Q(refresh_token=token_string))
             return qs.first()
 
     def revoke_token(self, token, _request):

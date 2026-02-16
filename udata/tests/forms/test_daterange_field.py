@@ -4,15 +4,15 @@ from mongoengine.fields import EmbeddedDocumentField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
-from udata.mongo import db
 from udata.mongo.datetime_fields import DateRange
+from udata.mongo.document import UDataDocument as Document
 from udata.tests import TestCase
 from udata.utils import to_iso_date
 
 
 class DateRangeFieldTest(TestCase):
     def factory(self):
-        class Fake(db.Document):
+        class Fake(Document):
             daterange = EmbeddedDocumentField(DateRange)
 
         class FakeForm(Form):

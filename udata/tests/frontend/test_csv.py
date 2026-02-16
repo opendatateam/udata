@@ -6,10 +6,12 @@ import factory
 import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import DictField, EmbeddedDocumentField, IntField, ListField, StringField
 
 from udata.core import csv
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.queryset import UDataQuerySet
 from udata.tests.api import APITestCase
 from udata.utils import faker
 
@@ -20,12 +22,12 @@ RE_FILENAME = re.compile(r"^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$
 blueprint = Blueprint("testcsv", __name__)
 
 
-class NestedFake(db.EmbeddedDocument):
+class NestedFake(EmbeddedDocument):
     key = StringField()
     value = IntField()
 
 
-class Fake(db.Document):
+class Fake(Document):
     title = StringField()
     description = StringField()
     tags = ListField(StringField())
@@ -91,7 +93,7 @@ def from_list():
 @blueprint.route("/queryset.csv")
 def from_queryset():
     qs = Fake.objects
-    assert isinstance(qs, db.BaseQuerySet)
+    assert isinstance(qs, UDataQuerySet)
     return csv.stream(qs)
 
 

@@ -2,6 +2,8 @@ from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
 from flask_storage.mongo import ImageField
+from mongoengine import PULL, Q
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -24,7 +26,9 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fi
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
+from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
@@ -45,7 +49,7 @@ class ReuseQuerySet(OwnedQuerySet):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
+        return self(Q(private=True) | Q(datasets__0__exists=False) | Q(deleted__ne=None))
 
 
 def check_url_does_not_exists(url, **_kwargs):
@@ -60,7 +64,7 @@ def check_url_does_not_exists(url, **_kwargs):
 # defined before Reuse in the file — Reuse is resolved lazily at call time.
 def validate_badge(value):
     if value not in Reuse.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise ValidationError("Unknown badge type")
 
 
 class ReuseBadge(Badge):
@@ -82,7 +86,7 @@ class ReuseBadgeMixin(BadgeMixin):
     nested_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):
+class Reuse(Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document):
     title = field(
         StringField(required=True),
         sortable=True,
@@ -124,7 +128,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     datasets = field(
         ListField(
             field(
-                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=PULL),
                 nested_fields=dataset_fields,
             ),
         ),
@@ -134,7 +138,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     )
     dataservices = field(
         ListField(
-            field(ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
+            field(ReferenceField("Dataservice", reverse_delete_rule=PULL)),
         ),
         filterable={
             "key": "dataservice",

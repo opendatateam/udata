@@ -11,8 +11,8 @@ from udata.core.organization.notifications import (
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
-from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.uuid_fields import AutoUUIDField
 
@@ -38,7 +38,7 @@ def is_handled(base_query, filter_value):
 
 
 @generate_fields()
-class Notification(Datetimed, db.Document):
+class Notification(Datetimed, Document):
     meta = {
         "ordering": ["-created_at"],
         "queryset_class": NotificationQuerySet,

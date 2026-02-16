@@ -1,5 +1,7 @@
 from flask import url_for
 from flask_storage.mongo import ImageField
+from mongoengine import DENY, PULL
+from mongoengine.errors import ValidationError
 from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
@@ -9,7 +11,9 @@ from udata.core.pages.models import Page
 from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
@@ -19,7 +23,7 @@ from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 __all__ = ("Post",)
 
 
-class PostQuerySet(db.BaseQuerySet):
+class PostQuerySet(UDataQuerySet):
     def published(self):
         return self(published__ne=None).order_by("-published")
 
@@ -32,7 +36,7 @@ class PostQuerySet(db.BaseQuerySet):
     ],
     default_sort="-published",
 )
-class Post(db.Datetimed, Linkable, db.Document):
+class Post(Datetimed, Linkable, Document):
     name = field(
         StringField(max_length=255, required=True),
         sortable=True,
@@ -51,7 +55,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         markdown=True,
     )
     content_as_page = field(
-        ReferenceField("Page", reverse_delete_rule=db.DENY),
+        ReferenceField("Page", reverse_delete_rule=DENY),
         nested_fields=Page.__read_fields__,
         allow_null=True,
         description="Reference to a Page when body_type is 'blocs'",
@@ -81,14 +85,14 @@ class Post(db.Datetimed, Linkable, db.Document):
     datasets = field(
         ListField(
             field(
-                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=PULL),
                 nested_fields=dataset_fields,
             )
         ),
         description="The post datasets",
     )
     reuses = field(
-        ListField(ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        ListField(ReferenceField("Reuse", reverse_delete_rule=PULL)),
         description="The post reuses",
     )
 
@@ -135,12 +139,10 @@ class Post(db.Datetimed, Linkable, db.Document):
     def clean(self):
         if self.body_type == "blocs":
             if not self.content_as_page:
-                raise db.ValidationError("content_as_page is required when body_type is 'blocs'")
+                raise ValidationError("content_as_page is required when body_type is 'blocs'")
         else:
             if not self.content:
-                raise db.ValidationError(
-                    "content is required when body_type is 'markdown' or 'html'"
-                )
+                raise ValidationError("content is required when body_type is 'markdown' or 'html'")
 
     def __str__(self):
         return self.name or ""

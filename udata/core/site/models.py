@@ -1,4 +1,5 @@
 from flask import current_app, g
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     DictField,
     EmbeddedDocumentField,
@@ -15,7 +16,8 @@ from udata.core.dataset.models import Dataset
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.models import WithMetrics, db
+from udata.models import WithMetrics
+from udata.mongo.document import UDataDocument as Document
 from udata.utils import get_udata_version
 
 __all__ = ("Site", "SiteSettings")
@@ -24,13 +26,13 @@ __all__ = ("Site", "SiteSettings")
 DEFAULT_FEED_SIZE = 20
 
 
-class SiteSettings(db.EmbeddedDocument):
+class SiteSettings(EmbeddedDocument):
     home_datasets = ListField(ReferenceField(Dataset))
     home_reuses = ListField(ReferenceField(Reuse))
 
 
 @generate_fields()
-class Site(WithMetrics, db.Document):
+class Site(WithMetrics, Document):
     id = field(StringField(primary_key=True), readonly=True)
     title = field(StringField(required=True), description="The site display title")
     keywords = field(ListField(StringField()))

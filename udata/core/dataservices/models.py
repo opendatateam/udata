@@ -3,7 +3,8 @@ from datetime import datetime
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine import Q
+from mongoengine import PULL, EmbeddedDocument, Q
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -30,7 +31,8 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow, db
+from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
@@ -55,7 +57,7 @@ class DataserviceQuerySet(OwnedQuerySet):
         return self(archived_at=None, deleted_at=None, private=False)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(deleted_at__ne=None) | db.Q(archived_at__ne=None))
+        return self(Q(private=True) | Q(deleted_at__ne=None) | Q(archived_at__ne=None))
 
     def filter_by_dataset_pagination(self, datasets: list[Dataset], page: int):
         """Paginate the dataservices on the datasets provided.
@@ -100,7 +102,7 @@ class DataserviceQuerySet(OwnedQuerySet):
 # defined before Dataservice in the file — Dataservice is resolved lazily at call time.
 def validate_badge(value):
     if value not in Dataservice.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise ValidationError("Unknown badge type")
 
 
 class DataserviceBadge(Badge):
@@ -113,7 +115,7 @@ class DataserviceBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class HarvestMetadata(db.EmbeddedDocument):
+class HarvestMetadata(EmbeddedDocument):
     backend = field(StringField())
     domain = field(StringField())
 
@@ -182,7 +184,7 @@ def filter_by_reuse(base_query, filter_value):
     ],
 )
 class Dataservice(
-    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, db.Document
+    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, Document
 ):
     meta = {
         "indexes": [
@@ -271,7 +273,7 @@ class Dataservice(
     contact_points = field(
         ListField(
             field(
-                ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
+                ReferenceField("ContactPoint", reverse_delete_rule=PULL),
                 nested_fields=contact_api_fields.contact_point_fields,
                 allow_null=True,
             ),

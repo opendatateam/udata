@@ -9,12 +9,13 @@ from mongoengine.fields import DateTimeField, GenericLazyReferenceField, Referen
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.queryset import UDataQuerySet
 
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
-class ReportQuerySet(db.BaseQuerySet):
+class ReportQuerySet(UDataQuerySet):
     def unhandled(self):
         return self.filter(dismissed_at=None, subject_deleted_at=None)
 
@@ -40,7 +41,7 @@ def filter_by_handled(base_query, filter_value):
         },
     ],
 )
-class Report(db.Document):
+class Report(Document):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,

@@ -3,6 +3,7 @@ import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
 from flask_storage.mongo import ImageField
+from mongoengine import PULL, EmbeddedDocument
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -19,7 +20,8 @@ from udata.core.organization.models import Organization
 from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
-from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
+from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
@@ -53,7 +55,7 @@ class FakeBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class FakeEmbedded(db.EmbeddedDocument):
+class FakeEmbedded(EmbeddedDocument):
     title = field(
         StringField(required=True),
         sortable=True,
@@ -81,7 +83,7 @@ class FakeEmbedded(db.EmbeddedDocument):
         },
     ],
 )
-class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
+class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     filter_field = field(StringField(), filterable={"key": "filter_field_name"})
     title = field(
         StringField(required=True),
@@ -116,7 +118,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     datasets = field(
         ListField(
             field(
-                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=PULL),
                 nested_fields=dataset_fields,
             ),
         ),

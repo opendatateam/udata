@@ -8,7 +8,7 @@ from udata.core.organization.models import Organization
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.models import Member
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import APITestCase, DBTestCase
 
 
@@ -17,7 +17,7 @@ class CustomQuerySet(owned.OwnedQuerySet):
         return self(private__ne=True)
 
 
-class Owned(owned.Owned, db.Document):
+class Owned(owned.Owned, Document):
     name = StringField()
     private = BooleanField()
 
@@ -26,7 +26,7 @@ class Owned(owned.Owned, db.Document):
     }
 
 
-class OwnedPostSave(owned.Owned, db.Document):
+class OwnedPostSave(owned.Owned, Document):
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         if "post_save" in kwargs.get("ignores", []):
@@ -341,7 +341,7 @@ class OwnableReadPermissionTest(APITestCase):
     def test_object_without_private_attribute(self):
         """Objects without private attribute should be visible by everyone."""
 
-        class OwnedWithoutPrivate(owned.Owned, db.Document):
+        class OwnedWithoutPrivate(owned.Owned, Document):
             name = StringField()
 
         obj = OwnedWithoutPrivate.objects.create(owner=UserFactory())

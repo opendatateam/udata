@@ -10,6 +10,7 @@ from blinker import Signal
 from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from flask_storage.mongo import ImageField
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -31,6 +32,7 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
@@ -45,7 +47,7 @@ log = logging.getLogger(__name__)
 
 
 # TODO: use simple text for role
-class Role(db.Document, RoleMixin):
+class Role(Document, RoleMixin):
     ADMIN = "admin"
     name = StringField(max_length=80, unique=True)
     description = StringField(max_length=255)
@@ -55,12 +57,12 @@ class Role(db.Document, RoleMixin):
         return self.name
 
 
-class UserSettings(db.EmbeddedDocument):
+class UserSettings(EmbeddedDocument):
     prefered_language = StringField()
 
 
 @generate_fields()
-class User(WithMetrics, UserMixin, Linkable, db.Document):
+class User(WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
@@ -286,7 +288,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         return result
 
     def _delete(self, *args, **kwargs):
-        return db.Document.delete(self, *args, **kwargs)
+        return Document.delete(self, *args, **kwargs)
 
     def delete(self, *args, **kwargs):
         raise NotImplementedError("""This method should not be using directly.

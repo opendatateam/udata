@@ -6,7 +6,7 @@ from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceFi
 from mongoengine.signals import post_save
 
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ TRANSFER_STATUS = {
 }
 
 
-class Transfer(db.Document):
+class Transfer(Document):
     user = ReferenceField("User")
     owner = GenericReferenceField(required=True)
     recipient = GenericReferenceField(required=True)

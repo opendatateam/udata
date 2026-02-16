@@ -2,16 +2,16 @@ from mongoengine.fields import ListField, ReferenceField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests import TestCase
 from udata.utils import faker
 
 
-class Nested(db.Document):
+class Nested(Document):
     name = StringField()
 
 
-class Fake(db.Document):
+class Fake(Document):
     name = StringField()
     nested = ListField(ReferenceField(Nested))
 

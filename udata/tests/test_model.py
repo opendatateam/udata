@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
+from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BaseField,
@@ -19,7 +20,8 @@ from udata.errors import ConfigError
 from udata.i18n import _
 from udata.models import Dataset
 from udata.mongo import build_test_config, db, validate_config
-from udata.mongo.datetime_fields import DateField, DateRange
+from udata.mongo.datetime_fields import DateField, DateRange, Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
@@ -29,15 +31,15 @@ from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates, assert_json_equal
 
 
-class UUIDTester(db.Document):
+class UUIDTester(Document):
     uuid = AutoUUIDField()
 
 
-class UUIDAsIdTester(db.Document):
+class UUIDAsIdTester(Document):
     id = AutoUUIDField(primary_key=True)
 
 
-class SlugTester(db.Document):
+class SlugTester(Document):
     title = StringField()
     slug = SlugField(populate_from="title", max_length=1000)
     meta = {
@@ -45,24 +47,24 @@ class SlugTester(db.Document):
     }
 
 
-class SlugUpdateTester(db.Document):
+class SlugUpdateTester(Document):
     title = StringField()
     slug = SlugField(populate_from="title", update=True)
 
 
-class DateTester(db.Document):
+class DateTester(Document):
     a_date = DateField()
 
 
-class DateRangeTester(db.Document):
+class DateRangeTester(Document):
     temporal = EmbeddedDocumentField(DateRange)
 
 
-class RequiredDateRangeTester(db.Document):
+class RequiredDateRangeTester(Document):
     temporal = EmbeddedDocumentField(DateRange, required=True)
 
 
-class DateTesterWithDefault(db.Document):
+class DateTesterWithDefault(Document):
     a_date = DateField(default=date.today)
 
 
@@ -70,15 +72,15 @@ class InheritedSlugTester(SlugTester):
     other = StringField()
 
 
-class DatetimedTester(db.Datetimed, db.Document):
+class DatetimedTester(Datetimed, Document):
     name = StringField()
 
 
-class URLTester(db.Document):
+class URLTester(Document):
     url = URLField()
 
 
-class PrivateURLTester(db.Document):
+class PrivateURLTester(Document):
     url = URLField(private=True)
 
 
@@ -497,7 +499,7 @@ class DatetimedTest(PytestOnlyDBTestCase):
 
 class ExtrasFieldTest(PytestOnlyDBTestCase):
     def test_default_validate_primitive_type(self):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         now = datetime.utcnow()
@@ -516,7 +518,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
         tester.validate()
 
     def test_can_only_register_db_type(self):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         with pytest.raises(TypeError):
@@ -533,7 +535,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
         ],
     )
     def test_validate_registered_db_type(self, dbtype, value):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         Tester.extras.register("test", dbtype)
@@ -551,33 +553,33 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
         ],
     )
     def test_fail_to_validate_wrong_type(self, dbtype, value):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         Tester.extras.register("test", dbtype)
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             Tester(extras={"test": value}).validate()
 
     def test_validate_custom_type(self):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         @Tester.extras("test")
         class Custom(BaseField):
             def validate(self, value):
                 if not isinstance(value, dict):
-                    raise db.ValidationError("Should be a dict instance")
+                    raise ValidationError("Should be a dict instance")
 
         tester = Tester(extras={"test": {}})
         tester.validate()
 
     def test_validate_registered_type_embedded_document(self):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         @Tester.extras("test")
-        class EmbeddedExtra(db.EmbeddedDocument):
+        class EmbeddedExtra(EmbeddedDocument):
             name = StringField(required=True)
 
         tester = Tester(extras={"test": {}})
@@ -591,11 +593,11 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
         tester.validate()
 
     def test_is_json_serializable(self):
-        class Tester(db.Document):
+        class Tester(Document):
             extras = ExtrasField()
 
         @Tester.extras("embedded")
-        class EmbeddedExtra(db.EmbeddedDocument):
+        class EmbeddedExtra(EmbeddedDocument):
             name = StringField(required=True)
 
         tester = Tester(

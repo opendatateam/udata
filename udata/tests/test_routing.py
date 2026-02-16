@@ -8,7 +8,7 @@ from mongoengine.fields import StringField
 from udata import routing
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.spatial.models import GeoZone
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.slug_fields import SlugField, SlugFollow
 from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyDBTestCase
@@ -46,15 +46,15 @@ class UUIDConverterTest(PytestOnlyTestCase):
         assert404(client.get("/uuid/bad"))
 
 
-class Tester(db.Document):
+class Tester(Document):
     slug = StringField()
 
 
-class SlugTester(db.Document):
+class SlugTester(Document):
     slug = SlugField()
 
 
-class RedirectTester(db.Document):
+class RedirectTester(Document):
     slug = SlugField(follow=True)
 
 

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from flask import url_for
 from flask_login import current_user
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -15,7 +16,7 @@ from mongoengine.fields import (
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
@@ -24,7 +25,7 @@ from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_
 log = logging.getLogger(__name__)
 
 
-class Message(SpamMixin, db.EmbeddedDocument):
+class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
     id = AutoUUIDField()
@@ -82,7 +83,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
         return message
 
 
-class Discussion(SpamMixin, Linkable, db.Document):
+class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
     user = ReferenceField("User")

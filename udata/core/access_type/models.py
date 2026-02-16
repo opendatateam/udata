@@ -1,3 +1,4 @@
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import EmbeddedDocumentListField, EnumField, StringField
 
 from udata.api_fields import field, generate_fields
@@ -8,13 +9,12 @@ from udata.core.access_type.constants import (
     InspireLimitationCategory,
 )
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.url_field import URLField
 
 
 @generate_fields()
-class AccessAudience(db.EmbeddedDocument):
+class AccessAudience(EmbeddedDocument):
     role = field(StringField(choices=[e.value for e in AccessAudienceType]), filterable={})
     condition = field(
         StringField(choices=[e.value for e in AccessAudienceCondition]), filterable={}

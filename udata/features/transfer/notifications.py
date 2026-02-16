@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import GenericReferenceField
 
 from udata.api_fields import field, generate_fields
@@ -11,13 +12,12 @@ from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
 from udata.models import Transfer
-from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
 
 @generate_fields()
-class TransferRequestNotificationDetails(db.EmbeddedDocument):
+class TransferRequestNotificationDetails(EmbeddedDocument):
     transfer_owner = field(
         GenericReferenceField(choices=(User, Organization), required=True),
         readonly=True,

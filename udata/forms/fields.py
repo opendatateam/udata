@@ -3,6 +3,8 @@ import uuid
 from dateutil.parser import parse
 from flask import url_for
 from flask_storage.mongo import ImageReference
+from mongoengine.errors import DoesNotExist
+from mongoengine.errors import ValidationError as MongoValidationError
 from mongoengine.fields import BooleanField as MongoBooleanField
 from mongoengine.fields import DateTimeField as MongoDateTimeField
 from mongoengine.fields import FloatField as MongoFloatField
@@ -525,7 +527,7 @@ class ModelField(Field):
 
         try:
             self.data = model.objects.only("id").get(id=oid)
-        except db.DoesNotExist:
+        except DoesNotExist:
             label = "{0}({1})".format(model.__name__, oid)
             msg = _("{0} does not exists").format(label)
             raise validators.ValidationError(msg)
@@ -885,7 +887,7 @@ class ExtrasField(Field):
         elif self.data:
             try:
                 self.extras.validate(self.data)
-            except db.ValidationError as e:
+            except MongoValidationError as e:
                 self.errors = e.errors if e.errors else [e.message]
         else:
             self.errors = None

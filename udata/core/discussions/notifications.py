@@ -1,6 +1,7 @@
 import logging
 from enum import StrEnum, auto
 
+from mongoengine import EmbeddedDocument
 from mongoengine.fields import EnumField, ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
@@ -8,7 +9,6 @@ from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
 from udata.features.notifications.actions import notifier
-from udata.models import db
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class DiscussionStatus(StrEnum):
 
 
 @generate_fields()
-class DiscussionNotificationDetails(db.EmbeddedDocument):
+class DiscussionNotificationDetails(EmbeddedDocument):
     status = field(
         EnumField(DiscussionStatus),
         readonly=True,

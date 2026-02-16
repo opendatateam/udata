@@ -14,8 +14,8 @@ from mongoengine.fields import (
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
-from udata.mongo import db
 from udata.mongo.datetime_fields import DateField
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.url_field import URLField
 from udata.tests import PytestOnlyTestCase
@@ -23,7 +23,7 @@ from udata.tests import PytestOnlyTestCase
 
 class ExtrasFieldTest(PytestOnlyTestCase):
     def factory(self):
-        class Fake(db.Document):
+        class Fake(Document):
             extras = ExtrasField()
 
         class FakeForm(ModelForm):

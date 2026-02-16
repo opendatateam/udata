@@ -6,12 +6,13 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.user.factories import UserFactory
-from udata.models import Follow, db
+from udata.models import Follow
+from udata.mongo.document import UDataDocument as Document
 
 from . import APITestCase
 
 
-class FakeModel(db.Document):
+class FakeModel(Document):
     name = StringField()
 
     def count_followers(self):

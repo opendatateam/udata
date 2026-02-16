@@ -7,13 +7,14 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
-from udata.models import Member, Organization, User, db
+from udata.models import Member, Organization, User
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import DBTestCase
 
 
 class PublishFieldTest(DBTestCase):
     def factory(self, *args, **kwargs):
-        class Ownable(db.Document):
+        class Ownable(Document):
             owner = ReferenceField(User)
             organization = ReferenceField(Organization)
 

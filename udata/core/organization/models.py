@@ -5,6 +5,8 @@ from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
 from flask_storage.mongo import ImageField
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -26,8 +28,10 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import OrganizationExtrasField
+from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
@@ -61,7 +65,7 @@ BADGES: dict[str, LazyString] = {
 
 
 @generate_fields()
-class Team(db.EmbeddedDocument):
+class Team(EmbeddedDocument):
     name = StringField(required=True)
     slug = SlugField(max_length=255, required=True, populate_from="name", update=True, unique=False)
     description = StringField()
@@ -70,7 +74,7 @@ class Team(db.EmbeddedDocument):
 
 
 @generate_fields()
-class Member(db.EmbeddedDocument):
+class Member(EmbeddedDocument):
     user = ReferenceField("User")
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
     since = DateTimeField(default=datetime.utcnow, required=True)
@@ -81,7 +85,7 @@ class Member(db.EmbeddedDocument):
 
 
 @generate_fields()
-class MembershipRequest(db.EmbeddedDocument):
+class MembershipRequest(EmbeddedDocument):
     """
     Pending organization membership requests or invitations.
 
@@ -123,7 +127,7 @@ class MembershipRequest(db.EmbeddedDocument):
         return MEMBERSHIP_STATUS[self.status]
 
 
-class OrganizationQuerySet(db.BaseQuerySet):
+class OrganizationQuerySet(UDataQuerySet):
     def visible(self):
         return self(deleted=None)
 
@@ -143,7 +147,7 @@ class OrganizationQuerySet(db.BaseQuerySet):
 # defined before Organization in the file — Organization is resolved lazily at call time.
 def validate_badge(value):
     if value not in Organization.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise ValidationError("Unknown badge type")
 
 
 class OrganizationBadge(Badge):
@@ -158,9 +162,7 @@ class OrganizationBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Organization(
-    Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
-):
+class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, Datetimed, Document):
     name = field(StringField(required=True), show_as_ref=True)
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(

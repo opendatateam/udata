@@ -3,20 +3,20 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import PytestOnlyDBTestCase
 
 
-class Target(db.Document):
+class Target(Document):
     name = StringField()
 
 
-class Model(db.Document):
+class Model(Document):
     name = StringField()
     target = GenericReferenceField()
 
 
-class ModelExplicit(db.Document):
+class ModelExplicit(Document):
     name = StringField()
     target = ReferenceField(Target)
 

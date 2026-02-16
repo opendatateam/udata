@@ -1,9 +1,10 @@
 from flask_security import current_user
+from mongoengine.errors import DoesNotExist
 from mongoengine.fields import ReferenceField
 
 from udata.core.topic.models import TopicElement
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Topic, db
+from udata.models import Activity, Topic
 
 __all__ = (
     "UserCreatedTopic",
@@ -88,7 +89,7 @@ def on_user_updated_topic_element(topic_element, **kwargs):
 def on_user_deleted_topic_element(topic_element):
     try:
         topic = topic_element.topic
-    except db.DoesNotExist:
+    except DoesNotExist:
         # Topic was already deleted, skip activity creation
         return
     if current_user and current_user.is_authenticated and topic:

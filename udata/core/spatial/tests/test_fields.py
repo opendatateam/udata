@@ -5,7 +5,7 @@ from mongoengine.fields import EmbeddedDocumentField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests import TestCase
 from udata.tests.helpers import assert_json_equal
 from udata.utils import faker
@@ -19,7 +19,7 @@ A_YEAR = timedelta(days=365)
 
 class SpatialCoverageFieldTest(TestCase):
     def factory(self):
-        class Fake(db.Document):
+        class Fake(Document):
             spatial = EmbeddedDocumentField(SpatialCoverage)
 
         class FakeForm(Form):
