@@ -11,7 +11,7 @@ from blinker import signal
 from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
-from mongoengine.fields import DateTimeField
+from mongoengine.fields import DateTimeField, StringField
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
@@ -93,28 +93,28 @@ def get_json_ld_extra(key, value):
 
 @generate_fields()
 class HarvestDatasetMetadata(db.EmbeddedDocument):
-    backend = db.StringField()
+    backend = StringField()
     created_at = db.DateTimeField()
     issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
-    source_id = db.StringField()
-    remote_id = db.StringField()
-    domain = db.StringField()
+    source_id = StringField()
+    remote_id = StringField()
+    domain = StringField()
     last_update = db.DateTimeField()
     remote_url = db.URLField()
-    uri = db.StringField()
-    dct_identifier = db.StringField()
+    uri = StringField()
+    dct_identifier = StringField()
     archived_at = db.DateTimeField()
-    archived = db.StringField()
-    ckan_name = db.StringField()
-    ckan_source = db.StringField()
+    archived = StringField()
+    ckan_name = StringField()
+    ckan_source = StringField()
 
 
 class HarvestResourceMetadata(db.EmbeddedDocument):
     issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
-    uri = db.StringField()
-    dct_identifier = db.StringField()
+    uri = StringField()
+    dct_identifier = StringField()
 
 
 @generate_fields()
@@ -126,8 +126,8 @@ class Schema(db.EmbeddedDocument):
     """
 
     url = db.URLField()
-    name = db.StringField()
-    version = db.StringField()
+    name = StringField()
+    version = StringField()
 
     def __bool__(self):
         """
@@ -218,15 +218,15 @@ class Schema(db.EmbeddedDocument):
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
-    id = db.StringField(primary_key=True)
+    id = StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
-    title = db.StringField(required=True)
-    alternate_titles = db.ListField(db.StringField())
+    title = StringField(required=True)
+    alternate_titles = db.ListField(StringField())
     slug = db.SlugField(required=True, populate_from="title")
     url = db.URLField()
     alternate_urls = db.ListField(db.URLField())
-    maintainer = db.StringField()
-    flags = db.ListField(db.StringField())
+    maintainer = StringField()
+    flags = db.ListField(StringField())
 
     active = db.BooleanField()
 
@@ -354,8 +354,8 @@ class DatasetQuerySet(OwnedQuerySet):
 
 
 class Checksum(db.EmbeddedDocument):
-    type = db.StringField(choices=CHECKSUM_TYPES, required=True)
-    value = db.StringField(required=True)
+    type = StringField(choices=CHECKSUM_TYPES, required=True)
+    value = StringField(required=True)
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
@@ -364,17 +364,17 @@ class Checksum(db.EmbeddedDocument):
 
 class ResourceMixin(object):
     id = db.AutoUUIDField(primary_key=True)
-    title = db.StringField(verbose_name="Title", required=True)
-    description = db.StringField()
-    filetype = db.StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
-    type = db.StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
+    title = StringField(verbose_name="Title", required=True)
+    description = StringField()
+    filetype = StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
+    type = StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
     url = db.URLField(required=True)
-    urlhash = db.StringField()
+    urlhash = StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
-    format = db.StringField()
-    mime = db.StringField()
+    format = StringField()
+    mime = StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
-    fs_filename = db.StringField()
+    fs_filename = StringField()
     extras = db.ExtrasField(
         {
             "check:available": db.BooleanField,
@@ -534,7 +534,7 @@ def validate_badge(value):
 
 
 class DatasetBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class DatasetBadgeMixin(BadgeMixin):
@@ -546,8 +546,8 @@ class DatasetBadgeMixin(BadgeMixin):
 class Dataset(
     Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
 ):
-    title = field(db.StringField(required=True))
-    acronym = field(db.StringField(max_length=128))
+    title = field(StringField(required=True))
+    acronym = field(StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
     slug = field(
@@ -557,10 +557,10 @@ class Dataset(
         auditable=False,
     )
     description = field(
-        db.StringField(required=True, default=""),
+        StringField(required=True, default=""),
         markdown=True,
     )
-    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
+    description_short = field(StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
     tags = field(db.TagListField())

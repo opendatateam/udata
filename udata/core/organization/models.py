@@ -4,6 +4,7 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -48,11 +49,11 @@ BADGES: dict[str, LazyString] = {
 
 @generate_fields()
 class Team(db.EmbeddedDocument):
-    name = db.StringField(required=True)
+    name = StringField(required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from="name", update=True, unique=False
     )
-    description = db.StringField()
+    description = StringField()
 
     members = db.ListField(db.ReferenceField("User"))
 
@@ -60,7 +61,7 @@ class Team(db.EmbeddedDocument):
 @generate_fields()
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField("User")
-    role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
     since = db.DateTimeField(default=datetime.utcnow, required=True)
 
     @property
@@ -87,21 +88,21 @@ class MembershipRequest(db.EmbeddedDocument):
 
     id = db.AutoUUIDField()
     user = db.ReferenceField("User")
-    status = db.StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
+    status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
 
     created = db.DateTimeField(default=datetime.utcnow, required=True)
 
     handled_on = db.DateTimeField()
     handled_by = db.ReferenceField("User")
 
-    comment = db.StringField()
-    refusal_comment = db.StringField()
+    comment = StringField()
+    refusal_comment = StringField()
 
     # New fields for invitation support
-    kind = db.StringField(choices=list(REQUEST_TYPES), default="request")
-    email = db.StringField()  # For inviting non-registered users by email
+    kind = StringField(choices=list(REQUEST_TYPES), default="request")
+    email = StringField()  # For inviting non-registered users by email
     created_by = db.ReferenceField("User")  # Admin who created the invitation
-    role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
 
     after_create = Signal()
     after_handle = Signal()
@@ -135,7 +136,7 @@ def validate_badge(value):
 
 
 class OrganizationBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class OrganizationBadgeMixin(BadgeMixin):
@@ -149,19 +150,19 @@ class OrganizationBadgeMixin(BadgeMixin):
 class Organization(
     Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
 ):
-    name = field(db.StringField(required=True), show_as_ref=True)
-    acronym = field(db.StringField(max_length=128), show_as_ref=True)
+    name = field(StringField(required=True), show_as_ref=True)
+    acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
         show_as_ref=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
     url = field(db.URLField())
-    image_url = field(db.StringField())
+    image_url = field(StringField())
     logo = field(
         db.ImageField(
             fs=avatars,
@@ -174,14 +175,14 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
+    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT))
 
     members = field(db.ListField(db.EmbeddedDocumentField(Member)))
     teams = field(db.ListField(db.EmbeddedDocumentField(Team)))
     requests = field(db.ListField(db.EmbeddedDocumentField(MembershipRequest)))
 
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
-    zone = field(db.StringField())
+    zone = field(StringField())
     extras = field(db.OrganizationExtrasField(), auditable=False)
 
     deleted = field(db.DateTimeField())

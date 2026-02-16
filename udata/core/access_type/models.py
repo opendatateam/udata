@@ -1,3 +1,5 @@
+from mongoengine.fields import StringField
+
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
@@ -12,9 +14,9 @@ from udata.mongo.errors import FieldValidationError
 
 @generate_fields()
 class AccessAudience(db.EmbeddedDocument):
-    role = field(db.StringField(choices=[e.value for e in AccessAudienceType]), filterable={})
+    role = field(StringField(choices=[e.value for e in AccessAudienceType]), filterable={})
     condition = field(
-        db.StringField(choices=[e.value for e in AccessAudienceCondition]), filterable={}
+        StringField(choices=[e.value for e in AccessAudienceCondition]), filterable={}
     )
 
 
@@ -39,6 +41,6 @@ class WithAccessType:
 
     authorization_request_url = field(db.URLField())
     access_type_reason_category = field(
-        db.StringField(choices=[e.value for e in InspireLimitationCategory]), allow_null=True
+        StringField(choices=[e.value for e in InspireLimitationCategory]), allow_null=True
     )
-    access_type_reason = field(db.StringField())
+    access_type_reason = field(StringField())

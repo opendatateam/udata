@@ -9,6 +9,7 @@ from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -33,8 +34,8 @@ log = logging.getLogger(__name__)
 # TODO: use simple text for role
 class Role(db.Document, RoleMixin):
     ADMIN = "admin"
-    name = db.StringField(max_length=80, unique=True)
-    description = db.StringField(max_length=255)
+    name = StringField(max_length=80, unique=True)
+    description = StringField(max_length=255)
     permissions = db.ListField()
 
     def __str__(self):
@@ -42,7 +43,7 @@ class Role(db.Document, RoleMixin):
 
 
 class UserSettings(db.EmbeddedDocument):
-    prefered_language = db.StringField()
+    prefered_language = StringField()
 
 
 @generate_fields()
@@ -52,14 +53,14 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         auditable=False,
         show_as_ref=True,
     )
-    email = field(db.StringField(max_length=255, required=True, unique=True))
-    password = field(db.StringField())
+    email = field(StringField(max_length=255, required=True, unique=True))
+    password = field(StringField())
     active = field(db.BooleanField())
-    fs_uniquifier = field(db.StringField(max_length=64, unique=True, sparse=True))
+    fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
     roles = field(db.ListField(db.ReferenceField(Role), default=[]))
 
-    first_name = field(db.StringField(max_length=255, required=True), show_as_ref=True)
-    last_name = field(db.StringField(max_length=255, required=True), show_as_ref=True)
+    first_name = field(StringField(max_length=255, required=True), show_as_ref=True)
+    last_name = field(StringField(max_length=255, required=True), show_as_ref=True)
 
     avatar_url = field(db.URLField())
     avatar = field(
@@ -71,13 +72,13 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     )
     website = field(db.URLField())
     about = field(
-        db.StringField(),
+        StringField(),
         markdown=True,
     )
 
-    prefered_language = field(db.StringField())
+    prefered_language = field(StringField())
 
-    apikey = field(db.StringField())
+    apikey = field(StringField())
 
     created_at = field(db.DateTimeField(default=datetime.utcnow, required=True), auditable=False)
 
@@ -92,13 +93,13 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     # when SECURITY_TRACKABLE is True
     last_login_at = field(db.DateTimeField(), auditable=False)
     current_login_at = field(db.DateTimeField(), auditable=False)
-    last_login_ip = field(db.StringField(), auditable=False)
-    current_login_ip = field(db.StringField(), auditable=False)
+    last_login_ip = field(StringField(), auditable=False)
+    current_login_ip = field(StringField(), auditable=False)
     login_count = field(db.IntField(), auditable=False)
 
     # Two-Factor authentification fields
-    tf_primary_method = field(db.StringField(), auditable=False)
-    tf_totp_secret = field(db.StringField(), auditable=False)
+    tf_primary_method = field(StringField(), auditable=False)
+    tf_totp_secret = field(StringField(), auditable=False)
 
     deleted = field(db.DateTimeField())
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()))

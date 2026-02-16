@@ -1,4 +1,5 @@
 from flask import current_app, g
+from mongoengine.fields import StringField
 from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
@@ -23,9 +24,9 @@ class SiteSettings(db.EmbeddedDocument):
 
 @generate_fields()
 class Site(WithMetrics, db.Document):
-    id = field(db.StringField(primary_key=True), readonly=True)
-    title = field(db.StringField(required=True), description="The site display title")
-    keywords = field(db.ListField(db.StringField()))
+    id = field(StringField(primary_key=True), readonly=True)
+    title = field(StringField(required=True), description="The site display title")
+    keywords = field(db.ListField(StringField()))
     feed_size = field(db.IntField(required=True, default=DEFAULT_FEED_SIZE))
     configs = db.DictField()
     themes = db.DictField()

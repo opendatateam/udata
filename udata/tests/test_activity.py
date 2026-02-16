@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from blinker import Signal
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field
@@ -14,22 +15,22 @@ from udata.tests.helpers import assert_emit, assert_not_emit
 
 
 class FakeSubject(db.Document):
-    name = db.StringField()
+    name = StringField()
 
 
 class FakeEmbedded(db.EmbeddedDocument):
-    name = db.StringField()
+    name = StringField()
 
 
 class FakeAuditableSubject(Auditable, db.Document):
-    name = field(db.StringField())
+    name = field(StringField())
     tags = field(db.TagListField())
     some_date = field(db.DateField())
     daterange_embedded = field(db.EmbeddedDocumentField(db.DateRange))
-    some_list = field(db.ListField(db.StringField()))
+    some_list = field(db.ListField(StringField()))
     embedded_list = field(db.ListField(db.EmbeddedDocumentField("FakeEmbedded")))
     ref_list = field(db.ListField(db.ReferenceField("FakeSubject")))
-    not_auditable = field(db.StringField(), auditable=False)
+    not_auditable = field(StringField(), auditable=False)
 
     after_save = Signal()
     on_create = Signal()

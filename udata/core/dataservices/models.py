@@ -4,6 +4,7 @@ from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
 from mongoengine import Q
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
@@ -90,7 +91,7 @@ def validate_badge(value):
 
 
 class DataserviceBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class DataserviceBadgeMixin(BadgeMixin):
@@ -100,13 +101,13 @@ class DataserviceBadgeMixin(BadgeMixin):
 
 @generate_fields()
 class HarvestMetadata(db.EmbeddedDocument):
-    backend = field(db.StringField())
-    domain = field(db.StringField())
+    backend = field(StringField())
+    domain = field(StringField())
 
-    source_id = field(db.StringField())
+    source_id = field(StringField())
     source_url = field(db.URLField())
 
-    remote_id = field(db.StringField())
+    remote_id = field(StringField())
     remote_url = field(db.URLField())
 
     # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
@@ -125,7 +126,7 @@ class HarvestMetadata(db.EmbeddedDocument):
     )
     last_update = field(db.DateTimeField(), description="Date of the last harvesting")
     archived_at = field(db.DateTimeField())
-    archived_reason = field(db.StringField())
+    archived_reason = field(StringField())
 
 
 def filter_by_topic(base_query, filter_value):
@@ -192,10 +193,10 @@ class Dataservice(
         return self.title or ""
 
     title = field(
-        db.StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
+        StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
     )
     acronym = field(
-        db.StringField(max_length=128),
+        StringField(max_length=128),
     )
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
@@ -206,7 +207,7 @@ class Dataservice(
         readonly=True,
     )
     description = field(
-        db.StringField(default=""),
+        StringField(default=""),
         markdown=True,
     )
     base_api_url = field(db.URLField(), sortable=True)
@@ -217,13 +218,13 @@ class Dataservice(
     technical_documentation_url = field(db.URLField(), description="HTML version of a Swagger…")
     business_documentation_url = field(db.URLField())
 
-    rate_limiting = field(db.StringField())
+    rate_limiting = field(StringField())
     rate_limiting_url = field(db.URLField())
 
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
 
-    format = field(db.StringField(choices=DATASERVICE_FORMATS))
+    format = field(StringField(choices=DATASERVICE_FORMATS))
 
     license = field(
         db.ReferenceField("License"),

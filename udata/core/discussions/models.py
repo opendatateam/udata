@@ -3,6 +3,7 @@ from datetime import datetime
 
 from flask import url_for
 from flask_login import current_user
+from mongoengine.fields import StringField
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
@@ -18,7 +19,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
     verbose_name = _("message")
 
     id = db.AutoUUIDField()
-    content = db.StringField(required=True)
+    content = StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")
     posted_by_organization = db.ReferenceField("Organization")
@@ -79,7 +80,7 @@ class Discussion(SpamMixin, Linkable, db.Document):
     organization = db.ReferenceField("Organization")
 
     subject = db.GenericReferenceField()
-    title = db.StringField(required=True)
+    title = StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
     created = db.DateTimeField(default=datetime.utcnow, required=True)
     closed = db.DateTimeField()

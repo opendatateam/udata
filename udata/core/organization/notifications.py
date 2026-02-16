@@ -1,5 +1,7 @@
 import logging
 
+from mongoengine.fields import StringField
+
 from udata.api_fields import field, generate_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import MembershipRequest, Organization
@@ -30,7 +32,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     kind = field(
-        db.StringField(default="request"),
+        StringField(default="request"),
         readonly=True,
         auditable=False,
         filterable={},
@@ -48,7 +50,7 @@ class NewBadgeNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     kind = field(
-        db.StringField(),
+        StringField(),
         readonly=True,
         auditable=False,
         allow_null=True,

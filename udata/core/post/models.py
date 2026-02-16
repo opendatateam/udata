@@ -1,4 +1,5 @@
 from flask import url_for
+from mongoengine.fields import StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
@@ -30,7 +31,7 @@ class PostQuerySet(db.BaseQuerySet):
 )
 class Post(db.Datetimed, Linkable, db.Document):
     name = field(
-        db.StringField(max_length=255, required=True),
+        StringField(max_length=255, required=True),
         sortable=True,
         show_as_ref=True,
     )
@@ -39,11 +40,11 @@ class Post(db.Datetimed, Linkable, db.Document):
         readonly=True,
     )
     headline = field(
-        db.StringField(),
+        StringField(),
         sortable=True,
     )
     content = field(
-        db.StringField(),
+        StringField(),
         markdown=True,
     )
     content_as_page = field(
@@ -53,7 +54,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         description="Reference to a Page when body_type is 'blocs'",
     )
     image_url = field(
-        db.StringField(),
+        StringField(),
     )
     image = field(
         db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
@@ -62,7 +63,7 @@ class Post(db.Datetimed, Linkable, db.Document):
     )
 
     credit_to = field(
-        db.StringField(),
+        StringField(),
         description="An optional credit line (associated to the image)",
     )
     credit_url = field(
@@ -71,7 +72,7 @@ class Post(db.Datetimed, Linkable, db.Document):
     )
 
     tags = field(
-        db.ListField(db.StringField()),
+        db.ListField(StringField()),
         description="Some keywords to help in search",
     )
     datasets = field(
@@ -103,11 +104,11 @@ class Post(db.Datetimed, Linkable, db.Document):
     )
 
     body_type = field(
-        db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
+        StringField(choices=list(BODY_TYPES), default="markdown", required=False),
     )
 
     kind = field(
-        db.StringField(choices=list(POST_KINDS), default="news", required=False),
+        StringField(choices=list(POST_KINDS), default="news", required=False),
         filterable={},
         description="Post kind (news or page)",
     )

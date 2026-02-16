@@ -1,3 +1,4 @@
+from mongoengine.fields import StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -7,11 +8,11 @@ from udata.utils import faker
 
 
 class Nested(db.Document):
-    name = db.StringField()
+    name = StringField()
 
 
 class Fake(db.Document):
-    name = db.StringField()
+    name = StringField()
     nested = db.ListField(db.ReferenceField(Nested))
 
 

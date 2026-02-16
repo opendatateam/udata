@@ -1,6 +1,7 @@
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -50,7 +51,7 @@ def validate_badge(value):
 
 
 class ReuseBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class ReuseBadgeMixin(BadgeMixin):
@@ -70,7 +71,7 @@ class ReuseBadgeMixin(BadgeMixin):
 )
 class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):
     title = field(
-        db.StringField(required=True),
+        StringField(required=True),
         sortable=True,
         show_as_ref=True,
     )
@@ -82,11 +83,11 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         auditable=False,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
     type = field(
-        db.StringField(required=True, choices=list(REUSE_TYPES)),
+        StringField(required=True, choices=list(REUSE_TYPES)),
         filterable={},
     )
     url = field(
@@ -94,8 +95,8 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         description="The remote URL (website)",
         checks=[check_url_does_not_exists],
     )
-    urlhash = db.StringField(required=True, unique=True)
-    image_url = db.StringField()
+    urlhash = StringField(required=True, unique=True)
+    image_url = StringField()
     image = field(
         db.ImageField(
             fs=images,
@@ -135,7 +136,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         },
     )
     topic = field(
-        db.StringField(required=True, choices=list(REUSE_TOPICS)),
+        StringField(required=True, choices=list(REUSE_TOPICS)),
         filterable={},
     )
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))

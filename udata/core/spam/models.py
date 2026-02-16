@@ -1,6 +1,7 @@
 from flask import current_app
 from langdetect import detect
 from mongoengine import signals
+from mongoengine.fields import StringField
 
 from udata.mongo import db
 
@@ -9,7 +10,7 @@ from .signals import on_new_potential_spam
 
 
 class SpamInfo(db.EmbeddedDocument):
-    status = db.StringField(choices=SPAM_STATUS_CHOICES, default=NOT_CHECKED)
+    status = StringField(choices=SPAM_STATUS_CHOICES, default=NOT_CHECKED)
     callbacks = db.DictField(default={})
 
 

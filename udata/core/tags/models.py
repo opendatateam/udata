@@ -1,5 +1,7 @@
 import logging
 
+from mongoengine.fields import StringField
+
 from udata.mongo import db
 
 log = logging.getLogger(__name__)
@@ -14,7 +16,7 @@ class Tag(db.Document):
     from Datasets dans Reuses.
     """
 
-    name = db.StringField(required=True, unique=True)
+    name = StringField(required=True, unique=True)
     counts = db.DictField()
     total = db.IntField(default=0)
 

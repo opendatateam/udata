@@ -1,3 +1,5 @@
+from mongoengine.fields import StringField
+
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
@@ -25,8 +27,8 @@ class Bloc(db.EmbeddedDocument):
 
 
 class BlocWithTitleMixin:
-    title = field(db.StringField(required=True))
-    subtitle = field(db.StringField())
+    title = field(StringField(required=True))
+    subtitle = field(StringField())
 
 
 @generate_fields(
@@ -69,16 +71,16 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
 
 @generate_fields()
 class LinkInBloc(db.EmbeddedDocument):
-    title = field(db.StringField(required=True))
-    color = field(db.StringField())
-    url = field(db.StringField())
+    title = field(StringField(required=True))
+    color = field(StringField())
+    url = field(StringField())
 
 
 @generate_fields()
 class LinksListBloc(BlocWithTitleMixin, Bloc):
-    paragraph = field(db.StringField())
-    main_link_url = field(db.StringField())
-    main_link_title = field(db.StringField())
+    paragraph = field(StringField())
+    main_link_url = field(StringField())
+    main_link_title = field(StringField())
 
     links = field(db.EmbeddedDocumentListField(LinkInBloc))
 
@@ -88,20 +90,20 @@ HERO_COLORS = ("primary", "green", "purple")
 
 @generate_fields()
 class HeroBloc(Bloc):
-    title = field(db.StringField(required=True))
-    description = field(db.StringField())
-    color = field(db.StringField(choices=HERO_COLORS))
-    main_link_url = field(db.StringField())
-    main_link_title = field(db.StringField())
+    title = field(StringField(required=True))
+    description = field(StringField())
+    color = field(StringField(choices=HERO_COLORS))
+    main_link_url = field(StringField())
+    main_link_title = field(StringField())
 
 
 @generate_fields()
 class MarkdownBloc(Bloc):
     # Not using BlocWithTitleMixin because title should be optional here
-    title = field(db.StringField())
-    subtitle = field(db.StringField())
+    title = field(StringField())
+    subtitle = field(StringField())
     content = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
 
@@ -119,7 +121,7 @@ def check_no_recursive_blocs(blocs, **kwargs):
 
 @generate_fields()
 class AccordionItemBloc(db.EmbeddedDocument):
-    title = field(db.StringField(required=True))
+    title = field(StringField(required=True))
     content = field(
         db.EmbeddedDocumentListField(Bloc),
         generic=True,
@@ -129,8 +131,8 @@ class AccordionItemBloc(db.EmbeddedDocument):
 
 @generate_fields()
 class AccordionListBloc(Bloc):
-    title = field(db.StringField())
-    description = field(db.StringField())
+    title = field(StringField())
+    description = field(StringField())
     items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
 
 

@@ -3,6 +3,7 @@ import uuid
 from dateutil.parser import parse
 from flask import url_for
 from flask_storage.mongo import ImageReference
+from mongoengine.fields import StringField as MongoStringField
 from speaklater import is_lazy_string
 from wtforms import Field as WTField
 from wtforms import Form as WTForm
@@ -819,7 +820,7 @@ class ExtrasField(Field):
         db.DateField: DateField,
         db.IntField: IntegerField,
         db.BooleanField: BooleanField,
-        db.StringField: StringField,
+        MongoStringField: StringField,
         db.FloatField: FloatField,
         db.URLField: URLField,
         db.UUIDField: UUIDField,

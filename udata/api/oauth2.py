@@ -31,6 +31,7 @@ from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
 from flask import abort, current_app, jsonify, render_template, request
 from flask_security.utils import verify_password
+from mongoengine.fields import StringField
 from werkzeug.exceptions import Unauthorized
 
 from udata.app import csrf
@@ -60,19 +61,19 @@ SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
-    secret = db.StringField(default=None)
+    secret = StringField(default=None)
 
-    name = db.StringField(required=True)
-    description = db.StringField()
+    name = StringField(required=True)
+    description = StringField()
 
     owner = db.ReferenceField("User")
     organization = db.ReferenceField(Organization, reverse_delete_rule=db.NULLIFY)
     image = db.ImageField(fs=images, basename=default_image_basename, thumbnails=[150, 25])
 
-    redirect_uris = db.ListField(db.StringField())
-    scope = db.StringField(default="default")
-    grant_types = db.ListField(db.StringField())
-    response_types = db.ListField(db.StringField())
+    redirect_uris = db.ListField(StringField())
+    scope = StringField(default="default")
+    grant_types = db.ListField(StringField())
+    response_types = db.ListField(StringField())
 
     confidential = db.BooleanField(default=False)
     internal = db.BooleanField(default=False)
@@ -136,13 +137,13 @@ class OAuth2Token(db.Document):
     user = db.ReferenceField("User")
 
     # currently only bearer is supported
-    token_type = db.StringField(choices=list(TOKEN_TYPES), default="Bearer")
+    token_type = StringField(choices=list(TOKEN_TYPES), default="Bearer")
 
-    access_token = db.StringField(unique=True)
-    refresh_token = db.StringField(unique=True, sparse=True)
+    access_token = StringField(unique=True)
+    refresh_token = StringField(unique=True, sparse=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
-    scope = db.StringField(default="")
+    scope = StringField(default="")
     revoked = db.BooleanField(default=False)
 
     meta = {"collection": "oauth2_token"}
@@ -184,14 +185,14 @@ class OAuth2Code(db.Document):
     user = db.ReferenceField("User", required=True)
     client = db.ReferenceField("OAuth2Client", required=True)
 
-    code = db.StringField(required=True)
+    code = StringField(required=True)
 
-    redirect_uri = db.StringField()
+    redirect_uri = StringField()
     expires = db.DateTimeField()
 
-    scope = db.StringField(default="")
-    code_challenge = db.StringField()
-    code_challenge_method = db.StringField()
+    scope = StringField(default="")
+    code_challenge = StringField()
+    code_challenge_method = StringField()
 
     meta = {"collection": "oauth2_code"}
 

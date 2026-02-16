@@ -2,6 +2,7 @@ import factory
 import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
+from mongoengine.fields import StringField
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -34,7 +35,7 @@ def check_url(url: str = "", **_kwargs) -> None:
 
 
 class FakeBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = StringField(required=True, choices=list(BADGES.keys()))
 
 
 class FakeBadgeMixin(BadgeMixin):
@@ -45,12 +46,12 @@ class FakeBadgeMixin(BadgeMixin):
 @generate_fields()
 class FakeEmbedded(db.EmbeddedDocument):
     title = field(
-        db.StringField(required=True),
+        StringField(required=True),
         sortable=True,
         show_as_ref=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
 
@@ -72,9 +73,9 @@ class FakeEmbedded(db.EmbeddedDocument):
     ],
 )
 class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
-    filter_field = field(db.StringField(), filterable={"key": "filter_field_name"})
+    filter_field = field(StringField(), filterable={"key": "filter_field_name"})
     title = field(
-        db.StringField(required=True),
+        StringField(required=True),
         sortable=True,
         show_as_ref=True,
     )
@@ -85,15 +86,15 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         readonly=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
     url = field(
-        db.StringField(required=True),
+        StringField(required=True),
         description="The remote URL (website)",
         checks=[check_url],
     )
-    image_url = db.StringField()
+    image_url = StringField()
     image = field(
         db.ImageField(
             fs=images,

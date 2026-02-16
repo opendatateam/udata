@@ -1,6 +1,7 @@
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
+from mongoengine.fields import StringField
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
@@ -15,12 +16,12 @@ __all__ = ("Topic", "TopicElement")
 
 
 class TopicElement(Auditable, db.Document):
-    title = field(db.StringField(required=False))
+    title = field(StringField(required=False))
     description = field(
-        db.StringField(required=False),
+        StringField(required=False),
         markdown=True,
     )
-    tags = field(db.ListField(db.StringField()))
+    tags = field(db.ListField(StringField()))
     extras = field(db.ExtrasField())
     element = field(db.GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]))
     # Made optional to allow proper form handling with commit=False
@@ -61,16 +62,16 @@ class TopicElement(Auditable, db.Document):
 
 
 class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
-    name = field(db.StringField(required=True))
+    name = field(StringField(required=True))
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
     )
     description = field(
-        db.StringField(),
+        StringField(),
         markdown=True,
     )
-    tags = field(db.ListField(db.StringField()))
+    tags = field(db.ListField(StringField()))
     color = field(db.IntField())
 
     featured = field(db.BooleanField(default=False), auditable=False)

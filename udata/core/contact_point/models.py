@@ -1,3 +1,5 @@
+from mongoengine.fields import StringField
+
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -21,10 +23,10 @@ CONTACT_ROLES = {
 
 
 class ContactPoint(db.Document, Owned):
-    name = db.StringField(max_length=255, required=True)
-    email = db.StringField(max_length=255)
+    name = StringField(max_length=255, required=True)
+    email = StringField(max_length=255)
     contact_form = db.URLField()
-    role = db.StringField(required=True, choices=list(CONTACT_ROLES))
+    role = StringField(required=True, choices=list(CONTACT_ROLES))
 
     meta = {"queryset_class": OwnedQuerySet}
 

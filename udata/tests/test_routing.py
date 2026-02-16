@@ -3,6 +3,7 @@ from uuid import uuid4
 import pytest
 from bson import ObjectId
 from flask import url_for
+from mongoengine.fields import StringField
 
 from udata import routing
 from udata.core.spatial.factories import GeoZoneFactory
@@ -46,7 +47,7 @@ class UUIDConverterTest(PytestOnlyTestCase):
 
 
 class Tester(db.Document):
-    slug = db.StringField()
+    slug = StringField()
 
 
 class SlugTester(db.Document):

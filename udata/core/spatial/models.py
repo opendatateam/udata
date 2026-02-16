@@ -1,4 +1,5 @@
 import geojson
+from mongoengine.fields import StringField
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -14,8 +15,8 @@ __all__ = ("GeoLevel", "GeoZone", "SpatialCoverage", "spatial_granularities")
 
 
 class GeoLevel(db.Document):
-    id = db.StringField(primary_key=True)
-    name = db.StringField(required=True)
+    id = StringField(primary_key=True)
+    name = StringField(required=True)
     admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN, max_value=ADMIN_LEVEL_MAX, default=100)
 
 
@@ -39,12 +40,12 @@ class GeoZoneQuerySet(db.BaseQuerySet):
 class GeoZone(WithMetrics, db.Document):
     SEPARATOR = ":"
 
-    id = db.StringField(primary_key=True)
-    slug = db.StringField(required=True)
-    name = db.StringField(required=True)
-    code = db.StringField(required=True)
-    level = db.StringField(required=True)
-    uri = db.StringField()
+    id = StringField(primary_key=True)
+    slug = StringField(required=True)
+    name = StringField(required=True)
+    code = StringField(required=True)
+    level = StringField(required=True)
+    uri = StringField()
 
     meta = {
         "indexes": [
@@ -136,7 +137,7 @@ class SpatialCoverage(db.EmbeddedDocument):
 
     geom = db.MultiPolygonField()
     zones = db.ListField(db.ReferenceField(GeoZone))
-    granularity = db.StringField(default="other")
+    granularity = StringField(default="other")
 
     @property
     def granularity_label(self):

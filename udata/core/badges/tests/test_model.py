@@ -1,3 +1,5 @@
+from mongoengine.fields import StringField
+
 from udata.api_fields import field
 from udata.auth import login_user
 from udata.core.user.factories import UserFactory
@@ -21,7 +23,7 @@ def validate_badge(value):
 
 
 class FakeBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class FakeBadgeMixin(BadgeMixin):

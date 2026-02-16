@@ -701,7 +701,7 @@ def field(
     Can be used in two ways:
 
     1. As a wrapper for MongoEngine fields:
-        title = field(db.StringField(required=True),
+        title = field(StringField(required=True),
                      sortable=True,
                      description="The title of the item")
 

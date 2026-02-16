@@ -1,3 +1,4 @@
+from mongoengine.fields import StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -7,16 +8,16 @@ from udata.tests.api import PytestOnlyDBTestCase
 
 
 class Target(db.Document):
-    name = db.StringField()
+    name = StringField()
 
 
 class Model(db.Document):
-    name = db.StringField()
+    name = StringField()
     target = db.GenericReferenceField()
 
 
 class ModelExplicit(db.Document):
-    name = db.StringField()
+    name = StringField()
     target = db.ReferenceField(Target)
 
 

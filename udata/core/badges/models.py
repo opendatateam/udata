@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
@@ -25,7 +26,7 @@ DEFAULT_BADGES_LIST_PARAMS = {
 class Badge(db.EmbeddedDocument):
     meta = {"allow_inheritance": True}
     # The following field should be overloaded in descendants.
-    kind = db.StringField(required=True)
+    kind = StringField(required=True)
     created = db.DateTimeField(default=datetime.utcnow, required=True)
     created_by = db.ReferenceField("User")
 

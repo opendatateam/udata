@@ -1,4 +1,5 @@
 from bson import ObjectId
+from mongoengine.fields import StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -8,11 +9,11 @@ from udata.utils import faker
 
 
 class Nested(db.Document):
-    name = db.StringField()
+    name = StringField()
 
 
 class WithReference(db.Document):
-    name = db.StringField()
+    name = StringField()
     nested = db.ReferenceField(Nested)
 
 
@@ -129,22 +130,22 @@ class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
 class Nested2(db.Document):
     """A dummy model just to nesting/ReferenceField"""
 
-    name = db.StringField()
+    name = StringField()
 
 
 class Nested3(db.Document):
     """A dummy model just to nesting/ReferenceField"""
 
-    name = db.StringField()
+    name = StringField()
 
 
 class WithGeneric(db.Document):
-    name = db.StringField()
+    name = StringField()
     nested = db.GenericReferenceField()
 
 
 class WithGenericChoices(db.Document):
-    name = db.StringField()
+    name = StringField()
     nested = db.GenericReferenceField(choices=[Nested, Nested2])
 
 

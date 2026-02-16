@@ -6,6 +6,7 @@ import factory
 import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
+from mongoengine.fields import StringField
 
 from udata.core import csv
 from udata.mongo import db
@@ -20,15 +21,15 @@ blueprint = Blueprint("testcsv", __name__)
 
 
 class NestedFake(db.EmbeddedDocument):
-    key = db.StringField()
+    key = StringField()
     value = db.IntField()
 
 
 class Fake(db.Document):
-    title = db.StringField()
-    description = db.StringField()
-    tags = db.ListField(db.StringField())
-    other = db.ListField(db.StringField())
+    title = StringField()
+    description = StringField()
+    tags = db.ListField(StringField())
+    other = db.ListField(StringField())
     nested = db.ListField(db.EmbeddedDocumentField(NestedFake))
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()

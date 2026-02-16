@@ -1,4 +1,5 @@
 from mongoengine import post_save
+from mongoengine.fields import StringField
 
 import udata.core.owned as owned
 from udata.core.dataset.permissions import OwnableReadPermission
@@ -17,7 +18,7 @@ class CustomQuerySet(owned.OwnedQuerySet):
 
 
 class Owned(owned.Owned, db.Document):
-    name = db.StringField()
+    name = StringField()
     private = db.BooleanField()
 
     meta = {
@@ -341,7 +342,7 @@ class OwnableReadPermissionTest(APITestCase):
         """Objects without private attribute should be visible by everyone."""
 
         class OwnedWithoutPrivate(owned.Owned, db.Document):
-            name = db.StringField()
+            name = StringField()
 
         obj = OwnedWithoutPrivate.objects.create(owner=UserFactory())
         assert OwnableReadPermission(obj).can() is True

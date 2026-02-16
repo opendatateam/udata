@@ -4,6 +4,7 @@ from bson import DBRef
 from flask import url_for
 from flask_restx import inputs
 from mongoengine import DO_NOTHING, NULLIFY, Q, signals
+from mongoengine.fields import StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -61,10 +62,10 @@ class Report(db.Document):
     )
 
     reason = field(
-        db.StringField(choices=REPORT_REASONS_CHOICES, required=True),
+        StringField(choices=REPORT_REASONS_CHOICES, required=True),
     )
     message = field(
-        db.StringField(),
+        StringField(),
     )
 
     reported_at = field(

@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+from mongoengine.fields import StringField
 
 from udata.mongo import db
 from udata.tests import TestCase
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class TestModel(SpamMixin, db.Document):
-    text = db.StringField(required=True)
+    text = StringField(required=True)
     _created = True
 
     def texts_to_check_for_spam(self):

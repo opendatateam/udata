@@ -1,3 +1,4 @@
+from mongoengine.fields import StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -8,11 +9,11 @@ from udata.utils import faker
 
 class Nested(db.EmbeddedDocument):
     id = db.AutoUUIDField()
-    name = db.StringField(required=True)
+    name = StringField(required=True)
 
 
 class Fake(db.Document):
-    name = db.StringField()
+    name = StringField()
     nested = db.EmbeddedDocumentField(Nested)
 
 

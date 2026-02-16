@@ -2,6 +2,7 @@ from datetime import date, datetime
 from uuid import UUID
 
 import pytest
+from mongoengine.fields import StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -135,7 +136,7 @@ class ExtrasFieldTest(PytestOnlyTestCase):
                 (db.DateField, "2018-05-29", date, date(2018, 5, 29)),
                 (db.BooleanField, "true", bool, True),
                 (db.IntField, 42, int, 42),
-                (db.StringField, "42", str, "42"),
+                (StringField, "42", str, "42"),
                 (db.FloatField, "42.0", float, 42.0),
                 (db.URLField, "http://test.com", str, "http://test.com"),
                 (
@@ -171,7 +172,7 @@ class ExtrasFieldTest(PytestOnlyTestCase):
                 (db.DateTimeField, "xxxx"),
                 (db.DateField, "xxxx"),
                 (db.IntField, "xxxx"),
-                (db.StringField, 42),
+                (StringField, 42),
                 (db.FloatField, "xxxx"),
                 (db.URLField, "not-an-url"),
                 (db.UUIDField, "not-a-uuid"),

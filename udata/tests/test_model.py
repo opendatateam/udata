@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from mongoengine.errors import ValidationError
-from mongoengine.fields import BaseField
+from mongoengine.fields import BaseField, StringField
 from mongoengine.signals import pre_save
 
 from udata.errors import ConfigError
@@ -25,7 +25,7 @@ class UUIDAsIdTester(db.Document):
 
 
 class SlugTester(db.Document):
-    title = db.StringField()
+    title = StringField()
     slug = db.SlugField(populate_from="title", max_length=1000)
     meta = {
         "allow_inheritance": True,
@@ -33,7 +33,7 @@ class SlugTester(db.Document):
 
 
 class SlugUpdateTester(db.Document):
-    title = db.StringField()
+    title = StringField()
     slug = db.SlugField(populate_from="title", update=True)
 
 
@@ -54,11 +54,11 @@ class DateTesterWithDefault(db.Document):
 
 
 class InheritedSlugTester(SlugTester):
-    other = db.StringField()
+    other = StringField()
 
 
 class DatetimedTester(db.Datetimed, db.Document):
-    name = db.StringField()
+    name = StringField()
 
 
 class URLTester(db.Document):
@@ -565,7 +565,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
         @Tester.extras("test")
         class EmbeddedExtra(db.EmbeddedDocument):
-            name = db.StringField(required=True)
+            name = StringField(required=True)
 
         tester = Tester(extras={"test": {}})
         with pytest.raises(ValidationError):
@@ -583,7 +583,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
         @Tester.extras("embedded")
         class EmbeddedExtra(db.EmbeddedDocument):
-            name = db.StringField(required=True)
+            name = StringField(required=True)
 
         tester = Tester(
             extras={

@@ -1,4 +1,5 @@
 from flask import url_for
+from mongoengine.fields import StringField
 
 from udata.api import api
 from udata.core.dataset.factories import DatasetFactory
@@ -11,7 +12,7 @@ from . import APITestCase
 
 
 class FakeModel(db.Document):
-    name = db.StringField()
+    name = StringField()
 
     def count_followers(self):
         pass

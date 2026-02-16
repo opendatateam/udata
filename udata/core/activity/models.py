@@ -4,6 +4,7 @@ from datetime import datetime
 from blinker import Signal
 from flask import g
 from mongoengine.errors import DoesNotExist
+from mongoengine.fields import StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
@@ -43,7 +44,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     organization = db.ReferenceField("Organization")
     related_to = db.ReferenceField(db.DomainModel, required=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
-    changes = db.ListField(db.StringField())
+    changes = db.ListField(StringField())
 
     extras = db.ExtrasField()
 

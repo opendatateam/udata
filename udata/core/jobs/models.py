@@ -1,5 +1,6 @@
 from celerybeatmongo.models import PERIODS
 from celerybeatmongo.models import PeriodicTask as BasePeriodicTask
+from mongoengine.fields import StringField
 
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -10,7 +11,7 @@ CRON = "{minute} {hour} {day_of_month} {month_of_year} {day_of_week}"
 
 
 class PeriodicTask(BasePeriodicTask):
-    last_run_id = db.StringField()
+    last_run_id = StringField()
 
     class Interval(BasePeriodicTask.Interval):
         def __str__(self):
