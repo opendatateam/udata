@@ -55,19 +55,13 @@ def on_harvest_source_created(source: HarvestSource, **kwargs):
 
     for admin in sysadmins:
         try:
-            existing = Notification.objects(
+            notification = Notification(
                 user=admin,
-                details__source=source,
-            ).first()
-
-            if not existing:
-                notification = Notification(
-                    user=admin,
-                    details=ValidateHarvesterNotificationDetails(
-                        source=source,
-                    ),
-                )
-                notification.save()
+                details=ValidateHarvesterNotificationDetails(
+                    source=source,
+                ),
+            )
+            notification.save()
         except Exception as e:
             log.error(
                 f"Error creating notification for user {admin.id} "

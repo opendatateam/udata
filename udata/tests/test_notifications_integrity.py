@@ -164,3 +164,28 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
 
         # Verify all notifications are cleaned up
         assert Notification.objects.count() == 0
+
+    def test_discussion_notification_survives_message_delete(self):
+        """Test that notifications are not broken when referenced messages are deleted."""
+        user = UserFactory()
+        dataset = DatasetFactory()
+        message1 = MessageDiscussionFactory(posted_by=user)
+        message2 = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory(user=user, subject=dataset, discussion=[message1, message2])
+
+        notification = Notification(
+            user=user,
+            details=DiscussionNotificationDetails(
+                discussion=discussion,
+                status=DiscussionStatus.NEW_COMMENT,
+                message_id=discussion.discussion[1].id,
+            ),
+        )
+        notification.save()
+
+        assert Notification.objects.count() == 1
+        assert Notification.objects.first().details.discussion == discussion
+
+        discussion.remove_message(1)
+
+        assert Notification.objects.count() == 0
