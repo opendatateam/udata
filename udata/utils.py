@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
-from typing import Any, Hashable
+from typing import Any, Hashable, overload
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -113,6 +113,10 @@ class Paginable(object):
     """
     A simple helper mixin for pagination
     """
+
+    page: int
+    page_size: int | None
+    total: int
 
     @property
     def pages(self):
@@ -397,7 +401,15 @@ class UnicodeLoremProvider(LoremProvider):
     word_list = [w + "é" for w in LoremProvider.word_list]
 
 
-def safe_unicode(string: bytes | str | None) -> str | None:
+@overload
+def safe_unicode(string: None) -> None: ...
+
+
+@overload
+def safe_unicode(string: object) -> str: ...
+
+
+def safe_unicode(string: object | None) -> str | None:
     """Safely transform any object into utf8 decoded str"""
     if string is None:
         return None
