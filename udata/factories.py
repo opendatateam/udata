@@ -1,9 +1,18 @@
+from typing import TYPE_CHECKING, TypeVar
+
 import factory
 
 from .models import db
 
+T = TypeVar("T")
 
-class ModelFactory(factory.mongoengine.MongoEngineFactory):
+if TYPE_CHECKING:
+    _ModelFactoryBase = factory.mongoengine.MongoEngineFactory[T]
+else:
+    _ModelFactoryBase = factory.mongoengine.MongoEngineFactory
+
+
+class ModelFactory(_ModelFactoryBase):
     class Meta:
         abstract = True
 
