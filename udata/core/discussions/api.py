@@ -314,8 +314,7 @@ class DiscussionCommentAPI(API):
         message.permissions["delete"].test()
         send_legal_notice_on_deletion(message, args)
 
-        discussion.discussion.pop(cidx)
-        discussion.save()
+        discussion.remove_message(cidx)
         return "", 204
 
 
