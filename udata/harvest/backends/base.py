@@ -291,10 +291,6 @@ class BaseBackend(object):
         return self.max_items and len(self.job.items) >= self.max_items
 
     def process_dataservice(self, remote_id: str, **kwargs) -> None:
-        """
-        Return `True` if the parent should stop iterating because we exceed the number
-        of items to process.
-        """
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
