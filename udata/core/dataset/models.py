@@ -34,16 +34,21 @@ from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
+from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
+from udata.core.contact_point.models import (
+    ContactPoint,  # noqa: F401 — must be registered before Dataset
+)
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
+from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError

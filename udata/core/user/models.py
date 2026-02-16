@@ -27,11 +27,13 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field, generate_fields
 from udata.core import storages
 from udata.core.discussions.models import Discussion
+from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
+from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Follow, WithMetrics, db
+from udata.mongo import db
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
