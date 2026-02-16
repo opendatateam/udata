@@ -63,7 +63,7 @@ def check_owner_is_current_user(owner, **_kwargs):
         raise FieldValidationError(_("You can only set yourself as owner"), field="owner")
 
 
-def check_organization_is_valid_for_current_user(organization, **_kwargs):
+def check_organization_is_valid_for_current_user(organization, is_creation=False, **_kwargs):
     from udata.auth import current_user
     from udata.models import Organization
 
@@ -75,6 +75,14 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
         raise FieldValidationError(
             _("Permission denied for this organization"), field="organization"
         )
+
+    if is_creation and current_user.is_authenticated and org:
+        member = org.member(current_user._get_current_object())
+        if member and member.role == "partial_editor":
+            raise FieldValidationError(
+                _("Partial editors cannot create objects for this organization"),
+                field="organization",
+            )
 
 
 class Owned(object):

@@ -8,6 +8,7 @@ from udata.utils import get_by
 OrganizationNeed = namedtuple("organization", ("role", "value"))
 OrganizationAdminNeed = partial(OrganizationNeed, "admin")
 OrganizationEditorNeed = partial(OrganizationNeed, "editor")
+OrganizationPartialEditorNeed = partial(OrganizationNeed, "partial_editor")
 
 
 class EditOrganizationPermission(Permission):
@@ -23,7 +24,9 @@ class OrganizationPrivatePermission(Permission):
 
     def __init__(self, org):
         super(OrganizationPrivatePermission, self).__init__(
-            OrganizationAdminNeed(org.id), OrganizationEditorNeed(org.id)
+            OrganizationAdminNeed(org.id),
+            OrganizationEditorNeed(org.id),
+            OrganizationPartialEditorNeed(org.id),
         )
 
 

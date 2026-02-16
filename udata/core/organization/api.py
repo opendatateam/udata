@@ -42,6 +42,7 @@ from .api_fields import (
     refuse_membership_fields,
     request_fields,
 )
+from .assignment import ASSIGNABLE_OBJECT_TYPES, Assignment
 from .constants import DEFAULT_ROLE, ORG_ROLES
 from .forms import (
     MemberForm,
@@ -606,11 +607,97 @@ class MemberAPI(API):
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
+            Assignment.objects(user=user, organization=org).delete()
             org.reload()
             org.count_members()
             return "", 204
         else:
             api.abort(404)
+
+
+def _resolve_assigned_object(object_type, object_id, org):
+    """Resolve the assigned object and verify it belongs to the organization."""
+    if object_type == "dataset":
+        obj = Dataset.objects(id=object_id, organization=org).first()
+    elif object_type == "dataservice":
+        obj = Dataservice.objects(id=object_id, organization=org).first()
+    elif object_type == "reuse":
+        obj = Reuse.objects(id=object_id, organization=org).first()
+    else:
+        return None
+    return obj
+
+
+@ns.route("/<org:org>/assignments/", endpoint="organization_assignments", doc=common_doc)
+class AssignmentListAPI(API):
+    @api.secure
+    @api.doc("list_organization_assignments")
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def get(self, org):
+        """List assignments for this organization"""
+        org.permissions["members"].test()
+        return list(Assignment.objects(organization=org))
+
+    @api.secure
+    @api.doc("create_organization_assignment", responses={403: "Not Authorized"})
+    @api.expect(Assignment.__write_fields__)
+    @api.marshal_with(Assignment.__read_fields__, code=201)
+    def post(self, org):
+        """Assign an object to a partial_editor member"""
+        org.permissions["members"].test()
+
+        data = request.json
+
+        user_id = data.get("user")
+        object_type = data.get("object_type")
+        object_id = data.get("object_id")
+
+        if not user_id or not object_type or not object_id:
+            api.abort(400, "Missing required fields: user, object_type, object_id")
+
+        if object_type not in ASSIGNABLE_OBJECT_TYPES:
+            api.abort(400, f"Invalid object_type. Must be one of: {ASSIGNABLE_OBJECT_TYPES}")
+
+        from udata.models import User
+
+        user = User.objects(id=user_id).first()
+        if not user:
+            api.abort(400, "User not found")
+
+        member = org.member(user)
+        if not member or member.role != "partial_editor":
+            api.abort(400, "User must be a partial_editor member of this organization")
+
+        obj = _resolve_assigned_object(object_type, object_id, org)
+        if not obj:
+            api.abort(400, "Object not found in this organization")
+
+        existing = Assignment.objects(user=user, object_type=object_type, object_id=obj.id).first()
+        if existing:
+            api.abort(400, "Assignment already exists")
+
+        assignment = Assignment(
+            user=user,
+            organization=org,
+            object_type=object_type,
+            object_id=obj.id,
+        )
+        assignment.save()
+        return assignment, 201
+
+
+@ns.route("/<org:org>/assignments/<id>/", endpoint="organization_assignment", doc=common_doc)
+class AssignmentAPI(API):
+    @api.secure
+    @api.doc("delete_organization_assignment", responses={403: "Not Authorized"})
+    def delete(self, org, id):
+        """Delete an assignment"""
+        org.permissions["members"].test()
+        assignment = Assignment.objects(id=id, organization=org).first()
+        if not assignment:
+            api.abort(404, "Assignment not found")
+        assignment.delete()
+        return "", 204
 
 
 @ns.route("/<id>/followers/", endpoint="organization_followers")

@@ -3,6 +3,7 @@ from udata.i18n import lazy_gettext as _
 ORG_ROLES = {
     "admin": _("Administrator"),
     "editor": _("Editor"),
+    "partial_editor": _("Partial editor"),
 }
 DEFAULT_ROLE = "editor"
 
