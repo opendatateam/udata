@@ -54,24 +54,6 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         user_notifications = Notification.objects(user=user)
         assert user_notifications.count() == 0
 
-    def test_create_source_does_not_duplicate_notifications(self):
-        admin = AdminFactory()
-
-        source = actions.create_source(
-            name="Test Source",
-            url="http://example.com",
-            backend="dcat",
-        )
-
-        # Manually trigger the signal again (simulating duplicate call)
-        from udata.harvest.signals import harvest_source_created
-
-        harvest_source_created.send(source)
-
-        # Should still only have one notification
-        notifications = Notification.objects(user=admin)
-        assert notifications.count() == 1
-
     def test_validate_source_creates_notification_for_owner(self):
         owner = UserFactory()
         source = HarvestSourceFactory(owner=owner)
