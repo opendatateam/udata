@@ -362,21 +362,6 @@ PROVIDERS.remove("faker.providers.lorem")
 faker = Faker("fr_FR")  # Use a unicode/utf-8 based locale
 
 
-def generate_tags(nb=3) -> list[str]:
-    return [generate_tag() for _ in range(nb)]
-
-
-def generate_tag() -> str:
-    fake_tag: str = faker.word()
-    while len(fake_tag) < tags.TAG_MIN_LENGTH:
-        fake_tag = faker.word()
-    return fake_tag
-
-
-faker.tag = generate_tag
-faker.tags = generate_tags
-
-
 def faker_provider(provider):
     faker.add_provider(provider)
     factory.Faker.add_provider(provider)
@@ -394,6 +379,15 @@ class UDataProvider(BaseProvider):
     def unique_string(self, length: int = UUID_LENGTH) -> str:
         """Generate a unique string"""
         return unique_string(length)
+
+    def tag(self) -> str:
+        fake_tag: str = self.generator.word()
+        while len(fake_tag) < tags.TAG_MIN_LENGTH:
+            fake_tag = self.generator.word()
+        return fake_tag
+
+    def tags(self, nb: int = 3) -> list[str]:
+        return [self.tag() for _ in range(nb)]
 
 
 @faker_provider  # Replace the default lorem provider with a unicode one
