@@ -23,7 +23,8 @@ For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
-from typing import Any, Callable, Iterable
+from datetime import datetime
+from typing import Any, Callable, Iterable, TypedDict, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -618,6 +619,57 @@ def generate_fields(**kwargs) -> Callable:
         return cls
 
     return wrapper
+
+
+class _FieldKwargs(TypedDict, total=False):
+    sortable: bool | str | None
+    filterable: dict[str, Any] | None
+    readonly: bool | None
+    show_as_ref: bool | None
+    markdown: bool | None
+    description: str | None
+    auditable: bool | None
+    checks: list[Callable] | None
+    attribute: str | None
+    thumbnail_info: dict[str, Any] | None
+    example: str | None
+    nested_fields: dict[str, Any] | None
+    inner_field_info: dict[str, Any] | None
+    size: int | None
+    is_thumbnail: bool | None
+    href: Callable | None
+    generic: bool | None
+    generic_key: str | None
+    convert_to: Callable | None
+    allow_null: bool | None
+
+
+@overload
+def field(inner: mongo_fields.StringField, **kwargs: Unpack[_FieldKwargs]) -> str: ...
+
+
+@overload
+def field(inner: mongo_fields.IntField, **kwargs: Unpack[_FieldKwargs]) -> int: ...
+
+
+@overload
+def field(inner: mongo_fields.BooleanField, **kwargs: Unpack[_FieldKwargs]) -> bool: ...
+
+
+@overload
+def field(inner: mongo_fields.FloatField, **kwargs: Unpack[_FieldKwargs]) -> float: ...
+
+
+@overload
+def field(inner: mongo_fields.DateTimeField, **kwargs: Unpack[_FieldKwargs]) -> datetime: ...
+
+
+@overload
+def field(inner: None = None, **kwargs: Unpack[_FieldKwargs]) -> Callable: ...
+
+
+@overload
+def field(inner: mongoengine.fields.BaseField, **kwargs: Unpack[_FieldKwargs]) -> Any: ...  # type: ignore[reportOverlappingOverload]
 
 
 def field(
