@@ -234,7 +234,7 @@ class License(db.Document):
         return self.title
 
     @classmethod
-    def extract_first_url(cls, text: str) -> tuple[str]:
+    def extract_first_url(cls, text: str) -> tuple[str, ...]:
         """
         Extracts the first URL from a given text string and returns the URL and the remaining text.
         """

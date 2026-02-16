@@ -362,7 +362,7 @@ PROVIDERS.remove("faker.providers.lorem")
 faker = Faker("fr_FR")  # Use a unicode/utf-8 based locale
 
 
-def generate_tags(nb=3) -> [str]:
+def generate_tags(nb=3) -> list[str]:
     return [generate_tag() for _ in range(nb)]
 
 
