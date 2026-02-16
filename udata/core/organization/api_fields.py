@@ -3,9 +3,19 @@ from flask import request
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.fields import badge_fields
-from udata.core.organization.permissions import OrganizationPrivatePermission
 
-from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES
+from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+
+org_permissions_fields = api.model(
+    "OrganizationPermissions",
+    {
+        "edit": fields.Permission(),
+        "delete": fields.Permission(),
+        "members": fields.Permission(),
+        "harvest": fields.Permission(),
+        "private": fields.Permission(),
+    },
+)
 
 org_ref_fields = api.inherit(
     "OrganizationReference",
@@ -36,6 +46,7 @@ org_ref_fields = api.inherit(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
     },
 )
 
@@ -52,7 +63,7 @@ def check_can_access_user_private_info():
     if org is None:
         return False
 
-    return OrganizationPrivatePermission(org).can()
+    return org.permissions["private"].can()
 
 
 def member_email_with_visibility_check(email):
@@ -93,12 +104,46 @@ request_fields = api.model(
     "MembershipRequest",
     {
         "id": fields.String(readonly=True),
-        "user": fields.Nested(member_user_with_email_fields),
+        "user": fields.Nested(member_user_with_email_fields, allow_null=True),
+        "email": fields.String(description="Email for non-registered user invitations"),
+        "kind": fields.String(
+            description="The request kind (request or invitation)",
+            enum=list(REQUEST_TYPES),
+            default="request",
+        ),
         "created": fields.ISODateTime(description="The request creation date", readonly=True),
         "status": fields.String(
             description="The current request status", required=True, enum=list(MEMBERSHIP_STATUS)
         ),
-        "comment": fields.String(description="A request comment from the user", required=True),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="A request comment from the user"),
+    },
+)
+
+invite_fields = api.model(
+    "MembershipInvite",
+    {
+        "user": fields.String(description="User ID to invite"),
+        "email": fields.String(description="Email to invite (if user not registered)"),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="Invitation message"),
+    },
+)
+
+pending_invitation_fields = api.model(
+    "PendingInvitation",
+    {
+        "id": fields.String(readonly=True),
+        "organization": fields.Nested(org_ref_fields),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="Invitation message"),
+        "created": fields.ISODateTime(description="The invitation creation date", readonly=True),
     },
 )
 
@@ -118,6 +163,7 @@ member_fields = api.model(
         ),
     },
 )
+
 
 org_fields = api.model(
     "Organization",
@@ -172,6 +218,7 @@ org_fields = api.model(
         "badges": fields.List(
             fields.Nested(badge_fields), description="The organization badges", readonly=True
         ),
+        "permissions": fields.Nested(org_permissions_fields, readonly=True),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )

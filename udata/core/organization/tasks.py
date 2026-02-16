@@ -89,15 +89,46 @@ def notify_membership_response(org_id, request_id):
         notification.save()
 
 
-@task
-def notify_new_member(org_id, email):
+@task(route="high.mail")
+def notify_membership_invitation(org_id, invitation_id):
     org = Organization.objects.get(pk=org_id)
-    member = next((m for m in org.members if m.user.email == email), None)
+    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
 
-    if member is None:
+    if invitation is None:
         return
 
-    mails.new_member(org).send(member.user)
+    if invitation.user:
+        mails.membership_invitation(org, invitation, user_exists=True).send(invitation.user)
+    elif invitation.email:
+        mails.membership_invitation(org, invitation, user_exists=False).send(invitation.email)
+
+
+@task(route="high.mail")
+def notify_membership_invitation_response(org_id, invitation_id):
+    org = Organization.objects.get(pk=org_id)
+    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
+
+    if invitation is None or invitation.created_by is None:
+        return
+
+    if invitation.status == "accepted":
+        mails.membership_invitation_accepted(org, invitation).send(invitation.created_by)
+    elif invitation.status == "refused":
+        mails.membership_invitation_refused(org, invitation).send(invitation.created_by)
+
+
+@task(route="high.mail")
+def notify_membership_invitation_canceled(org_id, invitation_id):
+    org = Organization.objects.get(pk=org_id)
+    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
+
+    if invitation is None:
+        return
+
+    if invitation.user:
+        mails.membership_invitation_canceled(org).send(invitation.user)
+    elif invitation.email:
+        mails.membership_invitation_canceled(org).send(invitation.email)
 
 
 @notify_new_badge(Organization, CERTIFIED)

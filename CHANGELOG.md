@@ -1,5 +1,21 @@
 # Changelog
 
+## 15.0.0 (2026-02-12)
+
+- **feat!: add MembershipRequest from org ([#3570](https://github.com/opendatateam/udata/pull/3570))**
+- chore: add breaking change override for `tag-version.sh` ([#3657](https://github.com/opendatateam/udata/pull/3657))
+- feat: expose organization permissions ([#3656](https://github.com/opendatateam/udata/pull/3656))
+- fix: missing new line between breaking and non breaking ([#3663](https://github.com/opendatateam/udata/pull/3663))
+- fix: new line in tag-version with breaking changes ([#3662](https://github.com/opendatateam/udata/pull/3662))
+- fix: remove dead code for site form ([#3658](https://github.com/opendatateam/udata/pull/3658))
+
+
+## 14.13.0 (2026-02-10)
+
+- feat: allow badges filtering with settings ([#3649](https://github.com/opendatateam/udata/pull/3649))
+- fix: last_update dates missing in indexing ([#3653](https://github.com/opendatateam/udata/pull/3653))
+
+
 ## 14.12.0 (2026-02-10)
 
 - feat(harvest): add GeoDCAT-AP option to csw-dcat backend ([#3648](https://github.com/opendatateam/udata/pull/3648))

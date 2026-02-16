@@ -194,6 +194,8 @@ class Defaults(object):
 
     UDATA_INSTANCE_NAME = "udata"
 
+    DATASET_HIDDEN_BADGES = []
+
     HARVESTER_BACKENDS = []
     THEME = None
 
