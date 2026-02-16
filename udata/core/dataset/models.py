@@ -11,7 +11,7 @@ from blinker import signal
 from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
-from mongoengine.fields import DateTimeField, StringField
+from mongoengine.fields import BooleanField, DateTimeField, IntField, ReferenceField, StringField
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
@@ -32,6 +32,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.url_field import URLField
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -94,25 +95,25 @@ def get_json_ld_extra(key, value):
 @generate_fields()
 class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = StringField()
-    created_at = db.DateTimeField()
-    issued_at = db.DateTimeField()
-    modified_at = db.DateTimeField()
+    created_at = DateTimeField()
+    issued_at = DateTimeField()
+    modified_at = DateTimeField()
     source_id = StringField()
     remote_id = StringField()
     domain = StringField()
-    last_update = db.DateTimeField()
-    remote_url = db.URLField()
+    last_update = DateTimeField()
+    remote_url = URLField()
     uri = StringField()
     dct_identifier = StringField()
-    archived_at = db.DateTimeField()
+    archived_at = DateTimeField()
     archived = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
 
 class HarvestResourceMetadata(db.EmbeddedDocument):
-    issued_at = db.DateTimeField()
-    modified_at = db.DateTimeField()
+    issued_at = DateTimeField()
+    modified_at = DateTimeField()
     uri = StringField()
     dct_identifier = StringField()
 
@@ -125,7 +126,7 @@ class Schema(db.EmbeddedDocument):
     - Unknown schema: url is set, name and version are maybe set
     """
 
-    url = db.URLField()
+    url = URLField()
     name = StringField()
     version = StringField()
 
@@ -219,16 +220,16 @@ class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
     id = StringField(primary_key=True)
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
     title = StringField(required=True)
     alternate_titles = db.ListField(StringField())
     slug = db.SlugField(required=True, populate_from="title")
-    url = db.URLField()
-    alternate_urls = db.ListField(db.URLField())
+    url = URLField()
+    alternate_urls = db.ListField(URLField())
     maintainer = StringField()
     flags = db.ListField(StringField())
 
-    active = db.BooleanField()
+    active = BooleanField()
 
     def __str__(self):
         return self.title
@@ -368,26 +369,26 @@ class ResourceMixin(object):
     description = StringField()
     filetype = StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
     type = StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
-    url = db.URLField(required=True)
+    url = URLField(required=True)
     urlhash = StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
     format = StringField()
     mime = StringField()
-    filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
+    filesize = IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = StringField()
     extras = db.ExtrasField(
         {
-            "check:available": db.BooleanField,
-            "check:status": db.IntField,
-            "check:date": db.DateTimeField,
+            "check:available": BooleanField,
+            "check:status": IntField,
+            "check:date": DateTimeField,
         }
     )
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.EmbeddedDocumentField(Schema)
 
-    created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
-    last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
-    deleted = db.DateTimeField()
+    created_at_internal = DateTimeField(default=datetime.utcnow, required=True)
+    last_modified_internal = DateTimeField(default=datetime.utcnow, required=True)
+    deleted = DateTimeField()
 
     @property
     def internal(self):
@@ -561,15 +562,15 @@ class Dataset(
         markdown=True,
     )
     description_short = field(StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
-    license = field(db.ReferenceField("License"))
+    license = field(ReferenceField("License"))
 
     tags = field(db.TagListField())
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
-    private = field(db.BooleanField(default=False))
+    private = field(BooleanField(default=False))
 
     frequency = field(db.EnumField(UpdateFrequency))
-    frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
+    frequency_date = field(DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(
         db.EmbeddedDocumentField(db.DateRange),
         nested_fields=temporal_coverage_fields,
@@ -587,12 +588,12 @@ class Dataset(
     quality_cached = field(db.DictField(), auditable=False)
 
     featured = field(
-        db.BooleanField(required=True, default=False),
+        BooleanField(required=True, default=False),
         auditable=False,
     )
 
     contact_points = field(
-        db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
+        db.ListField(ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
     )
 
     created_at_internal = field(
@@ -613,8 +614,8 @@ class Dataset(
         ),
         auditable=False,
     )
-    deleted = field(db.DateTimeField(), auditable=False)
-    archived = field(db.DateTimeField())
+    deleted = field(DateTimeField(), auditable=False)
+    archived = field(DateTimeField())
 
     def __str__(self):
         return self.title or ""
@@ -1114,7 +1115,7 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     original dataset
     """
 
-    dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
+    dataset = ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
 
     __metrics_keys__ = [
         "views",

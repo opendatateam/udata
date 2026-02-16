@@ -9,7 +9,7 @@ from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, DateTimeField, IntField, ReferenceField, StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -21,6 +21,7 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from . import mails
@@ -55,14 +56,14 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     )
     email = field(StringField(max_length=255, required=True, unique=True))
     password = field(StringField())
-    active = field(db.BooleanField())
+    active = field(BooleanField())
     fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
-    roles = field(db.ListField(db.ReferenceField(Role), default=[]))
+    roles = field(db.ListField(ReferenceField(Role), default=[]))
 
     first_name = field(StringField(max_length=255, required=True), show_as_ref=True)
     last_name = field(StringField(max_length=255, required=True), show_as_ref=True)
 
-    avatar_url = field(db.URLField())
+    avatar_url = field(URLField())
     avatar = field(
         db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
         show_as_ref=True,
@@ -70,7 +71,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
             "size": BIGGEST_AVATAR_SIZE,
         },
     )
-    website = field(db.URLField())
+    website = field(URLField())
     about = field(
         StringField(),
         markdown=True,
@@ -80,34 +81,34 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
 
     apikey = field(StringField())
 
-    created_at = field(db.DateTimeField(default=datetime.utcnow, required=True), auditable=False)
+    created_at = field(DateTimeField(default=datetime.utcnow, required=True), auditable=False)
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
-    confirmed_at = field(db.DateTimeField(), auditable=False)
+    confirmed_at = field(DateTimeField(), auditable=False)
 
-    password_rotation_demanded = field(db.DateTimeField(), auditable=False)
-    password_rotation_performed = field(db.DateTimeField(), auditable=False)
+    password_rotation_demanded = field(DateTimeField(), auditable=False)
+    password_rotation_performed = field(DateTimeField(), auditable=False)
 
     # The 5 fields below are required for Flask-security
     # when SECURITY_TRACKABLE is True
-    last_login_at = field(db.DateTimeField(), auditable=False)
-    current_login_at = field(db.DateTimeField(), auditable=False)
+    last_login_at = field(DateTimeField(), auditable=False)
+    current_login_at = field(DateTimeField(), auditable=False)
     last_login_ip = field(StringField(), auditable=False)
     current_login_ip = field(StringField(), auditable=False)
-    login_count = field(db.IntField(), auditable=False)
+    login_count = field(IntField(), auditable=False)
 
     # Two-Factor authentification fields
     tf_primary_method = field(StringField(), auditable=False)
     tf_totp_secret = field(StringField(), auditable=False)
 
-    deleted = field(db.DateTimeField())
+    deleted = field(DateTimeField())
     ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
     extras = field(db.ExtrasField(), auditable=False)
 
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
-    inactive_deletion_notified_at = field(db.DateTimeField(), auditable=False)
+    inactive_deletion_notified_at = field(DateTimeField(), auditable=False)
 
     before_save = Signal()
     after_save = Signal()

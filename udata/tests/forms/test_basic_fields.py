@@ -2,6 +2,7 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
 from udata.mongo import db
+from udata.mongo.url_field import URLField
 from udata.tests import TestCase
 from udata.utils import faker
 
@@ -9,7 +10,7 @@ from udata.utils import faker
 class UrlFieldTest(TestCase):
     def factory(self):
         class Fake(db.Document):
-            url = db.URLField()
+            url = URLField()
 
         class FakeForm(Form):
             url = fields.URLField()

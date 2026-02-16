@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
 from blinker import Signal
-from mongoengine.fields import StringField
+from mongoengine.fields import ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field
@@ -29,7 +29,7 @@ class FakeAuditableSubject(Auditable, db.Document):
     daterange_embedded = field(db.EmbeddedDocumentField(db.DateRange))
     some_list = field(db.ListField(StringField()))
     embedded_list = field(db.ListField(db.EmbeddedDocumentField("FakeEmbedded")))
-    ref_list = field(db.ListField(db.ReferenceField("FakeSubject")))
+    ref_list = field(db.ListField(ReferenceField("FakeSubject")))
     not_auditable = field(StringField(), auditable=False)
 
     after_save = Signal()
@@ -43,7 +43,7 @@ post_save.connect(FakeAuditableSubject.post_save, sender=FakeAuditableSubject)
 
 class FakeActivity(Activity):
     key = "fake"
-    related_to = db.ReferenceField(FakeSubject)
+    related_to = ReferenceField(FakeSubject)
 
 
 class ActivityTest(APITestCase):

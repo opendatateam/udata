@@ -2,7 +2,7 @@ import factory
 import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -109,7 +109,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
             ),
         ),
@@ -125,10 +125,10 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     )
 
     deleted = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
     archived = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
 
     embedded = field(db.EmbeddedDocumentField(FakeEmbedded))

@@ -4,7 +4,7 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -18,6 +18,7 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import (
@@ -55,14 +56,14 @@ class Team(db.EmbeddedDocument):
     )
     description = StringField()
 
-    members = db.ListField(db.ReferenceField("User"))
+    members = db.ListField(ReferenceField("User"))
 
 
 @generate_fields()
 class Member(db.EmbeddedDocument):
-    user = db.ReferenceField("User")
+    user = ReferenceField("User")
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = db.DateTimeField(default=datetime.utcnow, required=True)
+    since = DateTimeField(default=datetime.utcnow, required=True)
 
     @property
     def label(self):
@@ -87,13 +88,13 @@ class MembershipRequest(db.EmbeddedDocument):
     """
 
     id = db.AutoUUIDField()
-    user = db.ReferenceField("User")
+    user = ReferenceField("User")
     status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
 
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=datetime.utcnow, required=True)
 
-    handled_on = db.DateTimeField()
-    handled_by = db.ReferenceField("User")
+    handled_on = DateTimeField()
+    handled_by = ReferenceField("User")
 
     comment = StringField()
     refusal_comment = StringField()
@@ -101,7 +102,7 @@ class MembershipRequest(db.EmbeddedDocument):
     # New fields for invitation support
     kind = StringField(choices=list(REQUEST_TYPES), default="request")
     email = StringField()  # For inviting non-registered users by email
-    created_by = db.ReferenceField("User")  # Admin who created the invitation
+    created_by = ReferenceField("User")  # Admin who created the invitation
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
 
     after_create = Signal()
@@ -161,7 +162,7 @@ class Organization(
         StringField(required=True),
         markdown=True,
     )
-    url = field(db.URLField())
+    url = field(URLField())
     image_url = field(StringField())
     logo = field(
         db.ImageField(
@@ -185,7 +186,7 @@ class Organization(
     zone = field(StringField())
     extras = field(db.OrganizationExtrasField(), auditable=False)
 
-    deleted = field(db.DateTimeField())
+    deleted = field(DateTimeField())
 
     meta = {
         "indexes": [

@@ -1,6 +1,6 @@
 import logging
 
-from mongoengine.fields import StringField
+from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 @generate_fields()
 class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     request_organization = field(
-        db.ReferenceField(Organization),
+        ReferenceField(Organization),
         readonly=True,
         nested_fields=org_ref_fields,
         auditable=False,
@@ -24,7 +24,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     request_user = field(
-        db.ReferenceField(User),
+        ReferenceField(User),
         nested_fields=user_ref_fields,
         readonly=True,
         auditable=False,
@@ -42,7 +42,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
 @generate_fields()
 class NewBadgeNotificationDetails(db.EmbeddedDocument):
     organization = field(
-        db.ReferenceField(Organization),
+        ReferenceField(Organization),
         readonly=True,
         nested_fields=org_ref_fields,
         auditable=False,

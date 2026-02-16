@@ -1,4 +1,5 @@
 from flask_security import current_user
+from mongoengine.fields import ReferenceField
 
 from udata.core.topic.models import TopicElement
 from udata.i18n import lazy_gettext as _
@@ -15,7 +16,7 @@ __all__ = (
 
 
 class TopicRelatedActivity(object):
-    related_to = db.ReferenceField("Topic")
+    related_to = ReferenceField("Topic")
 
 
 class UserCreatedTopic(TopicRelatedActivity, Activity):

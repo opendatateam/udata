@@ -3,7 +3,7 @@ from collections import OrderedDict
 from datetime import datetime
 from urllib.parse import urlparse
 
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, DateTimeField, ReferenceField, StringField
 from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
@@ -55,7 +55,7 @@ DEFAULT_HARVEST_ITEM_STATUS = "pending"
 class HarvestError(db.EmbeddedDocument):
     """Store harvesting errors"""
 
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
     message = StringField()
     details = StringField()
 
@@ -68,14 +68,14 @@ class HarvestLog(db.EmbeddedDocument):
 class HarvestItem(db.EmbeddedDocument):
     remote_id = StringField()
     remote_url = StringField()
-    dataset = db.ReferenceField(Dataset)
-    dataservice = db.ReferenceField(Dataservice)
+    dataset = ReferenceField(Dataset)
+    dataservice = ReferenceField(Dataservice)
     status = StringField(
         choices=list(HARVEST_ITEM_STATUS), default=DEFAULT_HARVEST_ITEM_STATUS, required=True
     )
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    started = db.DateTimeField()
-    ended = db.DateTimeField()
+    created = DateTimeField(default=datetime.utcnow, required=True)
+    started = DateTimeField()
+    ended = DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     logs = db.ListField(db.EmbeddedDocumentField(HarvestLog), default=[])
     args = db.ListField(StringField())
@@ -97,8 +97,8 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     """Store harvest source validation details"""
 
     state = StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING, required=True)
-    by = db.ReferenceField("User")
-    on = db.DateTimeField()
+    by = ReferenceField("User")
+    on = DateTimeField()
     comment = StringField()
 
 
@@ -116,16 +116,16 @@ class HarvestSource(Owned, db.Document):
     url = StringField(required=True)
     backend = StringField(required=True)
     config = db.DictField()
-    periodic_task = db.ReferenceField("PeriodicTask", reverse_delete_rule=db.NULLIFY)
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=db.NULLIFY)
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
     frequency = StringField(
         choices=list(HARVEST_FREQUENCIES), default=DEFAULT_HARVEST_FREQUENCY, required=True
     )
-    active = db.BooleanField(default=True)
-    autoarchive = db.BooleanField(default=True)
+    active = BooleanField(default=True)
+    autoarchive = BooleanField(default=True)
     validation = db.EmbeddedDocumentField(HarvestSourceValidation, default=HarvestSourceValidation)
 
-    deleted = db.DateTimeField()
+    deleted = DateTimeField()
 
     @property
     def domain(self):
@@ -191,15 +191,15 @@ class HarvestSource(Owned, db.Document):
 class HarvestJob(db.Document):
     """Keep track of harvestings"""
 
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    started = db.DateTimeField()
-    ended = db.DateTimeField()
+    created = DateTimeField(default=datetime.utcnow, required=True)
+    started = DateTimeField()
+    ended = DateTimeField()
     status = StringField(
         choices=list(HARVEST_JOB_STATUS), default=DEFAULT_HARVEST_JOB_STATUS, required=True
     )
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
-    source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.CASCADE)
+    source = ReferenceField(HarvestSource, reverse_delete_rule=db.CASCADE)
     data = db.DictField()
 
     meta = {

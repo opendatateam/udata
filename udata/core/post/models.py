@@ -1,5 +1,5 @@
 from flask import url_for
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
@@ -9,6 +9,7 @@ from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
@@ -48,7 +49,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         markdown=True,
     )
     content_as_page = field(
-        db.ReferenceField("Page", reverse_delete_rule=db.DENY),
+        ReferenceField("Page", reverse_delete_rule=db.DENY),
         nested_fields=Page.__read_fields__,
         allow_null=True,
         description="Reference to a Page when body_type is 'blocs'",
@@ -67,7 +68,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         description="An optional credit line (associated to the image)",
     )
     credit_url = field(
-        db.URLField(),
+        URLField(),
         description="An optional link associated to the credits",
     )
 
@@ -78,26 +79,26 @@ class Post(db.Datetimed, Linkable, db.Document):
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
             )
         ),
         description="The post datasets",
     )
     reuses = field(
-        db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        db.ListField(ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
         description="The post reuses",
     )
 
     owner = field(
-        db.ReferenceField("User"),
+        ReferenceField("User"),
         nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,
         description="The owner user",
     )
     published = field(
-        db.DateTimeField(),
+        DateTimeField(),
         readonly=True,
         sortable=True,
         description="The post publication date",

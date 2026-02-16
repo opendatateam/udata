@@ -1,5 +1,5 @@
 from bson import ObjectId
-from mongoengine.fields import StringField
+from mongoengine.fields import ReferenceField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -14,7 +14,7 @@ class Nested(db.Document):
 
 class WithReference(db.Document):
     name = StringField()
-    nested = db.ReferenceField(Nested)
+    nested = ReferenceField(Nested)
 
 
 class WithReferenceForm(ModelForm):

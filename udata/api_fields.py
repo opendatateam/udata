@@ -47,7 +47,7 @@ def required_if(**conditions):
 
     Usage:
         page_id = field(
-            db.ReferenceField("Page"),
+            ReferenceField("Page"),
             checks=[required_if(body_type="blocs")],
         )
     """

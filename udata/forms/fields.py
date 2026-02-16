@@ -3,6 +3,11 @@ import uuid
 from dateutil.parser import parse
 from flask import url_for
 from flask_storage.mongo import ImageReference
+from mongoengine.fields import BooleanField as MongoBooleanField
+from mongoengine.fields import DateTimeField as MongoDateTimeField
+from mongoengine.fields import FloatField as MongoFloatField
+from mongoengine.fields import IntField as MongoIntField
+from mongoengine.fields import ReferenceField
 from mongoengine.fields import StringField as MongoStringField
 from speaklater import is_lazy_string
 from wtforms import Field as WTField
@@ -19,6 +24,7 @@ from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectFi
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
 from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.mongo.url_field import URLField as MongoURLField
 from udata.utils import get_by, to_iso_date
 
 from . import widgets
@@ -493,7 +499,7 @@ class ModelField(Field):
         elif not specs.get("id", None):
             raise validators.ValidationError(_('Missing "id" field'))
 
-        if isinstance(model_field, db.ReferenceField):
+        if isinstance(model_field, ReferenceField):
             expected_model = str(model_field.document_type.__name__)
             if "class" not in specs:
                 specs["class"] = expected_model
@@ -816,13 +822,13 @@ def field_parse(cls, value, *args, **kwargs):
 
 class ExtrasField(Field):
     KNOWN_TYPES = {
-        db.DateTimeField: DateTimeField,
+        MongoDateTimeField: DateTimeField,
         db.DateField: DateField,
-        db.IntField: IntegerField,
-        db.BooleanField: BooleanField,
+        MongoIntField: IntegerField,
+        MongoBooleanField: BooleanField,
         MongoStringField: StringField,
-        db.FloatField: FloatField,
-        db.URLField: URLField,
+        MongoFloatField: FloatField,
+        MongoURLField: URLField,
         db.UUIDField: UUIDField,
     }
 

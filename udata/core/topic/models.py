@@ -1,7 +1,7 @@
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, IntField, ReferenceField, StringField
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
@@ -25,7 +25,7 @@ class TopicElement(Auditable, db.Document):
     extras = field(db.ExtrasField())
     element = field(db.GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]))
     # Made optional to allow proper form handling with commit=False
-    topic = field(db.ReferenceField("Topic", required=False))
+    topic = field(ReferenceField("Topic", required=False))
 
     meta = {
         "indexes": [
@@ -72,10 +72,10 @@ class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
         markdown=True,
     )
     tags = field(db.ListField(StringField()))
-    color = field(db.IntField())
+    color = field(IntField())
 
-    featured = field(db.BooleanField(default=False), auditable=False)
-    private = field(db.BooleanField())
+    featured = field(BooleanField(default=False), auditable=False)
+    private = field(BooleanField())
     extras = field(db.ExtrasField(), auditable=False)
 
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))

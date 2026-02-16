@@ -1,5 +1,6 @@
 from flask_restx.inputs import boolean
 from mongoengine import NULLIFY, Q
+from mongoengine.fields import DateTimeField, ReferenceField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.notifications import DiscussionNotificationDetails
@@ -44,13 +45,13 @@ class Notification(Datetimed, db.Document):
 
     id = field(db.AutoUUIDField(primary_key=True))
     handled_at = field(
-        db.DateTimeField(),
+        DateTimeField(),
         sortable=True,
         auditable=False,
         filterable={"key": "handled", "query": is_handled, "type": boolean},
     )
     user = field(
-        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,

@@ -1,6 +1,8 @@
 import logging
 from enum import StrEnum, auto
 
+from mongoengine.fields import ReferenceField
+
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
@@ -33,7 +35,7 @@ class DiscussionNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     discussion = field(
-        db.ReferenceField(Discussion),
+        ReferenceField(Discussion),
         readonly=True,
         nested_fields=discussion_fields,
         auditable=False,

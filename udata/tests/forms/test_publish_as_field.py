@@ -1,4 +1,5 @@
 from bson import ObjectId
+from mongoengine.fields import ReferenceField
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
@@ -13,8 +14,8 @@ from udata.tests.api import DBTestCase
 class PublishFieldTest(DBTestCase):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
-            owner = db.ReferenceField(User)
-            organization = db.ReferenceField(Organization)
+            owner = ReferenceField(User)
+            organization = ReferenceField(Organization)
 
         class OwnableForm(ModelForm):
             model_class = Ownable

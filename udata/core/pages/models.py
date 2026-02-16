@@ -1,4 +1,4 @@
-from mongoengine.fields import StringField
+from mongoengine.fields import ReferenceField, StringField
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -38,7 +38,7 @@ class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField("Dataset"),
+                ReferenceField("Dataset"),
                 nested_fields=dataset_fields,
             )
         )
@@ -50,7 +50,7 @@ class ReusesListBloc(BlocWithTitleMixin, Bloc):
     reuses = field(
         db.ListField(
             field(
-                db.ReferenceField("Reuse"),
+                ReferenceField("Reuse"),
                 nested_fields=Reuse.__read_fields__,
             )
         )
@@ -62,7 +62,7 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
     dataservices = field(
         db.ListField(
             field(
-                db.ReferenceField("Dataservice"),
+                ReferenceField("Dataservice"),
                 nested_fields=Dataservice.__read_fields__,
             )
         )

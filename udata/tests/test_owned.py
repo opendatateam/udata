@@ -1,5 +1,5 @@
 from mongoengine import post_save
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, ReferenceField, StringField
 
 import udata.core.owned as owned
 from udata.core.dataset.permissions import OwnableReadPermission
@@ -19,7 +19,7 @@ class CustomQuerySet(owned.OwnedQuerySet):
 
 class Owned(owned.Owned, db.Document):
     name = StringField()
-    private = db.BooleanField()
+    private = BooleanField()
 
     meta = {
         "queryset_class": CustomQuerySet,
@@ -45,10 +45,10 @@ def compute_some_metrics(document, **kwargs):
 
 class TestOwned(DBTestCase):
     def test_fields(self):
-        self.assertIsInstance(Owned.owner, db.ReferenceField)
+        self.assertIsInstance(Owned.owner, ReferenceField)
         self.assertEqual(Owned.owner.document_type_obj, User)
 
-        self.assertIsInstance(Owned.organization, db.ReferenceField)
+        self.assertIsInstance(Owned.organization, ReferenceField)
         self.assertEqual(Owned.organization.document_type_obj, Organization)
 
     def test_owner_changed_from_user_to_user(self):

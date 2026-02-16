@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import url_for
 from flask_login import current_user
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
@@ -20,10 +20,10 @@ class Message(SpamMixin, db.EmbeddedDocument):
 
     id = db.AutoUUIDField()
     content = StringField(required=True)
-    posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
-    posted_by = db.ReferenceField("User")
-    posted_by_organization = db.ReferenceField("Organization")
-    last_modified_at = db.DateTimeField()
+    posted_on = DateTimeField(default=datetime.utcnow, required=True)
+    posted_by = ReferenceField("User")
+    posted_by_organization = ReferenceField("Organization")
+    last_modified_at = DateTimeField()
 
     @property
     def permissions(self):
@@ -76,16 +76,16 @@ class Message(SpamMixin, db.EmbeddedDocument):
 class Discussion(SpamMixin, Linkable, db.Document):
     verbose_name = _("discussion")
 
-    user = db.ReferenceField("User")
-    organization = db.ReferenceField("Organization")
+    user = ReferenceField("User")
+    organization = ReferenceField("Organization")
 
     subject = db.GenericReferenceField()
     title = StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    closed = db.DateTimeField()
-    closed_by = db.ReferenceField("User")
-    closed_by_organization = db.ReferenceField("Organization")
+    created = DateTimeField(default=datetime.utcnow, required=True)
+    closed = DateTimeField()
+    closed_by = ReferenceField("User")
+    closed_by_organization = ReferenceField("Organization")
     extras = db.ExtrasField()
 
     meta = {

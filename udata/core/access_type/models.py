@@ -10,6 +10,7 @@ from udata.core.access_type.constants import (
 from udata.i18n import lazy_gettext as _
 from udata.models import db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.url_field import URLField
 
 
 @generate_fields()
@@ -39,7 +40,7 @@ class WithAccessType:
         checks=[check_only_one_condition_per_role],
     )
 
-    authorization_request_url = field(db.URLField())
+    authorization_request_url = field(URLField())
     access_type_reason_category = field(
         StringField(choices=[e.value for e in InspireLimitationCategory]), allow_null=True
     )

@@ -6,7 +6,7 @@ import factory
 import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
-from mongoengine.fields import StringField
+from mongoengine.fields import IntField, StringField
 
 from udata.core import csv
 from udata.mongo import db
@@ -22,7 +22,7 @@ blueprint = Blueprint("testcsv", __name__)
 
 class NestedFake(db.EmbeddedDocument):
     key = StringField()
-    value = db.IntField()
+    value = IntField()
 
 
 class Fake(db.Document):

@@ -1,7 +1,7 @@
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, DateTimeField, ReferenceField, StringField
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -17,6 +17,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 from udata.utils import hash_url
 
@@ -91,7 +92,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         filterable={},
     )
     url = field(
-        db.URLField(required=True),
+        URLField(required=True),
         description="The remote URL (website)",
         checks=[check_url_does_not_exists],
     )
@@ -113,7 +114,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
             ),
         ),
@@ -123,7 +124,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     )
     dataservices = field(
         db.ListField(
-            field(db.ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
+            field(ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
         ),
         filterable={
             "key": "dataservice",
@@ -141,23 +142,23 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     )
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = field(db.BooleanField(default=False), filterable={})
+    private = field(BooleanField(default=False), filterable={})
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = field(db.ExtrasField(), auditable=False)
 
     featured = field(
-        db.BooleanField(),
+        BooleanField(),
         filterable={},
         readonly=True,
         auditable=False,
     )
     deleted = field(
-        db.DateTimeField(),
+        DateTimeField(),
         auditable=False,
     )
     archived = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
 
     def __str__(self):

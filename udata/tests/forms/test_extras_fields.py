@@ -2,11 +2,12 @@ from datetime import date, datetime
 from uuid import UUID
 
 import pytest
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, DateTimeField, FloatField, IntField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.mongo.url_field import URLField
 from udata.tests import PytestOnlyTestCase
 
 
@@ -128,17 +129,17 @@ class ExtrasFieldTest(PytestOnlyTestCase):
             pytest.param(*p, id=p[0].__name__)
             for p in [
                 (
-                    db.DateTimeField,
+                    DateTimeField,
                     "2018-05-29T13:15:04.397603",
                     datetime,
                     datetime(2018, 5, 29, 13, 15, 4, 397603),
                 ),
                 (db.DateField, "2018-05-29", date, date(2018, 5, 29)),
-                (db.BooleanField, "true", bool, True),
-                (db.IntField, 42, int, 42),
+                (BooleanField, "true", bool, True),
+                (IntField, 42, int, 42),
                 (StringField, "42", str, "42"),
-                (db.FloatField, "42.0", float, 42.0),
-                (db.URLField, "http://test.com", str, "http://test.com"),
+                (FloatField, "42.0", float, 42.0),
+                (URLField, "http://test.com", str, "http://test.com"),
                 (
                     db.UUIDField,
                     "e3b06d6d-90c0-4407-adc0-de81d327f181",
@@ -169,12 +170,12 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         [
             pytest.param(*p, id=p[0].__name__)
             for p in [
-                (db.DateTimeField, "xxxx"),
+                (DateTimeField, "xxxx"),
                 (db.DateField, "xxxx"),
-                (db.IntField, "xxxx"),
+                (IntField, "xxxx"),
                 (StringField, 42),
-                (db.FloatField, "xxxx"),
-                (db.URLField, "not-an-url"),
+                (FloatField, "xxxx"),
+                (URLField, "not-an-url"),
                 (db.UUIDField, "not-a-uuid"),
             ]
         ],

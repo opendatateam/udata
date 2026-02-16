@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from blinker import Signal
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.i18n import lazy_gettext as _
@@ -21,17 +21,17 @@ TRANSFER_STATUS = {
 
 
 class Transfer(db.Document):
-    user = db.ReferenceField("User")
+    user = ReferenceField("User")
     owner = db.GenericReferenceField(required=True)
     recipient = db.GenericReferenceField(required=True)
     subject = db.GenericReferenceField(required=True)
     comment = StringField()
     status = StringField(choices=list(TRANSFER_STATUS), default="pending")
 
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=datetime.utcnow, required=True)
 
-    responded = db.DateTimeField()
-    responder = db.ReferenceField("User")
+    responded = DateTimeField()
+    responder = ReferenceField("User")
     response_comment = StringField()
 
     on_create = Signal()

@@ -4,7 +4,7 @@ from bson import DBRef
 from flask import url_for
 from flask_restx import inputs
 from mongoengine import DO_NOTHING, NULLIFY, Q, signals
-from mongoengine.fields import StringField
+from mongoengine.fields import DateTimeField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -42,7 +42,7 @@ def filter_by_handled(base_query, filter_value):
 )
 class Report(db.Document):
     by = field(
-        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         description="Only set if a user was connected when reporting an element.",
         readonly=True,
@@ -56,7 +56,7 @@ class Report(db.Document):
     )
 
     subject_deleted_at = field(
-        db.DateTimeField(),
+        DateTimeField(),
         allow_null=True,
         readonly=True,
     )
@@ -69,16 +69,16 @@ class Report(db.Document):
     )
 
     reported_at = field(
-        db.DateTimeField(default=datetime.utcnow, required=True),
+        DateTimeField(default=datetime.utcnow, required=True),
         readonly=True,
         sortable=True,
     )
 
     dismissed_at = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
     dismissed_by = field(
-        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         allow_null=True,
     )

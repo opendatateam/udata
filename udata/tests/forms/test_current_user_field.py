@@ -1,6 +1,7 @@
 import datetime
 
 from bson import ObjectId
+from mongoengine.fields import ReferenceField
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
@@ -16,7 +17,7 @@ from udata.tests.helpers import security_gettext
 class CurrentUserFieldTest(DBTestCase):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
-            owner = db.ReferenceField(User)
+            owner = ReferenceField(User)
 
         class OwnableForm(ModelForm):
             model_class = Ownable

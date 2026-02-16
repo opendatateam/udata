@@ -4,7 +4,7 @@ from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
 from mongoengine import Q
-from mongoengine.fields import StringField
+from mongoengine.fields import BooleanField, DateTimeField, FloatField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
@@ -22,6 +22,7 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow, db
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 BADGES: dict[str, LazyString] = {
@@ -105,27 +106,27 @@ class HarvestMetadata(db.EmbeddedDocument):
     domain = field(StringField())
 
     source_id = field(StringField())
-    source_url = field(db.URLField())
+    source_url = field(URLField())
 
     remote_id = field(StringField())
-    remote_url = field(db.URLField())
+    remote_url = field(URLField())
 
     # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
     # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we
     # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
     uri = field(
-        db.URLField(),
+        URLField(),
         description="RDF node ID if it's an `URIRef`. `None` if it's not present or if it's a random auto-generated ID inside the graph.",
     )
 
     created_at = field(
-        db.DateTimeField(), description="Date of the creation as provided by the harvested catalog"
+        DateTimeField(), description="Date of the creation as provided by the harvested catalog"
     )
     issued_at = field(
-        db.DateTimeField(), description="Release date as provided by the harvested catalog"
+        DateTimeField(), description="Release date as provided by the harvested catalog"
     )
-    last_update = field(db.DateTimeField(), description="Date of the last harvesting")
-    archived_at = field(db.DateTimeField())
+    last_update = field(DateTimeField(), description="Date of the last harvesting")
+    archived_at = field(DateTimeField())
     archived_reason = field(StringField())
 
 
@@ -210,24 +211,24 @@ class Dataservice(
         StringField(default=""),
         markdown=True,
     )
-    base_api_url = field(db.URLField(), sortable=True)
+    base_api_url = field(URLField(), sortable=True)
 
     machine_documentation_url = field(
-        db.URLField(), description="Swagger link, OpenAPI format, WMS XML…"
+        URLField(), description="Swagger link, OpenAPI format, WMS XML…"
     )
-    technical_documentation_url = field(db.URLField(), description="HTML version of a Swagger…")
-    business_documentation_url = field(db.URLField())
+    technical_documentation_url = field(URLField(), description="HTML version of a Swagger…")
+    business_documentation_url = field(URLField())
 
     rate_limiting = field(StringField())
-    rate_limiting_url = field(db.URLField())
+    rate_limiting_url = field(URLField())
 
-    availability = field(db.FloatField(min=0, max=100), example="99.99")
-    availability_url = field(db.URLField())
+    availability = field(FloatField(min=0, max=100), example="99.99")
+    availability_url = field(URLField())
 
     format = field(StringField(choices=DATASERVICE_FORMATS))
 
     license = field(
-        db.ReferenceField("License"),
+        ReferenceField("License"),
         allow_null=True,
         attribute="license.id",
         description="The ID of the license",
@@ -241,7 +242,7 @@ class Dataservice(
     )
 
     private = field(
-        db.BooleanField(default=False),
+        BooleanField(default=False),
         description="Is the dataservice private to the owner or the organization",
     )
 
@@ -251,7 +252,7 @@ class Dataservice(
     )
 
     featured = field(
-        db.BooleanField(),
+        BooleanField(),
         filterable={},
         readonly=True,
         auditable=False,
@@ -260,7 +261,7 @@ class Dataservice(
     contact_points = field(
         db.ListField(
             field(
-                db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
+                ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
                 nested_fields=contact_api_fields.contact_point_fields,
                 allow_null=True,
             ),
@@ -271,20 +272,20 @@ class Dataservice(
     )
 
     created_at = field(
-        db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
         sortable="created",
     )
     metadata_modified_at = field(
-        db.DateTimeField(
+        DateTimeField(
             verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
         ),
         readonly=True,
         sortable="last_modified",
         auditable=False,
     )
-    deleted_at = field(db.DateTimeField(), auditable=False)
-    archived_at = field(db.DateTimeField())
+    deleted_at = field(DateTimeField(), auditable=False)
+    archived_at = field(DateTimeField())
 
     datasets = field(
         db.ListField(

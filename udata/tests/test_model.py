@@ -4,13 +4,21 @@ from uuid import UUID, uuid4
 
 import pytest
 from mongoengine.errors import ValidationError
-from mongoengine.fields import BaseField, StringField
+from mongoengine.fields import (
+    BaseField,
+    BooleanField,
+    DateTimeField,
+    FloatField,
+    IntField,
+    StringField,
+)
 from mongoengine.signals import pre_save
 
 from udata.errors import ConfigError
 from udata.i18n import _
 from udata.models import Dataset
 from udata.mongo import build_test_config, db, validate_config
+from udata.mongo.url_field import URLField
 from udata.settings import Defaults
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates, assert_json_equal
@@ -62,11 +70,11 @@ class DatetimedTester(db.Datetimed, db.Document):
 
 
 class URLTester(db.Document):
-    url = db.URLField()
+    url = URLField()
 
 
 class PrivateURLTester(db.Document):
-    url = db.URLField(private=True)
+    url = URLField(private=True)
 
 
 class AutoUUIDFieldTest(PytestOnlyDBTestCase):
@@ -423,8 +431,8 @@ class URLFieldTest(PytestOnlyDBTestCase):
 
 class DatetimedTest(PytestOnlyDBTestCase):
     def test_class(self):
-        assert isinstance(DatetimedTester.created_at, db.DateTimeField)
-        assert isinstance(DatetimedTester.last_modified, db.DateTimeField)
+        assert isinstance(DatetimedTester.created_at, DateTimeField)
+        assert isinstance(DatetimedTester.last_modified, DateTimeField)
 
     def test_new_instance(self):
         now = datetime.utcnow()
@@ -512,10 +520,10 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "dbtype,value",
         [
-            (db.IntField, 42),
-            (db.FloatField, 0.42),
-            (db.BooleanField, True),
-            (db.DateTimeField, datetime.utcnow()),
+            (IntField, 42),
+            (FloatField, 0.42),
+            (BooleanField, True),
+            (DateTimeField, datetime.utcnow()),
             (db.DateField, date.today()),
         ],
     )
@@ -530,10 +538,10 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "dbtype,value",
         [
-            (db.IntField, datetime.utcnow()),
-            (db.FloatField, datetime.utcnow()),
-            (db.BooleanField, 42),
-            (db.DateTimeField, 42),
+            (IntField, datetime.utcnow()),
+            (FloatField, datetime.utcnow()),
+            (BooleanField, 42),
+            (DateTimeField, 42),
             (db.DateField, 42),
         ],
     )

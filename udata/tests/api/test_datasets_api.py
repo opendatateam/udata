@@ -8,6 +8,7 @@ import pytest
 import pytz
 import requests_mock
 from flask import url_for
+from mongoengine.fields import BooleanField
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
@@ -1827,7 +1828,7 @@ class DatasetResourceAPITest(APITestCase):
     def test_reorder(self):
         # Register an extra field in order to test
         # https://github.com/opendatateam/udata/issues/1794
-        ResourceMixin.extras.register("my:register", db.BooleanField)
+        ResourceMixin.extras.register("my:register", BooleanField)
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.resources[0].extras = {
             "my:register": True,

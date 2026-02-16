@@ -1,5 +1,5 @@
 import geojson
-from mongoengine.fields import StringField
+from mongoengine.fields import IntField, ReferenceField, StringField
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -17,7 +17,7 @@ __all__ = ("GeoLevel", "GeoZone", "SpatialCoverage", "spatial_granularities")
 class GeoLevel(db.Document):
     id = StringField(primary_key=True)
     name = StringField(required=True)
-    admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN, max_value=ADMIN_LEVEL_MAX, default=100)
+    admin_level = IntField(min_value=ADMIN_LEVEL_MIN, max_value=ADMIN_LEVEL_MAX, default=100)
 
 
 class GeoZoneQuerySet(db.BaseQuerySet):
@@ -136,7 +136,7 @@ class SpatialCoverage(db.EmbeddedDocument):
     """Represent a spatial coverage as a list of territories and/or a geometry."""
 
     geom = db.MultiPolygonField()
-    zones = db.ListField(db.ReferenceField(GeoZone))
+    zones = db.ListField(ReferenceField(GeoZone))
     granularity = StringField(default="other")
 
     @property
