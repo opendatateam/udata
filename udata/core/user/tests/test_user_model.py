@@ -1,5 +1,6 @@
 import pytest
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
@@ -43,8 +44,10 @@ class UserModelTest(APITestCase):
     def test_mark_as_deleted_with_comments_deletion(self):
         user = UserFactory()
         other_user = UserFactory()
+        dataset = DatasetFactory(owner=user)
         discussion_only_user = DiscussionFactory(
             user=user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user),
