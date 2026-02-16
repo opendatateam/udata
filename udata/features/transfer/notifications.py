@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from mongoengine.fields import GenericReferenceField
+
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
@@ -17,21 +19,21 @@ log = logging.getLogger(__name__)
 @generate_fields()
 class TransferRequestNotificationDetails(db.EmbeddedDocument):
     transfer_owner = field(
-        db.GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=(User, Organization), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_recipient = field(
-        db.GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=(User, Organization), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_subject = field(
-        db.GenericReferenceField(choices=(Dataset, Dataservice, Reuse), required=True),
+        GenericReferenceField(choices=(Dataset, Dataservice, Reuse), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,

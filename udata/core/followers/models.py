@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from mongoengine.fields import DateTimeField, ReferenceField
+from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceField
 
 from udata.mongo import db
 
@@ -22,7 +22,7 @@ class FollowQuerySet(db.BaseQuerySet):
 
 class Follow(db.Document):
     follower = ReferenceField("User", required=True)
-    following = db.GenericReferenceField()
+    following = GenericReferenceField()
     since = DateTimeField(required=True, default=datetime.utcnow)
     until = DateTimeField()
 

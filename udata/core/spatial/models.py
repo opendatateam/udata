@@ -1,5 +1,5 @@
 import geojson
-from mongoengine.fields import IntField, ReferenceField, StringField
+from mongoengine.fields import IntField, ListField, MultiPolygonField, ReferenceField, StringField
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -135,8 +135,8 @@ admin_levels = LocalProxy(get_spatial_admin_levels)
 class SpatialCoverage(db.EmbeddedDocument):
     """Represent a spatial coverage as a list of territories and/or a geometry."""
 
-    geom = db.MultiPolygonField()
-    zones = db.ListField(ReferenceField(GeoZone))
+    geom = MultiPolygonField()
+    zones = ListField(ReferenceField(GeoZone))
     granularity = StringField(default="other")
 
     @property

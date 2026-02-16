@@ -3,12 +3,21 @@ from datetime import datetime
 
 from flask import url_for
 from flask_login import current_user
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    GenericReferenceField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.uuid_fields import AutoUUIDField
 
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
@@ -18,7 +27,7 @@ log = logging.getLogger(__name__)
 class Message(SpamMixin, db.EmbeddedDocument):
     verbose_name = _("message")
 
-    id = db.AutoUUIDField()
+    id = AutoUUIDField()
     content = StringField(required=True)
     posted_on = DateTimeField(default=datetime.utcnow, required=True)
     posted_by = ReferenceField("User")
@@ -79,14 +88,14 @@ class Discussion(SpamMixin, Linkable, db.Document):
     user = ReferenceField("User")
     organization = ReferenceField("Organization")
 
-    subject = db.GenericReferenceField()
+    subject = GenericReferenceField()
     title = StringField(required=True)
-    discussion = db.ListField(db.EmbeddedDocumentField(Message))
+    discussion = ListField(EmbeddedDocumentField(Message))
     created = DateTimeField(default=datetime.utcnow, required=True)
     closed = DateTimeField()
     closed_by = ReferenceField("User")
     closed_by_organization = ReferenceField("Organization")
-    extras = db.ExtrasField()
+    extras = ExtrasField()
 
     meta = {
         "indexes": [

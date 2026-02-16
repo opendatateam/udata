@@ -6,9 +6,10 @@ from flask_storage.mongo import ImageReference
 from mongoengine.fields import BooleanField as MongoBooleanField
 from mongoengine.fields import DateTimeField as MongoDateTimeField
 from mongoengine.fields import FloatField as MongoFloatField
+from mongoengine.fields import GenericReferenceField, ReferenceField
 from mongoengine.fields import IntField as MongoIntField
-from mongoengine.fields import ReferenceField
 from mongoengine.fields import StringField as MongoStringField
+from mongoengine.fields import UUIDField as MongoUUIDField
 from speaklater import is_lazy_string
 from wtforms import Field as WTField
 from wtforms import Form as WTForm
@@ -24,6 +25,9 @@ from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectFi
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
 from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.mongo.datetime_fields import DateField as MongoDateField
+from udata.mongo.datetime_fields import DateRange
+from udata.mongo.extras_fields import ExtrasField as MongoExtrasField
 from udata.mongo.url_field import URLField as MongoURLField
 from udata.utils import get_by, to_iso_date
 
@@ -508,7 +512,7 @@ class ModelField(Field):
                     expected_model, specs["class"]
                 )
                 raise validators.ValidationError(msg)
-        elif isinstance(model_field, db.GenericReferenceField):
+        elif isinstance(model_field, GenericReferenceField):
             if "class" not in specs:
                 msg = _("Expect both class and identifier")
                 raise validators.ValidationError(msg)
@@ -709,7 +713,7 @@ class DateRangeField(Field):
                 start, end = value.split(" - ")
                 if end is not None:
                     end = parse(end, yearfirst=True).date()
-                self.data = db.DateRange(
+                self.data = DateRange(
                     start=parse(start, yearfirst=True).date(),
                     end=end,
                 )
@@ -718,7 +722,7 @@ class DateRangeField(Field):
                     end = parse(value["end"], yearfirst=True).date()
                 else:
                     end = None
-                self.data = db.DateRange(
+                self.data = DateRange(
                     start=parse(value["start"], yearfirst=True).date(),
                     end=end,
                 )
@@ -823,13 +827,13 @@ def field_parse(cls, value, *args, **kwargs):
 class ExtrasField(Field):
     KNOWN_TYPES = {
         MongoDateTimeField: DateTimeField,
-        db.DateField: DateField,
+        MongoDateField: DateField,
         MongoIntField: IntegerField,
         MongoBooleanField: BooleanField,
         MongoStringField: StringField,
         MongoFloatField: FloatField,
         MongoURLField: URLField,
-        db.UUIDField: UUIDField,
+        MongoUUIDField: UUIDField,
     }
 
     def __init__(self, *args, **kwargs):
@@ -837,7 +841,7 @@ class ExtrasField(Field):
         if not isinstance(self._form, ModelForm):
             raise ValueError("ExtrasField can only be used within a ModelForm")
         model_field = getattr(self._form.model_class, self.short_name, None)
-        if not model_field or not isinstance(model_field, db.ExtrasField):
+        if not model_field or not isinstance(model_field, MongoExtrasField):
             msg = "Form ExtrasField can only be mapped to a model ExtraField"
             raise ValueError(msg)
 

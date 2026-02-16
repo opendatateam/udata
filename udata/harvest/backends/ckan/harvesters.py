@@ -15,6 +15,7 @@ from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
 from udata.models import GeoZone, License, Resource, SpatialCoverage, db
+from udata.mongo.datetime_fields import DateRange
 from udata.utils import daterange_end, daterange_start, get_by
 
 from .schemas.ckan import schema as ckan_schema
@@ -238,7 +239,7 @@ class CkanBackend(BaseBackend):
             dataset.spatial.geom = {"type": "MultiPolygon", "coordinates": coordinates}
 
         if temporal_start and temporal_end:
-            dataset.temporal_coverage = db.DateRange(
+            dataset.temporal_coverage = DateRange(
                 start=temporal_start,
                 end=temporal_end,
             )

@@ -1,6 +1,7 @@
 import json
 from datetime import timedelta
 
+from mongoengine.fields import EmbeddedDocumentField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
@@ -19,7 +20,7 @@ A_YEAR = timedelta(days=365)
 class SpatialCoverageFieldTest(TestCase):
     def factory(self):
         class Fake(db.Document):
-            spatial = db.EmbeddedDocumentField(SpatialCoverage)
+            spatial = EmbeddedDocumentField(SpatialCoverage)
 
         class FakeForm(Form):
             spatial = SpatialCoverageField()

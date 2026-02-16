@@ -9,7 +9,17 @@ from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
-from mongoengine.fields import BooleanField, DateTimeField, IntField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    GenericEmbeddedDocumentField,
+    IntField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -21,6 +31,8 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
@@ -37,7 +49,7 @@ class Role(db.Document, RoleMixin):
     ADMIN = "admin"
     name = StringField(max_length=80, unique=True)
     description = StringField(max_length=255)
-    permissions = db.ListField()
+    permissions = ListField()
 
     def __str__(self):
         return self.name
@@ -50,7 +62,7 @@ class UserSettings(db.EmbeddedDocument):
 @generate_fields()
 class User(WithMetrics, UserMixin, Linkable, db.Document):
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="fullname"),
+        SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
         show_as_ref=True,
     )
@@ -58,14 +70,14 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     password = field(StringField())
     active = field(BooleanField())
     fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
-    roles = field(db.ListField(ReferenceField(Role), default=[]))
+    roles = field(ListField(ReferenceField(Role), default=[]))
 
     first_name = field(StringField(max_length=255, required=True), show_as_ref=True)
     last_name = field(StringField(max_length=255, required=True), show_as_ref=True)
 
     avatar_url = field(URLField())
     avatar = field(
-        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
+        ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_AVATAR_SIZE,
@@ -103,8 +115,8 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     tf_totp_secret = field(StringField(), auditable=False)
 
     deleted = field(DateTimeField())
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
-    extras = field(db.ExtrasField(), auditable=False)
+    ext = field(MapField(GenericEmbeddedDocumentField()))
+    extras = field(ExtrasField(), auditable=False)
 
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set

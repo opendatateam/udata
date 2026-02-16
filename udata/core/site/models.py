@@ -1,5 +1,12 @@
 from flask import current_app, g
-from mongoengine.fields import IntField, ReferenceField, StringField
+from mongoengine.fields import (
+    DictField,
+    EmbeddedDocumentField,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
@@ -18,19 +25,19 @@ DEFAULT_FEED_SIZE = 20
 
 
 class SiteSettings(db.EmbeddedDocument):
-    home_datasets = db.ListField(ReferenceField(Dataset))
-    home_reuses = db.ListField(ReferenceField(Reuse))
+    home_datasets = ListField(ReferenceField(Dataset))
+    home_reuses = ListField(ReferenceField(Reuse))
 
 
 @generate_fields()
 class Site(WithMetrics, db.Document):
     id = field(StringField(primary_key=True), readonly=True)
     title = field(StringField(required=True), description="The site display title")
-    keywords = field(db.ListField(StringField()))
+    keywords = field(ListField(StringField()))
     feed_size = field(IntField(required=True, default=DEFAULT_FEED_SIZE))
-    configs = db.DictField()
-    themes = db.DictField()
-    settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
+    configs = DictField()
+    themes = DictField()
+    settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
     datasets_page = field(ReferenceField("Page"), attribute="datasets_page.id")
     reuses_page = field(ReferenceField("Page"), attribute="reuses_page.id")
     dataservices_page = field(ReferenceField("Page"), attribute="dataservices_page.id")

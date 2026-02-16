@@ -2,7 +2,14 @@ import factory
 import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -14,6 +21,8 @@ from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
@@ -80,9 +89,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         readonly=True,
     )
     description = field(
@@ -96,7 +103,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     )
     image_url = StringField()
     image = field(
-        db.ImageField(
+        ImageField(
             fs=images,
             basename=default_image_basename,
         ),
@@ -107,7 +114,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         },
     )
     datasets = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
@@ -118,7 +125,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         },
     )
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },
@@ -131,7 +138,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         DateTimeField(),
     )
 
-    embedded = field(db.EmbeddedDocumentField(FakeEmbedded))
+    embedded = field(EmbeddedDocumentField(FakeEmbedded))
 
     def __str__(self) -> str:
         return self.title or ""

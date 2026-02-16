@@ -13,6 +13,7 @@ from udata.core.spatial.models import GeoZone
 from udata.features.notifications.models import Notification
 from udata.harvest.models import HarvestSource
 from udata.mongo import db
+from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url, homepage_url
 
 
@@ -67,7 +68,7 @@ class ModelConverter(BaseConverter):
 
     @property
     def has_slug(self):
-        return hasattr(self.model, "slug") and isinstance(self.model.slug, db.SlugField)
+        return hasattr(self.model, "slug") and isinstance(self.model.slug, SlugField)
 
     @property
     def has_redirected_slug(self):

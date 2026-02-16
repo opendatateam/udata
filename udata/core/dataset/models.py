@@ -11,7 +11,19 @@ from blinker import signal
 from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
-from mongoengine.fields import BooleanField, DateTimeField, IntField, ReferenceField, StringField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    EmbeddedDocumentField,
+    EnumField,
+    GenericEmbeddedDocumentField,
+    IntField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
@@ -31,8 +43,13 @@ from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
+from udata.mongo.datetime_fields import DateRange
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -222,12 +239,12 @@ class License(db.Document):
     id = StringField(primary_key=True)
     created_at = DateTimeField(default=datetime.utcnow, required=True)
     title = StringField(required=True)
-    alternate_titles = db.ListField(StringField())
-    slug = db.SlugField(required=True, populate_from="title")
+    alternate_titles = ListField(StringField())
+    slug = SlugField(required=True, populate_from="title")
     url = URLField()
-    alternate_urls = db.ListField(URLField())
+    alternate_urls = ListField(URLField())
     maintainer = StringField()
-    flags = db.ListField(StringField())
+    flags = ListField(StringField())
 
     active = BooleanField()
 
@@ -364,27 +381,27 @@ class Checksum(db.EmbeddedDocument):
 
 
 class ResourceMixin(object):
-    id = db.AutoUUIDField(primary_key=True)
+    id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)
     description = StringField()
     filetype = StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
     type = StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
     url = URLField(required=True)
     urlhash = StringField()
-    checksum = db.EmbeddedDocumentField(Checksum)
+    checksum = EmbeddedDocumentField(Checksum)
     format = StringField()
     mime = StringField()
     filesize = IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = StringField()
-    extras = db.ExtrasField(
+    extras = ExtrasField(
         {
             "check:available": BooleanField,
             "check:status": IntField,
             "check:date": DateTimeField,
         }
     )
-    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.EmbeddedDocumentField(Schema)
+    harvest = EmbeddedDocumentField(HarvestResourceMetadata)
+    schema = EmbeddedDocumentField(Schema)
 
     created_at_internal = DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = DateTimeField(default=datetime.utcnow, required=True)
@@ -552,9 +569,7 @@ class Dataset(
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         auditable=False,
     )
     description = field(
@@ -564,37 +579,35 @@ class Dataset(
     description_short = field(StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(ReferenceField("License"))
 
-    tags = field(db.TagListField())
-    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
+    tags = field(TagListField())
+    resources = field(ListField(EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(BooleanField(default=False))
 
-    frequency = field(db.EnumField(UpdateFrequency))
+    frequency = field(EnumField(UpdateFrequency))
     frequency_date = field(DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(
-        db.EmbeddedDocumentField(db.DateRange),
+        EmbeddedDocumentField(DateRange),
         nested_fields=temporal_coverage_fields,
     )
     spatial = field(
-        db.EmbeddedDocumentField(SpatialCoverage),
+        EmbeddedDocumentField(SpatialCoverage),
         nested_fields=spatial_coverage_fields,
     )
-    schema = field(db.EmbeddedDocumentField(Schema))
+    schema = field(EmbeddedDocumentField(Schema))
 
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()), auditable=False)
-    extras = field(db.ExtrasField(), auditable=False)
-    harvest = field(db.EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
+    ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
+    extras = field(ExtrasField(), auditable=False)
+    harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
-    quality_cached = field(db.DictField(), auditable=False)
+    quality_cached = field(DictField(), auditable=False)
 
     featured = field(
         BooleanField(required=True, default=False),
         auditable=False,
     )
 
-    contact_points = field(
-        db.ListField(ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
-    )
+    contact_points = field(ListField(ReferenceField("ContactPoint", reverse_delete_rule=db.PULL)))
 
     created_at_internal = field(
         DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),

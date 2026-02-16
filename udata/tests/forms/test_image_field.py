@@ -2,6 +2,7 @@ import logging
 
 import flask_storage as fs
 import pytest
+from flask_storage.mongo import ImageField as MongoImageField
 
 from udata.core.storages import tmp
 from udata.forms import Form
@@ -27,8 +28,8 @@ class PostData(dict):
 
 class ImageFieldTest(PytestOnlyDBTestCase):
     class D(db.Document):
-        image = db.ImageField(fs=storage)
-        thumbnail = db.ImageField(fs=storage, thumbnails=SIZES)
+        image = MongoImageField(fs=storage)
+        thumbnail = MongoImageField(fs=storage, thumbnails=SIZES)
 
     class F(Form):
         image = ImageField()

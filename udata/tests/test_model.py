@@ -8,6 +8,7 @@ from mongoengine.fields import (
     BaseField,
     BooleanField,
     DateTimeField,
+    EmbeddedDocumentField,
     FloatField,
     IntField,
     StringField,
@@ -18,23 +19,27 @@ from udata.errors import ConfigError
 from udata.i18n import _
 from udata.models import Dataset
 from udata.mongo import build_test_config, db, validate_config
+from udata.mongo.datetime_fields import DateField, DateRange
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.settings import Defaults
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates, assert_json_equal
 
 
 class UUIDTester(db.Document):
-    uuid = db.AutoUUIDField()
+    uuid = AutoUUIDField()
 
 
 class UUIDAsIdTester(db.Document):
-    id = db.AutoUUIDField(primary_key=True)
+    id = AutoUUIDField(primary_key=True)
 
 
 class SlugTester(db.Document):
     title = StringField()
-    slug = db.SlugField(populate_from="title", max_length=1000)
+    slug = SlugField(populate_from="title", max_length=1000)
     meta = {
         "allow_inheritance": True,
     }
@@ -42,23 +47,23 @@ class SlugTester(db.Document):
 
 class SlugUpdateTester(db.Document):
     title = StringField()
-    slug = db.SlugField(populate_from="title", update=True)
+    slug = SlugField(populate_from="title", update=True)
 
 
 class DateTester(db.Document):
-    a_date = db.DateField()
+    a_date = DateField()
 
 
 class DateRangeTester(db.Document):
-    temporal = db.EmbeddedDocumentField(db.DateRange)
+    temporal = EmbeddedDocumentField(DateRange)
 
 
 class RequiredDateRangeTester(db.Document):
-    temporal = db.EmbeddedDocumentField(db.DateRange, required=True)
+    temporal = EmbeddedDocumentField(DateRange, required=True)
 
 
 class DateTesterWithDefault(db.Document):
-    a_date = db.DateField(default=date.today)
+    a_date = DateField(default=date.today)
 
 
 class InheritedSlugTester(SlugTester):
@@ -116,7 +121,7 @@ class SlugFieldTest(PytestOnlyDBTestCase):
         # It isn't registered on startup
         startup_receivers = copy(pre_save.receivers)
         assert not any(
-            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            getattr(receiver, "__func__", None) == SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
 
@@ -124,7 +129,7 @@ class SlugFieldTest(PytestOnlyDBTestCase):
 
         # It is registered when initializing a new SlugUpdateTester with a SlugField
         assert any(
-            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            getattr(receiver, "__func__", None) == SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
         assert hasattr(SlugUpdateTester.slug, "owner")
@@ -140,7 +145,7 @@ class SlugFieldTest(PytestOnlyDBTestCase):
 
         # It is also registered when updating an existing SlugUpdateTester with a SlugField
         assert any(
-            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            getattr(receiver, "__func__", None) == SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
         assert tester.slug == "other-title"
@@ -261,27 +266,27 @@ class SlugFieldTest(PytestOnlyDBTestCase):
         assert last_obj.slug.endswith("-10")
 
     def test_multiple_spaces(self):
-        field = db.SlugField()
+        field = SlugField()
         assert field.slugify("a  b") == "a-b"
 
     def test_lower_case_default(self):
-        field = db.SlugField()
+        field = SlugField()
         assert field.slugify("ABC") == "abc"
 
     def test_lower_case_false(self):
-        field = db.SlugField(lower_case=False)
+        field = SlugField(lower_case=False)
         assert field.slugify("AbC") == "AbC"
 
     def test_custom_separator(self):
-        field = db.SlugField(separator="+")
+        field = SlugField(separator="+")
         assert field.slugify("a b") == "a+b"
 
     def test_is_stripped(self):
-        field = db.SlugField()
+        field = SlugField()
         assert field.slugify("  ab  ") == "ab"
 
     def test_special_chars_are_normalized(self):
-        field = db.SlugField()
+        field = SlugField()
         assert field.slugify("à-€-ü") == "a-eur-u"
 
 
@@ -493,7 +498,7 @@ class DatetimedTest(PytestOnlyDBTestCase):
 class ExtrasFieldTest(PytestOnlyDBTestCase):
     def test_default_validate_primitive_type(self):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         now = datetime.utcnow()
         today = date.today()
@@ -512,7 +517,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
     def test_can_only_register_db_type(self):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         with pytest.raises(TypeError):
             Tester.extras.register("test", datetime)
@@ -524,12 +529,12 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
             (FloatField, 0.42),
             (BooleanField, True),
             (DateTimeField, datetime.utcnow()),
-            (db.DateField, date.today()),
+            (DateField, date.today()),
         ],
     )
     def test_validate_registered_db_type(self, dbtype, value):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         Tester.extras.register("test", dbtype)
 
@@ -542,12 +547,12 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
             (FloatField, datetime.utcnow()),
             (BooleanField, 42),
             (DateTimeField, 42),
-            (db.DateField, 42),
+            (DateField, 42),
         ],
     )
     def test_fail_to_validate_wrong_type(self, dbtype, value):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         Tester.extras.register("test", dbtype)
 
@@ -556,7 +561,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
     def test_validate_custom_type(self):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         @Tester.extras("test")
         class Custom(BaseField):
@@ -569,7 +574,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
     def test_validate_registered_type_embedded_document(self):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         @Tester.extras("test")
         class EmbeddedExtra(db.EmbeddedDocument):
@@ -587,7 +592,7 @@ class ExtrasFieldTest(PytestOnlyDBTestCase):
 
     def test_is_json_serializable(self):
         class Tester(db.Document):
-            extras = db.ExtrasField()
+            extras = ExtrasField()
 
         @Tester.extras("embedded")
         class EmbeddedExtra(db.EmbeddedDocument):

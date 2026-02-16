@@ -1,8 +1,9 @@
-from mongoengine.fields import StringField
+from mongoengine.fields import DictField, EmbeddedDocumentField, ListField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.tests import TestCase
 from udata.utils import faker
 
@@ -12,15 +13,15 @@ class SubNested(db.EmbeddedDocument):
 
 
 class Nested(db.EmbeddedDocument):
-    id = db.AutoUUIDField()
+    id = AutoUUIDField()
     name = StringField()
-    sub = db.EmbeddedDocumentField(SubNested)
-    raw = db.DictField()
+    sub = EmbeddedDocumentField(SubNested)
+    raw = DictField()
 
 
 class Fake(db.Document):
     name = StringField()
-    nested = db.ListField(db.EmbeddedDocumentField(Nested))
+    nested = ListField(EmbeddedDocumentField(Nested))
 
 
 class SubNestedForm(ModelForm):

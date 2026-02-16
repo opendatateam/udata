@@ -3,7 +3,15 @@ from collections import OrderedDict
 from datetime import datetime
 from urllib.parse import urlparse
 
-from mongoengine.fields import BooleanField, DateTimeField, ReferenceField, StringField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    EmbeddedDocumentField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
@@ -12,6 +20,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, db
+from udata.mongo.slug_fields import SlugField
 
 log = logging.getLogger(__name__)
 
@@ -76,10 +85,10 @@ class HarvestItem(db.EmbeddedDocument):
     created = DateTimeField(default=datetime.utcnow, required=True)
     started = DateTimeField()
     ended = DateTimeField()
-    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
-    logs = db.ListField(db.EmbeddedDocumentField(HarvestLog), default=[])
-    args = db.ListField(StringField())
-    kwargs = db.DictField()
+    errors = ListField(EmbeddedDocumentField(HarvestError))
+    logs = ListField(EmbeddedDocumentField(HarvestLog), default=[])
+    args = ListField(StringField())
+    kwargs = DictField()
 
 
 VALIDATION_ACCEPTED = "accepted"
@@ -109,13 +118,11 @@ class HarvestSourceQuerySet(OwnedQuerySet):
 
 class HarvestSource(Owned, db.Document):
     name = StringField(max_length=255)
-    slug = db.SlugField(
-        max_length=255, required=True, unique=True, populate_from="name", update=True
-    )
+    slug = SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True)
     description = StringField()
     url = StringField(required=True)
     backend = StringField(required=True)
-    config = db.DictField()
+    config = DictField()
     periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=db.NULLIFY)
     created_at = DateTimeField(default=datetime.utcnow, required=True)
     frequency = StringField(
@@ -123,7 +130,7 @@ class HarvestSource(Owned, db.Document):
     )
     active = BooleanField(default=True)
     autoarchive = BooleanField(default=True)
-    validation = db.EmbeddedDocumentField(HarvestSourceValidation, default=HarvestSourceValidation)
+    validation = EmbeddedDocumentField(HarvestSourceValidation, default=HarvestSourceValidation)
 
     deleted = DateTimeField()
 
@@ -197,10 +204,10 @@ class HarvestJob(db.Document):
     status = StringField(
         choices=list(HARVEST_JOB_STATUS), default=DEFAULT_HARVEST_JOB_STATUS, required=True
     )
-    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
-    items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
+    errors = ListField(EmbeddedDocumentField(HarvestError))
+    items = ListField(EmbeddedDocumentField(HarvestItem))
     source = ReferenceField(HarvestSource, reverse_delete_rule=db.CASCADE)
-    data = db.DictField()
+    data = DictField()
 
     meta = {
         "indexes": ["-created", "source", ("source", "-created"), "items.dataset"],

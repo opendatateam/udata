@@ -4,13 +4,14 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
 from udata.mongo import db
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.tests import TestCase
 
 
 class UUIDFieldTest(TestCase):
     def factory(self):
         class Fake(db.Document):
-            id = db.AutoUUIDField()
+            id = AutoUUIDField()
 
         class FakeForm(Form):
             id = fields.UUIDField()

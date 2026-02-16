@@ -4,7 +4,16 @@ from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
 from mongoengine import Q
-from mongoengine.fields import BooleanField, DateTimeField, FloatField, ReferenceField, StringField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    EmbeddedDocumentField,
+    FloatField,
+    LazyReferenceField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
@@ -22,6 +31,9 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow, db
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
@@ -202,9 +214,7 @@ class Dataservice(
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         readonly=True,
     )
     description = field(
@@ -235,7 +245,7 @@ class Dataservice(
     )
 
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },
@@ -247,7 +257,7 @@ class Dataservice(
     )
 
     extras = field(
-        db.ExtrasField(),
+        ExtrasField(),
         auditable=False,
     )
 
@@ -259,7 +269,7 @@ class Dataservice(
     )
 
     contact_points = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
                 nested_fields=contact_api_fields.contact_point_fields,
@@ -288,9 +298,9 @@ class Dataservice(
     archived_at = field(DateTimeField())
 
     datasets = field(
-        db.ListField(
+        ListField(
             field(
-                db.LazyReferenceField(Dataset, passthrough=True),
+                LazyReferenceField(Dataset, passthrough=True),
                 nested_fields=dataset_ref_fields,
             )
         ),
@@ -303,7 +313,7 @@ class Dataservice(
     )
 
     harvest = field(
-        db.EmbeddedDocumentField(HarvestMetadata),
+        EmbeddedDocumentField(HarvestMetadata),
         readonly=True,
         auditable=False,
     )

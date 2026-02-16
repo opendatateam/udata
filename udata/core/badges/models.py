@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from mongoengine.fields import DateTimeField, EmbeddedDocumentListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
@@ -34,7 +34,7 @@ class Badge(db.EmbeddedDocument):
         return self.kind
 
 
-class BadgesList(db.EmbeddedDocumentListField):
+class BadgesList(EmbeddedDocumentListField):
     def __init__(self, badge_model, *args, **kwargs):
         return super(BadgesList, self).__init__(badge_model, *args, **kwargs)
 

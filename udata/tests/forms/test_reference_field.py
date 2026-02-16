@@ -1,5 +1,5 @@
 from bson import ObjectId
-from mongoengine.fields import ReferenceField, StringField
+from mongoengine.fields import GenericReferenceField, ReferenceField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -141,12 +141,12 @@ class Nested3(db.Document):
 
 class WithGeneric(db.Document):
     name = StringField()
-    nested = db.GenericReferenceField()
+    nested = GenericReferenceField()
 
 
 class WithGenericChoices(db.Document):
     name = StringField()
-    nested = db.GenericReferenceField(choices=[Nested, Nested2])
+    nested = GenericReferenceField(choices=[Nested, Nested2])
 
 
 class WithGenericForm(ModelForm):

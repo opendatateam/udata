@@ -1,6 +1,6 @@
 import factory
 from factory.mongoengine import MongoEngineFactory
-from mongoengine.fields import BooleanField, StringField
+from mongoengine.fields import BooleanField, ListField, StringField
 
 from udata import search
 from udata.mongo import db
@@ -13,8 +13,8 @@ from udata.mongo import db
 class FakeSearchable(db.Document):
     title = StringField()
     description = StringField()
-    tags = db.ListField(StringField())
-    other = db.ListField(StringField())
+    tags = ListField(StringField())
+    other = ListField(StringField())
     indexable = BooleanField(default=True)
 
     meta = {"allow_inheritance": True}

@@ -31,7 +31,15 @@ from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
 from flask import abort, current_app, jsonify, render_template, request
 from flask_security.utils import verify_password
-from mongoengine.fields import BooleanField, DateTimeField, IntField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.exceptions import Unauthorized
 
 from udata.app import csrf
@@ -68,12 +76,12 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
 
     owner = ReferenceField("User")
     organization = ReferenceField(Organization, reverse_delete_rule=db.NULLIFY)
-    image = db.ImageField(fs=images, basename=default_image_basename, thumbnails=[150, 25])
+    image = ImageField(fs=images, basename=default_image_basename, thumbnails=[150, 25])
 
-    redirect_uris = db.ListField(StringField())
+    redirect_uris = ListField(StringField())
     scope = StringField(default="default")
-    grant_types = db.ListField(StringField())
-    response_types = db.ListField(StringField())
+    grant_types = ListField(StringField())
+    response_types = ListField(StringField())
 
     confidential = BooleanField(default=False)
     internal = BooleanField(default=False)

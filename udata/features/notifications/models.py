@@ -1,6 +1,6 @@
 from flask_restx.inputs import boolean
 from mongoengine import NULLIFY, Q
-from mongoengine.fields import DateTimeField, ReferenceField
+from mongoengine.fields import DateTimeField, GenericEmbeddedDocumentField, ReferenceField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.notifications import DiscussionNotificationDetails
@@ -14,6 +14,7 @@ from udata.features.transfer.notifications import TransferRequestNotificationDet
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.queryset import UDataQuerySet
+from udata.mongo.uuid_fields import AutoUUIDField
 
 
 class NotificationQuerySet(UDataQuerySet):
@@ -43,7 +44,7 @@ class Notification(Datetimed, db.Document):
         "queryset_class": NotificationQuerySet,
     }
 
-    id = field(db.AutoUUIDField(primary_key=True))
+    id = field(AutoUUIDField(primary_key=True))
     handled_at = field(
         DateTimeField(),
         sortable=True,
@@ -59,7 +60,7 @@ class Notification(Datetimed, db.Document):
         filterable={},
     )
     details = field(
-        db.GenericEmbeddedDocumentField(
+        GenericEmbeddedDocumentField(
             choices=(
                 MembershipRequestNotificationDetails,
                 TransferRequestNotificationDetails,

@@ -1,7 +1,16 @@
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine.fields import BooleanField, DateTimeField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    GenericEmbeddedDocumentField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -17,6 +26,9 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 from udata.utils import hash_url
@@ -77,9 +89,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         readonly=True,
         auditable=False,
     )
@@ -99,7 +109,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     urlhash = StringField(required=True, unique=True)
     image_url = StringField()
     image = field(
-        db.ImageField(
+        ImageField(
             fs=images,
             basename=default_image_basename,
             max_size=IMAGE_MAX_SIZE,
@@ -112,7 +122,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         },
     )
     datasets = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
@@ -123,7 +133,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         },
     )
     dataservices = field(
-        db.ListField(
+        ListField(
             field(ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
         ),
         filterable={
@@ -131,7 +141,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         },
     )
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },
@@ -140,12 +150,11 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         StringField(required=True, choices=list(REUSE_TOPICS)),
         filterable={},
     )
-    # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = field(BooleanField(default=False), filterable={})
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = field(db.ExtrasField(), auditable=False)
+    ext = MapField(GenericEmbeddedDocumentField())
+    extras = field(ExtrasField(), auditable=False)
 
     featured = field(
         BooleanField(),

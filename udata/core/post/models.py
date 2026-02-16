@@ -1,5 +1,6 @@
 from flask import url_for
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
@@ -9,6 +10,7 @@ from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
@@ -37,7 +39,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         readonly=True,
     )
     headline = field(
@@ -58,7 +60,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         StringField(),
     )
     image = field(
-        db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
+        ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
         readonly=True,
         thumbnail_info={"size": 100},
     )
@@ -73,11 +75,11 @@ class Post(db.Datetimed, Linkable, db.Document):
     )
 
     tags = field(
-        db.ListField(StringField()),
+        ListField(StringField()),
         description="Some keywords to help in search",
     )
     datasets = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
@@ -86,7 +88,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         description="The post datasets",
     )
     reuses = field(
-        db.ListField(ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        ListField(ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
         description="The post reuses",
     )
 

@@ -4,12 +4,13 @@ from datetime import datetime
 from blinker import Signal
 from flask import g
 from mongoengine.errors import DoesNotExist
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
 from udata.auth import current_user
 from udata.mongo import db
+from udata.mongo.extras_fields import ExtrasField
 from udata.utils import filter_changed_fields, get_field_value_from_path
 
 from .signals import new_activity
@@ -44,9 +45,9 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     organization = ReferenceField("Organization")
     related_to = ReferenceField(db.DomainModel, required=True)
     created_at = DateTimeField(default=datetime.utcnow, required=True)
-    changes = db.ListField(StringField())
+    changes = ListField(StringField())
 
-    extras = db.ExtrasField()
+    extras = ExtrasField()
 
     on_new = Signal()
 

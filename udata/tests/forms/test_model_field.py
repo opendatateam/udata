@@ -1,4 +1,4 @@
-from mongoengine.fields import ReferenceField, StringField
+from mongoengine.fields import GenericReferenceField, ReferenceField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
@@ -13,7 +13,7 @@ class Target(db.Document):
 
 class Model(db.Document):
     name = StringField()
-    target = db.GenericReferenceField()
+    target = GenericReferenceField()
 
 
 class ModelExplicit(db.Document):

@@ -6,7 +6,7 @@ import factory
 import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
-from mongoengine.fields import IntField, StringField
+from mongoengine.fields import DictField, EmbeddedDocumentField, IntField, ListField, StringField
 
 from udata.core import csv
 from udata.mongo import db
@@ -28,11 +28,11 @@ class NestedFake(db.EmbeddedDocument):
 class Fake(db.Document):
     title = StringField()
     description = StringField()
-    tags = db.ListField(StringField())
-    other = db.ListField(StringField())
-    nested = db.ListField(db.EmbeddedDocumentField(NestedFake))
-    sub = db.EmbeddedDocumentField(NestedFake)
-    metrics = db.DictField()
+    tags = ListField(StringField())
+    other = ListField(StringField())
+    nested = ListField(EmbeddedDocumentField(NestedFake))
+    sub = EmbeddedDocumentField(NestedFake)
+    metrics = DictField()
 
     __metrics_keys__ = [
         "fake-metric-int",

@@ -1,4 +1,4 @@
-from mongoengine.fields import StringField
+from mongoengine.fields import EmbeddedDocumentListField, EnumField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.constants import (
@@ -8,7 +8,7 @@ from udata.core.access_type.constants import (
     InspireLimitationCategory,
 )
 from udata.i18n import lazy_gettext as _
-from udata.models import db
+from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.url_field import URLField
 
@@ -32,11 +32,11 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 class WithAccessType:
     access_type = field(
-        db.EnumField(AccessType, default=AccessType.OPEN),
+        EnumField(AccessType, default=AccessType.OPEN),
         filterable={},
     )
     access_audiences = field(
-        db.EmbeddedDocumentListField(AccessAudience),
+        EmbeddedDocumentListField(AccessAudience),
         checks=[check_only_one_condition_per_role],
     )
 

@@ -4,7 +4,16 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine.fields import DateTimeField, ReferenceField, StringField
+from flask_storage.mongo import ImageField
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    GenericEmbeddedDocumentField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -18,7 +27,10 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.extras_fields import OrganizationExtrasField
+from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import cdata_url
 
 from .constants import (
@@ -51,12 +63,10 @@ BADGES: dict[str, LazyString] = {
 @generate_fields()
 class Team(db.EmbeddedDocument):
     name = StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, unique=False
-    )
+    slug = SlugField(max_length=255, required=True, populate_from="name", update=True, unique=False)
     description = StringField()
 
-    members = db.ListField(ReferenceField("User"))
+    members = ListField(ReferenceField("User"))
 
 
 @generate_fields()
@@ -87,7 +97,7 @@ class MembershipRequest(db.EmbeddedDocument):
         - created_by = admin who created the invitation
     """
 
-    id = db.AutoUUIDField()
+    id = AutoUUIDField()
     user = ReferenceField("User")
     status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
 
@@ -154,7 +164,7 @@ class Organization(
     name = field(StringField(required=True), show_as_ref=True)
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
         show_as_ref=True,
     )
@@ -165,7 +175,7 @@ class Organization(
     url = field(URLField())
     image_url = field(StringField())
     logo = field(
-        db.ImageField(
+        ImageField(
             fs=avatars,
             basename=default_image_basename,
             max_size=LOGO_MAX_SIZE,
@@ -178,13 +188,13 @@ class Organization(
     )
     business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT))
 
-    members = field(db.ListField(db.EmbeddedDocumentField(Member)))
-    teams = field(db.ListField(db.EmbeddedDocumentField(Team)))
-    requests = field(db.ListField(db.EmbeddedDocumentField(MembershipRequest)))
+    members = field(ListField(EmbeddedDocumentField(Member)))
+    teams = field(ListField(EmbeddedDocumentField(Team)))
+    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)))
 
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    ext = field(MapField(GenericEmbeddedDocumentField()))
     zone = field(StringField())
-    extras = field(db.OrganizationExtrasField(), auditable=False)
+    extras = field(OrganizationExtrasField(), auditable=False)
 
     deleted = field(DateTimeField())
 

@@ -1,4 +1,4 @@
-from mongoengine.fields import ReferenceField, StringField
+from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -9,6 +9,7 @@ from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.uuid_fields import AutoUUIDField
 
 page_permissions_fields = api.model(
     "PagePermissions",
@@ -23,7 +24,7 @@ page_permissions_fields = api.model(
 class Bloc(db.EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
-    id = field(db.AutoUUIDField(primary_key=True))
+    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:
@@ -36,7 +37,7 @@ class BlocWithTitleMixin:
 )
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Dataset"),
                 nested_fields=dataset_fields,
@@ -48,7 +49,7 @@ class DatasetsListBloc(BlocWithTitleMixin, Bloc):
 @generate_fields()
 class ReusesListBloc(BlocWithTitleMixin, Bloc):
     reuses = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Reuse"),
                 nested_fields=Reuse.__read_fields__,
@@ -60,7 +61,7 @@ class ReusesListBloc(BlocWithTitleMixin, Bloc):
 @generate_fields()
 class DataservicesListBloc(BlocWithTitleMixin, Bloc):
     dataservices = field(
-        db.ListField(
+        ListField(
             field(
                 ReferenceField("Dataservice"),
                 nested_fields=Dataservice.__read_fields__,
@@ -82,7 +83,7 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
     main_link_url = field(StringField())
     main_link_title = field(StringField())
 
-    links = field(db.EmbeddedDocumentListField(LinkInBloc))
+    links = field(EmbeddedDocumentListField(LinkInBloc))
 
 
 HERO_COLORS = ("primary", "green", "purple")
@@ -123,7 +124,7 @@ def check_no_recursive_blocs(blocs, **kwargs):
 class AccordionItemBloc(db.EmbeddedDocument):
     title = field(StringField(required=True))
     content = field(
-        db.EmbeddedDocumentListField(Bloc),
+        EmbeddedDocumentListField(Bloc),
         generic=True,
         checks=[check_no_recursive_blocs],
     )
@@ -133,13 +134,13 @@ class AccordionItemBloc(db.EmbeddedDocument):
 class AccordionListBloc(Bloc):
     title = field(StringField())
     description = field(StringField())
-    items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
+    items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 
 @generate_fields()
 class Page(Auditable, Owned, Datetimed, db.Document):
     blocs = field(
-        db.EmbeddedDocumentListField(Bloc),
+        EmbeddedDocumentListField(Bloc),
         generic=True,
     )
 

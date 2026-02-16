@@ -1,6 +1,6 @@
 import logging
 
-from mongoengine.fields import IntField, StringField
+from mongoengine.fields import DictField, IntField, StringField
 
 from udata.mongo import db
 
@@ -17,7 +17,7 @@ class Tag(db.Document):
     """
 
     name = StringField(required=True, unique=True)
-    counts = db.DictField()
+    counts = DictField()
     total = IntField(default=0)
 
     meta = {

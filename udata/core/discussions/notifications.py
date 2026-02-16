@@ -1,7 +1,7 @@
 import logging
 from enum import StrEnum, auto
 
-from mongoengine.fields import ReferenceField
+from mongoengine.fields import EnumField, ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.actions import discussions_for
@@ -22,14 +22,14 @@ class DiscussionStatus(StrEnum):
 @generate_fields()
 class DiscussionNotificationDetails(db.EmbeddedDocument):
     status = field(
-        db.EnumField(DiscussionStatus),
+        EnumField(DiscussionStatus),
         readonly=True,
         auditable=False,
         filterable={},
     )
     # keep track of the message to show in the notification
     message_id = field(
-        db.UUIDField(),
+        UUIDField(),
         readonly=True,
         auditable=False,
         filterable={},

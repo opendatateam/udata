@@ -1,9 +1,8 @@
 from celerybeatmongo.models import PERIODS
 from celerybeatmongo.models import PeriodicTask as BasePeriodicTask
-from mongoengine.fields import StringField
+from mongoengine.fields import EmbeddedDocumentField, StringField
 
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
 
 __all__ = ("PeriodicTask", "PERIODS")
 
@@ -43,5 +42,5 @@ class PeriodicTask(BasePeriodicTask):
         else:
             raise Exception("must define internal or crontab schedule")
 
-    interval = db.EmbeddedDocumentField(Interval)
-    crontab = db.EmbeddedDocumentField(Crontab)
+    interval = EmbeddedDocumentField(Interval)
+    crontab = EmbeddedDocumentField(Crontab)
