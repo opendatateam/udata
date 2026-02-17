@@ -54,7 +54,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
-from .constants import DEFAULT_LICENSE, OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -149,18 +149,39 @@ def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = No
     return UDATA_FREQ_ID_TO_TERM.get(frequency)
 
 
-def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
+def access_right_to_rdf(dataset: Dataset, graph: Graph | None = None):
     """
-    Build the access rights and rights from a dataset to a RdfResource with the associated predicate.
-    Cardinality is 0..1 for accessRights and 0..* for rights.
+    Build the access rights from a dataset.
+    Cardinality is 0..1 for accessRights.
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset.access_type:
         node = graph.resource(URIRef(AccessType(dataset.access_type).url))
         node.set(RDF.type, DCT.RightsStatement)
-        yield node, DCT.accessRights
-    if dataset.license and dataset.license.id != DEFAULT_LICENSE["id"]:
-        yield Literal(dataset.license.title), DCT.rights
+        return node
+
+
+def license_to_rdf(dataset: Dataset | None):
+    """
+    Build the license from a dataset.
+    Cardinality is 0..1 for license.
+    See also `rights_to_rdf` for license without a url.
+    """
+    if dataset and dataset.license and dataset.license.url:
+        return URIRef(dataset.license.url)
+
+
+def rights_to_rdf(dataset: Dataset | None, graph: Graph | None = None):
+    """
+    Build the rights from a dataset to a RdfResource.
+    Cardinality is 0..* for rights.
+    See also `license_to_rdf` for license with a url.
+    """
+    if not dataset:
+        return
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    if dataset.license and not dataset.license.url:
+        yield Literal(dataset.license.title)
     if dataset.access_type_reason_category:
         node = graph.resource(
             URIRef(InspireLimitationCategory(dataset.access_type_reason_category).url)
@@ -170,7 +191,7 @@ def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
             DCT.description,
             Literal(InspireLimitationCategory(dataset.access_type_reason_category).definition),
         )
-        yield node, DCT.rights
+        yield node
 
 
 def owner_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource | None:
@@ -224,11 +245,11 @@ def ogc_service_to_rdf(
             URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
         )
 
-    if dataset:
-        for right, predicate in rights_to_rdf(dataset, graph):
-            service.add(predicate, right)
-    if dataset and dataset.license and dataset.license.url:
-        service.add(DCT.license, URIRef(dataset.license.url))
+    for right in rights_to_rdf(dataset, graph):
+        service.add(DCT.rights, right)
+
+    if license := license_to_rdf(dataset):
+        service.add(DCT.license, license)
 
     if dataset and dataset.contact_points:
         for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
@@ -271,11 +292,10 @@ def resource_to_rdf(
     # modified
     set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
     # add appropriate rights and license
-    if dataset:
-        for right, predicate in rights_to_rdf(dataset, graph):
-            r.add(predicate, right)
-        if dataset.license and dataset.license.url:
-            r.add(DCT.license, URIRef(dataset.license.url))
+    for right in rights_to_rdf(dataset, graph):
+        r.add(DCT.rights, right)
+    if license := license_to_rdf(dataset):
+        r.add(DCT.license, license)
     if resource.filesize is not None:
         r.add(DCAT.byteSize, Literal(resource.filesize))
     if resource.mime:
@@ -392,8 +412,8 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
     if frequency := frequency_to_rdf(dataset.frequency):
         d.set(DCT.accrualPeriodicity, frequency)
 
-    for right, predicate in rights_to_rdf(dataset, graph):
-        d.add(predicate, right)
+    if access_right := access_right_to_rdf(dataset, graph):
+        d.add(DCT.accessRights, access_right)
 
     owner_role = DCT.publisher
     if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
