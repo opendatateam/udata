@@ -225,8 +225,8 @@ def ogc_service_to_rdf(
         )
 
     if dataset:
-        for access_right, predicate in rights_to_rdf(dataset, graph):
-            service.add(predicate, access_right)
+        for right, predicate in rights_to_rdf(dataset, graph):
+            service.add(predicate, right)
     if dataset and dataset.license and dataset.license.url:
         service.add(DCT.license, URIRef(dataset.license.url))
 
@@ -272,8 +272,8 @@ def resource_to_rdf(
     set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
     # add appropriate rights and license
     if dataset:
-        for access_right, predicate in rights_to_rdf(dataset, graph):
-            r.add(predicate, access_right)
+        for right, predicate in rights_to_rdf(dataset, graph):
+            r.add(predicate, right)
         if dataset.license and dataset.license.url:
             r.add(DCT.license, URIRef(dataset.license.url))
     if resource.filesize is not None:
@@ -392,8 +392,8 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
     if frequency := frequency_to_rdf(dataset.frequency):
         d.set(DCT.accrualPeriodicity, frequency)
 
-    for access_right, predicate in rights_to_rdf(dataset, graph):
-        d.add(predicate, access_right)
+    for right, predicate in rights_to_rdf(dataset, graph):
+        d.add(predicate, right)
 
     owner_role = DCT.publisher
     if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
