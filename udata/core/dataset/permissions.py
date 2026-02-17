@@ -1,8 +1,9 @@
 from flask_principal import Permission as BasePermission
 from flask_principal import RoleNeed
 
-from udata.auth import Permission, UserNeed, current_user
+from udata.auth import Permission, UserNeed
 from udata.core.organization.permissions import (
+    AssignmentNeed,
     OrganizationAdminNeed,
     OrganizationEditorNeed,
     OrganizationPartialEditorNeed,
@@ -15,30 +16,16 @@ class OwnablePermission(Permission):
     """A generic permission for ownable objects (with owner or organization)"""
 
     def __init__(self, obj):
-        self._obj = obj
         needs = []
 
         if obj.organization:
             needs.append(OrganizationAdminNeed(obj.organization.id))
             needs.append(OrganizationEditorNeed(obj.organization.id))
+            needs.append(AssignmentNeed(obj.__class__.__name__, obj.id))
         elif obj.owner:
             needs.append(UserNeed(obj.owner.fs_uniquifier))
 
         super(OwnablePermission, self).__init__(*needs)
-
-    def allows(self, identity):
-        if super().allows(identity):
-            return True
-        # Partial editors can edit only assigned objects
-        if not self._obj.organization or not current_user.is_authenticated:
-            return False
-        from udata.core.organization.assignment import Assignment
-
-        return Assignment.has_assignment(
-            user=current_user._get_current_object(),
-            organization=self._obj.organization,
-            obj=self._obj,
-        )
 
 
 class OwnableReadPermission(BasePermission):

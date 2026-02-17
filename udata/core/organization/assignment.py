@@ -29,10 +29,6 @@ class Assignment(db.Document):
         ],
     }
 
-    @classmethod
-    def has_assignment(cls, user, organization, obj):
-        return cls.objects(user=user, organization=organization, subject=obj).count() > 0
-
 
 def auto_assign_if_partial_editor(obj):
     """Auto-assign an object to the current user if they are a partial editor."""

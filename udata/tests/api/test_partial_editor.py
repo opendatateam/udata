@@ -56,12 +56,14 @@ class PartialEditorDatasetAPITest(APITestCase):
 
         created_dataset = Dataset.objects.get(id=response.json["id"])
         self.assertTrue(
-            Assignment.has_assignment(
-                user=self.partial_editor_user,
-                organization=self.org,
-                obj=created_dataset,
-            )
+            Assignment.objects(user=self.partial_editor_user, subject=created_dataset).count() > 0
         )
+
+        # Verify the partial editor can edit the dataset they just created
+        data = created_dataset.to_dict()
+        data["description"] = "updated after creation"
+        response = self.put(url_for("api.dataset", dataset=created_dataset), data)
+        self.assert200(response)
 
     def test_partial_editor_cannot_edit_unassigned_dataset(self):
         """A partial_editor cannot edit a dataset they are not assigned to."""
