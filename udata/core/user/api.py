@@ -281,6 +281,10 @@ class AcceptOrgInvitationAPI(API):
 
                     if req.assignments:
                         for subject in req.assignments:
+                            if not subject:
+                                continue
+                            if not hasattr(subject, "organization") or subject.organization != org:
+                                continue
                             Assignment(
                                 user=user,
                                 organization=org,

@@ -1,10 +1,13 @@
 from flask import url_for
 
+from udata.auth import login_user
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.organization.assignment import Assignment
+from udata.core.organization.assignment import Assignment, clean_assignments_on_owner_change  # noqa
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, MembershipRequest
 from udata.core.user.factories import UserFactory
+from udata.features.transfer.actions import accept_transfer
+from udata.features.transfer.factories import TransferFactory
 from udata.models import Dataset
 
 from . import APITestCase
@@ -332,3 +335,127 @@ class PartialEditorInvitationAssignmentTest(APITestCase):
         self.assertEqual(len(response.json[0]["assignments"]), 2)
         assignment_ids = {a["id"] for a in response.json[0]["assignments"]}
         self.assertIn(str(self.dataset1.id), assignment_ids)
+
+    def test_accept_invitation_skips_deleted_subjects(self):
+        """If a dataset is deleted between invitation and acceptance, the assignment is skipped."""
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=invited_user,
+            created_by=self.admin_user,
+            role="partial_editor",
+            assignments=[self.dataset1, self.dataset2],
+        )
+        self.org.requests.append(invitation)
+        self.org.save()
+
+        self.dataset1.delete()
+
+        self.login(invited_user)
+        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
+        self.assert200(response)
+
+        # Only dataset2 should have an assignment
+        assignments = Assignment.objects(user=invited_user, organization=self.org)
+        self.assertEqual(assignments.count(), 1)
+        self.assertEqual(assignments.first().subject, self.dataset2)
+
+    def test_accept_invitation_skips_transferred_subjects(self):
+        """If a dataset is transferred to another org between invitation and acceptance,
+        the assignment is skipped."""
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=invited_user,
+            created_by=self.admin_user,
+            role="partial_editor",
+            assignments=[self.dataset1, self.dataset2],
+        )
+        self.org.requests.append(invitation)
+        self.org.save()
+
+        other_org = OrganizationFactory()
+        self.dataset1.organization = other_org
+        self.dataset1.save()
+
+        self.login(invited_user)
+        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
+        self.assert200(response)
+
+        assignments = Assignment.objects(user=invited_user, organization=self.org)
+        self.assertEqual(assignments.count(), 1)
+        self.assertEqual(assignments.first().subject, self.dataset2)
+
+
+class AssignmentIntegrityTest(APITestCase):
+    """Tests for assignment cleanup on lifecycle events."""
+
+    def setUp(self):
+        super().setUp()
+        self.admin_user = UserFactory()
+        self.partial_editor = UserFactory()
+        self.org = OrganizationFactory(
+            members=[
+                Member(user=self.admin_user, role="admin"),
+                Member(user=self.partial_editor, role="partial_editor"),
+            ]
+        )
+        self.dataset = DatasetFactory(organization=self.org)
+        Assignment(
+            user=self.partial_editor,
+            organization=self.org,
+            subject=self.dataset,
+        ).save()
+
+    def test_transfer_to_other_org_cleans_assignments(self):
+        """When a dataset is transferred to another org, assignments are removed."""
+        other_admin = UserFactory()
+        other_org = OrganizationFactory(members=[Member(user=other_admin, role="admin")])
+        transfer = TransferFactory(owner=self.org, recipient=other_org, subject=self.dataset)
+
+        login_user(other_admin)
+        accept_transfer(transfer)
+
+        self.assertEqual(Assignment.objects(subject=self.dataset).count(), 0)
+
+    def test_transfer_to_user_cleans_assignments(self):
+        """When a dataset is transferred to a user, assignments are removed."""
+        recipient = UserFactory()
+        transfer = TransferFactory(owner=self.org, recipient=recipient, subject=self.dataset)
+
+        login_user(recipient)
+        accept_transfer(transfer)
+
+        self.assertEqual(Assignment.objects(subject=self.dataset).count(), 0)
+
+    def test_role_change_from_partial_editor_cleans_assignments(self):
+        """When a partial_editor is promoted to editor, their assignments are removed."""
+        self.assertEqual(
+            Assignment.objects(user=self.partial_editor, organization=self.org).count(), 1
+        )
+
+        self.login(self.admin_user)
+        response = self.put(
+            url_for("api.member", org=self.org, user=self.partial_editor),
+            {"role": "editor"},
+        )
+        self.assert200(response)
+
+        self.assertEqual(
+            Assignment.objects(user=self.partial_editor, organization=self.org).count(), 0
+        )
+
+    def test_role_change_to_partial_editor_keeps_no_assignments(self):
+        """When an editor becomes partial_editor, they start with no assignments."""
+        editor = UserFactory()
+        self.org.members.append(Member(user=editor, role="editor"))
+        self.org.save()
+
+        self.login(self.admin_user)
+        response = self.put(
+            url_for("api.member", org=self.org, user=editor),
+            {"role": "partial_editor"},
+        )
+        self.assert200(response)
+
+        self.assertEqual(Assignment.objects(user=editor, organization=self.org).count(), 0)

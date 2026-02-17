@@ -3,6 +3,7 @@ from datetime import datetime
 from mongoengine import CASCADE
 
 from udata.api_fields import field, generate_fields
+from udata.core.owned import Owned
 from udata.core.user.api_fields import user_ref_fields
 from udata.mongo import db
 
@@ -45,3 +46,9 @@ def auto_assign_if_partial_editor(obj):
             organization=obj.organization,
             subject=obj,
         ).save()
+
+
+@Owned.on_owner_change.connect
+def clean_assignments_on_owner_change(document, previous):
+    """Remove all assignments for an object when its ownership changes (e.g. transfer)."""
+    Assignment.objects(subject=document).delete()

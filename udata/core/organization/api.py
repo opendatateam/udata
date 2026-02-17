@@ -627,9 +627,13 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        old_role = member.role
         form = api.validate(MemberForm, member)
         form.populate_obj(member)
         org.save()
+
+        if old_role == "partial_editor" and member.role != "partial_editor":
+            Assignment.objects(user=user, organization=org).delete()
 
         return member
 

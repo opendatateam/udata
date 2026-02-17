@@ -6,6 +6,7 @@ from udata.search import reindex
 from udata.tasks import get_logger, job, task
 
 from . import mails
+from .assignment import Assignment
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
 from .notifications import NewBadgeNotificationDetails
@@ -29,6 +30,8 @@ def purge_organizations(self):
         ContactPoint.objects(organization=organization).delete()
         # Remove related notifications
         Notification.objects.with_organization_in_details(organization).delete()
+        # Remove assignments
+        Assignment.objects(organization=organization).delete()
         # Store datasets for later reindexation
         d_ids = [d.id for d in Dataset.objects(organization=organization)]
         # Remove organization's logo in all sizes
