@@ -71,22 +71,32 @@ def notify_membership_response(org_id, request_id):
 
     if request.status == "accepted":
         mails.membership_accepted(org).send(request.user)
-        notification = Notification(
-            user=request.user,
-            details=MembershipAcceptedNotificationDetails(
-                organization=org,
-            ),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=request.user,
+                details=MembershipAcceptedNotificationDetails(
+                    organization=org,
+                ),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create membership accepted notification for user {request.user}: {e}"
+            )
     else:
         mails.membership_refused(org).send(request.user)
-        notification = Notification(
-            user=request.user,
-            details=MembershipRefusedNotificationDetails(
-                organization=org,
-            ),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=request.user,
+                details=MembershipRefusedNotificationDetails(
+                    organization=org,
+                ),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create membership refused notification for user {request.user}: {e}"
+            )
 
 
 @task(route="high.mail")
@@ -144,11 +154,16 @@ def notify_badge_certified(org_id):
 
     # Create in-app notifications
     for member in org.members:
-        notification = Notification(
-            user=member.user,
-            details=NewBadgeNotificationDetails(organization=org, kind=CERTIFIED),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=member.user,
+                details=NewBadgeNotificationDetails(organization=org, kind=CERTIFIED),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create new badge notification for kind {CERTIFIED} and user {member.user}: {e}"
+            )
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)
@@ -164,11 +179,16 @@ def notify_badge_public_service(org_id):
 
     # Create in-app notifications
     for member in org.members:
-        notification = Notification(
-            user=member.user,
-            details=NewBadgeNotificationDetails(organization=org, kind=PUBLIC_SERVICE),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=member.user,
+                details=NewBadgeNotificationDetails(organization=org, kind=PUBLIC_SERVICE),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create new badge notification for kind {PUBLIC_SERVICE} and user {member.user}: {e}"
+            )
 
 
 @notify_new_badge(Organization, COMPANY)
@@ -182,11 +202,16 @@ def notify_badge_company(org_id):
 
     # Create in-app notifications
     for member in org.members:
-        notification = Notification(
-            user=member.user,
-            details=NewBadgeNotificationDetails(organization=org, kind=COMPANY),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=member.user,
+                details=NewBadgeNotificationDetails(organization=org, kind=COMPANY),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create new badge notification for kind {COMPANY} and user {member.user}: {e}"
+            )
 
 
 @notify_new_badge(Organization, ASSOCIATION)
@@ -200,11 +225,16 @@ def notify_badge_association(org_id):
 
     # Create in-app notifications
     for member in org.members:
-        notification = Notification(
-            user=member.user,
-            details=NewBadgeNotificationDetails(organization=org, kind=ASSOCIATION),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=member.user,
+                details=NewBadgeNotificationDetails(organization=org, kind=ASSOCIATION),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create new badge notification for kind {ASSOCIATION} and user {member.user}: {e}"
+            )
 
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
@@ -218,8 +248,13 @@ def notify_badge_local_authority(org_id):
 
     # Create in-app notifications
     for member in org.members:
-        notification = Notification(
-            user=member.user,
-            details=NewBadgeNotificationDetails(organization=org, kind=LOCAL_AUTHORITY),
-        )
-        notification.save()
+        try:
+            notification = Notification(
+                user=member.user,
+                details=NewBadgeNotificationDetails(organization=org, kind=LOCAL_AUTHORITY),
+            )
+            notification.save()
+        except Exception as e:
+            log.error(
+                f"Failed to create new badge notification for kind {LOCAL_AUTHORITY} and user {member.user}: {e}"
+            )

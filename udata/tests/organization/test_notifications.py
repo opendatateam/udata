@@ -1,11 +1,14 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import (
+    MembershipAcceptedNotificationDetails,
+    MembershipRefusedNotificationDetails,
     membership_request_notifications,
 )
+from udata.core.organization.tasks import notify_membership_response
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
-from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
+from udata.tests.api import DBTestCase, PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
 
@@ -92,3 +95,53 @@ class MembershipRequestNotificationTest(DBTestCase):
         request_users = [notif.details.request_user for notif in notifications]
         self.assertIn(applicant1, request_users)
         self.assertIn(applicant2, request_users)
+
+
+class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
+    def test_accept_membership_creates_notification(self):
+        """Accepting a membership request creates a notification for the applicant"""
+
+        applicant = UserFactory()
+        admin = UserFactory()
+        self.login(admin)
+        membership_request = MembershipRequest(user=applicant, comment="test", status="pending")
+        org = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[membership_request]
+        )
+
+        # Accept the membership request and notify
+        membership_request.status = "accepted"
+        org.save()
+        notify_membership_response(org.id, str(membership_request.id))
+
+        notifications = Notification.objects(user=applicant).all()
+        assert len(notifications) == 1
+
+        notification = notifications[0]
+        assert notification.user == applicant
+        assert notification.details.organization == org
+        assert isinstance(notification.details, MembershipAcceptedNotificationDetails)
+
+    def test_refuse_membership_creates_notification(self):
+        """Refusing a membership request creates a notification for the applicant"""
+
+        applicant = UserFactory()
+        admin = UserFactory()
+        self.login(admin)
+        membership_request = MembershipRequest(user=applicant, comment="test", status="pending")
+        org = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[membership_request]
+        )
+
+        # Refuse the membership request and notify
+        membership_request.status = "refused"
+        org.save()
+        notify_membership_response(org.id, str(membership_request.id))
+
+        notifications = Notification.objects(user=applicant).all()
+        assert len(notifications) == 1
+
+        notification = notifications[0]
+        assert notification.user == applicant
+        assert notification.details.organization == org
+        assert isinstance(notification.details, MembershipRefusedNotificationDetails)
