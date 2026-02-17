@@ -3,7 +3,7 @@ from flask import url_for
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member
+from udata.core.organization.models import Member, MembershipRequest
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset
 
@@ -223,3 +223,112 @@ class PartialEditorDatasetAPITest(APITestCase):
         response = self.get(url_for("api.organization_assignments", org=self.org))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+
+class PartialEditorInvitationAssignmentTest(APITestCase):
+    def setUp(self):
+        super().setUp()
+        self.admin_user = UserFactory()
+        self.org = OrganizationFactory(members=[Member(user=self.admin_user, role="admin")])
+        self.dataset1 = DatasetFactory(organization=self.org)
+        self.dataset2 = DatasetFactory(organization=self.org)
+
+    def test_invite_partial_editor_with_assignments_then_accept(self):
+        """Inviting a partial_editor with assignments creates assignments on acceptance."""
+        invited_user = UserFactory()
+        self.login(self.admin_user)
+        response = self.post(
+            url_for("api.invite_member", org=self.org),
+            {
+                "user": str(invited_user.id),
+                "role": "partial_editor",
+                "assignments": [
+                    {"class": "Dataset", "id": str(self.dataset1.id)},
+                    {"class": "Dataset", "id": str(self.dataset2.id)},
+                ],
+            },
+        )
+        self.assert201(response)
+        self.assertEqual(len(response.json["assignments"]), 2)
+
+        # Accept the invitation
+        invitation_id = response.json["id"]
+        self.login(invited_user)
+        response = self.post(url_for("api.accept_org_invitation", id=invitation_id))
+        self.assert200(response)
+
+        # Verify assignments were created
+        assignments = Assignment.objects(user=invited_user, organization=self.org)
+        self.assertEqual(assignments.count(), 2)
+
+        # Verify partial_editor can edit assigned datasets
+        data = self.dataset1.to_dict()
+        data["description"] = "updated by partial editor"
+        response = self.put(url_for("api.dataset", dataset=self.dataset1), data)
+        self.assert200(response)
+
+    def test_invite_with_assignments_requires_partial_editor_role(self):
+        """Assignments can only be set for partial_editor invitations."""
+        invited_user = UserFactory()
+        self.login(self.admin_user)
+        response = self.post(
+            url_for("api.invite_member", org=self.org),
+            {
+                "user": str(invited_user.id),
+                "role": "editor",
+                "assignments": [{"class": "Dataset", "id": str(self.dataset1.id)}],
+            },
+        )
+        self.assert400(response)
+
+    def test_invite_with_assignments_from_other_org(self):
+        """Cannot assign objects from another organization."""
+        invited_user = UserFactory()
+        other_org = OrganizationFactory()
+        other_dataset = DatasetFactory(organization=other_org)
+
+        self.login(self.admin_user)
+        response = self.post(
+            url_for("api.invite_member", org=self.org),
+            {
+                "user": str(invited_user.id),
+                "role": "partial_editor",
+                "assignments": [{"class": "Dataset", "id": str(other_dataset.id)}],
+            },
+        )
+        self.assert400(response)
+
+    def test_invite_without_assignments_still_works(self):
+        """Inviting a partial_editor without assignments works (assignments added later)."""
+        invited_user = UserFactory()
+        self.login(self.admin_user)
+        response = self.post(
+            url_for("api.invite_member", org=self.org),
+            {
+                "user": str(invited_user.id),
+                "role": "partial_editor",
+            },
+        )
+        self.assert201(response)
+        self.assertEqual(len(response.json["assignments"]), 0)
+
+    def test_list_invitations_includes_assignments(self):
+        """Pending invitations listing includes assignments."""
+        invited_user = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=invited_user,
+            created_by=self.admin_user,
+            role="partial_editor",
+            assignments=[self.dataset1, self.dataset2],
+        )
+        self.org.requests.append(invitation)
+        self.org.save()
+
+        self.login(invited_user)
+        response = self.get(url_for("api.my_org_invitations"))
+        self.assert200(response)
+        self.assertEqual(len(response.json), 1)
+        self.assertEqual(len(response.json[0]["assignments"]), 2)
+        assignment_ids = {a["id"] for a in response.json[0]["assignments"]}
+        self.assertIn(str(self.dataset1.id), assignment_ids)

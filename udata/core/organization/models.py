@@ -20,6 +20,7 @@ from udata.mongo import db
 from udata.uris import cdata_url
 
 from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
@@ -102,6 +103,7 @@ class MembershipRequest(db.EmbeddedDocument):
     email = db.StringField()  # For inviting non-registered users by email
     created_by = db.ReferenceField("User")  # Admin who created the invitation
     role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    assignments = db.ListField(db.GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES))
 
     after_create = Signal()
     after_handle = Signal()

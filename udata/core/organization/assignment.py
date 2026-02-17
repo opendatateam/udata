@@ -6,6 +6,8 @@ from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.mongo import db
 
+from .constants import ASSIGNABLE_OBJECT_TYPES
+
 
 @generate_fields()
 class Assignment(db.Document):
@@ -18,7 +20,7 @@ class Assignment(db.Document):
         readonly=True,
     )
     subject = field(
-        db.GenericReferenceField(choices=["Dataset", "Dataservice", "Reuse"], required=True),
+        db.GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES, required=True),
     )
     created_at = field(db.DateTimeField(default=datetime.utcnow), readonly=True)
 

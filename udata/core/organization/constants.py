@@ -45,6 +45,8 @@ PRODUCER_TYPES = frozenset(
 )
 
 
+ASSIGNABLE_OBJECT_TYPES = {"Dataset", "Dataservice", "Reuse"}
+
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
