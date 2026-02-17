@@ -12,6 +12,7 @@ from udata.core.organization.notifications import (
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.queryset import UDataQuerySet
@@ -68,6 +69,7 @@ class Notification(Datetimed, db.Document):
                 DiscussionNotificationDetails,
                 MembershipAcceptedNotificationDetails,
                 MembershipRefusedNotificationDetails,
+                ValidateHarvesterNotificationDetails,
             )
         ),
         generic=True,
