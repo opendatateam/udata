@@ -21,7 +21,7 @@ class UdataPasswordUtil:
         pnorm = self.normalize(password)
 
         error_list = []
-        pass_length: int = current_app.config.get("SECURITY_PASSWORD_LENGTH_MIN", 8)
+        pass_length: int = current_app.config["SECURITY_PASSWORD_LENGTH_MIN"]
         if len(pnorm) < pass_length:
             message = _("Password must be at least {pass_length} characters long")
             error_list.append(message.format(pass_length=pass_length))
