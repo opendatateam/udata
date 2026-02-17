@@ -157,11 +157,41 @@ class APITestCaseMixin:
         __tracebackhide__ = True
         helpers.assert_status(response, status_code, message=message)
 
+    def assert200(self, response):
+        __tracebackhide__ = True
+        helpers.assert200(response)
 
-for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
-    name = "assert{0}".format(code)
-    helper = getattr(helpers, name)
-    setattr(APITestCaseMixin, name, lambda s, r, h=helper: h(r))
+    def assert201(self, response):
+        __tracebackhide__ = True
+        helpers.assert201(response)
+
+    def assert204(self, response):
+        __tracebackhide__ = True
+        helpers.assert204(response)
+
+    def assert400(self, response):
+        __tracebackhide__ = True
+        helpers.assert400(response)
+
+    def assert401(self, response):
+        __tracebackhide__ = True
+        helpers.assert401(response)
+
+    def assert403(self, response):
+        __tracebackhide__ = True
+        helpers.assert403(response)
+
+    def assert404(self, response):
+        __tracebackhide__ = True
+        helpers.assert404(response)
+
+    def assert410(self, response):
+        __tracebackhide__ = True
+        helpers.assert410(response)
+
+    def assert500(self, response):
+        __tracebackhide__ = True
+        helpers.assert500(response)
 
 
 class _CleanDBMixin:
