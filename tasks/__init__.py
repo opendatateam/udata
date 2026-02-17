@@ -88,7 +88,7 @@ def test(ctx, fast=False, report=False, verbose=False, ci=False):
     header("Run tests suite")
     cmd = ["pytest udata"]
     if ci:
-        cmd.append("-p no:sugar --color=yes")
+        cmd.append("-p no:sugar --color=yes -n 2 --dist loadscope")
     if verbose:
         cmd.append("-v")
     if fast:
