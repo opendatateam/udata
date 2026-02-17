@@ -740,12 +740,17 @@ class Dataset(
 
     @property
     def permissions(self):
-        from .permissions import DatasetEditPermission, ResourceEditPermission
+        from .permissions import (
+            DatasetEditPermission,
+            OwnableReadPermission,
+            ResourceEditPermission,
+        )
 
         return {
             "delete": DatasetEditPermission(self),
             "edit": DatasetEditPermission(self),
             "edit_resources": ResourceEditPermission(self),
+            "read": OwnableReadPermission(self),
         }
 
     def self_web_url(self, **kwargs):
