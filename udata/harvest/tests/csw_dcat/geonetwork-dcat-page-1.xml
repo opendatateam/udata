@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2026-02-06T15:03:35.418284Z" />
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="3">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:void="http://www.w3.org/TR/void/" xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gmd="http://www.isotc211.org/2005/gmd">
+      <dcat:CatalogRecord rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4">
+        <foaf:primaryTopic rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Finsee%2Fpartmenage5ans" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2021-01-25</dct:issued>
+        <dct:modified>2021-01-25</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/api/records/04bcec79-5b25-4b16-b635-73115f7456e4/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/04bcec79-5b25-4b16-b635-73115f7456e4">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/04bcec79-5b25-4b16-b635-73115f7456e4">
+        <dct:identifier>https://www.geo2france.fr/insee/partmenage5ans</dct:identifier>
+        <dcat:landingPage>https://www.geo2france.fr/geonetwork/srv/resources/https://www.geo2france.fr/insee/partmenage5ans</dcat:landingPage>
+        <dct:title>INSEE - Part des ménages présents depuis 5 ans ou plus dans leur logement actuel (2010)</dct:title>
+        <dct:abstract>Part des ménages présents depuis 5 ans ou plus dans leur logement actuel, par "rectangle INSEE" en Région Hauts-de-France. La taille des cercles proportionnels est relative au nombre de ménages. Le nombre de ménages présents depuis 5 ans ou plus dans leur logement actuel est indiqué dans chaque cercle. Le "rectangle" est l'objet élémentaire des données carroyées à 200 mètres de l'INSEE relatives aux ménages (Millésime 2010).
+
+Région : HAUTS-DE-FRANCE.</dct:abstract>
+        <dcat:keyword>LOGEMENT</dcat:keyword>
+        <dcat:keyword>INSTITUT NATIONAL DE LA STATISTIQUE ET DES ETUDES ECONOMIQUES</dcat:keyword>
+        <dcat:keyword>MENAGE</dcat:keyword>
+        <dcat:keyword>POPULATION</dcat:keyword>
+        <dcat:keyword>INSEE</dcat:keyword>
+        <dcat:keyword>DONNEE OUVERTE</dcat:keyword>
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/society" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/public/vignettes_geonetwork/part_menage_5ans.jpg" />
+        <dct:spatial>
+          <ogc:Polygon xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.32898744824151 48.79422289313, 1.32898744824151 51.0829997967797, 4.30533171628197 51.0829997967797, 4.30533171628197 48.79422289313, 1.32898744824151 48.79422289313))</geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2020-09-22</dct:issued>
+        <dct:publisher rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:language>fre</dct:language>
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-M%C3%A9tadonn%C3%A9es%20INSEE%20-%20data.gouv.fr" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-insee.fr%20-%20donn%C3%A9es%20carroy%C3%A9es%20%C3%A0%20200%20m%C3%A8tres" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-Documentation%20g%C3%A9n%C3%A9rale%20-%20donn%C3%A9es%20carroy%C3%A9es" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-Documentation%20compl%C3%A8te%20-%20donn%C3%A9es%20carroy%C3%A9es%20%C3%A0%20200%20m%C3%A8tres" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#OGC%3AWMS-rectangles_200m_menage_erbm" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#OGC%3AWFS-insee%3Arectangles_200m_menage_erbm" />
+        <dcat:contactPoint>
+          <vcard:Kind xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </vcard:Kind>
+        </dcat:contactPoint>
+        <dcat:dataQuality>Source : données carroyées à 200 mètres de l'INSEE. Mise en ligne et représentation : Géo2France.</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-M%C3%A9tadonn%C3%A9es%20INSEE%20-%20data.gouv.fr">
+        <dcat:accessURL>https://www.data.gouv.fr/fr/datasets/donnees-carroyees-a-200-m-sur-la-population/</dcat:accessURL>
+        <dct:title>Métadonnées INSEE - data.gouv.fr</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-insee.fr%20-%20donn%C3%A9es%20carroy%C3%A9es%20%C3%A0%20200%20m%C3%A8tres">
+        <dcat:accessURL>https://www.insee.fr/fr/statistiques/2520034</dcat:accessURL>
+        <dct:title>insee.fr - données carroyées à 200 mètres</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-Documentation%20g%C3%A9n%C3%A9rale%20-%20donn%C3%A9es%20carroy%C3%A9es">
+        <dcat:accessURL>https://www.google.fr/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=2&amp;ved=0ahUKEwiO7-e20qLZAhVE7BQKHWU7DRwQFgg2MAE&amp;url=https%3A%2F%2Fwww.insee.fr%2Ffr%2Fstatistiques%2Ffichier%2F2520034%2Fdonnee-carroyees-documentation-generale.pdf&amp;usg=AOvVaw23DGMDgbpfAt_WkAENe3eG</dcat:accessURL>
+        <dct:title>Documentation générale - données carroyées</dct:title>
+        <dct:description>Documentation générale - données carroyées</dct:description>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#WWW%3ALINK-1.0-http--link-Documentation%20compl%C3%A8te%20-%20donn%C3%A9es%20carroy%C3%A9es%20%C3%A0%20200%20m%C3%A8tres">
+        <dcat:accessURL>https://www.insee.fr/fr/statistiques/fichier/2520034/documentation-complete-donnees-a-200m-1.pdf</dcat:accessURL>
+        <dct:title>Documentation complète - données carroyées à 200 mètres</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/04bcec79-5b25-4b16-b635-73115f7456e4#OGC%3AWMS-rectangles_200m_menage_erbm">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/insee/ows</dcat:accessURL>
+        <dct:title>rectangles_200m_menage_erbm</dct:title>
+        <dct:description>INSEE - Part des ménages présents depuis plus de 5 ans</dct:description>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:phone />
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:void="http://www.w3.org/TR/void/" xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gmd="http://www.isotc211.org/2005/gmd">
+      <dcat:CatalogRecord rdf:about="https://www.geo2france.fr/geonetwork/records/06367a09-096c-4db6-a122-52469176d619">
+        <foaf:primaryTopic rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/fr-200053742%2F2019%2Flimite%2Fbud" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2024-02-07</dct:issued>
+        <dct:modified>2024-02-07</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/api/records/06367a09-096c-4db6-a122-52469176d619/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/06367a09-096c-4db6-a122-52469176d619">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/06367a09-096c-4db6-a122-52469176d619">
+        <dct:identifier>fr-200053742/2019/limite/bud</dct:identifier>
+        <dcat:landingPage>https://www.geo2france.fr/geonetwork/srv/resources/fr-200053742/2019/limite/bud</dcat:landingPage>
+        <dct:title>Zonage du bassin urbain à dynamiser (BUD) de la Région Hauts-de-France - (2018-2020)</dct:title>
+        <dct:abstract>Zonage défini par un arrêté de 2018. Les entreprises qui se créent sur les communes du bassin urbain à dynamiser (entre le 1/1/2018 et le 31/12/2020) bénéficient pendant 3 ans d'un régime spécifique d'exonération fiscale. Dans les Hauts-de-France 159 communes du bassin minier sont concernées par ce dispositif.
+Arrêté officiel de classement : https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000038436169&amp;categorieLien=id
+
+Thèmes - SIG - HdF : ECONOMIE.
+GEMET - INSPIRE themes, version 1.0 : Unités administratives.
+Région : HAUTS-DE-FRANCE.
+Départements : PAS-DE-CALAIS.
+Départements : NORD.</dct:abstract>
+        <dcat:keyword>COMMUNE</dcat:keyword>
+        <dcat:keyword>BUD</dcat:keyword>
+        <dcat:keyword>BASSIN URBAIN A DYNAMISER</dcat:keyword>
+        <dcat:keyword>ECONOMIE</dcat:keyword>
+        <dcat:keyword>ENTREPRISE</dcat:keyword>
+        <dcat:keyword>FISCALITE</dcat:keyword>
+        <dcat:keyword>EMPLOI</dcat:keyword>
+        <dcat:keyword>AIDE ECONOMIQUE</dcat:keyword>
+        <dcat:keyword>BASSIN MINIER</dcat:keyword>
+        <dcat:keyword>DONNEE OUVERTE</dcat:keyword>
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF/concepts/ECONOMIE" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Unit%C3%A9s%20administratives" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS" />
+        <dcat:theme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/economy" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/public/vignettes_geonetwork/bud.jpg" />
+        <dct:spatial>
+          <ogc:Polygon xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.365 48.827, 1.365 51.09, 4.086 51.09, 4.086 48.827, 1.365 48.827))</geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2020-05-28</dct:issued>
+        <dct:publisher rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:accrualPeriodicity>PUNCTUAL</dct:accrualPeriodicity>
+        <dcat:granularity>5000</dcat:granularity>
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/06367a09-096c-4db6-a122-52469176d619#OGC%3AWMS-bassins_urbains_a_dynamiser" />
+        <dcat:distribution rdf:resource="https://www.geo2france.fr/geonetwork/records/06367a09-096c-4db6-a122-52469176d619#OGC%3AWFS-anct%3Abassins_urbains_a_dynamiser" />
+        <dcat:contactPoint>
+          <vcard:Kind xmlns:vcard="http://www.w3.org/2006/vcard/ns#" rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </vcard:Kind>
+        </dcat:contactPoint>
+        <dcat:dataQuality>Source CGET
+Communes en bassin urbain à dynamiser (159 communes concernées) avec contours basés sur la BD Topo de l’IGN. (05-2020)</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF/concepts/ECONOMIE">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/Th%C3%A8mes%20-%20SIG%20-%20HdF" />
+        <skos:prefLabel>ECONOMIE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Unit%C3%A9s%20administratives">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0" />
+        <skos:prefLabel>Unités administratives</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>PAS-DE-CALAIS</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD">
+        <skos:inScheme rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>NORD</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://www.geo2france.fr/geonetwork/records/06367a09-096c-4db6-a122-52469176d619#OGC%3AWMS-bassins_urbains_a_dynamiser">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/anct/ows</dcat:accessURL>
+        <dct:title>bassins_urbains_a_dynamiser</dct:title>
+        <dct:description>Bassins urbains à dynamiser (BUD)</dct:description>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="https://www.geo2france.fr/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:phone />
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>
+

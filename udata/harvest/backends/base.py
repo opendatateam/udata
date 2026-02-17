@@ -290,11 +290,7 @@ class BaseBackend(object):
         """Should be called after process_dataset to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
-    def process_dataservice(self, remote_id: str, **kwargs) -> bool:
-        """
-        Return `True` if the parent should stop iterating because we exceed the number
-        of items to process.
-        """
+    def process_dataservice(self, remote_id: str, **kwargs) -> None:
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
@@ -351,7 +347,7 @@ class BaseBackend(object):
 
         self.remote_ids.add(item.remote_id)
 
-    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
+    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: str):
         if not harvest:
             harvest = HarvestDatasetMetadata()
 
@@ -368,7 +364,7 @@ class BaseBackend(object):
         return harvest
 
     def update_dataservice_harvest_info(
-        self, harvest: HarvestDataserviceMetadata | None, remote_id: int
+        self, harvest: HarvestDataserviceMetadata | None, remote_id: str
     ):
         if not harvest:
             harvest = HarvestDataserviceMetadata()

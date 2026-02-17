@@ -7,7 +7,6 @@ from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
 from udata.harvest.backends import get_enabled_backends
 
@@ -188,7 +187,7 @@ feature_fields = api.model(
         "label": fields.String(description="A localized human-readable and descriptive label"),
         "key": fields.String(description="The feature key"),
         "description": fields.String(description="Some details about the behavior"),
-        "default": fields.String(description="The feature default state (true is enabled)"),
+        "default": fields.Boolean(description="The feature default state (true is enabled)"),
     },
 )
 
@@ -307,7 +306,7 @@ class SourcesAPI(API):
         """Create a new harvest source"""
         form = api.validate(HarvestSourceForm)
         if form.organization.data:
-            EditOrganizationPermission(form.organization.data).test()
+            form.organization.data.permissions["harvest"].test()
         source = actions.create_source(**form.data)
         return source, 201
 
@@ -413,7 +412,7 @@ class PreviewSourceConfigAPI(API):
         """Preview an harvesting from a source created with the given payload"""
         form = api.validate(HarvestSourceForm)
         if form.organization.data:
-            EditOrganizationPermission(form.organization.data).test()
+            form.organization.data.permissions["harvest"].test()
         return actions.preview_from_config(**form.data)
 
 

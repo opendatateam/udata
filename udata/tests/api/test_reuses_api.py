@@ -20,6 +20,7 @@ from udata.tests.helpers import (
     assert201,
     assert204,
     assert400,
+    assert403,
     assert404,
     assert410,
 )
@@ -441,6 +442,36 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert404(response)
         reuse.reload()
         assert len(reuse.datasets) == 0
+
+    def test_reuse_api_add_dataset_permission_denied(self):
+        """It should not allow adding a dataset to a reuse you don't own"""
+        owner = UserFactory()
+        reuse = ReuseFactory(owner=owner)
+
+        self.login()  # Different user than owner
+        dataset = DatasetFactory()
+        data = {"id": dataset.id, "class": "Dataset"}
+        url = url_for("api.reuse_add_dataset", reuse=reuse)
+        response = self.post(url, data)
+
+        assert403(response)
+        reuse.reload()
+        assert len(reuse.datasets) == 0
+
+    def test_reuse_api_add_dataservice_permission_denied(self):
+        """It should not allow adding a dataservice to a reuse you don't own"""
+        owner = UserFactory()
+        reuse = ReuseFactory(owner=owner)
+
+        self.login()  # Different user than owner
+        dataservice = DataserviceFactory()
+        data = {"id": dataservice.id, "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = self.post(url, data)
+
+        assert403(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 0
 
     def test_reuse_api_filter_by_dataservice(self):
         user = self.login()

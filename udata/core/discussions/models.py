@@ -9,7 +9,13 @@ from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 
-from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
+from .signals import (
+    on_discussion_closed,
+    on_discussion_deleted,
+    on_discussion_message_deleted,
+    on_new_discussion,
+    on_new_discussion_comment,
+)
 
 log = logging.getLogger(__name__)
 
@@ -175,6 +181,19 @@ class Discussion(SpamMixin, Linkable, db.Document):
 
         return message
 
+    def owner_recipients(self, sender=None):
+        """Return the list of users that should be notified about this discussion."""
+        recipients = {m.posted_by.id: m.posted_by for m in self.discussion}
+        if getattr(self.subject, "organization", None):
+            for member in self.subject.organization.members:
+                recipients[member.user.id] = member.user
+        elif getattr(self.subject, "owner", None):
+            recipients[self.subject.owner.id] = self.subject.owner
+
+        if sender:
+            recipients.pop(sender.id, None)
+        return list(recipients.values())
+
     @spam_protected()
     def signal_new(self):
         on_new_discussion.send(self)
@@ -186,3 +205,17 @@ class Discussion(SpamMixin, Linkable, db.Document):
     @spam_protected(lambda discussion, message: discussion.discussion[message])
     def signal_comment(self, message):
         on_new_discussion_comment.send(self, message=message)
+
+    def delete(self, *args, **kwargs):
+        """Delete the discussion and send deletion signal"""
+        result = super().delete(*args, **kwargs)
+        on_discussion_deleted.send(self)
+        return result
+
+    def remove_message(self, message_index):
+        """Remove a message from the discussion and trigger deletion signal"""
+        if 0 <= message_index < len(self.discussion):
+            message = self.discussion[message_index]
+            self.discussion.pop(message_index)
+            self.save()
+            on_discussion_message_deleted.send(self, message=message)

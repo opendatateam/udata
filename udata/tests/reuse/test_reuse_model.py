@@ -135,7 +135,7 @@ class ReuseModelTest(DBTestCase):
 
 
 class ReuseBadgeTest(DBTestCase):
-    # Model badges can be extended in plugins, for example in udata-front
+    # Model badges can be extended in plugins, for example in our previous plugin udata-front
     # for french only badges.
     Reuse.__badges__["new"] = "new"
 

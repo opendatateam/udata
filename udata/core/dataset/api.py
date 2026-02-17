@@ -113,6 +113,8 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "badge",
             type=str,
@@ -489,7 +491,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc("available_dataset_badges")
     def get(self):
         """List all available dataset badges and their labels"""
-        return Dataset.__badges__
+        return Dataset.available_badges()
 
 
 @ns.route("/<dataset:dataset>/badges/", endpoint="dataset_badges")

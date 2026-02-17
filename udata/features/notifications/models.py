@@ -2,6 +2,7 @@ from flask_restx.inputs import boolean
 from mongoengine import NULLIFY, Q
 
 from udata.api_fields import field, generate_fields
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.notifications import (
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
@@ -9,6 +10,7 @@ from udata.core.organization.notifications import (
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.queryset import UDataQuerySet
@@ -62,6 +64,8 @@ class Notification(Datetimed, db.Document):
                 MembershipRequestNotificationDetails,
                 TransferRequestNotificationDetails,
                 NewBadgeNotificationDetails,
+                DiscussionNotificationDetails,
+                ValidateHarvesterNotificationDetails,
             )
         ),
         generic=True,
