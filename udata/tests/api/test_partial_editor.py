@@ -1,6 +1,7 @@
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
@@ -34,23 +35,33 @@ class PartialEditorDatasetAPITest(APITestCase):
             url_for("api.organization_assignments", org=self.org),
             {
                 "user": str(self.partial_editor_user.id),
-                "object_type": "dataset",
-                "object_id": str(self.dataset_assigned.id),
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(self.dataset_assigned.id),
+                },
             },
         )
         self.assert201(response)
         self.logout()
         return response
 
-    def test_partial_editor_cannot_create_dataset(self):
-        """A partial_editor cannot create a new dataset for the org."""
+    def test_partial_editor_can_create_dataset_and_is_auto_assigned(self):
+        """A partial_editor can create a dataset and gets auto-assigned to it."""
         self.login(self.partial_editor_user)
         data = DatasetFactory.as_dict()
         data["organization"] = str(self.org.id)
         response = self.post(url_for("api.datasets"), data)
-        self.assert400(response)
-        # Only the 2 datasets from setUp should exist
-        self.assertEqual(Dataset.objects.count(), 2)
+        self.assert201(response)
+        self.assertEqual(Dataset.objects.count(), 3)
+
+        created_dataset = Dataset.objects.get(id=response.json["id"])
+        self.assertTrue(
+            Assignment.has_assignment(
+                user=self.partial_editor_user,
+                organization=self.org,
+                obj=created_dataset,
+            )
+        )
 
     def test_partial_editor_cannot_edit_unassigned_dataset(self):
         """A partial_editor cannot edit a dataset they are not assigned to."""
@@ -121,8 +132,10 @@ class PartialEditorDatasetAPITest(APITestCase):
             url_for("api.organization_assignments", org=self.org),
             {
                 "user": str(self.partial_editor_user.id),
-                "object_type": "dataset",
-                "object_id": str(self.dataset_assigned.id),
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(self.dataset_assigned.id),
+                },
             },
         )
         self.assert201(response)
@@ -153,8 +166,10 @@ class PartialEditorDatasetAPITest(APITestCase):
             url_for("api.organization_assignments", org=self.org),
             {
                 "user": str(self.partial_editor_user.id),
-                "object_type": "dataset",
-                "object_id": str(self.dataset_assigned.id),
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(self.dataset_assigned.id),
+                },
             },
         )
         self.assert403(response)
@@ -169,8 +184,10 @@ class PartialEditorDatasetAPITest(APITestCase):
             url_for("api.organization_assignments", org=self.org),
             {
                 "user": str(self.partial_editor_user.id),
-                "object_type": "dataset",
-                "object_id": str(other_dataset.id),
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(other_dataset.id),
+                },
             },
         )
         self.assert400(response)
@@ -182,8 +199,10 @@ class PartialEditorDatasetAPITest(APITestCase):
             url_for("api.organization_assignments", org=self.org),
             {
                 "user": str(self.editor_user.id),
-                "object_type": "dataset",
-                "object_id": str(self.dataset_assigned.id),
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(self.dataset_assigned.id),
+                },
             },
         )
         self.assert400(response)

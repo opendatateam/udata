@@ -254,7 +254,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
 
             def constructor_write(**kwargs):
-                return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+                return restx_fields.Nested(lazy_reference, **kwargs)
         else:
 
             def constructor(**kwargs):

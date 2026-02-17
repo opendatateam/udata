@@ -42,7 +42,7 @@ from .api_fields import (
     refuse_membership_fields,
     request_fields,
 )
-from .assignment import ASSIGNABLE_OBJECT_TYPES, Assignment
+from .assignment import Assignment
 from .constants import DEFAULT_ROLE, ORG_ROLES
 from .forms import (
     MemberForm,
@@ -615,19 +615,6 @@ class MemberAPI(API):
             api.abort(404)
 
 
-def _resolve_assigned_object(object_type, object_id, org):
-    """Resolve the assigned object and verify it belongs to the organization."""
-    if object_type == "dataset":
-        obj = Dataset.objects(id=object_id, organization=org).first()
-    elif object_type == "dataservice":
-        obj = Dataservice.objects(id=object_id, organization=org).first()
-    elif object_type == "reuse":
-        obj = Reuse.objects(id=object_id, organization=org).first()
-    else:
-        return None
-    return obj
-
-
 @ns.route("/<org:org>/assignments/", endpoint="organization_assignments", doc=common_doc)
 class AssignmentListAPI(API):
     @api.secure
@@ -646,21 +633,13 @@ class AssignmentListAPI(API):
         """Assign an object to a partial_editor member"""
         org.permissions["members"].test()
 
-        data = request.json
-
-        user_id = data.get("user")
-        object_type = data.get("object_type")
-        object_id = data.get("object_id")
-
-        if not user_id or not object_type or not object_id:
-            api.abort(400, "Missing required fields: user, object_type, object_id")
-
-        if object_type not in ASSIGNABLE_OBJECT_TYPES:
-            api.abort(400, f"Invalid object_type. Must be one of: {ASSIGNABLE_OBJECT_TYPES}")
-
+        from udata.api_fields import patch as patch_fields
         from udata.models import User
 
-        user = User.objects(id=user_id).first()
+        assignment = patch_fields(Assignment(), request)
+        assignment.organization = org
+
+        user = User.objects(id=assignment.user.id).first()
         if not user:
             api.abort(400, "User not found")
 
@@ -668,20 +647,16 @@ class AssignmentListAPI(API):
         if not member or member.role != "partial_editor":
             api.abort(400, "User must be a partial_editor member of this organization")
 
-        obj = _resolve_assigned_object(object_type, object_id, org)
-        if not obj:
+        if (
+            not hasattr(assignment.subject, "organization")
+            or assignment.subject.organization != org
+        ):
             api.abort(400, "Object not found in this organization")
 
-        existing = Assignment.objects(user=user, object_type=object_type, object_id=obj.id).first()
+        existing = Assignment.objects(user=user, subject=assignment.subject).first()
         if existing:
             api.abort(400, "Assignment already exists")
 
-        assignment = Assignment(
-            user=user,
-            organization=org,
-            object_type=object_type,
-            object_id=obj.id,
-        )
         assignment.save()
         return assignment, 201
 

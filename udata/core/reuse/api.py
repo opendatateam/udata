@@ -16,6 +16,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
+from udata.core.organization.assignment import auto_assign_if_partial_editor
 from udata.core.organization.models import Organization
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
@@ -132,6 +133,7 @@ class ReuseListAPI(API):
             reuse.owner = current_user._get_current_object()
 
         reuse.save()
+        auto_assign_if_partial_editor(reuse)
 
         return patch_and_save(reuse, request), 201
 
