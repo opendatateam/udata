@@ -1368,3 +1368,87 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         headers, data = response.data.decode("utf-8").strip().split("\r\n")
         expected = '"{discussion.id}";"{discussion.user}"'
         assert_starts_with(data, expected.format(discussion=discussion))
+
+
+class OrganizationPermissionsAPITest(PytestOnlyAPITestCase):
+    def test_get_organization_permissions_as_anonymous(self):
+        """It should return all permissions as False for anonymous users"""
+        organization = OrganizationFactory()
+
+        url = url_for("api.organization", org=organization)
+        response = self.get(url)
+        assert200(response)
+
+        assert "permissions" in response.json
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["members"] is False
+        assert permissions["harvest"] is False
+        assert permissions["private"] is False
+
+    def test_get_organization_permissions_as_org_admin(self):
+        """It should return admin permissions as True for org admins"""
+        user = self.login()
+        member = Member(user=user, role="admin")
+        organization = OrganizationFactory(members=[member])
+
+        url = url_for("api.organization", org=organization)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["members"] is True
+        assert permissions["harvest"] is True
+        assert permissions["private"] is True
+
+    def test_get_organization_permissions_as_org_editor(self):
+        """It should return limited permissions as True for org editors"""
+        user = self.login()
+        member = Member(user=user, role="editor")
+        organization = OrganizationFactory(members=[member])
+
+        url = url_for("api.organization", org=organization)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["members"] is False
+        assert permissions["harvest"] is False
+        assert permissions["private"] is True
+
+    def test_get_organization_permissions_as_superadmin(self):
+        """It should return all permissions as True for admin users"""
+        self.login(AdminFactory())
+        organization = OrganizationFactory()
+
+        url = url_for("api.organization", org=organization)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["members"] is True
+        assert permissions["harvest"] is True
+        assert permissions["private"] is True
+
+    def test_get_organization_permissions_as_other_user(self):
+        """It should return all permissions as False for non-member users"""
+        self.login()
+        organization = OrganizationFactory()  # no members
+
+        url = url_for("api.organization", org=organization)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["members"] is False
+        assert permissions["harvest"] is False
+        assert permissions["private"] is False
