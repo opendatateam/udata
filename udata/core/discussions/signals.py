@@ -14,3 +14,6 @@ on_discussion_closed = namespace.signal("on-discussion-closed")
 
 #: Trigerred when an discussion is deleted
 on_discussion_deleted = namespace.signal("on-discussion-deleted")
+
+#: Triggered when a message is deleted from a discussion
+on_discussion_message_deleted = namespace.signal("on-discussion-message-deleted")
