@@ -145,3 +145,106 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
         assert notification.user == applicant
         assert notification.details.organization == org
         assert isinstance(notification.details, MembershipRefusedNotificationDetails)
+
+    def test_full_membership_request_cycle_with_refusal_then_approval(self):
+        """Test full cycle: request -> refused -> new request -> approved"""
+        from datetime import datetime
+
+        applicant = UserFactory()
+        admin = UserFactory()
+        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
+
+        # Step 1: Applicant requests membership
+        first_request = MembershipRequest(user=applicant, comment="I want to join")
+        org.add_membership_request(first_request)
+
+        org.reload()
+        assert len(org.pending_requests) == 1
+
+        admin_notifications = Notification.objects(user=admin).all()
+        assert len(admin_notifications) == 1
+        assert admin_notifications[0].details.request_user == applicant
+        assert admin_notifications[0].details.request_organization == org
+        assert admin_notifications[0].handled_at is None
+
+        # Step 2: Admin refuses the request
+        first_request = org.requests[0]
+        first_request.status = "refused"
+        first_request.handled_by = admin
+        first_request.handled_on = datetime.utcnow()
+        first_request.refusal_comment = "Not now"
+        org.save()
+        MembershipRequest.after_handle.send(first_request, org=org)
+        notify_membership_response(org.id, str(first_request.id))
+
+        org.reload()
+        assert len(org.pending_requests) == 0
+        assert len(org.refused_requests) == 1
+        assert not org.is_member(applicant)
+
+        admin_notifications = Notification.objects(user=admin).all()
+        assert len(admin_notifications) == 1
+        assert admin_notifications[0].handled_at is not None
+
+        applicant_notifications = Notification.objects(user=applicant).all()
+        assert len(applicant_notifications) == 1
+        assert isinstance(applicant_notifications[0].details, MembershipRefusedNotificationDetails)
+        assert applicant_notifications[0].details.organization == org
+
+        admin_notifications = Notification.objects(user=admin).all()
+        assert len(admin_notifications) == 1
+        assert admin_notifications[0].handled_at is not None
+
+        # Step 3: Applicant sends a new request after refusal
+        second_request = MembershipRequest(user=applicant, comment="Please reconsider")
+        org.add_membership_request(second_request)
+
+        org.reload()
+        assert len(org.pending_requests) == 1
+        assert org.pending_requests[0].comment == "Please reconsider"
+        assert org.pending_requests[0].id != first_request.id
+
+        admin_pending_notifications = Notification.objects(user=admin, handled_at=None).all()
+        assert len(admin_pending_notifications) == 1
+        assert admin_pending_notifications[0].details.request_user == applicant
+
+        # Step 4: Admin accepts the second request
+        second_request = org.pending_requests[0]
+        second_request.status = "accepted"
+        second_request.handled_by = admin
+        second_request.handled_on = datetime.utcnow()
+        member = Member(user=applicant, role="editor")
+        org.members.append(member)
+        org.save()
+        MembershipRequest.after_handle.send(second_request, org=org)
+        notify_membership_response(org.id, str(second_request.id))
+
+        org.reload()
+        assert len(org.pending_requests) == 0
+        assert len(org.accepted_requests) == 1
+        assert org.is_member(applicant)
+
+        # Verify applicant received an acceptance notification
+        applicant_notifications = Notification.objects(user=applicant).all()
+        assert len(applicant_notifications) == 2
+
+        acceptance_notifications = [
+            n
+            for n in applicant_notifications
+            if isinstance(n.details, MembershipAcceptedNotificationDetails)
+        ]
+        assert len(acceptance_notifications) == 1
+        assert acceptance_notifications[0].details.organization == org
+
+        refusal_notifications = [
+            n
+            for n in applicant_notifications
+            if isinstance(n.details, MembershipRefusedNotificationDetails)
+        ]
+        assert len(refusal_notifications) == 1
+
+        # Verify all admin notifications are now handled
+        admin_all_notifications = Notification.objects(user=admin).all()
+        assert len(admin_all_notifications) == 2
+        for notif in admin_all_notifications:
+            assert notif.handled_at is not None
