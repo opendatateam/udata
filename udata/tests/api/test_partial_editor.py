@@ -34,17 +34,15 @@ class PartialEditorDatasetAPITest(APITestCase):
     def assign_dataset_to_partial_editor(self):
         """Admin assigns dataset_assigned to the partial_editor via API."""
         self.login(self.admin_user)
-        response = self.post(
-            url_for("api.organization_assignments", org=self.org),
-            {
-                "user": str(self.partial_editor_user.id),
-                "subject": {
-                    "class": "Dataset",
-                    "id": str(self.dataset_assigned.id),
-                },
-            },
+        response = self.put(
+            url_for(
+                "api.member_assignments",
+                org=self.org,
+                user=self.partial_editor_user,
+            ),
+            [{"class": "Dataset", "id": str(self.dataset_assigned.id)}],
         )
-        self.assert201(response)
+        self.assert200(response)
         self.logout()
         return response
 
@@ -128,34 +126,40 @@ class PartialEditorDatasetAPITest(APITestCase):
         response = self.put(url_for("api.dataset", dataset=self.dataset_other), data)
         self.assert200(response)
 
-    def test_admin_can_assign_and_unassign(self):
-        """Admin can create and delete assignments."""
+    def test_admin_can_sync_assignments(self):
+        """Admin can sync assignments for a partial_editor."""
         self.login(self.admin_user)
-
-        # Create assignment
-        response = self.post(
-            url_for("api.organization_assignments", org=self.org),
-            {
-                "user": str(self.partial_editor_user.id),
-                "subject": {
-                    "class": "Dataset",
-                    "id": str(self.dataset_assigned.id),
-                },
-            },
+        url = url_for(
+            "api.member_assignments",
+            org=self.org,
+            user=self.partial_editor_user,
         )
-        self.assert201(response)
-        assignment_id = response.json["id"]
 
-        # List assignments
+        # Assign one dataset
+        response = self.put(url, [{"class": "Dataset", "id": str(self.dataset_assigned.id)}])
+        self.assert200(response)
+        self.assertEqual(len(response.json), 1)
+
+        # List all org assignments
         response = self.get(url_for("api.organization_assignments", org=self.org))
         self.assert200(response)
         self.assertEqual(len(response.json), 1)
 
-        # Delete assignment
-        response = self.delete(
-            url_for("api.organization_assignment", org=self.org, id=assignment_id)
+        # Sync with both datasets
+        response = self.put(
+            url,
+            [
+                {"class": "Dataset", "id": str(self.dataset_assigned.id)},
+                {"class": "Dataset", "id": str(self.dataset_other.id)},
+            ],
         )
-        self.assert204(response)
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
+
+        # Sync with empty list (remove all)
+        response = self.put(url, [])
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
 
         # Verify partial_editor can no longer edit
         self.login(self.partial_editor_user)
@@ -167,15 +171,13 @@ class PartialEditorDatasetAPITest(APITestCase):
     def test_editor_cannot_manage_assignments(self):
         """Only admins can manage assignments, not editors."""
         self.login(self.editor_user)
-        response = self.post(
-            url_for("api.organization_assignments", org=self.org),
-            {
-                "user": str(self.partial_editor_user.id),
-                "subject": {
-                    "class": "Dataset",
-                    "id": str(self.dataset_assigned.id),
-                },
-            },
+        response = self.put(
+            url_for(
+                "api.member_assignments",
+                org=self.org,
+                user=self.partial_editor_user,
+            ),
+            [{"class": "Dataset", "id": str(self.dataset_assigned.id)}],
         )
         self.assert403(response)
 
@@ -185,30 +187,26 @@ class PartialEditorDatasetAPITest(APITestCase):
         other_dataset = DatasetFactory(organization=other_org)
 
         self.login(self.admin_user)
-        response = self.post(
-            url_for("api.organization_assignments", org=self.org),
-            {
-                "user": str(self.partial_editor_user.id),
-                "subject": {
-                    "class": "Dataset",
-                    "id": str(other_dataset.id),
-                },
-            },
+        response = self.put(
+            url_for(
+                "api.member_assignments",
+                org=self.org,
+                user=self.partial_editor_user,
+            ),
+            [{"class": "Dataset", "id": str(other_dataset.id)}],
         )
         self.assert400(response)
 
     def test_cannot_assign_to_non_partial_editor(self):
         """Cannot assign objects to members who are not partial_editors."""
         self.login(self.admin_user)
-        response = self.post(
-            url_for("api.organization_assignments", org=self.org),
-            {
-                "user": str(self.editor_user.id),
-                "subject": {
-                    "class": "Dataset",
-                    "id": str(self.dataset_assigned.id),
-                },
-            },
+        response = self.put(
+            url_for(
+                "api.member_assignments",
+                org=self.org,
+                user=self.editor_user,
+            ),
+            [{"class": "Dataset", "id": str(self.dataset_assigned.id)}],
         )
         self.assert400(response)
 

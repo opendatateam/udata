@@ -663,54 +663,60 @@ class AssignmentListAPI(API):
         org.permissions["members"].test()
         return list(Assignment.objects(organization=org))
 
+
+@ns.route(
+    "/<org:org>/member/<user:user>/assignments/",
+    endpoint="member_assignments",
+    doc=common_doc,
+)
+class MemberAssignmentsAPI(API):
     @api.secure
-    @api.doc("create_organization_assignment", responses={403: "Not Authorized"})
-    @api.expect(Assignment.__write_fields__)
-    @api.marshal_with(Assignment.__read_fields__, code=201)
-    def post(self, org):
-        """Assign an object to a partial_editor member"""
+    @api.doc("sync_member_assignments", responses={403: "Not Authorized"})
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def put(self, org, user):
+        """Sync assignments for a partial_editor member.
+
+        Replaces all current assignments with the provided list.
+        """
         org.permissions["members"].test()
-
-        from udata.api_fields import patch as patch_fields
-        from udata.models import User
-
-        assignment = patch_fields(Assignment(), request)
-        assignment.organization = org
-
-        user = User.objects(id=assignment.user.id).first()
-        if not user:
-            api.abort(400, "User not found")
 
         member = org.member(user)
         if not member or member.role != "partial_editor":
             api.abort(400, "User must be a partial_editor member of this organization")
 
-        if (
-            not hasattr(assignment.subject, "organization")
-            or assignment.subject.organization != org
-        ):
-            api.abort(400, "Object not found in this organization")
+        raw_subjects = request.json or []
+        allowed_classes = ASSIGNABLE_OBJECT_TYPES
 
-        existing = Assignment.objects(user=user, subject=assignment.subject).first()
-        if existing:
-            api.abort(400, "Assignment already exists")
+        desired_subjects = []
+        for raw in raw_subjects:
+            cls_name = raw.get("class")
+            obj_id = raw.get("id")
+            if cls_name not in allowed_classes:
+                api.abort(400, f"Invalid object class '{cls_name}'")
+            model_cls = db.resolve_model(cls_name)
+            obj = model_cls.objects(id=obj_id).first()
+            if not obj:
+                api.abort(400, f"{cls_name} '{obj_id}' not found")
+            if not hasattr(obj, "organization") or obj.organization != org:
+                api.abort(400, f"{cls_name} '{obj_id}' does not belong to this organization")
+            desired_subjects.append(obj)
 
-        assignment.save()
-        return assignment, 201
+        current = list(Assignment.objects(user=user, organization=org))
+        current_by_subject = {(a.subject.__class__.__name__, str(a.subject.id)): a for a in current}
+        desired_keys = {(s.__class__.__name__, str(s.id)) for s in desired_subjects}
 
+        # Delete removed
+        for key, assignment in current_by_subject.items():
+            if key not in desired_keys:
+                assignment.delete()
 
-@ns.route("/<org:org>/assignments/<id>/", endpoint="organization_assignment", doc=common_doc)
-class AssignmentAPI(API):
-    @api.secure
-    @api.doc("delete_organization_assignment", responses={403: "Not Authorized"})
-    def delete(self, org, id):
-        """Delete an assignment"""
-        org.permissions["members"].test()
-        assignment = Assignment.objects(id=id, organization=org).first()
-        if not assignment:
-            api.abort(404, "Assignment not found")
-        assignment.delete()
-        return "", 204
+        # Create new
+        for subject in desired_subjects:
+            key = (subject.__class__.__name__, str(subject.id))
+            if key not in current_by_subject:
+                Assignment(user=user, organization=org, subject=subject).save()
+
+        return list(Assignment.objects(user=user, organization=org))
 
 
 @ns.route("/<id>/followers/", endpoint="organization_followers")
