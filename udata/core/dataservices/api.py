@@ -13,6 +13,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
+from udata.core.organization.assignment import auto_assign_if_partial_editor
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -52,6 +53,7 @@ class DataservicesAPI(API):
         if dataservice.access_type != AccessType.RESTRICTED:
             dataservice.access_audiences = []
         dataservice.save()
+        auto_assign_if_partial_editor(dataservice)
         return dataservice, 201
 
 

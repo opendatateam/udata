@@ -29,6 +29,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.models import ContactPoint
+from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
@@ -42,7 +43,8 @@ from .api_fields import (
     refuse_membership_fields,
     request_fields,
 )
-from .constants import DEFAULT_ROLE, ORG_ROLES
+from .assignment import Assignment
+from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
 from .forms import (
     MemberForm,
     MembershipInviteForm,
@@ -564,6 +566,38 @@ class MemberInviteAPI(API):
                     field="email", message="An invitation is already pending for this email"
                 )
 
+        # Resolve assignments for partial_editor invitations
+        raw_assignments = request.json.get("assignments", []) or []
+        assignment_subjects = []
+        if raw_assignments:
+            if role != "partial_editor":
+                raise FieldValidationError(
+                    field="assignments",
+                    message="Assignments can only be set for partial_editor role",
+                )
+            allowed_classes = ASSIGNABLE_OBJECT_TYPES
+            for raw in raw_assignments:
+                cls_name = raw.get("class")
+                obj_id = raw.get("id")
+                if cls_name not in allowed_classes:
+                    raise FieldValidationError(
+                        field="assignments",
+                        message=f"Invalid object class '{cls_name}'",
+                    )
+                model_cls = db.resolve_model(cls_name)
+                obj = model_cls.objects(id=obj_id).first()
+                if not obj:
+                    raise FieldValidationError(
+                        field="assignments",
+                        message=f"{cls_name} '{obj_id}' not found",
+                    )
+                if not hasattr(obj, "organization") or obj.organization != org:
+                    raise FieldValidationError(
+                        field="assignments",
+                        message=f"{cls_name} '{obj_id}' does not belong to this organization",
+                    )
+                assignment_subjects.append(obj)
+
         # Create invitation
         invitation = MembershipRequest(
             kind="invitation",
@@ -572,6 +606,7 @@ class MemberInviteAPI(API):
             created_by=current_user._get_current_object(),
             role=role,
             comment=comment,
+            assignments=assignment_subjects,
         )
         org.requests.append(invitation)
         org.save()
@@ -592,9 +627,13 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        old_role = member.role
         form = api.validate(MemberForm, member)
         form.populate_obj(member)
         org.save()
+
+        if old_role == "partial_editor" and member.role != "partial_editor":
+            Assignment.objects(user=user, organization=org).delete()
 
         return member
 
@@ -606,11 +645,78 @@ class MemberAPI(API):
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
+            Assignment.objects(user=user, organization=org).delete()
             org.reload()
             org.count_members()
             return "", 204
         else:
             api.abort(404)
+
+
+@ns.route("/<org:org>/assignments/", endpoint="organization_assignments", doc=common_doc)
+class AssignmentListAPI(API):
+    @api.secure
+    @api.doc("list_organization_assignments")
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def get(self, org):
+        """List assignments for this organization"""
+        org.permissions["members"].test()
+        return list(Assignment.objects(organization=org))
+
+
+@ns.route(
+    "/<org:org>/member/<user:user>/assignments/",
+    endpoint="member_assignments",
+    doc=common_doc,
+)
+class MemberAssignmentsAPI(API):
+    @api.secure
+    @api.doc("sync_member_assignments", responses={403: "Not Authorized"})
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def put(self, org, user):
+        """Sync assignments for a partial_editor member.
+
+        Replaces all current assignments with the provided list.
+        """
+        org.permissions["members"].test()
+
+        member = org.member(user)
+        if not member or member.role != "partial_editor":
+            api.abort(400, "User must be a partial_editor member of this organization")
+
+        raw_subjects = request.json or []
+        allowed_classes = ASSIGNABLE_OBJECT_TYPES
+
+        desired_subjects = []
+        for raw in raw_subjects:
+            cls_name = raw.get("class")
+            obj_id = raw.get("id")
+            if cls_name not in allowed_classes:
+                api.abort(400, f"Invalid object class '{cls_name}'")
+            model_cls = db.resolve_model(cls_name)
+            obj = model_cls.objects(id=obj_id).first()
+            if not obj:
+                api.abort(400, f"{cls_name} '{obj_id}' not found")
+            if not hasattr(obj, "organization") or obj.organization != org:
+                api.abort(400, f"{cls_name} '{obj_id}' does not belong to this organization")
+            desired_subjects.append(obj)
+
+        current = list(Assignment.objects(user=user, organization=org))
+        current_by_subject = {(a.subject.__class__.__name__, str(a.subject.id)): a for a in current}
+        desired_keys = {(s.__class__.__name__, str(s.id)) for s in desired_subjects}
+
+        # Delete removed
+        for key, assignment in current_by_subject.items():
+            if key not in desired_keys:
+                assignment.delete()
+
+        # Create new
+        for subject in desired_subjects:
+            key = (subject.__class__.__name__, str(subject.id))
+            if key not in current_by_subject:
+                Assignment(user=user, organization=org, subject=subject).save()
+
+        return list(Assignment.objects(user=user, organization=org))
 
 
 @ns.route("/<id>/followers/", endpoint="organization_followers")

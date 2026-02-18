@@ -1,4 +1,5 @@
 from udata.core import storages
+from udata.core.organization.assignment import Assignment
 from udata.core.pages.models import Page
 from udata.core.topic.models import TopicElement
 from udata.models import Activity, Discussion, Follow, Transfer
@@ -22,6 +23,8 @@ def purge_reuses(self) -> None:
         Activity.objects(related_to=reuse).delete()
         # Remove transfers
         Transfer.objects(subject=reuse).delete()
+        # Remove assignments
+        Assignment.objects(subject=reuse).delete()
         # Remove reuses references in Topics
         TopicElement.objects(element=reuse).update(element=None)
         # Remove reuses in pages (mongoengine doesn't support updating a field in a generic embed)

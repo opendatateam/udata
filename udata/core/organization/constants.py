@@ -3,6 +3,7 @@ from udata.i18n import lazy_gettext as _
 ORG_ROLES = {
     "admin": _("Administrator"),
     "editor": _("Editor"),
+    "partial_editor": _("Partial editor"),
 }
 DEFAULT_ROLE = "editor"
 
@@ -43,6 +44,8 @@ PRODUCER_TYPES = frozenset(
     {PUBLIC_SERVICE, ASSOCIATION, COMPANY, LOCAL_AUTHORITY, USER, NOT_SPECIFIED}
 )
 
+
+ASSIGNABLE_OBJECT_TYPES = {"Dataset", "Dataservice", "Reuse"}
 
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000

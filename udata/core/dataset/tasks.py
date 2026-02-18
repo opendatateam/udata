@@ -14,6 +14,7 @@ from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import INSPIRE
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
 from udata.core.pages.models import Page
@@ -68,6 +69,8 @@ def purge_datasets(self):
         )
         # Remove associated Transfers
         Transfer.objects(subject=dataset).delete()
+        # Remove assignments
+        Assignment.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
