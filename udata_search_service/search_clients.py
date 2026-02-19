@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from datetime import datetime
 from fnmatch import fnmatch
@@ -36,7 +35,6 @@ log = logging.getLogger(__name__)
 
 IS_TTY = sys.__stdin__.isatty()
 
-UDATA_INSTANCE_NAME = os.environ.get("UDATA_INSTANCE_NAME", "udata")
 
 SEARCH_SYNONYMS = [
     "AMD, administrateur ministériel des données, AMDAC",
@@ -68,13 +66,40 @@ dgv_analyzer = analyzer(
 )
 
 
-class IndexDocument(Document):
+class _DynamicIndexMeta(type(Document)):
+    """Metaclass that gives each subclass its own ES Index based on _entity_type.
+
+    Without this, elasticsearch-dsl's IndexMeta shares the parent's _index
+    object across all subclasses that don't declare a class Index block.
+    """
+
+    def __new__(mcs, name, bases, attrs):
+        new_cls = super().__new__(mcs, name, bases, attrs)
+        entity_type = attrs.get("_entity_type")
+        if entity_type:
+            from elasticsearch_dsl import Index as ESIndex
+
+            new_cls._index = ESIndex(name=entity_type)
+            new_cls._index.document(new_cls)
+        return new_cls
+
+
+class IndexDocument(Document, metaclass=_DynamicIndexMeta):
+    _entity_type = None
+
+    @classmethod
+    def _get_index_name(cls):
+        from flask import current_app
+
+        return f"{current_app.config['UDATA_INSTANCE_NAME']}-{cls._entity_type}"
+
     @classmethod
     def init_index(cls, es_client: Elasticsearch, suffix: str) -> None:
-        alias = cls._index._name
+        alias = cls._get_index_name()
         pattern = alias + "-*"
 
         log.info(f"Saving template {alias} on the following pattern: {pattern}")
+        cls._index._name = alias
         index_template = cls._index.as_template(alias, pattern)
         index_template.save()
 
@@ -87,7 +112,7 @@ class IndexDocument(Document):
 
     @classmethod
     def delete_indices(cls, es_client: Elasticsearch) -> None:
-        alias = cls._index._name
+        alias = cls._get_index_name()
         pattern = alias + "*"
         log.info(f"Deleting indices with pattern {pattern}")
         es_client.indices.delete(index=pattern)
@@ -96,12 +121,28 @@ class IndexDocument(Document):
     def _matches(cls, hit):
         # override _matches to match indices in a pattern instead of just ALIAS
         # hit is the raw dict as returned by elasticsearch
-        alias = cls._index._name
-        pattern = alias + "-*"
+        pattern = cls._get_index_name() + "-*"
         return fnmatch(hit["_index"], pattern)
+
+    @classmethod
+    def search(cls, **kwargs):
+        s = super().search(**kwargs)
+        return s.index(cls._get_index_name())
+
+    def save(self, **kwargs):
+        if kwargs.get("index") is None:
+            kwargs["index"] = self._get_index_name()
+        return super().save(**kwargs)
+
+    @classmethod
+    def get(cls, id, **kwargs):
+        if "index" not in kwargs:
+            kwargs["index"] = cls._get_index_name()
+        return super().get(id=id, **kwargs)
 
 
 class SearchableDataservice(IndexDocument):
+    _entity_type = "dataservice"
     title = Text(analyzer=dgv_analyzer)
     created_at = Date()
     metadata_modified_at = Date()
@@ -120,11 +161,9 @@ class SearchableDataservice(IndexDocument):
     producer_type = Keyword(multi=True)
     documentation_content = Text(analyzer=dgv_analyzer)
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-dataservice"
-
 
 class SearchableTopic(IndexDocument):
+    _entity_type = "topic"
     name = Text(analyzer=dgv_analyzer)
     description = Text(analyzer=dgv_analyzer)
     tags = Keyword(multi=True)
@@ -140,11 +179,9 @@ class SearchableTopic(IndexDocument):
     nb_reuses = Integer()
     nb_dataservices = Integer()
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-topic"
-
 
 class SearchableDiscussion(IndexDocument):
+    _entity_type = "discussion"
     title = Text(analyzer=dgv_analyzer)
     content = Text(analyzer=dgv_analyzer)
     created_at = Date()
@@ -153,11 +190,9 @@ class SearchableDiscussion(IndexDocument):
     subject_class = Keyword()
     subject_id = Keyword()
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-discussion"
-
 
 class SearchablePost(IndexDocument):
+    _entity_type = "post"
     name = Text(analyzer=dgv_analyzer)
     headline = Text(analyzer=dgv_analyzer)
     content = Text(analyzer=dgv_analyzer)
@@ -166,11 +201,9 @@ class SearchablePost(IndexDocument):
     last_modified = Date()
     published = Date()
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-post"
-
 
 class SearchableOrganization(IndexDocument):
+    _entity_type = "organization"
     name = Text(analyzer=dgv_analyzer)
     acronym = Text()
     description = Text(analyzer=dgv_analyzer)
@@ -184,11 +217,9 @@ class SearchableOrganization(IndexDocument):
     badges = Keyword(multi=True)
     producer_type = Keyword(multi=True)
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-organization"
-
 
 class SearchableReuse(IndexDocument):
+    _entity_type = "reuse"
     title = Text(analyzer=dgv_analyzer)
     url = Text()
     created_at = Date()
@@ -212,11 +243,9 @@ class SearchableReuse(IndexDocument):
     owner = Keyword()
     producer_type = Keyword(multi=True)
 
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-reuse"
-
 
 class SearchableDataset(IndexDocument):
+    _entity_type = "dataset"
     title = Text(analyzer=dgv_analyzer)
     acronym = Text()
     url = Text()
@@ -252,9 +281,6 @@ class SearchableDataset(IndexDocument):
     access_type = Keyword()
     format_family = Keyword(multi=True)
     producer_type = Keyword(multi=True)
-
-    class Index:
-        name = f"{UDATA_INSTANCE_NAME}-dataset"
 
 
 class ElasticClient:
