@@ -156,6 +156,11 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     ]
 
     meta: dict = {
+        # Unique collection name to avoid index conflicts with other test
+        # models also named "Fake" (which default to the "fake" collection).
+        # The slug unique index would prevent other Fake models without a slug
+        # field from inserting more than one document (duplicate null slug).
+        "collection": "fake_api_fields",
         "indexes": [
             "$title",
         ],
