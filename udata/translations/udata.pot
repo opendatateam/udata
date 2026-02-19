@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-02-12 13:54+0100\n"
-"PO-Revision-Date: 2026-02-12 13:54+0100\n"
+"POT-Creation-Date: 2026-02-19 16:50+0100\n"
+"PO-Revision-Date: 2026-02-19 16:50+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -19,74 +19,74 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: udata/settings.py:130
+#: udata/settings.py:131
 msgid "Welcome"
 msgstr ""
 
-#: udata/settings.py:131
+#: udata/settings.py:132
 msgid "Please confirm your email"
 msgstr ""
 
-#: udata/settings.py:132
+#: udata/settings.py:133
 msgid "Login instructions"
 msgstr ""
 
-#: udata/auth/mails.py:127 udata/settings.py:133
+#: udata/auth/mails.py:127 udata/settings.py:134
 msgid "Your password has been reset"
 msgstr ""
 
-#: udata/auth/mails.py:139 udata/settings.py:134
+#: udata/auth/mails.py:139 udata/settings.py:135
 msgid "Your password has been changed"
 msgstr ""
 
-#: udata/settings.py:135
+#: udata/settings.py:136
 msgid "Password reset instructions"
 msgstr ""
 
-#: udata/settings.py:569
+#: udata/settings.py:570
 msgid "This dataset has been archived"
 msgstr ""
 
-#: udata/uris.py:54
+#: udata/uris.py:55
 #, python-brace-format
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:1200 udata/tests/test_model.py:402
-#: udata/uris.py:56
+#: udata/tests/api/test_datasets_api.py:1202 udata/tests/test_model.py:417
+#: udata/uris.py:57
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr ""
 
-#: udata/uris.py:128
+#: udata/uris.py:129
 #, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr ""
 
-#: udata/uris.py:131
+#: udata/uris.py:132
 msgid "Credentials in URL are not allowed"
 msgstr ""
 
-#: udata/uris.py:135
+#: udata/uris.py:136
 #, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr ""
 
-#: udata/uris.py:144
+#: udata/uris.py:145
 #, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr ""
 
-#: udata/uris.py:146
+#: udata/uris.py:147
 #, python-brace-format
 msgid "{0} is a mask IP"
 msgstr ""
 
-#: udata/uris.py:150
+#: udata/uris.py:151
 msgid "is a local URL"
 msgstr ""
 
-#: udata/tests/test_model.py:420 udata/uris.py:157
+#: udata/tests/test_model.py:435 udata/uris.py:158
 msgid "is a private URL"
 msgstr ""
 
@@ -96,15 +96,15 @@ msgid ""
 "of the error and we will fix it as soon as possible."
 msgstr ""
 
-#: udata/api/oauth2.py:56
+#: udata/api/oauth2.py:67
 msgid "Bearer Token"
 msgstr ""
 
-#: udata/api/oauth2.py:59
+#: udata/api/oauth2.py:70
 msgid "Default scope"
 msgstr ""
 
-#: udata/api/oauth2.py:59
+#: udata/api/oauth2.py:70
 msgid "System administrator rights"
 msgstr ""
 
@@ -150,7 +150,7 @@ msgstr ""
 msgid "You must accept the terms of use to continue."
 msgstr ""
 
-#: udata/auth/forms.py:75 udata/tests/forms/test_current_user_field.py:192
+#: udata/auth/forms.py:75 udata/tests/forms/test_current_user_field.py:194
 msgid "Password must be changed for security reasons"
 msgstr ""
 
@@ -275,7 +275,7 @@ msgstr ""
 msgid "Your udata instance is ready!"
 msgstr ""
 
-#: udata/core/owned.py:63 udata/forms/fields.py:758
+#: udata/core/owned.py:63 udata/forms/fields.py:771
 #: udata/tests/api/test_dataservices_api.py:569
 msgid "You can only set yourself as owner"
 msgstr ""
@@ -284,7 +284,7 @@ msgstr ""
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:76 udata/forms/fields.py:790
+#: udata/core/owned.py:76 udata/forms/fields.py:803
 #: udata/tests/api/test_dataservices_api.py:582
 msgid "Permission denied for this organization"
 msgstr ""
@@ -323,20 +323,20 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:140
 msgid ""
-"Public access to dataset and service would adversely affect the "
+"Public access to datasets and services would adversely affect the "
 "confidentiality of the proceedings of public authorities, where such "
 "confidentiality is provided for by law."
 msgstr ""
 
 #: udata/core/access_type/constants.py:144
 msgid ""
-"Public access to dataset and service would adversely affect international "
+"Public access to datasets and services would adversely affect international "
 "relations, public security or national defence."
 msgstr ""
 
 #: udata/core/access_type/constants.py:148
 msgid ""
-"Public access to dataset and service would adversely affect the course of "
+"Public access to datasets and services would adversely affect the course of "
 "justice, the ability of any person to receive a fair trial or the ability of "
 "a public authority to conduct an enquiry of a criminal or disciplinary "
 "nature."
@@ -344,7 +344,7 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:152
 msgid ""
-"Public access to dataset and service would adversely affect the "
+"Public access to datasets and services would adversely affect the "
 "confidentiality of commercial or industrial information, where such "
 "confidentiality is provided for by national or Community law to protect a "
 "legitimate economic interest, including the public interest in maintaining "
@@ -353,13 +353,13 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:156
 msgid ""
-"Public access to dataset and service would adversely affect intellectual "
+"Public access to datasets and services would adversely affect intellectual "
 "property rights."
 msgstr ""
 
 #: udata/core/access_type/constants.py:160
 msgid ""
-"Public access to dataset and service would adversely affect the "
+"Public access to datasets and services would adversely affect the "
 "confidentiality of personal data and/or files relating to a natural person "
 "where that person has not consented to the disclosure of the information to "
 "the public, where such confidentiality is provided for by national or "
@@ -368,8 +368,8 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:164
 msgid ""
-"Public access to dataset and service would adversely affect the interests or "
-"protection of any person who supplied the information requested on a "
+"Public access to datasets and services would adversely affect the interests "
+"or protection of any person who supplied the information requested on a "
 "voluntary basis without being under, or capable of being put under, a legal "
 "obligation to do so, unless that person has consented to the release of the "
 "information concerned."
@@ -377,12 +377,12 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:168
 msgid ""
-"Public access to dataset and service would adversely affect the protection of"
-" the environment to which such information relates, such as the location of "
-"rare species."
+"Public access to datasets and services would adversely affect the protection "
+"of the environment to which such information relates, such as the location of"
+" rare species."
 msgstr ""
 
-#: udata/core/access_type/models.py:25
+#: udata/core/access_type/models.py:28
 msgid "You can only set one condition for a given access audience role"
 msgstr ""
 
@@ -429,63 +429,63 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: udata/core/contact_point/models.py:9
+#: udata/core/contact_point/models.py:13
 msgid "Contact"
 msgstr ""
 
-#: udata/core/contact_point/models.py:10
+#: udata/core/contact_point/models.py:14
 msgid "Creator"
 msgstr ""
 
-#: udata/core/contact_point/models.py:11
+#: udata/core/contact_point/models.py:15
 msgid "Publisher"
 msgstr ""
 
-#: udata/core/contact_point/models.py:12
+#: udata/core/contact_point/models.py:16
 msgid "Rights Holder"
 msgstr ""
 
-#: udata/core/contact_point/models.py:13
+#: udata/core/contact_point/models.py:17
 msgid "Custodian"
 msgstr ""
 
-#: udata/core/contact_point/models.py:14
+#: udata/core/contact_point/models.py:18
 msgid "Distributor"
 msgstr ""
 
-#: udata/core/contact_point/models.py:15
+#: udata/core/contact_point/models.py:19
 msgid "Originator"
 msgstr ""
 
-#: udata/core/contact_point/models.py:16
+#: udata/core/contact_point/models.py:20
 msgid "Principal Investigator"
 msgstr ""
 
-#: udata/core/contact_point/models.py:17
+#: udata/core/contact_point/models.py:21
 msgid "Processor"
 msgstr ""
 
-#: udata/core/contact_point/models.py:18
+#: udata/core/contact_point/models.py:22
 msgid "Resource Provider"
 msgstr ""
 
-#: udata/core/contact_point/models.py:19
+#: udata/core/contact_point/models.py:23
 msgid "User"
 msgstr ""
 
-#: udata/core/contact_point/models.py:34 udata/tests/api/test_contact_points.py:136
+#: udata/core/contact_point/models.py:38 udata/tests/api/test_contact_points.py:136
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:23
+#: udata/core/dataservices/activities.py:24
 msgid "created a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:29
+#: udata/core/dataservices/activities.py:30
 msgid "updated a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:36
+#: udata/core/dataservices/activities.py:37
 msgid "deleted a dataservice"
 msgstr ""
 
@@ -493,58 +493,58 @@ msgstr ""
 msgid "Latest APIs"
 msgstr ""
 
-#: udata/core/dataservices/models.py:27
+#: udata/core/dataservices/models.py:43
 msgid "Dataservice serving high value datasets"
 msgstr ""
 
-#: udata/core/dataservices/models.py:189
+#: udata/core/dataservices/models.py:205
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:273 udata/core/dataset/models.py:599
+#: udata/core/dataservices/models.py:287 udata/core/dataset/models.py:613
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataservices/models.py:279 udata/core/dataset/models.py:604
+#: udata/core/dataservices/models.py:293 udata/core/dataset/models.py:618
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr ""
 
-#: udata/core/dataset/activities.py:24
+#: udata/core/dataset/activities.py:25
 msgid "created a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:30
+#: udata/core/dataset/activities.py:31
 msgid "updated a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:37
+#: udata/core/dataset/activities.py:38
 msgid "deleted a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:43
+#: udata/core/dataset/activities.py:44
 msgid "added a resource to a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:49
+#: udata/core/dataset/activities.py:50
 msgid "updated a resource"
 msgstr ""
 
-#: udata/core/dataset/activities.py:55
+#: udata/core/dataset/activities.py:56
 msgid "removed a resource from a dataset"
 msgstr ""
 
-#: udata/core/dataset/api.py:346
+#: udata/core/dataset/api.py:350
 #, python-brace-format
 msgid "Datasets search: {q}"
 msgstr ""
 
-#: udata/core/dataset/api.py:348
+#: udata/core/dataset/api.py:352
 msgid "Filtered datasets"
 msgstr ""
 
-#: udata/core/dataset/api.py:350
+#: udata/core/dataset/api.py:354
 msgid "Latest datasets"
 msgstr ""
 
@@ -600,7 +600,7 @@ msgstr ""
 msgid "Twice a day"
 msgstr ""
 
-#: udata/core/dataset/constants.py:36 udata/harvest/models.py:22
+#: udata/core/dataset/constants.py:36 udata/harvest/models.py:34
 msgid "Daily"
 msgstr ""
 
@@ -616,7 +616,7 @@ msgstr ""
 msgid "Twice a week"
 msgstr ""
 
-#: udata/core/dataset/constants.py:44 udata/harvest/models.py:21
+#: udata/core/dataset/constants.py:44 udata/harvest/models.py:33
 msgid "Weekly"
 msgstr ""
 
@@ -632,7 +632,7 @@ msgstr ""
 msgid "Twice a month"
 msgstr ""
 
-#: udata/core/dataset/constants.py:52 udata/harvest/models.py:20
+#: udata/core/dataset/constants.py:52 udata/harvest/models.py:32
 msgid "Monthly"
 msgstr ""
 
@@ -814,7 +814,7 @@ msgstr ""
 msgid "Related dataset"
 msgstr ""
 
-#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1112
+#: udata/core/dataset/forms.py:147 udata/tests/api/test_datasets_api.py:1114
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -900,67 +900,67 @@ msgstr ""
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 
-#: udata/core/dataset/models.py:71
+#: udata/core/dataset/models.py:96
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:72
+#: udata/core/dataset/models.py:97
 msgid "Reference data public service"
 msgstr ""
 
-#: udata/core/dataset/models.py:73
+#: udata/core/dataset/models.py:98
 msgid "Inspire"
 msgstr ""
 
-#: udata/core/dataset/models.py:74
+#: udata/core/dataset/models.py:99
 msgid "High value datasets"
 msgstr ""
 
-#: udata/core/dataset/models.py:75
+#: udata/core/dataset/models.py:100
 msgid "Certified statistic series"
 msgstr ""
 
-#: udata/core/dataset/models.py:76
+#: udata/core/dataset/models.py:101
 msgid "Statistical series of general interest"
 msgstr ""
 
-#: udata/core/dataset/models.py:158
+#: udata/core/dataset/models.py:183
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:190 udata/tests/api/test_datasets_api.py:1208
-#: udata/tests/api/test_datasets_api.py:1219
+#: udata/core/dataset/models.py:215 udata/tests/api/test_datasets_api.py:1210
+#: udata/tests/api/test_datasets_api.py:1221
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:209 udata/tests/api/test_datasets_api.py:1231
+#: udata/core/dataset/models.py:234 udata/tests/api/test_datasets_api.py:1233
 #, python-brace-format
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:458 udata/core/dataset/rdf.py:627
-#: udata/tests/dataset/test_dataset_rdf.py:1009
-#: udata/tests/dataset/test_dataset_rdf.py:1022
+#: udata/core/dataset/models.py:478 udata/core/dataset/rdf.py:647
+#: udata/tests/dataset/test_dataset_rdf.py:1012
+#: udata/tests/dataset/test_dataset_rdf.py:1025
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:572
+#: udata/core/dataset/models.py:588
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:610
+#: udata/core/dataset/models.py:624
 msgid "Last update of the dataset resources"
 msgstr ""
 
-#: udata/core/dataset/models.py:665
+#: udata/core/dataset/models.py:679
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:625 udata/tests/dataset/test_dataset_rdf.py:979
-#: udata/tests/dataset/test_dataset_rdf.py:996
+#: udata/core/dataset/rdf.py:645 udata/tests/dataset/test_dataset_rdf.py:982
+#: udata/tests/dataset/test_dataset_rdf.py:999
 #, python-brace-format
 msgid "{format} resource"
 msgstr ""
@@ -1024,11 +1024,11 @@ msgstr ""
 msgid "View the discussion"
 msgstr ""
 
-#: udata/core/discussions/models.py:18
+#: udata/core/discussions/models.py:35
 msgid "message"
 msgstr ""
 
-#: udata/core/discussions/models.py:76
+#: udata/core/discussions/models.py:93
 msgid "discussion"
 msgstr ""
 
@@ -1108,11 +1108,11 @@ msgstr ""
 msgid "Deletion of your %(content_type)s"
 msgstr ""
 
-#: udata/core/organization/activities.py:18
+#: udata/core/organization/activities.py:19
 msgid "created an organization"
 msgstr ""
 
-#: udata/core/organization/activities.py:25
+#: udata/core/organization/activities.py:26
 msgid "updated an organization"
 msgstr ""
 
@@ -1124,18 +1124,19 @@ msgstr ""
 msgid "Editor"
 msgstr ""
 
-#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:89
+#: udata/core/organization/constants.py:11 udata/features/transfer/models.py:17
+#: udata/harvest/models.py:40 udata/harvest/models.py:52
+#: udata/harvest/models.py:101
 msgid "Pending"
 msgstr ""
 
-#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:17
-#: udata/harvest/models.py:90
+#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:18
+#: udata/harvest/models.py:102
 msgid "Accepted"
 msgstr ""
 
-#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:18
-#: udata/harvest/models.py:91
+#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:19
+#: udata/harvest/models.py:103
 msgid "Refused"
 msgstr ""
 
@@ -1339,27 +1340,27 @@ msgstr ""
 msgid "You have been invited to join an organization"
 msgstr ""
 
-#: udata/core/organization/models.py:41
+#: udata/core/organization/models.py:59
 msgid "Public Service"
 msgstr ""
 
-#: udata/core/organization/models.py:42
+#: udata/core/organization/models.py:60
 msgid "Certified"
 msgstr ""
 
-#: udata/core/organization/models.py:43
+#: udata/core/organization/models.py:61
 msgid "Association"
 msgstr ""
 
-#: udata/core/organization/models.py:44
+#: udata/core/organization/models.py:62
 msgid "Company"
 msgstr ""
 
-#: udata/core/organization/models.py:45
+#: udata/core/organization/models.py:63
 msgid "Local authority"
 msgstr ""
 
-#: udata/core/organization/models.py:205
+#: udata/core/organization/models.py:219
 msgid "organization"
 msgstr ""
 
@@ -1387,7 +1388,7 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: udata/core/post/models.py:129
+#: udata/core/post/models.py:137
 msgid "post"
 msgstr ""
 
@@ -1415,15 +1416,15 @@ msgstr ""
 msgid "Spam"
 msgstr ""
 
-#: udata/core/reuse/activities.py:18
+#: udata/core/reuse/activities.py:19
 msgid "created a reuse"
 msgstr ""
 
-#: udata/core/reuse/activities.py:24
+#: udata/core/reuse/activities.py:25
 msgid "updated a reuse"
 msgstr ""
 
-#: udata/core/reuse/activities.py:31
+#: udata/core/reuse/activities.py:32
 msgid "deleted a reuse"
 msgstr ""
 
@@ -1532,11 +1533,11 @@ msgstr ""
 msgid "View the reuse"
 msgstr ""
 
-#: udata/core/reuse/models.py:40
+#: udata/core/reuse/models.py:58
 msgid "This URL is already registered"
 msgstr ""
 
-#: udata/core/reuse/models.py:198
+#: udata/core/reuse/models.py:213
 msgid "reuse"
 msgstr ""
 
@@ -1629,23 +1630,23 @@ msgstr ""
 msgid "French arrondissement"
 msgstr ""
 
-#: udata/core/topic/activities.py:25
+#: udata/core/topic/activities.py:27
 msgid "created a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:31
+#: udata/core/topic/activities.py:33
 msgid "updated a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:38
+#: udata/core/topic/activities.py:40
 msgid "added an element to a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:44
+#: udata/core/topic/activities.py:46
 msgid "updated an element in a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:51
+#: udata/core/topic/activities.py:53
 msgid "removed an element from a topic"
 msgstr ""
 
@@ -1661,35 +1662,35 @@ msgstr ""
 msgid "Featured"
 msgstr ""
 
-#: udata/core/user/activities.py:35
+#: udata/core/user/activities.py:36
 msgid "followed a user"
 msgstr ""
 
-#: udata/core/user/activities.py:42
+#: udata/core/user/activities.py:43
 msgid "discussed a dataservice"
 msgstr ""
 
-#: udata/core/user/activities.py:47
+#: udata/core/user/activities.py:48
 msgid "discussed a dataset"
 msgstr ""
 
-#: udata/core/user/activities.py:52
+#: udata/core/user/activities.py:53
 msgid "discussed a reuse"
 msgstr ""
 
-#: udata/core/user/activities.py:57
+#: udata/core/user/activities.py:58
 msgid "followed a dataservice"
 msgstr ""
 
-#: udata/core/user/activities.py:62
+#: udata/core/user/activities.py:63
 msgid "followed a dataset"
 msgstr ""
 
-#: udata/core/user/activities.py:67
+#: udata/core/user/activities.py:68
 msgid "followed a reuse"
 msgstr ""
 
-#: udata/core/user/activities.py:72
+#: udata/core/user/activities.py:73
 msgid "followed an organization"
 msgstr ""
 
@@ -1752,7 +1753,7 @@ msgid ""
 "always re-create an account on the %(site)s platform if necessary."
 msgstr ""
 
-#: udata/core/user/models.py:134
+#: udata/core/user/models.py:152
 msgid "account"
 msgstr ""
 
@@ -1772,68 +1773,68 @@ msgstr ""
 msgid "Not a valid choice"
 msgstr ""
 
-#: udata/forms/fields.py:126
+#: udata/forms/fields.py:139
 msgid "Please input a date/time value"
 msgstr ""
 
-#: udata/forms/fields.py:138
+#: udata/forms/fields.py:151
 msgid "Invalid date/time input"
 msgstr ""
 
-#: udata/forms/fields.py:168
+#: udata/forms/fields.py:181
 #, python-brace-format
 msgid "The role {role} does not exist"
 msgstr ""
 
-#: udata/forms/fields.py:186
+#: udata/forms/fields.py:199
 msgid "Not a valid UUID"
 msgstr ""
 
-#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:38
+#: udata/forms/fields.py:433 udata/mongo/taglist_field.py:38
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:460 udata/forms/fields.py:519
+#: udata/forms/fields.py:473 udata/forms/fields.py:532
 #, python-brace-format
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:493 udata/tests/forms/test_model_field.py:331
-#: udata/tests/forms/test_model_field.py:347
+#: udata/forms/fields.py:506 udata/tests/forms/test_model_field.py:332
+#: udata/tests/forms/test_model_field.py:348
 msgid "Missing \"id\" field"
 msgstr ""
 
-#: udata/forms/fields.py:500
+#: udata/forms/fields.py:513
 #, python-brace-format
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr ""
 
-#: udata/forms/fields.py:506 udata/tests/forms/test_model_field.py:39
-#: udata/tests/forms/test_model_field.py:54
+#: udata/forms/fields.py:519 udata/tests/forms/test_model_field.py:40
+#: udata/tests/forms/test_model_field.py:55
 msgid "Expect both class and identifier"
 msgstr ""
 
-#: udata/forms/fields.py:551
+#: udata/forms/fields.py:564
 #, python-brace-format
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:585
+#: udata/forms/fields.py:598
 #, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:719
+#: udata/forms/fields.py:732
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:751 udata/forms/fields.py:783
-#: udata/tests/forms/test_publish_as_field.py:212
+#: udata/forms/fields.py:764 udata/forms/fields.py:796
+#: udata/tests/forms/test_publish_as_field.py:214
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr ""
 
-#: udata/forms/fields.py:756 udata/forms/fields.py:788
+#: udata/forms/fields.py:769 udata/forms/fields.py:801
 msgid "You must be authenticated"
 msgstr ""
 
@@ -1854,43 +1855,43 @@ msgstr ""
 msgid "Backend"
 msgstr ""
 
-#: udata/harvest/models.py:19
+#: udata/harvest/models.py:31
 msgid "Manual"
 msgstr ""
 
-#: udata/harvest/models.py:29
+#: udata/harvest/models.py:41
 msgid "Initializing"
 msgstr ""
 
-#: udata/harvest/models.py:30
+#: udata/harvest/models.py:42
 msgid "Initialized"
 msgstr ""
 
-#: udata/harvest/models.py:31
+#: udata/harvest/models.py:43
 msgid "Processing"
 msgstr ""
 
-#: udata/harvest/models.py:32 udata/harvest/models.py:42
+#: udata/harvest/models.py:44 udata/harvest/models.py:54
 msgid "Done"
 msgstr ""
 
-#: udata/harvest/models.py:33
+#: udata/harvest/models.py:45
 msgid "Done with errors"
 msgstr ""
 
-#: udata/harvest/models.py:34 udata/harvest/models.py:43
+#: udata/harvest/models.py:46 udata/harvest/models.py:55
 msgid "Failed"
 msgstr ""
 
-#: udata/harvest/models.py:41
+#: udata/harvest/models.py:53
 msgid "Started"
 msgstr ""
 
-#: udata/harvest/models.py:44
+#: udata/harvest/models.py:56
 msgid "Skipped"
 msgstr ""
 
-#: udata/harvest/models.py:45
+#: udata/harvest/models.py:57
 msgid "Archived"
 msgstr ""
 
@@ -1910,19 +1911,19 @@ msgstr ""
 msgid "Request GeoDCAT-AP to the CSW server (must be supported by the server)."
 msgstr ""
 
-#: udata/harvest/backends/ckan/harvesters.py:33
+#: udata/harvest/backends/ckan/harvesters.py:35
 msgid "Organization"
 msgstr ""
 
-#: udata/harvest/backends/ckan/harvesters.py:33
+#: udata/harvest/backends/ckan/harvesters.py:35
 msgid "A CKAN Organization name"
 msgstr ""
 
-#: udata/harvest/backends/ckan/harvesters.py:34
+#: udata/harvest/backends/ckan/harvesters.py:36
 msgid "Tag"
 msgstr ""
 
-#: udata/harvest/backends/ckan/harvesters.py:34
+#: udata/harvest/backends/ckan/harvesters.py:36
 msgid "A CKAN tag name"
 msgstr ""
 
@@ -2112,7 +2113,7 @@ msgstr ""
 msgid "Some text:"
 msgstr ""
 
-#: udata/tests/forms/test_model_field.py:163
+#: udata/tests/forms/test_model_field.py:164
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
 msgstr ""
 

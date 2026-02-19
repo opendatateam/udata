@@ -137,35 +137,35 @@ class InspireLimitationCategory(StrEnum):
         match self:
             case InspireLimitationCategory.PUBLIC_AUTHORITIES:
                 return _(
-                    "Public access to dataset and service would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
+                    "Public access to datasets and services would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
                 )
             case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
                 return _(
-                    "Public access to dataset and service would adversely affect international relations, public security or national defence."
+                    "Public access to datasets and services would adversely affect international relations, public security or national defence."
                 )
             case InspireLimitationCategory.COURSE_OF_JUSTICE:
                 return _(
-                    "Public access to dataset and service would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
+                    "Public access to datasets and services would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
                 )
             case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
                 return _(
-                    "Public access to dataset and service would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
+                    "Public access to datasets and services would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
                 )
             case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
                 return _(
-                    "Public access to dataset and service would adversely affect intellectual property rights."
+                    "Public access to datasets and services would adversely affect intellectual property rights."
                 )
             case InspireLimitationCategory.PERSONAL_DATA:
                 return _(
-                    "Public access to dataset and service would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
+                    "Public access to datasets and services would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
                 )
             case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
                 return _(
-                    "Public access to dataset and service would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
+                    "Public access to datasets and services would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
                 )
             case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
                 return _(
-                    "Public access to dataset and service would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
+                    "Public access to datasets and services would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
                 )
             case _:
                 assert_never(self)
