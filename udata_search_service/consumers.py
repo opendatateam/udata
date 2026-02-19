@@ -1,11 +1,13 @@
-import logging
-import os
-
-from udata_search_service.domain.entities import Dataset, Organization, Reuse, Dataservice, Topic, Discussion, Post
-from udata_search_service.infrastructure.utils import get_concat_title_org, log2p, mdstrip
-
-
-CONSUMER_LOGGING_LEVEL = int(os.environ.get("CONSUMER_LOGGING_LEVEL", logging.INFO))
+from udata_search_service.entities import (
+    Dataservice,
+    Dataset,
+    Discussion,
+    Organization,
+    Post,
+    Reuse,
+    Topic,
+)
+from udata_search_service.utils import get_concat_title_org, log2p, mdstrip
 
 
 class DatasetConsumer(Dataset):
@@ -18,18 +20,20 @@ class DatasetConsumer(Dataset):
         data["schema"] = data.get("schema_") or data.get("schema")
 
         organization = data["organization"]
-        data["organization"] = organization.get('id') if organization else None
-        data["orga_followers"] = organization.get('followers') if organization else None
-        data["orga_sp"] = organization.get('public_service') if organization else None
-        data["organization_name"] = organization.get('name') if organization else None
-        data["organization_badges"] = organization.get('badges') if organization else None
+        data["organization"] = organization.get("id") if organization else None
+        data["orga_followers"] = organization.get("followers") if organization else None
+        data["orga_sp"] = organization.get("public_service") if organization else None
+        data["organization_name"] = organization.get("name") if organization else None
+        data["organization_badges"] = organization.get("badges") if organization else None
 
         resources = data["resources"]
         data["resources_ids"] = [res.get("id") for res in resources]
         data["resources_titles"] = [res.get("title") for res in resources]
         del data["resources"]
 
-        data["concat_title_org"] = get_concat_title_org(data["title"], data['acronym'], data['organization_name'])
+        data["concat_title_org"] = get_concat_title_org(
+            data["title"], data["acronym"], data["organization_name"]
+        )
         data["geozones"] = [zone.get("id") for zone in data.get("geozones", [])]
 
         # Normalize values
@@ -50,10 +54,10 @@ class ReuseConsumer(Reuse):
         data["description"] = mdstrip(data["description"])
 
         organization = data["organization"]
-        data["organization"] = organization.get('id') if organization else None
-        data["orga_followers"] = organization.get('followers') if organization else None
-        data["organization_name"] = organization.get('name') if organization else None
-        data["organization_badges"] = organization.get('badges') if organization else None
+        data["organization"] = organization.get("id") if organization else None
+        data["orga_followers"] = organization.get("followers") if organization else None
+        data["organization_name"] = organization.get("name") if organization else None
+        data["organization_badges"] = organization.get("badges") if organization else None
 
         # Normalize values
         data["views"] = log2p(data.get("views", 0))
@@ -82,9 +86,9 @@ class DataserviceConsumer(Dataservice):
         data["description_length"] = len(data["description"])
 
         organization = data["organization"]
-        data["organization"] = organization.get('id') if organization else None
-        data["orga_followers"] = organization.get('followers') if organization else None
-        data["organization_name"] = organization.get('name') if organization else None
+        data["organization"] = organization.get("id") if organization else None
+        data["orga_followers"] = organization.get("followers") if organization else None
+        data["organization_name"] = organization.get("name") if organization else None
 
         # Normalize values
         data["views"] = log2p(data.get("views", 0))

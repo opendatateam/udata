@@ -1,12 +1,12 @@
 import dataclasses
-from typing import List
 from datetime import datetime
+from typing import List
+
 from dateutil.parser import isoparse
 
 
 @dataclasses.dataclass
-class EntityBase():
-
+class EntityBase:
     @classmethod
     def load_from_dict(cls, data):
         fields = [f.name for f in dataclasses.fields(cls)]
