@@ -41,7 +41,7 @@ def filter_by_handled(base_query, filter_value):
         },
     ],
 )
-class Report(Document):
+class Report(Document[ReportQuerySet]):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,

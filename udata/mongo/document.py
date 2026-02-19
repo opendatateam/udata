@@ -1,6 +1,8 @@
 import logging
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Generic
+
+from typing_extensions import TypeVar
 
 from udata.flask_mongoengine.document import Document
 
@@ -8,6 +10,8 @@ from .queryset import UDataQuerySet
 
 if TYPE_CHECKING:
     from bson import ObjectId
+
+QS = TypeVar("QS", bound=UDataQuerySet, default=UDataQuerySet)
 
 log = logging.getLogger(__name__)
 
@@ -37,14 +41,14 @@ def get_all_models():
     return all_models
 
 
-class UDataDocument(Document):
+class UDataDocument(Document, Generic[QS]):
     meta = {
         "abstract": True,
         "queryset_class": UDataQuerySet,
     }
 
     # Dynamically created by MongoEngine's metaclass, declared here for type checkers.
-    objects: ClassVar[UDataQuerySet]
+    objects: QS
     DoesNotExist: ClassVar[type[Exception]]
     id: "ObjectId"
 

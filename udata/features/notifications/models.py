@@ -41,7 +41,7 @@ def is_handled(base_query, filter_value):
 
 
 @generate_fields()
-class Notification(Datetimed, Document):
+class Notification(Datetimed, Document[NotificationQuerySet]):
     meta = {
         "ordering": ["-created_at"],
         "queryset_class": NotificationQuerySet,

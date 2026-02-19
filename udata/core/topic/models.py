@@ -73,7 +73,7 @@ class TopicElement(Auditable, Document):
         cls.on_delete.send(document)
 
 
-class Topic(Datetimed, Auditable, Linkable, Document, Owned):
+class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
     name = field(StringField(required=True))
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),

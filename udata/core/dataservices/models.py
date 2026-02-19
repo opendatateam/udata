@@ -184,7 +184,13 @@ def filter_by_reuse(base_query, filter_value):
     ],
 )
 class Dataservice(
-    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, Document
+    Auditable,
+    WithMetrics,
+    WithAccessType,
+    DataserviceBadgeMixin,
+    Linkable,
+    Owned,
+    Document[DataserviceQuerySet],
 ):
     meta = {
         "indexes": [

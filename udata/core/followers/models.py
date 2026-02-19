@@ -22,7 +22,7 @@ class FollowQuerySet(UDataQuerySet):
         return self(follower=user, following=following, until=None).count() > 0
 
 
-class Follow(Document):
+class Follow(Document[FollowQuerySet]):
     follower = ReferenceField("User", required=True)
     following = GenericReferenceField()
     since = DateTimeField(required=True, default=datetime.utcnow)
