@@ -220,6 +220,8 @@ class DatasetAPITest(APITestCase):
             ]
         )
 
+        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
+
         total_datasets = Dataset.objects().count()
 
         # no filter
@@ -323,6 +325,17 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(schema_version2_dataset.id))
+
+        # filter on access rights open (default)
+        response = self.get(url_for("api.datasets", access_type="open"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - 1)
+
+        # filter on access rights restricted
+        response = self.get(url_for("api.datasets", access_type="restricted"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))
 
         # filter on topic
         response = self.get(url_for("api.datasets", topic=topic.id))

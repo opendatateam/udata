@@ -19,6 +19,7 @@ class Defaults(object):
         "de": "Deutsch",
     }
     DEFAULT_LANGUAGE = "en"
+    DEFAULT_COUNTRY_CODE = "fr"
     SECRET_KEY = "Default uData secret key"
     CONTACT_EMAIL = "contact@example.org"
 
