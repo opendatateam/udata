@@ -1,5 +1,5 @@
-import datetime
 import logging
+from datetime import UTC, datetime
 
 import requests
 from flask import current_app
@@ -85,7 +85,7 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 
         if self.user.password_rotation_demanded:
             self.user.password_rotation_demanded = None
-            self.user.password_rotation_performed = datetime.datetime.utcnow()
+            self.user.password_rotation_performed = datetime.now(UTC)
             self.user.save()
 
         return True
