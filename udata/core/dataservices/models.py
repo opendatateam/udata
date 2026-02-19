@@ -353,11 +353,14 @@ class Dataservice(
         nested_fields=dataservice_permissions_fields,
     )
     def permissions(self):
+        from udata.core.dataset.permissions import OwnableReadPermission
+
         from .permissions import DataserviceEditPermission
 
         return {
             "delete": DataserviceEditPermission(self),
             "edit": DataserviceEditPermission(self),
+            "read": OwnableReadPermission(self),
         }
 
     def count_discussions(self):
