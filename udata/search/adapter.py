@@ -14,6 +14,8 @@ class ModelSearchAdapter:
     sorts = None
     search_url = None
     filters = {}
+    service_class = None
+    consumer_class = None
 
     @classmethod
     def serialize(cls, document):

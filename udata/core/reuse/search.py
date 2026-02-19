@@ -14,6 +14,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import ReuseConsumer
+from udata_search_service.services import ReuseService
 
 __all__ = ("ReuseSearch",)
 
@@ -22,6 +24,8 @@ __all__ = ("ReuseSearch",)
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     search_url = "reuses/"
+    service_class = ReuseService
+    consumer_class = ReuseConsumer
 
     sorts = {
         "created": "created_at",

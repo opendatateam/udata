@@ -2,7 +2,6 @@ import datetime
 from unittest.mock import patch
 
 import pytest
-from flask import current_app
 from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
 
@@ -118,76 +117,65 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "page_size", int)
 
 
-@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg/")
+@pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
 class IndexingLifecycleTest(APITestCase):
-    @patch("requests.delete")
-    def test_producer_should_send_a_message_without_payload_if_not_indexable(self, mock_req):
+    @patch("udata.search.get_elastic_client")
+    def test_reindex_calls_delete_one_if_not_indexable(self, mock_get_client):
         fake_data = HiddenDatasetFactory(id="61fd30cb29ea95c7bc0e1211")
 
-        reindex.run(*as_task_param(fake_data))
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            reindex.run(*as_task_param(fake_data))
+            mock_service.delete_one.assert_called_once_with(str(fake_data.id))
 
-        search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
-        url = f"{search_service_url}{DatasetSearch.search_url}{str(fake_data.id)}/unindex"
-        mock_req.assert_called_with(url)
-
-    @patch("requests.post")
-    def test_producer_should_send_a_message_with_payload_if_indexable(self, mock_req):
+    @patch("udata.search.get_elastic_client")
+    def test_reindex_calls_feed_if_indexable(self, mock_get_client):
         resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
         fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211", resources=[resource])
 
-        reindex.run(*as_task_param(fake_data))
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            reindex.run(*as_task_param(fake_data))
+            mock_service.feed.assert_called_once()
 
-        expected_value = {"document": DatasetSearch.serialize(fake_data)}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}index"
-        mock_req.assert_called_with(url, json=expected_value)
+    @patch("udata.search.commands.get_elastic_client")
+    def test_index_model(self, mock_get_client):
+        DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
 
-    @patch("requests.Session.post")
-    def test_index_model(self, mock_req):
-        fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
+            mock_service.feed.assert_called_once()
 
-        index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
+    @patch("udata.search.commands.get_elastic_client")
+    def test_reindex_model_creates_index_and_feeds(self, mock_get_client):
+        DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
+        mock_es = mock_get_client.return_value.es
 
-        expected_value = {"document": DatasetSearch.serialize(fake_data), "index": "dataset"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_req.assert_called_with(url, json=expected_value)
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
+            mock_es.indices.create.assert_called_once()
+            mock_service.feed.assert_called_once()
 
-    @patch("requests.post")
-    @patch("requests.Session.post")
-    def test_reindex_model(self, mock_session, mock_req):
-        fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
-
-        index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
-
-        # Create index
-        expected_value = {"index": "dataset-2022-02-20-20-02"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
-        mock_req.assert_called_with(url, json=expected_value)
-
-        # Index document
-        expected_value = {
-            "document": DatasetSearch.serialize(fake_data),
-            "index": "dataset-2022-02-20-20-02",
-        }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_session.assert_called_with(url, json=expected_value)
-
-    @patch("requests.Session.post")
-    def test_index_model_from_datetime(self, mock_req):
+    @patch("udata.search.commands.get_elastic_client")
+    def test_index_model_from_datetime(self, mock_get_client):
         DatasetFactory(
             id="61fd30cb29ea95c7bc0e1211", last_modified_internal=datetime.datetime(2020, 1, 1)
         )
-        fake_data = DatasetFactory(
+        DatasetFactory(
             id="61fd30cb29ea95c7bc0e1212", last_modified_internal=datetime.datetime(2022, 1, 1)
         )
 
-        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
-        mock_req.assert_not_called()
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
+            mock_service.feed.assert_not_called()
 
-        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
-
-        expected_value = {"document": DatasetSearch.serialize(fake_data), "index": "dataset"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_req.assert_called_with(url, json=expected_value)
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
+            mock_service.feed.assert_called_once()
 
 
 class DatasetSearchAdapterTest(APITestCase):
