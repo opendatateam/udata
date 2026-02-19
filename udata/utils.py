@@ -243,7 +243,7 @@ def safe_harvest_datetime(value: Any, field: str, refuse_future: bool = False) -
     return parsed
 
 
-def to_iso(dt: date | datetime) -> str | None:
+def to_iso(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 string
 
@@ -255,7 +255,7 @@ def to_iso(dt: date | datetime) -> str | None:
         return to_iso_date(dt)
 
 
-def to_iso_date(dt: date | datetime) -> str | None:
+def to_iso_date(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 date string.
 
@@ -265,7 +265,7 @@ def to_iso_date(dt: date | datetime) -> str | None:
         return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
 
 
-def to_iso_datetime(dt: date | datetime) -> str | None:
+def to_iso_datetime(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 datetime string.
 

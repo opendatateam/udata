@@ -36,7 +36,7 @@ class PostQuerySet(UDataQuerySet):
     ],
     default_sort="-published",
 )
-class Post(Datetimed, Linkable, Document):
+class Post(Datetimed, Linkable, Document[PostQuerySet]):
     name = field(
         StringField(max_length=255, required=True),
         sortable=True,

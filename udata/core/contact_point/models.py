@@ -24,7 +24,7 @@ CONTACT_ROLES = {
 }
 
 
-class ContactPoint(Document, Owned):
+class ContactPoint(Document[OwnedQuerySet], Owned):
     name = StringField(max_length=255, required=True)
     email = StringField(max_length=255)
     contact_form = URLField()

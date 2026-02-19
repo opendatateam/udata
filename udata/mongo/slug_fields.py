@@ -4,7 +4,7 @@ import slugify
 from mongoengine.fields import StringField
 from mongoengine.signals import post_delete, pre_save
 
-from udata.flask_mongoengine.document import Document
+from udata.mongo.document import UDataDocument
 from udata.utils import is_uuid
 
 from .queryset import UDataQuerySet
@@ -104,7 +104,7 @@ class SlugField(StringField):
             populate_slug(document, field)
 
 
-class SlugFollow(Document):
+class SlugFollow(UDataDocument):
     """
     Keeps track of slug changes for a given namespace/class.
     Fields are:

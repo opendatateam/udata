@@ -563,7 +563,15 @@ class DatasetBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, Document):
+class Dataset(
+    Auditable,
+    WithMetrics,
+    WithAccessType,
+    DatasetBadgeMixin,
+    Owned,
+    Linkable,
+    Document[DatasetQuerySet],
+):
     title = field(StringField(required=True))
     acronym = field(StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -1122,7 +1130,7 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, Owned, Document):
+class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySet]):
     """
     Local file, remote file or API added by the community of the users to the
     original dataset
