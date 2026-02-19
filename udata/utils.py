@@ -255,6 +255,14 @@ def to_iso(dt: date | datetime | None) -> str | None:
         return to_iso_date(dt)
 
 
+@overload
+def to_iso_date(dt: date | datetime) -> str: ...
+
+
+@overload
+def to_iso_date(dt: None) -> None: ...
+
+
 def to_iso_date(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 date string.
@@ -263,6 +271,14 @@ def to_iso_date(dt: date | datetime | None) -> str | None:
     """
     if dt:
         return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
+
+
+@overload
+def to_iso_datetime(dt: date | datetime) -> str: ...
+
+
+@overload
+def to_iso_datetime(dt: None) -> None: ...
 
 
 def to_iso_datetime(dt: date | datetime | None) -> str | None:
