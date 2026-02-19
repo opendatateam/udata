@@ -93,6 +93,8 @@ dependencies = [
     "wtforms[email]>=3.2.1,<4.0.0",
     "wtforms-json>=0.3.5,<1.0.0",
     "qrcode>=8.2,<9.0",
+    "elasticsearch>=8.19.3",
+    "elasticsearch-dsl>=8.18.0",
 ]
 
 [project.urls]
