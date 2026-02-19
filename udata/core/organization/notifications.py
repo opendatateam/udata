@@ -1,20 +1,22 @@
 import logging
 
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import ReferenceField, StringField
+
 from udata.api_fields import field, generate_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
-from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
 
 @generate_fields()
-class MembershipRequestNotificationDetails(db.EmbeddedDocument):
+class MembershipRequestNotificationDetails(EmbeddedDocument):
     request_organization = field(
-        db.ReferenceField(Organization),
+        ReferenceField(Organization),
         readonly=True,
         nested_fields=org_ref_fields,
         auditable=False,
@@ -22,7 +24,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     request_user = field(
-        db.ReferenceField(User),
+        ReferenceField(User),
         nested_fields=user_ref_fields,
         readonly=True,
         auditable=False,
@@ -30,7 +32,7 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     kind = field(
-        db.StringField(default="request"),
+        StringField(default="request"),
         readonly=True,
         auditable=False,
         filterable={},
@@ -38,9 +40,9 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
 
 
 @generate_fields()
-class NewBadgeNotificationDetails(db.EmbeddedDocument):
+class NewBadgeNotificationDetails(EmbeddedDocument):
     organization = field(
-        db.ReferenceField(Organization),
+        ReferenceField(Organization),
         readonly=True,
         nested_fields=org_ref_fields,
         auditable=False,
@@ -48,8 +50,32 @@ class NewBadgeNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     kind = field(
-        db.StringField(),
+        StringField(),
         readonly=True,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
+@generate_fields()
+class MembershipAcceptedNotificationDetails(EmbeddedDocument):
+    organization = field(
+        ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
+@generate_fields()
+class MembershipRefusedNotificationDetails(EmbeddedDocument):
+    organization = field(
+        ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -79,6 +105,7 @@ def on_new_membership_request(request: MembershipRequest, **kwargs):
         try:
             existing = Notification.objects(
                 user=recipient,
+                handled_at=None,
                 details__request_organization=organization,
                 details__request_user=request.user,
             ).first()

@@ -1,6 +1,7 @@
 from flask import url_for
 
 from udata.core import storages
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
@@ -412,8 +413,10 @@ class UserAPITest(APITestCase):
         user = AdminFactory()
         self.login(user)
         user_to_delete = UserFactory()
+        dataset = DatasetFactory(owner=user_to_delete)
         discussion_only_user = DiscussionFactory(
             user=user_to_delete,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user_to_delete),
                 MessageDiscussionFactory(posted_by=user_to_delete),

@@ -1,4 +1,5 @@
 from mongoengine import post_save
+from mongoengine.fields import BooleanField, ReferenceField, StringField
 
 import udata.core.owned as owned
 from udata.core.dataset.permissions import OwnableReadPermission
@@ -7,7 +8,7 @@ from udata.core.organization.models import Organization
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.models import Member
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import APITestCase, DBTestCase
 
 
@@ -16,16 +17,16 @@ class CustomQuerySet(owned.OwnedQuerySet):
         return self(private__ne=True)
 
 
-class Owned(owned.Owned, db.Document):
-    name = db.StringField()
-    private = db.BooleanField()
+class Owned(owned.Owned, Document):
+    name = StringField()
+    private = BooleanField()
 
     meta = {
         "queryset_class": CustomQuerySet,
     }
 
 
-class OwnedPostSave(owned.Owned, db.Document):
+class OwnedPostSave(owned.Owned, Document):
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         if "post_save" in kwargs.get("ignores", []):
@@ -44,10 +45,10 @@ def compute_some_metrics(document, **kwargs):
 
 class TestOwned(DBTestCase):
     def test_fields(self):
-        self.assertIsInstance(Owned.owner, db.ReferenceField)
+        self.assertIsInstance(Owned.owner, ReferenceField)
         self.assertEqual(Owned.owner.document_type_obj, User)
 
-        self.assertIsInstance(Owned.organization, db.ReferenceField)
+        self.assertIsInstance(Owned.organization, ReferenceField)
         self.assertEqual(Owned.organization.document_type_obj, Organization)
 
     def test_owner_changed_from_user_to_user(self):
@@ -340,8 +341,8 @@ class OwnableReadPermissionTest(APITestCase):
     def test_object_without_private_attribute(self):
         """Objects without private attribute should be visible by everyone."""
 
-        class OwnedWithoutPrivate(owned.Owned, db.Document):
-            name = db.StringField()
+        class OwnedWithoutPrivate(owned.Owned, Document):
+            name = StringField()
 
         obj = OwnedWithoutPrivate.objects.create(owner=UserFactory())
         assert OwnableReadPermission(obj).can() is True

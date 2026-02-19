@@ -11,7 +11,7 @@ from udata.utils import get_udata_version, safe_unicode
 
 log = logging.getLogger(__name__)
 
-IS_TTY = sys.__stdin__.isatty()
+IS_TTY = sys.__stdin__.isatty() if sys.__stdin__ else False
 
 INFO = "➢"
 DEBUG = "⇝"

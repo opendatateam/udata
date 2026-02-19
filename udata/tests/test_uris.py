@@ -160,7 +160,7 @@ DEFAULT_SCHEMES = Defaults.URLS_ALLOWED_SCHEMES
 CUSTOM_SCHEMES = ["irc", "unknown"]
 
 # Extract some default TLDs
-DEFAULT_TLDS = list(Defaults.URLS_ALLOWED_TLDS)[:2]
+DEFAULT_TLDS = sorted(Defaults.URLS_ALLOWED_TLDS)[:2]
 # Custom TLDs not in IANA official list
 CUSTOM_TLDS = ["i2", "unknown"]
 

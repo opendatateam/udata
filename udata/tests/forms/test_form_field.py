@@ -1,19 +1,22 @@
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import EmbeddedDocumentField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.tests import TestCase
 from udata.utils import faker
 
 
-class Nested(db.EmbeddedDocument):
-    id = db.AutoUUIDField()
-    name = db.StringField(required=True)
+class Nested(EmbeddedDocument):
+    id = AutoUUIDField()
+    name = StringField(required=True)
 
 
-class Fake(db.Document):
-    name = db.StringField()
-    nested = db.EmbeddedDocumentField(Nested)
+class Fake(Document):
+    name = StringField()
+    nested = EmbeddedDocumentField(Nested)
 
 
 class NestedForm(ModelForm):

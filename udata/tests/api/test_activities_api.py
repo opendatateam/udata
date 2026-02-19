@@ -1,4 +1,5 @@
 from flask import url_for
+from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
 from udata.core.activity.models import Activity
@@ -10,24 +11,23 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.mongo import db
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert400
 
 
 class FakeDatasetActivity(Activity):
     key = "fakeDataset"
-    related_to = db.ReferenceField(Dataset, required=True)
+    related_to = ReferenceField(Dataset, required=True)
 
 
 class FakeReuseActivity(Activity):
     key = "fakeReuse"
-    related_to = db.ReferenceField(Reuse, required=True)
+    related_to = ReferenceField(Reuse, required=True)
 
 
 class FakeTopicActivity(Activity):
     key = "fakeTopic"
-    related_to = db.ReferenceField(Topic, required=True)
+    related_to = ReferenceField(Topic, required=True)
 
 
 class ActivityAPITest(APITestCase):

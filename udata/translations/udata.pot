@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-02-13 18:35+0100\n"
-"PO-Revision-Date: 2026-02-13 18:35+0100\n"
+"POT-Creation-Date: 2026-02-12 13:54+0100\n"
+"PO-Revision-Date: 2026-02-12 13:54+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -19,31 +19,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: udata/settings.py:131
+#: udata/settings.py:130
 msgid "Welcome"
 msgstr ""
 
-#: udata/settings.py:132
+#: udata/settings.py:131
 msgid "Please confirm your email"
 msgstr ""
 
-#: udata/settings.py:133
+#: udata/settings.py:132
 msgid "Login instructions"
 msgstr ""
 
-#: udata/auth/mails.py:127 udata/settings.py:134
+#: udata/auth/mails.py:127 udata/settings.py:133
 msgid "Your password has been reset"
 msgstr ""
 
-#: udata/auth/mails.py:139 udata/settings.py:135
+#: udata/auth/mails.py:139 udata/settings.py:134
 msgid "Your password has been changed"
 msgstr ""
 
-#: udata/settings.py:136
+#: udata/settings.py:135
 msgid "Password reset instructions"
 msgstr ""
 
-#: udata/settings.py:570
+#: udata/settings.py:569
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -535,16 +535,16 @@ msgstr ""
 msgid "removed a resource from a dataset"
 msgstr ""
 
-#: udata/core/dataset/api.py:350
+#: udata/core/dataset/api.py:346
 #, python-brace-format
 msgid "Datasets search: {q}"
 msgstr ""
 
-#: udata/core/dataset/api.py:352
+#: udata/core/dataset/api.py:348
 msgid "Filtered datasets"
 msgstr ""
 
-#: udata/core/dataset/api.py:354
+#: udata/core/dataset/api.py:350
 msgid "Latest datasets"
 msgstr ""
 
@@ -1536,7 +1536,7 @@ msgstr ""
 msgid "This URL is already registered"
 msgstr ""
 
-#: udata/core/reuse/models.py:198 udata/core/visualizations/models.py:75
+#: udata/core/reuse/models.py:198
 msgid "reuse"
 msgstr ""
 
