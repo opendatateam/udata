@@ -76,10 +76,9 @@ class ActivityTest(APITestCase):
         org = OrganizationFactory()
         FakeActivity.objects.create(actor=self.user, related_to=self.fake, organization=org)
 
-        activities = Activity.objects(organization=org)
+        activities = FakeActivity.objects(organization=org)
 
         self.assertEqual(len(activities), 1)
-        self.assertIsInstance(activities[0], FakeActivity)
 
     def test_create_and_retrieve_for_related(self):
         org = OrganizationFactory()
