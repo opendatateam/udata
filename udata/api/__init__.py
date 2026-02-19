@@ -96,20 +96,21 @@ class UDataApi(Api):
         @wraps(func)
         def wrapper(*args, **kwargs):
             from udata.api.oauth2 import check_credentials
-            from udata.core.user.models import User
 
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
 
             apikey = request.headers.get(HEADER_API_KEY)
             if apikey:
-                try:
-                    user = User.objects.get(apikey=apikey)
-                except User.DoesNotExist:
+                from udata.core.user.api_tokens import ApiToken
+
+                api_token = ApiToken.authenticate(apikey)
+                if api_token is None:
                     self.abort(401, "Invalid API Key")
 
-                if not login_user(user, False):
+                if not login_user(api_token.user, False):
                     self.abort(401, "Inactive user")
+                api_token.update_usage(request.headers.get("User-Agent"))
             else:
                 check_credentials()
             return func(*args, **kwargs)

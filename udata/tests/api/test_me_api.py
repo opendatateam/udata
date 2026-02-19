@@ -227,45 +227,102 @@ class MeAPITest(APITestCase):
         response = self.get(url_for("api.my_reuses"))
         self.assert401(response)
 
-    def test_generate_apikey(self):
-        """It should generate an API Key on POST"""
+    def test_create_token(self):
+        """It should create a new API token on POST"""
         self.login()
-        response = self.post(url_for("api.my_apikey"))
+        response = self.post(url_for("api.my_tokens"))
         self.assert201(response)
-        self.assertIsNotNone(response.json["apikey"])
+        self.assertIn("token", response.json)
+        self.assertIn("token_prefix", response.json)
+        self.assertTrue(response.json["token"].startswith("udata_"))
 
-        self.user.reload()
-        self.assertFalse(self.user.apikey.startswith("b'"))
-        self.assertIsNotNone(self.user.apikey)
-        self.assertEqual(self.user.apikey, response.json["apikey"])
-
-    def test_regenerate_apikey(self):
-        """It should regenerate an API Key on POST"""
+    def test_create_token_with_name(self):
+        """It should create a named API token on POST"""
         self.login()
-        self.user.generate_api_key()
-        self.user.save()
-
-        apikey = self.user.apikey
-        response = self.post(url_for("api.my_apikey"))
+        response = self.post(url_for("api.my_tokens"), {"name": "My CI token"})
         self.assert201(response)
-        self.assertIsNotNone(response.json["apikey"])
+        self.assertEqual(response.json["name"], "My CI token")
 
-        self.user.reload()
-        self.assertIsNotNone(self.user.apikey)
-        self.assertNotEqual(self.user.apikey, apikey)
-        self.assertEqual(self.user.apikey, response.json["apikey"])
-
-    def test_clear_apikey(self):
-        """It should clear an API Key on DELETE"""
+    def test_create_token_with_expiration(self):
+        """It should create a token with an expiration date"""
         self.login()
-        self.user.generate_api_key()
-        self.user.save()
+        response = self.post(
+            url_for("api.my_tokens"),
+            {"expires_at": "2030-01-01T00:00:00"},
+        )
+        self.assert201(response)
+        self.assertIsNotNone(response.json["expires_at"])
 
-        response = self.delete(url_for("api.my_apikey"))
+    def test_list_tokens(self):
+        """It should list active tokens without the plaintext"""
+        self.login()
+        self.post(url_for("api.my_tokens"), {"name": "Token 1"})
+        self.post(url_for("api.my_tokens"), {"name": "Token 2"})
+        response = self.get(url_for("api.my_tokens"))
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
+        for token_data in response.json:
+            self.assertNotIn("token", token_data)
+            self.assertIn("token_prefix", token_data)
+
+    def test_revoke_token(self):
+        """It should revoke a token on DELETE"""
+        self.login()
+        create_response = self.post(url_for("api.my_tokens"))
+        self.assert201(create_response)
+        token_id = create_response.json["id"]
+        plaintext = create_response.json["token"]
+
+        response = self.delete(url_for("api.my_token", id=token_id))
         self.assert204(response)
 
-        self.user.reload()
-        self.assertIsNone(self.user.apikey)
+        # Verify the token is no longer in the active list
+        response = self.get(url_for("api.my_tokens"))
+        self.assert200(response)
+        active_ids = [t["id"] for t in response.json]
+        self.assertNotIn(token_id, active_ids)
+
+        # Verify the revoked token no longer authenticates
+        from udata.core.user.api_tokens import ApiToken
+
+        self.assertIsNone(ApiToken.authenticate(plaintext))
+
+    def test_revoke_nonexistent_token(self):
+        """It should return 404 for a non-existent token"""
+        self.login()
+        response = self.delete(url_for("api.my_token", id="000000000000000000000000"))
+        self.assert404(response)
+
+    def test_multiple_tokens(self):
+        """It should support multiple active tokens"""
+        self.login()
+        resp1 = self.post(url_for("api.my_tokens"), {"name": "Token 1"})
+        resp2 = self.post(url_for("api.my_tokens"), {"name": "Token 2"})
+        self.assert201(resp1)
+        self.assert201(resp2)
+        token1 = resp1.json["token"]
+        token2 = resp2.json["token"]
+        token1_id = resp1.json["id"]
+
+        # Both tokens should work
+        from udata.core.user.api_tokens import ApiToken
+
+        self.assertIsNotNone(ApiToken.authenticate(token1))
+        self.assertIsNotNone(ApiToken.authenticate(token2))
+
+        # Revoke token1
+        self.delete(url_for("api.my_token", id=token1_id))
+
+        # token1 no longer works, token2 still works
+        self.assertIsNone(ApiToken.authenticate(token1))
+        self.assertIsNotNone(ApiToken.authenticate(token2))
+
+    def test_get_me_no_apikey_field(self):
+        """GET /me should no longer contain the apikey field"""
+        self.login()
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+        self.assertNotIn("apikey", response.json)
 
     def test_delete(self):
         """It should delete the connected user"""
