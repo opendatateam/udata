@@ -185,9 +185,9 @@ class ReuseAPI(API):
     def get(self, reuse):
         """Fetch a given reuse"""
         if not reuse.permissions["read"].can():
+            if not reuse.private and reuse.deleted:
+                api.abort(410, "This reuse has been deleted")
             api.abort(404)
-        if reuse.deleted and not reuse.permissions["edit"].can():
-            api.abort(410, "This reuse has been deleted")
         return reuse
 
     @api.secure

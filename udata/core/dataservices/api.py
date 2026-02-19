@@ -98,9 +98,9 @@ class DataserviceAPI(API):
     @api.marshal_with(Dataservice.__read_fields__)
     def get(self, dataservice):
         if not dataservice.permissions["read"].can():
+            if not dataservice.private and dataservice.deleted_at:
+                api.abort(410, "Dataservice has been deleted")
             api.abort(404)
-        if dataservice.deleted_at and not dataservice.permissions["edit"].can():
-            api.abort(410, "Dataservice has been deleted")
         return dataservice
 
     @api.secure
@@ -256,9 +256,9 @@ class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
     def get(self, dataservice: Dataservice, _format):
         if not dataservice.permissions["read"].can():
+            if not dataservice.private and dataservice.deleted_at:
+                api.abort(410)
             api.abort(404)
-        if dataservice.deleted_at and not dataservice.permissions["edit"].can():
-            api.abort(410)
 
         resource = dataservice_to_rdf(dataservice)
         # bypass flask-restplus make_response, since graph_response
