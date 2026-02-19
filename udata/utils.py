@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
-from typing import Any, Hashable
+from typing import Any, Hashable, overload
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -113,6 +113,10 @@ class Paginable(object):
     """
     A simple helper mixin for pagination
     """
+
+    page: int
+    page_size: int | None
+    total: int
 
     @property
     def pages(self):
@@ -362,21 +366,6 @@ PROVIDERS.remove("faker.providers.lorem")
 faker = Faker("fr_FR")  # Use a unicode/utf-8 based locale
 
 
-def generate_tags(nb=3) -> [str]:
-    return [generate_tag() for _ in range(nb)]
-
-
-def generate_tag() -> str:
-    fake_tag: str = faker.word()
-    while len(fake_tag) < tags.TAG_MIN_LENGTH:
-        fake_tag = faker.word()
-    return fake_tag
-
-
-faker.tag = generate_tag
-faker.tags = generate_tags
-
-
 def faker_provider(provider):
     faker.add_provider(provider)
     factory.Faker.add_provider(provider)
@@ -395,6 +384,15 @@ class UDataProvider(BaseProvider):
         """Generate a unique string"""
         return unique_string(length)
 
+    def tag(self) -> str:
+        fake_tag: str = self.generator.word()
+        while len(fake_tag) < tags.TAG_MIN_LENGTH:
+            fake_tag = self.generator.word()
+        return fake_tag
+
+    def tags(self, nb: int = 3) -> list[str]:
+        return [self.tag() for _ in range(nb)]
+
 
 @faker_provider  # Replace the default lorem provider with a unicode one
 class UnicodeLoremProvider(LoremProvider):
@@ -403,7 +401,15 @@ class UnicodeLoremProvider(LoremProvider):
     word_list = [w + "é" for w in LoremProvider.word_list]
 
 
-def safe_unicode(string: bytes) -> str | None:
+@overload
+def safe_unicode(string: None) -> None: ...
+
+
+@overload
+def safe_unicode(string: object) -> str: ...
+
+
+def safe_unicode(string: object | None) -> str | None:
     """Safely transform any object into utf8 decoded str"""
     if string is None:
         return None

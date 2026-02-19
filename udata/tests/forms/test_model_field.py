@@ -1,23 +1,24 @@
+from mongoengine.fields import GenericReferenceField, ReferenceField, StringField
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import PytestOnlyDBTestCase
 
 
-class Target(db.Document):
-    name = db.StringField()
+class Target(Document):
+    name = StringField()
 
 
-class Model(db.Document):
-    name = db.StringField()
-    target = db.GenericReferenceField()
+class Model(Document):
+    name = StringField()
+    target = GenericReferenceField()
 
 
-class ModelExplicit(db.Document):
-    name = db.StringField()
-    target = db.ReferenceField(Target)
+class ModelExplicit(Document):
+    name = StringField()
+    target = ReferenceField(Target)
 
 
 class Generic:

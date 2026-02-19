@@ -1,6 +1,9 @@
 import logging
 from datetime import datetime
 
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import GenericReferenceField
+
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
@@ -9,29 +12,28 @@ from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
 from udata.models import Transfer
-from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
 
 @generate_fields()
-class TransferRequestNotificationDetails(db.EmbeddedDocument):
+class TransferRequestNotificationDetails(EmbeddedDocument):
     transfer_owner = field(
-        db.GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=(User, Organization), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_recipient = field(
-        db.GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=(User, Organization), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_subject = field(
-        db.GenericReferenceField(choices=(Dataset, Dataservice, Reuse), required=True),
+        GenericReferenceField(choices=(Dataset, Dataservice, Reuse), required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
@@ -130,3 +132,19 @@ def transfer_request_notifications(user):
         )
 
     return notifications
+
+
+@Transfer.after_delete.connect
+def on_transfer_deleted(transfer, **kwargs):
+    """Clean up notifications when a transfer is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        # Delete all notifications that reference this transfer
+        Notification.objects(
+            details__transfer_owner=transfer.owner,
+            details__transfer_recipient=transfer.recipient,
+            details__transfer_subject=transfer.subject,
+        ).delete()
+    except Exception as e:
+        log.error(f"Error cleaning up notifications for deleted transfer {transfer.id}: {e}")

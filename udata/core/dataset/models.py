@@ -10,8 +10,21 @@ import requests
 from blinker import signal
 from flask import current_app, url_for
 from flask_babel import LazyString
+from mongoengine import NULLIFY, PULL, EmbeddedDocument, Q
 from mongoengine import ValidationError as MongoEngineValidationError
-from mongoengine.fields import DateTimeField
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    EmbeddedDocumentField,
+    EnumField,
+    GenericEmbeddedDocumentField,
+    IntField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
@@ -21,17 +34,29 @@ from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
+from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
+from udata.core.contact_point.models import (
+    ContactPoint,  # noqa: F401 — must be registered before Dataset
+)
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
+from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
+from udata.mongo.datetime_fields import DateRange
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
+from udata.mongo.url_field import URLField
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -92,42 +117,42 @@ def get_json_ld_extra(key, value):
 
 
 @generate_fields()
-class HarvestDatasetMetadata(db.EmbeddedDocument):
-    backend = db.StringField()
-    created_at = db.DateTimeField()
-    issued_at = db.DateTimeField()
-    modified_at = db.DateTimeField()
-    source_id = db.StringField()
-    remote_id = db.StringField()
-    domain = db.StringField()
-    last_update = db.DateTimeField()
-    remote_url = db.URLField()
-    uri = db.StringField()
-    dct_identifier = db.StringField()
-    archived_at = db.DateTimeField()
-    archived = db.StringField()
-    ckan_name = db.StringField()
-    ckan_source = db.StringField()
+class HarvestDatasetMetadata(EmbeddedDocument):
+    backend = StringField()
+    created_at = DateTimeField()
+    issued_at = DateTimeField()
+    modified_at = DateTimeField()
+    source_id = StringField()
+    remote_id = StringField()
+    domain = StringField()
+    last_update = DateTimeField()
+    remote_url = URLField()
+    uri = StringField()
+    dct_identifier = StringField()
+    archived_at = DateTimeField()
+    archived = StringField()
+    ckan_name = StringField()
+    ckan_source = StringField()
 
 
-class HarvestResourceMetadata(db.EmbeddedDocument):
-    issued_at = db.DateTimeField()
-    modified_at = db.DateTimeField()
-    uri = db.StringField()
-    dct_identifier = db.StringField()
+class HarvestResourceMetadata(EmbeddedDocument):
+    issued_at = DateTimeField()
+    modified_at = DateTimeField()
+    uri = StringField()
+    dct_identifier = StringField()
 
 
 @generate_fields()
-class Schema(db.EmbeddedDocument):
+class Schema(EmbeddedDocument):
     """
     Schema can only be two things right now:
     - Known schema: url is not set, name is set, version is maybe set
     - Unknown schema: url is set, name and version are maybe set
     """
 
-    url = db.URLField()
-    name = db.StringField()
-    version = db.StringField()
+    url = URLField()
+    name = StringField()
+    version = StringField()
 
     def __bool__(self):
         """
@@ -215,26 +240,26 @@ class Schema(db.EmbeddedDocument):
                     return
 
 
-class License(db.Document):
+class License(Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
-    id = db.StringField(primary_key=True)
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
-    title = db.StringField(required=True)
-    alternate_titles = db.ListField(db.StringField())
-    slug = db.SlugField(required=True, populate_from="title")
-    url = db.URLField()
-    alternate_urls = db.ListField(db.URLField())
-    maintainer = db.StringField()
-    flags = db.ListField(db.StringField())
+    id = StringField(primary_key=True)
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    title = StringField(required=True)
+    alternate_titles = ListField(StringField())
+    slug = SlugField(required=True, populate_from="title")
+    url = URLField()
+    alternate_urls = ListField(URLField())
+    maintainer = StringField()
+    flags = ListField(StringField())
 
-    active = db.BooleanField()
+    active = BooleanField()
 
     def __str__(self):
         return self.title
 
     @classmethod
-    def extract_first_url(cls, text: str) -> tuple[str]:
+    def extract_first_url(cls, text: str) -> tuple[str, ...]:
         """
         Extracts the first URL from a given text string and returns the URL and the remaining text.
         """
@@ -279,10 +304,7 @@ class License(db.Document):
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
         license = qs(
-            db.Q(id__iexact=text)
-            | db.Q(slug=slug)
-            | db.Q(url__iexact=text)
-            | db.Q(alternate_urls__iexact=text)
+            Q(id__iexact=text) | Q(slug=slug) | Q(url__iexact=text) | Q(alternate_urls__iexact=text)
         ).first()
 
         if license is None:
@@ -296,9 +318,7 @@ class License(db.Document):
                 parsed = urlparse(url)
                 path = parsed.path.rstrip("/")
                 query = f"{parsed.netloc}{path}"
-                license = qs(
-                    db.Q(url__icontains=query) | db.Q(alternate_urls__contains=query)
-                ).first()
+                license = qs(Q(url__icontains=query) | Q(alternate_urls__contains=query)).first()
 
         if license is None:
             # Try to single match `slug` with a low Damerau-Levenshtein distance
@@ -347,15 +367,15 @@ class DatasetQuerySet(OwnedQuerySet):
         return self(private__ne=True, deleted=None, archived=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
+        return self(Q(private=True) | Q(deleted__ne=None) | Q(archived__ne=None))
 
     def with_badge(self, kind):
         return self(badges__kind=kind)
 
 
-class Checksum(db.EmbeddedDocument):
-    type = db.StringField(choices=CHECKSUM_TYPES, required=True)
-    value = db.StringField(required=True)
+class Checksum(EmbeddedDocument):
+    type = StringField(choices=CHECKSUM_TYPES, required=True)
+    value = StringField(required=True)
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
@@ -363,31 +383,31 @@ class Checksum(db.EmbeddedDocument):
 
 
 class ResourceMixin(object):
-    id = db.AutoUUIDField(primary_key=True)
-    title = db.StringField(verbose_name="Title", required=True)
-    description = db.StringField()
-    filetype = db.StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
-    type = db.StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
-    url = db.URLField(required=True)
-    urlhash = db.StringField()
-    checksum = db.EmbeddedDocumentField(Checksum)
-    format = db.StringField()
-    mime = db.StringField()
-    filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
-    fs_filename = db.StringField()
-    extras = db.ExtrasField(
+    id = AutoUUIDField(primary_key=True)
+    title = StringField(verbose_name="Title", required=True)
+    description = StringField()
+    filetype = StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
+    type = StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
+    url = URLField(required=True)
+    urlhash = StringField()
+    checksum = EmbeddedDocumentField(Checksum)
+    format = StringField()
+    mime = StringField()
+    filesize = IntField()  # `size` is a reserved keyword for mongoengine.
+    fs_filename = StringField()
+    extras = ExtrasField(
         {
-            "check:available": db.BooleanField,
-            "check:status": db.IntField,
-            "check:date": db.DateTimeField,
+            "check:available": BooleanField,
+            "check:status": IntField,
+            "check:date": DateTimeField,
         }
     )
-    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.EmbeddedDocumentField(Schema)
+    harvest = EmbeddedDocumentField(HarvestResourceMetadata)
+    schema = EmbeddedDocumentField(Schema)
 
-    created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
-    last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
-    deleted = db.DateTimeField()
+    created_at_internal = DateTimeField(default=datetime.utcnow, required=True)
+    last_modified_internal = DateTimeField(default=datetime.utcnow, required=True)
+    deleted = DateTimeField()
 
     @property
     def internal(self):
@@ -487,7 +507,7 @@ class ResourceMixin(object):
 
 
 @generate_fields()
-class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
     """
     Local file, remote file or API provided by the original provider of the
     dataset
@@ -530,11 +550,11 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 # defined before Dataset in the file — Dataset is resolved lazily at call time.
 def validate_badge(value):
     if value not in Dataset.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise MongoEngineValidationError("Unknown badge type")
 
 
 class DatasetBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class DatasetBadgeMixin(BadgeMixin):
@@ -543,57 +563,51 @@ class DatasetBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Dataset(
-    Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
-):
-    title = field(db.StringField(required=True))
-    acronym = field(db.StringField(max_length=128))
+class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, Document):
+    title = field(StringField(required=True))
+    acronym = field(StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         auditable=False,
     )
     description = field(
-        db.StringField(required=True, default=""),
+        StringField(required=True, default=""),
         markdown=True,
     )
-    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
-    license = field(db.ReferenceField("License"))
+    description_short = field(StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
+    license = field(ReferenceField("License"))
 
-    tags = field(db.TagListField())
-    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
+    tags = field(TagListField())
+    resources = field(ListField(EmbeddedDocumentField(Resource)), auditable=False)
 
-    private = field(db.BooleanField(default=False))
+    private = field(BooleanField(default=False))
 
-    frequency = field(db.EnumField(UpdateFrequency))
-    frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
+    frequency = field(EnumField(UpdateFrequency))
+    frequency_date = field(DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(
-        db.EmbeddedDocumentField(db.DateRange),
+        EmbeddedDocumentField(DateRange),
         nested_fields=temporal_coverage_fields,
     )
     spatial = field(
-        db.EmbeddedDocumentField(SpatialCoverage),
+        EmbeddedDocumentField(SpatialCoverage),
         nested_fields=spatial_coverage_fields,
     )
-    schema = field(db.EmbeddedDocumentField(Schema))
+    schema = field(EmbeddedDocumentField(Schema))
 
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()), auditable=False)
-    extras = field(db.ExtrasField(), auditable=False)
-    harvest = field(db.EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
+    ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
+    extras = field(ExtrasField(), auditable=False)
+    harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
-    quality_cached = field(db.DictField(), auditable=False)
+    quality_cached = field(DictField(), auditable=False)
 
     featured = field(
-        db.BooleanField(required=True, default=False),
+        BooleanField(required=True, default=False),
         auditable=False,
     )
 
-    contact_points = field(
-        db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
-    )
+    contact_points = field(ListField(ReferenceField("ContactPoint", reverse_delete_rule=PULL)))
 
     created_at_internal = field(
         DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
@@ -613,8 +627,8 @@ class Dataset(
         ),
         auditable=False,
     )
-    deleted = field(db.DateTimeField(), auditable=False)
-    archived = field(db.DateTimeField())
+    deleted = field(DateTimeField(), auditable=False)
+    archived = field(DateTimeField())
 
     def __str__(self):
         return self.title or ""
@@ -1108,13 +1122,13 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
+class CommunityResource(ResourceMixin, WithMetrics, Owned, Document):
     """
     Local file, remote file or API added by the community of the users to the
     original dataset
     """
 
-    dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
+    dataset = ReferenceField(Dataset, reverse_delete_rule=NULLIFY)
 
     __metrics_keys__ = [
         "views",

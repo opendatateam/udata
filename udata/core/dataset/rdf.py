@@ -21,7 +21,7 @@ from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
-from udata.models import db
+from udata.mongo.datetime_fields import DateRange
 from udata.rdf import (
     ADMS,
     CONTACT_POINT_ENTITY_TO_ROLE,
@@ -132,7 +132,7 @@ EUFREQ_ID_TO_UDATA = {
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 
-def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfResource | None:
+def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -147,6 +147,49 @@ def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfR
 
 def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = None) -> str | None:
     return UDATA_FREQ_ID_TO_TERM.get(frequency)
+
+
+def access_right_to_rdf(dataset: Dataset, graph: Graph | None = None):
+    """
+    Build the access rights from a dataset.
+    Cardinality is 0..1 for accessRights.
+    """
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    if dataset.access_type:
+        node = graph.resource(URIRef(AccessType(dataset.access_type).url))
+        node.set(RDF.type, DCT.RightsStatement)
+        return node
+
+
+def license_to_rdf(dataset: Dataset):
+    """
+    Build the license from a dataset.
+    Cardinality is 0..1 for license.
+    See also `rights_to_rdf` for license without a url.
+    """
+    if dataset.license and dataset.license.url:
+        return URIRef(dataset.license.url)
+
+
+def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
+    """
+    Build the rights from a dataset to a RdfResource.
+    Cardinality is 0..* for rights.
+    See also `license_to_rdf` for license with a url.
+    """
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    if dataset.license and not dataset.license.url:
+        yield Literal(dataset.license.title)
+    if dataset.access_type_reason_category:
+        node = graph.resource(
+            URIRef(InspireLimitationCategory(dataset.access_type_reason_category).url)
+        )
+        node.set(RDF.type, DCT.RightsStatement)
+        node.set(
+            DCT.description,
+            Literal(InspireLimitationCategory(dataset.access_type_reason_category).definition),
+        )
+        yield node
 
 
 def owner_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource | None:
@@ -200,14 +243,16 @@ def ogc_service_to_rdf(
             URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
         )
 
-    if dataset and dataset.license:
-        service.add(DCT.rights, Literal(dataset.license.title))
-        if dataset.license.url:
-            service.add(DCT.license, URIRef(dataset.license.url))
+    if dataset:
+        for right in rights_to_rdf(dataset, graph):
+            service.add(DCT.rights, right)
 
-    if dataset and dataset.contact_points:
-        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
-            service.set(predicate, contact_point)
+        if license := license_to_rdf(dataset):
+            service.add(DCT.license, license)
+
+        if dataset.contact_points:
+            for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+                service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -245,10 +290,12 @@ def resource_to_rdf(
     set_harvested_date(resource, r, DCT.issued, "issued_at", fallback=resource.created_at)
     # modified
     set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
-    if dataset and dataset.license:
-        r.add(DCT.rights, Literal(dataset.license.title))
-        if dataset.license.url:
-            r.add(DCT.license, URIRef(dataset.license.url))
+    # add appropriate rights and license
+    if dataset:
+        for right in rights_to_rdf(dataset, graph):
+            r.add(DCT.rights, right)
+        if license := license_to_rdf(dataset):
+            r.add(DCT.license, license)
     if resource.filesize is not None:
         r.add(DCAT.byteSize, Literal(resource.filesize))
     if resource.mime:
@@ -365,6 +412,9 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
     if frequency := frequency_to_rdf(dataset.frequency):
         d.set(DCT.accrualPeriodicity, frequency)
 
+    if access_right := access_right_to_rdf(dataset, graph):
+        d.add(DCT.accessRights, access_right)
+
     owner_role = DCT.publisher
     if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
         # There's already a publisher, so the owner should instead be a distributor.
@@ -396,16 +446,16 @@ def temporal_from_literal(text):
         # This is an ISO date range as preconized by Gov.uk
         # http://guidance.data.gov.uk/dcat_fields.html
         start, end = text.split("/")
-        return db.DateRange(start=parse_dt(start).date(), end=parse_dt(end).date())
+        return DateRange(start=parse_dt(start).date(), end=parse_dt(end).date())
     else:
         separators = text.count("-")
         if separators == 0:
             # this is a year
-            return db.DateRange(start=date(int(text), 1, 1), end=date(int(text), 12, 31))
+            return DateRange(start=date(int(text), 1, 1), end=date(int(text), 12, 31))
         elif separators == 1:
             # this is a month
             dt = parse_dt(text).date()
-            return db.DateRange(
+            return DateRange(
                 start=dt.replace(day=1),
                 end=dt.replace(day=calendar.monthrange(dt.year, dt.month)[1]),
             )
@@ -413,7 +463,7 @@ def temporal_from_literal(text):
 
 def maybe_date_range(start, end):
     if start or end:
-        return db.DateRange(
+        return DateRange(
             start=start.toPython() if start else None,
             end=end.toPython() if end else None,
         )

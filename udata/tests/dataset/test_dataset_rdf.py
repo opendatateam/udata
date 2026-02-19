@@ -25,19 +25,22 @@ from udata.core.dataset.models import (
 from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
     FREQ_TERM_TO_UDATA,
+    access_right_to_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
     infer_dataset_access_rights,
+    license_to_rdf,
     licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
+    rights_to_rdf,
     temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import DateRange
 from udata.rdf import (
     ADMS,
     DCAT,
@@ -55,7 +58,6 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
-from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -225,7 +227,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert r.value(DCT.issued) == Literal(resource.harvest.issued_at)
         assert r.value(DCT.modified) == Literal(resource.harvest.modified_at)
         assert r.value(DCT.license).identifier == URIRef(license.url)
-        assert r.value(DCT.rights) == Literal(license.title)
+        # We don't need a duplicate DCT.rights if we already have a DCT.license
+        # assert r.value(DCT.rights) == Literal(license.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)
         assert r.value(DCAT.accessURL).identifier == URIRef(permalink)
         assert r.value(DCAT.byteSize) == Literal(resource.filesize)
@@ -279,7 +282,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
-        temporal_coverage = db.DateRange(start=start, end=end)
+        temporal_coverage = DateRange(start=start, end=end)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -292,7 +295,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
     def test_temporal_coverage_only_start(self):
         start = faker.past_date(start_date="-30d")
-        temporal_coverage = db.DateRange(start=start)
+        temporal_coverage = DateRange(start=start)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -305,7 +308,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
     def test_temporal_coverage_only_end(self):
         end = faker.future_date(end_date="+30d")
-        temporal_coverage = db.DateRange(end=end)
+        temporal_coverage = DateRange(end=end)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -480,7 +483,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
         assert set(dataset.tags) == set(tags)
-        assert isinstance(dataset.temporal_coverage, db.DateRange)
+        assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
 
@@ -1247,7 +1250,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end == end
 
@@ -1261,7 +1264,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end is None
 
@@ -1275,7 +1278,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start is None
         assert daterange.end == end
 
@@ -1287,7 +1290,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end == end
 
@@ -1296,18 +1299,18 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_as_iso_month(self):
         pot = Literal("2017-06")
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 6 == 1)
-        assert daterange.end, date(2017, 6 == 30)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 6, 1)
+        assert daterange.end == date(2017, 6, 30)
 
     @pytest.mark.skipif(not GOV_UK_REF_IS_UP, reason="Gov.uk references is unreachable")
     def test_parse_temporal_as_gov_uk_format(self):
@@ -1318,9 +1321,9 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_is_failsafe(self):
         node = URIRef("http://nowhere.org")
@@ -1526,7 +1529,7 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         )
 
 
-class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
+class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
     def test_licenses_from_rdf(self):
         """Test a bunch of cases of licenses detection from RDF"""
         rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1648,3 +1651,53 @@ class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
         assert access_rights == {"Some unknown rights"}
         assert access_type is None
         assert inspire_category is None
+
+    def test_rights_to_rdf_with_license_with_url_and_access_type_open(self, app):
+        dataset = DatasetFactory(
+            license=LicenseFactory(title="the license title", url="https://example.com/license"),
+            access_type=AccessType.OPEN,
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+        license = license_to_rdf(dataset)
+
+        assert len(rights) == 0  # the license is exposed as DCT.license
+        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
+        assert license == URIRef("https://example.com/license")
+
+    def test_rights_to_rdf_with_license_without_url_and_access_type_open(self, app):
+        license_without_url = LicenseFactory(url=None)
+        dataset = DatasetFactory(license=license_without_url, access_type=AccessType.OPEN)
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+        license = license_to_rdf(dataset)
+
+        assert len(rights) == 1
+        assert rights[0] == Literal(license_without_url.title)
+        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
+        assert license is None
+
+    def test_rights_to_rdf_with_access_type_restricted(self, app):
+        dataset = DatasetFactory(license=None, access_type=AccessType.RESTRICTED)
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+
+        assert len(rights) == 0
+        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+
+    def test_rights_to_rdf_with_access_type_restricted_and_reason_category(self, app):
+        dataset = DatasetFactory(
+            license=None,
+            access_type=AccessType.RESTRICTED,
+            access_type_reason_category=InspireLimitationCategory.PUBLIC_AUTHORITIES,
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+
+        assert len(rights) == 1
+        assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
+        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)

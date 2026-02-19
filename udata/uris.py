@@ -1,4 +1,5 @@
 import re
+from typing import NoReturn
 from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
 from flask import current_app, url_for
@@ -48,7 +49,7 @@ class ValidationError(ValueError):
     pass
 
 
-def error(url, reason=None):
+def error(url, reason=None) -> NoReturn:
     __tracebackhide__ = True
     if reason is not None:
         msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
