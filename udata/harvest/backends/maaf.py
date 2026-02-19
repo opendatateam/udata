@@ -19,7 +19,8 @@ from udata.harvest.filters import (
     to_date,
 )
 from udata.harvest.models import HarvestItem
-from udata.models import Checksum, License, Resource, SpatialCoverage, db
+from udata.models import Checksum, License, Resource, SpatialCoverage
+from udata.mongo.datetime_fields import DateRange
 from udata.utils import get_by
 
 log = logging.getLogger(__name__)
@@ -172,7 +173,7 @@ class MaafBackend(BaseBackend):
             dataset.license = License.objects.get(id=metadata["license_id"])
 
         if metadata.get("temporal_coverage_from") and metadata.get("temporal_coverage_to"):
-            dataset.temporal_coverage = db.DateRange(
+            dataset.temporal_coverage = DateRange(
                 start=metadata["temporal_coverage_from"], end=metadata["temporal_coverage_to"]
             )
 

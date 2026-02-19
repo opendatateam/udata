@@ -8,6 +8,7 @@ import pytest
 import pytz
 import requests_mock
 from flask import url_for
+from mongoengine.fields import BooleanField
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
@@ -47,7 +48,8 @@ from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.models import CommunityResource, Dataset, Follow, Member, db
+from udata.models import CommunityResource, Dataset, Follow, Member
+from udata.mongo.datetime_fields import DateRange
 from udata.tags import TAG_MAX_LENGTH, TAG_MIN_LENGTH
 from udata.tests.helpers import assert200, assert404, create_geozones_fixtures
 from udata.utils import faker, unique_string
@@ -192,7 +194,7 @@ class DatasetAPITest(APITestCase):
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
         granularity_dataset = DatasetFactory(spatial=SpatialCoverageFactory(granularity="country"))
 
-        temporal_coverage = db.DateRange(start="2022-05-03", end="2022-05-04")
+        temporal_coverage = DateRange(start="2022-05-03", end="2022-05-04")
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         owner_dataset = DatasetFactory(owner=owner)
@@ -1827,7 +1829,7 @@ class DatasetResourceAPITest(APITestCase):
     def test_reorder(self):
         # Register an extra field in order to test
         # https://github.com/opendatateam/udata/issues/1794
-        ResourceMixin.extras.register("my:register", db.BooleanField)
+        ResourceMixin.extras.register("my:register", BooleanField)
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.resources[0].extras = {
             "my:register": True,

@@ -1,4 +1,5 @@
 from flask_security import current_user
+from mongoengine.fields import ReferenceField
 
 from udata.core.dataservices.activities import DataserviceRelatedActivity
 from udata.core.dataservices.models import Dataservice
@@ -8,7 +9,7 @@ from udata.core.followers.signals import on_follow
 from udata.core.organization.activities import OrgRelatedActivity
 from udata.core.reuse.activities import ReuseRelatedActivity
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Dataset, Organization, Reuse, User, db
+from udata.models import Activity, Dataset, Organization, Reuse, User
 
 __all__ = (
     "UserFollowedDataset",
@@ -33,7 +34,7 @@ class DiscussActivity(object):
 class UserFollowedUser(FollowActivity, Activity):
     key = "user:followed"
     label = _("followed a user")
-    related_to = db.ReferenceField(User)
+    related_to = ReferenceField(User)
     template = "activity/user.html"
 
 
