@@ -1,5 +1,6 @@
 import logging
 import time
+from collections.abc import Iterator
 from functools import wraps
 
 import requests
@@ -41,7 +42,7 @@ def save_model(model: Document, model_id: str, metrics: dict[str, int]) -> None:
         log.exception(e)
 
 
-def iterate_on_metrics(target: str, value_keys: list[str], page_size: int = 50) -> dict:
+def iterate_on_metrics(target: str, value_keys: list[str], page_size: int = 50) -> Iterator[dict]:
     """
     Yield all elements with not zero values for the keys inside `value_keys`.
     If you pass ['visit', 'download_resource'], it will do a `OR` and get

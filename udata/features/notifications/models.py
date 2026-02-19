@@ -5,12 +5,15 @@ from mongoengine.fields import DateTimeField, GenericEmbeddedDocumentField, Refe
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.notifications import (
+    MembershipAcceptedNotificationDetails,
+    MembershipRefusedNotificationDetails,
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
 )
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
@@ -26,7 +29,7 @@ class NotificationQuerySet(UDataQuerySet):
 
     def with_user_in_details(self, user):
         """This function must be updated to handle new details cases"""
-        return self(details__request_user=user)
+        return self.filter(details__request_user=user)
 
 
 def is_handled(base_query, filter_value):
@@ -66,6 +69,9 @@ class Notification(Datetimed, Document):
                 TransferRequestNotificationDetails,
                 NewBadgeNotificationDetails,
                 DiscussionNotificationDetails,
+                MembershipAcceptedNotificationDetails,
+                MembershipRefusedNotificationDetails,
+                ValidateHarvesterNotificationDetails,
             )
         ),
         generic=True,

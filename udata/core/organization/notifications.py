@@ -58,6 +58,30 @@ class NewBadgeNotificationDetails(EmbeddedDocument):
     )
 
 
+@generate_fields()
+class MembershipAcceptedNotificationDetails(EmbeddedDocument):
+    organization = field(
+        ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
+@generate_fields()
+class MembershipRefusedNotificationDetails(EmbeddedDocument):
+    organization = field(
+        ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
 @MembershipRequest.after_create.connect
 def on_new_membership_request(request: MembershipRequest, **kwargs):
     from udata.features.notifications.models import Notification
@@ -81,6 +105,7 @@ def on_new_membership_request(request: MembershipRequest, **kwargs):
         try:
             existing = Notification.objects(
                 user=recipient,
+                handled_at=None,
                 details__request_organization=organization,
                 details__request_user=request.user,
             ).first()

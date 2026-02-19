@@ -45,7 +45,7 @@ def metrics_by_label(monthly_metrics: dict, metrics_labels: list[str]) -> list[O
 
 def get_metrics_for_model(
     model: str, id: str | ObjectId | None, metrics_labels: list[str]
-) -> list[OrderedDict]:
+) -> list[OrderedDict | dict]:
     """
     Get distant metrics for a particular model object
     """

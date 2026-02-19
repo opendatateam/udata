@@ -36,6 +36,7 @@ class Transfer(Document):
 
     on_create = Signal()
     after_handle = Signal()
+    after_delete = Signal()
 
     meta = {
         "indexes": [
@@ -52,6 +53,12 @@ class Transfer(Document):
         # Only trigger on_create signal on creation, not on every save
         if kwargs.get("created"):
             cls.on_create.send(document)
+
+    def delete(self, *args, **kwargs):
+        """Delete the transfer and ensure after_delete signal is triggered"""
+        result = super().delete(*args, **kwargs)
+        self.after_delete.send(self)
+        return result
 
 
 # Connect the post_save signal

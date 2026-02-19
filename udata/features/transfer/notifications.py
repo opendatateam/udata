@@ -132,3 +132,19 @@ def transfer_request_notifications(user):
         )
 
     return notifications
+
+
+@Transfer.after_delete.connect
+def on_transfer_deleted(transfer, **kwargs):
+    """Clean up notifications when a transfer is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        # Delete all notifications that reference this transfer
+        Notification.objects(
+            details__transfer_owner=transfer.owner,
+            details__transfer_recipient=transfer.recipient,
+            details__transfer_subject=transfer.subject,
+        ).delete()
+    except Exception as e:
+        log.error(f"Error cleaning up notifications for deleted transfer {transfer.id}: {e}")

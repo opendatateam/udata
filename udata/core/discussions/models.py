@@ -20,7 +20,13 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
-from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
+from .signals import (
+    on_discussion_closed,
+    on_discussion_deleted,
+    on_discussion_message_deleted,
+    on_new_discussion,
+    on_new_discussion_comment,
+)
 
 log = logging.getLogger(__name__)
 
@@ -210,3 +216,17 @@ class Discussion(SpamMixin, Linkable, Document):
     @spam_protected(lambda discussion, message: discussion.discussion[message])
     def signal_comment(self, message):
         on_new_discussion_comment.send(self, message=message)
+
+    def delete(self, *args, **kwargs):
+        """Delete the discussion and send deletion signal"""
+        result = super().delete(*args, **kwargs)
+        on_discussion_deleted.send(self)
+        return result
+
+    def remove_message(self, message_index):
+        """Remove a message from the discussion and trigger deletion signal"""
+        if 0 <= message_index < len(self.discussion):
+            message = self.discussion[message_index]
+            self.discussion.pop(message_index)
+            self.save()
+            on_discussion_message_deleted.send(self, message=message)

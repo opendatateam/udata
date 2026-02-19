@@ -1295,8 +1295,8 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         daterange = temporal_from_rdf(pot)
 
         assert isinstance(daterange, DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_as_iso_month(self):
         pot = Literal("2017-06")
@@ -1304,8 +1304,8 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         daterange = temporal_from_rdf(pot)
 
         assert isinstance(daterange, DateRange)
-        assert daterange.start, date(2017, 6 == 1)
-        assert daterange.end, date(2017, 6 == 30)
+        assert daterange.start == date(2017, 6, 1)
+        assert daterange.end == date(2017, 6, 30)
 
     @pytest.mark.skipif(not GOV_UK_REF_IS_UP, reason="Gov.uk references is unreachable")
     def test_parse_temporal_as_gov_uk_format(self):
@@ -1317,8 +1317,8 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         daterange = temporal_from_rdf(g.resource(node))
 
         assert isinstance(daterange, DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_is_failsafe(self):
         node = URIRef("http://nowhere.org")

@@ -153,7 +153,7 @@ class SpamMixin(object):
     def spam_is_whitelisted(self) -> bool:
         return False
 
-    def spam_report_message(self):
+    def spam_report_message(self, breadcrumb=None):
         return f"Spam potentiel sur {type(self).__name__}"
 
     def _report(self, text, breadcrumb, reason):

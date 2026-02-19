@@ -126,7 +126,7 @@ def display_op(op):
     format_output(op["output"], success=op["success"], traceback=op.get("traceback"))
 
 
-def check_references(models_to_check):
+def check_references(models_to_check=()):
     # Cannot modify local scope from Python… :-(
     class Log:
         errors = []
