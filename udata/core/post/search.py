@@ -28,10 +28,9 @@ class PostSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        """Fallback search implementation when search service is not available"""
         posts = Post.objects()
-        posts = posts.order_by("-created_at")
-        return posts
+        sort = cls.parse_sort(args["sort"]) or "-created_at"
+        return posts.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, post):

@@ -1,10 +1,8 @@
 import logging
 
-# Import udata event in order for datasets event hooks to be executed
 from flask import current_app
 from mongoengine.signals import post_delete, post_save
 
-import udata.event  # noqa
 from udata.mongo import db
 from udata.tasks import as_task_param, task
 
@@ -61,6 +59,11 @@ def unindex(classname, id):
         service.delete_one(str(id))
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
+
+
+# Placed after reindex/unindex definitions to avoid circular import:
+# udata.search → udata.event → udata.models → udata.core.topic.models → udata.search.reindex
+import udata.event  # noqa: E402, F401
 
 
 def reindex_model_on_save(sender, document, **kwargs):

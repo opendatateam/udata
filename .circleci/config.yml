@@ -113,7 +113,7 @@ jobs:
       - run:
           name: Run tests
           environment:
-            SEARCH_SERVICE_API_URL: "http://localhost:5000/api/1/"
+            ELASTICSEARCH_URL: "http://localhost:9200"
           command: |
             mkdir -p reports/python
             uv run inv test --report --ci
