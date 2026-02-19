@@ -1,20 +1,21 @@
 import factory
 from factory.mongoengine import MongoEngineFactory
+from mongoengine.fields import BooleanField, ListField, StringField
 
 from udata import search
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 
 #############################################################################
 #                           Fake object for testing                         #
 #############################################################################
 
 
-class FakeSearchable(db.Document):
-    title = db.StringField()
-    description = db.StringField()
-    tags = db.ListField(db.StringField())
-    other = db.ListField(db.StringField())
-    indexable = db.BooleanField(default=True)
+class FakeSearchable(Document):
+    title = StringField()
+    description = StringField()
+    tags = ListField(StringField())
+    other = ListField(StringField())
+    indexable = BooleanField(default=True)
 
     meta = {"allow_inheritance": True}
 

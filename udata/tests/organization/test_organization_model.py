@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+from mongoengine.errors import ValidationError
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
@@ -11,7 +12,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization, OrganizationBadge
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, Follow, Member, Reuse, db
+from udata.models import Dataset, Follow, Member, Reuse
 from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
@@ -83,7 +84,7 @@ class OrganizationModelTest(DBTestCase):
         assert org_certified_association in associations
 
     def test_organization__url(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             OrganizationFactory(url="not-an-url")
 
 
@@ -100,6 +101,6 @@ class OrganizationBadgeTest(DBTestCase):
         badge = OrganizationBadge(kind="new")
         badge.validate()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             badge = OrganizationBadge(kind="doesnotexist")
             badge.validate()

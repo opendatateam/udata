@@ -21,7 +21,7 @@ from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
-from udata.models import db
+from udata.mongo.datetime_fields import DateRange
 from udata.rdf import (
     ADMS,
     CONTACT_POINT_ENTITY_TO_ROLE,
@@ -132,7 +132,7 @@ EUFREQ_ID_TO_UDATA = {
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 
-def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfResource | None:
+def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -396,16 +396,16 @@ def temporal_from_literal(text):
         # This is an ISO date range as preconized by Gov.uk
         # http://guidance.data.gov.uk/dcat_fields.html
         start, end = text.split("/")
-        return db.DateRange(start=parse_dt(start).date(), end=parse_dt(end).date())
+        return DateRange(start=parse_dt(start).date(), end=parse_dt(end).date())
     else:
         separators = text.count("-")
         if separators == 0:
             # this is a year
-            return db.DateRange(start=date(int(text), 1, 1), end=date(int(text), 12, 31))
+            return DateRange(start=date(int(text), 1, 1), end=date(int(text), 12, 31))
         elif separators == 1:
             # this is a month
             dt = parse_dt(text).date()
-            return db.DateRange(
+            return DateRange(
                 start=dt.replace(day=1),
                 end=dt.replace(day=calendar.monthrange(dt.year, dt.month)[1]),
             )
@@ -413,7 +413,7 @@ def temporal_from_literal(text):
 
 def maybe_date_range(start, end):
     if start or end:
-        return db.DateRange(
+        return DateRange(
             start=start.toPython() if start else None,
             end=end.toPython() if end else None,
         )
