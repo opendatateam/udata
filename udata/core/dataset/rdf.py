@@ -161,24 +161,22 @@ def access_right_to_rdf(dataset: Dataset, graph: Graph | None = None):
         return node
 
 
-def license_to_rdf(dataset: Dataset | None):
+def license_to_rdf(dataset: Dataset):
     """
     Build the license from a dataset.
     Cardinality is 0..1 for license.
     See also `rights_to_rdf` for license without a url.
     """
-    if dataset and dataset.license and dataset.license.url:
+    if dataset.license and dataset.license.url:
         return URIRef(dataset.license.url)
 
 
-def rights_to_rdf(dataset: Dataset | None, graph: Graph | None = None):
+def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
     """
     Build the rights from a dataset to a RdfResource.
     Cardinality is 0..* for rights.
     See also `license_to_rdf` for license with a url.
     """
-    if not dataset:
-        return
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset.license and not dataset.license.url:
         yield Literal(dataset.license.title)
@@ -245,15 +243,16 @@ def ogc_service_to_rdf(
             URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
         )
 
-    for right in rights_to_rdf(dataset, graph):
-        service.add(DCT.rights, right)
+    if dataset:
+        for right in rights_to_rdf(dataset, graph):
+            service.add(DCT.rights, right)
 
-    if license := license_to_rdf(dataset):
-        service.add(DCT.license, license)
+        if license := license_to_rdf(dataset):
+            service.add(DCT.license, license)
 
-    if dataset and dataset.contact_points:
-        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
-            service.set(predicate, contact_point)
+        if dataset.contact_points:
+            for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+                service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -292,10 +291,11 @@ def resource_to_rdf(
     # modified
     set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
     # add appropriate rights and license
-    for right in rights_to_rdf(dataset, graph):
-        r.add(DCT.rights, right)
-    if license := license_to_rdf(dataset):
-        r.add(DCT.license, license)
+    if dataset:
+        for right in rights_to_rdf(dataset, graph):
+            r.add(DCT.rights, right)
+        if license := license_to_rdf(dataset):
+            r.add(DCT.license, license)
     if resource.filesize is not None:
         r.add(DCAT.byteSize, Literal(resource.filesize))
     if resource.mime:
