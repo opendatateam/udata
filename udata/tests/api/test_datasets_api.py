@@ -1593,6 +1593,61 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(len(feed.entries), 1)
         self.assertEqual(feed.entries[0].title, "Transport public")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_geozone_filter(self):
+        paca, _, _ = create_geozones_fixtures()
+        DatasetFactory(
+            title="PACA Dataset",
+            spatial=SpatialCoverageFactory(zones=[paca.id]),
+            resources=[ResourceFactory()],
+        )
+        DatasetFactory(title="No Zone", resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", geozone=paca.id))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "PACA Dataset")
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_granularity_filter(self):
+        DatasetFactory(
+            title="Country Dataset",
+            spatial=SpatialCoverageFactory(granularity="country"),
+            resources=[ResourceFactory()],
+        )
+        DatasetFactory(title="No Granularity", resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", granularity="country"))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "Country Dataset")
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_schema_filter(self):
+        DatasetFactory(
+            title="Schema Dataset",
+            resources=[
+                ResourceFactory(schema={"name": "my-schema", "url": "https://example.org"})
+            ],
+        )
+        DatasetFactory(title="No Schema", resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed", schema="my-schema"))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+        self.assertEqual(len(feed.entries), 1)
+        self.assertEqual(feed.entries[0].title, "Schema Dataset")
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_recent_feed_with_sort_by_last_update(self):
+        response = self.get(url_for("api.recent_datasets_atom_feed", sort="-last_update"))
+        self.assert200(response)
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
