@@ -181,13 +181,12 @@ def rights_to_rdf(dataset: Dataset, graph: Graph | None = None):
     if dataset.license and not dataset.license.url:
         yield Literal(dataset.license.title)
     if dataset.access_type_reason_category:
-        node = graph.resource(
-            URIRef(InspireLimitationCategory(dataset.access_type_reason_category).url)
-        )
+        category = InspireLimitationCategory(dataset.access_type_reason_category)
+        node = graph.resource(URIRef(category.url))
         node.set(RDF.type, DCT.RightsStatement)
         node.set(
             DCT.description,
-            Literal(InspireLimitationCategory(dataset.access_type_reason_category).definition),
+            Literal(category.definition),
         )
         yield node
 
