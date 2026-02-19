@@ -6,6 +6,8 @@ from udata.core.organization.constants import PRODUCER_BADGE_TYPES
 from udata.models import Organization
 from udata.search.fields import ModelTermsFilter
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import OrganizationConsumer
+from udata_search_service.services import OrganizationService
 
 __all__ = ("OrganizationSearch",)
 
@@ -14,6 +16,8 @@ __all__ = ("OrganizationSearch",)
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     search_url = "organizations/"
+    service_class = OrganizationService
+    consumer_class = OrganizationConsumer
 
     sorts = {
         "reuses": "metrics.reuses",

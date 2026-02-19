@@ -30,6 +30,7 @@ class Defaults(object):
     # Search service configuration
     SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
+    ELASTICSEARCH_URL = None
     UDATA_INSTANCE_NAME = "udata"
 
     # BROKER_TRANSPORT = 'redis'

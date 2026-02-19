@@ -18,6 +18,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import DatasetConsumer
+from udata_search_service.services import DatasetService
 
 __all__ = ("DatasetSearch",)
 
@@ -31,6 +33,8 @@ MAX_NUMBER_OF_RESOURCES_TO_INDEX = 500
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     search_url = "datasets/"
+    service_class = DatasetService
+    consumer_class = DatasetConsumer
 
     sorts = {
         "created": "created_at_internal",

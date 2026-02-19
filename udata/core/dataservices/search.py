@@ -21,6 +21,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import DataserviceConsumer
+from udata_search_service.services import DataserviceService
 
 # Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
 MAX_DOCUMENTATION_SIZE = 100 * 1024
@@ -72,6 +74,8 @@ class DataserviceApiParser(ModelApiParser):
 class DataserviceSearch(ModelSearchAdapter):
     model = Dataservice
     search_url = "dataservices/"
+    service_class = DataserviceService
+    consumer_class = DataserviceConsumer
 
     sorts = {"created": "created_at", "views": "views", "followers": "followers"}
 

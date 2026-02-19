@@ -1,11 +1,15 @@
 from udata.core.post.models import Post
 from udata.search import Filter, ListFilter, ModelSearchAdapter, register
+from udata_search_service.consumers import PostConsumer
+from udata_search_service.services import PostService
 
 
 @register
 class PostSearch(ModelSearchAdapter):
     model = Post
     search_url = "posts/"
+    service_class = PostService
+    consumer_class = PostConsumer
 
     sorts = {
         "created": "created_at",
