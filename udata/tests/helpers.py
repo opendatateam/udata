@@ -1,6 +1,6 @@
 import os
 from contextlib import contextmanager
-from datetime import timedelta
+from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
 
@@ -21,6 +21,11 @@ requires_search_service = pytest.mark.skipif(
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.
     """Lax date comparison, avoid comparing milliseconds and seconds."""
     __tracebackhide__ = True
+    # Normalize both datetimes to naive (MongoEngine returns naive datetimes)
+    if isinstance(datetime1, datetime) and datetime1.tzinfo is not None:
+        datetime1 = datetime1.replace(tzinfo=None)
+    if isinstance(datetime2, datetime) and datetime2.tzinfo is not None:
+        datetime2 = datetime2.replace(tzinfo=None)
     delta = datetime1 - datetime2
     assert timedelta(seconds=-limit) <= delta <= timedelta(seconds=limit)
 

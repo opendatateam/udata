@@ -1,8 +1,8 @@
 import datetime
 import inspect
 import logging
+from datetime import UTC
 
-import pytz
 from dateutil.parser import parse
 from flask import request, url_for
 
@@ -50,10 +50,13 @@ class ISODateTime(String):
         if (
             isinstance(value, datetime.date)
             and not isinstance(value, datetime.datetime)
-            or value.tzinfo
+            or (isinstance(value, datetime.datetime) and value.tzinfo)
         ):
             return value.isoformat()
-        return pytz.utc.localize(value).isoformat()
+        # If naive datetime, localize it to UTC
+        if isinstance(value, datetime.datetime) and not value.tzinfo:
+            return value.replace(tzinfo=UTC).isoformat()
+        return value.isoformat()
 
 
 class Markdown(String):

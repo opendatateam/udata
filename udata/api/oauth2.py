@@ -16,7 +16,7 @@ As well as a sample application:
 
 import fnmatch
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
 from authlib.integrations.flask_oauth2.errors import (
@@ -151,7 +151,7 @@ class OAuth2Token(Document):
 
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
-    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     expires_in = IntField(required=True, default=TOKEN_EXPIRATION)
     scope = StringField(default="")
     revoked = BooleanField(default=False)
@@ -188,7 +188,8 @@ class OAuth2Token(Document):
             return False
         expired_at = datetime.fromtimestamp(self.get_expires_at())
         expired_at += timedelta(days=REFRESH_EXPIRATION)
-        return expired_at > datetime.utcnow()
+        # expired_at is naive (fromtimestamp), so compare with naive datetime
+        return expired_at > datetime.now(UTC).replace(tzinfo=None)
 
 
 class OAuth2Code(Document):
@@ -210,7 +211,8 @@ class OAuth2Code(Document):
         return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
 
     def is_expired(self):
-        return self.expires < datetime.utcnow()
+        # MongoEngine returns naive datetimes, so compare with naive datetime
+        return self.expires < datetime.now(UTC).replace(tzinfo=None)
 
     def get_redirect_uri(self):
         return self.redirect_uri
@@ -225,7 +227,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get("code_challenge")
         code_challenge_method = request.data.get("code_challenge_method")
-        expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
+        expires = datetime.now(UTC) + timedelta(seconds=GRANT_EXPIRATION)
         auth_code = OAuth2Code.objects.create(
             code=code,
             client=ObjectId(request.client.client_id),

@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
@@ -20,7 +20,7 @@ def notify_inactive_users(self):
         )
         return
     notification_comparison_date = (
-        datetime.utcnow()
+        datetime.now(UTC)
         - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
         + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
     )
@@ -38,7 +38,7 @@ def notify_inactive_users(self):
         mails.inactive_user(user).send(user)
 
         logging.debug(f"Notified {user.email} of account inactivity")
-        user.inactive_deletion_notified_at = datetime.utcnow()
+        user.inactive_deletion_notified_at = datetime.now(UTC)
         user.save()
 
     logging.info(f"Notified {users_to_notify.count()} inactive users")
@@ -59,10 +59,10 @@ def delete_inactive_users(self):
             user.save()
 
     # Delete inactive users upon notification delay if user still hasn't logged in
-    deletion_comparison_date = datetime.utcnow() - timedelta(
+    deletion_comparison_date = datetime.now(UTC) - timedelta(
         days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365
     )
-    notified_at = datetime.utcnow() - timedelta(
+    notified_at = datetime.now(UTC) - timedelta(
         days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"]
     )
     users_to_delete = User.objects(

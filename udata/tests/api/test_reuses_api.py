@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import feedparser
 import pytest
@@ -244,14 +244,14 @@ class ReuseAPITest(PytestOnlyAPITestCase):
 
     def test_reuse_api_get_deleted(self):
         """It should not fetch a deleted reuse from the API and raise 410"""
-        reuse = ReuseFactory(deleted=datetime.utcnow())
+        reuse = ReuseFactory(deleted=datetime.now(UTC))
         response = self.get(url_for("api.reuse", reuse=reuse))
         assert410(response)
 
     def test_reuse_api_get_deleted_but_authorized(self):
         """It should fetch a deleted reuse from the API if authorized"""
         user = self.login()
-        reuse = ReuseFactory(deleted=datetime.utcnow(), owner=user)
+        reuse = ReuseFactory(deleted=datetime.now(UTC), owner=user)
         response = self.get(url_for("api.reuse", reuse=reuse))
         assert200(response)
 
@@ -352,7 +352,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
     def test_reuse_api_update_deleted(self):
         """It should not update a deleted reuse from the API and raise 410"""
         self.login()
-        reuse = ReuseFactory(deleted=datetime.utcnow())
+        reuse = ReuseFactory(deleted=datetime.now(UTC))
         response = self.put(url_for("api.reuse", reuse=reuse), {})
         assert410(response)
 
@@ -373,7 +373,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
     def test_reuse_api_delete_deleted(self):
         """It should not delete a deleted reuse from the API and raise 410"""
         self.login()
-        reuse = ReuseFactory(deleted=datetime.utcnow())
+        reuse = ReuseFactory(deleted=datetime.now(UTC))
         response = self.delete(url_for("api.reuse", reuse=reuse))
         assert410(response)
 
@@ -683,12 +683,12 @@ class ReusesFeedAPItest(APITestCase):
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
         # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
-        ReuseFactory(title="A", datasets=[DatasetFactory()], created_at=datetime.utcnow())
+        ReuseFactory(title="A", datasets=[DatasetFactory()], created_at=datetime.now(UTC))
         ReuseFactory(
-            title="B", datasets=[DatasetFactory()], created_at=datetime.utcnow() - timedelta(days=2)
+            title="B", datasets=[DatasetFactory()], created_at=datetime.now(UTC) - timedelta(days=2)
         )
         ReuseFactory(
-            title="C", datasets=[DatasetFactory()], created_at=datetime.utcnow() - timedelta(days=1)
+            title="C", datasets=[DatasetFactory()], created_at=datetime.now(UTC) - timedelta(days=1)
         )
 
         response = self.get(url_for("api.recent_reuses_atom_feed"))

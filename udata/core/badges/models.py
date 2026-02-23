@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
@@ -28,7 +28,7 @@ class Badge(EmbeddedDocument):
     meta = {"allow_inheritance": True}
     # The following field should be overloaded in descendants.
     kind = StringField(required=True)
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     created_by = ReferenceField("User")
 
     def __str__(self):

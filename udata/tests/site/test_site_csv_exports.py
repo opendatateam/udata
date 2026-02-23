@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from io import StringIO
 
 import pytest
@@ -19,7 +19,7 @@ class SiteCsvExportsTest(APITestCase):
     def test_datasets_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(5)]
-        archived_datasets = [DatasetFactory(archived=datetime.utcnow()) for _ in range(3)]
+        archived_datasets = [DatasetFactory(archived=datetime.now(UTC)) for _ in range(3)]
         hidden_dataset = DatasetFactory(private=True)
 
         response = self.get(url_for("api.site_datasets_csv"))
@@ -212,7 +212,7 @@ class SiteCsvExportsTest(APITestCase):
     def test_organizations_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         orgs = [OrganizationFactory() for _ in range(5)]
-        hidden_org = OrganizationFactory(deleted=datetime.utcnow())
+        hidden_org = OrganizationFactory(deleted=datetime.now(UTC))
 
         response = self.get(url_for("api.site_organizations_csv"))
 
@@ -255,7 +255,7 @@ class SiteCsvExportsTest(APITestCase):
     def test_reuses_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         reuses = [ReuseFactory(datasets=[DatasetFactory()]) for _ in range(5)]
-        archived_reuses = [ReuseFactory(archived=datetime.utcnow()) for _ in range(3)]
+        archived_reuses = [ReuseFactory(archived=datetime.now(UTC)) for _ in range(3)]
         hidden_reuse = ReuseFactory(private=True)
 
         response = self.get(url_for("api.site_reuses_csv"))
@@ -338,7 +338,7 @@ class SiteCsvExportsTest(APITestCase):
         self.app.config["EXPORT_CSV_MODELS"] = []
         dataservices = [DataserviceFactory(datasets=[DatasetFactory()]) for _ in range(5)]
         archived_dataservices = [
-            DataserviceFactory(archived_at=datetime.utcnow()) for _ in range(3)
+            DataserviceFactory(archived_at=datetime.now(UTC)) for _ in range(3)
         ]
         hidden_dataservice = DataserviceFactory(private=True)
 
@@ -430,7 +430,7 @@ class SiteCsvExportsTest(APITestCase):
             for i in range(5)
         ]
         hidden_harvest = HarvestSource.objects.create(
-            backend="factory", url="https://example.com/deleted", deleted=datetime.utcnow()
+            backend="factory", url="https://example.com/deleted", deleted=datetime.now(UTC)
         )
 
         response = self.get(url_for("api.site_harvests_csv"))

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceField
 from mongoengine.signals import post_save
@@ -25,7 +25,7 @@ class FollowQuerySet(UDataQuerySet):
 class Follow(Document):
     follower = ReferenceField("User", required=True)
     following = GenericReferenceField()
-    since = DateTimeField(required=True, default=datetime.utcnow)
+    since = DateTimeField(required=True, default=lambda: datetime.now(UTC))
     until = DateTimeField()
 
     meta = {

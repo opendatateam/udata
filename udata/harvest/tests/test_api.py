@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from flask import url_for
@@ -51,7 +51,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
 
     def test_list_sources_exclude_deleted(self):
         sources = HarvestSourceFactory.create_batch(3)
-        HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow())
+        HarvestSourceFactory.create_batch(2, deleted=datetime.now(UTC))
 
         response = self.get(url_for("api.harvest_sources"))
         assert200(response)
@@ -59,7 +59,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
 
     def test_list_sources_include_deleted(self):
         sources = HarvestSourceFactory.create_batch(3)
-        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow()))
+        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.now(UTC)))
 
         response = self.get(url_for("api.harvest_sources", deleted=True))
         assert200(response)

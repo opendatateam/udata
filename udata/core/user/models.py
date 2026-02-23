@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import copy
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import chain
 from time import time
 
@@ -97,7 +97,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
 
     apikey = field(StringField())
 
-    created_at = field(DateTimeField(default=datetime.utcnow, required=True), auditable=False)
+    created_at = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True), auditable=False
+    )
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
@@ -320,7 +322,7 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         self.about = None
         self.extras = None
         self.apikey = None
-        self.deleted = datetime.utcnow()
+        self.deleted = datetime.now(UTC)
         self.save()
         for organization in self.organizations:
             organization.members = [

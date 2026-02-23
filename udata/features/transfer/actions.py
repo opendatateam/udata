@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from udata.auth import current_user, login_required
 from udata.models import Organization, User
@@ -31,7 +31,7 @@ def accept_transfer(transfer, comment=None):
     """Accept an incoming a transfer request"""
     TransferResponsePermission(transfer).test()
 
-    transfer.responded = datetime.utcnow()
+    transfer.responded = datetime.now(UTC)
     transfer.responder = current_user._get_current_object()
     transfer.status = "accepted"
     transfer.response_comment = comment
@@ -55,7 +55,7 @@ def refuse_transfer(transfer, comment=None):
     """Refuse an incoming a transfer request"""
     TransferResponsePermission(transfer).test()
 
-    transfer.responded = datetime.utcnow()
+    transfer.responded = datetime.now(UTC)
     transfer.responder = current_user._get_current_object()
     transfer.status = "refused"
     transfer.response_comment = comment

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from mongoengine.fields import DictField
 from werkzeug.datastructures import MultiDict
@@ -31,7 +31,7 @@ class DictFieldTest(PytestOnlyTestCase):
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         today = date.today()
 
         fake = Fake()

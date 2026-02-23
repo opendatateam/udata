@@ -4,7 +4,7 @@ import logging
 import math
 import re
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
 from typing import Any, Hashable, overload
@@ -237,9 +237,12 @@ def safe_harvest_datetime(value: Any, field: str, refuse_future: bool = False) -
     except ParserError:
         log.warning(f"Unparseable {field} value: '{value}'")
         return None
-    if refuse_future and parsed and parsed > datetime.utcnow():
-        log.warning(f"Future {field} value: '{value}'")
-        return None
+    if refuse_future and parsed:
+        # Compare with naive datetime (MongoEngine stores naive datetimes)
+        now_naive = datetime.now(UTC).replace(tzinfo=None)
+        if parsed > now_naive:
+            log.warning(f"Future {field} value: '{value}'")
+            return None
     return parsed
 
 
@@ -437,7 +440,7 @@ def get_rss_feed_list(queryset: BaseQuerySet, created_at_field: str) -> list[Any
 
     certifed_orgs = Organization.objects(badges__kind=CERTIFIED).only("id")
 
-    created_delay = datetime.utcnow() - timedelta(
+    created_delay = datetime.now(UTC) - timedelta(
         hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
     )
     elements_with_delay = list(

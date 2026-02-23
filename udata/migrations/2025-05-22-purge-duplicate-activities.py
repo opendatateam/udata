@@ -3,7 +3,7 @@ This migration updates Topic.featured to False when it is None.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from mongoengine.connection import get_db
 
@@ -51,7 +51,7 @@ def migrate(db):
             .timeout(False)
         )
         log.info(
-            f"{datetime.utcnow()}: Processing {activities.count()} {action_related_activity} activities..."
+            f"{datetime.now(UTC)}: Processing {activities.count()} {action_related_activity} activities..."
         )
         for act in activities:
             object_activity_count += object_updated_activity.objects(
@@ -68,7 +68,7 @@ def migrate(db):
                     created_at__lte=act.created_at + timedelta(seconds=1),
                 ).delete()
         log.info(
-            f"{datetime.utcnow()}: Deleted {object_activity_count} {object_updated_activity} and {org_activity_count} UserUpdatedOrganization activities"
+            f"{datetime.now(UTC)}: Deleted {object_activity_count} {object_updated_activity} and {org_activity_count} UserUpdatedOrganization activities"
         )
 
     # Clean duplicated UserUpdatedOrganization activities on organization for any object related activity
@@ -89,7 +89,7 @@ def migrate(db):
             .timeout(False)
         )
         log.info(
-            f"{datetime.utcnow()}: Processing {activities.count()} {object_related_activity} activities..."
+            f"{datetime.now(UTC)}: Processing {activities.count()} {object_related_activity} activities..."
         )
         for act in activities:
             count += UserUpdatedOrganization.objects(
@@ -98,4 +98,4 @@ def migrate(db):
                 created_at__gte=act.created_at - timedelta(seconds=1),
                 created_at__lte=act.created_at + timedelta(seconds=1),
             ).delete()
-        log.info(f"{datetime.utcnow()}: Deleted {count} UserUpdatedOrganization activities")
+        log.info(f"{datetime.now(UTC)}: Deleted {count} UserUpdatedOrganization activities")

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from blinker import Signal
 from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceField, StringField
@@ -28,7 +28,7 @@ class Transfer(Document):
     comment = StringField()
     status = StringField(choices=list(TRANSFER_STATUS), default="pending")
 
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     responded = DateTimeField()
     responder = ReferenceField("User")

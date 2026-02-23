@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from uuid import UUID
 
 import pytest
@@ -44,7 +44,7 @@ class ExtrasFieldTest(PytestOnlyTestCase):
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         today = date.today()
 
         fake = Fake()
