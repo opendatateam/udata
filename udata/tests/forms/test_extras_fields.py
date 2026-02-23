@@ -2,17 +2,29 @@ from datetime import UTC, date, datetime
 from uuid import UUID
 
 import pytest
+from mongoengine.fields import (
+    BooleanField,
+    DateTimeField,
+    DictField,
+    FloatField,
+    IntField,
+    StringField,
+    UUIDField,
+)
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
-from udata.mongo import db
+from udata.mongo.datetime_fields import DateField
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.url_field import URLField
 from udata.tests import PytestOnlyTestCase
 
 
 class ExtrasFieldTest(PytestOnlyTestCase):
     def factory(self):
-        class Fake(db.Document):
-            extras = db.ExtrasField()
+        class Fake(Document):
+            extras = ExtrasField()
 
         class FakeForm(ModelForm):
             model_class = Fake
@@ -91,7 +103,7 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         Fake, FakeForm = self.factory()
 
         @Fake.extras("dict")
-        class Custom(db.DictField):
+        class Custom(DictField):
             pass
 
         fake = Fake()
@@ -127,19 +139,19 @@ class ExtrasFieldTest(PytestOnlyTestCase):
             pytest.param(*p, id=p[0].__name__)
             for p in [
                 (
-                    db.DateTimeField,
+                    DateTimeField,
                     "2018-05-29T13:15:04.397603",
                     datetime,
                     datetime(2018, 5, 29, 13, 15, 4, 397603),
                 ),
-                (db.DateField, "2018-05-29", date, date(2018, 5, 29)),
-                (db.BooleanField, "true", bool, True),
-                (db.IntField, 42, int, 42),
-                (db.StringField, "42", str, "42"),
-                (db.FloatField, "42.0", float, 42.0),
-                (db.URLField, "http://test.com", str, "http://test.com"),
+                (DateField, "2018-05-29", date, date(2018, 5, 29)),
+                (BooleanField, "true", bool, True),
+                (IntField, 42, int, 42),
+                (StringField, "42", str, "42"),
+                (FloatField, "42.0", float, 42.0),
+                (URLField, "http://test.com", str, "http://test.com"),
                 (
-                    db.UUIDField,
+                    UUIDField,
                     "e3b06d6d-90c0-4407-adc0-de81d327f181",
                     UUID,
                     UUID("e3b06d6d-90c0-4407-adc0-de81d327f181"),
@@ -168,13 +180,13 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         [
             pytest.param(*p, id=p[0].__name__)
             for p in [
-                (db.DateTimeField, "xxxx"),
-                (db.DateField, "xxxx"),
-                (db.IntField, "xxxx"),
-                (db.StringField, 42),
-                (db.FloatField, "xxxx"),
-                (db.URLField, "not-an-url"),
-                (db.UUIDField, "not-a-uuid"),
+                (DateTimeField, "xxxx"),
+                (DateField, "xxxx"),
+                (IntField, "xxxx"),
+                (StringField, 42),
+                (FloatField, "xxxx"),
+                (URLField, "not-an-url"),
+                (UUIDField, "not-a-uuid"),
             ]
         ],
     )

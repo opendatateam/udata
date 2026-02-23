@@ -6,9 +6,12 @@ import factory
 import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import DictField, EmbeddedDocumentField, IntField, ListField, StringField
 
 from udata.core import csv
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.queryset import UDataQuerySet
 from udata.tests.api import APITestCase
 from udata.utils import faker
 
@@ -19,19 +22,19 @@ RE_FILENAME = re.compile(r"^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$
 blueprint = Blueprint("testcsv", __name__)
 
 
-class NestedFake(db.EmbeddedDocument):
-    key = db.StringField()
-    value = db.IntField()
+class NestedFake(EmbeddedDocument):
+    key = StringField()
+    value = IntField()
 
 
-class Fake(db.Document):
-    title = db.StringField()
-    description = db.StringField()
-    tags = db.ListField(db.StringField())
-    other = db.ListField(db.StringField())
-    nested = db.ListField(db.EmbeddedDocumentField(NestedFake))
-    sub = db.EmbeddedDocumentField(NestedFake)
-    metrics = db.DictField()
+class Fake(Document):
+    title = StringField()
+    description = StringField()
+    tags = ListField(StringField())
+    other = ListField(StringField())
+    nested = ListField(EmbeddedDocumentField(NestedFake))
+    sub = EmbeddedDocumentField(NestedFake)
+    metrics = DictField()
 
     __metrics_keys__ = [
         "fake-metric-int",
@@ -90,7 +93,7 @@ def from_list():
 @blueprint.route("/queryset.csv")
 def from_queryset():
     qs = Fake.objects
-    assert isinstance(qs, db.BaseQuerySet)
+    assert isinstance(qs, UDataQuerySet)
     return csv.stream(qs)
 
 

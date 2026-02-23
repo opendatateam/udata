@@ -710,6 +710,9 @@ class Testing(object):
     SEARCH_SERVICE_API_URL = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    DATASET_HIDDEN_BADGES = []
 
 
 class Debug(Defaults):

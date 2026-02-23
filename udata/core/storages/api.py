@@ -160,7 +160,7 @@ def handle_upload(storage, prefix=None):
 
 
 def parse_uploaded_image(field):
-    """Parse an uploaded image and save into a db.ImageField()"""
+    """Parse an uploaded image and save into a ImageField()"""
     args = image_parser.parse_args()
 
     image = args["file"]

@@ -18,7 +18,8 @@ from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
 from udata.core.pages.models import Page
 from udata.harvest.models import HarvestJob
-from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
+from udata.models import Activity, Discussion, Follow, TopicElement, Transfer
+from udata.mongo.document import UDataDocument as Document
 from udata.storage.s3 import store_bytes
 from udata.tasks import job
 
@@ -30,7 +31,7 @@ log = get_task_logger(__name__)
 def flatten(iterable):
     for el in iterable:
         if isinstance(el, collections.Iterable) and not (
-            isinstance(el, str) or isinstance(el, db.Document)
+            isinstance(el, str) or isinstance(el, Document)
         ):
             yield from flatten(el)
         else:
