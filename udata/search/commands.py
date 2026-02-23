@@ -131,6 +131,18 @@ def finalize_reindex(models, start):
     )
 
 
+@grp.command("init-es")
+def init_es():
+    """Create Elasticsearch index templates and indices."""
+    if not current_app.config["ELASTICSEARCH_URL"]:
+        log.error("Missing ELASTICSEARCH_URL configuration")
+        sys.exit(-1)
+
+    es_client = get_elastic_client()
+    es_client.init_indices()
+    log.info("Elasticsearch indices initialized")
+
+
 @grp.command()
 @click.argument("models", nargs=-1, metavar="[<model> ...]")
 @click.option("-r", "--reindex", default=False, type=bool)

@@ -5,9 +5,6 @@ parameters:
   python-version:
     type: string
     default: "3.11"
-  udata-search-service-package:
-    type: string
-    default: "udata-search-service"
   publish-branch:
     type: string
     default: "main"
@@ -56,7 +53,6 @@ jobs:
           name: Install Python dependencies
           command: |
             uv sync --frozen
-            uv pip install << pipeline.parameters.udata-search-service-package >>
       - save_cache:
           key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
@@ -88,32 +84,13 @@ jobs:
             echo "Elasticsearch failed to start"
             exit 1
       - run:
-          name: Start search-service
-          background: true
-          command: |
-            export ELASTICSEARCH_URL=http://localhost:9200
-            export UDATA_INSTANCE_NAME=udata-test
-            uv run udata-search-service run --host 0.0.0.0 --port 5000
-      - run:
-          name: Wait for search-service
-          command: |
-            for i in $(seq 1 30); do
-              curl -s http://localhost:5000/ && exit 0
-              echo "Waiting for search-service... ($i/30)"
-              sleep 2
-            done
-            echo "Search-service failed to start"
-            exit 1
-      - run:
           name: Initialize Elasticsearch indices
           command: |
-            export ELASTICSEARCH_URL=http://localhost:9200
-            export UDATA_INSTANCE_NAME=udata-test
-            uv run udata-search-service init-es
+            echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
+            uv run udata search init-es
+            rm udata.cfg
       - run:
           name: Run tests
-          environment:
-            ELASTICSEARCH_URL: "http://localhost:9200"
           command: |
             mkdir -p reports/python
             uv run inv test --report --ci

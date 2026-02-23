@@ -52,7 +52,7 @@ class OrganizationService:
 
     @staticmethod
     def format_filters(filters):
-        if filters["badge"]:
+        if filters.get("badge"):
             filters["badges"] = filters.pop("badge")
         filtered = {k: v for k, v in filters.items() if v is not None}
         filters.clear()

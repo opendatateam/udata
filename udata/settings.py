@@ -27,8 +27,7 @@ class Defaults(object):
     MONGODB_HOST = "mongodb://localhost:27017/udata"
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
-    # Search service configuration
-    SEARCH_SERVICE_API_URL = None
+    # Search configuration
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
     ELASTICSEARCH_URL = None
     UDATA_INSTANCE_NAME = "udata"
@@ -709,7 +708,6 @@ class Testing(object):
     SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
-    SEARCH_SERVICE_API_URL = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
 
