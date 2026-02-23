@@ -1,7 +1,6 @@
 import logging
 import sys
 from datetime import datetime
-from fnmatch import fnmatch
 from typing import List, Optional, Tuple
 
 import click
@@ -66,44 +65,13 @@ dgv_analyzer = analyzer(
 )
 
 
-class _DynamicIndexMeta(type(Document)):
-    """Metaclass that gives each subclass its own ES Index based on _entity_type.
-
-    Without this, elasticsearch-dsl's IndexMeta shares the parent's _index
-    object across all subclasses that don't declare a class Index block.
-    """
-
-    def __new__(mcs, name, bases, attrs):
-        new_cls = super().__new__(mcs, name, bases, attrs)
-        entity_type = attrs.get("_entity_type")
-        if entity_type:
-            from elasticsearch_dsl import Index as ESIndex
-
-            new_cls._index = ESIndex(name=entity_type)
-            new_cls._index.document(new_cls)
-        return new_cls
-
-
-class IndexDocument(Document, metaclass=_DynamicIndexMeta):
-    _entity_type = None
-
-    @classmethod
-    def _get_index_name(cls):
-        from flask import current_app
-
-        return f"{current_app.config['UDATA_INSTANCE_NAME']}-{cls._entity_type}"
-
-    @classmethod
-    def _default_index(cls, index=None):
-        return index or cls._get_index_name()
-
+class IndexDocument(Document):
     @classmethod
     def init_index(cls, es_client: Elasticsearch, suffix: str) -> None:
-        alias = cls._get_index_name()
+        alias = cls._index._name
         pattern = alias + "-*"
 
         log.info(f"Saving template {alias} on the following pattern: {pattern}")
-        cls._index._name = alias
         index_template = cls._index.as_template(alias, pattern)
         index_template.save()
 
@@ -116,37 +84,15 @@ class IndexDocument(Document, metaclass=_DynamicIndexMeta):
 
     @classmethod
     def delete_indices(cls, es_client: Elasticsearch) -> None:
-        alias = cls._get_index_name()
-        pattern = alias + "*"
+        pattern = cls._index._name + "*"
         log.info(f"Deleting indices with pattern {pattern}")
         es_client.indices.delete(index=pattern)
 
-    @classmethod
-    def _matches(cls, hit):
-        # override _matches to match indices in a pattern instead of just ALIAS
-        # hit is the raw dict as returned by elasticsearch
-        pattern = cls._get_index_name() + "-*"
-        return fnmatch(hit["_index"], pattern)
-
-    @classmethod
-    def search(cls, **kwargs):
-        s = super().search(**kwargs)
-        return s.index(cls._get_index_name())
-
-    def save(self, **kwargs):
-        if kwargs.get("index") is None:
-            kwargs["index"] = self._get_index_name()
-        return super().save(**kwargs)
-
-    @classmethod
-    def get(cls, id, **kwargs):
-        if "index" not in kwargs:
-            kwargs["index"] = cls._get_index_name()
-        return super().get(id=id, **kwargs)
-
 
 class SearchableDataservice(IndexDocument):
-    _entity_type = "dataservice"
+    class Index:
+        name = "dataservice"
+
     title = Text(analyzer=dgv_analyzer)
     created_at = Date()
     metadata_modified_at = Date()
@@ -167,7 +113,9 @@ class SearchableDataservice(IndexDocument):
 
 
 class SearchableTopic(IndexDocument):
-    _entity_type = "topic"
+    class Index:
+        name = "topic"
+
     name = Text(analyzer=dgv_analyzer)
     description = Text(analyzer=dgv_analyzer)
     tags = Keyword(multi=True)
@@ -185,7 +133,9 @@ class SearchableTopic(IndexDocument):
 
 
 class SearchableDiscussion(IndexDocument):
-    _entity_type = "discussion"
+    class Index:
+        name = "discussion"
+
     title = Text(analyzer=dgv_analyzer)
     content = Text(analyzer=dgv_analyzer)
     created_at = Date()
@@ -196,7 +146,9 @@ class SearchableDiscussion(IndexDocument):
 
 
 class SearchablePost(IndexDocument):
-    _entity_type = "post"
+    class Index:
+        name = "post"
+
     name = Text(analyzer=dgv_analyzer)
     headline = Text(analyzer=dgv_analyzer)
     content = Text(analyzer=dgv_analyzer)
@@ -207,7 +159,9 @@ class SearchablePost(IndexDocument):
 
 
 class SearchableOrganization(IndexDocument):
-    _entity_type = "organization"
+    class Index:
+        name = "organization"
+
     name = Text(analyzer=dgv_analyzer)
     acronym = Text()
     description = Text(analyzer=dgv_analyzer)
@@ -223,7 +177,9 @@ class SearchableOrganization(IndexDocument):
 
 
 class SearchableReuse(IndexDocument):
-    _entity_type = "reuse"
+    class Index:
+        name = "reuse"
+
     title = Text(analyzer=dgv_analyzer)
     url = Text()
     created_at = Date()
@@ -249,7 +205,9 @@ class SearchableReuse(IndexDocument):
 
 
 class SearchableDataset(IndexDocument):
-    _entity_type = "dataset"
+    class Index:
+        name = "dataset"
+
     title = Text(analyzer=dgv_analyzer)
     acronym = Text()
     url = Text()
@@ -287,9 +245,26 @@ class SearchableDataset(IndexDocument):
     producer_type = Keyword(multi=True)
 
 
+ALL_DOCUMENT_CLASSES = [
+    SearchableDataset,
+    SearchableReuse,
+    SearchableOrganization,
+    SearchableDataservice,
+    SearchableTopic,
+    SearchableDiscussion,
+    SearchablePost,
+]
+
+
+def configure_indices(prefix):
+    for cls in ALL_DOCUMENT_CLASSES:
+        cls._index._name = f"{prefix}-{cls.Index.name}"
+
+
 class ElasticClient:
-    def __init__(self, url: str):
+    def __init__(self, url: str, prefix: str):
         self.es = connections.create_connection(hosts=[url])
+        configure_indices(prefix)
 
     def init_indices(self) -> None:
         """

@@ -18,7 +18,10 @@ def get_elastic_client():
     if _elastic_client is None:
         from udata_search_service.search_clients import ElasticClient
 
-        _elastic_client = ElasticClient(current_app.config["ELASTICSEARCH_URL"])
+        _elastic_client = ElasticClient(
+            current_app.config["ELASTICSEARCH_URL"],
+            current_app.config["UDATA_INSTANCE_NAME"],
+        )
     return _elastic_client
 
 
