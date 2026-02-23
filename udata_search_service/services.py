@@ -1,3 +1,4 @@
+from math import ceil
 from typing import List, Optional, Tuple
 
 from udata_search_service.entities import (
@@ -36,7 +37,7 @@ class OrganizationService:
             search_text, offset, page_size, filters, sort
         )
         results = [Organization.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, organization_id: str) -> Optional[Organization]:
@@ -89,7 +90,7 @@ class DatasetService:
             search_text, offset, page_size, filters, sort
         )
         results = [Dataset.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, dataset_id: str) -> Optional[Dataset]:
@@ -161,7 +162,7 @@ class ReuseService:
             search_text, offset, page_size, filters, sort
         )
         results = [Reuse.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, reuse_id: str) -> Optional[Reuse]:
@@ -219,7 +220,7 @@ class DataserviceService:
             search_text, offset, page_size, filters, sort
         )
         results = [Dataservice.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, dataservice_id: str) -> Optional[Dataservice]:
@@ -278,7 +279,7 @@ class TopicService:
             search_text, offset, page_size, filters, sort
         )
         results = [Topic.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, topic_id: str) -> Optional[Topic]:
@@ -329,7 +330,7 @@ class DiscussionService:
             search_text, offset, page_size, filters, sort
         )
         results = [Discussion.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, discussion_id: str) -> Optional[Discussion]:
@@ -380,7 +381,7 @@ class PostService:
             search_text, offset, page_size, filters, sort
         )
         results = [Post.load_from_dict(hit) for hit in search_results]
-        total_pages = round(results_number / page_size) or 1
+        total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
     def find_one(self, post_id: str) -> Optional[Post]:

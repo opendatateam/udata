@@ -28,7 +28,6 @@ class Defaults(object):
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
     # Search configuration
-    SEARCH_SERVICE_REQUEST_TIMEOUT = 20
     ELASTICSEARCH_URL = None
     UDATA_INSTANCE_NAME = "udata"
 

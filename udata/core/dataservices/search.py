@@ -2,7 +2,6 @@ import datetime
 
 import requests
 from bson.objectid import ObjectId
-from flask import current_app
 from flask_restx.inputs import boolean
 
 from udata.api import api
@@ -105,7 +104,7 @@ class DataserviceSearch(ModelSearchAdapter):
             return None
 
         try:
-            timeout = current_app.config.get("SEARCH_SERVICE_REQUEST_TIMEOUT", 10)
+            timeout = 10
             headers = {"User-Agent": "udata-search-service/1.0"}
             response = requests.get(url, timeout=timeout, stream=True, headers=headers)
             response.raise_for_status()
