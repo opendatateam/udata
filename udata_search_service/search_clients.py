@@ -67,6 +67,12 @@ dgv_analyzer = analyzer(
 
 class IndexDocument(Document):
     @classmethod
+    def _matches(cls, hit):
+        # ES returns the physical index name in hits (e.g. "udata-dataset-2024-01-01-12-00"),
+        # not the alias ("udata-dataset"). Default _matches uses fnmatch exact match which fails.
+        return hit.get("_index", "").startswith(cls._index._name)
+
+    @classmethod
     def init_index(cls, es_client: Elasticsearch, suffix: str) -> None:
         alias = cls._index._name
         pattern = alias + "-*"
