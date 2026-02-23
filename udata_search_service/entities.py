@@ -14,7 +14,15 @@ class EntityBase:
         return cls(**data)
 
     def to_dict(self):
-        return dataclasses.asdict(self)
+        # Manual conversion instead of dataclasses.asdict() because asdict() tries to
+        # reconstruct list-like types (e.g. MongoEngine BaseList) which fails.
+        result = {}
+        for f in dataclasses.fields(self):
+            value = getattr(self, f.name)
+            if isinstance(value, list):
+                value = list(value)
+            result[f.name] = value
+        return result
 
 
 @dataclasses.dataclass

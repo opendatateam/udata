@@ -94,6 +94,10 @@ class IndexDocument(Document, metaclass=_DynamicIndexMeta):
         return f"{current_app.config['UDATA_INSTANCE_NAME']}-{cls._entity_type}"
 
     @classmethod
+    def _default_index(cls, index=None):
+        return index or cls._get_index_name()
+
+    @classmethod
     def init_index(cls, es_client: Elasticsearch, suffix: str) -> None:
         alias = cls._get_index_name()
         pattern = alias + "-*"
