@@ -188,7 +188,7 @@ lint = { extend-select = [
 line-length = 100
 
 [tool.setuptools]
-packages = ["udata"]
+packages = ["udata", "udata_search_service"]
 
 [tool.setuptools.package-data]
 udata = ["templates/*", "translations/*", "fixtures/*"]
