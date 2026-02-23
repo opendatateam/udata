@@ -117,6 +117,78 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "page_size", int)
 
 
+class ConfigureIndicesTest:
+    """Requires a running Elasticsearch on localhost:9200."""
+
+    ES_URL = "http://localhost:9200"
+    PREFIX = "test-configure-indices"
+
+    @pytest.fixture(autouse=True)
+    def setup_and_teardown(self):
+        from elasticsearch import Elasticsearch
+
+        from udata_search_service.search_clients import ElasticClient
+
+        self.client = ElasticClient(self.ES_URL, self.PREFIX)
+        self.es = Elasticsearch(self.ES_URL)
+        # Cleanup any leftover indices from previous runs
+        self.es.indices.delete(index=f"{self.PREFIX}-*", ignore_unavailable=True)
+        yield
+        self.es.indices.delete(index=f"{self.PREFIX}-*", ignore_unavailable=True)
+
+    def test_init_creates_prefixed_indices_in_elasticsearch(self):
+        self.client.init_indices()
+
+        indices = list(self.es.indices.get(index=f"{self.PREFIX}-*").keys())
+        expected_types = [
+            "dataset",
+            "reuse",
+            "organization",
+            "dataservice",
+            "topic",
+            "discussion",
+            "post",
+        ]
+        for entity_type in expected_types:
+            matching = [i for i in indices if i.startswith(f"{self.PREFIX}-{entity_type}-")]
+            assert len(matching) == 1, f"Expected one index for {entity_type}, got {matching}"
+
+    def test_save_and_get_use_prefixed_index(self):
+        from udata_search_service.search_clients import SearchableDataset
+
+        self.client.init_indices()
+
+        SearchableDataset(meta={"id": "test-doc-1"}, title="Mon dataset").save(
+            skip_empty=False, refresh="wait_for"
+        )
+
+        doc = SearchableDataset.get(id="test-doc-1")
+        assert doc.title == "Mon dataset"
+        assert doc.meta.index.startswith(f"{self.PREFIX}-dataset-")
+
+    def test_search_targets_prefixed_index(self):
+        from udata_search_service.search_clients import SearchableOrganization
+
+        self.client.init_indices()
+
+        SearchableOrganization(
+            meta={"id": "org-1"},
+            name="Ma structure",
+            description="test",
+            url="http://example.com",
+            orga_sp=1,
+            created_at="2024-01-01",
+            followers=0,
+            datasets=0,
+            views=0,
+            reuses=0,
+        ).save(skip_empty=False, refresh="wait_for")
+
+        results = SearchableOrganization.search().execute()
+        assert len(results.hits) == 1
+        assert results.hits[0].meta.index.startswith(f"{self.PREFIX}-organization-")
+
+
 @pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
 class IndexingLifecycleTest(APITestCase):
     @patch("udata.search.get_elastic_client")
