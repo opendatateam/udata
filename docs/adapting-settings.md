@@ -204,11 +204,11 @@ Before running the application, initialize the Elasticsearch indices:
 udata search init-es
 ```
 
-### UDATA_INSTANCE_NAME
+### ELASTICSEARCH_INDEX_BASENAME
 
 **default**: `"udata"`
 
-Prefix used for Elasticsearch index names. Each model gets its own index named `{UDATA_INSTANCE_NAME}-{model}` (e.g. `udata-dataset`, `udata-organization`).
+Prefix used for Elasticsearch index names. Each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`).
 
 ## Spatial configuration
 

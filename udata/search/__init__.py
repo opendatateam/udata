@@ -20,7 +20,7 @@ def get_elastic_client():
 
         _elastic_client = ElasticClient(
             current_app.config["ELASTICSEARCH_URL"],
-            current_app.config["UDATA_INSTANCE_NAME"],
+            current_app.config["ELASTICSEARCH_INDEX_BASENAME"],
         )
     return _elastic_client
 

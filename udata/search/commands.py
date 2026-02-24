@@ -69,7 +69,7 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     index_name = None
     if reindex:
         suffix = default_index_suffix_name(start)
-        alias = f"{current_app.config['UDATA_INSTANCE_NAME']}-{model_name}"
+        alias = f"{current_app.config['ELASTICSEARCH_INDEX_BASENAME']}-{model_name}"
         index_name = f"{alias}-{suffix}"
         es_client.es.indices.create(index=index_name)
 
@@ -93,7 +93,7 @@ def finalize_reindex(models, start):
     try:
         es = get_elastic_client().es
         suffix = default_index_suffix_name(start)
-        instance = current_app.config["UDATA_INSTANCE_NAME"]
+        instance = current_app.config["ELASTICSEARCH_INDEX_BASENAME"]
 
         for adapter in iter_adapters():
             model_name = adapter.model.__name__.lower()
