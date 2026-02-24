@@ -1,7 +1,9 @@
 import copy
+import json
 import logging
 import urllib.parse
 
+from elasticsearch.exceptions import BadRequestError
 from flask import current_app, request
 
 from udata.search.result import SearchResult
@@ -37,7 +39,15 @@ class SearchQuery:
             from udata.search import get_elastic_client
 
             service = self.adapter.service_class(get_elastic_client())
-            results, total, total_pages, facets = service.search(self.to_search_params())
+            try:
+                results, total, total_pages, facets = service.search(self.to_search_params())
+            except BadRequestError as e:
+                log.error(
+                    "Elasticsearch BadRequestError for %s: %s",
+                    self.adapter.__name__,
+                    json.dumps(e.body, indent=2, default=str),
+                )
+                raise
             result_dicts = [{"id": r.id} for r in results]
             return SearchResult(
                 query=self,

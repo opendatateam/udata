@@ -1008,6 +1008,7 @@ class ElasticClient:
 
         search = search[offset : (offset + page_size)]
 
+        log.debug("Elasticsearch query for datasets: %s", search.to_dict())
         response = search.execute()
         results_number = response.hits.total.value
         if response.hits and not isinstance(response.hits[0], SearchableDataset):
