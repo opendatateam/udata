@@ -238,11 +238,14 @@ class Reuse(Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned,
         nested_fields=reuse_permissions_fields,
     )
     def permissions(self):
+        from udata.core.dataset.permissions import OwnableReadPermission
+
         from .permissions import ReuseEditPermission
 
         return {
             "delete": ReuseEditPermission(self),
             "edit": ReuseEditPermission(self),
+            "read": OwnableReadPermission(self),
         }
 
     @property

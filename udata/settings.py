@@ -709,6 +709,9 @@ class Testing(object):
     HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    DATASET_HIDDEN_BADGES = []
 
 
 class Debug(Defaults):
