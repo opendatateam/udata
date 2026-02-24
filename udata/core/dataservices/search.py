@@ -72,7 +72,6 @@ class DataserviceApiParser(ModelApiParser):
 @register
 class DataserviceSearch(ModelSearchAdapter):
     model = Dataservice
-    search_url = "dataservices/"
     service_class = DataserviceService
     consumer_class = DataserviceConsumer
 

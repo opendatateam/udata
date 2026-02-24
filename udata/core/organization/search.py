@@ -15,7 +15,6 @@ __all__ = ("OrganizationSearch",)
 @search.register
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
-    search_url = "organizations/"
     service_class = OrganizationService
     consumer_class = OrganizationConsumer
 

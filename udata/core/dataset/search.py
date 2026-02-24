@@ -32,7 +32,6 @@ MAX_NUMBER_OF_RESOURCES_TO_INDEX = 500
 @register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
-    search_url = "datasets/"
     service_class = DatasetService
     consumer_class = DatasetConsumer
 

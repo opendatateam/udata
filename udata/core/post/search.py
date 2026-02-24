@@ -7,7 +7,6 @@ from udata_search_service.services import PostService
 @register
 class PostSearch(ModelSearchAdapter):
     model = Post
-    search_url = "posts/"
     service_class = PostService
     consumer_class = PostConsumer
 

@@ -23,7 +23,6 @@ __all__ = ("ReuseSearch",)
 @register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
-    search_url = "reuses/"
     service_class = ReuseService
     consumer_class = ReuseConsumer
 

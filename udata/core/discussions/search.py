@@ -7,7 +7,6 @@ from udata_search_service.services import DiscussionService
 @register
 class DiscussionSearch(ModelSearchAdapter):
     model = Discussion
-    search_url = "discussions/"
     service_class = DiscussionService
     consumer_class = DiscussionConsumer
 

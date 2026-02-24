@@ -20,7 +20,6 @@ __all__ = ("TopicSearch",)
 @register
 class TopicSearch(ModelSearchAdapter):
     model = Topic
-    search_url = "topics/"
     service_class = TopicService
     consumer_class = TopicConsumer
 
