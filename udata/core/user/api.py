@@ -222,8 +222,6 @@ class TokenListAPI(API):
         user = current_user._get_current_object()
         expires_at = None
         if args.get("expires_at"):
-            from datetime import datetime
-
             expires_at = datetime.fromisoformat(args["expires_at"])
         token, plaintext = ApiToken.generate(user, name=args.get("name"), expires_at=expires_at)
         token._plaintext = plaintext

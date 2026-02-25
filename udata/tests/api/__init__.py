@@ -5,6 +5,7 @@ import pytest
 from flask import json
 from flask_security.utils import login_user, logout_user, set_request_attr
 
+from udata.core.user.api_tokens import ApiToken
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
@@ -46,8 +47,6 @@ class APITestCaseMixin:
             with self.api_user(user) as user:
                 response = self.get(url)
         """
-        from udata.core.user.api_tokens import ApiToken
-
         self._user = user or UserFactory()
         token, plaintext = ApiToken.generate(self._user)
         self._api_key = plaintext
