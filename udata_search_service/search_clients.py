@@ -1,9 +1,7 @@
 import logging
-import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
-import click
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import (
@@ -31,9 +29,6 @@ from udata_search_service.entities import (
 )
 
 log = logging.getLogger(__name__)
-
-IS_TTY = sys.__stdin__.isatty()
-
 
 SEARCH_SYNONYMS = [
     "AMD, administrateur ministériel des données, AMDAC",
@@ -280,7 +275,7 @@ class ElasticClient:
         Create templates based on Document mappings and map patterns.
         Create time-based index matchin the template patterns.
         """
-        suffix_name = "-" + datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
+        suffix_name = "-" + datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
 
         SearchableDataset.init_index(self.es, suffix_name)
         SearchableReuse.init_index(self.es, suffix_name)
@@ -289,23 +284,6 @@ class ElasticClient:
         SearchableTopic.init_index(self.es, suffix_name)
         SearchableDiscussion.init_index(self.es, suffix_name)
         SearchablePost.init_index(self.es, suffix_name)
-
-    def clean_indices(self) -> None:
-        """
-        Removing previous indices and intializing new ones.
-        """
-        if IS_TTY:
-            msg = "Indices will be deleted, are you sure?"
-            click.confirm(msg, abort=True)
-        SearchableDataset.delete_indices(self.es)
-        SearchableReuse.delete_indices(self.es)
-        SearchableOrganization.delete_indices(self.es)
-        SearchableDataservice.delete_indices(self.es)
-        SearchableTopic.delete_indices(self.es)
-        SearchableDiscussion.delete_indices(self.es)
-        SearchablePost.delete_indices(self.es)
-
-        self.init_indices()
 
     def index_organization(self, to_index: Organization, index: str = None) -> None:
         SearchableOrganization(meta={"id": to_index.id}, **to_index.to_dict()).save(
