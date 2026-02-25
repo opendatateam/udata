@@ -9,7 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
-from udata.core.discussions.notifications import discussions_notifications
+from udata.core.discussions.notifications import DiscussionStatus
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -27,11 +27,12 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.features.notifications.models import Notification
 from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from .api import APITestCase, DBTestCase
+from .api import APITestCase
 from .helpers import assert_emit, assert_not_emit
 
 
@@ -1015,79 +1016,7 @@ class DiscussionsTest(APITestCase):
         self.assert403(response)
 
 
-class DiscussionsNotificationsTest(DBTestCase):
-    def test_notify_user_discussions(self):
-        owner = UserFactory()
-        dataset = DatasetFactory(owner=owner)
-
-        open_discussions = {}
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            discussion = Discussion.objects.create(
-                subject=dataset, user=user, title=faker.sentence(), discussion=[message]
-            )
-            open_discussions[discussion.id] = discussion
-        # Creating a closed discussion that shouldn't show up in response.
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset,
-            user=user,
-            title=faker.sentence(),
-            discussion=[message],
-            closed=datetime.utcnow(),
-            closed_by=user,
-        )
-
-        notifications = discussions_notifications(owner)
-
-        self.assertEqual(len(notifications), len(open_discussions))
-
-        for dt, details in notifications:
-            discussion = open_discussions[details["id"]]
-            self.assertEqual(details["title"], discussion.title)
-            self.assertEqual(details["subject"]["id"], discussion.subject.id)
-            self.assertEqual(details["subject"]["type"], "dataset")
-
-    def test_notify_org_discussions(self):
-        recipient = UserFactory()
-        member = Member(user=recipient, role="editor")
-        org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(organization=org)
-
-        open_discussions = {}
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            discussion = Discussion.objects.create(
-                subject=dataset, user=user, title=faker.sentence(), discussion=[message]
-            )
-            open_discussions[discussion.id] = discussion
-        # Creating a closed discussion that shouldn't show up in response.
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset,
-            user=user,
-            title=faker.sentence(),
-            discussion=[message],
-            closed=datetime.utcnow(),
-            closed_by=user,
-        )
-
-        notifications = discussions_notifications(recipient)
-
-        self.assertEqual(len(notifications), len(open_discussions))
-
-        for dt, details in notifications:
-            discussion = open_discussions[details["id"]]
-            self.assertEqual(details["title"], discussion.title)
-            self.assertEqual(details["subject"]["id"], discussion.subject.id)
-            self.assertEqual(details["subject"]["type"], "dataset")
-
-
-class DiscussionsMailsTest(APITestCase):
+class NotifyDiscussionsTest(APITestCase):
     def test_new_discussion_mail(self):
         user = UserFactory()
         owner = UserFactory()
@@ -1105,6 +1034,11 @@ class DiscussionsMailsTest(APITestCase):
         # Should have sent one mail to the owner
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].recipients[0], owner.email)
+
+        # Verify notification was created for the owner
+        notifications = Notification.objects(user=owner)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_DISCUSSION)
 
     def test_new_discussion_comment_mail(self):
         owner = UserFactory()
@@ -1132,6 +1066,37 @@ class DiscussionsMailsTest(APITestCase):
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(commenter.email, mail.recipients)
 
+        # Verify notification was created for the owner
+        notifications = Notification.objects(user=owner)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
+        self.assertEqual(notifications[0].details.message_id, new_message.id)
+
+    def test_new_discussion_comment_handle_previous_notifications(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=owner)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, new_message],
+        )
+
+        with capture_mails():
+            notify_new_discussion(discussion.id)
+            notify_new_discussion_comment(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Verify previous notifications were handled
+        notifications = Notification.objects(
+            user=commenter, details__status=DiscussionStatus.NEW_DISCUSSION
+        )
+        for notification in notifications:
+            assert notification.handled_at is not None
+
     def test_closed_discussion_mail(self):
         owner = UserFactory()
         poster = UserFactory()
@@ -1158,3 +1123,41 @@ class DiscussionsMailsTest(APITestCase):
         for mail in mails:
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(owner.email, mail.recipients)
+
+        # Verify notifications were created for the expected recipients
+        notifications = Notification.objects(user__in=[poster, commenter])
+        assert len(notifications) == len(expected_recipients)
+        assert notifications[0].details.status == DiscussionStatus.CLOSED
+
+    def test_new_discussion_closed_handle_previous_notifications(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=owner)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, new_message],
+        )
+
+        with capture_mails():
+            notify_new_discussion(discussion.id)
+            notify_new_discussion_comment(discussion.id, message=1)
+
+            # Properly close the discussion to ensure closed_by is set
+            discussion.closed = datetime.utcnow()
+            discussion.closed_by = commenter
+            discussion.save()
+
+            notify_discussion_closed(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Verify previous notifications (NEW_DISCUSSION and NEW_COMMENT) were handled
+        notifications = Notification.objects(
+            user=commenter, details__status__ne=DiscussionStatus.CLOSED
+        )
+        for notification in notifications:
+            print(notification)
+            assert notification.handled_at is not None

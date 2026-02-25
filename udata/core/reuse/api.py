@@ -54,6 +54,8 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument("dataset", type=str, location="args")
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "organization_badge",
             type=str,
@@ -182,11 +184,10 @@ class ReuseAPI(API):
     @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
-        if not reuse.permissions["edit"].can():
-            if reuse.private:
-                api.abort(404)
-            elif reuse.deleted:
+        if not reuse.permissions["read"].can():
+            if not reuse.private and reuse.deleted:
                 api.abort(410, "This reuse has been deleted")
+            api.abort(404)
         return reuse
 
     @api.secure
@@ -227,9 +228,11 @@ class ReuseDatasetsAPI(API):
     @api.doc("reuse_add_dataset", **common_doc)
     @api.expect(dataset_ref_fields)
     @api.response(200, "The dataset is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataset to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataset identifier")
         try:
@@ -251,9 +254,11 @@ class ReuseDataservicesAPI(API):
     @api.doc("reuse_add_dataservice", **common_doc)
     @api.expect(Dataservice.__ref_fields__)
     @api.response(200, "The dataservice is already present", Reuse.__read_fields__)
+    @api.response(403, "Not allowed to modify this reuse")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataservice to a given reuse"""
+        reuse.permissions["edit"].test()
         if "id" not in request.json:
             api.abort(400, "Expect a dataservice identifier")
         try:
@@ -274,7 +279,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc("available_reuse_badges")
     def get(self):
         """List all available reuse badges and their labels"""
-        return Reuse.__badges__
+        return Reuse.available_badges()
 
 
 @ns.route("/<reuse:reuse>/badges/", endpoint="reuse_badges")

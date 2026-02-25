@@ -23,7 +23,6 @@ from .forms import (
     DiscussionEditForm,
 )
 from .models import Discussion, Message
-from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
 
@@ -36,6 +35,7 @@ message_permissions_fields = api.model(
 message_fields = api.model(
     "DiscussionMessage",
     {
+        "id": fields.String(description="The message identifier"),
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_by_organization": fields.Nested(
@@ -225,6 +225,7 @@ class DiscussionAPI(API):
             discussion.signal_comment(message=message_idx)
         return discussion
 
+    @api.secure
     @api.doc("update_discussion")
     @api.response(403, "Not allowed to update this discussion")
     @api.expect(edit_comment_discussion_fields)
@@ -239,6 +240,7 @@ class DiscussionAPI(API):
 
         return discussion
 
+    @api.secure
     @api.doc("delete_discussion")
     @api.expect(discussion_delete_parser)
     @api.response(403, "Not allowed to delete this discussion")
@@ -250,7 +252,6 @@ class DiscussionAPI(API):
         send_legal_notice_on_deletion(discussion, args)
 
         discussion.delete()
-        on_discussion_deleted.send(discussion)
         return "", 204
 
 
@@ -275,6 +276,7 @@ class DiscussionCommentAPI(API):
     Base class for a comment in a discussion thread.
     """
 
+    @api.secure
     @api.doc("edit_discussion_comment")
     @api.response(403, "Not allowed to edit this comment")
     @api.expect(edit_comment_discussion_fields)
@@ -295,6 +297,7 @@ class DiscussionCommentAPI(API):
         discussion.save()
         return discussion
 
+    @api.secure
     @api.doc("delete_discussion_comment")
     @api.expect(message_delete_parser)
     @api.response(403, "Not allowed to delete this comment")
@@ -311,8 +314,7 @@ class DiscussionCommentAPI(API):
         message.permissions["delete"].test()
         send_legal_notice_on_deletion(message, args)
 
-        discussion.discussion.pop(cidx)
-        discussion.save()
+        discussion.remove_message(cidx)
         return "", 204
 
 

@@ -7,7 +7,6 @@ from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
-from udata.mongo.document import get_all_models
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
 
 
@@ -159,11 +158,41 @@ class APITestCaseMixin:
         __tracebackhide__ = True
         helpers.assert_status(response, status_code, message=message)
 
+    def assert200(self, response):
+        __tracebackhide__ = True
+        helpers.assert200(response)
 
-for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
-    name = "assert{0}".format(code)
-    helper = getattr(helpers, name)
-    setattr(APITestCaseMixin, name, lambda s, r, h=helper: h(r))
+    def assert201(self, response):
+        __tracebackhide__ = True
+        helpers.assert201(response)
+
+    def assert204(self, response):
+        __tracebackhide__ = True
+        helpers.assert204(response)
+
+    def assert400(self, response):
+        __tracebackhide__ = True
+        helpers.assert400(response)
+
+    def assert401(self, response):
+        __tracebackhide__ = True
+        helpers.assert401(response)
+
+    def assert403(self, response):
+        __tracebackhide__ = True
+        helpers.assert403(response)
+
+    def assert404(self, response):
+        __tracebackhide__ = True
+        helpers.assert404(response)
+
+    def assert410(self, response):
+        __tracebackhide__ = True
+        helpers.assert410(response)
+
+    def assert500(self, response):
+        __tracebackhide__ = True
+        helpers.assert500(response)
 
 
 class _CleanDBMixin:
@@ -179,21 +208,22 @@ class _CleanDBMixin:
 
         # drop the leading /
         db_name = parsed_url.path[1:]
-        db.connection.drop_database(db_name)
+        # Truncate all documents instead of dropping collections or database.
+        # drop_database/drop_collection cause WiredTiger to defer file deletions
+        # while MongoEngine immediately recreates collections and indexes via
+        # ensure_indexes. This rapid drop/recreate cycle exhausts file descriptors
+        # and crashes MongoDB ("Too many open files" → WiredTiger panic).
+        # delete_many involves zero file operations: no drops, no creates.
+        # Indexes and collections persist across tests, which is fine since
+        # the schemas don't change between tests.
+        database = db.connection[db_name]
+        for collection_name in database.list_collection_names():
+            if not collection_name.startswith("system."):
+                database[collection_name].delete_many({})
 
     @pytest.fixture(autouse=True)
     def _clean_db(self, app):
         self.drop_db(app)
-        for model in get_all_models():
-            # When dropping the database, MongoEngine will keep the collection cached inside
-            # `_collection` (in memory). This cache is used to call `ensure_indexes` only on the
-            # first call to `_get_collection()`, on subsequent calls the value inside `_collection`
-            # is returned without calling `ensure_indexes`.
-            # In tests, the first test will have a clean memory state, so MongoEngine will initialise
-            # the collection and create the indexes, then the following test, with a clean database (no indexes)
-            # will have the collection cached, so MongoEngine will never create the indexes (except if `auto_create_index_on_save`
-            # is set on the model, which may be the reason it is present on most of the big models, we may remove it?)
-            model._collection = None
 
 
 class DBTestCase(_CleanDBMixin, TestCase):

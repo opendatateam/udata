@@ -2,6 +2,15 @@ import factory
 import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
+from flask_storage.mongo import ImageField
+from mongoengine import PULL, EmbeddedDocument
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -11,8 +20,11 @@ from udata.core.organization.models import Organization
 from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
-from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
+from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.taglist_field import TagListField
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
@@ -34,7 +46,7 @@ def check_url(url: str = "", **_kwargs) -> None:
 
 
 class FakeBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = StringField(required=True, choices=list(BADGES.keys()))
 
 
 class FakeBadgeMixin(BadgeMixin):
@@ -43,14 +55,14 @@ class FakeBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class FakeEmbedded(db.EmbeddedDocument):
+class FakeEmbedded(EmbeddedDocument):
     title = field(
-        db.StringField(required=True),
+        StringField(required=True),
         sortable=True,
         show_as_ref=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
 
@@ -71,31 +83,29 @@ class FakeEmbedded(db.EmbeddedDocument):
         },
     ],
 )
-class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
-    filter_field = field(db.StringField(), filterable={"key": "filter_field_name"})
+class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
+    filter_field = field(StringField(), filterable={"key": "filter_field_name"})
     title = field(
-        db.StringField(required=True),
+        StringField(required=True),
         sortable=True,
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="title", update=True, follow=True
-        ),
+        SlugField(max_length=255, required=True, populate_from="title", update=True, follow=True),
         readonly=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
     url = field(
-        db.StringField(required=True),
+        StringField(required=True),
         description="The remote URL (website)",
         checks=[check_url],
     )
-    image_url = db.StringField()
+    image_url = StringField()
     image = field(
-        db.ImageField(
+        ImageField(
             fs=images,
             basename=default_image_basename,
         ),
@@ -106,9 +116,9 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         },
     )
     datasets = field(
-        db.ListField(
+        ListField(
             field(
-                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=PULL),
                 nested_fields=dataset_fields,
             ),
         ),
@@ -117,20 +127,20 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         },
     )
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },
     )
 
     deleted = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
     archived = field(
-        db.DateTimeField(),
+        DateTimeField(),
     )
 
-    embedded = field(db.EmbeddedDocumentField(FakeEmbedded))
+    embedded = field(EmbeddedDocumentField(FakeEmbedded))
 
     def __str__(self) -> str:
         return self.title or ""
@@ -146,6 +156,11 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     ]
 
     meta: dict = {
+        # Unique collection name to avoid index conflicts with other test
+        # models also named "Fake" (which default to the "fake" collection).
+        # The slug unique index would prevent other Fake models without a slug
+        # field from inserting more than one document (duplicate null slug).
+        "collection": "fake_api_fields",
         "indexes": [
             "$title",
         ],

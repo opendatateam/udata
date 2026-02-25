@@ -101,6 +101,7 @@ def validate_source(source: HarvestSource, comment=None):
     source.save()
     schedule(source, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
     launch(source)
+    signals.harvest_source_validated.send(source)
     return source
 
 
@@ -112,6 +113,7 @@ def reject_source(source: HarvestSource, comment):
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
+    signals.harvest_source_refused.send(source)
     return source
 
 
@@ -145,6 +147,15 @@ def purge_sources():
         dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
         for dataservice in dataservices:
             archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
+
+        # Clean up notifications before deleting the source
+        from udata.features.notifications.models import Notification
+
+        try:
+            Notification.objects(details__source=source).delete()
+        except Exception as e:
+            log.error(f"Error cleaning up notifications for purged harvest source {source.id}: {e}")
+
         source.delete()
     return count
 

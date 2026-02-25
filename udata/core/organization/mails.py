@@ -52,23 +52,6 @@ def membership_accepted(org: Organization) -> MailMessage:
     )
 
 
-def new_member(org: Organization) -> MailMessage:
-    return MailMessage(
-        subject=_("You have been added as a member of an organization"),
-        paragraphs=[
-            ParagraphWithLinks(
-                _(
-                    "Good news! You are now a member of %(org)s.",
-                    org=org,
-                )
-            ),
-            MailCTA(
-                _("View the organization"), cdata_url(f"/admin/organizations/{org.id}/datasets")
-            ),
-        ],
-    )
-
-
 def badge_added_certified(org: Organization) -> MailMessage:
     return MailMessage(
         subject=_("Your organization has been certified"),
@@ -141,4 +124,77 @@ def badge_added_association(org: Organization) -> MailMessage:
             ),
             MailCTA(_("View the organization"), org.self_web_url()),
         ],
+    )
+
+
+def membership_invitation_canceled(org: Organization) -> MailMessage:
+    return MailMessage(
+        subject=_("An organization invitation has been canceled"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "The invitation to join the organization %(org)s has been canceled.",
+                    org=org,
+                )
+            ),
+        ],
+    )
+
+
+def membership_invitation_accepted(org: Organization, invitation: MembershipRequest) -> MailMessage:
+    return MailMessage(
+        subject=_("An invitation to join your organization has been accepted"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "%(user)s has accepted the invitation to join the organization %(org)s.",
+                    user=invitation.user,
+                    org=org,
+                )
+            ),
+            MailCTA(
+                _("View the organization"), cdata_url(f"/admin/organizations/{org.id}/members")
+            ),
+        ],
+    )
+
+
+def membership_invitation_refused(org: Organization, invitation: MembershipRequest) -> MailMessage:
+    return MailMessage(
+        subject=_("An invitation to join your organization has been refused"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "%(user)s has refused the invitation to join the organization %(org)s.",
+                    user=invitation.user,
+                    org=org,
+                )
+            ),
+        ],
+    )
+
+
+def membership_invitation(
+    org: Organization, invitation: MembershipRequest, user_exists: bool
+) -> MailMessage:
+    paragraphs = [
+        ParagraphWithLinks(
+            _(
+                "You have been invited to join the organization %(org)s.",
+                org=org,
+            )
+        ),
+    ]
+    if invitation.comment:
+        paragraphs.append(LabelledContent(_("Message:"), invitation.comment))
+
+    if user_exists:
+        url = cdata_url("/admin/me/profile")
+    else:
+        url = cdata_url("/register", next="/admin/me/profile", email=invitation.email)
+
+    paragraphs.append(MailCTA(_("View and respond to invitation"), url))
+    return MailMessage(
+        subject=_("You have been invited to join an organization"),
+        paragraphs=paragraphs,
     )

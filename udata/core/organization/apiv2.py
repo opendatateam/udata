@@ -1,17 +1,19 @@
 from flask import request
 
 from udata import search
-from udata.api import API, apiv2
+from udata.api import API, apiv2, fields
 from udata.core.contact_point.api_fields import contact_point_fields
 
-from .api_fields import member_fields, org_fields, org_page_fields
-from .permissions import EditOrganizationPermission
+from .api_fields import member_fields, org_fields, org_page_fields, org_permissions_fields
 from .search import OrganizationSearch
 
 apiv2.inherit("OrganizationPage", org_page_fields)
 apiv2.inherit("Organization", org_fields)
 apiv2.inherit("Member", member_fields)
 apiv2.inherit("ContactPoint", contact_point_fields)
+apiv2.inherit("OrganizationPermissions", org_permissions_fields)
+
+org_search_page_fields = apiv2.model("OrganizationSearchPage", fields.search_pager(org_fields))
 
 
 ns = apiv2.namespace("organizations", "Organization related operations")
@@ -26,7 +28,7 @@ class OrganizationSearchAPI(API):
 
     @apiv2.doc("search_organizations")
     @apiv2.expect(search_parser)
-    @apiv2.marshal_with(org_page_fields)
+    @apiv2.marshal_with(org_search_page_fields)
     def get(self):
         """Search all organizations"""
         args = search_parser.parse_args()
@@ -55,7 +57,7 @@ class OrganizationExtrasAPI(API):
             apiv2.abort(400, "Wrong payload format, dict expected")
         if org.deleted:
             apiv2.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             org.extras.pop(key, None)
@@ -75,7 +77,7 @@ class OrganizationExtrasAPI(API):
             apiv2.abort(400, "Wrong payload format, list expected")
         if org.deleted:
             apiv2.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         for key in data:
             try:
                 del org.extras[key]

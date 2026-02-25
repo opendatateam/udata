@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_security import current_user, logout_user
 from slugify import slugify
 
@@ -9,6 +11,8 @@ from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
+from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -243,6 +247,102 @@ class TokenAPI(API):
             api.abort(404, "Token not found")
         token.revoke()
         return "", 204
+
+
+@me.route("/org_invitations/", endpoint="my_org_invitations")
+class MyOrgInvitationsAPI(API):
+    @api.secure
+    @api.doc("list_org_invitations")
+    @api.marshal_list_with(pending_invitation_fields)
+    def get(self):
+        """List pending organization invitations for current user."""
+        from udata.core.organization.models import Organization
+
+        user = current_user._get_current_object()
+        invitations = []
+
+        for org in Organization.objects(
+            requests__kind="invitation", requests__user=user, requests__status="pending"
+        ):
+            for req in org.requests:
+                if req.kind == "invitation" and req.user == user and req.status == "pending":
+                    invitations.append(
+                        {
+                            "id": str(req.id),
+                            "organization": org,
+                            "role": req.role,
+                            "comment": req.comment,
+                            "created": req.created,
+                        }
+                    )
+
+        return invitations
+
+
+@me.route("/org_invitations/<uuid:id>/accept/", endpoint="accept_org_invitation")
+class AcceptOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("accept_org_invitation")
+    @api.response(200, "Invitation accepted")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Accept an organization invitation."""
+        from udata.core.organization.models import Member, MembershipRequest, Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "accepted"
+                    req.handled_by = user
+                    req.handled_on = datetime.utcnow()
+
+                    member = Member(user=user, role=req.role)
+                    org.members.append(member)
+                    org.count_members()
+                    org.save()
+                    MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
+
+                    return {"message": "Invitation accepted"}, 200
+
+        api.abort(404, "Invitation not found")
+
+
+@me.route("/org_invitations/<uuid:id>/refuse/", endpoint="refuse_org_invitation")
+class RefuseOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("refuse_org_invitation")
+    @api.response(200, "Invitation refused")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Refuse an organization invitation."""
+        from udata.core.organization.models import MembershipRequest, Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "refused"
+                    req.handled_by = user
+                    req.handled_on = datetime.utcnow()
+                    org.save()
+                    MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
+
+                    return {"message": "Invitation refused"}, 200
+
+        api.abort(404, "Invitation not found")
 
 
 @ns.route("/", endpoint="users")

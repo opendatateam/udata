@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 from dateutil.parser import ParserError
+from mongoengine import Q
 
 from udata import uris
 from udata.core.dataset.constants import UpdateFrequency
@@ -14,7 +15,8 @@ from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
-from udata.models import GeoZone, License, Resource, SpatialCoverage, db
+from udata.models import GeoZone, License, Resource, SpatialCoverage
+from udata.mongo.datetime_fields import DateRange
 from udata.utils import daterange_end, daterange_start, get_by
 
 from .schemas.ckan import schema as ckan_schema
@@ -181,7 +183,7 @@ class CkanBackend(BaseBackend):
                     spatial_geom = json.loads(value)
             elif key == "spatial-text":
                 # Textual representation of the extent / location
-                qs = GeoZone.objects(db.Q(name=value) | db.Q(slug=value))
+                qs = GeoZone.objects(Q(name=value) | Q(slug=value))
                 if qs.count() == 1:
                     spatial_zone = qs.first()
                 else:
@@ -238,7 +240,7 @@ class CkanBackend(BaseBackend):
             dataset.spatial.geom = {"type": "MultiPolygon", "coordinates": coordinates}
 
         if temporal_start and temporal_end:
-            dataset.temporal_coverage = db.DateRange(
+            dataset.temporal_coverage = DateRange(
                 start=temporal_start,
                 end=temporal_end,
             )
