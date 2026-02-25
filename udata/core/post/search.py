@@ -1,11 +1,14 @@
 from udata.core.post.models import Post
 from udata.search import Filter, ListFilter, ModelSearchAdapter, register
+from udata_search_service.consumers import PostConsumer
+from udata_search_service.services import PostService
 
 
 @register
 class PostSearch(ModelSearchAdapter):
     model = Post
-    search_url = "posts/"
+    service_class = PostService
+    consumer_class = PostConsumer
 
     sorts = {
         "created": "created_at",
@@ -24,10 +27,9 @@ class PostSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        """Fallback search implementation when search service is not available"""
         posts = Post.objects()
-        posts = posts.order_by("-created_at")
-        return posts
+        sort = cls.parse_sort(args["sort"]) or "-created_at"
+        return posts.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, post):

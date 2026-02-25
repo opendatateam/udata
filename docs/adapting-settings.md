@@ -187,19 +187,28 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 **default**: `200`
 
-### SEARCH_SERVICE_API_URL
+### ELASTICSEARCH_URL
 
 **default**: None
 
-The independent search service api url to use if available.
-If not specified, mongo full text search is used.
+The Elasticsearch URL to use for search.
+If not specified, mongo full text search is used as a fallback.
 
 Ex:
 ```python
-SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+ELASTICSEARCH_URL = 'http://localhost:9200'
 ```
 
-See [udata-search-service][udata-search-service] for more information on using a search service.
+Before running the application, initialize the Elasticsearch indices:
+```shell
+udata search init-es
+```
+
+### ELASTICSEARCH_INDEX_BASENAME
+
+**default**: `None` (no prefix)
+
+Optional prefix for Elasticsearch index names. When set, each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`). When `None` or empty, index names match model names directly (e.g. `dataset`, `organization`).
 
 ## Spatial configuration
 
@@ -568,7 +577,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-mail-doc]: https://flask-mail.readthedocs.io/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
-[udata-search-service]: https://github.com/opendatateam/udata-search-service
+
 
 ## Resources modifications publishing
 

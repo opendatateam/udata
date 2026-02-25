@@ -2,7 +2,6 @@ import datetime
 from unittest.mock import patch
 
 import pytest
-from flask import current_app
 from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
 
@@ -118,76 +117,170 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "page_size", int)
 
 
-@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg/")
+class ConfigureIndicesTest:
+    """Requires a running Elasticsearch on localhost:9200."""
+
+    ES_URL = "http://localhost:9200"
+    PREFIX = "test-configure-indices"
+
+    @pytest.fixture(autouse=True)
+    def setup_and_teardown(self):
+        from elasticsearch import Elasticsearch
+
+        from udata_search_service.search_clients import ElasticClient
+
+        self.client = ElasticClient(self.ES_URL, self.PREFIX)
+        self.es = Elasticsearch(self.ES_URL)
+        # Cleanup any leftover indices from previous runs
+        self.es.indices.delete(index=f"{self.PREFIX}-*", ignore_unavailable=True)
+        yield
+        self.es.indices.delete(index=f"{self.PREFIX}-*", ignore_unavailable=True)
+
+    def test_init_creates_prefixed_indices_in_elasticsearch(self):
+        self.client.init_indices()
+
+        indices = list(self.es.indices.get(index=f"{self.PREFIX}-*").keys())
+        expected_types = [
+            "dataset",
+            "reuse",
+            "organization",
+            "dataservice",
+            "topic",
+            "discussion",
+            "post",
+        ]
+        for entity_type in expected_types:
+            matching = [i for i in indices if i.startswith(f"{self.PREFIX}-{entity_type}-")]
+            assert len(matching) == 1, f"Expected one index for {entity_type}, got {matching}"
+
+    def test_save_and_get_use_prefixed_index(self):
+        from udata_search_service.search_clients import SearchableDataset
+
+        self.client.init_indices()
+
+        SearchableDataset(meta={"id": "test-doc-1"}, title="Mon dataset").save(
+            skip_empty=False, refresh="wait_for"
+        )
+
+        doc = SearchableDataset.get(id="test-doc-1")
+        assert doc.title == "Mon dataset"
+        assert doc.meta.index.startswith(f"{self.PREFIX}-dataset-")
+
+    def test_search_targets_prefixed_index(self):
+        from udata_search_service.search_clients import SearchableOrganization
+
+        self.client.init_indices()
+
+        SearchableOrganization(
+            meta={"id": "org-1"},
+            name="Ma structure",
+            description="test",
+            url="http://example.com",
+            orga_sp=1,
+            created_at="2024-01-01",
+            followers=0,
+            datasets=0,
+            views=0,
+            reuses=0,
+        ).save(skip_empty=False, refresh="wait_for")
+
+        results = SearchableOrganization.search().execute()
+        assert len(results.hits) == 1
+        assert results.hits[0].meta.index.startswith(f"{self.PREFIX}-organization-")
+
+
+class ConfigureIndicesNoPrefixTest:
+    def test_configure_indices_without_prefix(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices(None)
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == cls.Index.name
+            assert "-" not in cls._index._name
+
+    def test_configure_indices_with_prefix(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices("myprefix")
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == f"myprefix-{cls.Index.name}"
+
+    def test_configure_indices_with_empty_string(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices("")
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == cls.Index.name
+
+
+@pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
 class IndexingLifecycleTest(APITestCase):
-    @patch("requests.delete")
-    def test_producer_should_send_a_message_without_payload_if_not_indexable(self, mock_req):
+    @patch("udata.search.get_elastic_client")
+    def test_reindex_calls_delete_one_if_not_indexable(self, mock_get_client):
         fake_data = HiddenDatasetFactory(id="61fd30cb29ea95c7bc0e1211")
 
-        reindex.run(*as_task_param(fake_data))
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            reindex.run(*as_task_param(fake_data))
+            mock_service.delete_one.assert_called_once_with(str(fake_data.id))
 
-        search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
-        url = f"{search_service_url}{DatasetSearch.search_url}{str(fake_data.id)}/unindex"
-        mock_req.assert_called_with(url)
-
-    @patch("requests.post")
-    def test_producer_should_send_a_message_with_payload_if_indexable(self, mock_req):
+    @patch("udata.search.get_elastic_client")
+    def test_reindex_calls_feed_if_indexable(self, mock_get_client):
         resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
         fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211", resources=[resource])
 
-        reindex.run(*as_task_param(fake_data))
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            reindex.run(*as_task_param(fake_data))
+            mock_service.feed.assert_called_once()
 
-        expected_value = {"document": DatasetSearch.serialize(fake_data)}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}index"
-        mock_req.assert_called_with(url, json=expected_value)
+    @patch("udata.search.commands.get_elastic_client")
+    def test_index_model(self, mock_get_client):
+        DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
 
-    @patch("requests.Session.post")
-    def test_index_model(self, mock_req):
-        fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
+            mock_service.feed.assert_called_once()
 
-        index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
+    @patch("udata.search.commands.get_elastic_client")
+    def test_reindex_model_creates_index_and_feeds(self, mock_get_client):
+        DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
+        mock_es = mock_get_client.return_value.es
 
-        expected_value = {"document": DatasetSearch.serialize(fake_data), "index": "dataset"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_req.assert_called_with(url, json=expected_value)
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
+            mock_es.indices.create.assert_called_once()
+            mock_service.feed.assert_called_once()
 
-    @patch("requests.post")
-    @patch("requests.Session.post")
-    def test_reindex_model(self, mock_session, mock_req):
-        fake_data = DatasetFactory(id="61fd30cb29ea95c7bc0e1211")
-
-        index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
-
-        # Create index
-        expected_value = {"index": "dataset-2022-02-20-20-02"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
-        mock_req.assert_called_with(url, json=expected_value)
-
-        # Index document
-        expected_value = {
-            "document": DatasetSearch.serialize(fake_data),
-            "index": "dataset-2022-02-20-20-02",
-        }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_session.assert_called_with(url, json=expected_value)
-
-    @patch("requests.Session.post")
-    def test_index_model_from_datetime(self, mock_req):
+    @patch("udata.search.commands.get_elastic_client")
+    def test_index_model_from_datetime(self, mock_get_client):
         DatasetFactory(
             id="61fd30cb29ea95c7bc0e1211", last_modified_internal=datetime.datetime(2020, 1, 1)
         )
-        fake_data = DatasetFactory(
+        DatasetFactory(
             id="61fd30cb29ea95c7bc0e1212", last_modified_internal=datetime.datetime(2022, 1, 1)
         )
 
-        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
-        mock_req.assert_not_called()
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
+            mock_service.feed.assert_not_called()
 
-        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
-
-        expected_value = {"document": DatasetSearch.serialize(fake_data), "index": "dataset"}
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_req.assert_called_with(url, json=expected_value)
+        with patch.object(DatasetSearch, "service_class") as mock_service_class:
+            mock_service = mock_service_class.return_value
+            index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
+            mock_service.feed.assert_called_once()
 
 
 class DatasetSearchAdapterTest(APITestCase):

@@ -2,7 +2,6 @@ import datetime
 
 import requests
 from bson.objectid import ObjectId
-from flask import current_app
 from flask_restx.inputs import boolean
 
 from udata.api import api
@@ -21,6 +20,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import DataserviceConsumer
+from udata_search_service.services import DataserviceService
 
 # Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
 MAX_DOCUMENTATION_SIZE = 100 * 1024
@@ -71,7 +72,8 @@ class DataserviceApiParser(ModelApiParser):
 @register
 class DataserviceSearch(ModelSearchAdapter):
     model = Dataservice
-    search_url = "dataservices/"
+    service_class = DataserviceService
+    consumer_class = DataserviceConsumer
 
     sorts = {"created": "created_at", "views": "views", "followers": "followers"}
 
@@ -101,7 +103,7 @@ class DataserviceSearch(ModelSearchAdapter):
             return None
 
         try:
-            timeout = current_app.config.get("SEARCH_SERVICE_REQUEST_TIMEOUT", 10)
+            timeout = 10
             headers = {"User-Agent": "udata-search-service/1.0"}
             response = requests.get(url, timeout=timeout, stream=True, headers=headers)
             response.raise_for_status()

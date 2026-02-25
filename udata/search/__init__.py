@@ -1,12 +1,8 @@
 import logging
 
-import requests
-
-# Import udata event in order for datasets event hooks to be executed
 from flask import current_app
 from mongoengine.signals import post_delete, post_save
 
-import udata.event  # noqa
 from udata.mongo import db
 from udata.tasks import as_task_param, task
 
@@ -14,10 +10,24 @@ log = logging.getLogger(__name__)
 
 adapter_catalog = {}
 
+_elastic_client = None
+
+
+def get_elastic_client():
+    global _elastic_client
+    if _elastic_client is None:
+        from udata_search_service.search_clients import ElasticClient
+
+        _elastic_client = ElasticClient(
+            current_app.config["ELASTICSEARCH_URL"],
+            current_app.config["ELASTICSEARCH_INDEX_BASENAME"],
+        )
+    return _elastic_client
+
 
 @task(route="high.search")
 def reindex(classname, id):
-    if not current_app.config["SEARCH_SERVICE_API_URL"]:
+    if not current_app.config["ELASTICSEARCH_URL"]:
         return
     model = db.resolve_model(classname)
     obj = model.objects.get(pk=id)
@@ -25,53 +35,49 @@ def reindex(classname, id):
     document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info("Indexing %s (%s)", model.__name__, obj.id)
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}index"
         try:
-            payload = {"document": document}
-            r = requests.post(url, json=payload)
-            r.raise_for_status()
+            entity = adapter_class.consumer_class.load_from_dict(document)
+            service = adapter_class.service_class(get_elastic_client())
+            service.feed(entity)
         except Exception:
-            log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
+            log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
         log.info("Unindexing %s (%s)", model.__name__, obj.id)
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}{str(obj.id)}/unindex"
         try:
-            r = requests.delete(url)
-            if r.status_code == 404:
-                # Unindexed already, we don't want to raise
-                return
-            r.raise_for_status()
+            service = adapter_class.service_class(get_elastic_client())
+            service.delete_one(str(obj.id))
         except Exception:
-            log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
+            log.exception('Unable to unindex %s "%s"', model.__name__, str(obj.id))
 
 
 @task(route="high.search")
 def unindex(classname, id):
-    if not current_app.config["SEARCH_SERVICE_API_URL"]:
+    if not current_app.config["ELASTICSEARCH_URL"]:
         return
     model = db.resolve_model(classname)
     adapter_class = adapter_catalog.get(model)
     log.info("Unindexing %s (%s)", model.__name__, id)
     try:
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}{str(id)}/unindex"
-        r = requests.delete(url)
-        if r.status_code == 404:
-            # Unindexed already, we don't want to raise
-            return
-        r.raise_for_status()
+        service = adapter_class.service_class(get_elastic_client())
+        service.delete_one(str(id))
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
 
+# Placed after reindex/unindex definitions to avoid circular import:
+# udata.search → udata.event → udata.models → udata.core.topic.models → udata.search.reindex
+import udata.event  # noqa: E402, F401
+
+
 def reindex_model_on_save(sender, document, **kwargs):
     """(Re/Un)Index Mongo document on post_save"""
-    if current_app.config.get("AUTO_INDEX") and current_app.config["SEARCH_SERVICE_API_URL"]:
+    if current_app.config.get("AUTO_INDEX") and current_app.config["ELASTICSEARCH_URL"]:
         reindex.delay(*as_task_param(document))
 
 
 def unindex_model_on_delete(sender, document, **kwargs):
     """Unindex Mongo document on post_delete"""
-    if current_app.config.get("AUTO_INDEX") and current_app.config["SEARCH_SERVICE_API_URL"]:
+    if current_app.config.get("AUTO_INDEX") and current_app.config["ELASTICSEARCH_URL"]:
         unindex.delay(*as_task_param(document))
 
 
@@ -111,9 +117,10 @@ def query(model, **params):
 
 def init_app(app):
     # Register core adapters
+    import udata.core.dataservices.search  # noqa
     import udata.core.dataset.search  # noqa
-    import udata.core.reuse.search  # noqa
-    import udata.core.organization.search  # noqa
-    import udata.core.topic.search  # noqa
     import udata.core.discussions.search  # noqa
+    import udata.core.organization.search  # noqa
     import udata.core.post.search  # noqa
+    import udata.core.reuse.search  # noqa
+    import udata.core.topic.search  # noqa
