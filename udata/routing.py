@@ -11,6 +11,7 @@ from werkzeug.routing import BaseConverter, PathConverter
 from udata import models
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
+from udata.core.visualizations.models import Chart
 from udata.features.notifications.models import Notification
 from udata.harvest.models import HarvestSource
 from udata.mongo.slug_fields import SlugField
@@ -176,6 +177,10 @@ class NotificationConverter(ModelConverter):
     model = Notification
 
 
+class VisualizationConverter(ModelConverter):
+    model = Chart
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = "fr"  # TODO: make it a setting parameter
 
@@ -258,6 +263,7 @@ def init_app(app):
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
+    app.url_map.converters["visualization"] = VisualizationConverter
 
     app.jinja_env.globals["cdata_url"] = cdata_url
     app.jinja_env.globals["homepage_url"] = homepage_url
