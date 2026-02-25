@@ -31,6 +31,13 @@ def iter_adapters():
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
+def index_alias(model_name):
+    prefix = current_app.config["ELASTICSEARCH_INDEX_BASENAME"]
+    if prefix:
+        return f"{prefix}-{model_name}"
+    return model_name
+
+
 def get_date_property(model_name: str) -> str:
     """Get the date property used for filtering modified objects by model name."""
     date_properties = {
@@ -69,7 +76,7 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     index_name = None
     if reindex:
         suffix = default_index_suffix_name(start)
-        alias = f"{current_app.config['ELASTICSEARCH_INDEX_BASENAME']}-{model_name}"
+        alias = index_alias(model_name)
         index_name = f"{alias}-{suffix}"
         es_client.es.indices.create(index=index_name)
 
@@ -93,13 +100,11 @@ def finalize_reindex(models, start):
     try:
         es = get_elastic_client().es
         suffix = default_index_suffix_name(start)
-        instance = current_app.config["ELASTICSEARCH_INDEX_BASENAME"]
-
         for adapter in iter_adapters():
             model_name = adapter.model.__name__.lower()
             if models and model_name not in models:
                 continue
-            alias = f"{instance}-{model_name}"
+            alias = index_alias(model_name)
             new_index = f"{alias}-{suffix}"
 
             actions = []

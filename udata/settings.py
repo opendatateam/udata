@@ -29,7 +29,7 @@ class Defaults(object):
 
     # Search configuration
     ELASTICSEARCH_URL = None
-    ELASTICSEARCH_INDEX_BASENAME = "udata"
+    ELASTICSEARCH_INDEX_BASENAME = None
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = "redis://localhost:6379"
@@ -191,8 +191,6 @@ class Defaults(object):
     TERMS_OF_USE_URL = None
     TERMS_OF_USE_DELETION_ARTICLE = None
     TELERECOURS_URL = None
-
-    ELASTICSEARCH_INDEX_BASENAME = "udata"
 
     DATASET_HIDDEN_BADGES = []
 

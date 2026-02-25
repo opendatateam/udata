@@ -206,9 +206,9 @@ udata search init-es
 
 ### ELASTICSEARCH_INDEX_BASENAME
 
-**default**: `"udata"`
+**default**: `None` (no prefix)
 
-Prefix used for Elasticsearch index names. Each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`).
+Optional prefix for Elasticsearch index names. When set, each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`). When `None` or empty, index names match model names directly (e.g. `dataset`, `organization`).
 
 ## Spatial configuration
 

@@ -189,6 +189,39 @@ class ConfigureIndicesTest:
         assert results.hits[0].meta.index.startswith(f"{self.PREFIX}-organization-")
 
 
+class ConfigureIndicesNoPrefixTest:
+    def test_configure_indices_without_prefix(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices(None)
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == cls.Index.name
+            assert "-" not in cls._index._name
+
+    def test_configure_indices_with_prefix(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices("myprefix")
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == f"myprefix-{cls.Index.name}"
+
+    def test_configure_indices_with_empty_string(self):
+        from udata_search_service.search_clients import (
+            ALL_DOCUMENT_CLASSES,
+            configure_indices,
+        )
+
+        configure_indices("")
+        for cls in ALL_DOCUMENT_CLASSES:
+            assert cls._index._name == cls.Index.name
+
+
 @pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
 class IndexingLifecycleTest(APITestCase):
     @patch("udata.search.get_elastic_client")

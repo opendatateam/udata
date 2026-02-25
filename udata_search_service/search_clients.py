@@ -264,7 +264,10 @@ ALL_DOCUMENT_CLASSES = [
 
 def configure_indices(prefix):
     for cls in ALL_DOCUMENT_CLASSES:
-        cls._index._name = f"{prefix}-{cls.Index.name}"
+        if prefix:
+            cls._index._name = f"{prefix}-{cls.Index.name}"
+        else:
+            cls._index._name = cls.Index.name
 
 
 class ElasticClient:
