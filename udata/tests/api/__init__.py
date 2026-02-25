@@ -5,6 +5,7 @@ import pytest
 from flask import json
 from flask_security.utils import login_user, logout_user, set_request_attr
 
+from udata.core.user.api_tokens import ApiToken
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
@@ -47,11 +48,11 @@ class APITestCaseMixin:
                 response = self.get(url)
         """
         self._user = user or UserFactory()
-        if not self._user.apikey:
-            self._user.generate_api_key()
-            self._user.save()
+        token, plaintext = ApiToken.generate(self._user)
+        self._api_key = plaintext
         yield self._user
         self._user = None
+        self._api_key = None
 
     def login(self, user=None):
         """Login a user via session authentication."""
@@ -92,7 +93,7 @@ class APITestCaseMixin:
             kwargs["data"] = data
 
         if self._user:
-            headers["X-API-KEY"] = kwargs.get("X-API-KEY", self._user.apikey)
+            headers["X-API-KEY"] = kwargs.get("X-API-KEY", self._api_key)
 
         kwargs["headers"] = headers
         method = getattr(self.client, verb)

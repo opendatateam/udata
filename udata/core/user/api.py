@@ -22,14 +22,13 @@ from udata.core.user.models import Role
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
-    apikey_fields,
-    me_fields,
     me_metrics_fields,
     user_fields,
     user_page_fields,
     user_role_fields,
     user_suggestion_fields,
 )
+from .api_tokens import ApiToken, apitoken_created_fields
 from .forms import UserProfileAdminForm, UserProfileForm
 
 DEFAULT_SORTING = "-created_at"
@@ -62,15 +61,15 @@ filter_parser.add_argument(
 class MeAPI(API):
     @api.secure
     @api.doc("get_me")
-    @api.marshal_with(me_fields)
+    @api.marshal_with(user_fields)
     def get(self):
         """Fetch the current user (me) identity"""
         return current_user._get_current_object()
 
     @api.secure
     @api.doc("update_me")
-    @api.expect(me_fields)
-    @api.marshal_with(me_fields)
+    @api.expect(user_fields)
+    @api.marshal_with(user_fields)
     @api.response(400, "Validation error")
     def put(self, **kwargs):
         """Update my profile"""
@@ -197,25 +196,54 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-@me.route("/apikey/", endpoint="my_apikey")
-class ApiKeyAPI(API):
+token_parser = api.parser()
+token_parser.add_argument("name", type=str, help="A label for this token", location="json")
+token_parser.add_argument(
+    "expires_at", type=str, help="Expiration date (ISO 8601)", location="json"
+)
+
+
+@me.route("/tokens/", endpoint="my_tokens")
+class TokenListAPI(API):
     @api.secure
-    @api.doc("generate_apikey")
-    @api.marshal_with(apikey_fields)
-    @api.response(201, "API Key generated")
-    def post(self):
-        """(Re)Generate my API Key"""
-        current_user.generate_api_key()
-        current_user.save()
-        return current_user, 201
+    @api.doc("list_tokens")
+    @api.marshal_list_with(ApiToken.__read_fields__)
+    def get(self):
+        """List all my active API tokens"""
+        return list(ApiToken.objects(user=current_user._get_current_object(), revoked_at=None))
 
     @api.secure
-    @api.doc("clear_apikey")
-    @api.response(204, "API Key deleted/cleared")
-    def delete(self):
-        """Clear/destroy an apikey"""
-        current_user.apikey = None
-        current_user.save()
+    @api.doc("create_token")
+    @api.expect(token_parser)
+    @api.marshal_with(apitoken_created_fields, code=201)
+    def post(self):
+        """Create a new API token. The plaintext token is returned only once."""
+        args = token_parser.parse_args()
+        user = current_user._get_current_object()
+        expires_at = None
+        if args.get("expires_at"):
+            expires_at = datetime.fromisoformat(args["expires_at"])
+        token, plaintext = ApiToken.generate(user, name=args.get("name"), expires_at=expires_at)
+        token._plaintext = plaintext
+        return token, 201
+
+
+@me.route("/tokens/<string:id>/", endpoint="my_token")
+class TokenAPI(API):
+    @api.secure
+    @api.doc("revoke_token")
+    @api.response(204, "Token revoked")
+    @api.response(404, "Token not found")
+    def delete(self, id):
+        """Revoke an API token"""
+        token = ApiToken.objects(
+            id=id,
+            user=current_user._get_current_object(),
+            revoked_at=None,
+        ).first()
+        if not token:
+            api.abort(404, "Token not found")
+        token.revoke()
         return "", 204
 
 
