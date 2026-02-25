@@ -84,7 +84,7 @@ class ApiToken(db.Document):
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
         plaintext = f"{prefix}{raw}"
         token_hash = _hash_token(plaintext)
-        display_prefix = raw[:PREFIX_DISPLAY_LENGTH]
+        display_prefix = plaintext[: len(prefix) + PREFIX_DISPLAY_LENGTH]
         token = cls(
             token_hash=token_hash,
             token_prefix=display_prefix,

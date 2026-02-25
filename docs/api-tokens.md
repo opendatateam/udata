@@ -31,7 +31,7 @@ A slow hash (bcrypt/argon2) is unnecessary here: tokens have 48 bytes of entropy
 
 A configurable prefix (default: `udata_`) is prepended to every generated token. This serves two purposes: secret scanning tools (GitHub, GitLeaks, etc.) can detect leaked tokens via pattern matching, and different prefixes per environment (e.g. `udata_prod_`, `udata_demo_`) let users identify which environment a token belongs to.
 
-Since the plaintext is never stored, we also save a `token_prefix`: the first 8 characters of the random part (after the global prefix). This lets users identify which token is which in the UI. The global prefix is not included in `token_prefix` because it's the same for all tokens of a given environment and wouldn't help distinguish them.
+Since the plaintext is never stored, we also save a `token_prefix`: the global prefix followed by the first 8 characters of the random part (e.g. `udata_abc123xy`). This lets users match the beginning of their token as they see it with what's displayed in the UI.
 
 ### Scope defaults to `admin`
 
