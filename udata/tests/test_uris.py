@@ -100,6 +100,12 @@ LOCAL_IPS = [
 
 LOCAL = LOCAL_HOSTS + LOCAL_IPS
 
+HOSTS_RESOLVING_TO_LOOPBACK = [
+    "http://localtest.me",
+    "http://localtest.me/index.html",
+    "http://localtest.me:8080/index.html",
+]
+
 MULTICAST = [
     "http://224.1.1.1",
     "http://224.1.1.1:8080",
@@ -253,6 +259,25 @@ def test_local_should_not_validate_private_urls(url):
 @pytest.mark.parametrize("url", PUBLIC + LOCAL + PRIVATE)
 def test_private_local_should_validate_any_valid_urls(url):
     assert uris.validate(url, local=True, private=True) == url
+
+
+@pytest.mark.parametrize("url", HOSTS_RESOLVING_TO_LOOPBACK)
+@pytest.mark.options(URLS_RESOLVE_HOSTNAME=True)
+def test_default_should_not_validate_hostnames_resolving_to_loopback(url):
+    with pytest.raises(uris.ValidationError, match="local URL"):
+        uris.validate(url)
+
+
+@pytest.mark.parametrize("url", HOSTS_RESOLVING_TO_LOOPBACK)
+@pytest.mark.options(URLS_RESOLVE_HOSTNAME=True)
+def test_should_validate_hostnames_if_no_resolve(url):
+    assert uris.validate(url, resolve=False) == url
+
+
+@pytest.mark.parametrize("url", HOSTS_RESOLVING_TO_LOOPBACK)
+@pytest.mark.options(URLS_RESOLVE_HOSTNAME=True)
+def test_local_should_validate_hostnames_resolving_to_loopback(url):
+    assert uris.validate(url, local=True) == url
 
 
 @pytest.mark.parametrize("scheme", CUSTOM_SCHEMES)
