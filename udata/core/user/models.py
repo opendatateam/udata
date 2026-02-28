@@ -176,6 +176,43 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     def sysadmin(self):
         return self.has_role("admin")
 
+    def check_tf_required(
+        self, tf_setup_methods: list[tuple[str, str]], tf_fresh: bool
+    ) -> tuple[bool, list[tuple[str, str]]]:
+        """Check if current user requires two-factor authentication.
+
+        :param tf_setup_methods: A tuple of (two_factor method, label) - methods
+            the user has already set up (from all two-factor implementations)
+        :param tf_fresh: if True then user has recently completed
+            two-factor authentication on the requesting device
+        :return: Whether TFA is required for this user and a possibly augmented
+            list of allowable methods
+
+        Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
+        This is called AFTER the user has successfully authenticated.
+        """
+        if (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED"]
+            or len(tf_setup_methods) > 0
+            or (current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
+        ):
+            if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
+                return True, tf_setup_methods
+        return False, tf_setup_methods
+
+    def check_tf_required_setup(self) -> bool:
+        """Check if current user requires two-factor authentication.
+        This is called as part of two-factor setup to inform the caller
+
+        N.B. this is only called from tf-setup - not from webauthn and
+        is only used to improve UX - the above method check_tf_required is the
+        definitive answer in the authentication path.
+        Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
+        """
+        return current_app.config["SECURITY_TWO_FACTOR_REQUIRED"] or (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
+        )
+
     def self_web_url(self, **kwargs):
         return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)
 
