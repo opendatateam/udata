@@ -104,8 +104,12 @@ class UDataApi(Api):
             if apikey:
                 from udata.core.user.api_tokens import ApiToken
 
-                api_token = ApiToken.authenticate(apikey)
+                api_token, error = ApiToken.authenticate(apikey)
                 if api_token is None:
+                    if error == "revoked":
+                        self.abort(401, "Revoked API Key")
+                    elif error == "expired":
+                        self.abort(401, "Expired API Key")
                     self.abort(401, "Invalid API Key")
 
                 if not login_user(api_token.user, False):

@@ -234,15 +234,17 @@ class TokenAPI(API):
     @api.doc("revoke_token")
     @api.response(204, "Token revoked")
     @api.response(404, "Token not found")
+    @api.response(410, "Token already revoked")
     def delete(self, id):
         """Revoke an API token"""
         token = ApiToken.objects(
             id=id,
             user=current_user._get_current_object(),
-            revoked_at=None,
         ).first()
         if not token:
             api.abort(404, "Token not found")
+        if token.revoked_at is not None:
+            api.abort(410, "Token already revoked")
         token.revoke()
         return "", 204
 

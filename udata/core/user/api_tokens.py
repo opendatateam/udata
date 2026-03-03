@@ -97,14 +97,24 @@ class ApiToken(db.Document):
 
     @classmethod
     def authenticate(cls, plaintext_token):
-        """Lookup a token by hashing the plaintext. Returns ApiToken or None."""
+        """Lookup a token by hashing the plaintext.
+
+        Returns (ApiToken, None) on success, or (None, error_reason) on failure.
+        error_reason is one of: "invalid", "revoked", "expired".
+        """
         token_hash = _hash_token(plaintext_token)
-        token = cls.objects(token_hash=token_hash, revoked_at=None).first()
+        token = cls.objects(token_hash=token_hash).first()
         if token is None:
-            return None
-        if token.expires_at and token.expires_at < datetime.now(timezone.utc):
-            return None
-        return token
+            return None, "invalid"
+        if token.revoked_at is not None:
+            return None, "revoked"
+        if token.expires_at:
+            expires_at = token.expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < datetime.now(timezone.utc):
+                return None, "expired"
+        return token, None
 
     def revoke(self):
         self.revoked_at = datetime.now(timezone.utc)

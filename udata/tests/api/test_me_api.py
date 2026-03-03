@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from flask import url_for
 
@@ -285,7 +285,9 @@ class MeAPITest(APITestCase):
         # Verify the revoked token no longer authenticates
         from udata.core.user.api_tokens import ApiToken
 
-        self.assertIsNone(ApiToken.authenticate(plaintext))
+        token, error = ApiToken.authenticate(plaintext)
+        self.assertIsNone(token)
+        self.assertEqual(error, "revoked")
 
     def test_revoke_nonexistent_token(self):
         """It should return 404 for a non-existent token"""
@@ -307,15 +309,15 @@ class MeAPITest(APITestCase):
         # Both tokens should work
         from udata.core.user.api_tokens import ApiToken
 
-        self.assertIsNotNone(ApiToken.authenticate(token1))
-        self.assertIsNotNone(ApiToken.authenticate(token2))
+        self.assertIsNotNone(ApiToken.authenticate(token1)[0])
+        self.assertIsNotNone(ApiToken.authenticate(token2)[0])
 
         # Revoke token1
         self.delete(url_for("api.my_token", id=token1_id))
 
         # token1 no longer works, token2 still works
-        self.assertIsNone(ApiToken.authenticate(token1))
-        self.assertIsNotNone(ApiToken.authenticate(token2))
+        self.assertIsNone(ApiToken.authenticate(token1)[0])
+        self.assertIsNotNone(ApiToken.authenticate(token2)[0])
 
     def test_get_me_no_apikey_field(self):
         """GET /me should no longer contain the apikey field"""
@@ -401,3 +403,65 @@ class MeAPITest(APITestCase):
 
         # The activities are unchanged
         self.assertEqual(activity.actor, user)
+
+    def test_expired_token_auth_returns_401(self):
+        """Should return 401 with 'Expired API Key' for an expired token"""
+        from udata.core.user.api_tokens import ApiToken
+
+        user = UserFactory()
+        expired = datetime.now(timezone.utc) - timedelta(hours=1)
+        token, plaintext = ApiToken.generate(user, expires_at=expired)
+
+        response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})
+        self.assert401(response)
+        self.assertIn("Expired", response.json["message"])
+
+    def test_expired_token_with_naive_datetime(self):
+        """authenticate() should not crash comparing naive vs aware datetimes"""
+        from udata.core.user.api_tokens import ApiToken
+
+        user = UserFactory()
+        # Simulate a naive datetime as MongoDB might return.
+        # Without the timezone fix, this would raise:
+        # TypeError: can't compare offset-naive and offset-aware datetimes
+        future_naive = datetime.utcnow() + timedelta(days=30)
+        token, plaintext = ApiToken.generate(user, expires_at=future_naive)
+
+        result, error = ApiToken.authenticate(plaintext)
+        self.assertIsNotNone(result)
+        self.assertIsNone(error)
+
+        # Also verify the expired naive case
+        past_naive = datetime.utcnow() - timedelta(hours=1)
+        token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
+
+        result2, error2 = ApiToken.authenticate(plaintext2)
+        self.assertIsNone(result2)
+        self.assertEqual(error2, "expired")
+
+    def test_revoked_token_auth_returns_401(self):
+        """Should return 401 with 'Revoked API Key' for a revoked token"""
+        from udata.core.user.api_tokens import ApiToken
+
+        user = UserFactory()
+        token, plaintext = ApiToken.generate(user)
+        token.revoke()
+
+        response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})
+        self.assert401(response)
+        self.assertIn("Revoked", response.json["message"])
+
+    def test_revoke_already_revoked_token_returns_410(self):
+        """Should return 410 when trying to revoke an already revoked token"""
+        self.login()
+        create_response = self.post(url_for("api.my_tokens"))
+        self.assert201(create_response)
+        token_id = create_response.json["id"]
+
+        # First revocation succeeds
+        response = self.delete(url_for("api.my_token", id=token_id))
+        self.assert204(response)
+
+        # Second revocation returns 410
+        response = self.delete(url_for("api.my_token", id=token_id))
+        self.assert410(response)
