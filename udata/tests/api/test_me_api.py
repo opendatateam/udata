@@ -230,7 +230,7 @@ class MeAPITest(APITestCase):
     def test_create_token(self):
         """It should create a new API token on POST"""
         self.login()
-        response = self.post(url_for("api.my_tokens"))
+        response = self.post(url_for("api.my_api_tokens"))
         self.assert201(response)
         self.assertIn("token", response.json)
         self.assertIn("token_prefix", response.json)
@@ -239,7 +239,7 @@ class MeAPITest(APITestCase):
     def test_create_token_with_name(self):
         """It should create a named API token on POST"""
         self.login()
-        response = self.post(url_for("api.my_tokens"), {"name": "My CI token"})
+        response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
         self.assert201(response)
         self.assertEqual(response.json["name"], "My CI token")
 
@@ -247,7 +247,7 @@ class MeAPITest(APITestCase):
         """It should create a token with an expiration date"""
         self.login()
         response = self.post(
-            url_for("api.my_tokens"),
+            url_for("api.my_api_tokens"),
             {"expires_at": "2030-01-01T00:00:00"},
         )
         self.assert201(response)
@@ -256,9 +256,9 @@ class MeAPITest(APITestCase):
     def test_list_tokens(self):
         """It should list active tokens without the plaintext"""
         self.login()
-        self.post(url_for("api.my_tokens"), {"name": "Token 1"})
-        self.post(url_for("api.my_tokens"), {"name": "Token 2"})
-        response = self.get(url_for("api.my_tokens"))
+        self.post(url_for("api.my_api_tokens"), {"name": "Token 1"})
+        self.post(url_for("api.my_api_tokens"), {"name": "Token 2"})
+        response = self.get(url_for("api.my_api_tokens"))
         self.assert200(response)
         self.assertEqual(len(response.json), 2)
         for token_data in response.json:
@@ -268,16 +268,16 @@ class MeAPITest(APITestCase):
     def test_revoke_token(self):
         """It should revoke a token on DELETE"""
         self.login()
-        create_response = self.post(url_for("api.my_tokens"))
+        create_response = self.post(url_for("api.my_api_tokens"))
         self.assert201(create_response)
         token_id = create_response.json["id"]
         plaintext = create_response.json["token"]
 
-        response = self.delete(url_for("api.my_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", id=token_id))
         self.assert204(response)
 
         # Verify the token is no longer in the active list
-        response = self.get(url_for("api.my_tokens"))
+        response = self.get(url_for("api.my_api_tokens"))
         self.assert200(response)
         active_ids = [t["id"] for t in response.json]
         self.assertNotIn(token_id, active_ids)
@@ -292,14 +292,14 @@ class MeAPITest(APITestCase):
     def test_revoke_nonexistent_token(self):
         """It should return 404 for a non-existent token"""
         self.login()
-        response = self.delete(url_for("api.my_token", id="000000000000000000000000"))
+        response = self.delete(url_for("api.my_api_token", id="000000000000000000000000"))
         self.assert404(response)
 
     def test_multiple_tokens(self):
         """It should support multiple active tokens"""
         self.login()
-        resp1 = self.post(url_for("api.my_tokens"), {"name": "Token 1"})
-        resp2 = self.post(url_for("api.my_tokens"), {"name": "Token 2"})
+        resp1 = self.post(url_for("api.my_api_tokens"), {"name": "Token 1"})
+        resp2 = self.post(url_for("api.my_api_tokens"), {"name": "Token 2"})
         self.assert201(resp1)
         self.assert201(resp2)
         token1 = resp1.json["token"]
@@ -313,7 +313,7 @@ class MeAPITest(APITestCase):
         self.assertIsNotNone(ApiToken.authenticate(token2)[0])
 
         # Revoke token1
-        self.delete(url_for("api.my_token", id=token1_id))
+        self.delete(url_for("api.my_api_token", id=token1_id))
 
         # token1 no longer works, token2 still works
         self.assertIsNone(ApiToken.authenticate(token1)[0])
@@ -454,14 +454,14 @@ class MeAPITest(APITestCase):
     def test_revoke_already_revoked_token_returns_410(self):
         """Should return 410 when trying to revoke an already revoked token"""
         self.login()
-        create_response = self.post(url_for("api.my_tokens"))
+        create_response = self.post(url_for("api.my_api_tokens"))
         self.assert201(create_response)
         token_id = create_response.json["id"]
 
         # First revocation succeeds
-        response = self.delete(url_for("api.my_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", id=token_id))
         self.assert204(response)
 
         # Second revocation returns 410
-        response = self.delete(url_for("api.my_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", id=token_id))
         self.assert410(response)

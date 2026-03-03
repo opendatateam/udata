@@ -203,17 +203,17 @@ token_parser.add_argument(
 )
 
 
-@me.route("/tokens/", endpoint="my_tokens")
-class TokenListAPI(API):
+@me.route("/api_tokens/", endpoint="my_api_tokens")
+class ApiTokenListAPI(API):
     @api.secure
-    @api.doc("list_tokens")
+    @api.doc("list_api_tokens")
     @api.marshal_list_with(ApiToken.__read_fields__)
     def get(self):
         """List all my active API tokens"""
-        return list(ApiToken.objects(user=current_user._get_current_object(), revoked_at=None))
+        return list(ApiToken.objects(user=current_user.id, revoked_at=None))
 
     @api.secure
-    @api.doc("create_token")
+    @api.doc("create_api_token")
     @api.expect(token_parser)
     @api.marshal_with(apitoken_created_fields, code=201)
     def post(self):
@@ -228,10 +228,10 @@ class TokenListAPI(API):
         return token, 201
 
 
-@me.route("/tokens/<string:id>/", endpoint="my_token")
-class TokenAPI(API):
+@me.route("/api_tokens/<string:id>/", endpoint="my_api_token")
+class ApiTokenAPI(API):
     @api.secure
-    @api.doc("revoke_token")
+    @api.doc("revoke_api_token")
     @api.response(204, "Token revoked")
     @api.response(404, "Token not found")
     @api.response(410, "Token already revoked")
@@ -239,7 +239,7 @@ class TokenAPI(API):
         """Revoke an API token"""
         token = ApiToken.objects(
             id=id,
-            user=current_user._get_current_object(),
+            user=current_user.id,
         ).first()
         if not token:
             api.abort(404, "Token not found")

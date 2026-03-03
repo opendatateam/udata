@@ -6,15 +6,6 @@ Opaque, randomly generated tokens that authenticate API requests via the `X-API-
 
 Tokens are stored as HMAC-SHA256 hashes in a dedicated `api_token` MongoDB collection. Revoked tokens are kept for audit (soft-delete via `revoked_at`).
 
-## Previous system
-
-The old system generated a JWS (JSON Web Signature) token but never actually verified or decoded it — authentication was a simple string comparison against the `apikey` field stored in plaintext on the `User` document. The JWS format added no security value since it was treated as an opaque string.
-
-- **One key per user**: generating a new key invalidated the previous one, breaking any integration still using it.
-- **Plaintext stored in DB**: the token was stored as-is, so a database leak directly exposed all API keys.
-- **No revocation or expiration**: the only way to invalidate a key was to generate a new one or delete it, with no audit trail.
-- **No usage tracking**: no way to know when or by what a key was last used.
-
 ## Design decisions
 
 ### HMAC-SHA256 instead of plain SHA-256
