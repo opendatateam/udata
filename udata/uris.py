@@ -117,7 +117,7 @@ def resolve_hostname(hostname: str, retry=5):
     except socket.gaierror:
         if retry == 0:
             # We don't raise an error here, we currently only log it
-            log.error(f"hostname {hostname} could not be resolved")
+            log.info(f"hostname {hostname} could not be resolved")
         else:
             yield from resolve_hostname(hostname, retry - 1)
 
