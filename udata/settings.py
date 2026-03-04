@@ -528,6 +528,8 @@ class Defaults(object):
     URLS_ALLOW_PRIVATE = False
     # Whether or not to allow local URLs (localhost...) submission.
     URLS_ALLOW_LOCAL = False
+    # Wheter or not to resolve hostname to verify for private or local IP.
+    URLS_RESOLVE_HOSTNAME = True
     # Whether or not to allow credentials in URLs submission.
     URLS_ALLOW_CREDENTIALS = True
     # List of allowed URL schemes.
@@ -698,6 +700,7 @@ class Testing(object):
     LOGGER_HANDLER_POLICY = "never"
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
+    URLS_RESOLVE_HOSTNAME = False
     URLS_ALLOWED_TLDS = tld_set | set(["test"])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
