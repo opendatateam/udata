@@ -12,7 +12,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset, User
-from udata.utils import safe_unicode
+from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import (
@@ -89,6 +89,10 @@ class BaseBackend(object):
     display_name: str | None = None
     verify_ssl = True
 
+    # When False (default), GET, HEAD, and POST requests will raise a
+    # HTTPError on any 3xx response. Override to True to permit redirects.
+    allow_redirects = False
+
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     filters = tuple()
@@ -118,17 +122,29 @@ class BaseBackend(object):
     def head(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.head(url, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.head(url, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def get(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.get(url, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.get(url, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def post(self, url, data, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.post(url, data=data, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.post(url, data=data, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def get_headers(self):
         return {
