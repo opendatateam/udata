@@ -139,8 +139,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
-        params["min"] = field.min  # TODO min_value?
-        params["max"] = field.max
+        params["min"] = field.min_value
+        params["max"] = field.max_value
     elif isinstance(field, mongo_fields.IntField):
         constructor = restx_fields.Integer
         params["min"] = field.min_value

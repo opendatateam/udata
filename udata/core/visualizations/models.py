@@ -45,30 +45,34 @@ visualization_permissions_fields = api.model(
 )
 
 
+@generate_fields()
 class GenericFilter(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
 
+@generate_fields()
 class Filter(GenericFilter):
-    column = StringField(required=True)
-    condition = StringField(required=True, choices=["equal", "greater"])
-    value = StringField()
+    column = field(StringField(required=True))
+    condition = field(StringField(required=True, choices=["equal", "greater"]))
+    value = field(StringField())
 
 
+@generate_fields()
 class AndFilters(GenericFilter):
-    filters = ListField(EmbeddedDocumentField(GenericFilter))
+    filters = field(ListField(EmbeddedDocumentField(GenericFilter)))
 
 
+@generate_fields()
 class DataSeries(EmbeddedDocument):
-    type = StringField(choices=["line", "histogram"])
+    type = field(StringField(choices=["line", "histogram"]))
     # if not column y, we count the number of x. Could it be non int/float values?
-    column_y = StringField(required=False)
-    aggregate_y = StringField(choices=["sum", "median"], required=False)
-    resource_id = UUIDField()
+    column_y = field(StringField(required=False))
+    aggregate_y = field(StringField(choices=["sum", "median"], required=False))
+    resource_id = field(UUIDField())
     # if the column x name in this resource does not match the one from XAxis
-    column_x_name_override = StringField()
+    column_x_name_override = field(StringField())
 
-    filters = EmbeddedDocumentField(GenericFilter)
+    filters = field(EmbeddedDocumentField(GenericFilter))
 
     @property
     def resource(self):
@@ -78,21 +82,25 @@ class DataSeries(EmbeddedDocument):
         return None
 
 
+@generate_fields()
 class XAxis(EmbeddedDocument):
-    column_x = StringField(required=True)
-    sort_x_by = StringField(choices=["axis_x", "axis_y"], default="axis_x")
-    sort_x_direction = StringField(choices=["asc", "desc"], default="asc")
-    type = StringField(
-        choices=["discrete", "continuous"], required=True
-    )  # can be deduced based on the column type, but an int could actually be discrete (code postal)
+    column_x = field(StringField(required=True))
+    sort_x_by = field(StringField(choices=["axis_x", "axis_y"], default="axis_x"))
+    sort_x_direction = field(StringField(choices=["asc", "desc"], default="asc"))
+    type = field(
+        StringField(
+            choices=["discrete", "continuous"], required=True
+        )  # can be deduced based on the column type, but an int could actually be discrete (code postal)
+    )
 
 
+@generate_fields()
 class YAxis(EmbeddedDocument):
-    min = FloatField()
-    max = FloatField()
-    label = StringField()
-    unit = StringField()
-    unit_position = StringField(choices=["prefix", "suffix"], default="suffix")
+    min = field(FloatField())
+    max = field(FloatField())
+    label = field(StringField())
+    unit = field(StringField())
+    unit_position = field(StringField(choices=["prefix", "suffix"], default="suffix"))
 
 
 # Chart model contains the following base fields (previously from Visualization class):
@@ -135,9 +143,9 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
     )
 
     # Chart-specific fields
-    x_axis = EmbeddedDocumentField(XAxis)
-    y_axis = EmbeddedDocumentField(YAxis)
-    series = ListField(EmbeddedDocumentField(DataSeries))
+    x_axis = field(EmbeddedDocumentField(XAxis))
+    y_axis = field(EmbeddedDocumentField(YAxis))
+    series = field(ListField(EmbeddedDocumentField(DataSeries)))
 
     @property
     @field(
