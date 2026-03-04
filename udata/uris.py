@@ -1,3 +1,4 @@
+import logging
 import re
 import socket
 from typing import NoReturn
@@ -40,6 +41,11 @@ URL_REGEX = re.compile(
     r"$",
     re.UNICODE | re.IGNORECASE,
 )
+
+# The retry count when trying to resolve the hostname in URL validation
+URL_RESOLVE_HOSTNAME_RETRY_COUNT = 0
+
+log = logging.getLogger(__name__)
 
 
 class ValidationError(ValueError):
@@ -103,6 +109,19 @@ def idna(string):
     return string.encode("idna").decode("utf8")
 
 
+def resolve_hostname(hostname: str, retry=5):
+    try:
+        addr_info = socket.getaddrinfo(hostname, None)
+        for family, socktype, proto, canonname, sockaddr in addr_info:
+            yield IPAddress(sockaddr[0])
+    except socket.gaierror:
+        if retry == 0:
+            # We don't raise an error here, we currently only log it
+            log.error(f"hostname {hostname} could not be resolved")
+        else:
+            yield from resolve_hostname(hostname, retry - 1)
+
+
 def validate(
     url, schemes=None, tlds=None, private=None, local=None, resolve=None, credentials=None
 ):
@@ -151,12 +170,7 @@ def validate(
 
     hostname = match.group("hostname")
     if hostname and resolve:
-        try:
-            addr_info = socket.getaddrinfo(hostname, None)
-            for family, socktype, proto, canonname, sockaddr in addr_info:
-                ips_to_check.append(IPAddress(sockaddr[0]))
-        except socket.gaierror:
-            pass
+        ips_to_check += resolve_hostname(hostname, retry=URL_RESOLVE_HOSTNAME_RETRY_COUNT)
 
     for ip in ips_to_check:
         if ip.is_multicast():
