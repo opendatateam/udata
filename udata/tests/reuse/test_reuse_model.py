@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from flask import current_app
+from mongoengine.errors import ValidationError
 
 from udata.core import metrics
 from udata.core.dataset.factories import DatasetFactory
@@ -11,7 +12,6 @@ from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.reuse.models import Reuse, ReuseBadge
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
-from udata.models import db
 from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
@@ -130,7 +130,7 @@ class ReuseModelTest(DBTestCase):
         self.assertEqual(reuse.private, True)
 
     def test_reuse_url(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             ReuseFactory(url="not-an-url")
 
 
@@ -144,6 +144,6 @@ class ReuseBadgeTest(DBTestCase):
         badge = ReuseBadge(kind="new")
         badge.validate()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             badge = ReuseBadge(kind="doesnotexist")
             badge.validate()

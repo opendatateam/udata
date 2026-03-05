@@ -1,13 +1,13 @@
 import pytest
+from mongoengine.errors import ValidationError
 
 from udata.core.contact_point.factories import ContactPointFactory
-from udata.models import db
 from udata.tests.api import PytestOnlyDBTestCase
 
 
 class ContactPointTest(PytestOnlyDBTestCase):
     def test_validate_contact_role_needs_email_or_contact_form(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             ContactPointFactory(role="contact", email=None, contact_form=None)
         # The ContactPointFactory provides an email by default, so the following should not raise.
         ContactPointFactory(role="contact", contact_form=None)

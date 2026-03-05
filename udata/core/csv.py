@@ -7,7 +7,7 @@ from io import StringIO
 from flask import Response, stream_with_context
 from mongoengine.queryset import QuerySet
 
-from udata.mongo import db
+from udata.mongo.queryset import UDataQuerySet
 from udata.utils import recursive_get
 
 log = logging.getLogger(__name__)
@@ -241,7 +241,7 @@ def stream(queryset_or_adapter, basename=None):
             raise ValueError("Type detection is not possible with an empty list")
         cls = _adapters.get(queryset_or_adapter[0].__class__)
         adapter = cls(queryset_or_adapter)
-    elif isinstance(queryset_or_adapter, db.BaseQuerySet):
+    elif isinstance(queryset_or_adapter, UDataQuerySet):
         cls = _adapters.get(queryset_or_adapter._document)
         adapter = cls(queryset_or_adapter)
     else:

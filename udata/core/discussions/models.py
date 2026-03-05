@@ -3,11 +3,22 @@ from datetime import datetime
 
 from flask import url_for
 from flask_login import current_user
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    GenericReferenceField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.uuid_fields import AutoUUIDField
 
 from .signals import (
     on_discussion_closed,
@@ -20,15 +31,15 @@ from .signals import (
 log = logging.getLogger(__name__)
 
 
-class Message(SpamMixin, db.EmbeddedDocument):
+class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
-    id = db.AutoUUIDField()
-    content = db.StringField(required=True)
-    posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
-    posted_by = db.ReferenceField("User")
-    posted_by_organization = db.ReferenceField("Organization")
-    last_modified_at = db.DateTimeField()
+    id = AutoUUIDField()
+    content = StringField(required=True)
+    posted_on = DateTimeField(default=datetime.utcnow, required=True)
+    posted_by = ReferenceField("User")
+    posted_by_organization = ReferenceField("Organization")
+    last_modified_at = DateTimeField()
 
     @property
     def permissions(self):
@@ -78,20 +89,20 @@ class Message(SpamMixin, db.EmbeddedDocument):
         return message
 
 
-class Discussion(SpamMixin, Linkable, db.Document):
+class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
-    user = db.ReferenceField("User")
-    organization = db.ReferenceField("Organization")
+    user = ReferenceField("User")
+    organization = ReferenceField("Organization")
 
-    subject = db.GenericReferenceField()
-    title = db.StringField(required=True)
-    discussion = db.ListField(db.EmbeddedDocumentField(Message))
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    closed = db.DateTimeField()
-    closed_by = db.ReferenceField("User")
-    closed_by_organization = db.ReferenceField("Organization")
-    extras = db.ExtrasField()
+    subject = GenericReferenceField()
+    title = StringField(required=True)
+    discussion = ListField(EmbeddedDocumentField(Message))
+    created = DateTimeField(default=datetime.utcnow, required=True)
+    closed = DateTimeField()
+    closed_by = ReferenceField("User")
+    closed_by_organization = ReferenceField("Organization")
+    extras = ExtrasField()
 
     meta = {
         "indexes": [

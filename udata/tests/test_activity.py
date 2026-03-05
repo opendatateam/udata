@@ -1,6 +1,8 @@
 from datetime import date, datetime
 
 from blinker import Signal
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import EmbeddedDocumentField, ListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field
@@ -8,28 +10,30 @@ from udata.auth import login_user
 from udata.core.activity.models import Activity, Auditable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.models import db
+from udata.mongo.datetime_fields import DateField, DateRange
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.taglist_field import TagListField
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
 
-class FakeSubject(db.Document):
-    name = db.StringField()
+class FakeSubject(Document):
+    name = StringField()
 
 
-class FakeEmbedded(db.EmbeddedDocument):
-    name = db.StringField()
+class FakeEmbedded(EmbeddedDocument):
+    name = StringField()
 
 
-class FakeAuditableSubject(Auditable, db.Document):
-    name = field(db.StringField())
-    tags = field(db.TagListField())
-    some_date = field(db.DateField())
-    daterange_embedded = field(db.EmbeddedDocumentField(db.DateRange))
-    some_list = field(db.ListField(db.StringField()))
-    embedded_list = field(db.ListField(db.EmbeddedDocumentField("FakeEmbedded")))
-    ref_list = field(db.ListField(db.ReferenceField("FakeSubject")))
-    not_auditable = field(db.StringField(), auditable=False)
+class FakeAuditableSubject(Auditable, Document):
+    name = field(StringField())
+    tags = field(TagListField())
+    some_date = field(DateField())
+    daterange_embedded = field(EmbeddedDocumentField(DateRange))
+    some_list = field(ListField(StringField()))
+    embedded_list = field(ListField(EmbeddedDocumentField("FakeEmbedded")))
+    ref_list = field(ListField(ReferenceField("FakeSubject")))
+    not_auditable = field(StringField(), auditable=False)
 
     after_save = Signal()
     on_create = Signal()
@@ -42,7 +46,7 @@ post_save.connect(FakeAuditableSubject.post_save, sender=FakeAuditableSubject)
 
 class FakeActivity(Activity):
     key = "fake"
-    related_to = db.ReferenceField(FakeSubject)
+    related_to = ReferenceField(FakeSubject)
 
 
 class ActivityTest(APITestCase):

@@ -338,11 +338,10 @@ class DatasetAPI(API):
     @apiv2.marshal_with(dataset_fields)
     def get(self, dataset):
         """Get a dataset given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                apiv2.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 apiv2.abort(410, "Dataset has been deleted")
+            apiv2.abort(404)
         return dataset
 
 
@@ -355,11 +354,10 @@ class DatasetExtrasAPI(API):
     @apiv2.doc("get_dataset_extras")
     def get(self, dataset):
         """Get a dataset extras given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                apiv2.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 apiv2.abort(410, "Dataset has been deleted")
+            apiv2.abort(404)
         return dataset.extras
 
     @apiv2.secure
@@ -407,11 +405,10 @@ class ResourcesAPI(API):
     @apiv2.marshal_with(resource_page_fields)
     def get(self, dataset):
         """Get the given dataset resources, paginated."""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                apiv2.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 apiv2.abort(410, "Dataset has been deleted")
+            apiv2.abort(404)
         args = resources_parser.parse_args()
         page = args["page"]
         page_size = args["page_size"]
@@ -454,11 +451,10 @@ class DatasetSchemasAPI(API):
     @apiv2.marshal_with(schema_fields)
     def get(self, dataset):
         """Get a dataset schemas given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                apiv2.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 apiv2.abort(410, "Dataset has been deleted")
+            apiv2.abort(404)
 
         pipeline = [
             {
@@ -497,11 +493,10 @@ class ResourceAPI(API):
     def get(self, rid):
         dataset = Dataset.objects(resources__id=rid).first()
         if dataset:
-            if not dataset.permissions["edit"].can():
-                if dataset.private:
-                    apiv2.abort(404)
-                elif dataset.deleted:
+            if not dataset.permissions["read"].can():
+                if not dataset.private and dataset.deleted:
                     apiv2.abort(410, "Dataset has been deleted")
+                apiv2.abort(404)
             resource = get_by(dataset.resources, "id", rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
@@ -530,11 +525,10 @@ class ResourceExtrasAPI(ResourceMixin, API):
     @apiv2.doc("get_resource_extras")
     def get(self, dataset, rid):
         """Get a resource extras given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                apiv2.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 apiv2.abort(410, "Dataset has been deleted")
+            apiv2.abort(404)
         resource = self.get_resource_or_404(dataset, rid)
         return resource.extras
 

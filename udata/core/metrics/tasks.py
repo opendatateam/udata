@@ -8,7 +8,8 @@ from flask import current_app
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.metrics.signals import on_site_metrics_computed
-from udata.models import CommunityResource, Dataset, Organization, Reuse, Site, db
+from udata.models import CommunityResource, Dataset, Organization, Reuse, Site
+from udata.mongo.document import UDataDocument as Document
 from udata.tasks import job
 
 log = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def log_timing(func):
     return timeit_wrapper
 
 
-def save_model(model: db.Document, model_id: str, metrics: dict[str, int]) -> None:
+def save_model(model: Document, model_id: str, metrics: dict[str, int]) -> None:
     try:
         result = model.objects(id=model_id).update(
             **{f"set__metrics__{key}": value for key, value in metrics.items()}

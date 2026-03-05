@@ -1,12 +1,14 @@
 import logging
 from datetime import datetime
 
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
+from mongoengine.fields import DateTimeField, EmbeddedDocumentListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
 from udata.auth import current_user
 from udata.core.badges.fields import badge_fields
-from udata.mongo import db
 
 from .signals import on_badge_added, on_badge_removed
 
@@ -22,18 +24,18 @@ DEFAULT_BADGES_LIST_PARAMS = {
 
 
 @generate_fields(default_filterable_field="kind")
-class Badge(db.EmbeddedDocument):
+class Badge(EmbeddedDocument):
     meta = {"allow_inheritance": True}
     # The following field should be overloaded in descendants.
-    kind = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    created_by = db.ReferenceField("User")
+    kind = StringField(required=True)
+    created = DateTimeField(default=datetime.utcnow, required=True)
+    created_by = ReferenceField("User")
 
     def __str__(self):
         return self.kind
 
 
-class BadgesList(db.EmbeddedDocumentListField):
+class BadgesList(EmbeddedDocumentListField):
     def __init__(self, badge_model, *args, **kwargs):
         return super(BadgesList, self).__init__(badge_model, *args, **kwargs)
 
@@ -62,7 +64,7 @@ class BadgeMixin:
             return badge
         if kind not in self.available_badges():
             msg = "Unknown badge type for {model}: {kind}"
-            raise db.ValidationError(msg.format(model=self.__class__.__name__, kind=kind))
+            raise ValidationError(msg.format(model=self.__class__.__name__, kind=kind))
         badge = self._fields["badges"].field.document_type(kind=kind)
         if current_user and current_user.is_authenticated:
             badge.created_by = current_user.id

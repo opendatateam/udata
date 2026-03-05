@@ -7,6 +7,7 @@ from bson import ObjectId
 from flask import current_app
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
+from mongoengine.errors import ValidationError
 
 from udata.app import cache
 from udata.core import metrics
@@ -36,7 +37,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema, db
+from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
@@ -92,7 +93,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         resource = ResourceFactory()
         resource.checksum.type = None
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             dataset.add_resource(resource)
 
     def test_update_resource(self):
@@ -115,7 +116,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(owner=user, resources=[resource])
         resource.checksum.type = None
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             dataset.update_resource(resource)
 
     def test_last_update_with_resource(self):
@@ -444,11 +445,11 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
 class ResourceModelTest(PytestOnlyDBTestCase):
     def test_url_is_required(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             DatasetFactory(resources=[ResourceFactory(url=None)])
 
     def test_bad_url(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             DatasetFactory(resources=[ResourceFactory(url="not-an-url")])
 
     def test_url_is_stripped(self):
@@ -786,19 +787,19 @@ class ResourceSchemaTest(PytestOnlyDBTestCase):
         resource.schema = Schema(name="etalab/schema-irve-statique", version="1337.42.0")
         resource.validate()
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             resource.schema = Schema(version="2.0.0")
             resource.validate()
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             resource.schema = Schema(name="some-name")
             resource.schema.clean(check_schema_in_catalog=True)
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             resource.schema = Schema(name="etalab/schema-irve-statique", version="1337.42.0")
             resource.schema.clean(check_schema_in_catalog=True)
 
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             resource.schema = Schema(version="2.0.0")
             resource.schema.clean(check_schema_in_catalog=True)
 
@@ -828,7 +829,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         harvest_metadata = HarvestDatasetMetadata(created_at="maintenant")
         dataset = DatasetFactory()
         dataset.harvest = harvest_metadata
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             dataset.save()
 
     def test_harvest_dataset_metadata_past_modifed_at(self):
@@ -857,7 +858,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         harvest_metadata = HarvestResourceMetadata(issued_at="maintenant")
         resource = ResourceFactory()
         resource.harvest = harvest_metadata
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             resource.validate()
 
     def test_harvest_resource_metadata_future_modifed_at(self):

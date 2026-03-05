@@ -1,10 +1,12 @@
 import logging
 from datetime import datetime
 
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import ReferenceField, StringField
+
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.actions import notifier
-from udata.mongo import db
 
 from .api import source_fields
 from .models import (
@@ -25,9 +27,9 @@ log = logging.getLogger(__name__)
 
 
 @generate_fields()
-class ValidateHarvesterNotificationDetails(db.EmbeddedDocument):
+class ValidateHarvesterNotificationDetails(EmbeddedDocument):
     source = field(
-        db.ReferenceField(HarvestSource),
+        ReferenceField(HarvestSource),
         readonly=True,
         nested_fields=source_fields,
         auditable=False,
@@ -35,7 +37,7 @@ class ValidateHarvesterNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
     status = field(
-        db.StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
+        StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
         readonly=True,
         auditable=False,
         filterable={},
