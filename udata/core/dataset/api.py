@@ -338,7 +338,9 @@ class DatasetsAtomFeedAPI(API):
 
         q = args.get("q").strip() if args.get("q") else ""
 
-        has_filters = any(value for key, value in args.items() if key not in ["page", "page_size", "sort"])
+        has_filters = any(
+            value for key, value in args.items() if key not in ["page", "page_size", "sort"]
+        )
 
         if q:
             title = _("Datasets search: {q}").format(q=q)
