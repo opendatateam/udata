@@ -1,7 +1,7 @@
 import csv
 import itertools
 import logging
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from io import StringIO
 
 from flask import Response, stream_with_context
@@ -247,7 +247,7 @@ def stream(queryset_or_adapter, basename=None):
     else:
         raise ValueError(f"Unsupported object type {queryset_or_adapter}")
 
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d-%H-%M")
     headers = {
         "Content-Disposition": "attachment; filename={0}-{1}.csv".format(
             basename or "export", timestamp

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import GenericReferenceField
@@ -100,7 +100,7 @@ def on_handle_transfer(transfer, **kwargs):
 
     # Update handled_at for all matching notifications
     for notification in notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
 

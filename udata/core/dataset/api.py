@@ -19,7 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 
 import logging
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -411,7 +411,7 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
-        dataset.last_modified_internal = datetime.utcnow()
+        dataset.last_modified_internal = datetime.now(UTC)
         form = api.validate(DatasetForm, dataset)
 
         return form.save()
@@ -428,8 +428,8 @@ class DatasetAPI(API):
         dataset.permissions["delete"].test()
         send_legal_notice_on_deletion(dataset, args)
 
-        dataset.deleted = datetime.utcnow()
-        dataset.last_modified_internal = datetime.utcnow()
+        dataset.deleted = datetime.now(UTC)
+        dataset.last_modified_internal = datetime.now(UTC)
         dataset.save()
         return "", 204
 
@@ -577,7 +577,7 @@ class ResourcesAPI(API):
 
 class UploadMixin(object):
     def handle_upload(self, dataset):
-        prefix = "/".join((dataset.slug, datetime.utcnow().strftime("%Y%m%d-%H%M%S")))
+        prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
@@ -727,7 +727,7 @@ class ResourceAPI(ResourceMixin, API):
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
-        resource.last_modified_internal = datetime.utcnow()
+        resource.last_modified_internal = datetime.now(UTC)
 
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
@@ -782,7 +782,7 @@ class CommunityResourcesAPI(API):
             api.abort(400, errors={"dataset": "A dataset identifier is required"})
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.last_modified_internal = datetime.utcnow()
+        resource.last_modified_internal = datetime.now(UTC)
         resource.save()
         return resource, 201
 
@@ -809,7 +809,7 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.last_modified_internal = datetime.utcnow()
+        community.last_modified_internal = datetime.now(UTC)
         community.save()
         return community
 

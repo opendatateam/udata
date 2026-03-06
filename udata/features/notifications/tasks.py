@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 @job("delete-expired-notifications")
 def delete_expired_notifications(self):
     # Delete expired notifications
-    handled_at = datetime.utcnow() - timedelta(
+    handled_at = datetime.now(UTC) - timedelta(
         days=current_app.config["DAYS_AFTER_NOTIFICATION_EXPIRED"]
     )
     notifications_to_delete = Notification.objects(

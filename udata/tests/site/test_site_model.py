@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import current_app, g
 
@@ -41,7 +41,7 @@ class SiteModelTest(DBTestCase):
         current_site.save()
 
         dataset = current_site.settings.home_datasets[1]
-        dataset.deleted = datetime.utcnow()
+        dataset.deleted = datetime.now(UTC)
         dataset.save()
 
         current_site.reload()
@@ -55,7 +55,7 @@ class SiteModelTest(DBTestCase):
         current_site.save()
 
         reuse = current_site.settings.home_reuses[1]
-        reuse.deleted = datetime.utcnow()
+        reuse.deleted = datetime.now(UTC)
         reuse.save()
 
         current_site.reload()
