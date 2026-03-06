@@ -337,13 +337,8 @@ class DatasetsAtomFeedAPI(API):
         queryset = DatasetApiParser.parse_filters(queryset, args)
 
         q = args.get("q").strip() if args.get("q") else ""
-        has_filters = any(
-            args.get(k)
-            for k in [
-                "q", "tag", "license", "organization", "owner", "format", "badge", "topic",
-                "geozone", "granularity", "schema", "organization_badge",
-            ]
-        )
+
+        has_filters = any(value for key, value in args.items() if key not in ["page", "page_size", "sort"])
 
         if q:
             title = _("Datasets search: {q}").format(q=q)
