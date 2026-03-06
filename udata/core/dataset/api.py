@@ -361,7 +361,7 @@ class DatasetsAtomFeedAPI(API):
 
         # Map sort parameter to a date field for RSS ordering
         # Only date fields make sense for chronological feeds
-        sort_field = "created_at_internal"  # default
+        sort_field = DEFAULT_SORTING.lstrip("-")
         if args.get("sort"):
             sort_value = args["sort"].lstrip("-")
             if sort_value in ("last_update", "created_at_internal"):
