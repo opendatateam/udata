@@ -398,11 +398,10 @@ class DatasetAPI(API):
     @api.marshal_with(dataset_fields)
     def get(self, dataset: Dataset):
         """Get a dataset given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                api.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 api.abort(410, "Dataset has been deleted")
+            api.abort(404)
         return dataset
 
     @api.secure
@@ -478,11 +477,10 @@ class DatasetRdfAPI(API):
 class DatasetRdfFormatAPI(API):
     @api.doc("rdf_dataset_format")
     def get(self, dataset, _format):
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                api.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 api.abort(410)
+            api.abort(404)
 
         resource = dataset_to_rdf(dataset)
         # bypass flask-restplus make_response, since graph_response
@@ -702,11 +700,10 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
-        if not dataset.permissions["edit"].can():
-            if dataset.private:
-                api.abort(404)
-            elif dataset.deleted:
+        if not dataset.permissions["read"].can():
+            if not dataset.private and dataset.deleted:
                 api.abort(410, "Dataset has been deleted")
+            api.abort(404)
         resource = self.get_resource_or_404(dataset, rid)
         return resource
 
