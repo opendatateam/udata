@@ -33,6 +33,7 @@ from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.core import storages
+from udata.core.access_type.constants import AccessType
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
@@ -137,6 +138,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
+        self.parser.add_argument("access_type", choices=[elem.value for elem in AccessType])
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
@@ -213,6 +215,8 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.filter(resources__schema__name=args["schema"])
         if args.get("schema_version"):
             datasets = datasets.filter(resources__schema__version=args["schema_version"])
+        if args.get("access_type"):
+            datasets = datasets.filter(access_type=args["access_type"])
         if args.get("topic"):
             if not ObjectId.is_valid(args["topic"]):
                 api.abort(400, "Topic arg must be an identifier")

@@ -9,6 +9,7 @@ from flask import current_app
 from lxml import etree
 from rdflib import Graph
 
+from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
@@ -1339,10 +1340,18 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
             )
 
         # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
-        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
+        access_right = [
+            "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
+        ]
         assert dataset.extras["dcat"]["accessRights"] == access_right
         # also present on the resource level
         assert resource.extras["dcat"]["accessRights"] == access_right
+        # it is also interpreted as a known INSPIRE restriction
+        assert dataset.access_type == AccessType.RESTRICTED
+        assert (
+            dataset.access_type_reason_category
+            == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
+        )
 
         # see `test_geo_ide` for detailed explanation of the following
         assert dataset.extras["dcat"].get("license") is None
