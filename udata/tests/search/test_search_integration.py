@@ -18,7 +18,7 @@ from udata.tests.helpers import requires_search_service
 
 
 @requires_search_service
-@pytest.mark.options(SEARCH_SERVICE_API_URL="http://localhost:5000/api/1/", AUTO_INDEX=True)
+@pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200", AUTO_INDEX=True)
 class SearchIntegrationTest(APITestCase):
     """Integration tests that require a running search-service and Elasticsearch."""
 

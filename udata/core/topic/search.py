@@ -11,6 +11,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import TopicConsumer
+from udata_search_service.services import TopicService
 
 __all__ = ("TopicSearch",)
 
@@ -18,7 +20,8 @@ __all__ = ("TopicSearch",)
 @register
 class TopicSearch(ModelSearchAdapter):
     model = Topic
-    search_url = "topics/"
+    service_class = TopicService
+    consumer_class = TopicConsumer
 
     sorts = {
         "name": "name",
@@ -41,7 +44,7 @@ class TopicSearch(ModelSearchAdapter):
     @classmethod
     def mongo_search(cls, args):
         """
-        Fallback Mongo search when SEARCH_SERVICE_API_URL is not configured.
+        Fallback Mongo search when ELASTICSEARCH_URL is not configured.
         We mimic the existing TopicsAPI behaviour as much as possible.
         """
         from flask_security import current_user

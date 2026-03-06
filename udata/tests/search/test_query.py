@@ -1,5 +1,3 @@
-import pytest
-
 from udata.search.query import DEFAULT_PAGE_SIZE, SearchQuery
 from udata.tests.api import APITestCase
 
@@ -40,11 +38,7 @@ class QueryTest(APITestCase):
         url = search_query.to_url()
         assert "organization=534fff81a3a7292c64a77e5c&q=insee&sort=-created&page=1" in url
 
-    @pytest.mark.options(SEARCH_SERVICE_API_URL="https://example.com/")
-    def test_search_query_to_search_service_url(self):
-        class FakeAdapater:
-            search_url = "search/"
-
+    def test_search_query_to_search_params(self):
         query = {
             "organization": "534fff81a3a7292c64a77e5c",
             "q": "insee",
@@ -54,9 +48,10 @@ class QueryTest(APITestCase):
             "tag": ["tag-1", "tag-2"],
         }
         search_query = SearchQuery(params=query)
-        search_query.adapter = FakeAdapater()
-        url = search_query.to_search_service_url()
-        assert (
-            url
-            == "https://example.com/search/?q=insee&page=1&page_size=20&sort=-created&organization=534fff81a3a7292c64a77e5c&tag=tag-1&tag=tag-2"
-        )
+        params = search_query.to_search_params()
+        assert params["q"] == "insee"
+        assert params["page"] == 1
+        assert params["page_size"] == 20
+        assert params["sort"] == "-created"
+        assert params["organization"] == "534fff81a3a7292c64a77e5c"
+        assert params["tag"] == ["tag-1", "tag-2"]
