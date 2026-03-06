@@ -1,4 +1,5 @@
 from mongoengine.base import get_document
+from mongoengine.errors import NotRegistered
 
 from udata.flask_mongoengine.engine import MongoEngine
 
@@ -23,7 +24,7 @@ class UDataMongoEngine(MongoEngine):
 
         try:
             return get_document(classname)
-        except self.NotRegistered:
+        except NotRegistered:
             message = 'Model "{0}" does not exist'.format(classname)
             raise ValueError(message)
 

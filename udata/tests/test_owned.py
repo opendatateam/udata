@@ -17,7 +17,7 @@ class CustomQuerySet(owned.OwnedQuerySet):
         return self(private__ne=True)
 
 
-class Owned(owned.Owned, Document):
+class Owned(owned.Owned, Document[CustomQuerySet]):
     name = StringField()
     private = BooleanField()
 
