@@ -337,9 +337,9 @@ class DatasetsAtomFeedAPI(API):
         queryset = DatasetApiParser.parse_filters(queryset, args)
 
         q = args.get("q").strip() if args.get("q") else ""
+
         has_filters = any(
-            args.get(k)
-            for k in ["q", "tag", "license", "organization", "owner", "format", "badge", "topic"]
+            value for key, value in args.items() if key not in ["page", "page_size", "sort"]
         )
 
         if q:
@@ -356,7 +356,15 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: list[Dataset] = get_rss_feed_list(queryset, "created_at_internal")
+        # Map sort parameter to a date field for RSS ordering
+        # Only date fields make sense for chronological feeds
+        sort_field = DEFAULT_SORTING.lstrip("-")
+        if args.get("sort"):
+            sort_value = args["sort"].lstrip("-")
+            if sort_value in ("last_update", "created_at_internal"):
+                sort_field = sort_value
+
+        datasets: list[Dataset] = get_rss_feed_list(queryset, sort_field)
 
         for dataset in datasets:
             author_name = None
