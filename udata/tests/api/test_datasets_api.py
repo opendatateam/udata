@@ -1632,9 +1632,7 @@ class DatasetsFeedAPItest(APITestCase):
     def test_recent_feed_with_schema_filter(self):
         DatasetFactory(
             title="Schema Dataset",
-            resources=[
-                ResourceFactory(schema={"name": "my-schema", "url": "https://example.org"})
-            ],
+            resources=[ResourceFactory(schema={"name": "my-schema", "url": "https://example.org"})],
         )
         DatasetFactory(title="No Schema", resources=[ResourceFactory()])
 
