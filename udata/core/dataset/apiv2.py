@@ -162,12 +162,14 @@ dataset_fields = apiv2.model(
             description="Link to the dataset community resources",
         ),
         "frequency": fields.Raw(
-            attribute=lambda d: {
-                "id": (d.frequency or UpdateFrequency.UNKNOWN).id,
-                "label": (d.frequency or UpdateFrequency.UNKNOWN).label,
-            }
-            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else (d.frequency or UpdateFrequency.UNKNOWN),
+            attribute=lambda d: (
+                {
+                    "id": (d.frequency or UpdateFrequency.UNKNOWN).id,
+                    "label": (d.frequency or UpdateFrequency.UNKNOWN).label,
+                }
+                if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+                else (d.frequency or UpdateFrequency.UNKNOWN)
+            ),
             enum=list(UpdateFrequency),
             default=UpdateFrequency.UNKNOWN,
             required=True,
@@ -202,9 +204,11 @@ dataset_fields = apiv2.model(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.Raw(
-            attribute=lambda d: marshal(d.license or DEFAULT_LICENSE, license_fields)
-            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else (d.license.id if d.license is not None else None),
+            attribute=lambda d: (
+                marshal(d.license or DEFAULT_LICENSE, license_fields)
+                if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+                else (d.license.id if d.license is not None else None)
+            ),
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),

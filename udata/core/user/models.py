@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from itertools import chain
 
 from blinker import Signal
@@ -92,7 +92,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
 
     prefered_language = field(StringField())
 
-    created_at = field(DateTimeField(default=datetime.utcnow, required=True), auditable=False)
+    created_at = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True), auditable=False
+    )
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
@@ -298,7 +300,7 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         self.website = None
         self.about = None
         self.extras = None
-        self.deleted = datetime.utcnow()
+        self.deleted = datetime.now(UTC)
         self.save()
         from udata.core.api_token.models import ApiToken
 

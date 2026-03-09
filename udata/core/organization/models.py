@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
@@ -77,7 +77,7 @@ class Team(EmbeddedDocument):
 class Member(EmbeddedDocument):
     user = ReferenceField("User")
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = DateTimeField(default=datetime.utcnow, required=True)
+    since = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     @property
     def label(self):
@@ -105,7 +105,7 @@ class MembershipRequest(EmbeddedDocument):
     user = ReferenceField("User")
     status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
 
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     handled_on = DateTimeField()
     handled_by = ReferenceField("User")

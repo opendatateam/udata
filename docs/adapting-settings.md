@@ -143,6 +143,13 @@ Whether or not to allow private URLs (private IPs...) submission
 Whether or not to allow local URLs (localhost...) submission.
 When developping you might need to set this to `True`.
 
+### URLS_RESOLVE_HOSTNAME
+
+**default**: `True`
+
+Whether or not to resolve hostname to in URI validation to check private or local IP.
+⚠ It may impact performances when validating URIs. Be sure to use DNS caching (ex with `dnsmasq` caching).
+
 ### URLS_ALLOW_CREDENTIALS
 
 **default**: `True`

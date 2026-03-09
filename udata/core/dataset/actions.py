@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import current_app, render_template
 
@@ -13,7 +13,7 @@ def archive(dataset: Dataset, comment=False) -> None:
     """Archive a dataset"""
     if dataset.archived:
         log.warning("Dataset %s already archived, bumping date", dataset)
-    dataset.archived = datetime.utcnow()
+    dataset.archived = datetime.now(UTC)
     dataset.save()
 
     if comment:

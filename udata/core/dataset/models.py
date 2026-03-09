@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from pydoc import locate
 from typing import Self
 from urllib.parse import urlparse
@@ -244,7 +244,7 @@ class License(Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
     id = StringField(primary_key=True)
-    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     title = StringField(required=True)
     alternate_titles = ListField(StringField())
     slug = SlugField(required=True, populate_from="title")
@@ -405,8 +405,8 @@ class ResourceMixin(object):
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
 
-    created_at_internal = DateTimeField(default=datetime.utcnow, required=True)
-    last_modified_internal = DateTimeField(default=datetime.utcnow, required=True)
+    created_at_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    last_modified_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     deleted = DateTimeField()
 
     @property
@@ -427,7 +427,7 @@ class ResourceMixin(object):
         if (
             self.harvest
             and self.harvest.modified_at
-            and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
+            and to_naive_datetime(self.harvest.modified_at) < datetime.now(UTC).replace(tzinfo=None)
         ):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
@@ -610,19 +610,23 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
     contact_points = field(ListField(ReferenceField("ContactPoint", reverse_delete_rule=PULL)))
 
     created_at_internal = field(
-        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        DateTimeField(
+            verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True
+        ),
         auditable=False,
     )
     last_modified_internal = field(
         DateTimeField(
-            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+            verbose_name=_("Last modification date"),
+            default=lambda: datetime.now(UTC),
+            required=True,
         ),
         auditable=False,
     )
     last_update = field(
         DateTimeField(
             verbose_name=_("Last update of the dataset resources"),
-            default=datetime.utcnow,
+            default=lambda: datetime.now(UTC),
             required=True,
         ),
         auditable=False,
@@ -871,7 +875,12 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
         if next_update:
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
-            quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
+            # Normalize to naive for comparison (MongoEngine returns naive datetimes)
+            now_naive = datetime.now(UTC).replace(tzinfo=None)
+            next_update_naive = (
+                next_update.replace(tzinfo=None) if next_update.tzinfo else next_update
+            )
+            quality["update_fulfilled_in_time"] = (next_update_naive - now_naive).days >= -1
         elif self.has_frequency and self.frequency.delta is None:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
@@ -989,7 +998,7 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
         self.update(
             set__quality_cached=self.compute_quality(),
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
-            set__last_modified_internal=datetime.utcnow(),
+            set__last_modified_internal=datetime.now(UTC),
         )
 
         self.reload()
@@ -1005,7 +1014,7 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
         Dataset.objects(id=self.id, resources__id=resource.id).update_one(
             set__quality_cached=self.compute_quality(),
             set__resources__S=resource,
-            set__last_modified_internal=datetime.utcnow(),
+            set__last_modified_internal=datetime.now(UTC),
         )
 
         self.reload()
@@ -1018,7 +1027,7 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
         self.update(
             set__quality_cached=self.compute_quality(),
             pull__resources__id=resource.id,
-            set__last_modified_internal=datetime.utcnow(),
+            set__last_modified_internal=datetime.now(UTC),
         )
 
         # Deletes resource's file from file storage
