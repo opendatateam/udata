@@ -108,14 +108,19 @@ def finalize_reindex(models, start):
             new_index = f"{alias}-{suffix}"
 
             actions = []
+            previous_indices = []
             try:
-                current_indices = list(es.indices.get_alias(name=alias).keys())
-                for old_index in current_indices:
+                previous_indices = list(es.indices.get_alias(name=alias).keys())
+                for old_index in previous_indices:
                     actions.append({"remove": {"index": old_index, "alias": alias}})
             except Exception:
                 pass
             actions.append({"add": {"index": new_index, "alias": alias}})
             es.indices.update_aliases(body={"actions": actions})
+
+            for old_index in previous_indices:
+                if old_index != new_index:
+                    es.indices.delete(index=old_index)
     except Exception:
         log.exception("Unable to set alias for index")
 

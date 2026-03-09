@@ -30,7 +30,7 @@ from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 from udata.search import as_task_param, reindex
-from udata.search.commands import index_model
+from udata.search.commands import finalize_reindex, index_model
 from udata.tests.api import APITestCase
 from udata.utils import clean_string
 
@@ -281,6 +281,45 @@ class IndexingLifecycleTest(APITestCase):
             mock_service = mock_service_class.return_value
             index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
             mock_service.feed.assert_called_once()
+
+
+@pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
+class FinalizeReindexTest(APITestCase):
+    @patch("udata.search.commands.get_elastic_client")
+    def test_finalize_reindex_deletes_old_indices(self, mock_get_client):
+        """finalize_reindex should delete old indices after switching aliases."""
+        mock_es = mock_get_client.return_value.es
+        start = datetime.datetime(2022, 2, 20, 20, 2)
+
+        old_index = "udata-test-dataset-2022-01-01-00-00"
+        new_index = "udata-test-dataset-2022-02-20-20-02"
+        alias = "udata-test-dataset"
+
+        mock_es.indices.get_alias.return_value = {old_index: {}}
+        mock_es.indices.update_aliases.return_value = True
+
+        finalize_reindex(["dataset"], start)
+
+        mock_es.indices.update_aliases.assert_called_once()
+        actions = mock_es.indices.update_aliases.call_args[1]["body"]["actions"]
+        assert {"remove": {"index": old_index, "alias": alias}} in actions
+        assert {"add": {"index": new_index, "alias": alias}} in actions
+
+        mock_es.indices.delete.assert_called_once_with(index=old_index)
+
+    @patch("udata.search.commands.get_elastic_client")
+    def test_finalize_reindex_does_not_delete_new_index(self, mock_get_client):
+        """finalize_reindex should not delete the new index if it was already aliased."""
+        mock_es = mock_get_client.return_value.es
+        start = datetime.datetime(2022, 2, 20, 20, 2)
+
+        new_index = "udata-test-dataset-2022-02-20-20-02"
+        mock_es.indices.get_alias.return_value = {new_index: {}}
+        mock_es.indices.update_aliases.return_value = True
+
+        finalize_reindex(["dataset"], start)
+
+        mock_es.indices.delete.assert_not_called()
 
 
 class DatasetSearchAdapterTest(APITestCase):

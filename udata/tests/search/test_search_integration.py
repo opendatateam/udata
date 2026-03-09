@@ -4,7 +4,7 @@ import pytest
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization import constants as org_constants
 from udata.core.organization.constants import COMPANY, PUBLIC_SERVICE
@@ -21,6 +21,16 @@ from udata.tests.helpers import requires_search_service
 @pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200", AUTO_INDEX=True)
 class SearchIntegrationTest(APITestCase):
     """Integration tests that require a running search-service and Elasticsearch."""
+
+    @pytest.fixture(autouse=True)
+    def clean_es(self, app):
+        from udata.search import get_elastic_client
+
+        es_client = get_elastic_client()
+        es_client.es.delete_by_query(
+            index="udata-test-*", body={"query": {"match_all": {}}}, refresh=True
+        )
+        yield
 
     def test_dataset_fuzzy_search(self):
         """
@@ -293,3 +303,166 @@ class SearchIntegrationTest(APITestCase):
         assert response.json["total"] == 2
         ids = [o["id"] for o in response.json["data"]]
         assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)
+
+    def test_dataset_sort_by_created(self):
+        from datetime import datetime
+
+        DatasetFactory(title="Ancien", created_at_internal=datetime(2020, 1, 1))
+        DatasetFactory(title="Récent", created_at_internal=datetime(2024, 1, 1))
+
+        time.sleep(1)
+
+        response = self.get("/api/2/datasets/search/?sort=-created")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        titles = [d["title"] for d in response.json["data"]]
+        assert titles[0] == "Récent"
+
+    def test_dataset_filter_by_license(self):
+        license_cc = LicenseFactory(id="cc-by")
+        license_odbl = LicenseFactory(id="odc-odbl")
+        DatasetFactory(title="CC-BY", license=license_cc)
+        DatasetFactory(title="ODbL", license=license_odbl)
+
+        time.sleep(1)
+
+        response = self.get("/api/2/datasets/search/?license=cc-by")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "CC-BY" in titles
+        assert "ODbL" not in titles
+
+    def test_dataset_filter_by_organization(self):
+        org = OrganizationFactory()
+        DatasetFactory(title="Dataset org", organization=org)
+        DatasetFactory(title="Dataset autre")
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/datasets/search/?organization={org.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Dataset org" in titles
+        assert "Dataset autre" not in titles
+
+    def test_dataset_filter_by_owner(self):
+        user = UserFactory()
+        DatasetFactory(title="Dataset user", owner=user, organization=None)
+        DatasetFactory(title="Dataset autre")
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/datasets/search/?owner={user.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Dataset user" in titles
+        assert "Dataset autre" not in titles
+
+    def test_dataset_filter_by_schema(self):
+        from udata.core.dataset.models import Schema
+
+        resource_with_schema = ResourceFactory(schema=Schema(name="etalab/schema-irve"))
+        DatasetFactory(title="Avec schéma", resources=[resource_with_schema])
+        DatasetFactory(title="Sans schéma")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/datasets/search/?schema=etalab/schema-irve")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Avec schéma" in titles
+
+    def test_dataset_filter_by_badge(self):
+        from udata.core.constants import HVD
+
+        ds = DatasetFactory(title="Dataset avec badge")
+        ds.add_badge(HVD)
+
+        DatasetFactory(title="Dataset sans badge")
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/datasets/search/?badge={HVD}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Dataset avec badge" in titles
+
+    def test_dataset_pagination(self):
+        for i in range(4):
+            DatasetFactory(title=f"Dataset {i}")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/datasets/search/?page_size=2&page=1")
+        self.assert200(response)
+        assert len(response.json["data"]) == 2
+        assert response.json["page"] == 1
+        assert response.json["page_size"] == 2
+        assert response.json["total"] == 4
+        assert response.json["next_page"] is not None
+        assert response.json["previous_page"] is None
+
+        response = self.get("/api/2/datasets/search/?page_size=2&page=2")
+        self.assert200(response)
+        assert len(response.json["data"]) == 2
+        assert response.json["page"] == 2
+        assert response.json["previous_page"] is not None
+
+    def test_reuse_filter_by_type(self):
+        VisibleReuseFactory(title="API reuse", type="api")
+        VisibleReuseFactory(title="App reuse", type="application")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/reuses/search/?type=api")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [r["title"] for r in response.json["data"]]
+        assert "API reuse" in titles
+        assert "App reuse" not in titles
+
+    def test_reuse_filter_by_owner(self):
+        user = UserFactory()
+        VisibleReuseFactory(title="Reuse user", owner=user, organization=None)
+        VisibleReuseFactory(title="Reuse autre")
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/reuses/search/?owner={user.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [r["title"] for r in response.json["data"]]
+        assert "Reuse user" in titles
+        assert "Reuse autre" not in titles
+
+    def test_dataservice_filter_by_organization(self):
+        org = OrganizationFactory()
+        DataserviceFactory(title="DS org", organization=org)
+        DataserviceFactory(title="DS autre")
+
+        time.sleep(1)
+
+        response = self.get(f"/api/2/dataservices/search/?organization={org.id}")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "DS org" in titles
+        assert "DS autre" not in titles
+
+    def test_dataservice_filter_by_tags(self):
+        DataserviceFactory(title="DS tagged", tags=["transport"])
+        DataserviceFactory(title="DS other", tags=["sante"])
+
+        time.sleep(1)
+
+        response = self.get("/api/2/dataservices/search/?tag=transport")
+        self.assert200(response)
+        assert response.json["total"] >= 1
+        titles = [d["title"] for d in response.json["data"]]
+        assert "DS tagged" in titles
+        assert "DS other" not in titles
