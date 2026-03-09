@@ -9,9 +9,9 @@ from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 
 from udata import models
+from udata.core.api_token.models import ApiToken
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
-from udata.core.user.api_tokens import ApiToken
 from udata.features.notifications.models import Notification
 from udata.harvest.models import HarvestSource
 from udata.mongo.slug_fields import SlugField

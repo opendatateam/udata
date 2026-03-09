@@ -301,7 +301,7 @@ class MeAPITest(APITestCase):
         self.assertNotIn(token_id, active_ids)
 
         # Verify the revoked token no longer authenticates
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         token, error = ApiToken.authenticate(plaintext)
         self.assertIsNone(token)
@@ -325,7 +325,7 @@ class MeAPITest(APITestCase):
         token1_id = resp1.json["id"]
 
         # Both tokens should work
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         self.assertIsNotNone(ApiToken.authenticate(token1)[0])
         self.assertIsNotNone(ApiToken.authenticate(token2)[0])
@@ -424,7 +424,7 @@ class MeAPITest(APITestCase):
 
     def test_expired_token_auth_returns_401(self):
         """Should return 401 with 'Expired API Key' for an expired token"""
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
         expired = datetime.now(timezone.utc) - timedelta(hours=1)
@@ -436,7 +436,7 @@ class MeAPITest(APITestCase):
 
     def test_expired_token_with_naive_datetime(self):
         """authenticate() should not crash comparing naive vs aware datetimes"""
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
         # Simulate a naive datetime as MongoDB might return.
@@ -459,7 +459,7 @@ class MeAPITest(APITestCase):
 
     def test_revoked_token_auth_returns_401(self):
         """Should return 401 with 'Revoked API Key' for a revoked token"""
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
         token, plaintext = ApiToken.generate(user)

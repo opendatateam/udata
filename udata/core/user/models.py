@@ -300,7 +300,7 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         self.extras = None
         self.deleted = datetime.utcnow()
         self.save()
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         ApiToken.objects(user=self, revoked_at=None).update(
             set__revoked_at=datetime.now(timezone.utc)

@@ -102,7 +102,7 @@ class UDataApi(Api):
 
             apikey = request.headers.get(HEADER_API_KEY)
             if apikey:
-                from udata.core.user.api_tokens import ApiToken
+                from udata.core.api_token.models import ApiToken
 
                 api_token, error = ApiToken.authenticate(apikey)
                 if api_token is None:

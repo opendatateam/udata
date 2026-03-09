@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from flask import current_app
 
-from udata.api import api, fields
+from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.models import db
 
@@ -140,16 +140,3 @@ class ApiToken(db.Document):
         if user_agent and user_agent not in agents and len(agents) < MAX_USER_AGENTS:
             update_kwargs["push__user_agents"] = user_agent
         type(self).objects(id=self.id).update_one(**update_kwargs)
-
-
-apitoken_created_fields = api.inherit(
-    "ApiTokenCreated",
-    ApiToken.__read_fields__,
-    {
-        "token": fields.String(
-            attribute="_plaintext",
-            readonly=True,
-            description="The plaintext token (shown only once at creation)",
-        ),
-    },
-)

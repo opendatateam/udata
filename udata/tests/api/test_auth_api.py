@@ -157,7 +157,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_deleted_user(self):
         """Should raise a HTTP 401 if the user is deleted"""
-        from udata.core.user.api_tokens import ApiToken
+        from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
         token, plaintext = ApiToken.generate(user)

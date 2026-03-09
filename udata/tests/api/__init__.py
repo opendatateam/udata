@@ -5,7 +5,7 @@ import pytest
 from flask import json
 from flask_security.utils import login_user, logout_user, set_request_attr
 
-from udata.core.user.api_tokens import ApiToken
+from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
