@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
 import factory
+import requests
 from bson import ObjectId
 from bson.errors import InvalidId
 from dateutil.parser import ParserError
@@ -481,3 +482,12 @@ def wants_json() -> bool:
         return True
 
     return request.accept_mimetypes.best == "application/json"
+
+
+def raise_if_redirect(response):
+    # Raise an error if response is a redirect
+    if 300 <= response.status_code < 400:
+        raise requests.exceptions.HTTPError(
+            f"Redirect ({response.status_code}) not allowed: {response.url} -> {response.headers.get('Location')}",
+            response=response,
+        )

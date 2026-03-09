@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
+import requests
 from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -208,6 +209,17 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         )
         backend = FakeBackend(source)
         assert backend.get_extra_config_value("test_str") == "test"
+
+    @pytest.mark.parametrize("method", ["head", "get", "post"])
+    def test_disallows_redirect(self, rmock, method):
+        backend = FakeBackend(HarvestSourceFactory())
+        url = "https://www.url.with.redirect.com/"
+        getattr(rmock, method)(url, status_code=302)
+        with pytest.raises(requests.exceptions.HTTPError):
+            if method == "post":
+                getattr(backend, method)(url, data={})
+            else:
+                getattr(backend, method)(url)
 
     def test_harvest_item_remote_url(self):
         n = 3

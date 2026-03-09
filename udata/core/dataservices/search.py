@@ -20,7 +20,7 @@ from udata.search import (
     ModelTermsFilter,
     register,
 )
-from udata.utils import to_iso_datetime
+from udata.utils import raise_if_redirect, to_iso_datetime
 
 # Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
 MAX_DOCUMENTATION_SIZE = 100 * 1024
@@ -103,8 +103,11 @@ class DataserviceSearch(ModelSearchAdapter):
         try:
             timeout = current_app.config.get("SEARCH_SERVICE_REQUEST_TIMEOUT", 10)
             headers = {"User-Agent": "udata-search-service/1.0"}
-            response = requests.get(url, timeout=timeout, stream=True, headers=headers)
+            response = requests.get(
+                url, timeout=timeout, stream=True, headers=headers, allow_redirects=False
+            )
             response.raise_for_status()
+            raise_if_redirect(response)
 
             if response.encoding is None:
                 response.encoding = response.apparent_encoding or "utf-8"
