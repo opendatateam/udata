@@ -107,10 +107,10 @@ class UDataApi(Api):
                 api_token, error = ApiToken.authenticate(apikey)
                 if api_token is None:
                     if error == "revoked":
-                        self.abort(401, "Revoked API Key")
+                        self.abort(401, "Revoked API token")
                     elif error == "expired":
-                        self.abort(401, "Expired API Key")
-                    self.abort(401, "Invalid API Key")
+                        self.abort(401, "Expired API token")
+                    self.abort(401, "Invalid API token")
 
                 if not login_user(api_token.user, False):
                     self.abort(401, "Inactive user")

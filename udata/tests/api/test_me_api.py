@@ -423,7 +423,7 @@ class MeAPITest(APITestCase):
         self.assertEqual(activity.actor, user)
 
     def test_expired_token_auth_returns_401(self):
-        """Should return 401 with 'Expired API Key' for an expired token"""
+        """Should return 401 with 'Expired API token' for an expired token"""
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
@@ -458,7 +458,7 @@ class MeAPITest(APITestCase):
         self.assertEqual(error2, "expired")
 
     def test_revoked_token_auth_returns_401(self):
-        """Should return 401 with 'Revoked API Key' for a revoked token"""
+        """Should return 401 with 'Revoked API token' for a revoked token"""
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
