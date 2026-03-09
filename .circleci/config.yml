@@ -88,7 +88,6 @@ jobs:
           command: |
             echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
             uv run udata search init-es
-            rm udata.cfg
       - run:
           name: Run tests
           command: |

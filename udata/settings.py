@@ -710,6 +710,8 @@ class Testing(object):
     SPAM_WORDS = []
     SPAM_ALLOWED_LANGS = []
     DATASET_HIDDEN_BADGES = []
+    ELASTICSEARCH_URL = None
+    ELASTICSEARCH_INDEX_BASENAME = "udata-test"
 
 
 class Debug(Defaults):

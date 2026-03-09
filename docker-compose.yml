@@ -27,6 +27,8 @@ services:
           - node.name=es01
           - cluster.name=es-docker-cluster
           - cluster.initial_master_nodes=es01
+          - ES_JAVA_OPTS=-Xms750m -Xmx750m
+        user: "1000:1000"
         volumes:
           - ./data/es:/usr/share/elasticsearch/data
         expose:

@@ -64,11 +64,6 @@ def unindex(classname, id):
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
 
-# Placed after reindex/unindex definitions to avoid circular import:
-# udata.search → udata.event → udata.models → udata.core.topic.models → udata.search.reindex
-import udata.event  # noqa: E402, F401
-
-
 def reindex_model_on_save(sender, document, **kwargs):
     """(Re/Un)Index Mongo document on post_save"""
     if current_app.config.get("AUTO_INDEX") and current_app.config["ELASTICSEARCH_URL"]:
@@ -116,7 +111,7 @@ def query(model, **params):
 
 
 def init_app(app):
-    # Register core adapters
+    # Side-effect imports to register event handlers and search adapters
     import udata.core.dataservices.search  # noqa
     import udata.core.dataset.search  # noqa
     import udata.core.discussions.search  # noqa
@@ -124,3 +119,4 @@ def init_app(app):
     import udata.core.post.search  # noqa
     import udata.core.reuse.search  # noqa
     import udata.core.topic.search  # noqa
+    import udata.event  # noqa
