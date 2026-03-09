@@ -1,5 +1,15 @@
 # Changelog
 
+## 15.2.0 (2026-03-09)
+
+- chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))
+- chore: add hostname resolve in uri validate ([#3682](https://github.com/opendatateam/udata/pull/3682))
+- chore: disallow redirects in harvest actions and dataservice search ([#3683](https://github.com/opendatateam/udata/pull/3683))
+- feat(api): extend Atom feed filters support ([#3676](https://github.com/opendatateam/udata/pull/3676))
+- feat(catalog): add badges in dataset catalog ([#3681](https://github.com/opendatateam/udata/pull/3681))
+- fix: remove datetime.utcnow() deprecation warnings ([#3635](https://github.com/opendatateam/udata/pull/3635))
+
+
 ## 15.1.0 (2026-02-19)
 
 - chore: add types to api fields ([#3670](https://github.com/opendatateam/udata/pull/3670))
