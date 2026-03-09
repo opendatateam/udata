@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from textwrap import dedent
 
@@ -163,7 +163,7 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
                 "filename": "test.py",
                 "ops": [
                     {
-                        "date": datetime.utcnow(),
+                        "date": datetime.now(UTC),
                         "type": "migrate",
                         "script": 'print("ok")',
                         "output": "ok",
@@ -183,7 +183,7 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
                 "filename": "test.py",
                 "ops": [
                     {
-                        "date": datetime.utcnow(),
+                        "date": datetime.now(UTC),
                         "type": "migrate",
                         "script": 'print("ok")',
                         "output": "ok",

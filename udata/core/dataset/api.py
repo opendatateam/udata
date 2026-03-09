@@ -19,7 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 
 import logging
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -337,9 +337,9 @@ class DatasetsAtomFeedAPI(API):
         queryset = DatasetApiParser.parse_filters(queryset, args)
 
         q = args.get("q").strip() if args.get("q") else ""
+
         has_filters = any(
-            args.get(k)
-            for k in ["q", "tag", "license", "organization", "owner", "format", "badge", "topic"]
+            value for key, value in args.items() if key not in ["page", "page_size", "sort"]
         )
 
         if q:
@@ -356,7 +356,15 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: list[Dataset] = get_rss_feed_list(queryset, "created_at_internal")
+        # Map sort parameter to a date field for RSS ordering
+        # Only date fields make sense for chronological feeds
+        sort_field = DEFAULT_SORTING.lstrip("-")
+        if args.get("sort"):
+            sort_value = args["sort"].lstrip("-")
+            if sort_value in ("last_update", "created_at_internal"):
+                sort_field = sort_value
+
+        datasets: list[Dataset] = get_rss_feed_list(queryset, sort_field)
 
         for dataset in datasets:
             author_name = None
@@ -411,7 +419,7 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
-        dataset.last_modified_internal = datetime.utcnow()
+        dataset.last_modified_internal = datetime.now(UTC)
         form = api.validate(DatasetForm, dataset)
 
         return form.save()
@@ -428,8 +436,8 @@ class DatasetAPI(API):
         dataset.permissions["delete"].test()
         send_legal_notice_on_deletion(dataset, args)
 
-        dataset.deleted = datetime.utcnow()
-        dataset.last_modified_internal = datetime.utcnow()
+        dataset.deleted = datetime.now(UTC)
+        dataset.last_modified_internal = datetime.now(UTC)
         dataset.save()
         return "", 204
 
@@ -577,7 +585,7 @@ class ResourcesAPI(API):
 
 class UploadMixin(object):
     def handle_upload(self, dataset):
-        prefix = "/".join((dataset.slug, datetime.utcnow().strftime("%Y%m%d-%H%M%S")))
+        prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
@@ -727,7 +735,7 @@ class ResourceAPI(ResourceMixin, API):
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
-        resource.last_modified_internal = datetime.utcnow()
+        resource.last_modified_internal = datetime.now(UTC)
 
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
@@ -782,7 +790,7 @@ class CommunityResourcesAPI(API):
             api.abort(400, errors={"dataset": "A dataset identifier is required"})
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.last_modified_internal = datetime.utcnow()
+        resource.last_modified_internal = datetime.now(UTC)
         resource.save()
         return resource, 201
 
@@ -809,7 +817,7 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.last_modified_internal = datetime.utcnow()
+        community.last_modified_internal = datetime.now(UTC)
         community.save()
         return community
 

@@ -19,7 +19,7 @@ from udata.search import (
     ModelTermsFilter,
     register,
 )
-from udata.utils import to_iso_datetime
+from udata.utils import raise_if_redirect, to_iso_datetime
 from udata_search_service.consumers import DataserviceConsumer
 from udata_search_service.services import DataserviceService
 
@@ -105,8 +105,11 @@ class DataserviceSearch(ModelSearchAdapter):
         try:
             timeout = 10
             headers = {"User-Agent": "udata-search-service/1.0"}
-            response = requests.get(url, timeout=timeout, stream=True, headers=headers)
+            response = requests.get(
+                url, timeout=timeout, stream=True, headers=headers, allow_redirects=False
+            )
             response.raise_for_status()
+            raise_if_redirect(response)
 
             if response.encoding is None:
                 response.encoding = response.apparent_encoding or "utf-8"

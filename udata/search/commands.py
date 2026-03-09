@@ -1,6 +1,6 @@
 import logging
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 
 import click
 from flask import current_app
@@ -172,7 +172,7 @@ def index(models=None, reindex=True, from_datetime=None):
         log.error("Missing ELASTICSEARCH_URL configuration")
         sys.exit(-1)
 
-    start = datetime.utcnow()
+    start = datetime.now(UTC)
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 
