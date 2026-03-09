@@ -39,12 +39,6 @@ Deleting a token marks it as revoked (`revoked_at` timestamp) rather than removi
 | `API_TOKEN_PREFIX` | `udata_` | Prefix for secret scanning tool detection. |
 | `API_TOKEN_SECRET` | *(empty — must be set)* | HMAC key for token hashing. The app refuses to start without it. |
 
-## Migration
-
-The migration `2026-01-28-migrate-apikeys-to-api-tokens.py` hashes each existing `User.apikey` with HMAC-SHA256 into the new collection, then removes the `apikey` field from all user documents.
-
-The migration is idempotent (checks for existing hashes before inserting). Existing API keys continue to work after migration because the same plaintext produces the same HMAC hash.
-
 ## Future work
 
 - **Restricted scopes (phase 2)**: add `normal` scope with permission enforcement, so that admin-only endpoints require `scope="admin"` + `is_admin`

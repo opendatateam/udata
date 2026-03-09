@@ -253,6 +253,24 @@ class MeAPITest(APITestCase):
         self.assert201(response)
         self.assertIsNotNone(response.json["expires_at"])
 
+    def test_create_token_with_invalid_expiration(self):
+        """It should return 400 for an invalid expires_at format"""
+        self.login()
+        response = self.post(
+            url_for("api.my_api_tokens"),
+            {"expires_at": "not-a-date"},
+        )
+        self.assert400(response)
+
+    def test_create_token_with_past_expiration(self):
+        """It should return 400 for an expires_at in the past"""
+        self.login()
+        response = self.post(
+            url_for("api.my_api_tokens"),
+            {"expires_at": "2020-01-01T00:00:00"},
+        )
+        self.assert400(response)
+
     def test_list_tokens(self):
         """It should list active tokens without the plaintext"""
         self.login()
@@ -273,7 +291,7 @@ class MeAPITest(APITestCase):
         token_id = create_response.json["id"]
         plaintext = create_response.json["token"]
 
-        response = self.delete(url_for("api.my_api_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert204(response)
 
         # Verify the token is no longer in the active list
@@ -292,7 +310,7 @@ class MeAPITest(APITestCase):
     def test_revoke_nonexistent_token(self):
         """It should return 404 for a non-existent token"""
         self.login()
-        response = self.delete(url_for("api.my_api_token", id="000000000000000000000000"))
+        response = self.delete(url_for("api.my_api_token", api_token="000000000000000000000000"))
         self.assert404(response)
 
     def test_multiple_tokens(self):
@@ -313,7 +331,7 @@ class MeAPITest(APITestCase):
         self.assertIsNotNone(ApiToken.authenticate(token2)[0])
 
         # Revoke token1
-        self.delete(url_for("api.my_api_token", id=token1_id))
+        self.delete(url_for("api.my_api_token", api_token=token1_id))
 
         # token1 no longer works, token2 still works
         self.assertIsNone(ApiToken.authenticate(token1)[0])
@@ -459,9 +477,9 @@ class MeAPITest(APITestCase):
         token_id = create_response.json["id"]
 
         # First revocation succeeds
-        response = self.delete(url_for("api.my_api_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert204(response)
 
         # Second revocation returns 410
-        response = self.delete(url_for("api.my_api_token", id=token_id))
+        response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert410(response)

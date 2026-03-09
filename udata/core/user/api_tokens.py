@@ -14,6 +14,20 @@ PREFIX_DISPLAY_LENGTH = 8
 MAX_USER_AGENTS = 20
 
 
+def parse_future_datetime(value):
+    """Parse an ISO 8601 string into a tz-aware datetime that must be in the future.
+    Aborts with 400 on invalid format or past date."""
+    try:
+        dt = datetime.fromisoformat(value)
+    except (ValueError, TypeError):
+        api.abort(400, "Invalid expires_at format")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    if dt < datetime.now(timezone.utc):
+        api.abort(400, "expires_at must be in the future")
+    return dt
+
+
 def _hash_token(plaintext):
     key = current_app.config["API_TOKEN_SECRET"].encode()
     return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()

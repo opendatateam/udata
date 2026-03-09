@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from flask import request as flask_request
 from flask_security import current_user, logout_user
 from slugify import slugify
 
@@ -28,7 +29,7 @@ from .api_fields import (
     user_role_fields,
     user_suggestion_fields,
 )
-from .api_tokens import ApiToken, apitoken_created_fields
+from .api_tokens import ApiToken, apitoken_created_fields, parse_future_datetime
 from .forms import UserProfileAdminForm, UserProfileForm
 
 DEFAULT_SORTING = "-created_at"
@@ -196,13 +197,6 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-token_parser = api.parser()
-token_parser.add_argument("name", type=str, help="A label for this token", location="json")
-token_parser.add_argument(
-    "expires_at", type=str, help="Expiration date (ISO 8601)", location="json"
-)
-
-
 @me.route("/api_tokens/", endpoint="my_api_tokens")
 class ApiTokenListAPI(API):
     @api.secure
@@ -214,38 +208,32 @@ class ApiTokenListAPI(API):
 
     @api.secure
     @api.doc("create_api_token")
-    @api.expect(token_parser)
+    @api.expect(ApiToken.__write_fields__)
     @api.marshal_with(apitoken_created_fields, code=201)
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
-        args = token_parser.parse_args()
+        data = flask_request.json or {}
         user = current_user._get_current_object()
-        expires_at = None
-        if args.get("expires_at"):
-            expires_at = datetime.fromisoformat(args["expires_at"])
-        token, plaintext = ApiToken.generate(user, name=args.get("name"), expires_at=expires_at)
+        expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
+        token, plaintext = ApiToken.generate(user, name=data.get("name"), expires_at=expires_at)
         token._plaintext = plaintext
         return token, 201
 
 
-@me.route("/api_tokens/<string:id>/", endpoint="my_api_token")
+@me.route("/api_tokens/<api_token:api_token>/", endpoint="my_api_token")
 class ApiTokenAPI(API):
     @api.secure
     @api.doc("revoke_api_token")
     @api.response(204, "Token revoked")
     @api.response(404, "Token not found")
     @api.response(410, "Token already revoked")
-    def delete(self, id):
+    def delete(self, api_token):
         """Revoke an API token"""
-        token = ApiToken.objects(
-            id=id,
-            user=current_user.id,
-        ).first()
-        if not token:
+        if api_token.user != current_user._get_current_object():
             api.abort(404, "Token not found")
-        if token.revoked_at is not None:
+        if api_token.revoked_at is not None:
             api.abort(410, "Token already revoked")
-        token.revoke()
+        api_token.revoke()
         return "", 204
 
 
