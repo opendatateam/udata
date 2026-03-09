@@ -138,7 +138,9 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
-        self.parser.add_argument("access_type", choices=[elem.value for elem in AccessType])
+        self.parser.add_argument(
+            "access_type", choices=[elem.value for elem in AccessType], location="args"
+        )
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
