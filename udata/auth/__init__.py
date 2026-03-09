@@ -57,8 +57,9 @@ def init_app(app):
     from udata.errors import ConfigError
     from udata.models import datastore
 
-    if not app.config.get("API_TOKEN_SECRET"):
-        raise ConfigError("API_TOKEN_SECRET must be set to a unique, random value.")
+    for key in ["SECRET_KEY", "API_TOKEN_SECRET"]:
+        if not app.config.get(key):
+            raise ConfigError(f"{key} must be set to a unique, random value.")
 
     from .forms import (
         ExtendedForgotPasswordForm,
