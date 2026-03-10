@@ -5,8 +5,8 @@ from mongoengine.fields import (
     BooleanField,
     DateTimeField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     FloatField,
-    ListField,
     StringField,
     UUIDField,
 )
@@ -59,7 +59,7 @@ class Filter(GenericFilter):
 
 @generate_fields()
 class AndFilters(GenericFilter):
-    filters = field(ListField(EmbeddedDocumentField(GenericFilter)))
+    filters = field(EmbeddedDocumentListField(GenericFilter))
 
 
 @generate_fields()
@@ -67,12 +67,12 @@ class DataSeries(EmbeddedDocument):
     type = field(StringField(choices=["line", "histogram"]))
     # if not column y, we count the number of x. Could it be non int/float values?
     column_y = field(StringField(required=False))
-    aggregate_y = field(StringField(choices=["sum", "median"], required=False))
-    resource_id = field(UUIDField())
+    aggregate_y = field(StringField(choices=["avg", "sum", "count", "min", "max"], required=False))
+    resource_id = field(UUIDField(required=True, binary=False))
     # if the column x name in this resource does not match the one from XAxis
     column_x_name_override = field(StringField())
 
-    filters = field(EmbeddedDocumentField(GenericFilter))
+    filters = field(EmbeddedDocumentField(GenericFilter, allow_null=True))
 
     @property
     def resource(self):
@@ -142,10 +142,9 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
         auditable=False,
     )
 
-    # Chart-specific fields
     x_axis = field(EmbeddedDocumentField(XAxis))
     y_axis = field(EmbeddedDocumentField(YAxis))
-    series = field(ListField(EmbeddedDocumentField(DataSeries)))
+    series = field(EmbeddedDocumentListField(DataSeries))
 
     @property
     @field(
