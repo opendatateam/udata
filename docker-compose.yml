@@ -28,9 +28,8 @@ services:
           - cluster.name=es-docker-cluster
           - cluster.initial_master_nodes=es01
           - ES_JAVA_OPTS=-Xms750m -Xmx750m
-        user: "1000:1000"
         volumes:
-          - ./data/es:/usr/share/elasticsearch/data
+          - es-data:/usr/share/elasticsearch/data
         expose:
           - "9200"
         ports:
@@ -51,3 +50,6 @@ services:
         environment:
             MP_SMTP_AUTH_ACCEPT_ANY: 1
             MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+    es-data:
