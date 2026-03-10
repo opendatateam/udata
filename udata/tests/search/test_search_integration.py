@@ -27,9 +27,8 @@ class SearchIntegrationTest(APITestCase):
         from udata.search import get_elastic_client
 
         es_client = get_elastic_client()
-        es_client.es.delete_by_query(
-            index="udata-test-*", body={"query": {"match_all": {}}}, refresh=True
-        )
+        es_client.es.indices.delete(index="udata-test-*", ignore=[404])
+        es_client.init_indices()
         yield
 
     def test_dataset_fuzzy_search(self):
