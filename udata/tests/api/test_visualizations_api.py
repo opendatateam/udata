@@ -8,71 +8,72 @@ from udata.core.user.factories import UserFactory
 from udata.core.visualizations.factories import ChartFactory
 from udata.core.visualizations.models import Chart
 
-from . import APITestCase
+from . import PytestOnlyAPITestCase
 
 
-class VisualizationAPITest(APITestCase):
+class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_list(self):
         """It should list visualizations"""
+        ChartFactory()
         response = self.get(url_for("api.visualizations"))
-        self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 3)
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
 
     def test_visualization_api_list_excludes_private(self):
         """It should not list private visualizations"""
         ChartFactory()
         ChartFactory(private=True)
         response = self.get(url_for("api.visualizations"))
-        self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 1)
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
 
     def test_visualization_api_list_excludes_deleted(self):
         """It should not list deleted visualizations"""
         ChartFactory()
         ChartFactory(deleted_at=datetime.utcnow())
         response = self.get(url_for("api.visualizations"))
-        self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 1)
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
 
     def test_visualization_api_get(self):
         """It should fetch a visualization from the API"""
         visualization = ChartFactory()
         response = self.get(url_for("api.visualization", visualization=visualization))
-        self.assert200(response)
-        self.assertEqual(response.json["title"], visualization.title)
+        assert response.status_code == 200
+        assert response.json["title"] == visualization.title
 
     def test_visualization_api_get_by_slug(self):
         """It should fetch a visualization by slug"""
         visualization = ChartFactory(title="My Test Visualization")
         response = self.get(url_for("api.visualization", visualization=visualization.slug))
-        self.assert200(response)
-        self.assertEqual(response.json["id"], str(visualization.id))
+        assert response.status_code == 200
+        assert response.json["id"] == str(visualization.id)
 
     def test_visualization_api_get_deleted(self):
         """It should return 410 for deleted visualization"""
         visualization = ChartFactory(deleted_at=datetime.utcnow())
         response = self.get(url_for("api.visualization", visualization=visualization))
-        self.assert410(response)
+        assert response.status_code == 410
 
     def test_visualization_api_get_deleted_but_authorized(self):
         """It should fetch deleted visualization if user is owner"""
         user = self.login()
         visualization = ChartFactory(deleted_at=datetime.utcnow(), owner=user)
         response = self.get(url_for("api.visualization", visualization=visualization))
-        self.assert200(response)
+        assert response.status_code == 200
 
     def test_visualization_api_get_private(self):
         """It should return 404 for private visualization"""
         visualization = ChartFactory(private=True)
         response = self.get(url_for("api.visualization", visualization=visualization))
-        self.assert404(response)
+        assert response.status_code == 404
 
     def test_visualization_api_get_private_but_authorized(self):
         """It should fetch private visualization if user is owner"""
         user = self.login()
         visualization = ChartFactory(owner=user, private=True)
         response = self.get(url_for("api.visualization", visualization=visualization))
-        self.assert200(response)
+        assert response.status_code == 200
 
     def test_visualization_api_create(self):
         """It should create a visualization"""
@@ -84,12 +85,12 @@ class VisualizationAPITest(APITestCase):
                 "description": "A test visualization",
             },
         )
-        self.assert201(response)
-        self.assertEqual(Chart.objects.count(), 1)
+        assert response.status_code == 201
+        assert Chart.objects.count() == 1
 
         visualization = Chart.objects.first()
-        self.assertEqual(visualization.title, "My Visualization")
-        self.assertEqual(visualization.owner, user)
+        assert visualization.title == "My Visualization"
+        assert visualization.owner == user
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
@@ -106,10 +107,10 @@ class VisualizationAPITest(APITestCase):
                 "organization": str(org.id),
             },
         )
-        self.assert201(response)
+        assert response.status_code == 201
 
         visualization = Chart.objects.first()
-        self.assertEqual(visualization.organization, org)
+        assert visualization.organization == org
 
     def test_visualization_api_create_requires_auth(self):
         """It should require authentication to create"""
@@ -120,7 +121,7 @@ class VisualizationAPITest(APITestCase):
                 "description": "A test visualization",
             },
         )
-        self.assert401(response)
+        assert response.status_code == 401
 
     def test_visualization_api_update(self):
         """It should update a visualization"""
@@ -131,8 +132,8 @@ class VisualizationAPITest(APITestCase):
             url_for("api.visualization", visualization=visualization),
             {"title": "Updated Title"},
         )
-        self.assert200(response)
-        self.assertEqual(response.json["title"], "Updated Title")
+        assert response.status_code == 200
+        assert response.json["title"] == "Updated Title"
 
     def test_visualization_api_update_requires_permission(self):
         """It should require permission to update"""
@@ -144,7 +145,7 @@ class VisualizationAPITest(APITestCase):
             url_for("api.visualization", visualization=visualization),
             {"title": "Updated Title"},
         )
-        self.assert403(response)
+        assert response.status_code == 403
 
     def test_visualization_api_update_deleted(self):
         """It should return 410 when updating deleted visualization"""
@@ -155,7 +156,7 @@ class VisualizationAPITest(APITestCase):
             url_for("api.visualization", visualization=visualization),
             {"title": "Updated Title"},
         )
-        self.assert410(response)
+        assert response.status_code == 410
 
     def test_visualization_api_delete(self):
         """It should soft delete a visualization"""
@@ -163,10 +164,10 @@ class VisualizationAPITest(APITestCase):
         visualization = ChartFactory(owner=user)
 
         response = self.delete(url_for("api.visualization", visualization=visualization))
-        self.assert204(response)
+        assert response.status_code == 204
 
         visualization.reload()
-        self.assertIsNotNone(visualization.deleted_at)
+        assert visualization.deleted_at is not None
 
     def test_visualization_api_delete_requires_permission(self):
         """It should require permission to delete"""
@@ -175,7 +176,7 @@ class VisualizationAPITest(APITestCase):
         visualization = ChartFactory(owner=other_user)
 
         response = self.delete(url_for("api.visualization", visualization=visualization))
-        self.assert403(response)
+        assert response.status_code == 403
 
     def test_visualization_api_delete_already_deleted(self):
         """It should return 410 when deleting already deleted visualization"""
@@ -183,13 +184,13 @@ class VisualizationAPITest(APITestCase):
         visualization = ChartFactory(owner=user, deleted_at=datetime.utcnow())
 
         response = self.delete(url_for("api.visualization", visualization=visualization))
-        self.assert410(response)
+        assert response.status_code == 410
 
 
-class ChartAPITest(APITestCase):
+class ChartAPITest(PytestOnlyAPITestCase):
     def test_chart_api_get(self):
         """It should fetch a chart (subclass of visualization)"""
         chart = ChartFactory()
         response = self.get(url_for("api.visualization", visualization=chart))
-        self.assert200(response)
-        self.assertEqual(response.json["title"], chart.title)
+        assert response.status_code == 200
+        assert response.json["title"] == chart.title
