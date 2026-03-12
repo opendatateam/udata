@@ -82,10 +82,31 @@ class MembershipRefusedNotificationDetails(EmbeddedDocument):
     )
 
 
-@MembershipRequest.after_create.connect
-def on_new_membership_request(request: MembershipRequest, **kwargs):
+def _create_membership_notification(request, organization, recipient):
     from udata.features.notifications.models import Notification
 
+    existing = Notification.objects(
+        user=recipient,
+        handled_at=None,
+        details__request_organization=organization,
+        details__request_user=request.user,
+    ).first()
+
+    if not existing:
+        notification = Notification(
+            user=recipient,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization,
+                request_user=request.user,
+                kind=request.kind,
+            ),
+        )
+        notification.created_at = request.created
+        notification.save()
+
+
+@MembershipRequest.after_create.connect
+def on_new_membership_request(request: MembershipRequest, **kwargs):
     """Create notification when a new membership request or invitation is created"""
     organization = kwargs.get("org")
 
@@ -93,34 +114,15 @@ def on_new_membership_request(request: MembershipRequest, **kwargs):
         return
 
     if request.kind == "invitation":
-        # Invitation: notify the invited user
         if request.user is None:
             return
         recipients = [request.user]
     else:
-        # Request: notify all org admins
         recipients = [member.user for member in organization.members if member.role == "admin"]
 
     for recipient in recipients:
         try:
-            existing = Notification.objects(
-                user=recipient,
-                handled_at=None,
-                details__request_organization=organization,
-                details__request_user=request.user,
-            ).first()
-
-            if not existing:
-                notification = Notification(
-                    user=recipient,
-                    details=MembershipRequestNotificationDetails(
-                        request_organization=organization,
-                        request_user=request.user,
-                        kind=request.kind,
-                    ),
-                )
-                notification.created_at = request.created
-                notification.save()
+            _create_membership_notification(request, organization, recipient)
         except Exception as e:
             log.error(
                 f"Error creating notification for user {recipient.id} "
