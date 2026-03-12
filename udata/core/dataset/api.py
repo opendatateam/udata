@@ -40,7 +40,6 @@ from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
-from udata.core.organization.assignment import auto_assign_if_partial_editor
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
@@ -325,7 +324,6 @@ class DatasetListAPI(API):
         """Create a new dataset"""
         form = api.validate(DatasetForm)
         dataset = form.save()
-        auto_assign_if_partial_editor(dataset)
         return dataset, 201
 
 

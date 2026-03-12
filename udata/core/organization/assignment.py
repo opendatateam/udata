@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from mongoengine import CASCADE
+from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
 from udata.core.owned import Owned
@@ -33,19 +34,29 @@ class Assignment(db.Document):
     }
 
 
-def auto_assign_if_partial_editor(obj):
-    """Auto-assign an object to the current user if they are a partial editor."""
+def _auto_assign_on_create(sender, document, **kwargs):
+    """Auto-assign an owned object to the current user if they are a partial editor."""
+    if not kwargs.get("created"):
+        return
+    if not isinstance(document, Owned):
+        return
+    if document.__class__.__name__ not in ASSIGNABLE_OBJECT_TYPES:
+        return
+
     from udata.auth import current_user
 
-    if not obj.organization or not current_user.is_authenticated:
+    if not document.organization or not current_user.is_authenticated:
         return
-    member = obj.organization.member(current_user._get_current_object())
+    member = document.organization.member(current_user._get_current_object())
     if member and member.role == "partial_editor":
         Assignment(
             user=current_user._get_current_object(),
-            organization=obj.organization,
-            subject=obj,
+            organization=document.organization,
+            subject=document,
         ).save()
+
+
+post_save.connect(_auto_assign_on_create)
 
 
 @Owned.on_owner_change.connect
