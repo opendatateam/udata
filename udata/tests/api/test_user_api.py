@@ -641,6 +641,12 @@ class OrgInvitationsAPITest(APITestCase):
         assert organization.requests[0].user == new_user
         assert organization.requests[0].email is None
 
+        # A notification should have been created for the new user
+        notifications = Notification.objects(user=new_user)
+        assert notifications.count() == 1
+        assert notifications.first().details.request_organization == organization
+        assert notifications.first().details.kind == "invitation"
+
         # Now the user should see the invitation
         self.login(new_user)
         response = self.get(url_for("api.my_org_invitations"))
