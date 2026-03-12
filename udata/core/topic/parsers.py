@@ -1,11 +1,11 @@
 from bson.objectid import ObjectId
 from flask_restx.inputs import boolean
+from mongoengine import Q
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
-from udata.mongo.engine import db
 
 
 class TopicElementsParser(ModelApiParser):
@@ -75,7 +75,7 @@ class TopicApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
 
             # Search topics by their own content
-            topic_text_filter = db.Q(__raw__={"$text": {"$search": phrase_query}})
+            topic_text_filter = Q(__raw__={"$text": {"$search": phrase_query}})
 
             # Find topics that have elements matching the search
             matching_elements = TopicElement.objects.search_text(phrase_query)
@@ -83,7 +83,7 @@ class TopicApiParser(ModelApiParser):
 
             # Combine with OR
             if element_topic_ids:
-                element_filter = db.Q(id__in=element_topic_ids)
+                element_filter = Q(id__in=element_topic_ids)
                 topics = topics.filter(topic_text_filter | element_filter)
             else:
                 topics = topics.filter(topic_text_filter)

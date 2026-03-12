@@ -1,4 +1,8 @@
 from flask import url_for
+from flask_storage.mongo import ImageField
+from mongoengine import DENY, PULL
+from mongoengine.errors import ValidationError
+from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
@@ -7,7 +11,11 @@ from udata.core.pages.models import Page
 from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.queryset import UDataQuerySet
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
@@ -15,7 +23,7 @@ from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 __all__ = ("Post",)
 
 
-class PostQuerySet(db.BaseQuerySet):
+class PostQuerySet(UDataQuerySet):
     def published(self):
         return self(published__ne=None).order_by("-published")
 
@@ -28,86 +36,86 @@ class PostQuerySet(db.BaseQuerySet):
     ],
     default_sort="-published",
 )
-class Post(db.Datetimed, Linkable, db.Document):
+class Post(Datetimed, Linkable, Document):
     name = field(
-        db.StringField(max_length=255, required=True),
+        StringField(max_length=255, required=True),
         sortable=True,
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         readonly=True,
     )
     headline = field(
-        db.StringField(),
+        StringField(),
         sortable=True,
     )
     content = field(
-        db.StringField(),
+        StringField(),
         markdown=True,
     )
     content_as_page = field(
-        db.ReferenceField("Page", reverse_delete_rule=db.DENY),
+        ReferenceField("Page", reverse_delete_rule=DENY),
         nested_fields=Page.__read_fields__,
         allow_null=True,
         description="Reference to a Page when body_type is 'blocs'",
     )
     image_url = field(
-        db.StringField(),
+        StringField(),
     )
     image = field(
-        db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
+        ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
         readonly=True,
         thumbnail_info={"size": 100},
     )
 
     credit_to = field(
-        db.StringField(),
+        StringField(),
         description="An optional credit line (associated to the image)",
     )
     credit_url = field(
-        db.URLField(),
+        URLField(),
         description="An optional link associated to the credits",
     )
 
     tags = field(
-        db.ListField(db.StringField()),
+        ListField(StringField()),
         description="Some keywords to help in search",
     )
     datasets = field(
-        db.ListField(
+        ListField(
             field(
-                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                ReferenceField("Dataset", reverse_delete_rule=PULL),
                 nested_fields=dataset_fields,
             )
         ),
         description="The post datasets",
     )
     reuses = field(
-        db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        ListField(ReferenceField("Reuse", reverse_delete_rule=PULL)),
         description="The post reuses",
     )
 
     owner = field(
-        db.ReferenceField("User"),
+        ReferenceField("User"),
         nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,
         description="The owner user",
     )
     published = field(
-        db.DateTimeField(),
+        DateTimeField(),
         readonly=True,
         sortable=True,
         description="The post publication date",
     )
 
     body_type = field(
-        db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
+        StringField(choices=list(BODY_TYPES), default="markdown", required=False),
     )
 
     kind = field(
-        db.StringField(choices=list(POST_KINDS), default="news", required=False),
+        StringField(choices=list(POST_KINDS), default="news", required=False),
         filterable={},
         description="Post kind (news or page)",
     )
@@ -131,12 +139,10 @@ class Post(db.Datetimed, Linkable, db.Document):
     def clean(self):
         if self.body_type == "blocs":
             if not self.content_as_page:
-                raise db.ValidationError("content_as_page is required when body_type is 'blocs'")
+                raise ValidationError("content_as_page is required when body_type is 'blocs'")
         else:
             if not self.content:
-                raise db.ValidationError(
-                    "content is required when body_type is 'markdown' or 'html'"
-                )
+                raise ValidationError("content is required when body_type is 'markdown' or 'html'")
 
     def __str__(self):
         return self.name or ""

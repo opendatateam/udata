@@ -1,6 +1,6 @@
 import logging
 import traceback
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import requests
@@ -12,7 +12,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset, User
-from udata.utils import safe_unicode
+from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import (
@@ -89,6 +89,10 @@ class BaseBackend(object):
     display_name: str | None = None
     verify_ssl = True
 
+    # When False (default), GET, HEAD, and POST requests will raise a
+    # HTTPError on any 3xx response. Override to True to permit redirects.
+    allow_redirects = False
+
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     filters = tuple()
@@ -118,17 +122,29 @@ class BaseBackend(object):
     def head(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.head(url, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.head(url, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def get(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.get(url, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.get(url, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def post(self, url, data, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
-        return requests.post(url, data=data, headers=headers, **kwargs)
+        kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
+        response = requests.post(url, data=data, headers=headers, **kwargs)
+        if not kwargs["allow_redirects"]:
+            raise_if_redirect(response)
+        return response
 
     def get_headers(self):
         return {
@@ -165,7 +181,7 @@ class BaseBackend(object):
     def harvest(self):
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
-        self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
+        self.job = factory(status="initialized", started=datetime.now(UTC), source=self.source)
         self.remote_ids = set()
 
         before_harvest_job.send(self)
@@ -231,7 +247,7 @@ class BaseBackend(object):
         log.debug(f"Processing dataset {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -279,7 +295,7 @@ class BaseBackend(object):
             item.errors.append(error)
         finally:
             current_app.logger.removeHandler(log_catcher)
-            item.ended = datetime.utcnow()
+            item.ended = datetime.now(UTC)
             item.logs = [
                 HarvestLog(level=record.levelname, message=record.getMessage())
                 for record in log_catcher.records
@@ -290,15 +306,11 @@ class BaseBackend(object):
         """Should be called after process_dataset to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
-    def process_dataservice(self, remote_id: str, **kwargs) -> bool:
-        """
-        Return `True` if the parent should stop iterating because we exceed the number
-        of items to process.
-        """
+    def process_dataservice(self, remote_id: str, **kwargs) -> None:
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -342,7 +354,7 @@ class BaseBackend(object):
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             item.errors.append(error)
         finally:
-            item.ended = datetime.utcnow()
+            item.ended = datetime.now(UTC)
             self.save_job()
 
     def ensure_unique_remote_id(self, item):
@@ -351,7 +363,7 @@ class BaseBackend(object):
 
         self.remote_ids.add(item.remote_id)
 
-    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
+    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: str):
         if not harvest:
             harvest = HarvestDatasetMetadata()
 
@@ -359,7 +371,7 @@ class BaseBackend(object):
         harvest.source_id = str(self.source.id)
         harvest.remote_id = remote_id
         harvest.domain = self.source.domain
-        harvest.last_update = datetime.utcnow()
+        harvest.last_update = datetime.now(UTC)
         harvest.archived_at = None
         harvest.archived = None
 
@@ -368,7 +380,7 @@ class BaseBackend(object):
         return harvest
 
     def update_dataservice_harvest_info(
-        self, harvest: HarvestDataserviceMetadata | None, remote_id: int
+        self, harvest: HarvestDataserviceMetadata | None, remote_id: str
     ):
         if not harvest:
             harvest = HarvestDataserviceMetadata()
@@ -380,7 +392,7 @@ class BaseBackend(object):
         harvest.source_url = str(self.source.url)
 
         harvest.remote_id = remote_id
-        harvest.last_update = datetime.utcnow()
+        harvest.last_update = datetime.now(UTC)
 
         harvest.archived_at = None
         harvest.archived_reason = None
@@ -392,7 +404,7 @@ class BaseBackend(object):
             self.job.save()
 
     def end_job(self):
-        self.job.ended = datetime.utcnow()
+        self.job.ended = datetime.now(UTC)
         if not self.dryrun:
             self.job.save()
 

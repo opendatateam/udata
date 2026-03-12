@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-01-13 10:28+0100\n"
+"POT-Creation-Date: 2026-02-12 13:54+0100\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -14,31 +14,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: udata/settings.py:129
+#: udata/settings.py:130
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:130
+#: udata/settings.py:131
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:131
+#: udata/settings.py:132
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/auth/mails.py:125 udata/settings.py:132
+#: udata/auth/mails.py:127 udata/settings.py:133
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/auth/mails.py:137 udata/settings.py:133
+#: udata/auth/mails.py:139 udata/settings.py:134
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:134
+#: udata/settings.py:135
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:553
+#: udata/settings.py:569
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -171,63 +171,72 @@ msgstr "Les adresses emails ne sont pas identiques"
 msgid "Change email"
 msgstr "Modifier l'adresse email"
 
-#: udata/auth/mails.py:67 udata/auth/mails.py:71 udata/auth/mails.py:96
-#: udata/auth/mails.py:99 udata/tests/api/test_security_api.py:109
+#: udata/auth/mails.py:69 udata/auth/mails.py:73 udata/auth/mails.py:98
+#: udata/auth/mails.py:101 udata/tests/api/test_security_api.py:109
 msgid "Confirm your email address"
 msgstr "Confirmez votre adresse e-mail"
 
-#: udata/auth/mails.py:69
+#: udata/auth/mails.py:71
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr "Bienvenue sur %(site)s !"
 
-#: udata/auth/mails.py:70 udata/auth/mails.py:98
+#: udata/auth/mails.py:72 udata/auth/mails.py:100
 msgid "Please confirm your email address."
 msgstr "Veuillez confirmer votre adresse e-mail."
 
-#: udata/auth/mails.py:80
+#: udata/auth/mails.py:82
 msgid "Your email address is already associated with an account"
 msgstr "Votre adresse e-mail est déjà associée à un compte"
 
-#: udata/auth/mails.py:83
+#: udata/auth/mails.py:85
 #, python-format
 msgid "Someone (you?) tried to create an account on %(site)s with your email."
 msgstr ""
 "Quelqu'un (vous? ) a essayé de créer un compte sur %(site)s avec votre "
 "email."
 
-#: udata/auth/mails.py:86
+#: udata/auth/mails.py:88
 msgid "If you forgot your password, you can reset it."
 msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser."
 
-#: udata/auth/mails.py:87 udata/auth/mails.py:109 udata/auth/mails.py:116
-#: udata/auth/mails.py:144
+#: udata/auth/mails.py:89 udata/auth/mails.py:111 udata/auth/mails.py:118
+#: udata/auth/mails.py:146
 msgid "Reset your password"
 msgstr "Réinitialisez votre mot de passe"
 
-#: udata/auth/mails.py:112
+#: udata/auth/mails.py:114
 #, python-format
 msgid "Someone requested a password reset for your %(site)s account."
 msgstr ""
 "Quelqu'un a demandé une réinitialisation du mot de passe pour votre "
 "compte %(site)s."
 
-#: udata/auth/mails.py:115
+#: udata/auth/mails.py:117
 msgid "If this wasn't you, please ignore this email."
 msgstr "Si ce n'était pas vous, veuillez ignorer cet e-mail."
 
-#: udata/auth/mails.py:127
+#: udata/auth/mails.py:129
 msgid "Your data.gouv.fr password has been reset."
 msgstr "Votre mot de passe data.gouv.fr a été réinitialisé."
 
-#: udata/auth/mails.py:140
+#: udata/auth/mails.py:142
 #, python-format
 msgid "Your %(site)s account password has been changed."
 msgstr "Le mot de passe de votre compte %(site)s a été modifié."
 
-#: udata/auth/mails.py:143
+#: udata/auth/mails.py:145
 msgid "If you did not change your password, please reset it."
 msgstr "Si vous n'avez pas changé votre mot de passe, veuillez le réinitialiser."
+
+#: udata/auth/mails.py:155
+msgid "User can't access mail account"
+msgstr "L'utilisateur ne peut pas accéder à son compte mail"
+
+#: udata/auth/mails.py:157
+#, python-format
+msgid "%(email)s can not access mail account"
+msgstr "%(email)s ne peut pas accéder à son compte mail"
 
 #: udata/auth/password_validation.py:26
 #, python-brace-format
@@ -270,16 +279,16 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
-#: udata/core/owned.py:64 udata/forms/fields.py:759
+#: udata/core/owned.py:63 udata/forms/fields.py:758
 #: udata/tests/api/test_dataservices_api.py:569
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/core/owned.py:73
+#: udata/core/owned.py:72
 msgid "Unknown organization"
 msgstr "Organisation inconnue"
 
-#: udata/core/owned.py:77 udata/forms/fields.py:791
+#: udata/core/owned.py:76 udata/forms/fields.py:790
 #: udata/tests/api/test_dataservices_api.py:582
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
@@ -425,12 +434,13 @@ msgid "An existing contact point already exists with these informations."
 msgstr "Un point de contact existe déjà avec ces informations."
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
-#: udata/core/organization/forms.py:46 udata/core/topic/forms.py:37
+#: udata/core/organization/forms.py:47 udata/core/topic/forms.py:37
 #: udata/harvest/forms.py:80
 msgid "Name"
 msgstr "Nom"
 
-#: udata/core/contact_point/forms.py:15 udata/core/user/forms.py:21
+#: udata/core/contact_point/forms.py:15 udata/core/organization/forms.py:104
+#: udata/core/user/forms.py:21
 msgid "Email"
 msgstr "Email"
 
@@ -449,7 +459,8 @@ msgstr "Formulaire de contact web de l'organisation"
 msgid "Publish as"
 msgstr "Publier en tant que"
 
-#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:95
+#: udata/core/organization/forms.py:106
 msgid "Role"
 msgstr "Rôle"
 
@@ -524,16 +535,16 @@ msgstr "Dernières APIs"
 msgid "Dataservice serving high value datasets"
 msgstr "API servant des jeux de données de haute valeur"
 
-#: udata/core/dataservices/models.py:185
+#: udata/core/dataservices/models.py:189
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:269 udata/core/dataset/models.py:595
+#: udata/core/dataservices/models.py:273 udata/core/dataset/models.py:599
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:275 udata/core/dataset/models.py:600
+#: udata/core/dataservices/models.py:279 udata/core/dataset/models.py:604
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -562,16 +573,16 @@ msgstr "a mis à jour une ressource"
 msgid "removed a resource from a dataset"
 msgstr "a supprimé une ressource d'un jeu de données"
 
-#: udata/core/dataset/api.py:344
+#: udata/core/dataset/api.py:346
 #, python-brace-format
 msgid "Datasets search: {q}"
 msgstr "Recherche de jeux de données : {q}"
 
-#: udata/core/dataset/api.py:346
+#: udata/core/dataset/api.py:348
 msgid "Filtered datasets"
 msgstr "Jeux de données filtrés"
 
-#: udata/core/dataset/api.py:348
+#: udata/core/dataset/api.py:350
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
@@ -786,12 +797,12 @@ msgstr "Version du schéma"
 
 #: udata/core/dataset/forms.py:71 udata/core/dataset/forms.py:162
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
-#: udata/core/site/forms.py:12 udata/core/topic/forms.py:13
+#: udata/core/topic/forms.py:13
 msgid "Title"
 msgstr "Titre"
 
 #: udata/core/dataset/forms.py:74 udata/core/dataset/forms.py:166
-#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
+#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:51
 #: udata/core/topic/forms.py:14 udata/core/topic/forms.py:38
 #: udata/harvest/forms.py:82
 msgid "Description"
@@ -849,7 +860,7 @@ msgstr ""
 "Mauvais ID de point de contact ou incompatibilité de possession du point "
 "de contact"
 
-#: udata/core/dataset/forms.py:164 udata/core/organization/forms.py:48
+#: udata/core/dataset/forms.py:164 udata/core/organization/forms.py:49
 msgid "Acronym"
 msgstr "Sigle"
 
@@ -916,8 +927,8 @@ msgstr "Couverture spatiale"
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:211 udata/core/site/forms.py:13
-#: udata/core/topic/forms.py:15 udata/core/topic/forms.py:89
+#: udata/core/dataset/forms.py:211 udata/core/topic/forms.py:15
+#: udata/core/topic/forms.py:89
 msgid "Tags"
 msgstr "Mots-clés"
 
@@ -986,15 +997,15 @@ msgstr ""
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:568
+#: udata/core/dataset/models.py:572
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:606
+#: udata/core/dataset/models.py:610
 msgid "Last update of the dataset resources"
 msgstr "Dernière mise à jour des ressources de ce jeu de données"
 
-#: udata/core/dataset/models.py:661
+#: udata/core/dataset/models.py:665
 msgid "dataset"
 msgstr "jeu de données"
 
@@ -1005,8 +1016,9 @@ msgid "{format} resource"
 msgstr "Ressource {format}"
 
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:31
-#: udata/core/discussions/forms.py:37 udata/core/organization/forms.py:83
-#: udata/core/organization/forms.py:87 udata/harvest/forms.py:100
+#: udata/core/discussions/forms.py:37 udata/core/organization/forms.py:84
+#: udata/core/organization/forms.py:88 udata/core/organization/forms.py:110
+#: udata/harvest/forms.py:100
 msgid "Comment"
 msgstr "Commentaire"
 
@@ -1113,10 +1125,10 @@ msgstr ""
 "spam et toute contribution contrevenant au cadre juridique en vigueur. "
 "L'Éditeur se réserve le droit sans préavis, de supprimer ou de rendre "
 "impossible l'accès à des contenus publiés sur la Plateforme n'ayant pas "
-"de lien avec son Objet. L'Éditeur ne réalise pas de contrôle \"a priori\" "
-"sur les publications. Dès que l'Éditeur a connaissance de contenus "
-"contraires aux présentes modalités d'utilisation, il agit rapidement pour "
-"les supprimer ou les rendre inaccessibles\"."
+"de lien avec son Objet. L'Éditeur ne réalise pas de contrôle \"a priori\""
+" sur les publications. Dès que l'Éditeur a connaissance de contenus "
+"contraires aux présentes modalités d'utilisation, il agit rapidement pour"
+" les supprimer ou les rendre inaccessibles\"."
 
 #: udata/core/legal/mails.py:95
 msgid ""
@@ -1209,48 +1221,64 @@ msgstr "Acceptée"
 msgid "Refused"
 msgstr "Refusée"
 
-#: udata/core/organization/forms.py:25
-#: udata/tests/api/test_organizations_api.py:159
+#: udata/core/organization/constants.py:14
+msgid "Canceled"
+msgstr "Annulée"
+
+#: udata/core/organization/constants.py:18
+msgid "Request"
+msgstr "Demande"
+
+#: udata/core/organization/constants.py:19
+msgid "Invitation"
+msgstr "Invitation"
+
+#: udata/core/organization/forms.py:26
+#: udata/tests/api/test_organizations_api.py:160
 msgid "A siret number is made of 14 digits"
 msgstr "Un numéro siret est composé de 14 chiffres"
 
-#: udata/core/organization/forms.py:36
-#: udata/tests/api/test_organizations_api.py:171
+#: udata/core/organization/forms.py:37
+#: udata/tests/api/test_organizations_api.py:172
 msgid "A siret number is only made of digits"
 msgstr "Un numéro siret est composé uniquement de chiffres"
 
-#: udata/core/organization/forms.py:39
-#: udata/tests/api/test_organizations_api.py:165
+#: udata/core/organization/forms.py:40
+#: udata/tests/api/test_organizations_api.py:166
 msgid "Invalid Siret number"
 msgstr "Numéro siret invalide"
 
-#: udata/core/organization/forms.py:48
+#: udata/core/organization/forms.py:49
 msgid "Shorter organization name"
 msgstr "Nom court de l'organisation"
 
-#: udata/core/organization/forms.py:52
+#: udata/core/organization/forms.py:53
 msgid "The details about your organization"
 msgstr "Les détails sur votre organisation"
 
-#: udata/core/organization/forms.py:54 udata/core/user/forms.py:23
+#: udata/core/organization/forms.py:55 udata/core/user/forms.py:23
 msgid "Website"
 msgstr "Site web"
 
-#: udata/core/organization/forms.py:54
+#: udata/core/organization/forms.py:55
 msgid "The organization website URL"
 msgstr "L'URL du site web de votre organisation"
 
-#: udata/core/organization/forms.py:55
+#: udata/core/organization/forms.py:56
 msgid "Logo"
 msgstr "Logo"
 
-#: udata/core/organization/forms.py:57
+#: udata/core/organization/forms.py:58
 msgid "Business id"
 msgstr "Numéro d'identification d'entreprise"
 
-#: udata/core/organization/forms.py:57
+#: udata/core/organization/forms.py:58
 msgid "Business identification number"
 msgstr "Numéro d'identification d'entreprise"
+
+#: udata/core/organization/forms.py:103
+msgid "User ID"
+msgstr "Identifiant utilisateur"
 
 #: udata/core/organization/mails.py:9
 msgid "New membership request"
@@ -1295,27 +1323,18 @@ msgstr ""
 "Bonne nouvelle ! Votre demande d'adhésion à l'organisation %(org)s a été "
 "approuvée."
 
-#: udata/core/organization/mails.py:49 udata/core/organization/mails.py:66
-#: udata/core/organization/mails.py:82 udata/core/organization/mails.py:97
-#: udata/core/organization/mails.py:112 udata/core/organization/mails.py:127
-#: udata/core/organization/mails.py:142
+#: udata/core/organization/mails.py:49 udata/core/organization/mails.py:65
+#: udata/core/organization/mails.py:80 udata/core/organization/mails.py:95
+#: udata/core/organization/mails.py:110 udata/core/organization/mails.py:125
+#: udata/core/organization/mails.py:156
 msgid "View the organization"
 msgstr "Voir l'organisation"
 
 #: udata/core/organization/mails.py:57
-msgid "You have been added as a member of an organization"
-msgstr "Vous avez été ajouté en tant que membre d'une organisation"
-
-#: udata/core/organization/mails.py:61
-#, python-format
-msgid "Good news! You are now a member of %(org)s."
-msgstr "Bonne nouvelle ! Vous êtes maintenant membre de %(org)s."
-
-#: udata/core/organization/mails.py:74
 msgid "Your organization has been certified"
 msgstr "Votre organisation a été certifiée"
 
-#: udata/core/organization/mails.py:78
+#: udata/core/organization/mails.py:61
 #, python-format
 msgid ""
 "Good news! Your organization %(org)s has been certified by our team. A "
@@ -1324,11 +1343,11 @@ msgstr ""
 "Bonne nouvelle ! Votre organisation %(org)s a été certifiée par notre "
 "équipe. Un badge est maintenant associé à votre organisation."
 
-#: udata/core/organization/mails.py:89
+#: udata/core/organization/mails.py:72
 msgid "Your organization has been identified as a public service"
 msgstr "Votre organisation a été identifiée comme un service public"
 
-#: udata/core/organization/mails.py:93
+#: udata/core/organization/mails.py:76
 #, python-format
 msgid ""
 "Good news! Your organization %(org)s has been identified by our team as a"
@@ -1338,13 +1357,13 @@ msgstr ""
 "équipe comme un service public. Un badge est maintenant associé à votre "
 "organisation."
 
-#: udata/core/organization/mails.py:104
+#: udata/core/organization/mails.py:87
 msgid "Your organization has been identified as a local authority"
 msgstr ""
 "Votre organisation a été identifiée comme étant une collectivité "
 "territoriale"
 
-#: udata/core/organization/mails.py:108
+#: udata/core/organization/mails.py:91
 #, python-format
 msgid ""
 "Good news! Your organization %(org)s has been identified by our team as a"
@@ -1354,11 +1373,11 @@ msgstr ""
 "équipe comme une collectivité territoriale. Un badge est maintenant "
 "associé à votre organisation."
 
-#: udata/core/organization/mails.py:119
+#: udata/core/organization/mails.py:102
 msgid "Your organization has been identified as a company"
 msgstr "Votre organisation a été identifiée comme entreprise"
 
-#: udata/core/organization/mails.py:123
+#: udata/core/organization/mails.py:106
 #, python-format
 msgid ""
 "Your organization %(org)s has been identified by our team as a company. A"
@@ -1367,11 +1386,11 @@ msgstr ""
 "Votre organisation %(org)s a été identifiée par notre équipe comme une "
 "entreprise. Un badge est maintenant associé à votre organisation."
 
-#: udata/core/organization/mails.py:134
+#: udata/core/organization/mails.py:117
 msgid "Your organization has been identified as an association"
 msgstr "Votre organisation a été identifiée comme une association"
 
-#: udata/core/organization/mails.py:138
+#: udata/core/organization/mails.py:121
 #, python-format
 msgid ""
 "Your organization %(org)s has been identified by our team as an "
@@ -1380,27 +1399,71 @@ msgstr ""
 "Votre organisation %(org)s a été identifiée par notre équipe comme une "
 "association. Un badge est maintenant associé à votre organisation."
 
-#: udata/core/organization/models.py:40
+#: udata/core/organization/mails.py:132
+msgid "An organization invitation has been canceled"
+msgstr "Une invitation à rejoindre une organisation a été annulée"
+
+#: udata/core/organization/mails.py:136
+#, python-format
+msgid "The invitation to join the organization %(org)s has been canceled."
+msgstr "L'invitation à rejoindre l'organisation %(org)s a été annulée."
+
+#: udata/core/organization/mails.py:146
+msgid "An invitation to join your organization has been accepted"
+msgstr "Une invitation à rejoindre votre organisation a été acceptée"
+
+#: udata/core/organization/mails.py:150
+#, python-format
+msgid "%(user)s has accepted the invitation to join the organization %(org)s."
+msgstr "%(user)s a accepté l'invitation à rejoindre l'organisation %(org)s."
+
+#: udata/core/organization/mails.py:164
+msgid "An invitation to join your organization has been refused"
+msgstr "Une invitation à rejoindre votre organisation a été refusée"
+
+#: udata/core/organization/mails.py:168
+#, python-format
+msgid "%(user)s has refused the invitation to join the organization %(org)s."
+msgstr "%(user)s a refusé l'invitation à rejoindre l'organisation %(org)s."
+
+#: udata/core/organization/mails.py:183
+#, python-format
+msgid "You have been invited to join the organization %(org)s."
+msgstr "Vous avez été invité à rejoindre l'organisation %(org)s."
+
+#: udata/core/organization/mails.py:189
+msgid "Message:"
+msgstr "Message :"
+
+#: udata/core/organization/mails.py:196
+msgid "View and respond to invitation"
+msgstr "Voir et répondre à l'invitation"
+
+#: udata/core/organization/mails.py:198
+msgid "You have been invited to join an organization"
+msgstr "Vous avez été invité à rejoindre une organisation"
+
+#: udata/core/organization/models.py:41
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:41
+#: udata/core/organization/models.py:42
 msgid "Certified"
 msgstr "Certifié"
 
-#: udata/core/organization/models.py:42
+#: udata/core/organization/models.py:43
 msgid "Association"
 msgstr "Association"
 
-#: udata/core/organization/models.py:43
+#: udata/core/organization/models.py:44
 msgid "Company"
 msgstr "Entreprise"
 
-#: udata/core/organization/models.py:44
+#: udata/core/organization/models.py:45
 msgid "Local authority"
 msgstr "Collectivité territoriale"
 
-#: udata/core/organization/models.py:183
+#: udata/core/organization/models.py:205
 msgid "organization"
 msgstr "organisation"
 
@@ -1468,7 +1531,7 @@ msgstr "a mis à jour une réutilisation"
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
 
-#: udata/core/reuse/api.py:142
+#: udata/core/reuse/api.py:144
 msgid "Latests reuses"
 msgstr "Dernières réutilisations"
 
@@ -1581,21 +1644,9 @@ msgstr "Voir la réutilisation"
 msgid "This URL is already registered"
 msgstr "Cette URL est déjà enregistrée"
 
-#: udata/core/reuse/models.py:194
+#: udata/core/reuse/models.py:198
 msgid "reuse"
 msgstr "réutilisation"
-
-#: udata/core/site/forms.py:13
-msgid "Some SEO keywords"
-msgstr "Des mots-clés pour le SEO"
-
-#: udata/core/site/forms.py:14
-msgid "Feed size"
-msgstr "Taille du flux"
-
-#: udata/core/site/forms.py:14
-msgid "Number of elements in feeds"
-msgstr "Nombre d’éléments dans les flux"
 
 #: udata/core/spatial/constants.py:4
 msgid "POI"
@@ -1821,7 +1872,7 @@ msgstr ""
 "vous aurez toujours la possibilité de recréer un compte sur la plateforme"
 " %(site)s."
 
-#: udata/core/user/models.py:130
+#: udata/core/user/models.py:134
 msgid "account"
 msgstr "compte"
 
@@ -1841,70 +1892,70 @@ msgstr "Moderateur"
 msgid "Not a valid choice"
 msgstr "Choix invalide"
 
-#: udata/forms/fields.py:127
+#: udata/forms/fields.py:126
 msgid "Please input a date/time value"
 msgstr "Merci d'indiquer une date/heure valide"
 
-#: udata/forms/fields.py:139
+#: udata/forms/fields.py:138
 msgid "Invalid date/time input"
 msgstr "Date/heure non valide"
 
-#: udata/forms/fields.py:169
+#: udata/forms/fields.py:168
 #, python-brace-format
 msgid "The role {role} does not exist"
 msgstr "Le rôle {role} n'existe pas"
 
-#: udata/forms/fields.py:187
+#: udata/forms/fields.py:186
 msgid "Not a valid UUID"
 msgstr "N'est pas un UUID"
 
-#: udata/forms/fields.py:421 udata/mongo/taglist_field.py:38
+#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:38
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
-#: udata/forms/fields.py:461 udata/forms/fields.py:520
+#: udata/forms/fields.py:460 udata/forms/fields.py:519
 #, python-brace-format
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
 
-#: udata/forms/fields.py:494 udata/tests/forms/test_model_field.py:331
+#: udata/forms/fields.py:493 udata/tests/forms/test_model_field.py:331
 #: udata/tests/forms/test_model_field.py:347
 msgid "Missing \"id\" field"
 msgstr "Champ \"id\" manquant"
 
-#: udata/forms/fields.py:501
+#: udata/forms/fields.py:500
 #, python-brace-format
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr "Attend une classe \"{0}\" mais \"{1}\" a été trouvée"
 
-#: udata/forms/fields.py:507 udata/tests/forms/test_model_field.py:39
+#: udata/forms/fields.py:506 udata/tests/forms/test_model_field.py:39
 #: udata/tests/forms/test_model_field.py:54
 msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
-#: udata/forms/fields.py:552
+#: udata/forms/fields.py:551
 #, python-brace-format
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
-#: udata/forms/fields.py:586
+#: udata/forms/fields.py:585
 #, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:720
+#: udata/forms/fields.py:719
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:752 udata/forms/fields.py:784
+#: udata/forms/fields.py:751 udata/forms/fields.py:783
 #: udata/tests/forms/test_publish_as_field.py:212
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr ""
 "Impossible de modifier le propriétaire après la création. Veuillez "
 "utiliser la fonctionnalité de transfert."
 
-#: udata/forms/fields.py:757 udata/forms/fields.py:789
+#: udata/forms/fields.py:756 udata/forms/fields.py:788
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
@@ -1965,13 +2016,21 @@ msgstr "Ignoré"
 msgid "Archived"
 msgstr "Archivé"
 
-#: udata/harvest/backends/dcat.py:437
+#: udata/harvest/backends/dcat.py:268
 msgid "Remote URL prefix"
 msgstr "Préfixe d'URL distante"
 
-#: udata/harvest/backends/dcat.py:440
+#: udata/harvest/backends/dcat.py:271
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
+
+#: udata/harvest/backends/dcat.py:458
+msgid "GeoDCAT-AP"
+msgstr "GeoDCAT-AP"
+
+#: udata/harvest/backends/dcat.py:459
+msgid "Request GeoDCAT-AP to the CSW server (must be supported by the server)."
+msgstr "Requêter GeoDCAT-AP auprès du serveur CSW (doit être supporté par le serveur)."
 
 #: udata/harvest/backends/ckan/harvesters.py:33
 msgid "Organization"
@@ -2108,6 +2167,74 @@ msgstr "Renvoyer les instructions de confirmation"
 msgid "Submit"
 msgstr "Soumettre"
 
+#: udata/templates/security/two_factor_setup.html:4
+msgid "Two-factor authentication adds an extra layer of security to your account"
+msgstr "L'authentification à deux facteurs ajoute une couche de sécurité supplémentaire à votre compte"
+
+#: udata/templates/security/two_factor_setup.html:5
+msgid "In addition to your username and password, you'll need to use a code."
+msgstr "En plus de votre nom d'utilisateur et de votre mot de passe, vous devrez utiliser un code."
+
+#: udata/templates/security/two_factor_setup.html:8
+#, python-format
+msgid "Currently setup two-factor method: %(method)s"
+msgstr "Méthode à deux facteurs actuellement configurée : %(method)s"
+
+#: udata/templates/security/two_factor_setup.html:17
+msgid "To complete logging in, please enter the code sent to your mail"
+msgstr "Pour terminer la connexion, veuillez entrer le code envoyé à votre adresse e-mail"
+
+#: udata/templates/security/two_factor_setup.html:23
+msgid ""
+"Open an authenticator app on your device and scan the following QRcode "
+"(or enter the code below manually) to start receiving codes:"
+msgstr ""
+"Ouvrez une application d'authentification sur votre appareil et scannez le "
+"QR code suivant (ou entrez le code ci-dessous manuellement) pour commencer "
+"à recevoir des codes :"
+
+#: udata/templates/security/two_factor_setup.html:26
+msgid "Two factor authentication code"
+msgstr "Code d'authentification à deux facteurs"
+
+#: udata/templates/security/two_factor_setup.html:32
+msgid "To Which Phone Number Should We Send Code To?"
+msgstr "À quel numéro de téléphone devons-nous envoyer le code ?"
+
+#: udata/templates/security/two_factor_setup.html:48
+msgid "Recovery Codes"
+msgstr "Codes de récupération"
+
+#: udata/templates/security/two_factor_setup.html:50
+msgid "This application supports setting up recovery codes."
+msgstr "Cette application permet de configurer des codes de récupération."
+
+#: udata/templates/security/two_factor_setup.html:51
+msgid "You can set them up here."
+msgstr "Vous pouvez les configurer ici."
+
+#: udata/templates/security/two_factor_verify_code.html:1
+#: udata/templates/security/two_factor_verify_code.html:6
+msgid "Two-Factor Authentication"
+msgstr "Authentification à deux facteurs"
+
+#: udata/templates/security/two_factor_verify_code.html:7
+#, python-format
+msgid "Please enter your authentication code generated via: %(method)s"
+msgstr "Veuillez entrer votre code d'authentification généré via : %(method)s"
+
+#: udata/templates/security/two_factor_verify_code.html:20
+msgid "The code for authentication was sent to your email address"
+msgstr "Le code d'authentification a été envoyé à votre adresse e-mail"
+
+#: udata/templates/security/two_factor_verify_code.html:23
+msgid "An email was sent to us in order to reset your application account"
+msgstr "Un e-mail nous a été envoyé afin de réinitialiser votre compte applicatif"
+
+#: udata/templates/security/verify.html:1
+msgid "Reauthenticate"
+msgstr "Se ré-authentifier"
+
 #: udata/tests/test_mail.py:17 udata/tests/test_mail.py:32
 #: udata/tests/test_mail.py:45 udata/tests/test_mail.py:61
 msgid "Some text"
@@ -2131,19 +2258,19 @@ msgstr "Attend une classe \"Target\" mais \"Wrong\" a été trouvée"
 msgid "Home"
 msgstr "Accueil"
 
-#: udata/tests/search/test_adapter.py:31
+#: udata/tests/search/test_adapter.py:45
 msgid "Never reused"
 msgstr "Jamais réutilisé"
 
-#: udata/tests/search/test_adapter.py:32
+#: udata/tests/search/test_adapter.py:46
 msgid "Little reused"
 msgstr "Peu réutilisé"
 
-#: udata/tests/search/test_adapter.py:33
+#: udata/tests/search/test_adapter.py:47
 msgid "Quite reused"
 msgstr "Assez réutilisé"
 
-#: udata/tests/search/test_adapter.py:34
+#: udata/tests/search/test_adapter.py:48
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
@@ -2190,4 +2317,19 @@ msgstr "Suppression de votre compte {site} inactif"
 
 #~ msgid "See you soon on the platform"
 #~ msgstr "A bientôt sur la plateforme"
+
+#~ msgid "You have been added as a member of an organization"
+#~ msgstr "Vous avez été ajouté en tant que membre d'une organisation"
+
+#~ msgid "Good news! You are now a member of %(org)s."
+#~ msgstr "Bonne nouvelle ! Vous êtes maintenant membre de %(org)s."
+
+#~ msgid "Some SEO keywords"
+#~ msgstr "Des mots-clés pour le SEO"
+
+#~ msgid "Feed size"
+#~ msgstr "Taille du flux"
+
+#~ msgid "Number of elements in feeds"
+#~ msgstr "Nombre d’éléments dans les flux"
 

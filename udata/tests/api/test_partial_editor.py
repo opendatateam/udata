@@ -1,8 +1,12 @@
 from flask import url_for
 
+import udata.models  # noqa: F401
 from udata.auth import login_user
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.organization.assignment import Assignment, clean_assignments_on_owner_change  # noqa
+from udata.core.organization.assignment import (  # noqa: F401
+    Assignment,
+    clean_assignments_on_owner_change,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, MembershipRequest
 from udata.core.user.factories import UserFactory
