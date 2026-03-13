@@ -342,6 +342,7 @@ def init_app(app):
     import udata.core.dataset.apiv2  # noqa
     import udata.core.dataservices.api  # noqa
     import udata.core.dataservices.apiv2  # noqa
+    import udata.core.visualizations.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.discussions.apiv2  # noqa
     import udata.core.reuse.api  # noqa
