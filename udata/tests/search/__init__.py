@@ -39,7 +39,6 @@ class FakeFactory(MongoEngineFactory):
 @search.register
 class FakeSearch(search.ModelSearchAdapter):
     model = FakeSearchable
-    search_url = "mock://test.com/fakeable/"
     filters = {
         "tag": search.Filter(),
         "other": search.Filter(),
