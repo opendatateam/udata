@@ -36,7 +36,7 @@ class TopicSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, topic: Topic) -> bool:
-        return True
+        return not topic.private
 
     @classmethod
     def mongo_search(cls, args):
