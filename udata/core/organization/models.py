@@ -11,6 +11,7 @@ from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
     GenericEmbeddedDocumentField,
+    GenericReferenceField,
     ListField,
     MapField,
     ReferenceField,
@@ -38,6 +39,7 @@ from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import cdata_url
 
 from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
@@ -118,6 +120,7 @@ class MembershipRequest(EmbeddedDocument):
     email = StringField()  # For inviting non-registered users by email
     created_by = ReferenceField("User")  # Admin who created the invitation
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    assignments = ListField(GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES))
 
     after_create = Signal()
     after_handle = Signal()
