@@ -86,7 +86,9 @@ class ReuseBadgeMixin(BadgeMixin):
     nested_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document):
+class Reuse(
+    Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document[ReuseQuerySet]
+):
     title = field(
         StringField(required=True),
         sortable=True,

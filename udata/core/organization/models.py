@@ -162,7 +162,14 @@ class OrganizationBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, Datetimed, Document):
+class Organization(
+    Auditable,
+    WithMetrics,
+    OrganizationBadgeMixin,
+    Linkable,
+    Datetimed,
+    Document[OrganizationQuerySet],
+):
     name = field(StringField(required=True), show_as_ref=True)
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(

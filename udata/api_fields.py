@@ -24,7 +24,7 @@ For field-specific metadata, see the `field()` function documentation.
 
 import functools
 from datetime import datetime
-from typing import Any, Callable, Iterable, TypedDict, Unpack, overload
+from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -770,7 +770,10 @@ def run_check(check, value, key, obj, data):
     )
 
 
-def patch(obj, request) -> type:
+_T = TypeVar("_T")
+
+
+def patch(obj: _T, request) -> _T:
     """Patch the object with the data from the request.
 
     Only fields decorated with the `field()` decorator will be read (and not readonly).
@@ -885,7 +888,7 @@ def is_value_modified(old_value, new_value) -> bool:
     return new_value != old_value
 
 
-def patch_and_save(obj, request) -> type:
+def patch_and_save(obj: _T, request) -> _T:
     obj = patch(obj, request)
     obj.save()
 
