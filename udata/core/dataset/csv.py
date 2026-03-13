@@ -36,6 +36,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("featured", lambda o: o.featured or False),
         "created_at",
         "last_modified",
+        ("badges", lambda o: ",".join([badge.kind for badge in o.badges])),
         ("tags", lambda o: ",".join(o.tags)),
         ("archived", lambda o: o.archived or False),
         ("resources_count", lambda o: len(o.resources)),

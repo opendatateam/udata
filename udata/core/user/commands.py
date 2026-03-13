@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 import click
 from flask import current_app
@@ -40,7 +40,7 @@ def create(first_name, last_name, email, password, admin):
     if form.validate():
         data["password"] = hash_password(data["password"])
         del data["password_confirm"]
-        data["confirmed_at"] = datetime.utcnow()
+        data["confirmed_at"] = datetime.now(UTC)
         user = datastore.create_user(**data)
         if admin:
             role = datastore.find_or_create_role("admin")
@@ -61,7 +61,7 @@ def activate():
     if user.confirmed_at is not None:
         exit_with_error("User email address already confirmed")
         return
-    user.confirmed_at = datetime.utcnow()
+    user.confirmed_at = datetime.now(UTC)
     user.save()
     success("User activated successfully")
 
@@ -105,7 +105,7 @@ def rotate_password(email):
     Ask user for password rotation on next login and reset any current session
     """
     user: User = datastore.find_user(email=email)
-    user.password_rotation_demanded = datetime.utcnow()
+    user.password_rotation_demanded = datetime.now(UTC)
     user.save()
     # Reset ongoing sessions by uniquifier
     datastore.set_uniquifier(user)

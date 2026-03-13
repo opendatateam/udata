@@ -1,5 +1,29 @@
 # Changelog
 
+## 15.2.0 (2026-03-09)
+
+- chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))
+- chore: add hostname resolve in uri validate ([#3682](https://github.com/opendatateam/udata/pull/3682))
+- chore: disallow redirects in harvest actions and dataservice search ([#3683](https://github.com/opendatateam/udata/pull/3683))
+- feat(api): extend Atom feed filters support ([#3676](https://github.com/opendatateam/udata/pull/3676))
+- feat(catalog): add badges in dataset catalog ([#3681](https://github.com/opendatateam/udata/pull/3681))
+- fix: remove datetime.utcnow() deprecation warnings ([#3635](https://github.com/opendatateam/udata/pull/3635))
+
+
+## 15.1.0 (2026-02-19)
+
+- chore: add types to api fields ([#3670](https://github.com/opendatateam/udata/pull/3670))
+- chore: parallel pytest ([#3672](https://github.com/opendatateam/udata/pull/3672))
+- chore(test): add empty testing values to prevent conflict in tests ([#3678](https://github.com/opendatateam/udata/pull/3678))
+- feat: add translations ([#3664](https://github.com/opendatateam/udata/pull/3664))
+- feat(notifications): add membership response notifications ([#3655](https://github.com/opendatateam/udata/pull/3655))
+- feat(notifications): prevent integrity issues and add harvest related notifications ([#3665](https://github.com/opendatateam/udata/pull/3665))
+- fix: missing producer type attribute ([#3674](https://github.com/opendatateam/udata/pull/3674))
+- fix: mongo crash in CI during tests ([#3675](https://github.com/opendatateam/udata/pull/3675))
+- fix: test assertion and types ([#3669](https://github.com/opendatateam/udata/pull/3669))
+- refactor: use read permission instead of can for get endpoints ([#3671](https://github.com/opendatateam/udata/pull/3671))
+
+
 ## 15.0.0 (2026-02-12)
 
 - **feat!: add MembershipRequest from org ([#3570](https://github.com/opendatateam/udata/pull/3570))**

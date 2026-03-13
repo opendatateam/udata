@@ -35,7 +35,7 @@ from udata.core.dataset.rdf import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import DateRange
 from udata.rdf import (
     ADMS,
     DCAT,
@@ -277,7 +277,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
-        temporal_coverage = db.DateRange(start=start, end=end)
+        temporal_coverage = DateRange(start=start, end=end)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -290,7 +290,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
     def test_temporal_coverage_only_start(self):
         start = faker.past_date(start_date="-30d")
-        temporal_coverage = db.DateRange(start=start)
+        temporal_coverage = DateRange(start=start)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -303,7 +303,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
     def test_temporal_coverage_only_end(self):
         end = faker.future_date(end_date="+30d")
-        temporal_coverage = db.DateRange(end=end)
+        temporal_coverage = DateRange(end=end)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         d = dataset_to_rdf(dataset)
@@ -478,7 +478,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
         assert set(dataset.tags) == set(tags)
-        assert isinstance(dataset.temporal_coverage, db.DateRange)
+        assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
 
@@ -1245,7 +1245,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end == end
 
@@ -1259,7 +1259,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end is None
 
@@ -1273,7 +1273,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start is None
         assert daterange.end == end
 
@@ -1285,7 +1285,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
+        assert isinstance(daterange, DateRange)
         assert daterange.start == start
         assert daterange.end == end
 
@@ -1294,18 +1294,18 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_as_iso_month(self):
         pot = Literal("2017-06")
 
         daterange = temporal_from_rdf(pot)
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 6 == 1)
-        assert daterange.end, date(2017, 6 == 30)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 6, 1)
+        assert daterange.end == date(2017, 6, 30)
 
     @pytest.mark.skipif(not GOV_UK_REF_IS_UP, reason="Gov.uk references is unreachable")
     def test_parse_temporal_as_gov_uk_format(self):
@@ -1316,9 +1316,9 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         daterange = temporal_from_rdf(g.resource(node))
 
-        assert isinstance(daterange, db.DateRange)
-        assert daterange.start, date(2017, 1 == 1)
-        assert daterange.end, date(2017, 12 == 31)
+        assert isinstance(daterange, DateRange)
+        assert daterange.start == date(2017, 1, 1)
+        assert daterange.end == date(2017, 12, 31)
 
     def test_parse_temporal_is_failsafe(self):
         node = URIRef("http://nowhere.org")

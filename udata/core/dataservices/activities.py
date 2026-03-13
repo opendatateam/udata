@@ -1,8 +1,9 @@
 from flask import g
+from mongoengine.fields import ReferenceField
 
 from udata.auth import current_user
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Dataservice, db
+from udata.models import Activity, Dataservice
 
 __all__ = (
     "UserCreatedDataservice",
@@ -13,7 +14,7 @@ __all__ = (
 
 
 class DataserviceRelatedActivity(object):
-    related_to = db.ReferenceField("Dataservice")
+    related_to = ReferenceField("Dataservice")
 
 
 class UserCreatedDataservice(DataserviceRelatedActivity, Activity):

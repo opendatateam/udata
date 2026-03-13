@@ -188,7 +188,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
 
 
 def dataservice_as_distribution_to_rdf(
-    dataservice: Dataservice, graph: Graph = None, is_hvd: bool = True
+    dataservice: Dataservice, graph: Graph | None = None, is_hvd: bool = True
 ):
     """
     Create a blank distribution pointing towards a dataservice with DCAT.accessService property

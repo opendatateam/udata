@@ -1,4 +1,7 @@
+import logging
 import re
+import socket
+from typing import NoReturn
 from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
 from flask import current_app, url_for
@@ -24,12 +27,10 @@ URL_REGEX = re.compile(
     # IPv6 address
     r"(?:\[(?P<ipv6>[0-9a-f:]+)\])"
     r"|"
-    # host name
-    r"(?:(?:[a-z\u00a1-\uffff0-9_]-?)*[a-z\u00a1-\uffff0-9]+)"
-    # domain name
+    # host name (domain + TLD)
+    r"(?P<hostname>(?:(?:[a-z\u00a1-\uffff0-9_]-?)*[a-z\u00a1-\uffff0-9]+)"
     r"(?:\.(?:[a-z\u00a1-\uffff0-9_]-?)*[a-z\u00a1-\uffff0-9]+)*"
-    # TLD identifier
-    r"(?:\.(?P<tld>[a-z0-9\u00a1-\uffff]{2,}))"
+    r"(?:\.(?P<tld>[a-z0-9\u00a1-\uffff]{2,})))"
     r")"
     # port number
     r"(?::\d{2,5})?"
@@ -41,6 +42,11 @@ URL_REGEX = re.compile(
     re.UNICODE | re.IGNORECASE,
 )
 
+# The retry count when trying to resolve the hostname in URL validation
+URL_RESOLVE_HOSTNAME_RETRY_COUNT = 0
+
+log = logging.getLogger(__name__)
+
 
 class ValidationError(ValueError):
     """Raised when URL is invalid"""
@@ -48,7 +54,7 @@ class ValidationError(ValueError):
     pass
 
 
-def error(url, reason=None):
+def error(url, reason=None) -> NoReturn:
     __tracebackhide__ = True
     if reason is not None:
         msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
@@ -103,7 +109,22 @@ def idna(string):
     return string.encode("idna").decode("utf8")
 
 
-def validate(url, schemes=None, tlds=None, private=None, local=None, credentials=None):
+def resolve_hostname(hostname: str, retry=5):
+    try:
+        addr_info = socket.getaddrinfo(hostname, None)
+        for family, socktype, proto, canonname, sockaddr in addr_info:
+            yield IPAddress(sockaddr[0])
+    except socket.gaierror:
+        if retry == 0:
+            # We don't raise an error here, we currently only log it
+            log.info(f"hostname {hostname} could not be resolved")
+        else:
+            yield from resolve_hostname(hostname, retry - 1)
+
+
+def validate(
+    url, schemes=None, tlds=None, private=None, local=None, resolve=None, credentials=None
+):
     """
     Validate and normalize an URL
 
@@ -115,6 +136,7 @@ def validate(url, schemes=None, tlds=None, private=None, local=None, credentials
 
     private = config_for(private, "URLS_ALLOW_PRIVATE")
     local = config_for(local, "URLS_ALLOW_LOCAL")
+    resolve = config_for(resolve, "URLS_RESOLVE_HOSTNAME")
     credentials = config_for(credentials, "URLS_ALLOW_CREDENTIALS")
     schemes = config_for(schemes, "URLS_ALLOWED_SCHEMES")
     tlds = config_for(tlds, "URLS_ALLOWED_TLDS")
@@ -134,26 +156,32 @@ def validate(url, schemes=None, tlds=None, private=None, local=None, credentials
     if tld and tld not in tlds and idna(tld) not in tlds:
         error(url, _("Invalid TLD {0}").format(tld))
 
-    ip = match.group("ipv6") or match.group("ipv4")
-    if ip:
+    direct_ip = match.group("ipv6") or match.group("ipv4")
+    if direct_ip:
         try:
-            ip = IPAddress(ip)
+            direct_ip = IPAddress(direct_ip)
         except AddrFormatError:
             error(url)
+
+    if not local and match.group("localhost"):
+        error(url, _("is a local URL"))
+
+    ips_to_check = [direct_ip] if direct_ip is not None else []
+
+    hostname = match.group("hostname")
+    if hostname and resolve:
+        ips_to_check += resolve_hostname(hostname, retry=URL_RESOLVE_HOSTNAME_RETRY_COUNT)
+
+    for ip in ips_to_check:
         if ip.is_multicast():
             error(url, _("{0} is a multicast IP").format(ip))
-        elif not ip.is_loopback() and ip.is_hostmask() or ip.is_netmask():
+        if not ip.is_loopback() and ip.is_hostmask() or ip.is_netmask():
             error(url, _("{0} is a mask IP").format(ip))
-
-    if not local:
-        if ip and ip.is_loopback() or match.group("localhost"):
+        if not local and ip.is_loopback():
             error(url, _("is a local URL"))
-
-    if (
-        not private
-        and ip
-        and (ip.is_link_local() or ip.is_ipv4_private_use() or ip.is_ipv6_unique_local())
-    ):
-        error(url, _("is a private URL"))
+        if not private and (
+            ip.is_link_local() or ip.is_ipv4_private_use() or ip.is_ipv6_unique_local()
+        ):
+            error(url, _("is a private URL"))
 
     return url

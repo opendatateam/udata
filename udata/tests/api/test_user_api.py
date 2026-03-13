@@ -1,6 +1,7 @@
 from flask import url_for
 
 from udata.core import storages
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
@@ -412,8 +413,10 @@ class UserAPITest(APITestCase):
         user = AdminFactory()
         self.login(user)
         user_to_delete = UserFactory()
+        dataset = DatasetFactory(owner=user_to_delete)
         discussion_only_user = DiscussionFactory(
             user=user_to_delete,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user_to_delete),
                 MessageDiscussionFactory(posted_by=user_to_delete),
@@ -637,6 +640,12 @@ class OrgInvitationsAPITest(APITestCase):
         organization.reload()
         assert organization.requests[0].user == new_user
         assert organization.requests[0].email is None
+
+        # A notification should have been created for the new user
+        notifications = Notification.objects(user=new_user)
+        assert notifications.count() == 1
+        assert notifications.first().details.request_organization == organization
+        assert notifications.first().details.kind == "invitation"
 
         # Now the user should see the invitation
         self.login(new_user)

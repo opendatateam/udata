@@ -1,7 +1,7 @@
 import csv
 import logging
 from collections import namedtuple
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from bson import ObjectId
 from flask import current_app
@@ -93,7 +93,7 @@ def update_source(source: HarvestSource, data):
 
 def validate_source(source: HarvestSource, comment=None):
     """Validate a source for automatic harvesting"""
-    source.validation.on = datetime.utcnow()
+    source.validation.on = datetime.now(UTC)
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
     if current_user.is_authenticated:
@@ -101,23 +101,25 @@ def validate_source(source: HarvestSource, comment=None):
     source.save()
     schedule(source, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
     launch(source)
+    signals.harvest_source_validated.send(source)
     return source
 
 
 def reject_source(source: HarvestSource, comment):
     """Reject a source for automatic harvesting"""
-    source.validation.on = datetime.utcnow()
+    source.validation.on = datetime.now(UTC)
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
+    signals.harvest_source_refused.send(source)
     return source
 
 
 def delete_source(source: HarvestSource):
     """Delete an harvest source"""
-    source.deleted = datetime.utcnow()
+    source.deleted = datetime.now(UTC)
     source.save()
     signals.harvest_source_deleted.send(source)
     return source
@@ -127,7 +129,7 @@ def clean_source(source: HarvestSource):
     """Deletes all datasets linked to a harvest source"""
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
     for dataset in datasets:
-        dataset.deleted = datetime.utcnow()
+        dataset.deleted = datetime.now(UTC)
         dataset.save()
     return len(datasets)
 
@@ -145,6 +147,15 @@ def purge_sources():
         dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
         for dataservice in dataservices:
             archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
+
+        # Clean up notifications before deleting the source
+        from udata.features.notifications.models import Notification
+
+        try:
+            Notification.objects(details__source=source).delete()
+        except Exception as e:
+            log.error(f"Error cleaning up notifications for purged harvest source {source.id}: {e}")
+
         source.delete()
     return count
 
@@ -152,7 +163,7 @@ def purge_sources():
 def purge_jobs():
     """Delete jobs older than retention policy"""
     retention = current_app.config["HARVEST_JOBS_RETENTION_DAYS"]
-    expiration = datetime.utcnow() - timedelta(days=retention)
+    expiration = datetime.now(UTC) - timedelta(days=retention)
 
     jobs_with_external_files = HarvestJob.objects(
         data__filename__exists=True, created__lt=expiration
@@ -312,7 +323,7 @@ def attach(domain, filename):
             dataset.harvest.domain = domain
             dataset.harvest.remote_id = row["remote"]
 
-            dataset.last_modified_internal = datetime.utcnow()
+            dataset.last_modified_internal = datetime.now(UTC)
             dataset.save()
             count += 1
 

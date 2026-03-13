@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import current_app, request
 from flask_security import current_user
@@ -80,7 +80,7 @@ class FollowAPI(API):
         """Unfollow an object given its ID"""
         model = self.model.objects.only("id").get_or_404(id=id_or_404(id))
         follow = Follow.objects.get_or_404(follower=current_user.id, following=model, until=None)
-        follow.until = datetime.utcnow()
+        follow.until = datetime.now(UTC)
         follow.save()
         count = Follow.objects.followers(model).count()
         return {"followers": count}, 200
