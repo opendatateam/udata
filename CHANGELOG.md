@@ -1,5 +1,14 @@
 # Changelog
 
+## 15.3.0 (2026-03-16)
+
+- chore: working on types ([#3677](https://github.com/opendatateam/udata/pull/3677))
+- feat: create notification when matching invitation after account creation ([#3686](https://github.com/opendatateam/udata/pull/3686))
+- feat: include `udata-search-service` inside `udata` ([#3679](https://github.com/opendatateam/udata/pull/3679))
+- feat(storage): upgrade flask storage to add S3 extra args ([#3687](https://github.com/opendatateam/udata/pull/3687))
+- fix(topics): do not index private topics ([#3688](https://github.com/opendatateam/udata/pull/3688))
+
+
 ## 15.2.0 (2026-03-09)
 
 - chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))
