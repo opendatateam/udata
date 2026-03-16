@@ -7,7 +7,7 @@ from udata.core.dataset.permissions import OwnablePermission
 from udata.i18n import lazy_gettext as _
 from udata.mongo.errors import FieldValidationError
 
-from .models import CONTACT_ROLES, ContactPoint
+from .models import CONTACT_ROLES, MASK_FIELDS, ContactPoint
 
 ns = api.namespace("contacts", "Contact points related operations")
 
@@ -27,8 +27,9 @@ class ContactPointsListAPI(API):
         if not contact_point.owner and not contact_point.organization:
             contact_point.owner = current_user._get_current_object()
         # Atomic get_or_create to avoid duplicates from concurrent requests.
-        # Build the query from __write_fields__ to automatically include any new field.
-        query = {name: getattr(contact_point, name) for name in ContactPoint.__write_fields__}
+        query = {name: getattr(contact_point, name) for name in MASK_FIELDS if name != "id"}
+        query["owner"] = contact_point.owner
+        query["organization"] = contact_point.organization
         contact_point, created = ContactPoint.objects.get_or_create(**query)
         return contact_point, 201 if created else 200
 
@@ -53,8 +54,7 @@ class ContactPointAPI(API):
 
         contact_point = patch(contact_point, request)
         # Reject if another contact point already has the exact same field values.
-        # Build the query from __write_fields__ to automatically include any new field.
-        query = {name: getattr(contact_point, name) for name in ContactPoint.__write_fields__}
+        query = {name: getattr(contact_point, name) for name in MASK_FIELDS if name != "id"}
         if ContactPoint.objects(**query).filter(id__ne=contact_point.id).count():
             raise FieldValidationError(
                 _("An existing contact point already exists with these informations."),

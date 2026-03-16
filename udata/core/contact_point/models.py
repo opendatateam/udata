@@ -7,6 +7,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 
 __all__ = ("ContactPoint",)
@@ -46,7 +47,7 @@ def check_is_email(value, field, **_kwargs):
 
 
 @generate_fields(mask=",".join(MASK_FIELDS))
-class ContactPoint(db.Document, Owned):
+class ContactPoint(Document, Owned):
     name = field(db.StringField(max_length=255, required=True), checks=[check_no_urls])
     email = field(db.StringField(max_length=255), checks=[check_is_email])
     contact_form = field(db.URLField())
