@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from flask import current_app
@@ -16,14 +16,14 @@ class UserTasksTest(APITestCase):
     @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     def test_notify_inactive_users(self):
         notification_comparison_date = (
-            datetime.utcnow()
+            datetime.now(UTC)
             - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
         )
 
         inactive_user = UserFactory(current_login_at=notification_comparison_date)
-        UserFactory(current_login_at=datetime.utcnow())  # Active user
+        UserFactory(current_login_at=datetime.now(UTC))  # Active user
 
         with capture_mails() as mails:
             tasks.notify_inactive_users()
@@ -46,7 +46,7 @@ class UserTasksTest(APITestCase):
     @pytest.mark.options(MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS=10)
     def test_notify_inactive_users_max_notifications(self):
         notification_comparison_date = (
-            datetime.utcnow()
+            datetime.now(UTC)
             - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
@@ -55,7 +55,7 @@ class UserTasksTest(APITestCase):
         NB_USERS_TO_NOTIFY = 15
 
         [UserFactory(current_login_at=notification_comparison_date) for _ in range(15)]
-        UserFactory(current_login_at=datetime.utcnow())  # Active user
+        UserFactory(current_login_at=datetime.now(UTC))  # Active user
 
         with capture_mails() as mails:
             tasks.notify_inactive_users()
@@ -78,13 +78,13 @@ class UserTasksTest(APITestCase):
     @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3, DEFAULT_LANGUAGE="en")
     def test_delete_inactive_users(self):
         deletion_comparison_date = (
-            datetime.utcnow()
+            datetime.now(UTC)
             - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             - timedelta(days=1)  # add margin
         )
 
         notification_comparison_date = (
-            datetime.utcnow()
+            datetime.now(UTC)
             - timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
         )
@@ -93,7 +93,7 @@ class UserTasksTest(APITestCase):
             current_login_at=deletion_comparison_date,
             inactive_deletion_notified_at=notification_comparison_date,
         )
-        UserFactory(current_login_at=datetime.utcnow())  # Active user
+        UserFactory(current_login_at=datetime.now(UTC))  # Active user
         discussion = DiscussionFactory(user=inactive_user_to_delete)
         discussion_title = discussion.title
 
@@ -119,13 +119,13 @@ class UserTasksTest(APITestCase):
     @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     def test_keep_inactive_users_that_logged_in(self):
         notification_comparison_date = (
-            datetime.utcnow()
+            datetime.now(UTC)
             - timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
         )
 
         inactive_user_that_logged_in_since_notification = UserFactory(
-            current_login_at=datetime.utcnow(),
+            current_login_at=datetime.now(UTC),
             inactive_deletion_notified_at=notification_comparison_date,
         )
 

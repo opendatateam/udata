@@ -1,4 +1,13 @@
 from flask import current_app, g
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import (
+    DictField,
+    EmbeddedDocumentField,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
@@ -7,7 +16,8 @@ from udata.core.dataset.models import Dataset
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.models import WithMetrics, db
+from udata.models import WithMetrics
+from udata.mongo.document import UDataDocument as Document
 from udata.utils import get_udata_version
 
 __all__ = ("Site", "SiteSettings")
@@ -16,23 +26,23 @@ __all__ = ("Site", "SiteSettings")
 DEFAULT_FEED_SIZE = 20
 
 
-class SiteSettings(db.EmbeddedDocument):
-    home_datasets = db.ListField(db.ReferenceField(Dataset))
-    home_reuses = db.ListField(db.ReferenceField(Reuse))
+class SiteSettings(EmbeddedDocument):
+    home_datasets = ListField(ReferenceField(Dataset))
+    home_reuses = ListField(ReferenceField(Reuse))
 
 
 @generate_fields()
-class Site(WithMetrics, db.Document):
-    id = field(db.StringField(primary_key=True), readonly=True)
-    title = field(db.StringField(required=True), description="The site display title")
-    keywords = field(db.ListField(db.StringField()))
-    feed_size = field(db.IntField(required=True, default=DEFAULT_FEED_SIZE))
-    configs = db.DictField()
-    themes = db.DictField()
-    settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_page = field(db.ReferenceField("Page"), attribute="datasets_page.id")
-    reuses_page = field(db.ReferenceField("Page"), attribute="reuses_page.id")
-    dataservices_page = field(db.ReferenceField("Page"), attribute="dataservices_page.id")
+class Site(WithMetrics, Document):
+    id = field(StringField(primary_key=True), readonly=True)
+    title = field(StringField(required=True), description="The site display title")
+    keywords = field(ListField(StringField()))
+    feed_size = field(IntField(required=True, default=DEFAULT_FEED_SIZE))
+    configs = DictField()
+    themes = DictField()
+    settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
+    datasets_page = field(ReferenceField("Page"), attribute="datasets_page.id")
+    reuses_page = field(ReferenceField("Page"), attribute="reuses_page.id")
+    dataservices_page = field(ReferenceField("Page"), attribute="dataservices_page.id")
 
     __metrics_keys__ = [
         "max_dataset_followers",

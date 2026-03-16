@@ -1,3 +1,7 @@
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
+from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
+
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
@@ -5,8 +9,9 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
-from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.uuid_fields import AutoUUIDField
 
 page_permissions_fields = api.model(
     "PagePermissions",
@@ -18,15 +23,15 @@ page_permissions_fields = api.model(
 
 
 @generate_fields()
-class Bloc(db.EmbeddedDocument):
+class Bloc(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
-    id = field(db.AutoUUIDField(primary_key=True))
+    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:
-    title = field(db.StringField(required=True))
-    subtitle = field(db.StringField())
+    title = field(StringField(required=True))
+    subtitle = field(StringField())
 
 
 @generate_fields(
@@ -34,9 +39,9 @@ class BlocWithTitleMixin:
 )
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
-        db.ListField(
+        ListField(
             field(
-                db.ReferenceField("Dataset"),
+                ReferenceField("Dataset"),
                 nested_fields=dataset_fields,
             )
         )
@@ -46,9 +51,9 @@ class DatasetsListBloc(BlocWithTitleMixin, Bloc):
 @generate_fields()
 class ReusesListBloc(BlocWithTitleMixin, Bloc):
     reuses = field(
-        db.ListField(
+        ListField(
             field(
-                db.ReferenceField("Reuse"),
+                ReferenceField("Reuse"),
                 nested_fields=Reuse.__read_fields__,
             )
         )
@@ -58,9 +63,9 @@ class ReusesListBloc(BlocWithTitleMixin, Bloc):
 @generate_fields()
 class DataservicesListBloc(BlocWithTitleMixin, Bloc):
     dataservices = field(
-        db.ListField(
+        ListField(
             field(
-                db.ReferenceField("Dataservice"),
+                ReferenceField("Dataservice"),
                 nested_fields=Dataservice.__read_fields__,
             )
         )
@@ -68,19 +73,19 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
-class LinkInBloc(db.EmbeddedDocument):
-    title = field(db.StringField(required=True))
-    color = field(db.StringField())
-    url = field(db.StringField())
+class LinkInBloc(EmbeddedDocument):
+    title = field(StringField(required=True))
+    color = field(StringField())
+    url = field(StringField())
 
 
 @generate_fields()
 class LinksListBloc(BlocWithTitleMixin, Bloc):
-    paragraph = field(db.StringField())
-    main_link_url = field(db.StringField())
-    main_link_title = field(db.StringField())
+    paragraph = field(StringField())
+    main_link_url = field(StringField())
+    main_link_title = field(StringField())
 
-    links = field(db.EmbeddedDocumentListField(LinkInBloc))
+    links = field(EmbeddedDocumentListField(LinkInBloc))
 
 
 HERO_COLORS = ("primary", "green", "purple")
@@ -88,20 +93,20 @@ HERO_COLORS = ("primary", "green", "purple")
 
 @generate_fields()
 class HeroBloc(Bloc):
-    title = field(db.StringField(required=True))
-    description = field(db.StringField())
-    color = field(db.StringField(choices=HERO_COLORS))
-    main_link_url = field(db.StringField())
-    main_link_title = field(db.StringField())
+    title = field(StringField(required=True))
+    description = field(StringField())
+    color = field(StringField(choices=HERO_COLORS))
+    main_link_url = field(StringField())
+    main_link_title = field(StringField())
 
 
 @generate_fields()
 class MarkdownBloc(Bloc):
     # Not using BlocWithTitleMixin because title should be optional here
-    title = field(db.StringField())
-    subtitle = field(db.StringField())
+    title = field(StringField())
+    subtitle = field(StringField())
     content = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
 
@@ -112,16 +117,14 @@ BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
 def check_no_recursive_blocs(blocs, **kwargs):
     for bloc in blocs:
         if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
-            raise db.ValidationError(
-                f"{bloc.__class__.__name__} cannot be nested inside an accordion"
-            )
+            raise ValidationError(f"{bloc.__class__.__name__} cannot be nested inside an accordion")
 
 
 @generate_fields()
-class AccordionItemBloc(db.EmbeddedDocument):
-    title = field(db.StringField(required=True))
+class AccordionItemBloc(EmbeddedDocument):
+    title = field(StringField(required=True))
     content = field(
-        db.EmbeddedDocumentListField(Bloc),
+        EmbeddedDocumentListField(Bloc),
         generic=True,
         checks=[check_no_recursive_blocs],
     )
@@ -129,15 +132,15 @@ class AccordionItemBloc(db.EmbeddedDocument):
 
 @generate_fields()
 class AccordionListBloc(Bloc):
-    title = field(db.StringField())
-    description = field(db.StringField())
-    items = field(db.EmbeddedDocumentListField(AccordionItemBloc))
+    title = field(StringField())
+    description = field(StringField())
+    items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 
 @generate_fields()
-class Page(Auditable, Owned, Datetimed, db.Document):
+class Page(Auditable, Owned, Datetimed, Document):
     blocs = field(
-        db.EmbeddedDocumentListField(Bloc),
+        EmbeddedDocumentListField(Bloc),
         generic=True,
     )
 

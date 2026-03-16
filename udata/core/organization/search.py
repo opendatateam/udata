@@ -2,10 +2,12 @@ import datetime
 
 from udata import search
 from udata.core.organization.api import DEFAULT_SORTING, OrgApiParser
-from udata.core.organization.constants import PRODUCER_BADGE_TYPES
+from udata.core.organization.constants import PRODUCER_BADGE_TYPES, PRODUCER_TYPES, USER
 from udata.models import Organization
-from udata.search.fields import ModelTermsFilter
+from udata.search.fields import Filter, ModelTermsFilter
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import OrganizationConsumer
+from udata_search_service.services import OrganizationService
 
 __all__ = ("OrganizationSearch",)
 
@@ -13,7 +15,8 @@ __all__ = ("OrganizationSearch",)
 @search.register
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
-    search_url = "organizations/"
+    service_class = OrganizationService
+    consumer_class = OrganizationConsumer
 
     sorts = {
         "reuses": "metrics.reuses",
@@ -29,6 +32,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         "badge": ModelTermsFilter(
             model=Organization, field_name="badges", choices=list(Organization.__badges__)
         ),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES - {USER})),
     }
 
     @classmethod

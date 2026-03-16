@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson import ObjectId
@@ -97,11 +97,10 @@ class DataserviceAPI(API):
     @api.doc("get_dataservice")
     @api.marshal_with(Dataservice.__read_fields__)
     def get(self, dataservice):
-        if not dataservice.permissions["edit"].can():
-            if dataservice.private:
-                api.abort(404)
-            elif dataservice.deleted_at:
+        if not dataservice.permissions["read"].can():
+            if not dataservice.private and dataservice.deleted_at:
                 api.abort(410, "Dataservice has been deleted")
+            api.abort(404)
         return dataservice
 
     @api.secure
@@ -118,7 +117,7 @@ class DataserviceAPI(API):
         dataservice.permissions["edit"].test()
 
         patch(dataservice, request)
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.now(UTC)
         if dataservice.access_type != AccessType.RESTRICTED:
             dataservice.access_audiences = []
 
@@ -137,8 +136,8 @@ class DataserviceAPI(API):
         dataservice.permissions["delete"].test()
         send_legal_notice_on_deletion(dataservice, args)
 
-        dataservice.deleted_at = datetime.utcnow()
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.deleted_at = datetime.now(UTC)
+        dataservice.metadata_modified_at = datetime.now(UTC)
         dataservice.save()
         return "", 204
 
@@ -207,7 +206,7 @@ class DataserviceDatasetsAPI(API):
 
         if diff:
             dataservice.datasets += [ObjectId(did) for did in diff]
-            dataservice.metadata_modified_at = datetime.utcnow()
+            dataservice.metadata_modified_at = datetime.now(UTC)
             dataservice.save()
 
         return dataservice, 201
@@ -231,7 +230,7 @@ class DataserviceDatasetAPI(API):
         if dataset not in dataservice.datasets:
             api.abort(404, "Dataset not found in dataservice")
         dataservice.datasets = [d for d in dataservice.datasets if d.id != dataset.id]
-        dataservice.metadata_modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.now(UTC)
         dataservice.save()
 
         return None, 204
@@ -256,11 +255,10 @@ class DataserviceRdfAPI(API):
 class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
     def get(self, dataservice: Dataservice, _format):
-        if not dataservice.permissions["edit"].can():
-            if dataservice.private:
-                api.abort(404)
-            elif dataservice.deleted_at:
+        if not dataservice.permissions["read"].can():
+            if not dataservice.private and dataservice.deleted_at:
                 api.abort(410)
+            api.abort(404)
 
         resource = dataservice_to_rdf(dataservice)
         # bypass flask-restplus make_response, since graph_response

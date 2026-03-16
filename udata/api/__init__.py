@@ -129,7 +129,7 @@ class UDataApi(Api):
         return form
 
     def render_ui(self):
-        return redirect(current_app.config.get("API_DOC_EXTERNAL_LINK"))
+        return redirect(current_app.config["API_DOC_EXTERNAL_LINK"])
 
     def unauthorized(self, response):
         """Override to change the WWW-Authenticate challenge"""

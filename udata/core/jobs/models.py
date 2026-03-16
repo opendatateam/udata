@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from typing import ClassVar
+
 from celerybeatmongo.models import PERIODS
 from celerybeatmongo.models import PeriodicTask as BasePeriodicTask
+from mongoengine.fields import EmbeddedDocumentField, StringField
+from mongoengine.queryset import QuerySet
 
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
 
 __all__ = ("PeriodicTask", "PERIODS")
 
@@ -10,7 +15,11 @@ CRON = "{minute} {hour} {day_of_month} {month_of_year} {day_of_week}"
 
 
 class PeriodicTask(BasePeriodicTask):
-    last_run_id = db.StringField()
+    # Dynamically created by MongoEngine's metaclass, declared here for type checkers.
+    objects: ClassVar[QuerySet]
+    DoesNotExist: ClassVar[type[Exception]]
+
+    last_run_id = StringField()
 
     class Interval(BasePeriodicTask.Interval):
         def __str__(self):
@@ -42,5 +51,5 @@ class PeriodicTask(BasePeriodicTask):
         else:
             raise Exception("must define internal or crontab schedule")
 
-    interval = db.EmbeddedDocumentField(Interval)
-    crontab = db.EmbeddedDocumentField(Crontab)
+    interval = EmbeddedDocumentField(Interval)
+    crontab = EmbeddedDocumentField(Crontab)

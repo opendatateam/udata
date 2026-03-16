@@ -1,5 +1,6 @@
 import re
 
+from mongoengine.errors import ValidationError
 from urlextract import URLExtract
 
 from udata.api_fields import field, generate_fields
@@ -54,7 +55,7 @@ class ContactPoint(db.Document, Owned):
 
     def validate(self, clean=True):
         if self.role == "contact" and not self.email and not self.contact_form:
-            raise db.ValidationError(
+            raise ValidationError(
                 _("At least an email or a contact form is required for a contact point")
             )
         return super().validate(clean=clean)
