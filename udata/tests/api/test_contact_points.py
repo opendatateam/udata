@@ -162,8 +162,11 @@ class ContactPointAPITest(APITestCase):
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
         contact_point = ContactPointFactory(organization=org)
-        data = contact_point.to_dict()
-        data["email"] = "new.email@newdomain.com"
+        data = {
+            "name": contact_point.name,
+            "role": contact_point.role,
+            "email": "new.email@newdomain.com",
+        }
         response = self.put(url_for("api.contact_point", contact_point=contact_point), data)
         assert200(response)
         assert ContactPoint.objects.count() == 1
@@ -174,7 +177,11 @@ class ContactPointAPITest(APITestCase):
         contact_point_a = ContactPointFactory(email="a@example.org", owner=user)
         contact_point_b = ContactPointFactory(email="b@example.org", owner=user)
 
-        data_b = contact_point_b.to_dict()
+        data_b = {
+            "name": contact_point_b.name,
+            "role": contact_point_b.role,
+            "email": contact_point_b.email,
+        }
         response = self.put(url_for("api.contact_point", contact_point=contact_point_a), data_b)
         assert400(response)
         assert ContactPoint.objects.count() == 2
@@ -186,8 +193,11 @@ class ContactPointAPITest(APITestCase):
         self.login()
         org = OrganizationFactory()
         contact_point = ContactPointFactory(organization=org)
-        data = contact_point.to_dict()
-        data["email"] = "new.email@newdomain.com"
+        data = {
+            "name": contact_point.name,
+            "role": contact_point.role,
+            "email": "new.email@newdomain.com",
+        }
         response = self.put(url_for("api.contact_point", contact_point=contact_point), data)
         assert403(response)
         assert ContactPoint.objects.count() == 1
