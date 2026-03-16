@@ -11,12 +11,11 @@ from mongoengine.fields import (
 from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
+from udata.core.metrics.models import WithMetrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.models import WithMetrics
 from udata.mongo.document import UDataDocument as Document
 from udata.utils import get_udata_version
 
@@ -125,6 +124,8 @@ class Site(WithMetrics, Document):
         self.save()
 
     def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
         self.metrics["dataservices"] = Dataservice.objects.visible().count()
         self.save()
 
