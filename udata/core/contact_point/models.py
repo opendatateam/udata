@@ -1,5 +1,5 @@
-import re
-
+from email_validator import EmailNotValidError, validate_email
+from flask import current_app
 from mongoengine.errors import ValidationError
 from urlextract import URLExtract
 
@@ -28,9 +28,6 @@ CONTACT_ROLES = {
 
 _url_extractor = URLExtract()
 
-# Basic email format check (something@something.something)
-_email_re = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
-
 MASK_FIELDS = ("id", "name", "email", "contact_form", "role")
 
 
@@ -40,8 +37,12 @@ def check_no_urls(value, field, **_kwargs):
 
 
 def check_is_email(value, field, **_kwargs):
-    if value and not _email_re.match(value):
-        raise FieldValidationError(_("Invalid email address"), field=field)
+    if value:
+        try:
+            kwargs = current_app.config.get("SECURITY_EMAIL_VALIDATOR_ARGS", {}) or {}
+            validate_email(value, **kwargs)
+        except EmailNotValidError:
+            raise FieldValidationError(_("Invalid email address"), field=field)
 
 
 @generate_fields(mask=",".join(MASK_FIELDS))
