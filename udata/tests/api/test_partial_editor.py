@@ -14,7 +14,53 @@ from udata.features.transfer.actions import accept_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.models import Dataset
 
-from . import APITestCase
+from . import APITestCase, DBTestCase
+
+
+class AutoAssignWithoutRequestContextTest(DBTestCase):
+    """Regression: creating a dataset via factory outside a request context
+    (e.g. CLI fixtures import) must not crash the auto-assign signal."""
+
+    def test_auto_assign_signal_with_no_current_user(self):
+        import json
+        import os
+        import subprocess
+        import tempfile
+
+        fixture_data = {
+            "datasets": [
+                {
+                    "dataset": {"title": "Test", "description": "Test dataset"},
+                    "organization": {
+                        "id": "000000000000000000000001",
+                        "name": "Test Org",
+                        "slug": "test-org",
+                        "members": [{"email": "fixture-admin@test.com", "role": "admin"}],
+                    },
+                    "resources": [],
+                    "reuses": [],
+                    "community_resources": [],
+                    "discussions": [],
+                    "dataservices": [],
+                }
+            ]
+        }
+        with (
+            tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f,
+            tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as cfg,
+        ):
+            json.dump(fixture_data, f)
+            f.flush()
+            cfg.write(f'MONGODB_HOST = "{self.app.config["MONGODB_HOST"]}"\n')
+            cfg.flush()
+            env = {**os.environ, "UDATA_SETTINGS": cfg.name}
+            result = subprocess.run(
+                ["uv", "run", "udata", "import-fixtures", f.name],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+        assert result.returncode == 0, result.stderr
 
 
 class PartialEditorDatasetAPITest(APITestCase):

@@ -45,7 +45,7 @@ def _auto_assign_on_create(sender, document, **kwargs):
 
     from udata.auth import current_user
 
-    if not document.organization or not current_user.is_authenticated:
+    if not document.organization or not current_user or not current_user.is_authenticated:
         return
     member = document.organization.member(current_user._get_current_object())
     if member and member.role == "partial_editor":
