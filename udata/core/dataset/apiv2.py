@@ -8,6 +8,7 @@ from flask_restx import marshal
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.access_type.models import AccessAudience
+from udata.core.badges.models import Badge
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
@@ -16,7 +17,6 @@ from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
-    badge_fields,
     catalog_schema_fields,
     checksum_fields,
     dataset_harvest_fields,
@@ -129,7 +129,7 @@ dataset_fields = apiv2.model(
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The dataset badges", readonly=True
+            fields.Nested(Badge.__read_fields__), description="The dataset badges", readonly=True
         ),
         "resources": fields.Raw(
             attribute=lambda o: {
@@ -276,7 +276,7 @@ specific_resource_fields = apiv2.model(
     },
 )
 
-apiv2.inherit("Badge", badge_fields)
+apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", org_ref_fields)
 apiv2.inherit("UserReference", user_ref_fields)
 apiv2.inherit("MemberUserWithEmail", member_user_with_email_fields)

@@ -1,6 +1,6 @@
 from udata.api import api, base_reference, fields
 from udata.core.access_type.models import AccessAudience
-from udata.core.badges.fields import badge_fields
+from udata.core.badges.models import Badge
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
@@ -353,7 +353,7 @@ dataset_fields = api.model(
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The dataset badges", readonly=True
+            fields.Nested(Badge.__read_fields__), description="The dataset badges", readonly=True
         ),
         "resources": fields.List(
             fields.Nested(resource_fields, description="The dataset resources")

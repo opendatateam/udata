@@ -34,7 +34,7 @@ from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.core import storages
 from udata.core.badges import api as badges_api
-from udata.core.badges.fields import badge_fields
+from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
@@ -503,8 +503,8 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route("/<dataset:dataset>/badges/", endpoint="dataset_badges")
 class DatasetBadgesAPI(API):
     @api.doc("add_dataset_badge", **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(Badge.__read_fields__)
+    @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, dataset):
         """Create a new badge for a given dataset"""
