@@ -1,20 +1,13 @@
 import logging
 
 import mongoengine
-from flask import abort, request
+from flask import abort, request, url_for
 from flask_security import current_user
 
 from udata import search
-from udata.api import API, api, apiv2
+from udata.api import API, api, apiv2, fields
 from udata.core.discussions.models import Discussion
-from udata.core.topic.api_fields import (
-    element_fields,
-    element_page_fields,
-    topic_fields,
-    topic_input_fields,
-    topic_page_fields,
-    topic_search_page_fields,
-)
+from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
@@ -22,6 +15,43 @@ from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
 
 apiv2.inherit("ModelReference", api.model_reference)
+apiv2.inherit("TopicElement (read)", TopicElement.__read_fields__)
+
+topic_fields = apiv2.clone(
+    "Topic",
+    Topic.__read_fields__,
+    {
+        "elements": fields.Raw(
+            attribute=lambda o: {
+                "rel": "subsection",
+                "href": url_for(
+                    "apiv2.topic_elements",
+                    topic=o.id,
+                    page=1,
+                    page_size=DEFAULT_PAGE_SIZE,
+                    _external=True,
+                ),
+                "type": "GET",
+                "total": o.elements.count(),
+            },
+            description="Link to the topic elements",
+        ),
+    },
+)
+
+topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
+topic_search_page_fields = apiv2.model("TopicSearchPage", fields.search_pager(topic_fields))
+element_page_fields = apiv2.model("TopicElementPage", fields.pager(TopicElement.__read_fields__))
+
+topic_input_fields = apiv2.clone(
+    "TopicInput",
+    Topic.__write_fields__,
+    {
+        "elements": fields.List(
+            fields.Nested(TopicElement.__read_fields__), description="The topic elements"
+        ),
+    },
+)
 
 DEFAULT_SORTING = "-created_at"
 
@@ -132,7 +162,7 @@ class TopicElementsAPI(API):
     @apiv2.secure
     @apiv2.doc("topic_elements_create")
     @apiv2.expect([api.model_reference])
-    @apiv2.marshal_list_with(element_fields)
+    @apiv2.marshal_list_with(TopicElement.__read_fields__)
     @apiv2.response(400, "Expecting a list")
     @apiv2.response(404, "Topic not found")
     @apiv2.response(403, "Forbidden")
@@ -206,8 +236,8 @@ class TopicElementAPI(API):
 
     @apiv2.secure
     @apiv2.doc("topic_element_update")
-    @apiv2.expect(element_fields)
-    @apiv2.marshal_with(element_fields)
+    @apiv2.expect(TopicElement.__read_fields__)
+    @apiv2.marshal_with(TopicElement.__read_fields__)
     @apiv2.response(404, "Topic not found")
     @apiv2.response(404, "Element not found in topic")
     @apiv2.response(204, "Success")

@@ -12,10 +12,12 @@ from mongoengine.fields import (
 )
 from mongoengine.signals import post_delete, post_save
 
-from udata.api_fields import field
+from udata.api import api
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.models import SpatialCoverage
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
@@ -27,6 +29,7 @@ from udata.tasks import as_task_param
 __all__ = ("Topic", "TopicElement")
 
 
+@generate_fields()
 class TopicElement(Auditable, Document):
     title = field(StringField(required=False))
     description = field(
@@ -35,9 +38,13 @@ class TopicElement(Auditable, Document):
     )
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
-    element = field(GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]))
-    # Made optional to allow proper form handling with commit=False
-    topic = field(ReferenceField("Topic", required=False))
+    element = field(
+        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
+        nested_fields=api.model_reference,
+        allow_null=True,
+    )
+    # Not exposed in the API (not wrapped with field()), only used internally.
+    topic = ReferenceField("Topic", required=False)
 
     meta = {
         "indexes": [
@@ -73,11 +80,13 @@ class TopicElement(Auditable, Document):
         cls.on_delete.send(document)
 
 
+@generate_fields()
 class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
-    name = field(StringField(required=True))
+    name = field(StringField(required=True), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
+        readonly=True,
     )
     description = field(
         StringField(),
@@ -90,7 +99,11 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
     private = field(BooleanField())
     extras = field(ExtrasField(), auditable=False)
 
-    spatial = field(EmbeddedDocumentField(SpatialCoverage))
+    spatial = field(
+        EmbeddedDocumentField(SpatialCoverage),
+        nested_fields=spatial_coverage_fields,
+        allow_null=True,
+    )
 
     meta = {
         "indexes": [
@@ -151,6 +164,10 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
             topic=self._link_id(**kwargs),
             **self._self_api_url_kwargs(**kwargs),
         )
+
+    @field(description="The topic API URI")
+    def uri(self):
+        return self.self_api_url()
 
 
 post_save.connect(Topic.post_save, sender=Topic)
