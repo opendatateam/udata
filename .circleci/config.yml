@@ -31,6 +31,7 @@ jobs:
           cluster.name: es-docker-cluster
           cluster.initial_master_nodes: es01
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        command: ["bash", "-c", "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"]
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
