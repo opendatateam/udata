@@ -106,6 +106,11 @@ class TopicsAPI(API):
     @apiv2.response(400, "Validation error")
     def post(self):
         """Create a topic"""
+        # Elements are a reverse relationship (TopicElement → Topic), not a field
+        # on Topic itself, so patch() can't handle them. We extract them from the
+        # payload and manage them manually after saving the topic.
+        # TODO: patch() could support virtual fields for reverse relationships to
+        # avoid this manual handling.
         data = request.json.copy()
         elements_data = data.pop("elements", None)
 
