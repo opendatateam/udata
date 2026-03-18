@@ -41,7 +41,7 @@ topic_fields = apiv2.clone(
 
 topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
 topic_search_page_fields = apiv2.model("TopicSearchPage", fields.search_pager(topic_fields))
-element_page_fields = apiv2.model("TopicElementPage", fields.pager(TopicElement.__read_fields__))
+apiv2.inherit("TopicElementPage", TopicElement.__page_fields__)
 
 topic_input_fields = apiv2.clone(
     "TopicInput",
@@ -149,7 +149,7 @@ class TopicAPI(API):
 class TopicElementsAPI(API):
     @apiv2.doc("topic_elements")
     @apiv2.expect(elements_parser.parser)
-    @apiv2.marshal_with(element_page_fields)
+    @apiv2.marshal_with(TopicElement.__page_fields__)
     def get(self, topic):
         """Get a given topic's elements with pagination."""
         args = elements_parser.parse()
