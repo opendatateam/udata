@@ -74,7 +74,7 @@ jobs:
           command: |
             apt-get update && apt-get install -y curl jq
             for i in $(seq 1 60); do
-              status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
+              status=$(curl -s http://localhost:9200/_cluster/health 2>/dev/null | jq -r '.status' 2>/dev/null || true)
               if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
                 echo "Elasticsearch is ready (status: $status)"
                 exit 0
