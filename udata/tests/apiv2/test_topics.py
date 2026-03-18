@@ -709,7 +709,7 @@ class TopicElementsAPITest(APITestCase):
             [{"element": {"class": "Reuse", "id": dataset.id}}],
         )
         assert response.status_code == 400
-        assert "n'existe pas" in response.json["errors"][0]["element"][0]
+        assert "Unknown reference" in response.json["errors"][0]["element"][0]
 
     def test_add_empty_element(self):
         owner = self.login()
