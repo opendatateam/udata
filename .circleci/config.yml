@@ -25,7 +25,7 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
-      - image: udata/elasticsearch:7.16.2
+      - image: elasticsearch:7.17.28
         environment:
           node.name: es01
           cluster.name: es-docker-cluster
