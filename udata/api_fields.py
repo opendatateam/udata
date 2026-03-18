@@ -317,6 +317,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
             )
 
+    elif isinstance(field, mongo_fields.MultiPolygonField):
+        constructor = restx_fields.Raw
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
