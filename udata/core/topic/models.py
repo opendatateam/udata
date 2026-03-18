@@ -18,8 +18,8 @@ from udata.core.activity.models import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.spatial.models import SpatialCoverage
 from udata.i18n import lazy_gettext as _
-from udata.models import SpatialCoverage
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
