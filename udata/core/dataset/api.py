@@ -503,7 +503,7 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route("/<dataset:dataset>/badges/", endpoint="dataset_badges")
 class DatasetBadgesAPI(API):
     @api.doc("add_dataset_badge", **common_doc)
-    @api.expect(Badge.__read_fields__)
+    @api.expect(Badge.__write_fields__)
     @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, dataset):

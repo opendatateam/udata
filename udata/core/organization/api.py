@@ -296,7 +296,7 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route("/<org:org>/badges/", endpoint="organization_badges")
 class OrganizationBadgesAPI(API):
     @api.doc("add_organization_badge", **common_doc)
-    @api.expect(Badge.__read_fields__)
+    @api.expect(Badge.__write_fields__)
     @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, org):
