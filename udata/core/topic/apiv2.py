@@ -6,13 +6,14 @@ from flask_security import current_user
 
 from udata import search
 from udata.api import API, api, apiv2, fields
+from udata.api_fields import patch, patch_and_save
 from udata.core.discussions.models import Discussion
 from udata.core.topic import DEFAULT_PAGE_SIZE
-from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
+from udata.mongo.errors import FieldValidationError
 
 apiv2.inherit("ModelReference", api.model_reference)
 apiv2.inherit("TopicElement (read)", TopicElement.__read_fields__)
@@ -105,8 +106,23 @@ class TopicsAPI(API):
     @apiv2.response(400, "Validation error")
     def post(self):
         """Create a topic"""
-        form = apiv2.validate(TopicForm)
-        return form.save(), 201
+        data = request.json.copy()
+        elements_data = data.pop("elements", None)
+
+        topic = patch(Topic(), data)
+
+        if not topic.owner and not topic.organization:
+            topic.owner = current_user._get_current_object()
+
+        topic.save()
+
+        if elements_data is not None:
+            for element_data in elements_data:
+                element = patch(TopicElement(), element_data)
+                element.topic = topic
+                element.save()
+
+        return topic, 201
 
 
 @ns.route("/<topic:topic>/", endpoint="topic", doc=common_doc)
@@ -128,8 +144,20 @@ class TopicAPI(API):
         """Update a given topic"""
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
-        form = apiv2.validate(TopicForm, topic)
-        return form.save()
+
+        data = request.json.copy()
+        elements_data = data.pop("elements", None)
+
+        patch_and_save(topic, data)
+
+        if elements_data is not None:
+            TopicElement.objects(topic=topic).delete()
+            for element_data in elements_data:
+                element = patch(TopicElement(), element_data)
+                element.topic = topic
+                element.save()
+
+        return topic
 
     @apiv2.secure
     @apiv2.doc("delete_topic")
@@ -178,18 +206,18 @@ class TopicElementsAPI(API):
         errors = []
         elements = []
         for element_data in data:
-            form = TopicElementForm.from_json(element_data, meta={"csrf": False})
-            if not form.validate():
-                errors.append(form.errors)
-            else:
-                element = TopicElement()
-                form.populate_obj(element)
+            try:
+                element = patch(TopicElement(), element_data)
                 element.topic = topic
-                element.save()
                 elements.append(element)
+            except FieldValidationError as e:
+                errors.append({e.field: [str(e)]})
 
         if errors:
             apiv2.abort(400, errors=errors)
+
+        for element in elements:
+            element.save()
 
         topic.save()
 
@@ -247,8 +275,6 @@ class TopicElementAPI(API):
             apiv2.abort(403, "Forbidden")
 
         element = TopicElement.objects.get_or_404(pk=element_id)
-        form = apiv2.validate(TopicElementForm, element)
-        form.populate_obj(element)
-        element.save()
+        patch_and_save(element, request)
 
         return element

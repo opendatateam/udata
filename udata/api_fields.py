@@ -804,7 +804,7 @@ def patch(obj: _T, request) -> _T:
                 model_attribute, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
             ):
                 value = wrap_primary_key(key, model_attribute, value)
-            elif isinstance(
+            elif value and isinstance(
                 model_attribute,
                 (
                     mongoengine.fields.GenericReferenceField,

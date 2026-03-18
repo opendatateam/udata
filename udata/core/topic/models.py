@@ -18,15 +18,30 @@ from udata.core.activity.models import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.i18n import lazy_gettext as _
 from udata.models import SpatialCoverage
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.search import reindex
 from udata.tasks import as_task_param
 
 __all__ = ("Topic", "TopicElement")
+
+
+def check_title_or_element_required(value, obj, data, **_kwargs):
+    title = data.get("title", getattr(obj, "title", None))
+    element = data.get("element", getattr(obj, "element", None))
+    if not title and not element:
+        raise FieldValidationError(
+            _("A topic element must have a title or an element."),
+            field="element",
+        )
+
+
+check_title_or_element_required.run_even_if_missing = True
 
 
 @generate_fields()
@@ -42,6 +57,7 @@ class TopicElement(Auditable, Document):
         GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
         nested_fields=api.model_reference,
         allow_null=True,
+        checks=[check_title_or_element_required],
     )
     # Not exposed in the API (not wrapped with field()), only used internally.
     topic = ReferenceField("Topic", required=False)
