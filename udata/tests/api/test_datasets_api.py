@@ -1713,6 +1713,12 @@ class DatasetBadgeAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 0)
 
+    def test_create_unknown_kind(self):
+        response = self.post(
+            url_for("api.dataset_badges", dataset=self.dataset), {"kind": "doesnotexist"}
+        )
+        self.assert400(response)
+
     def test_delete_404(self):
         response = self.delete(
             url_for("api.dataset_badge", dataset=self.dataset, badge_kind=str(self.factory().kind))
