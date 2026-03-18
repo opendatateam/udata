@@ -44,7 +44,7 @@
 <label class="radio-inline">
     <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
         {% if selected %}checked="checked"{% endif %}>
-    {{ _(label) }}
+    {{ label }}
 </label>
 {% endfor %}
 {% endmacro %}
@@ -55,7 +55,7 @@
     <label>
         <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
             {% if selected %}checked="checked"{% endif %}>
-        {{ _(label) }}
+        {{ label }}
     </label>
 </div>
 {% endfor %}
