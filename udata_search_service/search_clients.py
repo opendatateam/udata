@@ -117,7 +117,7 @@ class SearchableTopic(IndexDocument):
     class Index:
         name = "topic"
 
-    name = Text(analyzer=dgv_analyzer)
+    name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
     description = Text(analyzer=dgv_analyzer)
     tags = Keyword(multi=True)
     featured = Integer()
@@ -574,6 +574,10 @@ class ElasticClient:
                 sort_field = "last_modified"
             elif sort == "-last_update":
                 sort_field = "-last_modified"
+            elif sort == "name":
+                sort_field = "name.keyword"
+            elif sort == "-name":
+                sort_field = "-name.keyword"
             search = search.sort(sort_field, {"_score": {"order": "desc"}})
 
         search = search[offset : (offset + page_size)]
