@@ -1,5 +1,11 @@
 # Changelog
 
+## 15.4.1 (2026-03-19)
+
+- fix: sending int for daterange ([#3693](https://github.com/opendatateam/udata/pull/3693))
+- fix: topic search sort ([#3689](https://github.com/opendatateam/udata/pull/3689))
+
+
 ## 15.4.0 (2026-03-19)
 
 - feat: partial editors ([#3668](https://github.com/opendatateam/udata/pull/3668))
