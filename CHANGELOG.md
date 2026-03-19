@@ -1,5 +1,15 @@
 # Changelog
 
+## 15.4.0 (2026-03-19)
+
+- feat: partial editors ([#3668](https://github.com/opendatateam/udata/pull/3668))
+- feat: update translations for partial editor ([#3696](https://github.com/opendatateam/udata/pull/3696))
+- fix: circular imports in tests ([#3690](https://github.com/opendatateam/udata/pull/3690))
+- fix: import-fixture broken following partial editors change ([#3692](https://github.com/opendatateam/udata/pull/3692))
+- fix: shadowing translation function ([#3698](https://github.com/opendatateam/udata/pull/3698))
+- test: update ElasticSearch version in CI ([#3697](https://github.com/opendatateam/udata/pull/3697))
+
+
 ## 15.3.0 (2026-03-16)
 
 - chore: working on types ([#3677](https://github.com/opendatateam/udata/pull/3677))
