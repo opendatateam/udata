@@ -178,7 +178,7 @@ time udata search index --reindex true
 ```
 The target index name will be time-based, ex: dataset-2022-02-20-20-02.
 
-**Warning**: After full reindexation execution, you'll need to change the alias on the search service to use the new index.
+**Warning**: After full reindexation execution, you'll need to change the Elasticsearch alias to use the new index.
 
 
 It's possible to index or reindex only last modified documents.

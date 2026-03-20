@@ -49,7 +49,7 @@ class TopicModelTest(PytestOnlyDBTestCase):
         topic.save()
         job_reindex.assert_called()
 
-    @pytest.mark.options(SEARCH_SERVICE_API_URL="http://smtg/")
+    @pytest.mark.options(ELASTICSEARCH_URL="http://localhost:9200")
     def test_pre_save_reindex(self, job_reindex):
         """This will call the real reindex method and thus bubble up errors"""
         # creates a topic with elements, thus calls reindex

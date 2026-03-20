@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bson import ObjectId
 from flask_restx.inputs import boolean
@@ -21,7 +21,6 @@ from .forms import (
     DiscussionEditForm,
 )
 from .models import Discussion, Message
-from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
 
@@ -207,7 +206,7 @@ class DiscussionAPI(API):
             discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
             discussion.closed_by_organization = form.organization.data
-            discussion.closed = datetime.utcnow()
+            discussion.closed = datetime.now(UTC)
 
         discussion.save()
         if close:
@@ -243,7 +242,6 @@ class DiscussionAPI(API):
         send_legal_notice_on_deletion(discussion, args)
 
         discussion.delete()
-        on_discussion_deleted.send(discussion)
         return "", 204
 
 
@@ -273,7 +271,7 @@ class DiscussionCommentAPI(API):
         form = api.validate(DiscussionEditCommentForm)
 
         discussion.discussion[cidx].content = form.comment.data
-        discussion.discussion[cidx].last_modified_at = datetime.utcnow()
+        discussion.discussion[cidx].last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
 
@@ -294,8 +292,7 @@ class DiscussionCommentAPI(API):
         message.permissions["delete"].test()
         send_legal_notice_on_deletion(message, args)
 
-        discussion.discussion.pop(cidx)
-        discussion.save()
+        discussion.remove_message(cidx)
         return "", 204
 
 

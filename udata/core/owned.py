@@ -7,7 +7,6 @@ from mongoengine.fields import ReferenceField
 from udata.api_fields import field
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
-from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
@@ -72,7 +71,7 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
     if org is None:
         raise FieldValidationError(_("Unknown organization"), field="organization")
 
-    if current_user.is_authenticated and org and not OrganizationPrivatePermission(org).can():
+    if current_user.is_authenticated and org and not org.permissions["private"].can():
         raise FieldValidationError(
             _("Permission denied for this organization"), field="organization"
         )

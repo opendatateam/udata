@@ -1,11 +1,14 @@
 from udata.core.discussions.models import Discussion
 from udata.search import BoolFilter, Filter, ModelSearchAdapter, register
+from udata_search_service.consumers import DiscussionConsumer
+from udata_search_service.services import DiscussionService
 
 
 @register
 class DiscussionSearch(ModelSearchAdapter):
     model = Discussion
-    search_url = "discussions/"
+    service_class = DiscussionService
+    consumer_class = DiscussionConsumer
 
     sorts = {
         "created": "created_at",
@@ -23,10 +26,9 @@ class DiscussionSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        """Fallback search implementation when search service is not available"""
         discussions = Discussion.objects()
-        discussions = discussions.order_by("-created")
-        return discussions
+        sort = cls.parse_sort(args["sort"]) or "-created"
+        return discussions.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, discussion):

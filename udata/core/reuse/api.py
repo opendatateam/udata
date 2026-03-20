@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -184,11 +184,10 @@ class ReuseAPI(API):
     @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
-        if not reuse.permissions["edit"].can():
-            if reuse.private:
-                api.abort(404)
-            elif reuse.deleted:
+        if not reuse.permissions["read"].can():
+            if not reuse.private and reuse.deleted:
                 api.abort(410, "This reuse has been deleted")
+            api.abort(404)
         return reuse
 
     @api.secure
@@ -218,7 +217,7 @@ class ReuseAPI(API):
         reuse.permissions["delete"].test()
         send_legal_notice_on_deletion(reuse, args)
 
-        reuse.deleted = datetime.utcnow()
+        reuse.deleted = datetime.now(UTC)
         reuse.save()
         return "", 204
 

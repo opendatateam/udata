@@ -50,6 +50,7 @@ class UDataApp(Flask):
 
     # Keep track of static dirs given as register_blueprint argument
     static_prefixes = {}
+    settings_file: str | None = None
 
     def send_static_file(self, filename):
         """

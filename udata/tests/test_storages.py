@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from os.path import basename
 from uuid import uuid4
@@ -239,7 +239,7 @@ class ChunksRetentionTest(PytestOnlyTestCase):
                     "uuid": str(uuid),
                     "filename": faker.file_name(),
                     "totalparts": nb + 1,
-                    "lastchunk": last or datetime.utcnow(),
+                    "lastchunk": last or datetime.now(UTC),
                 }
             ),
         )
@@ -254,8 +254,8 @@ class ChunksRetentionTest(PytestOnlyTestCase):
 
     @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)  # 1 hour
     def test_chunks_kept_before_max_retention(self, client):
-        not_expired = datetime.utcnow()
-        expired = datetime.utcnow() - timedelta(hours=2)
+        not_expired = datetime.now(UTC)
+        expired = datetime.now(UTC) - timedelta(hours=2)
         expired_uuid = str(uuid4())
         active_uuid = str(uuid4())
         parts = 3

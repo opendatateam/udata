@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Script to create a git tag and update CHANGELOG.md
-# Usage: ./tag-version.sh <version> [--dry-run]
+# Usage: ./tag-version.sh <version> [--dry-run] [--breaking PR1,PR2,...]
 
 set -e
 
 DRY_RUN=false
+BREAKING_PRS=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -13,6 +14,10 @@ while [[ $# -gt 0 ]]; do
         --dry-run)
             DRY_RUN=true
             shift
+            ;;
+        --breaking)
+            BREAKING_PRS="$2"
+            shift 2
             ;;
         *)
             VERSION="$1"
@@ -22,9 +27,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version> [--dry-run]"
+    echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
     echo "Example: $0 11.0.1"
     echo "Example: $0 11.0.1 --dry-run"
+    echo "Example: $0 11.0.1 --breaking 3649,3651"
     exit 1
 fi
 
@@ -141,6 +147,23 @@ while IFS= read -r hash; do
         body=$(echo "$body" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
     fi
 
+    # Check if this commit's PR was manually marked as breaking
+    is_forced_breaking=false
+    if [ -n "$BREAKING_PRS" ]; then
+        IFS=',' read -ra pr_numbers <<< "$BREAKING_PRS"
+        for pr in "${pr_numbers[@]}"; do
+            if [[ "$subject" =~ \#$pr\) ]] || [[ "$subject" =~ \#$pr\] ]]; then
+                is_forced_breaking=true
+                break
+            fi
+        done
+    fi
+
+    # Inject ! before : for forced breaking changes that don't already have it
+    if [ "$is_forced_breaking" = true ]; then
+        subject=$(echo "$subject" | sed -E 's/^([a-z]+(\([^\)]+\))?): /\1!: /')
+    fi
+
     # Check if it's a breaking change (contains ! before :)
     if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
         # Make subject bold in markdown
@@ -158,6 +181,20 @@ while IFS= read -r hash; do
         REGULAR_COMMITS_RAW="${REGULAR_COMMITS_RAW}- ${subject}${COMMIT_DELIMITER}"$'\n'
     fi
 done <<< "$COMMIT_HASHES"
+
+# Warn if breaking changes detected without a major version bump
+if [ -n "$BREAKING_CHANGES_RAW" ] && [ -n "$LAST_TAG" ]; then
+    LAST_MAJOR=$(echo "$LAST_TAG" | sed -E 's/^v?([0-9]+)\..*/\1/')
+    NEW_MAJOR=$(echo "$VERSION" | sed -E 's/^([0-9]+)\..*/\1/')
+    if [ "$LAST_MAJOR" = "$NEW_MAJOR" ]; then
+        echo "Warning: breaking changes detected but major version is unchanged ($LAST_MAJOR → $NEW_MAJOR)"
+        read -p "Continue anyway? [y/N] " confirm
+        if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+            echo "Aborted."
+            exit 1
+        fi
+    fi
+fi
 
 # Sort breaking changes (sort by first line only, keep blocks together)
 BREAKING_CHANGES=""
@@ -194,13 +231,13 @@ fi
 # Sort regular commits
 REGULAR_COMMITS=""
 if [ -n "$REGULAR_COMMITS_RAW" ]; then
-    REGULAR_COMMITS=$(echo "$REGULAR_COMMITS_RAW" | sed "s/${COMMIT_DELIMITER}//g" | sort)$'\n'
+    REGULAR_COMMITS=$(echo "$REGULAR_COMMITS_RAW" | sed "s/${COMMIT_DELIMITER}//g" | sed '/^$/d' | sort)$'\n'
 fi
 
 # Combine: breaking changes first, then regular commits
 SORTED_COMMITS=""
 if [ -n "$BREAKING_CHANGES" ]; then
-    SORTED_COMMITS="$BREAKING_CHANGES"
+    SORTED_COMMITS="$BREAKING_CHANGES"$'\n'
 fi
 if [ -n "$REGULAR_COMMITS" ]; then
     SORTED_COMMITS="${SORTED_COMMITS}${REGULAR_COMMITS}"
@@ -208,6 +245,7 @@ fi
 
 # Prepare the new changelog entry
 NEW_ENTRY="## $VERSION ($DATE)
+
 $SORTED_COMMITS
 "
 

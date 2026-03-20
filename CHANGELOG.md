@@ -1,5 +1,70 @@
 # Changelog
 
+## 15.4.1 (2026-03-19)
+
+- fix: sending int for daterange ([#3693](https://github.com/opendatateam/udata/pull/3693))
+- fix: topic search sort ([#3689](https://github.com/opendatateam/udata/pull/3689))
+
+
+## 15.4.0 (2026-03-19)
+
+- feat: partial editors ([#3668](https://github.com/opendatateam/udata/pull/3668))
+- feat: update translations for partial editor ([#3696](https://github.com/opendatateam/udata/pull/3696))
+- fix: circular imports in tests ([#3690](https://github.com/opendatateam/udata/pull/3690))
+- fix: import-fixture broken following partial editors change ([#3692](https://github.com/opendatateam/udata/pull/3692))
+- fix: shadowing translation function ([#3698](https://github.com/opendatateam/udata/pull/3698))
+- test: update ElasticSearch version in CI ([#3697](https://github.com/opendatateam/udata/pull/3697))
+
+
+## 15.3.0 (2026-03-16)
+
+- chore: working on types ([#3677](https://github.com/opendatateam/udata/pull/3677))
+- feat: create notification when matching invitation after account creation ([#3686](https://github.com/opendatateam/udata/pull/3686))
+- feat: include `udata-search-service` inside `udata` ([#3679](https://github.com/opendatateam/udata/pull/3679))
+- feat(storage): upgrade flask storage to add S3 extra args ([#3687](https://github.com/opendatateam/udata/pull/3687))
+- fix(topics): do not index private topics ([#3688](https://github.com/opendatateam/udata/pull/3688))
+
+
+## 15.2.0 (2026-03-09)
+
+- chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))
+- chore: add hostname resolve in uri validate ([#3682](https://github.com/opendatateam/udata/pull/3682))
+- chore: disallow redirects in harvest actions and dataservice search ([#3683](https://github.com/opendatateam/udata/pull/3683))
+- feat(api): extend Atom feed filters support ([#3676](https://github.com/opendatateam/udata/pull/3676))
+- feat(catalog): add badges in dataset catalog ([#3681](https://github.com/opendatateam/udata/pull/3681))
+- fix: remove datetime.utcnow() deprecation warnings ([#3635](https://github.com/opendatateam/udata/pull/3635))
+
+
+## 15.1.0 (2026-02-19)
+
+- chore: add types to api fields ([#3670](https://github.com/opendatateam/udata/pull/3670))
+- chore: parallel pytest ([#3672](https://github.com/opendatateam/udata/pull/3672))
+- chore(test): add empty testing values to prevent conflict in tests ([#3678](https://github.com/opendatateam/udata/pull/3678))
+- feat: add translations ([#3664](https://github.com/opendatateam/udata/pull/3664))
+- feat(notifications): add membership response notifications ([#3655](https://github.com/opendatateam/udata/pull/3655))
+- feat(notifications): prevent integrity issues and add harvest related notifications ([#3665](https://github.com/opendatateam/udata/pull/3665))
+- fix: missing producer type attribute ([#3674](https://github.com/opendatateam/udata/pull/3674))
+- fix: mongo crash in CI during tests ([#3675](https://github.com/opendatateam/udata/pull/3675))
+- fix: test assertion and types ([#3669](https://github.com/opendatateam/udata/pull/3669))
+- refactor: use read permission instead of can for get endpoints ([#3671](https://github.com/opendatateam/udata/pull/3671))
+
+
+## 15.0.0 (2026-02-12)
+
+- **feat!: add MembershipRequest from org ([#3570](https://github.com/opendatateam/udata/pull/3570))**
+- chore: add breaking change override for `tag-version.sh` ([#3657](https://github.com/opendatateam/udata/pull/3657))
+- feat: expose organization permissions ([#3656](https://github.com/opendatateam/udata/pull/3656))
+- fix: missing new line between breaking and non breaking ([#3663](https://github.com/opendatateam/udata/pull/3663))
+- fix: new line in tag-version with breaking changes ([#3662](https://github.com/opendatateam/udata/pull/3662))
+- fix: remove dead code for site form ([#3658](https://github.com/opendatateam/udata/pull/3658))
+
+
+## 14.13.0 (2026-02-10)
+
+- feat: allow badges filtering with settings ([#3649](https://github.com/opendatateam/udata/pull/3649))
+- fix: last_update dates missing in indexing ([#3653](https://github.com/opendatateam/udata/pull/3653))
+
+
 ## 14.12.0 (2026-02-10)
 
 - feat(harvest): add GeoDCAT-AP option to csw-dcat backend ([#3648](https://github.com/opendatateam/udata/pull/3648))
