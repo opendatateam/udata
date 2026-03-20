@@ -285,6 +285,21 @@ class ElasticClient:
         SearchableDiscussion.init_index(self.es, suffix_name)
         SearchablePost.init_index(self.es, suffix_name)
 
+    def delete_indices(self):
+        """
+        Clear all existing indices and templates.
+        """
+        SearchableDataset.delete_indices(self.es)
+        SearchableReuse.delete_indices(self.es)
+        SearchableOrganization.delete_indices(self.es)
+        SearchableDataservice.delete_indices(self.es)
+        SearchableTopic.delete_indices(self.es)
+        SearchableDiscussion.delete_indices(self.es)
+        SearchablePost.delete_indices(self.es)
+
+    def delete_index(self, index_document: IndexDocument):
+        index_document.delete_indices(self.es)
+
     def index_organization(self, to_index: Organization, index: str = None) -> None:
         SearchableOrganization(meta={"id": to_index.id}, **to_index.to_dict()).save(
             skip_empty=False, index=index
