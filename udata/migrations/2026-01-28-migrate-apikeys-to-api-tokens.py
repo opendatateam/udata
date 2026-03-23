@@ -37,7 +37,7 @@ def migrate(db):
             continue
 
         # Never store more than 8 chars to avoid leaking the full key when it's short
-        prefix = apikey[:8] if len(apikey) > 8 else ""
+        prefix = apikey[:8] if len(apikey) >= 8 else ""
 
         api_token_collection.insert_one(
             {

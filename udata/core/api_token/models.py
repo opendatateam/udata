@@ -137,6 +137,6 @@ class ApiToken(db.Document):
     def update_usage(self, user_agent=None):
         update_kwargs = {"set__last_used_at": datetime.now(timezone.utc)}
         agents = self.user_agents or []
-        if user_agent and user_agent not in agents and len(agents) < MAX_USER_AGENTS:
-            update_kwargs["push__user_agents"] = user_agent
+        if user_agent and len(agents) < MAX_USER_AGENTS:
+            update_kwargs["add_to_set__user_agents"] = user_agent
         type(self).objects(id=self.id).update_one(**update_kwargs)
