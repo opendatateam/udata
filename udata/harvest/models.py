@@ -212,7 +212,13 @@ class HarvestJob(Document):
     data = DictField()
 
     meta = {
-        "indexes": ["-created", "source", ("source", "-created"), "items.dataset"],
+        "indexes": [
+            "-created",
+            "source",
+            ("source", "-created"),
+            "items.dataset",
+            "items.dataservice",
+        ],
         "ordering": ["-created"],
     }
 
