@@ -175,7 +175,7 @@ def clean_es(models=None):
     all_existing_models = {
         index_document.Index.name.lower(): index_document for index_document in ALL_DOCUMENT_CLASSES
     }
-    for model in [model.lower().rstrip("s") for model in models]:
+    for model in [model.lower().removesuffix("s") for model in models]:
         index_document = all_existing_models.get(model)
         if not index_document:
             log.error("Unknown model %s", model)
