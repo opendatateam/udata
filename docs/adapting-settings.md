@@ -36,6 +36,12 @@ The default fallback language when no language prefix is provided in URLs.
 A secret key used as salt for cryptographic parts.
 **You must specify your own secure key and use the same in all your instances**.
 
+### API_TOKEN_SECRET
+
+A secret key used for HMAC-SHA256 hashing of API tokens.
+**You must specify your own secure key, different from `SECRET_KEY`**.
+The app refuses to start without it.
+
 ### SITE_ID
 
 **default**: `'default'`
@@ -564,6 +570,7 @@ DEBUG = True
 SEND_MAIL = False
 
 SECRET_KEY = 'A unique secret key'
+API_TOKEN_SECRET = 'A different unique secret key'
 
 SERVER_NAME = 'www.data.dev'
 

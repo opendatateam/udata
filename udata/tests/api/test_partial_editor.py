@@ -52,6 +52,9 @@ class AutoAssignWithoutRequestContextTest(DBTestCase):
             json.dump(fixture_data, f)
             f.flush()
             cfg.write(f'MONGODB_HOST = "{self.app.config["MONGODB_HOST"]}"\n')
+            cfg.write(
+                f'API_TOKEN_SECRET = "{self.app.config.get("API_TOKEN_SECRET", "test-secret")}"\n'
+            )
             cfg.flush()
             env = {**os.environ, "UDATA_SETTINGS": cfg.name}
             result = subprocess.run(

@@ -9,6 +9,7 @@ from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 
 from udata import models
+from udata.core.api_token.models import ApiToken
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.features.notifications.models import Notification
@@ -176,6 +177,10 @@ class NotificationConverter(ModelConverter):
     model = Notification
 
 
+class ApiTokenConverter(ModelConverter):
+    model = ApiToken
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = "fr"  # TODO: make it a setting parameter
 
@@ -258,6 +263,7 @@ def init_app(app):
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
+    app.url_map.converters["api_token"] = ApiTokenConverter
 
     app.jinja_env.globals["cdata_url"] = cdata_url
     app.jinja_env.globals["homepage_url"] = homepage_url

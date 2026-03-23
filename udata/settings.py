@@ -199,6 +199,10 @@ class Defaults(object):
 
     STATIC_DIRS = []
 
+    # API Token settings
+    API_TOKEN_PREFIX = "udata_"
+    API_TOKEN_SECRET = ""
+
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
@@ -710,6 +714,7 @@ class Testing(object):
     HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
+    API_TOKEN_SECRET = "test-secret"
     SPAM_WORDS = []
     SPAM_ALLOWED_LANGS = []
     DATASET_HIDDEN_BADGES = []
