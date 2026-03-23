@@ -22,12 +22,7 @@ def notify_potential_spam(sender, **kwargs):
 
 
 def send_message(text: str):
-    """Send a message to a mattermost channel
-
-    Args:
-        text (str): Text to send to a channel
-    """
-    webhook = current_app.config.get("MATTERMOST_WEBHOOK")
+    webhook = current_app.config.get("TCHAP_WEBHOOK")
     if not webhook:
         return
 
