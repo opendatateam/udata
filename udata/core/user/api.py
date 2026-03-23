@@ -262,6 +262,7 @@ class MyOrgInvitationsAPI(API):
                             "role": req.role,
                             "comment": req.comment,
                             "created": req.created,
+                            "assignments": req.assignments or [],
                         }
                     )
 
@@ -277,6 +278,7 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
+        from udata.core.organization.assignment import Assignment
         from udata.core.organization.models import Member, MembershipRequest, Organization
 
         user = current_user._get_current_object()
@@ -295,6 +297,19 @@ class AcceptOrgInvitationAPI(API):
                     org.members.append(member)
                     org.count_members()
                     org.save()
+
+                    if req.assignments:
+                        for subject in req.assignments:
+                            if not subject:
+                                continue
+                            if not hasattr(subject, "organization") or subject.organization != org:
+                                continue
+                            Assignment(
+                                user=user,
+                                organization=org,
+                                subject=subject,
+                            ).save()
+
                     MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))
 

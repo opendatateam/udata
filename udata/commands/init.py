@@ -24,7 +24,7 @@ def init(ctx):
     log.info("Apply DB migrations if needed")
     ctx.invoke(migrate, record=True)
 
-    if current_app.config["SEARCH_SERVICE_API_URL"]:
+    if current_app.config["ELASTICSEARCH_URL"]:
         log.info("Preparing index")
         ctx.invoke(index)
 

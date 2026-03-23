@@ -6,6 +6,14 @@ from udata.core.badges.fields import badge_fields
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
 
+generic_reference_fields = api.model(
+    "GenericReference",
+    {
+        "class": fields.String(attribute=lambda o: o.__class__.__name__),
+        "id": fields.String(attribute=lambda o: str(o.id)),
+    },
+)
+
 org_permissions_fields = api.model(
     "OrganizationPermissions",
     {
@@ -119,6 +127,10 @@ request_fields = api.model(
             description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
         "comment": fields.String(description="A request comment from the user"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 
@@ -131,6 +143,10 @@ invite_fields = api.model(
             description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
         "comment": fields.String(description="Invitation message"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 
@@ -144,6 +160,10 @@ pending_invitation_fields = api.model(
         ),
         "comment": fields.String(description="Invitation message"),
         "created": fields.ISODateTime(description="The invitation creation date", readonly=True),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 

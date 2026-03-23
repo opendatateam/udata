@@ -118,7 +118,7 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
-class HarvestSource(Owned, Document):
+class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
     name = StringField(max_length=255)
     slug = SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True)
     description = StringField()
@@ -212,7 +212,13 @@ class HarvestJob(Document):
     data = DictField()
 
     meta = {
-        "indexes": ["-created", "source", ("source", "-created"), "items.dataset"],
+        "indexes": [
+            "-created",
+            "source",
+            ("source", "-created"),
+            "items.dataset",
+            "items.dataservice",
+        ],
         "ordering": ["-created"],
     }
 

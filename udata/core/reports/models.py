@@ -4,7 +4,14 @@ from bson import DBRef
 from flask import url_for
 from flask_restx import inputs
 from mongoengine import DO_NOTHING, NULLIFY, Q, signals
-from mongoengine.fields import DateTimeField, GenericLazyReferenceField, ReferenceField, StringField
+from mongoengine.fields import (
+    DateTimeField,
+    DictField,
+    GenericLazyReferenceField,
+    ReferenceField,
+    StringField,
+    UUIDField,
+)
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -41,7 +48,7 @@ def filter_by_handled(base_query, filter_value):
         },
     ],
 )
-class Report(Document):
+class Report(Document[ReportQuerySet]):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
@@ -82,6 +89,19 @@ class Report(Document):
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         allow_null=True,
+    )
+
+    subject_embed_id = field(
+        UUIDField(),
+        allow_null=True,
+        description="UUID of the embedded document within the subject (e.g., a Message within a Discussion)",
+    )
+
+    # Callbacks to execute when report is dismissed (for auto-spam reports)
+    # Format: {"method_name": {"args": [...], "kwargs": {...}}}
+    callbacks = field(
+        DictField(default=dict),
+        readonly=True,
     )
 
     meta = {

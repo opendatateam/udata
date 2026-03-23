@@ -720,7 +720,11 @@ class DateRangeField(Field):
                     end=end,
                 )
             elif "start" in value:
+                if not isinstance(value["start"], str):
+                    raise validators.ValidationError(_("Date must be a string"))
                 if value.get("end", None):
+                    if not isinstance(value["end"], str):
+                        raise validators.ValidationError(_("Date must be a string"))
                     end = parse(value["end"], yearfirst=True).date()
                 else:
                     end = None

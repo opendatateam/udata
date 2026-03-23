@@ -16,7 +16,7 @@ from udata.api_fields import field
 from udata.core.activity.models import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.models import SpatialCoverage
+from udata.core.spatial.models import SpatialCoverage
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
@@ -73,7 +73,7 @@ class TopicElement(Auditable, Document):
         cls.on_delete.send(document)
 
 
-class Topic(Datetimed, Auditable, Linkable, Document, Owned):
+class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
     name = field(StringField(required=True))
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),

@@ -108,6 +108,21 @@ class DateRangeFieldTest(TestCase):
         self.assertIn("daterange", form.errors)
         self.assertEqual(len(form.errors["daterange"]), 1)
 
+    def test_with_integer_dates_from_json(self):
+        Fake, FakeForm = self.factory()
+
+        form = FakeForm.from_json(
+            {
+                "daterange": {
+                    "start": 2022,
+                    "end": 2023,
+                }
+            }
+        )
+
+        form.validate()
+        self.assertIn("daterange", form.errors)
+
     def test_with_invalid_json_format(self):
         Fake, FakeForm = self.factory()
         start = date.today() - timedelta(days=1)

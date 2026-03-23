@@ -377,12 +377,14 @@ post_save.connect(User.post_save, sender=User)
 def match_email_invitations(sender, **kwargs):
     """Match pending email invitations when user registers."""
     from udata.core.organization.models import Organization
+    from udata.core.organization.notifications import _create_membership_notification
 
     user = sender
     for org in Organization.objects(
         requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
     ):
         modified = False
+        matched_requests = []
         for req in org.requests:
             if (
                 req.kind == "invitation"
@@ -393,8 +395,11 @@ def match_email_invitations(sender, **kwargs):
                 req.user = user
                 req.email = None
                 modified = True
+                matched_requests.append(req)
         if modified:
             org.save()
+            for req in matched_requests:
+                _create_membership_notification(req, org, user)
 
 
 User.on_create.connect(match_email_invitations)
