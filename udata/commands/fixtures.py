@@ -94,8 +94,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "preview_url",
         "permissions",
     ],
-    "discussion": ["subject", "url", "self_web_url", "class", "permissions"],
-    "discussion_message": ["permissions"],
+    "discussion": ["subject", "url", "self_web_url", "class", "permissions", "spam"],
+    "discussion_message": ["permissions", "spam"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
@@ -410,9 +410,11 @@ def import_fixtures(source):
                 discussion = remove_unwanted_keys(discussion, "discussion")
                 discussion["closed_by"] = get_or_create(discussion, "closed_by", User, UserFactory)
                 for message in discussion["discussion"]:
+                    message = remove_unwanted_keys(message, "discussion_message")
                     message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
                 discussion["discussion"] = [
-                    MessageDiscussionFactory(**message) for message in discussion["discussion"]
+                    MessageDiscussionFactory(**remove_unwanted_keys(message, "discussion_message"))
+                    for message in discussion["discussion"]
                 ]
                 discussion["user"] = get_or_create_user(discussion)
                 DiscussionFactory(**discussion, subject=dataset)
