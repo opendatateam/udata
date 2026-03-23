@@ -216,7 +216,12 @@ class ApiTokenListAPI(API):
         data = flask_request.json or {}
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
-        token, plaintext = ApiToken.generate(user, name=data.get("name"), expires_at=expires_at)
+        token, plaintext = ApiToken.generate(
+            user,
+            name=data.get("name"),
+            expires_at=expires_at,
+            scopes=data.get("scopes"),
+        )
         token._plaintext = plaintext
         return token, 201
 

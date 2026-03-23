@@ -45,7 +45,7 @@ def migrate(db):
                 "token_prefix": prefix,
                 "user": user["_id"],
                 "name": "Migrated API key",
-                "scope": "admin",
+                "scopes": ["admin"],
                 "kind": "api_key",
                 "created_at": datetime.now(timezone.utc),
                 "last_used_at": None,

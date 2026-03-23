@@ -46,10 +46,9 @@ class ApiToken(db.Document):
         db.StringField(max_length=255),
         description="User-given label for this token",
     )
-    scope = field(
-        db.StringField(choices=["admin"], default="admin"),
-        readonly=True,
-        description="Token scope",
+    scopes = field(
+        db.ListField(db.StringField(choices=["admin"]), default=lambda: ["admin"]),
+        description="Token scopes",
     )
     kind = field(
         db.StringField(choices=["api_key"], default="api_key"),
@@ -92,7 +91,7 @@ class ApiToken(db.Document):
     }
 
     @classmethod
-    def generate(cls, user, name=None, expires_at=None):
+    def generate(cls, user, name=None, expires_at=None, scopes=None):
         """Create a new token. Returns (ApiToken, plaintext_token)."""
         prefix = current_app.config.get("API_TOKEN_PREFIX", "udata_")
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
@@ -105,6 +104,7 @@ class ApiToken(db.Document):
             user=user,
             name=name,
             expires_at=expires_at,
+            scopes=scopes or ["admin"],
         )
         token.save()
         return token, plaintext
