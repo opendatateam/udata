@@ -7,12 +7,17 @@ set -e
 
 DRY_RUN=false
 BREAKING_PRS=""
+EDIT_CHANGELOG=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --dry-run)
             DRY_RUN=true
+            shift
+            ;;
+        --edit-changelog)
+            EDIT_CHANGELOG=true
             shift
             ;;
         --breaking)
@@ -278,6 +283,12 @@ $NEW_ENTRY" > CHANGELOG.md
 fi
 
 echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
+
+if [ "$EDIT_CHANGELOG" = true ]; then
+    ${EDITOR:-vi} CHANGELOG.md
+    # Re-extract release notes from the edited changelog (content between first and second ## headings)
+    RELEASE_NOTES=$(sed -n '/^## '"$VERSION"'/,/^## /{/^## /!p}' CHANGELOG.md)
+fi
 
 # Commit the CHANGELOG update
 git add CHANGELOG.md
