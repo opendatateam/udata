@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to create a git tag and update CHANGELOG.md
-# Usage: ./tag-version.sh <version> [--dry-run] [--breaking PR1,PR2,...]
+# Usage: ./tag-version.sh <version> [--dry-run] [--edit-changelog] [--breaking PR1,PR2,...]
 
 set -e
 
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+    echo "Usage: $0 <version> [--dry-run] [--edit-changelog] [--breaking PR1,PR2,...]"
     echo "Example: $0 11.0.1"
     echo "Example: $0 11.0.1 --dry-run"
     echo "Example: $0 11.0.1 --breaking 3649,3651"
@@ -261,6 +261,9 @@ RELEASE_NOTES="$SORTED_COMMITS"
 if [ "$DRY_RUN" = true ]; then
     echo "Would update CHANGELOG.md with:"
     echo "$NEW_ENTRY"
+    if [ "$EDIT_CHANGELOG" = true ]; then
+        echo "Would open \$EDITOR to edit CHANGELOG.md before committing"
+    fi
     echo "Would run: git add CHANGELOG.md"
     echo "Would run: git commit -m \"Bump version $VERSION\""
     echo "Would run: git tag -a \"v$VERSION\" -m \"Version $VERSION\""
