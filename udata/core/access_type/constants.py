@@ -172,7 +172,7 @@ class InspireLimitationCategory(StrEnum):
     def url(self) -> str:
         return self._url  # type: ignore[misc]
 
-    def localized_label(self, country: str) -> str:
+    def localized_label(self, country: str) -> str | None:
         """
         Returns the technical label that should be used.
         At the INSPIRE level, the labels are the following: https://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess
@@ -189,5 +189,5 @@ class InspireLimitationCategory(StrEnum):
     @classmethod
     def get_category_from_localized_label(cls, label: str, country: str):
         for member in cls:
-            if slugify(member.localized_label(country)) == slugify(label):
+            if slugify(member.localized_label(country) or "") == slugify(label):
                 return member

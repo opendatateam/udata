@@ -154,8 +154,8 @@ def access_right_to_rdf(dataset: Dataset, graph: Graph | None = None):
     Build the access rights from a dataset.
     Cardinality is 0..1 for accessRights.
     """
-    graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset.access_type:
+        graph = graph or Graph(namespace_manager=namespace_manager)
         node = graph.resource(URIRef(AccessType(dataset.access_type).url))
         node.set(RDF.type, DCT.RightsStatement)
         return node
@@ -694,14 +694,15 @@ def infer_dataset_access_rights(
     if current_app.config["INSPIRE_SUPPORT"]:
         # Try to match access rights to known inspire access rights limitation categories
         country = current_app.config["DEFAULT_COUNTRY_CODE"]
-        if access_right_category := next(
-            (
+        access_right_categories = set(
+            [
                 InspireLimitationCategory.get_category_from_localized_label(access_right, country)
                 for access_right in dataset_access_rights
-            ),
-            None,
-        ):
-            return dataset_access_rights, AccessType.RESTRICTED, access_right_category
+            ]
+        )
+        access_right_categories.discard(None)
+        if len(access_right_categories) == 1:
+            return dataset_access_rights, AccessType.RESTRICTED, access_right_categories.pop()
 
     return dataset_access_rights, None, None
 

@@ -326,12 +326,12 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["id"], str(schema_version2_dataset.id))
 
         # filter on access rights open (default)
-        response = self.get(url_for("api.datasets", access_type="open"))
+        response = self.get(url_for("api.datasets", access_type=AccessType.OPEN))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), total_datasets - 1)
 
         # filter on access rights restricted
-        response = self.get(url_for("api.datasets", access_type="restricted"))
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))

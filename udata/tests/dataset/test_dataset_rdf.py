@@ -227,8 +227,6 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert r.value(DCT.issued) == Literal(resource.harvest.issued_at)
         assert r.value(DCT.modified) == Literal(resource.harvest.modified_at)
         assert r.value(DCT.license).identifier == URIRef(license.url)
-        # We don't need a duplicate DCT.rights if we already have a DCT.license
-        # assert r.value(DCT.rights) == Literal(license.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)
         assert r.value(DCAT.accessURL).identifier == URIRef(permalink)
         assert r.value(DCAT.byteSize) == Literal(resource.filesize)
