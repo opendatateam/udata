@@ -1,5 +1,28 @@
 # Changelog
 
+## 16.0.0 (2026-03-24)
+
+- **feat!: new api key system ([#3636](https://github.com/opendatateam/udata/pull/3636))**
+  - Replace the single User.apikey (JWS token stored on the user document)
+  with a dedicated ApiToken collection supporting multiple tokens per
+  user, HMAC-SHA256 hashed storage, revocation, expiration, and tracking
+  - New API endpoints: POST /api/1/me/api_tokens/ (create), GET
+  /api/1/me/api_tokens/ (list active), DELETE /api/1/me/api_tokens/<id>/ (revoke)
+  — the plaintext token is returned only once at creation
+  - Remove the apikey field from the User model and the me_fields /
+  apikey_fields API serializers, along with the old /me/apikey/ endpoint
+  - Add an idempotent migration that hashes existing JWS apikeys with
+  HMAC-SHA256 into the new api_token collection, preserving backward
+  compatibility for existing consumers
+  - Introduce API_TOKEN_SECRET and API_TOKEN_PREFIX settings for token
+  hashing and secret-scanning tool integration
+- chore(harvest): add harvest job dataservice index ([#3701](https://github.com/opendatateam/udata/pull/3701))
+- feat: allow editing the changelog before pushing ([#3705](https://github.com/opendatateam/udata/pull/3705))
+- feat: prevent calling tag-version.sh --help ([#3704](https://github.com/opendatateam/udata/pull/3704))
+- feat(search): add clean-es commands ([#3700](https://github.com/opendatateam/udata/pull/3700))
+- refactor: remove SpamInfo in profit of Report ([#3556](https://github.com/opendatateam/udata/pull/3556))
+
+
 ## 15.4.1 (2026-03-19)
 
 - fix: sending int for daterange ([#3693](https://github.com/opendatateam/udata/pull/3693))
