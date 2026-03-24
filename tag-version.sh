@@ -11,6 +11,13 @@ BREAKING_PRS=""
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        -h|--help)
+            echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+            echo "Example: $0 11.0.1"
+            echo "Example: $0 11.0.1 --dry-run"
+            echo "Example: $0 11.0.1 --breaking 3649,3651"
+            exit 0
+            ;;
         --dry-run)
             DRY_RUN=true
             shift
@@ -18,6 +25,11 @@ while [[ $# -gt 0 ]]; do
         --breaking)
             BREAKING_PRS="$2"
             shift 2
+            ;;
+        -*)
+            echo "Error: Unknown option '$1'"
+            echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+            exit 1
             ;;
         *)
             VERSION="$1"
@@ -31,6 +43,12 @@ if [ -z "$VERSION" ]; then
     echo "Example: $0 11.0.1"
     echo "Example: $0 11.0.1 --dry-run"
     echo "Example: $0 11.0.1 --breaking 3649,3651"
+    exit 1
+fi
+
+if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Invalid version format '$VERSION'"
+    echo "Version must follow semver format: MAJOR.MINOR.PATCH (e.g., 11.0.1)"
     exit 1
 fi
 
