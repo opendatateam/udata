@@ -1,13 +1,13 @@
 import logging
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 
 import click
-import requests
 from flask import current_app
 
 from udata.commands import cli
-from udata.search import adapter_catalog
+from udata.search import adapter_catalog, get_elastic_client
+from udata_search_service.search_clients import ALL_DOCUMENT_CLASSES
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +30,13 @@ def iter_adapters():
     """Iter over adapter in predictable way"""
     adapters = adapter_catalog.values()
     return sorted(adapters, key=lambda a: a.model.__name__)
+
+
+def index_alias(model_name):
+    prefix = current_app.config["ELASTICSEARCH_INDEX_BASENAME"]
+    if prefix:
+        return f"{prefix}-{model_name}"
+    return model_name
 
 
 def get_date_property(model_name: str) -> str:
@@ -57,51 +64,64 @@ def iter_qs(qs, adapter):
 def index_model(adapter, start, reindex=False, from_datetime=None):
     """Index or unindex all objects given a model"""
     model = adapter.model
-    search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
     log.info("Indexing %s objects", model.__name__)
     model_name = adapter.model.__name__.lower()
     qs = model.objects
     if from_datetime:
         date_property = get_date_property(model_name)
         qs = qs.filter(**{f"{date_property}__gte": from_datetime})
-    index_name = model_name
+
+    es_client = get_elastic_client()
+    service = adapter.service_class(es_client)
+
+    index_name = None
     if reindex:
-        index_name += "-" + default_index_suffix_name(start)
-        payload = {"index": index_name}
-        url = f"{search_service_url}/create-index"
-        r = requests.post(url, json=payload)
-        r.raise_for_status()
+        suffix = default_index_suffix_name(start)
+        alias = index_alias(model_name)
+        index_name = f"{alias}-{suffix}"
+        es_client.es.indices.create(index=index_name)
 
     count = qs.count()
     label = f"Indexing {model.__name__}"
     with click.progressbar(iter_qs(qs, adapter), length=count, label=label) as docs:
         for indexable, doc in docs:
-            with requests.Session() as session:
-                try:
-                    if indexable:
-                        payload = {"document": doc, "index": index_name}
-                        url = f"{search_service_url}/{model_name}s/index"
-                        r = session.post(url, json=payload)
-                        r.raise_for_status()
-                    elif not indexable and not reindex:
-                        url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
-                        r = session.delete(url)
-                        if r.status_code != 404:  # We don't want to raise on 404
-                            r.raise_for_status()
-                    else:
-                        continue
-                except Exception as e:
-                    log.error(
-                        'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
-                    )
+            try:
+                if indexable:
+                    entity = adapter.consumer_class.load_from_dict(doc)
+                    service.feed(entity, index=index_name)
+                elif not reindex:
+                    service.delete_one(doc["id"])
+            except Exception as e:
+                log.error(
+                    'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
+                )
 
 
 def finalize_reindex(models, start):
     try:
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/set-index-alias"
-        payload = {"index_suffix_name": default_index_suffix_name(start), "indices": models}
-        r = requests.post(url, json=payload)
-        r.raise_for_status()
+        es = get_elastic_client().es
+        suffix = default_index_suffix_name(start)
+        for adapter in iter_adapters():
+            model_name = adapter.model.__name__.lower()
+            if models and model_name not in models:
+                continue
+            alias = index_alias(model_name)
+            new_index = f"{alias}-{suffix}"
+
+            actions = []
+            previous_indices = []
+            try:
+                previous_indices = list(es.indices.get_alias(name=alias).keys())
+                for old_index in previous_indices:
+                    actions.append({"remove": {"index": old_index, "alias": alias}})
+            except Exception:
+                pass
+            actions.append({"add": {"index": new_index, "alias": alias}})
+            es.indices.update_aliases(body={"actions": actions})
+
+            for old_index in previous_indices:
+                if old_index != new_index:
+                    es.indices.delete(index=old_index)
     except Exception:
         log.exception("Unable to set alias for index")
 
@@ -122,6 +142,48 @@ def finalize_reindex(models, start):
     )
 
 
+@grp.command("init-es")
+def init_es():
+    """Create Elasticsearch index templates and indices."""
+    if not current_app.config["ELASTICSEARCH_URL"]:
+        log.error("Missing ELASTICSEARCH_URL configuration")
+        sys.exit(-1)
+
+    es_client = get_elastic_client()
+    es_client.init_indices()
+    log.info("Elasticsearch indices initialized")
+
+
+@grp.command("clean-es")
+@click.argument("models", nargs=-1, metavar="[<model> ...]")
+def clean_es(models=None):
+    """Clear existing Elasticsearch indices.
+
+    If no models are specified, all indices are removed.
+    """
+    if not current_app.config["ELASTICSEARCH_URL"]:
+        log.error("Missing ELASTICSEARCH_URL configuration")
+        sys.exit(-1)
+
+    es_client = get_elastic_client()
+
+    if not models:
+        es_client.delete_indices()
+        log.info("All indices cleared. You can reinitialize them with `udata search init-es`.")
+        return
+
+    all_existing_models = {
+        index_document.Index.name.lower(): index_document for index_document in ALL_DOCUMENT_CLASSES
+    }
+    for model in [model.lower().removesuffix("s") for model in models]:
+        index_document = all_existing_models.get(model)
+        if not index_document:
+            log.error("Unknown model %s", model)
+            sys.exit(-1)
+        es_client.delete_index(index_document)
+    log.info("Selected indices cleared. You can reinitialize them with `udata search init-es`.")
+
+
 @grp.command()
 @click.argument("models", nargs=-1, metavar="[<model> ...]")
 @click.option("-r", "--reindex", default=False, type=bool)
@@ -137,11 +199,11 @@ def index(models=None, reindex=True, from_datetime=None):
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
     """
-    if not current_app.config["SEARCH_SERVICE_API_URL"]:
-        log.error("Missing URL for search service")
+    if not current_app.config["ELASTICSEARCH_URL"]:
+        log.error("Missing ELASTICSEARCH_URL configuration")
         sys.exit(-1)
 
-    start = datetime.utcnow()
+    start = datetime.now(UTC)
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 

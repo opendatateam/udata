@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
@@ -11,6 +11,7 @@ from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
     GenericEmbeddedDocumentField,
+    GenericReferenceField,
     ListField,
     MapField,
     ReferenceField,
@@ -38,6 +39,7 @@ from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import cdata_url
 
 from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
@@ -77,7 +79,7 @@ class Team(EmbeddedDocument):
 class Member(EmbeddedDocument):
     user = ReferenceField("User")
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = DateTimeField(default=datetime.utcnow, required=True)
+    since = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     @property
     def label(self):
@@ -105,7 +107,7 @@ class MembershipRequest(EmbeddedDocument):
     user = ReferenceField("User")
     status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
 
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     handled_on = DateTimeField()
     handled_by = ReferenceField("User")
@@ -118,6 +120,7 @@ class MembershipRequest(EmbeddedDocument):
     email = StringField()  # For inviting non-registered users by email
     created_by = ReferenceField("User")  # Admin who created the invitation
     role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    assignments = ListField(GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES))
 
     after_create = Signal()
     after_handle = Signal()
@@ -162,7 +165,14 @@ class OrganizationBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, Datetimed, Document):
+class Organization(
+    Auditable,
+    WithMetrics,
+    OrganizationBadgeMixin,
+    Linkable,
+    Datetimed,
+    Document[OrganizationQuerySet],
+):
     name = field(StringField(required=True), show_as_ref=True)
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(

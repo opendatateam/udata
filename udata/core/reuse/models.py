@@ -18,15 +18,16 @@ from werkzeug.utils import cached_property
 
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
+from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
+from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
@@ -86,7 +87,9 @@ class ReuseBadgeMixin(BadgeMixin):
     nested_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document):
+class Reuse(
+    Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document[ReuseQuerySet]
+):
     title = field(
         StringField(required=True),
         sortable=True,

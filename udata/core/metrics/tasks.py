@@ -2,6 +2,7 @@ import logging
 import time
 from collections.abc import Iterator
 from functools import wraps
+from typing import Any
 
 import requests
 from flask import current_app
@@ -30,7 +31,7 @@ def log_timing(func):
     return timeit_wrapper
 
 
-def save_model(model: Document, model_id: str, metrics: dict[str, int]) -> None:
+def save_model(model: type[Document[Any]], model_id: str, metrics: dict[str, int]) -> None:
     try:
         result = model.objects(id=model_id).update(
             **{f"set__metrics__{key}": value for key, value in metrics.items()}

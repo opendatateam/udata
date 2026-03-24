@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from blinker import Signal
 from flask import url_for
@@ -22,16 +22,18 @@ from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
+from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.models import Discussion
+from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
@@ -184,7 +186,13 @@ def filter_by_reuse(base_query, filter_value):
     ],
 )
 class Dataservice(
-    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, Document
+    Auditable,
+    WithMetrics,
+    WithAccessType,
+    DataserviceBadgeMixin,
+    Linkable,
+    Owned,
+    Document[DataserviceQuerySet],
 ):
     meta = {
         "indexes": [
@@ -284,13 +292,17 @@ class Dataservice(
     )
 
     created_at = field(
-        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        DateTimeField(
+            verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True
+        ),
         readonly=True,
         sortable="created",
     )
     metadata_modified_at = field(
         DateTimeField(
-            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+            verbose_name=_("Last modification date"),
+            default=lambda: datetime.now(UTC),
+            required=True,
         ),
         readonly=True,
         sortable="last_modified",

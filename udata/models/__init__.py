@@ -7,11 +7,13 @@ from udata.core.badges.models import *  # noqa
 from udata.core.discussions.models import *  # noqa
 from udata.core.followers.models import *  # noqa
 from udata.core.user.models import *  # noqa
+from udata.core.api_token.models import *  # noqa
 from udata.core.organization.models import *  # noqa
 from udata.core.contact_point.models import *  # noqa
-from udata.core.site.models import *  # noqa
 from udata.core.dataset.models import *  # noqa
+from udata.core.dataservices.models import *  # noqa
 from udata.core.reuse.models import *  # noqa
+from udata.core.site.models import *  # noqa
 from udata.core.activity.models import *  # noqa
 from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
@@ -19,7 +21,6 @@ from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
 from udata.core.spam.models import *  # noqa
 from udata.core.reports.models import *  # noqa
-from udata.core.dataservices.models import *  # noqa
 from udata.core.pages.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa

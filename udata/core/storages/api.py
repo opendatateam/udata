@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import json
 from werkzeug.datastructures import FileStorage
@@ -103,7 +103,7 @@ def save_chunk(file, args):
                 "uuid": str(args["uuid"]),
                 "filename": args["filename"],
                 "totalparts": args["totalparts"],
-                "lastchunk": datetime.utcnow(),
+                "lastchunk": datetime.now(UTC),
             }
         ),
         overwrite=True,

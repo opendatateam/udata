@@ -1,13 +1,10 @@
-import json
 import logging
 from copy import copy
-from datetime import datetime
+from datetime import UTC, datetime, timezone
 from itertools import chain
-from time import time
 
-from authlib.jose import JsonWebSignature
 from blinker import Signal
-from flask import current_app, url_for
+from flask import url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument
@@ -95,9 +92,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
 
     prefered_language = field(StringField())
 
-    apikey = field(StringField())
-
-    created_at = field(DateTimeField(default=datetime.utcnow, required=True), auditable=False)
+    created_at = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True), auditable=False
+    )
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
@@ -143,7 +140,6 @@ class User(WithMetrics, UserMixin, Linkable, Document):
             },
             "-created_at",
             "slug",
-            "apikey",
         ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
@@ -236,21 +232,6 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     def page(self, *args, **kwargs):
         return self.self_web_url(*args, **kwargs)
 
-    def generate_api_key(self):
-        payload = {
-            "user": str(self.id),
-            "time": time(),
-        }
-        s = JsonWebSignature(algorithms=["HS512"]).serialize_compact(
-            {"alg": "HS512"},
-            json.dumps(payload, separators=(",", ":")),
-            current_app.config["SECRET_KEY"],
-        )
-        self.apikey = s.decode()
-
-    def clear_api_key(self):
-        self.apikey = None
-
     @classmethod
     def get(cls, id_or_slug):
         obj = cls.objects(slug=id_or_slug).first()
@@ -319,9 +300,13 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         self.website = None
         self.about = None
         self.extras = None
-        self.apikey = None
-        self.deleted = datetime.utcnow()
+        self.deleted = datetime.now(UTC)
         self.save()
+        from udata.core.api_token.models import ApiToken
+
+        ApiToken.objects(user=self, revoked_at=None).update(
+            set__revoked_at=datetime.now(timezone.utc)
+        )
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self
@@ -392,12 +377,14 @@ post_save.connect(User.post_save, sender=User)
 def match_email_invitations(sender, **kwargs):
     """Match pending email invitations when user registers."""
     from udata.core.organization.models import Organization
+    from udata.core.organization.notifications import _create_membership_notification
 
     user = sender
     for org in Organization.objects(
         requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
     ):
         modified = False
+        matched_requests = []
         for req in org.requests:
             if (
                 req.kind == "invitation"
@@ -408,8 +395,11 @@ def match_email_invitations(sender, **kwargs):
                 req.user = user
                 req.email = None
                 modified = True
+                matched_requests.append(req)
         if modified:
             org.save()
+            for req in matched_requests:
+                _create_membership_notification(req, org, user)
 
 
 User.on_create.connect(match_email_invitations)

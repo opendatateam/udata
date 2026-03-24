@@ -1,10 +1,17 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bson import DBRef
 from flask import url_for
 from flask_restx import inputs
 from mongoengine import DO_NOTHING, NULLIFY, Q, signals
-from mongoengine.fields import DateTimeField, GenericLazyReferenceField, ReferenceField, StringField
+from mongoengine.fields import (
+    DateTimeField,
+    DictField,
+    GenericLazyReferenceField,
+    ReferenceField,
+    StringField,
+    UUIDField,
+)
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -41,7 +48,7 @@ def filter_by_handled(base_query, filter_value):
         },
     ],
 )
-class Report(Document):
+class Report(Document[ReportQuerySet]):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
@@ -70,7 +77,7 @@ class Report(Document):
     )
 
     reported_at = field(
-        DateTimeField(default=datetime.utcnow, required=True),
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
         sortable=True,
     )
@@ -82,6 +89,19 @@ class Report(Document):
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         allow_null=True,
+    )
+
+    subject_embed_id = field(
+        UUIDField(),
+        allow_null=True,
+        description="UUID of the embedded document within the subject (e.g., a Message within a Discussion)",
+    )
+
+    # Callbacks to execute when report is dismissed (for auto-spam reports)
+    # Format: {"method_name": {"args": [...], "kwargs": {...}}}
+    callbacks = field(
+        DictField(default=dict),
+        readonly=True,
     )
 
     meta = {
@@ -100,7 +120,7 @@ class Report(Document):
         """
         if hasattr(document, "deleted") and document.deleted:
             Report.objects(subject=document, subject_deleted_at=None).update(
-                subject_deleted_at=datetime.utcnow
+                subject_deleted_at=datetime.now(UTC)
             )
 
     @classmethod
@@ -112,7 +132,7 @@ class Report(Document):
         # because the document doesn't exist anymore…
         Report.objects(
             subject=DBRef(sender.__name__.lower(), document.id), subject_deleted_at=None
-        ).update(subject_deleted_at=datetime.utcnow)
+        ).update(subject_deleted_at=datetime.now(UTC))
 
 
 for model in REPORTABLE_MODELS:

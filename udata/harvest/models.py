@@ -1,6 +1,6 @@
 import logging
 from collections import OrderedDict
-from datetime import datetime
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from mongoengine import CASCADE, NULLIFY, EmbeddedDocument
@@ -66,7 +66,7 @@ DEFAULT_HARVEST_ITEM_STATUS = "pending"
 class HarvestError(EmbeddedDocument):
     """Store harvesting errors"""
 
-    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     message = StringField()
     details = StringField()
 
@@ -84,7 +84,7 @@ class HarvestItem(EmbeddedDocument):
     status = StringField(
         choices=list(HARVEST_ITEM_STATUS), default=DEFAULT_HARVEST_ITEM_STATUS, required=True
     )
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     started = DateTimeField()
     ended = DateTimeField()
     errors = ListField(EmbeddedDocumentField(HarvestError))
@@ -118,7 +118,7 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
-class HarvestSource(Owned, Document):
+class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
     name = StringField(max_length=255)
     slug = SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True)
     description = StringField()
@@ -126,7 +126,7 @@ class HarvestSource(Owned, Document):
     backend = StringField(required=True)
     config = DictField()
     periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=NULLIFY)
-    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     frequency = StringField(
         choices=list(HARVEST_FREQUENCIES), default=DEFAULT_HARVEST_FREQUENCY, required=True
     )
@@ -200,7 +200,7 @@ class HarvestSource(Owned, Document):
 class HarvestJob(Document):
     """Keep track of harvestings"""
 
-    created = DateTimeField(default=datetime.utcnow, required=True)
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     started = DateTimeField()
     ended = DateTimeField()
     status = StringField(
@@ -212,7 +212,13 @@ class HarvestJob(Document):
     data = DictField()
 
     meta = {
-        "indexes": ["-created", "source", ("source", "-created"), "items.dataset"],
+        "indexes": [
+            "-created",
+            "source",
+            ("source", "-created"),
+            "items.dataset",
+            "items.dataservice",
+        ],
         "ordering": ["-created"],
     }
 
@@ -223,7 +229,7 @@ def archive_harvested_dataset(dataset, reason, dryrun=False):
     If `dryrun` is True, the dataset is not saved but validated only.
     """
     log.debug("Archiving dataset %s", dataset.id)
-    archival_date = datetime.utcnow()
+    archival_date = datetime.now(UTC)
     dataset.archived = archival_date
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()
@@ -241,7 +247,7 @@ def archive_harvested_dataservice(dataservice, reason, dryrun=False):
     If `dryrun` is True, the dataservice is not saved but validated only.
     """
     log.debug("Archiving dataservice %s", dataservice.id)
-    archival_date = datetime.utcnow()
+    archival_date = datetime.now(UTC)
     dataservice.archived_at = archival_date
     if not dataservice.harvest:
         dataservice.harvest = HarvestDataserviceMetadata()

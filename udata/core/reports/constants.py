@@ -11,6 +11,7 @@ REASON_ILLEGAL_CONTENT = "illegal_content"
 REASON_OTHERS = "others"
 REASON_SECURITY = "security"
 REASON_SPAM = "spam"
+REASON_AUTO_SPAM = "auto_spam"  # Auto-detected spam (not user-reported)
 
 
 def reports_reasons_translations() -> list:
@@ -19,6 +20,7 @@ def reports_reasons_translations() -> list:
     at the start of the app.
     """
     return [
+        {"value": REASON_AUTO_SPAM, "label": _("Auto-detected spam")},
         {"value": REASON_EXPLICIT_CONTENT, "label": _("Explicit content")},
         {"value": REASON_ILLEGAL_CONTENT, "label": _("Illegal content")},
         {"value": REASON_OTHERS, "label": _("Others")},

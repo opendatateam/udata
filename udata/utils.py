@@ -4,7 +4,7 @@ import logging
 import math
 import re
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
 from typing import Any, Hashable, overload
@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
 import factory
+import requests
 from bson import ObjectId
 from bson.errors import InvalidId
 from dateutil.parser import ParserError
@@ -237,13 +238,16 @@ def safe_harvest_datetime(value: Any, field: str, refuse_future: bool = False) -
     except ParserError:
         log.warning(f"Unparseable {field} value: '{value}'")
         return None
-    if refuse_future and parsed and parsed > datetime.utcnow():
-        log.warning(f"Future {field} value: '{value}'")
-        return None
+    if refuse_future and parsed:
+        # Compare with naive datetime (MongoEngine stores naive datetimes)
+        now_naive = datetime.now(UTC).replace(tzinfo=None)
+        if parsed > now_naive:
+            log.warning(f"Future {field} value: '{value}'")
+            return None
     return parsed
 
 
-def to_iso(dt: date | datetime) -> str | None:
+def to_iso(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 string
 
@@ -255,7 +259,15 @@ def to_iso(dt: date | datetime) -> str | None:
         return to_iso_date(dt)
 
 
-def to_iso_date(dt: date | datetime) -> str | None:
+@overload
+def to_iso_date(dt: date | datetime) -> str: ...
+
+
+@overload
+def to_iso_date(dt: None) -> None: ...
+
+
+def to_iso_date(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 date string.
 
@@ -265,7 +277,15 @@ def to_iso_date(dt: date | datetime) -> str | None:
         return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
 
 
-def to_iso_datetime(dt: date | datetime) -> str | None:
+@overload
+def to_iso_datetime(dt: date | datetime) -> str: ...
+
+
+@overload
+def to_iso_datetime(dt: None) -> None: ...
+
+
+def to_iso_datetime(dt: date | datetime | None) -> str | None:
     """
     Format a date or datetime into an ISO-8601 datetime string.
 
@@ -437,7 +457,7 @@ def get_rss_feed_list(queryset: BaseQuerySet, created_at_field: str) -> list[Any
 
     certifed_orgs = Organization.objects(badges__kind=CERTIFIED).only("id")
 
-    created_delay = datetime.utcnow() - timedelta(
+    created_delay = datetime.now(UTC) - timedelta(
         hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
     )
     elements_with_delay = list(
@@ -478,3 +498,12 @@ def wants_json() -> bool:
         return True
 
     return request.accept_mimetypes.best == "application/json"
+
+
+def raise_if_redirect(response):
+    # Raise an error if response is a redirect
+    if 300 <= response.status_code < 400:
+        raise requests.exceptions.HTTPError(
+            f"Redirect ({response.status_code}) not allowed: {response.url} -> {response.headers.get('Location')}",
+            response=response,
+        )

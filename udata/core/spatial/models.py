@@ -40,7 +40,7 @@ class GeoZoneQuerySet(UDataQuerySet):
         return result.id if id_only and result else result
 
 
-class GeoZone(WithMetrics, Document):
+class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     SEPARATOR = ":"
 
     id = StringField(primary_key=True)

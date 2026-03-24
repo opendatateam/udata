@@ -1,7 +1,7 @@
 import collections
 import gzip
 import os
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
@@ -14,6 +14,7 @@ from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import INSPIRE
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
 from udata.core.pages.models import Page
@@ -69,6 +70,8 @@ def purge_datasets(self):
         )
         # Remove associated Transfers
         Transfer.objects(subject=dataset).delete()
+        # Remove assignments
+        Assignment.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
@@ -122,7 +125,7 @@ def get_or_create_resource(r_info, model, dataset):
 
 
 def store_resource(csvfile, model, dataset):
-    timestr = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    timestr = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     filename = "export-%s-%s.csv" % (model, timestr)
     prefix = "/".join((dataset.slug, timestr))
     storage = storages.resources
@@ -174,7 +177,7 @@ def export_csv_for_model(model, dataset, replace: bool = False):
         if created:
             dataset.add_resource(resource)
         else:
-            dataset.last_modified_internal = datetime.utcnow()
+            dataset.last_modified_internal = datetime.now(UTC)
             dataset.save()
         # remove previous catalog if exists and replace is True
         if replace and fs_filename_to_remove:

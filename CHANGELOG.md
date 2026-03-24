@@ -1,5 +1,40 @@
 # Changelog
 
+## 15.4.1 (2026-03-19)
+
+- fix: sending int for daterange ([#3693](https://github.com/opendatateam/udata/pull/3693))
+- fix: topic search sort ([#3689](https://github.com/opendatateam/udata/pull/3689))
+
+
+## 15.4.0 (2026-03-19)
+
+- feat: partial editors ([#3668](https://github.com/opendatateam/udata/pull/3668))
+- feat: update translations for partial editor ([#3696](https://github.com/opendatateam/udata/pull/3696))
+- fix: circular imports in tests ([#3690](https://github.com/opendatateam/udata/pull/3690))
+- fix: import-fixture broken following partial editors change ([#3692](https://github.com/opendatateam/udata/pull/3692))
+- fix: shadowing translation function ([#3698](https://github.com/opendatateam/udata/pull/3698))
+- test: update ElasticSearch version in CI ([#3697](https://github.com/opendatateam/udata/pull/3697))
+
+
+## 15.3.0 (2026-03-16)
+
+- chore: working on types ([#3677](https://github.com/opendatateam/udata/pull/3677))
+- feat: create notification when matching invitation after account creation ([#3686](https://github.com/opendatateam/udata/pull/3686))
+- feat: include `udata-search-service` inside `udata` ([#3679](https://github.com/opendatateam/udata/pull/3679))
+- feat(storage): upgrade flask storage to add S3 extra args ([#3687](https://github.com/opendatateam/udata/pull/3687))
+- fix(topics): do not index private topics ([#3688](https://github.com/opendatateam/udata/pull/3688))
+
+
+## 15.2.0 (2026-03-09)
+
+- chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))
+- chore: add hostname resolve in uri validate ([#3682](https://github.com/opendatateam/udata/pull/3682))
+- chore: disallow redirects in harvest actions and dataservice search ([#3683](https://github.com/opendatateam/udata/pull/3683))
+- feat(api): extend Atom feed filters support ([#3676](https://github.com/opendatateam/udata/pull/3676))
+- feat(catalog): add badges in dataset catalog ([#3681](https://github.com/opendatateam/udata/pull/3681))
+- fix: remove datetime.utcnow() deprecation warnings ([#3635](https://github.com/opendatateam/udata/pull/3635))
+
+
 ## 15.1.0 (2026-02-19)
 
 - chore: add types to api fields ([#3670](https://github.com/opendatateam/udata/pull/3670))

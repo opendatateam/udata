@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from mongoengine.errors import ValidationError
@@ -38,7 +38,7 @@ class OrganizationModelTest(DBTestCase):
             HiddenDatasetFactory(organization=org)
         with assert_emit(on_follow):
             follow = Follow.objects.create(
-                following=org, follower=UserFactory(), since=datetime.utcnow()
+                following=org, follower=UserFactory(), since=datetime.now(UTC)
             )
 
         assert org.get_metrics()["datasets"] == 1
@@ -47,16 +47,16 @@ class OrganizationModelTest(DBTestCase):
         assert org.get_metrics()["followers"] == 1
 
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.utcnow()
+            reuse.deleted = datetime.now(UTC)
             reuse.save()
         with assert_emit(Dataservice.on_delete):
-            dataservice.deleted_at = datetime.utcnow()
+            dataservice.deleted_at = datetime.now(UTC)
             dataservice.save()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.utcnow()
+            dataset.deleted = datetime.now(UTC)
             dataset.save()
         with assert_emit(on_unfollow):
-            follow.until = datetime.utcnow()
+            follow.until = datetime.now(UTC)
             follow.save()
 
         assert org.get_metrics()["datasets"] == 0
