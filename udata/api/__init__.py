@@ -353,7 +353,6 @@ def init_app(app):
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
     import udata.core.organization.apiv2  # noqa
-    import udata.core.pages.api  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa

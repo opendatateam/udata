@@ -7,8 +7,11 @@ from udata.core.dataset import tasks
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
+from udata.core.edito_blocs.models import DatasetsListBloc
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
+from udata.core.post.factories import PostFactory
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
+from udata.core.site.factories import SiteFactory
 from udata.core.tags.csv import TagCsvAdapter  # noqa
 from udata.core.topic.models import TopicElement
 from udata.core.user.factories import UserFactory
@@ -84,6 +87,27 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert job.items[0].dataset is None
         assert job.items[1].dataset == dataset_keep
         assert job.items[2].dataset is None
+
+    def test_purge_datasets_cleans_blocs_in_post_and_site(self):
+        dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
+        dataset_keep = Dataset.objects.create(title="keep me")
+
+        bloc = DatasetsListBloc(title="Featured", datasets=[dataset_to_delete, dataset_keep])
+        PostFactory(body_type="blocs", blocs=[bloc])
+        SiteFactory(id="test-site", datasets_blocs=[bloc])
+
+        tasks.purge_datasets()
+
+        from udata.core.post.models import Post
+        from udata.core.site.models import Site
+
+        post = Post.objects.first()
+        assert len(post.blocs[0].datasets) == 1
+        assert post.blocs[0].datasets[0].id == dataset_keep.id
+
+        site = Site.objects.get(id="test-site")
+        assert len(site.datasets_blocs[0].datasets) == 1
+        assert site.datasets_blocs[0].datasets[0].id == dataset_keep.id
 
     def test_purge_datasets_community(self):
         dataset = Dataset.objects.create(title="delete me", deleted="2016-01-01")

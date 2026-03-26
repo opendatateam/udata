@@ -3,6 +3,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     DictField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     IntField,
     ListField,
     ReferenceField,
@@ -12,6 +13,7 @@ from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.models import Dataset
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, Bloc
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.organization.models import Organization
@@ -39,9 +41,9 @@ class Site(WithMetrics, Document):
     configs = DictField()
     themes = DictField()
     settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_page = field(ReferenceField("Page"), attribute="datasets_page.id")
-    reuses_page = field(ReferenceField("Page"), attribute="reuses_page.id")
-    dataservices_page = field(ReferenceField("Page"), attribute="dataservices_page.id")
+    datasets_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    reuses_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    dataservices_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
     __metrics_keys__ = [
         "max_dataset_followers",
@@ -225,6 +227,11 @@ class Site(WithMetrics, Document):
             Discussion.objects(), date_label="created"
         )
         self.save()
+
+
+# Hide blocs from default Site API response — clients can use X-Fields header to include them
+_site_default_mask = ",".join(k for k in Site.__read_fields__ if k not in SITE_BLOCS_FIELDS)
+Site.__read_fields__.__mask__ = _site_default_mask
 
 
 def get_current_site():

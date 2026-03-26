@@ -1,8 +1,8 @@
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.pages.factories import PageFactory
-from udata.core.pages.models import DatasetsListBloc
+from udata.core.edito_blocs.models import DataservicesListBloc, DatasetsListBloc, ReusesListBloc
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
@@ -35,6 +35,16 @@ class PostsAPITest(APITestCase):
 
         assert len(response.json["data"]) == 4
         assert str(draft.id) in [post["id"] for post in response.json["data"]]
+
+    def test_post_api_list_excludes_blocs(self):
+        """Blocs should not be included in the list endpoint"""
+        bloc = DatasetsListBloc(title="Test", datasets=[])
+        PostFactory(body_type="blocs", blocs=[bloc])
+
+        response = self.get(url_for("api.posts"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert "blocs" not in response.json["data"][0]
 
     def test_search_post(self):
         """It should fetch a post list from the API"""
@@ -166,24 +176,30 @@ class PostsAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 3
 
-    def test_post_api_create_with_blocs_body_type_and_page(self):
-        """It should create a post with body_type='blocs' when content_as_page is provided"""
-        page = PageFactory()
-        data = PostFactory.as_dict()
-        data["datasets"] = [str(d.id) for d in data["datasets"]]
-        data["reuses"] = [str(r.id) for r in data["reuses"]]
-        data["body_type"] = "blocs"
-        data["content_as_page"] = str(page.id)
+    def test_post_api_create_with_blocs(self):
+        """It should create a post with body_type='blocs' and inline blocs"""
+        datasets = DatasetFactory.create_batch(2)
         self.login(AdminFactory())
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [
+                {
+                    "class": "DatasetsListBloc",
+                    "title": "Featured datasets",
+                    "datasets": [str(d.id) for d in datasets],
+                }
+            ],
+        }
         response = self.post(url_for("api.posts"), data)
         assert201(response)
-        assert Post.objects.count() == 1
         post = Post.objects.first()
         assert post.body_type == "blocs"
-        assert post.content_as_page.id == page.id
+        assert len(post.blocs) == 1
+        assert post.blocs[0].title == "Featured datasets"
 
-    def test_post_api_create_with_blocs_body_type_without_page(self):
-        """It should fail to create a post with body_type='blocs' without content_as_page"""
+    def test_post_api_create_with_blocs_body_type_without_blocs(self):
+        """It should fail to create a post with body_type='blocs' without blocs"""
         data = PostFactory.as_dict()
         data["datasets"] = [str(d.id) for d in data["datasets"]]
         data["reuses"] = [str(r.id) for r in data["reuses"]]
@@ -192,61 +208,58 @@ class PostsAPITest(APITestCase):
         response = self.post(url_for("api.posts"), data)
         assert400(response)
 
-    def test_post_api_get_with_blocs_returns_page_blocs(self):
-        """It should return blocs from the associated page when fetching a post"""
+    def test_post_api_get_with_blocs(self):
+        """It should return blocs directly on the post"""
         datasets = DatasetFactory.create_batch(2)
         bloc = DatasetsListBloc(title="Featured datasets", datasets=datasets)
-        page = PageFactory(blocs=[bloc])
-        post = PostFactory(body_type="blocs", content_as_page=page)
+        post = PostFactory(body_type="blocs", blocs=[bloc])
         response = self.get(url_for("api.post", post=post))
         assert200(response)
         assert response.json["body_type"] == "blocs"
-        assert "content_as_page" in response.json
-        page_data = response.json["content_as_page"]
-        assert "blocs" in page_data
-        assert len(page_data["blocs"]) == 1
-        assert page_data["blocs"][0]["class"] == "DatasetsListBloc"
-        assert page_data["blocs"][0]["title"] == "Featured datasets"
-        assert len(page_data["blocs"][0]["datasets"]) == 2
+        assert "blocs" in response.json
+        assert len(response.json["blocs"]) == 1
+        assert response.json["blocs"][0]["class"] == "DatasetsListBloc"
+        assert response.json["blocs"][0]["title"] == "Featured datasets"
+        assert len(response.json["blocs"][0]["datasets"]) == 2
 
-    def test_post_api_update_to_blocs_without_content_as_page(self):
-        """It should fail to update body_type to 'blocs' without providing content_as_page"""
+    def test_post_api_get_blocs_only_returns_card_fields(self):
+        """Blocs should return lightweight card representations, not full nested objects"""
+        datasets = DatasetFactory.create_batch(2)
+        reuses = ReuseFactory.create_batch(2)
+        dataservices = DataserviceFactory.create_batch(2)
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                DatasetsListBloc(title="Datasets", datasets=datasets),
+                ReusesListBloc(title="Reuses", reuses=reuses),
+                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+            ],
+        )
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+
+        dataset_json = response.json["blocs"][0]["datasets"][0]
+        assert "id" in dataset_json
+        assert "title" in dataset_json
+        assert "resources" not in dataset_json
+        assert "community_resources" not in dataset_json
+
+        reuse_json = response.json["blocs"][1]["reuses"][0]
+        assert "id" in reuse_json
+        assert "title" in reuse_json
+        assert "datasets" not in reuse_json
+
+        dataservice_json = response.json["blocs"][2]["dataservices"][0]
+        assert "id" in dataservice_json
+        assert "title" in dataservice_json
+        assert "datasets" not in dataservice_json
+
+    def test_post_api_update_to_blocs_without_blocs(self):
+        """It should fail to update body_type to 'blocs' without providing blocs"""
         post = PostFactory(body_type="markdown")
         self.login(AdminFactory())
         response = self.put(url_for("api.post", post=post), {"body_type": "blocs"})
         assert400(response)
-
-    def test_post_api_update_to_blocs_with_content_as_page(self):
-        """It should update body_type to 'blocs' when content_as_page is provided"""
-        post = PostFactory(body_type="markdown")
-        page = PageFactory()
-        self.login(AdminFactory())
-        response = self.put(
-            url_for("api.post", post=post), {"body_type": "blocs", "content_as_page": str(page.id)}
-        )
-        assert200(response)
-        post.reload()
-        assert post.body_type == "blocs"
-        assert post.content_as_page.id == page.id
-
-    def test_post_api_update_remove_content_as_page_from_blocs_post(self):
-        """It should fail to remove content_as_page from a post with body_type='blocs'"""
-        page = PageFactory()
-        post = PostFactory(body_type="blocs", content_as_page=page)
-        self.login(AdminFactory())
-        response = self.put(url_for("api.post", post=post), {"content_as_page": None})
-        assert400(response)
-
-    def test_post_api_update_body_type_preserves_content_as_page(self):
-        """Switching from 'blocs' to 'markdown' preserves content_as_page so user can switch back"""
-        page = PageFactory()
-        post = PostFactory(body_type="blocs", content_as_page=page)
-        self.login(AdminFactory())
-        response = self.put(url_for("api.post", post=post), {"body_type": "markdown"})
-        assert200(response)
-        post.reload()
-        assert post.body_type == "markdown"
-        assert post.content_as_page.id == page.id
 
     def test_post_api_filter_by_kind(self):
         """It should filter posts by kind"""
