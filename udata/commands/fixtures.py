@@ -23,6 +23,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.edito_blocs.models import (
+    SITE_BLOCS_FIELDS,
     AccordionItemBloc,
     AccordionListBloc,
     DataservicesListBloc,
@@ -273,7 +274,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     print("Fetching site...")
     json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
     remove_unwanted_keys(json_site, "site")
-    for blocs_field in ("datasets_blocs", "reuses_blocs", "dataservices_blocs"):
+    for blocs_field in SITE_BLOCS_FIELDS:
         for bloc in json_site.get(blocs_field, []):
             clean_bloc_for_generate(bloc)
 
@@ -334,26 +335,13 @@ def import_fixtures(source):
         with open(source) as f:
             json_fixtures = json.load(f)
 
-    # Build page index from legacy format (pages referenced by ID)
-    pages_by_id = {}
-    for page_data in json_fixtures.get("pages", []):
-        pages_by_id[page_data["id"]] = create_blocs_from_dicts(page_data.get("blocs", []))
-
     # Import site
     site_data = json_fixtures.get("site")
     if site_data:
         site_data = remove_unwanted_keys(site_data, "site")
-        # Support new format (blocs inline) and legacy format (page references)
-        for blocs_field, legacy_field in (
-            ("datasets_blocs", "datasets_page"),
-            ("reuses_blocs", "reuses_page"),
-            ("dataservices_blocs", "dataservices_page"),
-        ):
+        for blocs_field in SITE_BLOCS_FIELDS:
             if blocs_field in site_data:
                 site_data[blocs_field] = create_blocs_from_dicts(site_data.pop(blocs_field))
-            elif legacy_field in site_data:
-                page_id = site_data.pop(legacy_field)
-                site_data[blocs_field] = pages_by_id.get(page_id, [])
         if not Site.objects(id=site_data["id"]).first():
             SiteFactory(**site_data)
 
@@ -418,10 +406,6 @@ def import_fixtures(source):
         post_data = remove_unwanted_keys(post_data, "post")
         user = UserFactory()
         blocs = create_blocs_from_dicts(post_data.pop("blocs", []))
-        # Legacy format: content_as_page referenced a Page by ID
-        content_as_page_id = post_data.pop("content_as_page", None)
-        if not blocs and content_as_page_id:
-            blocs = pages_by_id.get(content_as_page_id, [])
         if not Post.objects(id=post_data["id"]).first():
             PostFactory(
                 **post_data,
