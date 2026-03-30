@@ -8,7 +8,7 @@ from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
-from udata.tests.helpers import assert200, assert201, assert204, assert400
+from udata.tests.helpers import assert200, assert201, assert204
 
 
 class PostsAPITest(APITestCase):
@@ -198,16 +198,6 @@ class PostsAPITest(APITestCase):
         assert len(post.blocs) == 1
         assert post.blocs[0].title == "Featured datasets"
 
-    def test_post_api_create_with_blocs_body_type_without_blocs(self):
-        """It should fail to create a post with body_type='blocs' without blocs"""
-        data = PostFactory.as_dict()
-        data["datasets"] = [str(d.id) for d in data["datasets"]]
-        data["reuses"] = [str(r.id) for r in data["reuses"]]
-        data["body_type"] = "blocs"
-        self.login(AdminFactory())
-        response = self.post(url_for("api.posts"), data)
-        assert400(response)
-
     def test_post_api_get_with_blocs(self):
         """It should return blocs directly on the post"""
         datasets = DatasetFactory.create_batch(2)
@@ -253,13 +243,6 @@ class PostsAPITest(APITestCase):
         assert "id" in dataservice_json
         assert "title" in dataservice_json
         assert "datasets" not in dataservice_json
-
-    def test_post_api_update_to_blocs_without_blocs(self):
-        """It should fail to update body_type to 'blocs' without providing blocs"""
-        post = PostFactory(body_type="markdown")
-        self.login(AdminFactory())
-        response = self.put(url_for("api.post", post=post), {"body_type": "blocs"})
-        assert400(response)
 
     def test_post_api_filter_by_kind(self):
         """It should filter posts by kind"""

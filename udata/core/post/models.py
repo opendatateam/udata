@@ -141,12 +141,8 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     verbose_name = _("post")
 
     def clean(self):
-        if self.body_type == "blocs":
-            if not self.blocs:
-                raise ValidationError("blocs is required when body_type is 'blocs'")
-        else:
-            if not self.content:
-                raise ValidationError("content is required when body_type is 'markdown' or 'html'")
+        if self.body_type != "blocs" and not self.content:
+            raise ValidationError("content is required when body_type is 'markdown' or 'html'")
 
     def __str__(self):
         return self.name or ""
