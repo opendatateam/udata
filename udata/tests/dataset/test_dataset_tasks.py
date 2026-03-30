@@ -10,8 +10,10 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.edito_blocs.models import DatasetsListBloc
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
 from udata.core.post.factories import PostFactory
+from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
 from udata.core.site.factories import SiteFactory
+from udata.core.site.models import Site
 from udata.core.tags.csv import TagCsvAdapter  # noqa
 from udata.core.topic.models import TopicElement
 from udata.core.user.factories import UserFactory
@@ -97,9 +99,6 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         SiteFactory(id="test-site", datasets_blocs=[bloc])
 
         tasks.purge_datasets()
-
-        from udata.core.post.models import Post
-        from udata.core.site.models import Site
 
         post = Post.objects.first()
         assert len(post.blocs[0].datasets) == 1
