@@ -8,9 +8,8 @@ from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core import csv
 from udata.core.badges import api as badges_api
-from udata.core.badges.fields import badge_fields
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
+from udata.core.badges.models import Badge
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
@@ -28,7 +27,6 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
-from udata.models import ContactPoint
 from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -296,8 +294,8 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route("/<org:org>/badges/", endpoint="organization_badges")
 class OrganizationBadgesAPI(API):
     @api.doc("add_organization_badge", **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(Badge.__write_fields__)
+    @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, org):
         """Create a new badge for a given organization"""
@@ -313,16 +311,16 @@ class OrganizationBadgeAPI(API):
         return badges_api.remove(org, badge_kind)
 
 
-contact_point_parser = ContactPointApiParser()
+contact_point_parser = ContactPoint.__index_parser__
 
 
 @ns.route("/<org:org>/contacts/", endpoint="org_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_organization_contact_point")
-    @api.marshal_with(contact_point_page_fields)
+    @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, org):
         """List all organization contact points"""
-        args = contact_point_parser.parse()
+        args = contact_point_parser.parse_args()
         contact_points = ContactPoint.objects.owned_by(org)
         return contact_points.paginate(args["page"], args["page_size"])
 
@@ -340,7 +338,7 @@ suggest_parser.add_argument(
 class ContactPointSuggestAPI(API):
     @api.doc("suggest_org_contact_points")
     @api.expect(suggest_parser)
-    @api.marshal_list_with(contact_point_fields)
+    @api.marshal_list_with(ContactPoint.__read_fields__)
     def get(self, org):
         """Contact points suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()

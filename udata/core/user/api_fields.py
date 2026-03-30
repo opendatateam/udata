@@ -82,14 +82,6 @@ user_fields = api.model(
     },
 )
 
-me_fields = api.inherit(
-    "Me",
-    user_fields,
-    {
-        "apikey": fields.String(description="The user API Key", readonly=True),
-    },
-)
-
 me_metrics_fields = api.model(
     "MyMetrics",
     {
@@ -105,13 +97,6 @@ me_metrics_fields = api.model(
         ),
         "datasets_count": fields.Integer(description="The user's datasets number", readonly=True),
         "followers_count": fields.Integer(description="The user's followers number", readonly=True),
-    },
-)
-
-apikey_fields = api.model(
-    "ApiKey",
-    {
-        "apikey": fields.String(description="The user API Key", readonly=True),
     },
 )
 

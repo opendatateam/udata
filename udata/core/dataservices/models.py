@@ -17,13 +17,13 @@ from mongoengine.fields import (
 )
 from mongoengine.signals import post_save
 
-import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
@@ -282,7 +282,7 @@ class Dataservice(
         ListField(
             field(
                 ReferenceField("ContactPoint", reverse_delete_rule=PULL),
-                nested_fields=contact_api_fields.contact_point_fields,
+                nested_fields=ContactPoint.__read_fields__,
                 allow_null=True,
             ),
         ),

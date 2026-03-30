@@ -12,6 +12,7 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
+from mongoengine.signals import post_save
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
@@ -62,8 +63,8 @@ class Message(SpamMixin, EmbeddedDocument):
     def posted_by_org_or_user(self):
         return self.posted_by_organization or self.posted_by
 
-    def texts_to_check_for_spam(self):
-        return [self.content]
+    def fields_to_check_for_spam(self):
+        return {"content": self.content}
 
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
@@ -154,9 +155,12 @@ class Discussion(SpamMixin, Linkable, Document):
         """
         return any(message.posted_by == person for message in self.discussion)
 
-    def texts_to_check_for_spam(self):
+    def fields_to_check_for_spam(self):
+        fields = {"title": self.title}
         # Discussion should always have a first message but it's not the case in some tests…
-        return [self.title, self.discussion[0].content if len(self.discussion) else ""]
+        if len(self.discussion):
+            fields["discussion.0.content"] = self.discussion[0].content
+        return fields
 
     def embeds_to_check_for_spam(self):
         return self.discussion[1:]
@@ -230,3 +234,6 @@ class Discussion(SpamMixin, Linkable, Document):
             self.discussion.pop(message_index)
             self.save()
             on_discussion_message_deleted.send(self, message=message)
+
+
+post_save.connect(Discussion.post_save, sender=Discussion)
