@@ -11,7 +11,7 @@ from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.badges import api as badges_api
-from udata.core.badges.fields import badge_fields
+from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
@@ -285,8 +285,8 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route("/<reuse:reuse>/badges/", endpoint="reuse_badges")
 class ReuseBadgesAPI(API):
     @api.doc("add_reuse_badge", **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(Badge.__write_fields__)
+    @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, reuse):
         """Create a new badge for a given reuse"""

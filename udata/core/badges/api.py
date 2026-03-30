@@ -1,25 +1,17 @@
-from udata.api import api
+from flask import request
 
-from .forms import badge_form
+from udata.api import api
+from udata.api_fields import patch
+
+from .models import Badge
 
 
 def add(obj):
-    """
-    Handle a badge add API.
-
-    - Expecting badge_fieds as payload
-    - Return the badge as payload
-    - Return 200 if the badge is already
-    - Return 201 if the badge is added
-    """
-    Form = badge_form(obj.__class__)
-    form = api.validate(Form)
-    kind = form.kind.data
-    badge = obj.get_badge(kind)
-    if badge:
-        return badge
-    else:
-        return obj.add_badge(kind), 201
+    badge = patch(Badge(), request)
+    existing = obj.get_badge(badge.kind)
+    if existing:
+        return existing
+    return obj.add_badge(badge.kind), 201
 
 
 def remove(obj, kind):

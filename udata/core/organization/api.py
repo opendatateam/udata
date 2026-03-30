@@ -8,7 +8,7 @@ from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core import csv
 from udata.core.badges import api as badges_api
-from udata.core.badges.fields import badge_fields
+from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
@@ -294,8 +294,8 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route("/<org:org>/badges/", endpoint="organization_badges")
 class OrganizationBadgesAPI(API):
     @api.doc("add_organization_badge", **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(Badge.__write_fields__)
+    @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, org):
         """Create a new badge for a given organization"""
