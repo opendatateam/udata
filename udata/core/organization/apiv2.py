@@ -2,7 +2,7 @@ from flask import request
 
 from udata import search
 from udata.api import API, apiv2, fields
-from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.contact_point.models import ContactPoint
 
 from .api_fields import member_fields, org_fields, org_page_fields, org_permissions_fields
 from .search import OrganizationSearch
@@ -10,7 +10,7 @@ from .search import OrganizationSearch
 apiv2.inherit("OrganizationPage", org_page_fields)
 apiv2.inherit("Organization", org_fields)
 apiv2.inherit("Member", member_fields)
-apiv2.inherit("ContactPoint", contact_point_fields)
+apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 apiv2.inherit("OrganizationPermissions", org_permissions_fields)
 
 org_search_page_fields = apiv2.model("OrganizationSearchPage", fields.search_pager(org_fields))
