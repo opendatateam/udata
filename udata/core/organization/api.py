@@ -791,6 +791,17 @@ class BannerAPI(API):
         org.save()
         return {"image": org.banner}
 
+    @api.secure
+    @api.doc("resize_organization_banner")
+    @api.expect(image_parser)
+    @api.marshal_with(uploaded_image_fields)
+    def put(self, org):
+        """Set the banner BBox"""
+        org.permissions["edit"].test()
+        parse_uploaded_image(org.banner)
+        org.save()
+        return {"image": org.banner}
+
 
 dataset_parser = DatasetApiParser()
 
