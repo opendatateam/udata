@@ -41,6 +41,9 @@ from udata.uris import cdata_url
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
+    BANNER_MAX_SIZE,
+    BANNER_SIZES,
+    BIGGEST_BANNER_SIZE,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
     COMPANY,
@@ -198,6 +201,19 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
+    banner = field(
+        ImageField(
+            fs=avatars,
+            basename=default_image_basename,
+            max_size=BANNER_MAX_SIZE,
+            thumbnails=BANNER_SIZES,
+        ),
+        show_as_ref=True,
+        thumbnail_info={
+            "size": BIGGEST_BANNER_SIZE,
+        },
+    )
+    banner_color = field(StringField(max_length=7))
     business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT))
 
     members = field(ListField(EmbeddedDocumentField(Member)))
