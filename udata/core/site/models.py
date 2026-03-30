@@ -32,7 +32,7 @@ class SiteSettings(EmbeddedDocument):
     home_reuses = ListField(ReferenceField(Reuse))
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=SITE_BLOCS_FIELDS)
 class Site(WithMetrics, Document):
     id = field(StringField(primary_key=True), readonly=True)
     title = field(StringField(required=True), description="The site display title")
@@ -227,11 +227,6 @@ class Site(WithMetrics, Document):
             Discussion.objects(), date_label="created"
         )
         self.save()
-
-
-# Hide blocs from default Site API response — clients can use X-Fields header to include them
-_site_default_mask = ",".join(k for k in Site.__read_fields__ if k not in SITE_BLOCS_FIELDS)
-Site.__read_fields__.__mask__ = _site_default_mask
 
 
 def get_current_site():

@@ -41,6 +41,7 @@ class PostQuerySet(UDataQuerySet):
         {"key": "modified", "value": "last_modified"},
     ],
     default_sort="-published",
+    page_mask_exclude=["blocs"],
 )
 class Post(Datetimed, Linkable, Document[PostQuerySet]):
     name = field(
@@ -166,8 +167,3 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     def count_discussions(self):
         # There are no metrics on Post to store discussions count
         pass
-
-
-# Exclude blocs from paginated list endpoint — blocs are only returned on detail
-_post_page_mask = "data{{{0}}},*".format(",".join(k for k in Post.__read_fields__ if k != "blocs"))
-Post.__page_fields__.__mask__ = _post_page_mask
