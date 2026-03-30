@@ -25,12 +25,13 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
-      - image: udata/elasticsearch:7.16.2
+      - image: elasticsearch:7.17.28
         environment:
           node.name: es01
           cluster.name: es-docker-cluster
           cluster.initial_master_nodes: es01
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        command: ["bash", "-c", "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"]
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
@@ -73,7 +74,7 @@ jobs:
           command: |
             apt-get update && apt-get install -y curl jq
             for i in $(seq 1 60); do
-              status=$(curl -s http://localhost:9200/_cluster/health | jq -r '.status' 2>/dev/null)
+              status=$(curl -s http://localhost:9200/_cluster/health 2>/dev/null | jq -r '.status' 2>/dev/null || true)
               if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
                 echo "Elasticsearch is ready (status: $status)"
                 exit 0
@@ -87,6 +88,7 @@ jobs:
           name: Initialize Elasticsearch indices
           command: |
             echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
+            echo 'API_TOKEN_SECRET = "ci-secret"' >> udata.cfg
             uv run udata search init-es
       - run:
           name: Run tests

@@ -1,11 +1,14 @@
 from datetime import datetime
 
+from flask import request as flask_request
 from flask_security import current_user, logout_user
 from slugify import slugify
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
+from udata.core.api_token.api import apitoken_created_fields
+from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
@@ -22,8 +25,6 @@ from udata.core.user.models import Role
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
-    apikey_fields,
-    me_fields,
     me_metrics_fields,
     user_fields,
     user_page_fields,
@@ -62,15 +63,15 @@ filter_parser.add_argument(
 class MeAPI(API):
     @api.secure
     @api.doc("get_me")
-    @api.marshal_with(me_fields)
+    @api.marshal_with(user_fields)
     def get(self):
         """Fetch the current user (me) identity"""
         return current_user._get_current_object()
 
     @api.secure
     @api.doc("update_me")
-    @api.expect(me_fields)
-    @api.marshal_with(me_fields)
+    @api.expect(user_fields)
+    @api.marshal_with(user_fields)
     @api.response(400, "Validation error")
     def put(self, **kwargs):
         """Update my profile"""
@@ -197,25 +198,48 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-@me.route("/apikey/", endpoint="my_apikey")
-class ApiKeyAPI(API):
+@me.route("/api_tokens/", endpoint="my_api_tokens")
+class ApiTokenListAPI(API):
     @api.secure
-    @api.doc("generate_apikey")
-    @api.marshal_with(apikey_fields)
-    @api.response(201, "API Key generated")
-    def post(self):
-        """(Re)Generate my API Key"""
-        current_user.generate_api_key()
-        current_user.save()
-        return current_user, 201
+    @api.doc("list_api_tokens")
+    @api.marshal_list_with(ApiToken.__read_fields__)
+    def get(self):
+        """List all my active API tokens"""
+        return list(ApiToken.objects(user=current_user.id, revoked_at=None))
 
     @api.secure
-    @api.doc("clear_apikey")
-    @api.response(204, "API Key deleted/cleared")
-    def delete(self):
-        """Clear/destroy an apikey"""
-        current_user.apikey = None
-        current_user.save()
+    @api.doc("create_api_token")
+    @api.expect(ApiToken.__write_fields__)
+    @api.marshal_with(apitoken_created_fields, code=201)
+    def post(self):
+        """Create a new API token. The plaintext token is returned only once."""
+        data = flask_request.json or {}
+        user = current_user._get_current_object()
+        expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
+        token, plaintext = ApiToken.generate(
+            user,
+            name=data.get("name"),
+            expires_at=expires_at,
+            scopes=data.get("scopes"),
+        )
+        token._plaintext = plaintext
+        return token, 201
+
+
+@me.route("/api_tokens/<api_token:api_token>/", endpoint="my_api_token")
+class ApiTokenAPI(API):
+    @api.secure
+    @api.doc("revoke_api_token")
+    @api.response(204, "Token revoked")
+    @api.response(404, "Token not found")
+    @api.response(410, "Token already revoked")
+    def delete(self, api_token):
+        """Revoke an API token"""
+        if api_token.user != current_user._get_current_object():
+            api.abort(404, "Token not found")
+        if api_token.revoked_at is not None:
+            api.abort(410, "Token already revoked")
+        api_token.revoke()
         return "", 204
 
 
@@ -243,6 +267,7 @@ class MyOrgInvitationsAPI(API):
                             "role": req.role,
                             "comment": req.comment,
                             "created": req.created,
+                            "assignments": req.assignments or [],
                         }
                     )
 
@@ -258,6 +283,7 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
+        from udata.core.organization.assignment import Assignment
         from udata.core.organization.models import Member, MembershipRequest, Organization
 
         user = current_user._get_current_object()
@@ -276,6 +302,19 @@ class AcceptOrgInvitationAPI(API):
                     org.members.append(member)
                     org.count_members()
                     org.save()
+
+                    if req.assignments:
+                        for subject in req.assignments:
+                            if not subject:
+                                continue
+                            if not hasattr(subject, "organization") or subject.organization != org:
+                                continue
+                            Assignment(
+                                user=user,
+                                organization=org,
+                                subject=subject,
+                            ).save()
+
                     MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))
 

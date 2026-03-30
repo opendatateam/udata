@@ -169,6 +169,68 @@ class SearchIntegrationTest(APITestCase):
         names = [t["name"] for t in response.json["data"]]
         assert "Transports et mobilité" in names
 
+    def test_topic_sort_by_name(self):
+        TopicFactory(name="aaa topic", private=False)
+        TopicFactory(name="zzz topic", private=False)
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?sort=name")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "aaa topic"
+        assert names[1] == "zzz topic"
+
+        response = self.get("/api/2/topics/search/?sort=-name")
+        self.assert200(response)
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "zzz topic"
+        assert names[1] == "aaa topic"
+
+    def test_topic_sort_by_created(self):
+        from datetime import datetime
+
+        TopicFactory(name="old topic", private=False, created_at=datetime(2020, 1, 1))
+        TopicFactory(name="new topic", private=False, created_at=datetime(2024, 1, 1))
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?sort=created")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "old topic"
+        assert names[1] == "new topic"
+
+        response = self.get("/api/2/topics/search/?sort=-created")
+        self.assert200(response)
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "new topic"
+        assert names[1] == "old topic"
+
+    def test_topic_sort_by_last_modified(self):
+        import time as time_mod
+
+        TopicFactory(name="old topic", private=False)
+        time_mod.sleep(1.5)
+        TopicFactory(name="new topic", private=False)
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?sort=last_modified")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "old topic"
+        assert names[1] == "new topic"
+
+        response = self.get("/api/2/topics/search/?sort=-last_modified")
+        self.assert200(response)
+        names = [t["name"] for t in response.json["data"]]
+        assert names[0] == "new topic"
+        assert names[1] == "old topic"
+
     def test_discussion_search(self):
         """Test discussion search endpoint."""
         dataset = DatasetFactory()

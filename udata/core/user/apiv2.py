@@ -7,8 +7,7 @@ from udata.models import Topic
 
 me = apiv2.namespace("me", "Connected user related operations (v2)")
 
-# we will force include_private to True, no need for this arg
-topic_parser = TopicApiParser(with_include_private=False)
+topic_parser = TopicApiParser()
 
 
 @me.route("/org_topics/", endpoint="my_org_topics")
@@ -20,7 +19,6 @@ class MyOrgTopicsAPI(API):
     def get(self):
         """List all topics related to me and my organizations."""
         args = topic_parser.parse()
-        args["include_private"] = True
         owners = list(current_user.organizations) + [current_user.id]
         topics = Topic.objects.owned_by(*owners)
         topics = topic_parser.parse_filters(topics, args)

@@ -117,7 +117,7 @@ class SearchableTopic(IndexDocument):
     class Index:
         name = "topic"
 
-    name = Text(analyzer=dgv_analyzer)
+    name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
     description = Text(analyzer=dgv_analyzer)
     tags = Keyword(multi=True)
     featured = Integer()
@@ -277,13 +277,18 @@ class ElasticClient:
         """
         suffix_name = "-" + datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
 
-        SearchableDataset.init_index(self.es, suffix_name)
-        SearchableReuse.init_index(self.es, suffix_name)
-        SearchableOrganization.init_index(self.es, suffix_name)
-        SearchableDataservice.init_index(self.es, suffix_name)
-        SearchableTopic.init_index(self.es, suffix_name)
-        SearchableDiscussion.init_index(self.es, suffix_name)
-        SearchablePost.init_index(self.es, suffix_name)
+        for index_document in ALL_DOCUMENT_CLASSES:
+            index_document.init_index(self.es, suffix_name)
+
+    def delete_indices(self):
+        """
+        Clear all existing indices and templates.
+        """
+        for index_document in ALL_DOCUMENT_CLASSES:
+            index_document.delete_indices(self.es)
+
+    def delete_index(self, index_document: IndexDocument):
+        index_document.delete_indices(self.es)
 
     def index_organization(self, to_index: Organization, index: str = None) -> None:
         SearchableOrganization(meta={"id": to_index.id}, **to_index.to_dict()).save(
@@ -574,6 +579,10 @@ class ElasticClient:
                 sort_field = "last_modified"
             elif sort == "-last_update":
                 sort_field = "-last_modified"
+            elif sort == "name":
+                sort_field = "name.keyword"
+            elif sort == "-name":
+                sort_field = "-name.keyword"
             search = search.sort(sort_field, {"_score": {"order": "desc"}})
 
         search = search[offset : (offset + page_size)]
