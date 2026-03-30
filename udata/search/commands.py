@@ -7,6 +7,7 @@ from flask import current_app
 
 from udata.commands import cli
 from udata.search import adapter_catalog, get_elastic_client
+from udata_search_service.search_clients import ALL_DOCUMENT_CLASSES
 
 log = logging.getLogger(__name__)
 
@@ -151,6 +152,36 @@ def init_es():
     es_client = get_elastic_client()
     es_client.init_indices()
     log.info("Elasticsearch indices initialized")
+
+
+@grp.command("clean-es")
+@click.argument("models", nargs=-1, metavar="[<model> ...]")
+def clean_es(models=None):
+    """Clear existing Elasticsearch indices.
+
+    If no models are specified, all indices are removed.
+    """
+    if not current_app.config["ELASTICSEARCH_URL"]:
+        log.error("Missing ELASTICSEARCH_URL configuration")
+        sys.exit(-1)
+
+    es_client = get_elastic_client()
+
+    if not models:
+        es_client.delete_indices()
+        log.info("All indices cleared. You can reinitialize them with `udata search init-es`.")
+        return
+
+    all_existing_models = {
+        index_document.Index.name.lower(): index_document for index_document in ALL_DOCUMENT_CLASSES
+    }
+    for model in [model.lower().removesuffix("s") for model in models]:
+        index_document = all_existing_models.get(model)
+        if not index_document:
+            log.error("Unknown model %s", model)
+            sys.exit(-1)
+        es_client.delete_index(index_document)
+    log.info("Selected indices cleared. You can reinitialize them with `udata search init-es`.")
 
 
 @grp.command()

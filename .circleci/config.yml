@@ -88,6 +88,7 @@ jobs:
           name: Initialize Elasticsearch indices
           command: |
             echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
+            echo 'API_TOKEN_SECRET = "ci-secret"' >> udata.cfg
             uv run udata search init-es
       - run:
           name: Run tests

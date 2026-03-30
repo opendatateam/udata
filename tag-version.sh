@@ -1,23 +1,40 @@
 #!/bin/bash
 
 # Script to create a git tag and update CHANGELOG.md
-# Usage: ./tag-version.sh <version> [--dry-run] [--breaking PR1,PR2,...]
+# Usage: ./tag-version.sh <version> [--dry-run] [--edit-changelog] [--breaking PR1,PR2,...]
 
 set -e
 
 DRY_RUN=false
 BREAKING_PRS=""
+EDIT_CHANGELOG=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        -h|--help)
+            echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+            echo "Example: $0 11.0.1"
+            echo "Example: $0 11.0.1 --dry-run"
+            echo "Example: $0 11.0.1 --breaking 3649,3651"
+            exit 0
+            ;;
         --dry-run)
             DRY_RUN=true
+            shift
+            ;;
+        --edit-changelog)
+            EDIT_CHANGELOG=true
             shift
             ;;
         --breaking)
             BREAKING_PRS="$2"
             shift 2
+            ;;
+        -*)
+            echo "Error: Unknown option '$1'"
+            echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+            exit 1
             ;;
         *)
             VERSION="$1"
@@ -27,10 +44,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version> [--dry-run] [--breaking PR1,PR2,...]"
+    echo "Usage: $0 <version> [--dry-run] [--edit-changelog] [--breaking PR1,PR2,...]"
     echo "Example: $0 11.0.1"
     echo "Example: $0 11.0.1 --dry-run"
     echo "Example: $0 11.0.1 --breaking 3649,3651"
+    exit 1
+fi
+
+if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Invalid version format '$VERSION'"
+    echo "Version must follow semver format: MAJOR.MINOR.PATCH (e.g., 11.0.1)"
     exit 1
 fi
 
@@ -256,6 +279,9 @@ RELEASE_NOTES="$SORTED_COMMITS"
 if [ "$DRY_RUN" = true ]; then
     echo "Would update CHANGELOG.md with:"
     echo "$NEW_ENTRY"
+    if [ "$EDIT_CHANGELOG" = true ]; then
+        echo "Would open \$EDITOR to edit CHANGELOG.md before committing"
+    fi
     echo "Would run: git add CHANGELOG.md"
     echo "Would run: git commit -m \"Bump version $VERSION\""
     echo "Would run: git tag -a \"v$VERSION\" -m \"Version $VERSION\""
@@ -278,6 +304,12 @@ $NEW_ENTRY" > CHANGELOG.md
 fi
 
 echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
+
+if [ "$EDIT_CHANGELOG" = true ]; then
+    ${EDITOR:-vi} CHANGELOG.md
+    # Re-extract release notes from the edited changelog (content between first and second ## headings)
+    RELEASE_NOTES=$(sed -n '/^## '"$VERSION"'/,/^## /{/^## /!p}' CHANGELOG.md)
+fi
 
 # Commit the CHANGELOG update
 git add CHANGELOG.md
