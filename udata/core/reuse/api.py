@@ -87,7 +87,7 @@ class ReuseApiParser(ModelApiParser):
         if args.get("type"):
             reuses = reuses.filter(type=args["type"])
         if args.get("tag"):
-            reuses = reuses.filter(tags=args["tag"])
+            reuses = reuses.filter(tags__all=args["tag"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
