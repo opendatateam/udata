@@ -104,7 +104,7 @@ class Team(EmbeddedDocument):
 
 @generate_fields()
 class Member(EmbeddedDocument):
-    user = field(ReferenceField("User"))
+    user = field(ReferenceField("User"), readonly=True)
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
     since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 

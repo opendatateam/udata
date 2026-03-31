@@ -35,8 +35,6 @@ from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from .api_fields import (
     invite_fields,
     member_fields,
-    org_fields,
-    org_page_fields,
     org_role_fields,
     org_suggestion_fields,
     refuse_membership_fields,
@@ -120,7 +118,7 @@ class OrganizationListAPI(API):
 
     @api.doc("list_organizations")
     @api.expect(organization_parser.parser)
-    @api.marshal_with(org_page_fields)
+    @api.marshal_with(Organization.__page_fields__)
     def get(self):
         """List or search all organizations"""
         args = organization_parser.parse()
@@ -133,7 +131,7 @@ class OrganizationListAPI(API):
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})
     @api.expect(Organization.__write_fields__)
-    @api.marshal_with(org_fields, code=201)
+    @api.marshal_with(Organization.__read_fields__, code=201)
     def post(self):
         """Create a new organization"""
         organization = patch(Organization(), request)
@@ -153,7 +151,7 @@ org_delete_parser = add_send_legal_notice_argument(api.parser())
 @api.response(410, "Organization has been deleted")
 class OrganizationAPI(API):
     @api.doc("get_organization")
-    @api.marshal_with(org_fields)
+    @api.marshal_with(Organization.__read_fields__)
     def get(self, org):
         """Get a organization given its identifier"""
         if org.deleted and not org.permissions["private"].can():
@@ -163,7 +161,7 @@ class OrganizationAPI(API):
     @api.secure
     @api.doc("update_organization")
     @api.expect(Organization.__write_fields__)
-    @api.marshal_with(org_fields)
+    @api.marshal_with(Organization.__read_fields__)
     @api.response(400, errors.VALIDATION_ERROR)
     @api.response(410, "Organization has been deleted")
     def put(self, org):
@@ -388,23 +386,25 @@ class MembershipRequestAPI(API):
             return org.requests
 
     @api.secure
+    @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
-        data = request.json or {}
-        comment = data.get("comment")
-        if not comment:
-            raise FieldValidationError(field="comment", message="Comment is required")
-
         user = current_user._get_current_object()
         membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
         if membership_request:
-            membership_request.comment = comment
+            patch(membership_request, request)
+        else:
+            membership_request = patch(MembershipRequest(user=user), request)
+
+        if not membership_request.comment:
+            raise FieldValidationError(field="comment", message="Comment is required")
+
+        if code == 200:
             org.save()
         else:
-            membership_request = MembershipRequest(user=user, comment=comment)
             org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
@@ -530,9 +530,6 @@ class MemberInviteAPI(API):
         role = data.get("role") or DEFAULT_ROLE
         comment = data.get("comment")
 
-        if role not in ORG_ROLES:
-            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
-
         if user_id and email:
             raise FieldValidationError(field="user", message="Cannot provide both user and email")
 
@@ -641,12 +638,8 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
-        data = request.json or {}
-        role = data.get("role", member.role)
-        if role not in ORG_ROLES:
-            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
         old_role = member.role
-        member.role = role
+        patch(member, request)
         org.save()
 
         if old_role == "partial_editor" and member.role != "partial_editor":

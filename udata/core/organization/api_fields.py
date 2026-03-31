@@ -1,10 +1,8 @@
-from flask import request
-
 from udata.api import api, fields
-from udata.auth.helpers import current_user_is_admin_or_self
+from udata.core.user.models import User
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
-from .models import Organization
+from .models import Member, Organization
 
 generic_reference_fields = api.model(
     "GenericReference",
@@ -14,63 +12,11 @@ generic_reference_fields = api.model(
     },
 )
 
-org_ref_fields = Organization.__ref_fields__
-
-
-def check_can_access_user_private_info():
-    # This endpoint is secure, only organization member has access.
-    if request.endpoint == "api.request_membership":
-        return True
-
-    if request.endpoint != "api.organization":
-        return False
-
-    org = request.view_args.get("org")
-    if org is None:
-        return False
-
-    return org.permissions["private"].can()
-
-
-def member_email_with_visibility_check(email):
-    if current_user_is_admin_or_self():
-        return email
-    name, domain = email.split("@")
-    if check_can_access_user_private_info():
-        # Obfuscate email partially for other members
-        name = name[:2] + "*" * (len(name) - 2)
-        return f"{name}@{domain}"
-    # Return only domain for other users
-    return f"***@{domain}"
-
-
-# This import is not at the top of the file to avoid circular imports
-from udata.core.user.api_fields import user_ref_fields  # noqa
-
-member_user_with_email_fields = api.inherit(
-    "MemberUserWithEmail",
-    user_ref_fields,
-    {
-        "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o.email),
-            description="The user email (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
-            readonly=True,
-        ),
-        "last_login_at": fields.Raw(
-            attribute=lambda o: (
-                o.current_login_at if check_can_access_user_private_info() else None
-            ),
-            description="The user last connection date (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
-            readonly=True,
-        ),
-    },
-)
-
 request_fields = api.model(
     "MembershipRequest",
     {
         "id": fields.String(readonly=True),
-        "user": fields.Nested(member_user_with_email_fields, allow_null=True),
+        "user": fields.Nested(User.__ref_fields__, allow_null=True),
         "email": fields.String(description="Email for non-registered user invitations"),
         "kind": fields.String(
             description="The request kind (request or invitation)",
@@ -112,7 +58,7 @@ pending_invitation_fields = api.model(
     "PendingInvitation",
     {
         "id": fields.String(readonly=True),
-        "organization": fields.Nested(org_ref_fields),
+        "organization": fields.Nested(Organization.__ref_fields__),
         "role": fields.String(
             description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
@@ -125,32 +71,7 @@ pending_invitation_fields = api.model(
     },
 )
 
-member_fields = api.model(
-    "Member",
-    {
-        "user": fields.Nested(member_user_with_email_fields),
-        "role": fields.String(
-            description="The member role in the organization",
-            required=True,
-            enum=list(ORG_ROLES),
-            default=DEFAULT_ROLE,
-        ),
-        "label": fields.String(readonly=True),
-        "since": fields.ISODateTime(
-            description="The date the user joined the organization", readonly=True
-        ),
-    },
-)
-
-# Patch auto-generated read_fields to use email-enriched member serialization.
-# Cannot be set at model definition time due to circular imports
-# (models.py → user/api_fields.py → organization/api_fields.py → models.py).
-Organization.__read_fields__["members"] = fields.List(
-    fields.Nested(member_fields, description="The organization members")
-)
-
-org_fields = Organization.__read_fields__
-org_page_fields = api.model("OrganizationPage", fields.pager(org_fields))
+member_fields = Member.__read_fields__
 
 
 refuse_membership_fields = api.model(

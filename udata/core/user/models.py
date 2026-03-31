@@ -22,6 +22,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, generate_fields
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
@@ -43,6 +44,42 @@ from .constants import AVATAR_SIZES, BIGGEST_AVATAR_SIZE
 __all__ = ("User", "Role", "datastore")
 
 log = logging.getLogger(__name__)
+
+
+def _is_org_private_context():
+    """Check if the current request is an org endpoint where the user has private access."""
+    from flask import request as flask_request
+
+    if flask_request.endpoint == "api.request_membership":
+        return True
+    if flask_request.endpoint != "api.organization":
+        return False
+    org = flask_request.view_args.get("org")
+    return org is not None and org.permissions["private"].can()
+
+
+def _visible_email(user):
+    """Return user email with appropriate visibility level.
+
+    - sysadmin or /me endpoint → full email
+    - org member context with private access → partially obfuscated
+    - otherwise → None
+    """
+    if current_user_is_admin_or_self():
+        return user.email
+    if _is_org_private_context():
+        name, domain = user.email.split("@")
+        name = name[:2] + "*" * (len(name) - 2)
+        return f"{name}@{domain}"
+    return None
+
+
+def _visible_login_date(user):
+    if current_user_is_admin_or_self():
+        return user.current_login_at
+    if _is_org_private_context():
+        return user.current_login_at
+    return None
 
 
 # TODO: use simple text for role
@@ -67,7 +104,11 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         auditable=False,
         show_as_ref=True,
     )
-    email = field(StringField(max_length=255, required=True, unique=True))
+    email = field(
+        StringField(max_length=255, required=True, unique=True),
+        show_as_ref=True,
+        attribute=_visible_email,
+    )
     password = field(StringField())
     active = field(BooleanField())
     fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
@@ -106,7 +147,12 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     # The 5 fields below are required for Flask-security
     # when SECURITY_TRACKABLE is True
     last_login_at = field(DateTimeField(), auditable=False)
-    current_login_at = field(DateTimeField(), auditable=False)
+    current_login_at = field(
+        DateTimeField(),
+        auditable=False,
+        show_as_ref=True,
+        attribute=_visible_login_date,
+    )
     last_login_ip = field(StringField(), auditable=False)
     current_login_ip = field(StringField(), auditable=False)
     login_count = field(IntField(), auditable=False)
