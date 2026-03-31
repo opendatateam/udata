@@ -9,7 +9,6 @@ from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
-    DictField,
     EmbeddedDocumentField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
@@ -248,14 +247,6 @@ class Organization(
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
     requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
-
-    # Override WithMetrics.metrics to expose filtered metrics via get_metrics().
-    metrics = field(
-        DictField(),
-        readonly=True,
-        auditable=False,
-        attribute=lambda o: o.get_metrics(),
-    )
 
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)
