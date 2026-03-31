@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
-from email_validator import EmailNotValidError, validate_email
 from flask import current_app, url_for
 from flask_babel import LazyString
 from flask_storage.mongo import ImageField
@@ -465,10 +464,9 @@ class Organization(
             raise FieldValidationError(field="user", message="Either user or email is required")
 
         if email:
-            try:
-                validate_email(email)
-            except EmailNotValidError:
-                raise FieldValidationError(field="email", message="Invalid email address")
+            from udata.core.contact_point.models import check_is_email
+
+            check_is_email(email, field="email")
 
         if role not in ORG_ROLES:
             raise FieldValidationError(field="role", message=f"Invalid role '{role}'")

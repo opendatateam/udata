@@ -698,6 +698,19 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert len(organization.requests) == 0
 
+    def test_invite_member_unknown_user_id(self):
+        """Test that inviting with an unknown user ID is rejected."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": "deadbeefdeadbeefdeadbeef", "role": "editor"})
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
     def test_invite_member_requires_user_or_email(self):
         """Test that inviting without user or email is rejected."""
         user = self.login()
