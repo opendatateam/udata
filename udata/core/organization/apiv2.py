@@ -12,7 +12,6 @@ apiv2.inherit("OrganizationPage", Organization.__page_fields__)
 apiv2.inherit("Team (read)", Team.__read_fields__)
 apiv2.inherit("Member (read)", Member.__read_fields__)
 apiv2.inherit("MembershipRequest (read)", MembershipRequest.__read_fields__)
-apiv2.inherit("Member", Member.__read_fields__)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 apiv2.inherit("OrganizationPermissions", org_permissions_fields)
 

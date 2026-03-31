@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timezone
 from itertools import chain
 
 from blinker import Signal
+from flask import request as flask_request
 from flask import url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from flask_storage.mongo import ImageField
@@ -48,8 +49,6 @@ log = logging.getLogger(__name__)
 
 def _is_org_private_context():
     """Check if the current request is an org endpoint where the user has private access."""
-    from flask import request as flask_request
-
     if flask_request.endpoint == "api.request_membership":
         return True
     if flask_request.endpoint != "api.organization":
@@ -67,7 +66,7 @@ def _visible_email(user):
     """
     if current_user_is_admin_or_self():
         return user.email
-    if not hasattr(user, "email") or not user.email:
+    if not user.email:
         return None
     name, domain = user.email.split("@")
     if _is_org_private_context():
@@ -77,9 +76,7 @@ def _visible_email(user):
 
 
 def _visible_login_date(user):
-    if current_user_is_admin_or_self():
-        return user.current_login_at
-    if _is_org_private_context():
+    if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
     return None
 

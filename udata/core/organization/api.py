@@ -54,6 +54,31 @@ DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
 
 
+def resolve_assignment_subjects(raw_assignments, org):
+    """Resolve raw {class, id} dicts into model instances belonging to org."""
+    subjects = []
+    for raw in raw_assignments:
+        cls_name = raw.get("class")
+        obj_id = raw.get("id")
+        if cls_name not in ASSIGNABLE_OBJECT_TYPES:
+            raise FieldValidationError(
+                field="assignments", message=f"Invalid object class '{cls_name}'"
+            )
+        model_cls = db.resolve_model(cls_name)
+        obj = model_cls.objects(id=obj_id).first()
+        if not obj:
+            raise FieldValidationError(
+                field="assignments", message=f"{cls_name} '{obj_id}' not found"
+            )
+        if not hasattr(obj, "organization") or obj.organization != org:
+            raise FieldValidationError(
+                field="assignments",
+                message=f"{cls_name} '{obj_id}' does not belong to this organization",
+            )
+        subjects.append(obj)
+    return subjects
+
+
 class OrgApiParser(ModelApiParser):
     sorts = {
         "name": "name",
@@ -532,9 +557,14 @@ class MemberInviteAPI(API):
                 raise FieldValidationError(field="user", message=f"Unknown user '{user_id}'")
 
         # Resolve assignment references from request payload
-        assignment_subjects = self._resolve_assignments(
-            data.get("assignments") or [], data.get("role") or DEFAULT_ROLE, org
-        )
+        raw_assignments = data.get("assignments") or []
+        role = data.get("role") or DEFAULT_ROLE
+        if raw_assignments and role != "partial_editor":
+            raise FieldValidationError(
+                field="assignments",
+                message="Assignments can only be set for partial_editor role",
+            )
+        assignment_subjects = resolve_assignment_subjects(raw_assignments, org)
 
         invitation = org.create_invitation(
             invited_by=current_user._get_current_object(),
@@ -548,37 +578,6 @@ class MemberInviteAPI(API):
         notify_membership_invitation.delay(str(org.id), str(invitation.id))
 
         return invitation, 201
-
-    @staticmethod
-    def _resolve_assignments(raw_assignments, role, org):
-        if not raw_assignments:
-            return []
-        if role != "partial_editor":
-            raise FieldValidationError(
-                field="assignments",
-                message="Assignments can only be set for partial_editor role",
-            )
-        subjects = []
-        for raw in raw_assignments:
-            cls_name = raw.get("class")
-            obj_id = raw.get("id")
-            if cls_name not in ASSIGNABLE_OBJECT_TYPES:
-                raise FieldValidationError(
-                    field="assignments", message=f"Invalid object class '{cls_name}'"
-                )
-            model_cls = db.resolve_model(cls_name)
-            obj = model_cls.objects(id=obj_id).first()
-            if not obj:
-                raise FieldValidationError(
-                    field="assignments", message=f"{cls_name} '{obj_id}' not found"
-                )
-            if not hasattr(obj, "organization") or obj.organization != org:
-                raise FieldValidationError(
-                    field="assignments",
-                    message=f"{cls_name} '{obj_id}' does not belong to this organization",
-                )
-            subjects.append(obj)
-        return subjects
 
 
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
@@ -647,22 +646,7 @@ class MemberAssignmentsAPI(API):
         if not member or member.role != "partial_editor":
             api.abort(400, "User must be a partial_editor member of this organization")
 
-        raw_subjects = request.json or []
-        allowed_classes = ASSIGNABLE_OBJECT_TYPES
-
-        desired_subjects = []
-        for raw in raw_subjects:
-            cls_name = raw.get("class")
-            obj_id = raw.get("id")
-            if cls_name not in allowed_classes:
-                api.abort(400, f"Invalid object class '{cls_name}'")
-            model_cls = db.resolve_model(cls_name)
-            obj = model_cls.objects(id=obj_id).first()
-            if not obj:
-                api.abort(400, f"{cls_name} '{obj_id}' not found")
-            if not hasattr(obj, "organization") or obj.organization != org:
-                api.abort(400, f"{cls_name} '{obj_id}' does not belong to this organization")
-            desired_subjects.append(obj)
+        desired_subjects = resolve_assignment_subjects(request.json or [], org)
 
         current = list(Assignment.objects(user=user, organization=org))
         current_by_subject = {(a.subject.__class__.__name__, str(a.subject.id)): a for a in current}

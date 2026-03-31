@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
+from email_validator import EmailNotValidError, validate_email
 from flask import current_app, url_for
 from flask_babel import LazyString
 from flask_storage.mongo import ImageField
@@ -458,8 +459,6 @@ class Organization(
         Either user or email must be provided, not both.
         Raises FieldValidationError on validation failure.
         """
-        from email_validator import EmailNotValidError, validate_email
-
         if user and email:
             raise FieldValidationError(field="user", message="Cannot provide both user and email")
         if not user and not email:
