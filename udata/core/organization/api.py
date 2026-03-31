@@ -558,12 +558,6 @@ class MemberInviteAPI(API):
 
         # Resolve assignment references from request payload
         raw_assignments = data.get("assignments") or []
-        role = data.get("role") or DEFAULT_ROLE
-        if raw_assignments and role != "partial_editor":
-            raise FieldValidationError(
-                field="assignments",
-                message="Assignments can only be set for partial_editor role",
-            )
         assignment_subjects = resolve_assignment_subjects(raw_assignments, org)
 
         invitation = org.create_invitation(
