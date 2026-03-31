@@ -108,6 +108,7 @@ class Member(EmbeddedDocument):
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
     since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
+    @property
     @field(readonly=True)
     def label(self):
         return ORG_ROLES[self.role]
@@ -451,6 +452,82 @@ class Organization(
         self.requests.append(membership_request)
         self.save()
         MembershipRequest.after_create.send(membership_request, org=self)
+
+    def create_invitation(
+        self,
+        invited_by,
+        user=None,
+        email=None,
+        role=DEFAULT_ROLE,
+        comment=None,
+        assignment_subjects=None,
+    ):
+        """Create a membership invitation after validating constraints.
+
+        Either user or email must be provided, not both.
+        Raises FieldValidationError on validation failure.
+        """
+        from email_validator import EmailNotValidError, validate_email
+
+        if user and email:
+            raise FieldValidationError(field="user", message="Cannot provide both user and email")
+        if not user and not email:
+            raise FieldValidationError(field="user", message="Either user or email is required")
+
+        if email:
+            try:
+                validate_email(email)
+            except EmailNotValidError:
+                raise FieldValidationError(field="email", message="Invalid email address")
+
+        if role not in ORG_ROLES:
+            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
+
+        # Resolve email to existing user
+        if email and not user:
+            from udata.core.user.models import User
+
+            user = User.objects(email=email.lower()).first()
+            if user:
+                email = None
+
+        # Check duplicates
+        email_lower = email.lower() if email else None
+        for member in self.members:
+            if user and member.user == user:
+                raise FieldValidationError(field="user", message="User is already a member")
+        for req in self.requests:
+            if req.status != "pending":
+                continue
+            if user and req.user == user:
+                raise FieldValidationError(
+                    field="user", message="A request or invitation is already pending for this user"
+                )
+            if email_lower and req.email and req.email.lower() == email_lower:
+                raise FieldValidationError(
+                    field="email", message="An invitation is already pending for this email"
+                )
+
+        # Validate assignments
+        if assignment_subjects and role != "partial_editor":
+            raise FieldValidationError(
+                field="assignments",
+                message="Assignments can only be set for partial_editor role",
+            )
+
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=user,
+            email=email_lower,
+            created_by=invited_by,
+            role=role,
+            comment=comment,
+            assignments=assignment_subjects or [],
+        )
+        self.requests.append(invitation)
+        self.save()
+        MembershipRequest.after_create.send(invitation, org=self)
+        return invitation
 
     def count_members(self):
         self.metrics["members"] = len(self.members)

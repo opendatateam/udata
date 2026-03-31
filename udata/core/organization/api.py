@@ -34,7 +34,6 @@ from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .api_fields import (
     invite_fields,
-    member_fields,
     org_role_fields,
     org_suggestion_fields,
     refuse_membership_fields,
@@ -424,7 +423,7 @@ class MembershipAPI(API):
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
     @api.doc("accept_membership", **common_doc)
-    @api.marshal_with(member_fields)
+    @api.marshal_with(Member.__read_fields__)
     def post(self, org, id):
         """Accept user membership to a given organization."""
         org.permissions["members"].test()
@@ -526,113 +525,67 @@ class MemberInviteAPI(API):
         data = request.json or {}
 
         user_id = data.get("user")
-        email = data.get("email")
-        role = data.get("role") or DEFAULT_ROLE
-        comment = data.get("comment")
-
-        if user_id and email:
-            raise FieldValidationError(field="user", message="Cannot provide both user and email")
-
-        if email:
-            from email_validator import EmailNotValidError, validate_email
-
-            try:
-                validate_email(email)
-            except EmailNotValidError:
-                raise FieldValidationError(field="email", message="Invalid email address")
-
         user = None
-
-        # If user ID provided, get user
         if user_id:
             user = User.objects(id=user_id).first()
             if not user:
                 raise FieldValidationError(field="user", message=f"Unknown user '{user_id}'")
 
-        # If email provided (and no user), check if it matches an existing user
-        if email and not user:
-            user = User.objects(email=email.lower()).first()
-            if user:
-                email = None  # User found, use user instead of email
-
-        # Validate we have either user or email
-        if not user and not email:
-            raise FieldValidationError(field="user", message="Either user or email is required")
-
-        # Check if user is already a member or has a pending request/invitation
-        email_lower = email.lower() if email else None
-        for member in org.members:
-            if user and member.user == user:
-                raise FieldValidationError(field="user", message="User is already a member")
-
-        for req in org.requests:
-            if req.status != "pending":
-                continue
-            if user and req.user == user:
-                raise FieldValidationError(
-                    field="user", message="A request or invitation is already pending for this user"
-                )
-            if email_lower and req.email and req.email.lower() == email_lower:
-                raise FieldValidationError(
-                    field="email", message="An invitation is already pending for this email"
-                )
-
-        # Resolve assignments for partial_editor invitations
-        raw_assignments = request.json.get("assignments", []) or []
-        assignment_subjects = []
-        if raw_assignments:
-            if role != "partial_editor":
-                raise FieldValidationError(
-                    field="assignments",
-                    message="Assignments can only be set for partial_editor role",
-                )
-            allowed_classes = ASSIGNABLE_OBJECT_TYPES
-            for raw in raw_assignments:
-                cls_name = raw.get("class")
-                obj_id = raw.get("id")
-                if cls_name not in allowed_classes:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"Invalid object class '{cls_name}'",
-                    )
-                model_cls = db.resolve_model(cls_name)
-                obj = model_cls.objects(id=obj_id).first()
-                if not obj:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"{cls_name} '{obj_id}' not found",
-                    )
-                if not hasattr(obj, "organization") or obj.organization != org:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"{cls_name} '{obj_id}' does not belong to this organization",
-                    )
-                assignment_subjects.append(obj)
-
-        # Create invitation
-        invitation = MembershipRequest(
-            kind="invitation",
-            user=user,
-            email=email.lower() if email else None,
-            created_by=current_user._get_current_object(),
-            role=role,
-            comment=comment,
-            assignments=assignment_subjects,
+        # Resolve assignment references from request payload
+        assignment_subjects = self._resolve_assignments(
+            data.get("assignments") or [], data.get("role") or DEFAULT_ROLE, org
         )
-        org.requests.append(invitation)
-        org.save()
-        MembershipRequest.after_create.send(invitation, org=org)
+
+        invitation = org.create_invitation(
+            invited_by=current_user._get_current_object(),
+            user=user,
+            email=data.get("email"),
+            role=data.get("role") or DEFAULT_ROLE,
+            comment=data.get("comment"),
+            assignment_subjects=assignment_subjects,
+        )
 
         notify_membership_invitation.delay(str(org.id), str(invitation.id))
 
         return invitation, 201
+
+    @staticmethod
+    def _resolve_assignments(raw_assignments, role, org):
+        if not raw_assignments:
+            return []
+        if role != "partial_editor":
+            raise FieldValidationError(
+                field="assignments",
+                message="Assignments can only be set for partial_editor role",
+            )
+        subjects = []
+        for raw in raw_assignments:
+            cls_name = raw.get("class")
+            obj_id = raw.get("id")
+            if cls_name not in ASSIGNABLE_OBJECT_TYPES:
+                raise FieldValidationError(
+                    field="assignments", message=f"Invalid object class '{cls_name}'"
+                )
+            model_cls = db.resolve_model(cls_name)
+            obj = model_cls.objects(id=obj_id).first()
+            if not obj:
+                raise FieldValidationError(
+                    field="assignments", message=f"{cls_name} '{obj_id}' not found"
+                )
+            if not hasattr(obj, "organization") or obj.organization != org:
+                raise FieldValidationError(
+                    field="assignments",
+                    message=f"{cls_name} '{obj_id}' does not belong to this organization",
+                )
+            subjects.append(obj)
+        return subjects
 
 
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
     @api.expect(Member.__write_fields__)
-    @api.marshal_with(member_fields)
+    @api.marshal_with(Member.__read_fields__)
     @api.doc("update_organization_member", responses={403: "Not Authorized"})
     def put(self, org, user):
         """Update member status into a given organization."""

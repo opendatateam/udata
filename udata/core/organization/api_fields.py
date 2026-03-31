@@ -2,7 +2,7 @@ from udata.api import api, fields
 from udata.core.user.models import User
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
-from .models import Member, Organization
+from .models import Organization
 
 generic_reference_fields = api.model(
     "GenericReference",
@@ -70,9 +70,6 @@ pending_invitation_fields = api.model(
         ),
     },
 )
-
-member_fields = Member.__read_fields__
-
 
 refuse_membership_fields = api.model(
     "RefuseMembership",

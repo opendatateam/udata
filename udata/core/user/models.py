@@ -63,15 +63,17 @@ def _visible_email(user):
 
     - sysadmin or /me endpoint → full email
     - org member context with private access → partially obfuscated
-    - otherwise → None
+    - otherwise → domain only
     """
     if current_user_is_admin_or_self():
         return user.email
+    if not hasattr(user, "email") or not user.email:
+        return None
+    name, domain = user.email.split("@")
     if _is_org_private_context():
-        name, domain = user.email.split("@")
         name = name[:2] + "*" * (len(name) - 2)
         return f"{name}@{domain}"
-    return None
+    return f"***@{domain}"
 
 
 def _visible_login_date(user):

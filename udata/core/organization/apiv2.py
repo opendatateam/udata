@@ -4,7 +4,6 @@ from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.contact_point.models import ContactPoint
 
-from .api_fields import member_fields
 from .models import Member, MembershipRequest, Organization, Team, org_permissions_fields
 from .search import OrganizationSearch
 
@@ -13,7 +12,7 @@ apiv2.inherit("OrganizationPage", Organization.__page_fields__)
 apiv2.inherit("Team (read)", Team.__read_fields__)
 apiv2.inherit("Member (read)", Member.__read_fields__)
 apiv2.inherit("MembershipRequest (read)", MembershipRequest.__read_fields__)
-apiv2.inherit("Member", member_fields)
+apiv2.inherit("Member", Member.__read_fields__)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 apiv2.inherit("OrganizationPermissions", org_permissions_fields)
 
