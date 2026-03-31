@@ -2,13 +2,14 @@ from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
-from flask import url_for
+from flask import current_app, url_for
 from flask_babel import LazyString
 from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
+    DictField,
     EmbeddedDocumentField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
@@ -20,6 +21,8 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api import api
+from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
@@ -31,6 +34,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import OrganizationExtrasField
 from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.slug_fields import SlugField
@@ -57,6 +61,29 @@ from .constants import (
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
 
+
+def check_siret(value, field, **_kwargs):
+    if not value:
+        return
+    if current_app.config.get("ORG_BID_FORMAT") != "siret":
+        return
+    siret_number = str(value)
+    if len(siret_number) != 14:
+        raise FieldValidationError(_("A siret number is made of 14 digits"), field=field)
+    # Exception for the french postal service.
+    if siret_number == "35600000000048":
+        return
+    try:
+        chiffres = [int(chiffre) for chiffre in siret_number[:9]]
+        chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
+        chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
+        total = sum(chiffres)
+    except ValueError:
+        raise FieldValidationError(_("A siret number is only made of digits"), field=field)
+    if total % 10 != 0:
+        raise FieldValidationError(_("Invalid Siret number"), field=field)
+
+
 BADGES: dict[str, LazyString] = {
     PUBLIC_SERVICE: _("Public Service"),
     CERTIFIED: _("Certified"),
@@ -77,11 +104,11 @@ class Team(EmbeddedDocument):
 
 @generate_fields()
 class Member(EmbeddedDocument):
-    user = ReferenceField("User")
-    role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    user = field(ReferenceField("User"))
+    role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
+    since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
-    @property
+    @field(readonly=True)
     def label(self):
         return ORG_ROLES[self.role]
 
@@ -103,23 +130,27 @@ class MembershipRequest(EmbeddedDocument):
         - created_by = admin who created the invitation
     """
 
-    id = AutoUUIDField()
-    user = ReferenceField("User")
-    status = StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
+    id = field(AutoUUIDField(), readonly=True)
+    user = field(ReferenceField("User"), allow_null=True, readonly=True)
+    status = field(StringField(choices=list(MEMBERSHIP_STATUS), default="pending"), readonly=True)
 
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
-    handled_on = DateTimeField()
-    handled_by = ReferenceField("User")
+    handled_on = field(DateTimeField(), readonly=True)
+    handled_by = field(ReferenceField("User"), readonly=True)
 
-    comment = StringField()
-    refusal_comment = StringField()
+    comment = field(StringField())
+    refusal_comment = field(StringField(), readonly=True)
 
-    # New fields for invitation support
-    kind = StringField(choices=list(REQUEST_TYPES), default="request")
-    email = StringField()  # For inviting non-registered users by email
-    created_by = ReferenceField("User")  # Admin who created the invitation
-    role = StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
+    kind = field(
+        StringField(choices=list(REQUEST_TYPES), default="request"),
+        readonly=True,
+    )
+    email = field(StringField(), readonly=True)
+    created_by = field(ReferenceField("User"), readonly=True)
+    role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE), readonly=True)
+    # Not wrapped with field() because GenericReferenceField choices (Dataset, Dataservice, Reuse)
+    # are not yet registered at import time. Serialized via manual request_fields in api_fields.py.
     assignments = ListField(GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES))
 
     after_create = Signal()
@@ -164,6 +195,18 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
+org_permissions_fields = api.model(
+    "OrganizationPermissions",
+    {
+        "edit": api_fields.Permission(),
+        "delete": api_fields.Permission(),
+        "members": api_fields.Permission(),
+        "harvest": api_fields.Permission(),
+        "private": api_fields.Permission(),
+    },
+)
+
+
 @generate_fields()
 class Organization(
     Auditable,
@@ -179,6 +222,7 @@ class Organization(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
         show_as_ref=True,
+        readonly=True,
     )
     description = field(
         StringField(required=True),
@@ -198,17 +242,25 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT))
+    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret])
 
-    members = field(ListField(EmbeddedDocumentField(Member)))
-    teams = field(ListField(EmbeddedDocumentField(Team)))
-    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)))
+    members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
+    teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
+    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
 
-    ext = field(MapField(GenericEmbeddedDocumentField()))
-    zone = field(StringField())
+    # Override WithMetrics.metrics to expose filtered metrics via get_metrics().
+    metrics = field(
+        DictField(),
+        readonly=True,
+        auditable=False,
+        attribute=lambda o: o.get_metrics(),
+    )
+
+    ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
+    zone = field(StringField(), readonly=True)
     extras = field(OrganizationExtrasField(), auditable=False)
 
-    deleted = field(DateTimeField())
+    deleted = field(DateTimeField(), readonly=True)
 
     meta = {
         "indexes": [
@@ -232,6 +284,7 @@ class Organization(
         return self.name or ""
 
     @property
+    @field(nested_fields=org_permissions_fields, show_as_ref=True)
     def permissions(self):
         from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 

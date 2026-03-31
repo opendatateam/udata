@@ -5,6 +5,7 @@ from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission, current_user
 from udata.core import csv
 from udata.core.badges import api as badges_api
@@ -43,13 +44,6 @@ from .api_fields import (
 )
 from .assignment import Assignment
 from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
-from .forms import (
-    MemberForm,
-    MembershipInviteForm,
-    MembershipRefuseForm,
-    MembershipRequestForm,
-    OrganizationForm,
-)
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
@@ -138,12 +132,16 @@ class OrganizationListAPI(API):
 
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})
-    @api.expect(org_fields)
+    @api.expect(Organization.__write_fields__)
     @api.marshal_with(org_fields, code=201)
     def post(self):
         """Create a new organization"""
-        form = api.validate(OrganizationForm)
-        organization = form.save()
+        organization = patch(Organization(), request)
+        user = current_user._get_current_object()
+        member = Member(user=user, role="admin")
+        organization.members.append(member)
+        organization.count_members()
+        organization.save()
         return organization, 201
 
 
@@ -164,7 +162,7 @@ class OrganizationAPI(API):
 
     @api.secure
     @api.doc("update_organization")
-    @api.expect(org_fields)
+    @api.expect(Organization.__write_fields__)
     @api.marshal_with(org_fields)
     @api.response(400, errors.VALIDATION_ERROR)
     @api.response(410, "Organization has been deleted")
@@ -178,8 +176,7 @@ class OrganizationAPI(API):
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
         org.permissions["edit"].test()
-        form = api.validate(OrganizationForm, org)
-        return form.save()
+        return patch_and_save(org, request)
 
     @api.secure
     @api.doc("delete_organization")
@@ -394,17 +391,20 @@ class MembershipRequestAPI(API):
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
-        membership_request = org.pending_request(current_user._get_current_object())
+        data = request.json or {}
+        comment = data.get("comment")
+        if not comment:
+            raise FieldValidationError(field="comment", message="Comment is required")
+
+        user = current_user._get_current_object()
+        membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
-        form = api.validate(MembershipRequestForm, membership_request)
-
         if membership_request:
-            form.populate_obj(membership_request)
+            membership_request.comment = comment
             org.save()
         else:
-            membership_request = MembershipRequest()
-            form.populate_obj(membership_request)
+            membership_request = MembershipRequest(user=user, comment=comment)
             org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
@@ -464,11 +464,15 @@ class MembershipRefuseAPI(MembershipAPI):
         if membership_request.kind == "invitation":
             api.abort(400, "Use the cancel endpoint for invitations")
 
-        form = api.validate(MembershipRefuseForm)
+        data = request.json or {}
+        comment = data.get("comment")
+        if not comment:
+            raise FieldValidationError(field="comment", message="Comment is required")
+
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
         membership_request.handled_on = datetime.now(UTC)
-        membership_request.refusal_comment = form.comment.data
+        membership_request.refusal_comment = comment
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)
@@ -519,15 +523,26 @@ class MemberInviteAPI(API):
         from udata.core.user.models import User
 
         org.permissions["members"].test()
-        form = api.validate(MembershipInviteForm)
+        data = request.json or {}
 
-        user_id = form.user.data
-        email = form.email.data
-        role = form.role.data or DEFAULT_ROLE
-        comment = form.comment.data
+        user_id = data.get("user")
+        email = data.get("email")
+        role = data.get("role") or DEFAULT_ROLE
+        comment = data.get("comment")
+
+        if role not in ORG_ROLES:
+            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
 
         if user_id and email:
             raise FieldValidationError(field="user", message="Cannot provide both user and email")
+
+        if email:
+            from email_validator import EmailNotValidError, validate_email
+
+            try:
+                validate_email(email)
+            except EmailNotValidError:
+                raise FieldValidationError(field="email", message="Invalid email address")
 
         user = None
 
@@ -619,16 +634,19 @@ class MemberInviteAPI(API):
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
-    @api.expect(member_fields)
+    @api.expect(Member.__write_fields__)
     @api.marshal_with(member_fields)
     @api.doc("update_organization_member", responses={403: "Not Authorized"})
     def put(self, org, user):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        data = request.json or {}
+        role = data.get("role", member.role)
+        if role not in ORG_ROLES:
+            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
         old_role = member.role
-        form = api.validate(MemberForm, member)
-        form.populate_obj(member)
+        member.role = role
         org.save()
 
         if old_role == "partial_editor" and member.role != "partial_editor":

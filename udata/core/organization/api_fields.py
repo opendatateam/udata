@@ -1,10 +1,10 @@
 from flask import request
 
-from udata.api import api, base_reference, fields
+from udata.api import api, fields
 from udata.auth.helpers import current_user_is_admin_or_self
-from udata.core.badges.models import Badge
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+from .models import Organization
 
 generic_reference_fields = api.model(
     "GenericReference",
@@ -14,51 +14,7 @@ generic_reference_fields = api.model(
     },
 )
 
-org_permissions_fields = api.model(
-    "OrganizationPermissions",
-    {
-        "edit": fields.Permission(),
-        "delete": fields.Permission(),
-        "members": fields.Permission(),
-        "harvest": fields.Permission(),
-        "private": fields.Permission(),
-    },
-)
-
-org_ref_fields = api.inherit(
-    "OrganizationReference",
-    base_reference,
-    {
-        "name": fields.String(description="The organization name", readonly=True),
-        "acronym": fields.String(description="The organization acronym"),
-        "slug": fields.String(
-            description="The organization string used as permalink", readonly=True
-        ),
-        "uri": fields.String(
-            attribute=lambda o: o.self_api_url(),
-            description="The API URI for this organization",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda o: o.self_web_url(),
-            description="The organization web page URL",
-            readonly=True,
-        ),
-        "logo": fields.ImageField(original=True, description="The organization logo URL"),
-        "logo_thumbnail": fields.ImageField(
-            attribute="logo",
-            size=BIGGEST_LOGO_SIZE,
-            description="The organization logo thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
-        ),
-        "badges": fields.List(
-            fields.Nested(Badge.__read_fields__),
-            description="The organization badges",
-            readonly=True,
-        ),
-        "permissions": fields.Nested(org_permissions_fields, readonly=True),
-    },
-)
+org_ref_fields = Organization.__ref_fields__
 
 
 def check_can_access_user_private_info():
@@ -186,67 +142,14 @@ member_fields = api.model(
     },
 )
 
-
-org_fields = api.model(
-    "Organization",
-    {
-        "id": fields.String(description="The organization identifier", readonly=True),
-        "name": fields.String(description="The organization name", required=True),
-        "acronym": fields.String(description="The organization acronym"),
-        "url": fields.String(description="The organization website URL"),
-        "slug": fields.String(
-            description="The organization string used as permalink", readonly=True
-        ),
-        "description": fields.Markdown(
-            description="The organization description in Markdown", required=True
-        ),
-        "business_number_id": fields.String(
-            description="The organization's business identification number."
-        ),
-        "created_at": fields.ISODateTime(
-            description="The organization creation date", readonly=True
-        ),
-        "last_modified": fields.ISODateTime(
-            description="The organization last modification date", readonly=True
-        ),
-        "deleted": fields.ISODateTime(
-            description="The organization deletion date if deleted", readonly=True
-        ),
-        "metrics": fields.Raw(
-            attribute=lambda o: o.get_metrics(),
-            description="The organization metrics",
-            readonly=True,
-        ),
-        "uri": fields.String(
-            attribute=lambda o: o.self_api_url(),
-            description="The API URI for this organization",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda o: o.self_web_url(),
-            description="The organization web page URL",
-            readonly=True,
-        ),
-        "logo": fields.ImageField(original=True, description="The organization logo URL"),
-        "logo_thumbnail": fields.ImageField(
-            attribute="logo",
-            size=BIGGEST_LOGO_SIZE,
-            description="The organization logo thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
-        ),
-        "members": fields.List(
-            fields.Nested(member_fields, description="The organization members")
-        ),
-        "badges": fields.List(
-            fields.Nested(Badge.__read_fields__),
-            description="The organization badges",
-            readonly=True,
-        ),
-        "permissions": fields.Nested(org_permissions_fields, readonly=True),
-        "extras": fields.Raw(description="Extras attributes as key-value pairs"),
-    },
+# Patch auto-generated read_fields to use email-enriched member serialization.
+# Cannot be set at model definition time due to circular imports
+# (models.py → user/api_fields.py → organization/api_fields.py → models.py).
+Organization.__read_fields__["members"] = fields.List(
+    fields.Nested(member_fields, description="The organization members")
 )
 
+org_fields = Organization.__read_fields__
 org_page_fields = api.model("OrganizationPage", fields.pager(org_fields))
 
 

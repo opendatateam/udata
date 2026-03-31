@@ -156,20 +156,20 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         data["business_number_id"] = "110014016"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _(
-            "A siret number is made of 14 digits"
+        assert response.json["errors"]["business_number_id"] == str(
+            _("A siret number is made of 14 digits")
         )
 
         data["business_number_id"] = "12345678901234"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _("Invalid Siret number")
+        assert response.json["errors"]["business_number_id"] == str(_("Invalid Siret number"))
 
         data["business_number_id"] = "tttttttttttttt"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _(
-            "A siret number is only made of digits"
+        assert response.json["errors"]["business_number_id"] == str(
+            _("A siret number is only made of digits")
         )
 
     def test_organization_api_update_deleted(self):
