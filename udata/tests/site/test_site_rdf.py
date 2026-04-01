@@ -306,7 +306,7 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         assert len(datasets) == 5
 
     def test_catalog_rdf_filter_multiple_tags(self, client):
-        both_tags = DatasetFactory.create_batch(2, tags=["tag-a", "tag-b"])
+        DatasetFactory.create_batch(2, tags=["tag-a", "tag-b"])
         DatasetFactory.create_batch(3, tags=["tag-a"])
 
         url = url_for("api.site_rdf_catalog_format", _format="xml", tag=["tag-a", "tag-b"])
