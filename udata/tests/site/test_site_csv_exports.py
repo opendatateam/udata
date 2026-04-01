@@ -370,6 +370,25 @@ class SiteCsvExportsTest(APITestCase):
             self.assertNotIn(str(reuse.id), ids)
         self.assertNotIn(str(hidden_reuse.id), ids)
 
+    def test_reuses_csv_with_dataset_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        dataset = DatasetFactory()
+        matching_reuse = ReuseFactory(datasets=[dataset])
+        other_reuse = ReuseFactory(datasets=[DatasetFactory()])
+
+        response = self.get(f"/api/1/site/reuses.csv?dataset={dataset.id}")
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(matching_reuse.id), ids)
+        self.assertNotIn(str(other_reuse.id), ids)
+
     def test_reuses_csv_with_multiple_tags_filter(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         both_tags = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a", "tag-b"])
