@@ -13,7 +13,6 @@ from udata.core.dataset.tasks import get_queryset as get_csv_queryset
 from udata.core.organization.api import OrgApiParser
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
-from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.tags.csv import TagCsvAdapter
 from udata.core.tags.models import Tag
@@ -135,13 +134,11 @@ class SiteOrganizationsCsv(API):
 @api.route("/site/reuses.csv", endpoint="site_reuses_csv")
 class SiteReusesCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "reuse" in exported_models:
+        if not request.args and "reuse" in exported_models:
             return redirect(get_export_url("reuse"))
-        params["facets"] = False
-        reuses = ReuseApiParser.parse_filters(get_csv_queryset(Reuse), params)
+        reuses = Reuse.apply_sort_filters(get_csv_queryset(Reuse))
         return csv.stream(ReuseCsvAdapter(reuses), "reuses")
 
 

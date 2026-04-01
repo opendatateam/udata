@@ -83,9 +83,16 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
         assert400(response)
 
-        # filter on tag
+        # filter on single tag
         tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
         response = self.get(url_for("api.dataservices", tag="my-tag"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
+        # filter on multiple tags should exclude partial matches
+        DataserviceFactory(tags=["my-tag"])
+        response = self.get("/api/1/dataservices/?tag=my-tag&tag=other")
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_dataservice.id)

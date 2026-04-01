@@ -546,12 +546,16 @@ def generate_fields(**kwargs) -> Callable:
             parser.add_argument("q", type=str, location="args")
 
         for filterable in filterables:
+            extra_kwargs = {}
+            if filterable.get("is_list"):
+                extra_kwargs["action"] = "append"
             parser.add_argument(
                 # Use the custom label from `nested_filters` if there's one.
                 filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                **extra_kwargs,
             )
 
         cls.__index_parser__ = parser
@@ -596,9 +600,12 @@ def generate_fields(**kwargs) -> Callable:
                     if query:
                         base_query = filterable["query"](base_query, filter)
                     else:
+                        column = filterable["column"]
+                        if filterable.get("is_list"):
+                            column = f"{column}__all"
                         base_query = base_query.filter(
                             **{
-                                filterable["column"]: filter,
+                                column: filter,
                             }
                         )
 
@@ -991,6 +998,23 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # "key" is the param key in the URL
     if "key" not in filterable:
         filterable["key"] = column
+
+    # For simple list fields (e.g. tags), allow multiple filter values via
+    # action="append" and use __all to match documents containing all values.
+    # Excluded: EmbeddedDocumentListField (filtered on a sub-field like
+    # badges__kind, where __all semantics don't apply).
+    # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
+    # Dataservice.contact_points) — these are filtered by a single ObjectId
+    # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
+    # Supporting it would also require updating the ObjectId validation above.
+    if (
+        isinstance(field, mongo_fields.ListField)
+        and not isinstance(field, mongo_fields.EmbeddedDocumentListField)
+        and not isinstance(
+            field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
+        )
+    ):
+        filterable["is_list"] = True
 
     # If we do a filter on a embed document, get the class info
     # of this document to see if there is a default filter value

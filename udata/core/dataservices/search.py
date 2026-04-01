@@ -53,7 +53,7 @@ class DataserviceApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             dataservices = dataservices.search_text(phrase_query)
         if args.get("tag"):
-            dataservices = dataservices.filter(tags=args["tag"])
+            dataservices = dataservices.filter(tags__all=args["tag"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
