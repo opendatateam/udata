@@ -987,6 +987,42 @@ class DiscussionsTest(APITestCase):
         )
         self.assertStatus(response, 403)
 
+    def test_edit_discussion_comment_by_uuid(self):
+        admin = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=admin)
+        message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
+        )
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message.id)),
+            {"comment": "edited by uuid"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        self.assertEqual(discussion.discussion[0].content, "edited by uuid")
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message2.id)),
+            {"comment": "second edited by uuid"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        self.assertEqual(discussion.discussion[1].content, "second edited by uuid")
+
+        response = self.put(
+            url_for(
+                "api.discussion_comment",
+                id=discussion.id,
+                cidx="00000000-0000-0000-0000-000000000000",
+            ),
+            {"comment": "unknown uuid"},
+        )
+        self.assertStatus(response, 404)
+
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
         user = UserFactory()
