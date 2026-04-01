@@ -233,6 +233,13 @@ class Discussion(SpamMixin, Linkable, Document):
             message = self.discussion[message_index]
             self.discussion.pop(message_index)
             self.save()
+
+            from udata.core.reports.models import Report
+
+            Report.objects(
+                subject=self, subject_embed_id=message.id, subject_deleted_at=None
+            ).update(subject_deleted_at=datetime.now(UTC))
+
             on_discussion_message_deleted.send(self, message=message)
 
 

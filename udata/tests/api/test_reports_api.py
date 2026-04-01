@@ -5,6 +5,7 @@ from flask import url_for
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.reports.constants import (
     REASON_ILLEGAL_CONTENT,
     REASON_SPAM,
@@ -354,3 +355,91 @@ class ReportsAPITest(APITestCase):
         response = self.get(url_for("api.reports", handled="false"))
         self.assert200(response)
         self.assertEqual(response.json["total"], 0)
+
+    def test_reports_marked_handled_when_dataset_soft_deleted(self):
+        """Soft-deleting a Dataset should mark its reports as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        report = Report(subject=dataset, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.dataset", dataset=dataset))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+
+    def test_reports_marked_handled_when_discussion_hard_deleted(self):
+        """Hard-deleting a Discussion should mark its reports as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(user=user, subject=dataset, discussion=[message])
+
+        report = Report(subject=discussion, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion", id=discussion.id))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+
+    def test_reports_on_message_marked_handled_when_discussion_hard_deleted(self):
+        """Hard-deleting a Discussion should also mark reports on its messages as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(user=user, subject=dataset, discussion=[message])
+
+        report = Report(subject=discussion, subject_embed_id=message.id, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion", id=discussion.id))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+
+    def test_reports_on_message_marked_handled_when_message_deleted(self):
+        """Deleting a message should mark reports targeting that specific message as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        first_message = MessageDiscussionFactory(posted_by=user)
+        second_message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(
+            user=user, subject=dataset, discussion=[first_message, second_message]
+        )
+
+        report_on_message = Report(
+            subject=discussion, subject_embed_id=second_message.id, reason=REASON_SPAM
+        ).save()
+        report_on_discussion = Report(subject=discussion, reason=REASON_SPAM).save()
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
+        self.assert204(response)
+
+        report_on_message.reload()
+        self.assertIsNotNone(report_on_message.subject_deleted_at)
+
+        report_on_discussion.reload()
+        self.assertIsNone(report_on_discussion.subject_deleted_at)
