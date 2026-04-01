@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from bson import DBRef
 from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -125,6 +126,45 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(REASON_SPAM, reports[1]["reason"])
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
+
+    def test_reports_api_list_with_raw_dbref_subject(self):
+        """Listing reports should not crash when the subject was stored as a raw DBRef
+        (e.g. from the SpamInfo migration) after the fix migration has run."""
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=admin)
+        message = MessageDiscussionFactory(posted_by=admin)
+        discussion = DiscussionFactory.create(user=admin, subject=dataset, discussion=[message])
+
+        Report._get_collection().insert_one(
+            {
+                "subject": DBRef("discussion", discussion.id),
+                "reason": REASON_SPAM,
+                "message": "Migrated from legacy SpamInfo",
+                "reported_at": datetime.now(UTC),
+            }
+        )
+
+        self.login(admin)
+
+        # Before migration: raw DBRef causes 500
+        response = self.get(url_for("api.reports"))
+        self.assert500(response)
+
+        # Run the fix migration
+        from mongoengine.connection import get_db
+
+        from udata.db.migrations import load_migration
+
+        migration = load_migration("2026-04-01-fix-report-subject-dbref-format.py")
+        migration.migrate(get_db())
+
+        # After migration: works
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["class"], "Discussion")
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(discussion.id))
 
     def test_reports_api_list(self):
         user = UserFactory()
