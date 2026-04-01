@@ -98,6 +98,24 @@ class SiteCsvExportsTest(APITestCase):
             self.assertNotIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
 
+    def test_datasets_csv_with_multiple_tags_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
+        only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
+
+        response = self.get("/api/1/site/datasets.csv?tag=tag-a&tag=tag-b")
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
+
     def test_datasets_csv_with_badge_filter(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         dataset_with_badge = DatasetFactory(resources=[ResourceFactory()])
@@ -208,6 +226,24 @@ class SiteCsvExportsTest(APITestCase):
         for dataset in filtered_datasets:
             for resource in dataset.resources:
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+    def test_resources_csv_with_multiple_tags_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
+        only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
+
+        response = self.get("/api/1/site/resources.csv?tag=tag-a&tag=tag-b")
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
 
     def test_organizations_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
@@ -334,6 +370,28 @@ class SiteCsvExportsTest(APITestCase):
             self.assertNotIn(str(reuse.id), ids)
         self.assertNotIn(str(hidden_reuse.id), ids)
 
+    def test_reuses_csv_with_multiple_tags_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        both_tags = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a", "tag-b"])
+        both_tags_and_more = ReuseFactory(
+            datasets=[DatasetFactory()], tags=["tag-a", "tag-b", "tag-c"]
+        )
+        only_a = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a"])
+
+        response = self.get("/api/1/site/reuses.csv?tag=tag-a&tag=tag-b")
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 2)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertIn(str(both_tags_and_more.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
+
     def test_dataservices_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         dataservices = [DataserviceFactory(datasets=[DatasetFactory()]) for _ in range(5)]
@@ -416,6 +474,28 @@ class SiteCsvExportsTest(APITestCase):
             self.assertIn(str(dataservice.id), ids)
         for dataservice in dataservices:
             self.assertNotIn(str(dataservice.id), ids)
+
+    def test_dataservices_csv_with_multiple_tags_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        both_tags = DataserviceFactory(datasets=[DatasetFactory()], tags=["tag-a", "tag-b"])
+        both_tags_and_more = DataserviceFactory(
+            datasets=[DatasetFactory()], tags=["tag-a", "tag-b", "tag-c"]
+        )
+        only_a = DataserviceFactory(datasets=[DatasetFactory()], tags=["tag-a"])
+
+        response = self.get("/api/1/site/dataservices.csv?tag=tag-a&tag=tag-b")
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 2)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertIn(str(both_tags_and_more.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
 
     def test_harvest_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []

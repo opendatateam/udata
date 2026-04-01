@@ -305,6 +305,19 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
         assert len(datasets) == 5
 
+    def test_catalog_rdf_filter_multiple_tags(self, client):
+        both_tags = DatasetFactory.create_batch(2, tags=["tag-a", "tag-b"])
+        DatasetFactory.create_batch(3, tags=["tag-a"])
+
+        url = url_for("api.site_rdf_catalog_format", _format="xml", tag=["tag-a", "tag-b"])
+
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format="xml")
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 2
+
     def test_catalog_rdf_dataservices(self, client):
         dataset_a = DatasetFactory.create()
         dataset_b = DatasetFactory.create()
