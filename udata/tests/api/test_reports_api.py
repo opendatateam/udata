@@ -152,6 +152,31 @@ class ReportsAPITest(APITestCase):
 
         self.assertEqual(payload["data"][1]["subject"]["id"], str(spam_reuse.id))
 
+    def test_reports_api_filter_by_subject_type(self):
+        user = UserFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        reuse = ReuseFactory.create(owner=user)
+
+        Report(subject=dataset, reason=REASON_SPAM).save()
+        Report(subject=reuse, reason=REASON_SPAM).save()
+
+        self.login(AdminFactory())
+
+        response = self.get(url_for("api.reports", subject_type="Dataset"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(dataset.id))
+
+        response = self.get(url_for("api.reports", subject_type="Reuse"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(reuse.id))
+
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 2)
+
     def test_reports_api_list_sort_by_reported_at(self):
         user = UserFactory()
 

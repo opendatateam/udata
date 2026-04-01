@@ -30,6 +30,9 @@ class ReportQuerySet(UDataQuerySet):
         return self.filter(Q(dismissed_at__ne=None) | Q(subject_deleted_at__ne=None))
 
 
+SUBJECT_TYPE_CHOICES = [model._class_name for model in REPORTABLE_MODELS]
+
+
 def filter_by_handled(base_query, filter_value):
     if filter_value is True:
         return base_query.handled()
@@ -39,12 +42,22 @@ def filter_by_handled(base_query, filter_value):
         return base_query
 
 
+def filter_by_subject_type(base_query, filter_value):
+    return base_query.filter(__raw__={"subject._cls": filter_value})
+
+
 @generate_fields(
     standalone_filters=[
         {
             "key": "handled",
             "query": filter_by_handled,
             "type": inputs.boolean,
+        },
+        {
+            "key": "subject_type",
+            "query": filter_by_subject_type,
+            "type": str,
+            "choices": SUBJECT_TYPE_CHOICES,
         },
     ],
 )
