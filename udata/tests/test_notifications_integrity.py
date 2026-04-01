@@ -186,6 +186,6 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 1
         assert Notification.objects.first().details.discussion == discussion
 
-        discussion.remove_message(1)
+        discussion.remove_message(message2.id)
 
         assert Notification.objects.count() == 0
