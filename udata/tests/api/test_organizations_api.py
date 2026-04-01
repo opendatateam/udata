@@ -254,6 +254,16 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by is None
         assert request.refusal_comment is None
 
+    def test_request_membership_without_comment(self):
+        organization = OrganizationFactory()
+        self.login()
+
+        response = self.post(url_for("api.request_membership", org=organization), {})
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
     def test_request_existing_pending_membership_do_not_duplicate_it(self):
         user = self.login()
         previous_request = MembershipRequest(user=user, comment="previous")
@@ -505,6 +515,21 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert404(response)
 
         assert response.json["message"] == "Unknown membership request id"
+
+    def test_refuse_membership_without_comment(self):
+        user = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="test")
+        member = Member(user=user, role="admin")
+        organization = OrganizationFactory(members=[member], requests=[membership_request])
+
+        api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
+        response = self.post(api_url, {})
+        assert400(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "pending"
+        assert organization.requests[0].refusal_comment is None
 
     def test_accept_membership_rejects_invitation(self):
         """Test that accept_membership rejects invitations."""

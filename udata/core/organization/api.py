@@ -423,9 +423,6 @@ class MembershipRequestAPI(API):
         else:
             membership_request = patch(MembershipRequest(user=user), request)
 
-        if not membership_request.comment:
-            raise FieldValidationError(field="comment", message="Comment is required")
-
         if code == 200:
             org.save()
         else:
@@ -488,8 +485,10 @@ class MembershipRefuseAPI(MembershipAPI):
         if membership_request.kind == "invitation":
             api.abort(400, "Use the cancel endpoint for invitations")
 
-        data = request.json or {}
-        comment = data.get("comment")
+        # TODO: use patch() here. Currently blocked because the API payload uses
+        # "comment" but the model field is "refusal_comment" — patch() would set
+        # the wrong field. Requires changing the API contract to use "refusal_comment".
+        comment = (request.json or {}).get("comment")
         if not comment:
             raise FieldValidationError(field="comment", message="Comment is required")
 

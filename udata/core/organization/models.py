@@ -22,7 +22,7 @@ from werkzeug.utils import cached_property
 
 from udata.api import api
 from udata.api import fields as api_fields
-from udata.api_fields import field, generate_fields
+from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.linkable import Linkable
@@ -139,7 +139,7 @@ class MembershipRequest(EmbeddedDocument):
     handled_on = field(DateTimeField(), readonly=True)
     handled_by = field(ReferenceField("User"), readonly=True)
 
-    comment = field(StringField())
+    comment = field(StringField(), checks=[required_if(kind="request")])
     refusal_comment = field(StringField(), readonly=True)
 
     kind = field(
