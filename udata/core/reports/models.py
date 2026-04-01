@@ -118,7 +118,8 @@ class Report(Document[ReportQuerySet]):
         Called when updating a model (maybe updating the `deleted` date)
         Some documents like Discussion do not have a `deleted` attribute.
         """
-        if hasattr(document, "deleted") and document.deleted:
+        deleted = getattr(document, "deleted", None) or getattr(document, "deleted_at", None)
+        if deleted:
             Report.objects(subject=document, subject_deleted_at=None).update(
                 subject_deleted_at=datetime.now(UTC)
             )

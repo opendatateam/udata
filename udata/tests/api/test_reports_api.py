@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.reports.constants import (
@@ -322,3 +323,34 @@ class ReportsAPITest(APITestCase):
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(deleted_subject_report.id))
+
+    def test_reports_marked_handled_when_dataservice_soft_deleted(self):
+        """Soft-deleting a Dataservice (which uses `deleted_at`) should mark its reports as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataservice = DataserviceFactory.create(owner=user)
+        report = Report(subject=dataservice, reason=REASON_SPAM).save()
+
+        report.reload()
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        # Soft delete the dataservice
+        response = self.delete(url_for("api.dataservice", dataservice=dataservice))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+
+        # Report should appear as handled
+        response = self.get(url_for("api.reports", handled="true"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["id"], str(report.id))
+
+        # And not as unhandled
+        response = self.get(url_for("api.reports", handled="false"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 0)
