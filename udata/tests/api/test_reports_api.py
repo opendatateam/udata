@@ -68,12 +68,14 @@ class ReportsAPITest(APITestCase):
         self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertIsNone(reports[0].by)
+        self.assertEqual(illegal_dataset.title, reports[0].subject_label)
 
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
         self.assertEqual("This is spammy", reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
+        self.assertEqual(spam_dataset.title, reports[1].subject_label)
 
         response = self.delete(url_for("api.dataset", dataset=illegal_dataset))
         self.assert204(response)
@@ -382,7 +384,7 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(response.json["total"], 0)
 
     def test_reports_marked_handled_when_dataset_soft_deleted(self):
-        """Soft-deleting a Dataset should mark its reports as handled."""
+        """Soft-deleting a Dataset should mark its reports as handled with deleted_by."""
         user = UserFactory()
         admin = AdminFactory()
 
@@ -398,9 +400,10 @@ class ReportsAPITest(APITestCase):
 
         report.reload()
         self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
 
     def test_reports_marked_handled_when_discussion_hard_deleted(self):
-        """Hard-deleting a Discussion should mark its reports as handled."""
+        """Hard-deleting a Discussion should mark its reports as handled with deleted_by."""
         user = UserFactory()
         admin = AdminFactory()
 
@@ -419,6 +422,7 @@ class ReportsAPITest(APITestCase):
 
         report.reload()
         self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
 
     def test_reports_on_message_marked_handled_when_discussion_hard_deleted(self):
         """Hard-deleting a Discussion should also mark reports on its messages as handled."""
@@ -440,6 +444,7 @@ class ReportsAPITest(APITestCase):
 
         report.reload()
         self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
 
     def test_reports_on_message_marked_handled_when_message_deleted(self):
         """Deleting a message should mark reports targeting that specific message as handled."""
@@ -465,6 +470,8 @@ class ReportsAPITest(APITestCase):
 
         report_on_message.reload()
         self.assertIsNotNone(report_on_message.subject_deleted_at)
+        self.assertEqual(report_on_message.subject_deleted_by.id, admin.id)
 
         report_on_discussion.reload()
         self.assertIsNone(report_on_discussion.subject_deleted_at)
+        self.assertIsNone(report_on_discussion.subject_deleted_by)
