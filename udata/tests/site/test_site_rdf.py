@@ -5,6 +5,7 @@ from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
 from werkzeug.datastructures import ImmutableMultiDict
 
+from udata.core.access_type.constants import AccessType
 from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -372,8 +373,6 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
 
     def test_catalog_rdf_filter_access_type(self, client):
         """Test that filter applies for both datasets and dataservices if supported"""
-        from udata.core.access_type.constants import AccessType
-
         DatasetFactory.create(access_type=AccessType.OPEN)
         restricted_dataset = DatasetFactory.create(access_type=AccessType.RESTRICTED)
 
