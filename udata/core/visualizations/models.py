@@ -53,7 +53,7 @@ class GenericFilter(EmbeddedDocument):
 @generate_fields()
 class Filter(GenericFilter):
     column = field(StringField(required=True))
-    condition = field(StringField(required=True, choices=["equal", "greater"]))
+    condition = field(StringField(required=True, choices=["exact", "differs", "is_null", "is_not_null", "greater", "less", "strictly_greater", "strictly_less"]))
     value = field(StringField())
 
 
