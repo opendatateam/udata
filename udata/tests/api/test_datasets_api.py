@@ -285,7 +285,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["id"], str(temporal_coverage_dataset.id))
 
         # filter on access_type
-        response = self.get(url_for("api.datasets", access_type="restricted"))
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))

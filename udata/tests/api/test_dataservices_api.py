@@ -95,12 +95,12 @@ class DataserviceAPITest(APITestCase):
         open_with_account_dataservice = DataserviceFactory(access_type=AccessType.OPEN_WITH_ACCOUNT)
         restricted_dataservice = DataserviceFactory(access_type=AccessType.RESTRICTED)
 
-        response = self.get(url_for("api.dataservices", access_type="restricted"))
+        response = self.get(url_for("api.dataservices", access_type=AccessType.RESTRICTED))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(restricted_dataservice.id)
 
-        response = self.get(url_for("api.dataservices", access_type="open_with_account"))
+        response = self.get(url_for("api.dataservices", access_type=AccessType.OPEN_WITH_ACCOUNT))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(open_with_account_dataservice.id)
