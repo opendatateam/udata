@@ -67,3 +67,6 @@ def migrate(db):
         if ops:
             site_collection.update_one({"_id": site["_id"]}, ops)
             log.info(f"\tMigrated blocs for site {site['_id']}: {list(updates.keys())}")
+
+    result = page_collection.drop()
+    log.info(f"\tDropped page collection: {result}")
