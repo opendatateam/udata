@@ -13,7 +13,7 @@ The `@generate_fields` decorator parameters:
 - additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
 - nested_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
 - standalone_filters: filter on something else than a field. Should be a list of dicts with filterable attributes, as returned by `compute_filter`.
-- mask: explicit mask string applied to `__page_fields__` (e.g. "*,datasets{id,title}").
+- page_mask: explicit mask string applied to `__page_fields__` (e.g. "*,datasets{id,title}").
 - read_mask_exclude: list of field names to exclude from `__read_fields__` default response.
 - page_mask_exclude: list of field names to exclude from `__page_fields__` (paginated list) default response.
 
@@ -515,7 +515,7 @@ def generate_fields(**kwargs) -> Callable:
         # manual mask= usage on models like Reuse and Dataset.
         read_mask_exclude: list | None = kwargs.pop("read_mask_exclude", None)
         page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
-        mask: str | None = kwargs.pop("mask", None)
+        page_mask: str | None = kwargs.pop("page_mask", None)
 
         read_mask = None
         if read_mask_exclude:
@@ -532,8 +532,8 @@ def generate_fields(**kwargs) -> Callable:
             page_mask = "data{{{0}}},*".format(
                 ",".join(k for k in read_fields if k not in page_mask_exclude)
             )
-        elif mask is not None:
-            page_mask = "data{{{0}}},*".format(mask)
+        elif page_mask is not None:
+            page_mask = "data{{{0}}},*".format(page_mask)
         cls.__page_fields__ = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(cls.__read_fields__),
