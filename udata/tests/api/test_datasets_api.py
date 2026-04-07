@@ -195,6 +195,8 @@ class DatasetAPITest(APITestCase):
 
         temporal_coverage = DateRange(start="2022-05-03", end="2022-05-04")
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+        _ = DatasetFactory(access_type=AccessType.OPEN)
+        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
 
         owner_dataset = DatasetFactory(owner=owner)
         org_dataset = DatasetFactory(organization=org)
@@ -283,6 +285,12 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(temporal_coverage_dataset.id))
+
+        # filter on access_type
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))
 
         # filter on owner
         response = self.get(url_for("api.datasets", owner=owner.id))

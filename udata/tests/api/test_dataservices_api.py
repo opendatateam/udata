@@ -90,6 +90,21 @@ class DataserviceAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_dataservice.id)
 
+        # filter on access_type (is_restricted not supported on api v1 mongo list endpoint)
+        _ = DataserviceFactory(access_type=AccessType.OPEN)
+        open_with_account_dataservice = DataserviceFactory(access_type=AccessType.OPEN_WITH_ACCOUNT)
+        restricted_dataservice = DataserviceFactory(access_type=AccessType.RESTRICTED)
+
+        response = self.get(url_for("api.dataservices", access_type=AccessType.RESTRICTED))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(restricted_dataservice.id)
+
+        response = self.get(url_for("api.dataservices", access_type=AccessType.OPEN_WITH_ACCOUNT))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(open_with_account_dataservice.id)
+
         # filter on topic
         topic_dataservice = DataserviceFactory()
         topic = TopicFactory()
