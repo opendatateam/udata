@@ -1,9 +1,12 @@
 from datetime import UTC, datetime
 
+from bson import DBRef
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.reports.constants import (
     REASON_ILLEGAL_CONTENT,
     REASON_SPAM,
@@ -66,12 +69,14 @@ class ReportsAPITest(APITestCase):
         self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertIsNone(reports[0].by)
+        self.assertEqual(illegal_dataset.title, reports[0].subject_label)
 
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
         self.assertEqual("This is spammy", reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
+        self.assertEqual(spam_dataset.title, reports[1].subject_label)
 
         response = self.delete(url_for("api.dataset", dataset=illegal_dataset))
         self.assert204(response)
@@ -122,6 +127,45 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
 
+    def test_reports_api_list_with_raw_dbref_subject(self):
+        """Listing reports should not crash when the subject was stored as a raw DBRef
+        (e.g. from the SpamInfo migration) after the fix migration has run."""
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=admin)
+        message = MessageDiscussionFactory(posted_by=admin)
+        discussion = DiscussionFactory.create(user=admin, subject=dataset, discussion=[message])
+
+        Report._get_collection().insert_one(
+            {
+                "subject": DBRef("discussion", discussion.id),
+                "reason": REASON_SPAM,
+                "message": "Migrated from legacy SpamInfo",
+                "reported_at": datetime.now(UTC),
+            }
+        )
+
+        self.login(admin)
+
+        # Before migration: raw DBRef causes 500
+        response = self.get(url_for("api.reports"))
+        self.assert500(response)
+
+        # Run the fix migration
+        from mongoengine.connection import get_db
+
+        from udata.db.migrations import load_migration
+
+        migration = load_migration("2026-04-01-fix-report-subject-dbref-format.py")
+        migration.migrate(get_db())
+
+        # After migration: works
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["class"], "Discussion")
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(discussion.id))
+
     def test_reports_api_list(self):
         user = UserFactory()
 
@@ -149,6 +193,31 @@ class ReportsAPITest(APITestCase):
         )
 
         self.assertEqual(payload["data"][1]["subject"]["id"], str(spam_reuse.id))
+
+    def test_reports_api_filter_by_subject_type(self):
+        user = UserFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        reuse = ReuseFactory.create(owner=user)
+
+        Report(subject=dataset, reason=REASON_SPAM).save()
+        Report(subject=reuse, reason=REASON_SPAM).save()
+
+        self.login(AdminFactory())
+
+        response = self.get(url_for("api.reports", subject_type="Dataset"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(dataset.id))
+
+        response = self.get(url_for("api.reports", subject_type="Reuse"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["subject"]["id"], str(reuse.id))
+
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 2)
 
     def test_reports_api_list_sort_by_reported_at(self):
         user = UserFactory()
@@ -322,3 +391,127 @@ class ReportsAPITest(APITestCase):
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(deleted_subject_report.id))
+
+    def test_reports_marked_handled_when_dataservice_soft_deleted(self):
+        """Soft-deleting a Dataservice (which uses `deleted_at`) should mark its reports as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataservice = DataserviceFactory.create(owner=user)
+        report = Report(subject=dataservice, reason=REASON_SPAM).save()
+
+        report.reload()
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        # Soft delete the dataservice
+        response = self.delete(url_for("api.dataservice", dataservice=dataservice))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+
+        # Report should appear as handled
+        response = self.get(url_for("api.reports", handled="true"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["id"], str(report.id))
+
+        # And not as unhandled
+        response = self.get(url_for("api.reports", handled="false"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 0)
+
+    def test_reports_marked_handled_when_dataset_soft_deleted(self):
+        """Soft-deleting a Dataset should mark its reports as handled with deleted_by."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        report = Report(subject=dataset, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.dataset", dataset=dataset))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
+
+    def test_reports_marked_handled_when_discussion_hard_deleted(self):
+        """Hard-deleting a Discussion should mark its reports as handled with deleted_by."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(user=user, subject=dataset, discussion=[message])
+
+        report = Report(subject=discussion, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion", id=discussion.id))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
+
+    def test_reports_on_message_marked_handled_when_discussion_hard_deleted(self):
+        """Hard-deleting a Discussion should also mark reports on its messages as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(user=user, subject=dataset, discussion=[message])
+
+        report = Report(subject=discussion, subject_embed_id=message.id, reason=REASON_SPAM).save()
+
+        self.assertIsNone(report.subject_deleted_at)
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion", id=discussion.id))
+        self.assert204(response)
+
+        report.reload()
+        self.assertIsNotNone(report.subject_deleted_at)
+        self.assertEqual(report.subject_deleted_by.id, admin.id)
+
+    def test_reports_on_message_marked_handled_when_message_deleted(self):
+        """Deleting a message should mark reports targeting that specific message as handled."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset = DatasetFactory.create(owner=user)
+        first_message = MessageDiscussionFactory(posted_by=user)
+        second_message = MessageDiscussionFactory(posted_by=user)
+        discussion = DiscussionFactory.create(
+            user=user, subject=dataset, discussion=[first_message, second_message]
+        )
+
+        report_on_message = Report(
+            subject=discussion, subject_embed_id=second_message.id, reason=REASON_SPAM
+        ).save()
+        report_on_discussion = Report(subject=discussion, reason=REASON_SPAM).save()
+
+        self.login(admin)
+
+        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
+        self.assert204(response)
+
+        report_on_message.reload()
+        self.assertIsNotNone(report_on_message.subject_deleted_at)
+        self.assertEqual(report_on_message.subject_deleted_by.id, admin.id)
+
+        report_on_discussion.reload()
+        self.assertIsNone(report_on_discussion.subject_deleted_at)
+        self.assertIsNone(report_on_discussion.subject_deleted_by)

@@ -227,13 +227,19 @@ class Discussion(SpamMixin, Linkable, Document):
         on_discussion_deleted.send(self)
         return result
 
-    def remove_message(self, message_index):
-        """Remove a message from the discussion and trigger deletion signal"""
-        if 0 <= message_index < len(self.discussion):
-            message = self.discussion[message_index]
-            self.discussion.pop(message_index)
-            self.save()
-            on_discussion_message_deleted.send(self, message=message)
+    def remove_message(self, message_id):
+        """Remove a message by its UUID and trigger deletion signal"""
+        for i, message in enumerate(self.discussion):
+            if message.id == message_id:
+                self.discussion.pop(i)
+                self.save()
+
+                from udata.core.reports.models import Report
+
+                Report.mark_subject_deleted_by_embed_id(self, message.id)
+
+                on_discussion_message_deleted.send(self, message=message)
+                return
 
 
 post_save.connect(Discussion.post_save, sender=Discussion)
