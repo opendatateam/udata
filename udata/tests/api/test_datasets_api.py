@@ -221,8 +221,6 @@ class DatasetAPITest(APITestCase):
             ]
         )
 
-        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
-
         total_datasets = Dataset.objects().count()
 
         # no filter
