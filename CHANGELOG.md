@@ -1,5 +1,18 @@
 # Changelog
 
+## 16.1.0 (2026-04-08)
+
+- chore: add access_type filter on list api endpoints and rdf catalogs ([#3711](https://github.com/opendatateam/udata/pull/3711))
+- chore(deps): update dependencies ([#3709](https://github.com/opendatateam/udata/pull/3709))
+- feat: migrate badges to api fields ([#3694](https://github.com/opendatateam/udata/pull/3694))
+- feat: migrate contact points to new API fields ([#3659](https://github.com/opendatateam/udata/pull/3659))
+- feat: moderation dashboard improvements ([#3713](https://github.com/opendatateam/udata/pull/3713))
+- feat(RDF): harvest and expose access rights and rights in RDF ([#3667](https://github.com/opendatateam/udata/pull/3667))
+- feat(topics): private=true|false API param ([#3699](https://github.com/opendatateam/udata/pull/3699))
+- fix: duplicate dataset in test ([#3715](https://github.com/opendatateam/udata/pull/3715))
+- refactor: simplify udata-search-service ([#3691](https://github.com/opendatateam/udata/pull/3691))
+
+
 ## 16.0.0 (2026-03-24)
 
 - **feat!: new api key system ([#3636](https://github.com/opendatateam/udata/pull/3636))**
