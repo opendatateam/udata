@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from bson import DBRef
+from bson import DBRef, ObjectId
 from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -126,6 +126,43 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(REASON_SPAM, reports[1]["reason"])
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
+
+    def test_reports_api_list_with_orphaned_user_ref(self):
+        """Listing reports should not crash when a report references a deleted user."""
+        admin = AdminFactory()
+        dataset = DatasetFactory.create(owner=admin)
+
+        # Insert a report with a DBRef pointing to a non-existent user
+        fake_user_id = ObjectId()
+        Report._get_collection().insert_one(
+            {
+                "by": DBRef("user", fake_user_id),
+                "subject": {"_cls": "Dataset", "_ref": DBRef("dataset", dataset.id)},
+                "reason": REASON_SPAM,
+                "message": "Reported by a now-deleted user",
+                "reported_at": datetime.now(UTC),
+            }
+        )
+
+        self.login(admin)
+
+        # Before migration: orphaned user ref causes 500
+        response = self.get(url_for("api.reports"))
+        self.assert500(response)
+
+        # Run the fix migration
+        from mongoengine.connection import get_db
+
+        from udata.db.migrations import load_migration
+
+        migration = load_migration("2026-04-08-fix-report-orphaned-user-refs.py")
+        migration.migrate(get_db())
+
+        # After migration: works, user field is null
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 1)
+        self.assertIsNone(response.json["data"][0]["by"])
 
     def test_reports_api_list_with_raw_dbref_subject(self):
         """Listing reports should not crash when the subject was stored as a raw DBRef
@@ -515,3 +552,38 @@ class ReportsAPITest(APITestCase):
         report_on_discussion.reload()
         self.assertIsNone(report_on_discussion.subject_deleted_at)
         self.assertIsNone(report_on_discussion.subject_deleted_by)
+
+    def test_reports_user_refs_nullified_when_user_deleted(self):
+        """Deleting a user should nullify by, dismissed_by and subject_deleted_by on reports."""
+        reporter = UserFactory()
+        dismisser = AdminFactory()
+        deleter = AdminFactory()
+        dataset = DatasetFactory.create(owner=AdminFactory())
+
+        report_with_by = Report(subject=dataset, reason=REASON_SPAM, by=reporter).save()
+        report_with_dismissed_by = Report(
+            subject=dataset,
+            reason=REASON_SPAM,
+            dismissed_at=datetime.now(UTC),
+            dismissed_by=dismisser,
+        ).save()
+        report_with_subject_deleted_by = Report(
+            subject=dataset,
+            reason=REASON_SPAM,
+            subject_deleted_at=datetime.now(UTC),
+            subject_deleted_by=deleter,
+        ).save()
+
+        # User.delete() is overridden to raise NotImplementedError,
+        # _delete() is the real MongoEngine delete that triggers reverse_delete_rule.
+        reporter._delete()
+        report_with_by.reload()
+        self.assertIsNone(report_with_by.by)
+
+        dismisser._delete()
+        report_with_dismissed_by.reload()
+        self.assertIsNone(report_with_dismissed_by.dismissed_by)
+
+        deleter._delete()
+        report_with_subject_deleted_by.reload()
+        self.assertIsNone(report_with_subject_deleted_by.subject_deleted_by)
