@@ -317,6 +317,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
             )
 
+    elif isinstance(field, mongo_fields.MultiPolygonField):
+        constructor = restx_fields.Raw
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
@@ -804,7 +806,7 @@ def patch(obj: _T, request) -> _T:
                 model_attribute, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
             ):
                 value = wrap_primary_key(key, model_attribute, value)
-            elif isinstance(
+            elif value and isinstance(
                 model_attribute,
                 (
                     mongoengine.fields.GenericReferenceField,
