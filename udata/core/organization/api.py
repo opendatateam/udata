@@ -776,6 +776,32 @@ class AvatarAPI(API):
         return {"image": org.logo}
 
 
+@ns.route("/<org:org>/banner/", endpoint="organization_banner")
+@api.doc(**common_doc)
+class BannerAPI(API):
+    @api.secure
+    @api.doc("organization_banner")
+    @api.expect(image_parser)
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, org):
+        """Upload a new banner"""
+        org.permissions["edit"].test()
+        parse_uploaded_image(org.banner)
+        org.save()
+        return {"image": org.banner}
+
+    @api.secure
+    @api.doc("resize_organization_banner")
+    @api.expect(image_parser)
+    @api.marshal_with(uploaded_image_fields)
+    def put(self, org):
+        """Set the banner BBox"""
+        org.permissions["edit"].test()
+        parse_uploaded_image(org.banner)
+        org.save()
+        return {"image": org.banner}
+
+
 dataset_parser = DatasetApiParser()
 
 

@@ -4,7 +4,7 @@ from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .constants import DESCRIPTION_SIZE_LIMIT, LOGO_SIZES, ORG_ROLES, TITLE_SIZE_LIMIT
+from .constants import BANNER_SIZES, DESCRIPTION_SIZE_LIMIT, LOGO_SIZES, ORG_ROLES, TITLE_SIZE_LIMIT
 from .models import Member, MembershipRequest, Organization
 
 __all__ = (
@@ -54,6 +54,8 @@ class OrganizationForm(ModelForm):
     )
     url = fields.URLField(_("Website"), description=_("The organization website URL"))
     logo = fields.ImageField(_("Logo"), sizes=LOGO_SIZES)
+    banner = fields.ImageField(_("Banner"), sizes=BANNER_SIZES)
+    banner_color = fields.StringField(_("Banner color"))
     business_number_id = fields.StringField(
         _("Business id"), [org_bid_check], description=_("Business identification number")
     )

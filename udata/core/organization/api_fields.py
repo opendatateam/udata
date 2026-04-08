@@ -4,7 +4,14 @@ from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.models import Badge
 
-from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+from .constants import (
+    BIGGEST_BANNER_SIZE,
+    BIGGEST_LOGO_SIZE,
+    DEFAULT_ROLE,
+    MEMBERSHIP_STATUS,
+    ORG_ROLES,
+    REQUEST_TYPES,
+)
 
 generic_reference_fields = api.model(
     "GenericReference",
@@ -51,6 +58,15 @@ org_ref_fields = api.inherit(
             description="The organization logo thumbnail URL. This is the square "
             "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
         ),
+        "banner": fields.ImageField(original=True, description="The organization banner URL"),
+        "banner_thumbnail": fields.ImageField(
+            attribute="banner",
+            size=BIGGEST_BANNER_SIZE,
+            description="The organization banner thumbnail URL ({0}px wide).".format(
+                BIGGEST_BANNER_SIZE
+            ),
+        ),
+        "banner_color": fields.String(description="The organization banner color (hex)"),
         "badges": fields.List(
             fields.Nested(Badge.__read_fields__),
             description="The organization badges",
@@ -234,6 +250,15 @@ org_fields = api.model(
             description="The organization logo thumbnail URL. This is the square "
             "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
         ),
+        "banner": fields.ImageField(original=True, description="The organization banner URL"),
+        "banner_thumbnail": fields.ImageField(
+            attribute="banner",
+            size=BIGGEST_BANNER_SIZE,
+            description="The organization banner thumbnail URL ({0}px wide).".format(
+                BIGGEST_BANNER_SIZE
+            ),
+        ),
+        "banner_color": fields.String(description="The organization banner color (hex)"),
         "members": fields.List(
             fields.Nested(member_fields, description="The organization members")
         ),
