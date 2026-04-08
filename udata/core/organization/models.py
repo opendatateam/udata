@@ -167,8 +167,8 @@ class OrganizationBadgeMixin(BadgeMixin):
 
 @generate_fields()
 class Organization(
-    SpamMixin,
     Auditable,
+    SpamMixin,
     WithMetrics,
     OrganizationBadgeMixin,
     Linkable,

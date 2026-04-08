@@ -565,8 +565,8 @@ class DatasetBadgeMixin(BadgeMixin):
 
 @generate_fields()
 class Dataset(
-    SpamMixin,
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DatasetBadgeMixin,

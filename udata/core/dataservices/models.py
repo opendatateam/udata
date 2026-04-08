@@ -187,8 +187,8 @@ def filter_by_reuse(base_query, filter_value):
     ],
 )
 class Dataservice(
-    SpamMixin,
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DataserviceBadgeMixin,

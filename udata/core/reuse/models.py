@@ -89,9 +89,9 @@ class ReuseBadgeMixin(BadgeMixin):
     mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(
-    SpamMixin,
     Datetimed,
     Auditable,
+    SpamMixin,
     WithMetrics,
     ReuseBadgeMixin,
     Linkable,
