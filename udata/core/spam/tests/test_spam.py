@@ -1,9 +1,12 @@
 import pytest
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion, Message
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 
@@ -119,3 +122,80 @@ class SpamTest(APITestCase):
             Report.objects(subject=discussion, reason=REASON_AUTO_SPAM, dismissed_at=None).count(),
             0,
         )
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_in_title(self):
+        dataset = DatasetFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_in_description(self):
+        dataset = DatasetFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_no_spam(self):
+        dataset = DatasetFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_not_reflagged_after_dismiss(self):
+        from datetime import datetime
+
+        dataset = DatasetFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataset))
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        report.dismissed_at = datetime.utcnow()
+        report.save()
+
+        dataset.reload()
+        dataset.description = "Updated description"
+        dataset.save()
+
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_spam_in_title(self):
+        reuse = ReuseFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_spam_in_description(self):
+        reuse = ReuseFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_no_spam(self):
+        reuse = ReuseFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_spam_in_name(self):
+        org = OrganizationFactory(name="Spam Organization")
+        self.assertTrue(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_spam_in_description(self):
+        org = OrganizationFactory(name="Normal Org", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_no_spam(self):
+        org = OrganizationFactory(name="Normal Org", description="Normal description")
+        self.assertFalse(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_spam_in_title(self):
+        dataservice = DataserviceFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_spam_in_description(self):
+        dataservice = DataserviceFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_no_spam(self):
+        dataservice = DataserviceFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(dataservice))
