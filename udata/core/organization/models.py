@@ -26,6 +26,7 @@ from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -167,6 +168,7 @@ class OrganizationBadgeMixin(BadgeMixin):
 @generate_fields()
 class Organization(
     Auditable,
+    SpamMixin,
     WithMetrics,
     OrganizationBadgeMixin,
     Linkable,
@@ -270,6 +272,9 @@ class Organization(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.compute_aggregate_metrics = True
+
+    def fields_to_check_for_spam(self):
+        return {"name": self.name, "description": self.description}
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
@@ -450,3 +455,4 @@ class Organization(
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
+post_save.connect(SpamMixin.post_save, sender=Organization)

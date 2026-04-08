@@ -45,6 +45,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
@@ -565,6 +566,7 @@ class DatasetBadgeMixin(BadgeMixin):
 @generate_fields()
 class Dataset(
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DatasetBadgeMixin,
@@ -691,6 +693,9 @@ class Dataset(
     verbose_name = _("dataset")
 
     missing_resources = False
+
+    def fields_to_check_for_spam(self):
+        return {"title": self.title, "description": self.description}
 
     @cached_property
     def resources_len(self):
@@ -1142,6 +1147,7 @@ class Dataset(
 pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
+post_save.connect(SpamMixin.post_save, sender=Dataset)
 
 
 class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySet]):

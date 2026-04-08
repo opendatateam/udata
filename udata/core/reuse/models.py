@@ -25,6 +25,7 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -88,7 +89,14 @@ class ReuseBadgeMixin(BadgeMixin):
     mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(
-    Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document[ReuseQuerySet]
+    Datetimed,
+    Auditable,
+    SpamMixin,
+    WithMetrics,
+    ReuseBadgeMixin,
+    Linkable,
+    Owned,
+    Document[ReuseQuerySet],
 ):
     title = field(
         StringField(required=True),
@@ -215,6 +223,9 @@ class Reuse(
 
     verbose_name = _("reuse")
 
+    def fields_to_check_for_spam(self):
+        return {"title": self.title, "description": self.description}
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Emit before_save
@@ -338,3 +349,4 @@ class Reuse(
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)
+post_save.connect(SpamMixin.post_save, sender=Reuse)
