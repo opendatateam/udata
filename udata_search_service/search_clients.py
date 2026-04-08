@@ -383,7 +383,7 @@ class ElasticClient:
             )
 
         search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
-        search.aggs.metric("total_count", "cardinality", field="_id")
+        search.aggs.bucket("total_count", "filter", filter=query.MatchAll())
 
         if post_filters:
             search = search.post_filter(query.Bool(must=post_filters))
@@ -405,7 +405,7 @@ class ElasticClient:
         facets = {}
         if hasattr(response, "aggregations"):
             total_count = (
-                int(response.aggregations.total_count.value)
+                response.aggregations.total_count.doc_count
                 if hasattr(response.aggregations, "total_count")
                 else 0
             )
@@ -504,10 +504,9 @@ class ElasticClient:
                 "tag_filtered", "filter", filter=query.Bool(must=tag_filters)
             )
             tag_agg.bucket("tag", "terms", field="tags", size=50)
-            tag_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("tag", "terms", field="tags", size=50)
-            search.aggs.metric("tag_total", "cardinality", field="_id")
+            search.aggs.bucket("tag_total", "filter", filter=query.MatchAll())
 
         org_filters = get_filters_except("organization_id_with_name")
         if org_filters:
@@ -517,12 +516,11 @@ class ElasticClient:
             org_agg.bucket(
                 "organization_id_with_name", "terms", field="organization_with_id", size=50
             )
-            org_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "organization_id_with_name", "terms", field="organization_with_id", size=50
             )
-            search.aggs.metric("organization_id_with_name_total", "cardinality", field="_id")
+            search.aggs.bucket("organization_id_with_name_total", "filter", filter=query.MatchAll())
 
         producer_filters = get_filters_except("producer_type")
         if producer_filters:
@@ -530,10 +528,9 @@ class ElasticClient:
                 "producer_type_filtered", "filter", filter=query.Bool(must=producer_filters)
             )
             producer_agg.bucket("producer_type", "terms", field="producer_type", size=50)
-            producer_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
-            search.aggs.metric("producer_type_total", "cardinality", field="_id")
+            search.aggs.bucket("producer_type_total", "filter", filter=query.MatchAll())
 
         last_update_filters = get_filters_except("last_update_range")
         if last_update_filters:
@@ -550,7 +547,6 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            last_update_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "last_update",
@@ -562,7 +558,7 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            search.aggs.metric("last_update_total", "cardinality", field="_id")
+            search.aggs.bucket("last_update_total", "filter", filter=query.MatchAll())
 
         post_filters = []
         for key, value in filter_dict.items():
@@ -617,9 +613,7 @@ class ElasticClient:
                             {"name": bucket.key, "count": bucket.doc_count}
                             for bucket in getattr(filtered_agg, facet_name).buckets
                         ]
-                        total_count = (
-                            int(filtered_agg.total.value) if hasattr(filtered_agg, "total") else 0
-                        )
+                        total_count = filtered_agg.doc_count
                         facets[facet_name] = [{"name": "all", "count": total_count}] + buckets
                 elif hasattr(response.aggregations, facet_name):
                     buckets = [
@@ -627,7 +621,7 @@ class ElasticClient:
                         for bucket in getattr(response.aggregations, facet_name).buckets
                     ]
                     total_count = (
-                        int(getattr(response.aggregations, total_name).value)
+                        getattr(response.aggregations, total_name).doc_count
                         if hasattr(response.aggregations, total_name)
                         else 0
                     )
@@ -823,10 +817,9 @@ class ElasticClient:
                 "format_family_filtered", "filter", filter=query.Bool(must=format_filters)
             )
             format_agg.bucket("format_family", "terms", field="format_family", size=50)
-            format_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("format_family", "terms", field="format_family", size=50)
-            search.aggs.metric("format_family_total", "cardinality", field="_id")
+            search.aggs.bucket("format_family_total", "filter", filter=query.MatchAll())
 
         access_filters = get_filters_except("access_type")
         if access_filters:
@@ -834,10 +827,9 @@ class ElasticClient:
                 "access_type_filtered", "filter", filter=query.Bool(must=access_filters)
             )
             access_agg.bucket("access_type", "terms", field="access_type", size=50)
-            access_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("access_type", "terms", field="access_type", size=50)
-            search.aggs.metric("access_type_total", "cardinality", field="_id")
+            search.aggs.bucket("access_type_total", "filter", filter=query.MatchAll())
 
         producer_filters = get_filters_except("producer_type")
         if producer_filters:
@@ -845,10 +837,9 @@ class ElasticClient:
                 "producer_type_filtered", "filter", filter=query.Bool(must=producer_filters)
             )
             producer_agg.bucket("producer_type", "terms", field="producer_type", size=50)
-            producer_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
-            search.aggs.metric("producer_type_total", "cardinality", field="_id")
+            search.aggs.bucket("producer_type_total", "filter", filter=query.MatchAll())
 
         org_name_filters = get_filters_except("organization_id_with_name")
         if org_name_filters:
@@ -860,12 +851,11 @@ class ElasticClient:
             org_name_agg.bucket(
                 "organization_id_with_name", "terms", field="organization_with_id", size=50
             )
-            org_name_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "organization_id_with_name", "terms", field="organization_with_id", size=50
             )
-            search.aggs.metric("organization_id_with_name_total", "cardinality", field="_id")
+            search.aggs.bucket("organization_id_with_name_total", "filter", filter=query.MatchAll())
 
         last_update_filters = get_filters_except("last_update_range")
         if last_update_filters:
@@ -882,7 +872,6 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            last_update_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "last_update",
@@ -894,7 +883,7 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            search.aggs.metric("last_update_total", "cardinality", field="_id")
+            search.aggs.bucket("last_update_total", "filter", filter=query.MatchAll())
 
         tag_filters = get_filters_except("tag")
         if tag_filters:
@@ -902,10 +891,9 @@ class ElasticClient:
                 "tag_filtered", "filter", filter=query.Bool(must=tag_filters)
             )
             tag_agg.bucket("tag", "terms", field="tags", size=50)
-            tag_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("tag", "terms", field="tags", size=50)
-            search.aggs.metric("tag_total", "cardinality", field="_id")
+            search.aggs.bucket("tag_total", "filter", filter=query.MatchAll())
 
         license_filters = get_filters_except("license")
         if license_filters:
@@ -913,10 +901,9 @@ class ElasticClient:
                 "license_filtered", "filter", filter=query.Bool(must=license_filters)
             )
             license_agg.bucket("license", "terms", field="license", size=50)
-            license_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("license", "terms", field="license", size=50)
-            search.aggs.metric("license_total", "cardinality", field="_id")
+            search.aggs.bucket("license_total", "filter", filter=query.MatchAll())
 
         format_filters = get_filters_except("format")
         if format_filters:
@@ -924,10 +911,9 @@ class ElasticClient:
                 "format_filtered", "filter", filter=query.Bool(must=format_filters)
             )
             format_agg.bucket("format", "terms", field="format", size=50)
-            format_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("format", "terms", field="format", size=50)
-            search.aggs.metric("format_total", "cardinality", field="_id")
+            search.aggs.bucket("format_total", "filter", filter=query.MatchAll())
 
         schema_filters = get_filters_except("schema")
         if schema_filters:
@@ -935,10 +921,9 @@ class ElasticClient:
                 "schema_filtered", "filter", filter=query.Bool(must=schema_filters)
             )
             schema_agg.bucket("schema", "terms", field="schema", size=50)
-            schema_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("schema", "terms", field="schema", size=50)
-            search.aggs.metric("schema_total", "cardinality", field="_id")
+            search.aggs.bucket("schema_total", "filter", filter=query.MatchAll())
 
         geozone_filters = get_filters_except("geozone")
         if geozone_filters:
@@ -946,10 +931,9 @@ class ElasticClient:
                 "geozone_filtered", "filter", filter=query.Bool(must=geozone_filters)
             )
             geozone_agg.bucket("geozone", "terms", field="geozones", size=50)
-            geozone_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("geozone", "terms", field="geozones", size=50)
-            search.aggs.metric("geozone_total", "cardinality", field="_id")
+            search.aggs.bucket("geozone_total", "filter", filter=query.MatchAll())
 
         granularity_filters = get_filters_except("granularity")
         if granularity_filters:
@@ -957,10 +941,9 @@ class ElasticClient:
                 "granularity_filtered", "filter", filter=query.Bool(must=granularity_filters)
             )
             granularity_agg.bucket("granularity", "terms", field="granularity", size=50)
-            granularity_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("granularity", "terms", field="granularity", size=50)
-            search.aggs.metric("granularity_total", "cardinality", field="_id")
+            search.aggs.bucket("granularity_total", "filter", filter=query.MatchAll())
 
         badge_filters = get_filters_except("badge")
         if badge_filters:
@@ -968,10 +951,9 @@ class ElasticClient:
                 "badge_filtered", "filter", filter=query.Bool(must=badge_filters)
             )
             badge_agg.bucket("badge", "terms", field="badges", size=50)
-            badge_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("badge", "terms", field="badges", size=50)
-            search.aggs.metric("badge_total", "cardinality", field="_id")
+            search.aggs.bucket("badge_total", "filter", filter=query.MatchAll())
 
         topics_filters = get_filters_except("topics")
         if topics_filters:
@@ -979,10 +961,9 @@ class ElasticClient:
                 "topics_filtered", "filter", filter=query.Bool(must=topics_filters)
             )
             topics_agg.bucket("topics", "terms", field="topics", size=50)
-            topics_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket("topics", "terms", field="topics", size=50)
-            search.aggs.metric("topics_total", "cardinality", field="_id")
+            search.aggs.bucket("topics_total", "filter", filter=query.MatchAll())
 
         post_filters = []
         for key, value in filter_dict.items():
@@ -1038,9 +1019,7 @@ class ElasticClient:
                             {"name": bucket.key, "count": bucket.doc_count}
                             for bucket in getattr(filtered_agg, facet_name).buckets
                         ]
-                        total_count = (
-                            int(filtered_agg.total.value) if hasattr(filtered_agg, "total") else 0
-                        )
+                        total_count = filtered_agg.doc_count
                         facets[facet_name] = [{"name": "all", "count": total_count}] + buckets
                 elif hasattr(response.aggregations, facet_name):
                     buckets = [
@@ -1048,7 +1027,7 @@ class ElasticClient:
                         for bucket in getattr(response.aggregations, facet_name).buckets
                     ]
                     total_count = (
-                        int(getattr(response.aggregations, total_name).value)
+                        getattr(response.aggregations, total_name).doc_count
                         if hasattr(response.aggregations, total_name)
                         else 0
                     )
@@ -1239,10 +1218,9 @@ class ElasticClient:
                     f"{agg_name}_filtered", "filter", filter=query.Bool(must=f)
                 )
                 agg.bucket(agg_name, "terms", field=es_field, size=50)
-                agg.metric("total", "cardinality", field="_id")
             else:
                 search.aggs.bucket(agg_name, "terms", field=es_field, size=50)
-                search.aggs.metric(f"{agg_name}_total", "cardinality", field="_id")
+                search.aggs.bucket(f"{agg_name}_total", "filter", filter=query.MatchAll())
 
         f = get_filters_except("last_update_range")
         if f:
@@ -1257,7 +1235,6 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "last_update",
@@ -1269,7 +1246,7 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            search.aggs.metric("last_update_total", "cardinality", field="_id")
+            search.aggs.bucket("last_update_total", "filter", filter=query.MatchAll())
 
         post_filters = []
         for k in [
@@ -1314,7 +1291,7 @@ class ElasticClient:
                 buckets = [
                     {"name": b.key, "count": b.doc_count} for b in getattr(fa, agg_name).buckets
                 ]
-                total = int(fa.total.value) if hasattr(fa, "total") else 0
+                total = fa.doc_count
                 facets[agg_name] = [{"name": "all", "count": total}] + buckets
 
             elif hasattr(response.aggregations, agg_name):
@@ -1323,7 +1300,7 @@ class ElasticClient:
                     for b in getattr(response.aggregations, agg_name).buckets
                 ]
                 total = (
-                    int(getattr(response.aggregations, total_name).value)
+                    getattr(response.aggregations, total_name).doc_count
                     if hasattr(response.aggregations, total_name)
                     else 0
                 )
@@ -1332,7 +1309,7 @@ class ElasticClient:
         if hasattr(response.aggregations, "last_update_filtered"):
             fa = response.aggregations.last_update_filtered
             buckets = [{"name": b.key, "count": b.doc_count} for b in fa.last_update.buckets]
-            total = int(fa.total.value) if hasattr(fa, "total") else 0
+            total = fa.doc_count
             facets["last_update"] = [{"name": "all", "count": total}] + buckets
         elif hasattr(response.aggregations, "last_update"):
             buckets = [
@@ -1340,7 +1317,7 @@ class ElasticClient:
                 for b in response.aggregations.last_update.buckets
             ]
             total = (
-                int(response.aggregations.last_update_total.value)
+                response.aggregations.last_update_total.doc_count
                 if hasattr(response.aggregations, "last_update_total")
                 else 0
             )
@@ -1525,10 +1502,9 @@ class ElasticClient:
                     f"{agg_name}_filtered", "filter", filter=query.Bool(must=f)
                 )
                 agg.bucket(agg_name, "terms", field=es_field, size=50)
-                agg.metric("total", "cardinality", field="_id")
             else:
                 search.aggs.bucket(agg_name, "terms", field=es_field, size=50)
-                search.aggs.metric(f"{agg_name}_total", "cardinality", field="_id")
+                search.aggs.bucket(f"{agg_name}_total", "filter", filter=query.MatchAll())
 
         # last_update facet
         f = get_filters_except("last_update_range")
@@ -1544,7 +1520,6 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
                 "last_update",
@@ -1556,7 +1531,7 @@ class ElasticClient:
                     {"key": "last_3_years", "from": "now-3y/d"},
                 ],
             )
-            search.aggs.metric("last_update_total", "cardinality", field="_id")
+            search.aggs.bucket("last_update_total", "filter", filter=query.MatchAll())
 
         post_filters = []
         for k in [
@@ -1592,7 +1567,7 @@ class ElasticClient:
                 buckets = [
                     {"name": b.key, "count": b.doc_count} for b in getattr(fa, agg_name).buckets
                 ]
-                total = int(fa.total.value) if hasattr(fa, "total") else 0
+                total = fa.doc_count
                 facets[agg_name] = [{"name": "all", "count": total}] + buckets
             elif hasattr(response.aggregations, agg_name):
                 buckets = [
@@ -1600,7 +1575,7 @@ class ElasticClient:
                     for b in getattr(response.aggregations, agg_name).buckets
                 ]
                 total = (
-                    int(getattr(response.aggregations, total_name).value)
+                    getattr(response.aggregations, total_name).doc_count
                     if hasattr(response.aggregations, total_name)
                     else 0
                 )
@@ -1609,7 +1584,7 @@ class ElasticClient:
         if hasattr(response.aggregations, "last_update_filtered"):
             fa = response.aggregations.last_update_filtered
             buckets = [{"name": b.key, "count": b.doc_count} for b in fa.last_update.buckets]
-            total = int(fa.total.value) if hasattr(fa, "total") else 0
+            total = fa.doc_count
             facets["last_update"] = [{"name": "all", "count": total}] + buckets
         elif hasattr(response.aggregations, "last_update"):
             buckets = [
@@ -1617,7 +1592,7 @@ class ElasticClient:
                 for b in response.aggregations.last_update.buckets
             ]
             total = (
-                int(response.aggregations.last_update_total.value)
+                response.aggregations.last_update_total.doc_count
                 if hasattr(response.aggregations, "last_update_total")
                 else 0
             )
@@ -1751,7 +1726,7 @@ class ElasticClient:
                 {"key": "last_3_years", "from": "now-3y/d"},
             ],
         )
-        search.aggs.metric("total_count", "cardinality", field="_id")
+        search.aggs.bucket("total_count", "filter", filter=query.MatchAll())
 
         if post_filters:
             search = search.post_filter(query.Bool(must=post_filters))
@@ -1773,7 +1748,7 @@ class ElasticClient:
         facets = {}
         if hasattr(response, "aggregations"):
             total_count = (
-                int(response.aggregations.total_count.value)
+                response.aggregations.total_count.doc_count
                 if hasattr(response.aggregations, "total_count")
                 else 0
             )
@@ -1865,7 +1840,7 @@ class ElasticClient:
                 {"key": "last_3_years", "from": "now-3y/d"},
             ],
         )
-        search.aggs.metric("total_count", "cardinality", field="_id")
+        search.aggs.bucket("total_count", "filter", filter=query.MatchAll())
 
         if post_filters:
             search = search.post_filter(query.Bool(must=post_filters))
@@ -1887,7 +1862,7 @@ class ElasticClient:
         facets = {}
         if hasattr(response, "aggregations"):
             total_count = (
-                int(response.aggregations.total_count.value)
+                response.aggregations.total_count.doc_count
                 if hasattr(response.aggregations, "total_count")
                 else 0
             )
