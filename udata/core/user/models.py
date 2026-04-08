@@ -27,6 +27,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -61,7 +62,7 @@ class UserSettings(EmbeddedDocument):
 
 
 @generate_fields()
-class User(WithMetrics, UserMixin, Linkable, Document):
+class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
@@ -146,6 +147,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     }
 
     verbose_name = _("account")
+
+    def fields_to_check_for_spam(self):
+        return {"about": self.about, "website": self.website}
 
     __metrics_keys__ = [
         "datasets",
@@ -372,6 +376,7 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
+post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):

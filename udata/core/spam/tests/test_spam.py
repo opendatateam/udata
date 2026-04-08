@@ -199,3 +199,18 @@ class SpamTest(APITestCase):
     def test_dataservice_no_spam(self):
         dataservice = DataserviceFactory(title="Normal title", description="Normal description")
         self.assertFalse(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_spam_in_about(self):
+        user = UserFactory(about="Buy spam products now")
+        self.assertTrue(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_spam_in_website(self):
+        user = UserFactory(website="https://spam.example.com")
+        self.assertTrue(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_no_spam(self):
+        user = UserFactory(about="Normal bio", website="https://example.com")
+        self.assertFalse(self.has_spam_report(user))
