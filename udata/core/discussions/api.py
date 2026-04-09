@@ -251,11 +251,25 @@ class DiscussionAPI(API):
 message_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
-@ns.route("/<id>/comments/<int:cidx>/", endpoint="discussion_comment")
+@ns.route("/<id>/comments/<cidx>/", endpoint="discussion_comment")
 class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
     """
+
+    def _resolve_message(self, discussion, cidx):
+        """Resolve a comment identifier (index or UUID) to the message."""
+        try:
+            idx = int(cidx)
+        except ValueError:
+            for message in discussion.discussion:
+                if str(message.id) == cidx:
+                    return message
+            api.abort(404, "Comment does not exist")
+        else:
+            if idx < 0 or idx >= len(discussion.discussion):
+                api.abort(404, "Comment does not exist")
+            return discussion.discussion[idx]
 
     @api.secure
     @api.doc("edit_discussion_comment")
@@ -263,18 +277,15 @@ class DiscussionCommentAPI(API):
     @api.expect(edit_comment_discussion_fields)
     @api.marshal_with(discussion_fields)
     def put(self, id, cidx):
-        """Edit a comment given its index"""
+        """Edit a comment given its index or UUID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-
-        message = discussion.discussion[cidx]
+        message = self._resolve_message(discussion, cidx)
         message.permissions["edit"].test()
 
         form = api.validate(DiscussionEditCommentForm)
 
-        discussion.discussion[cidx].content = form.comment.data
-        discussion.discussion[cidx].last_modified_at = datetime.now(UTC)
+        message.content = form.comment.data
+        message.last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
 
@@ -283,19 +294,17 @@ class DiscussionCommentAPI(API):
     @api.expect(message_delete_parser)
     @api.response(403, "Not allowed to delete this comment")
     def delete(self, id, cidx):
-        """Delete a comment given its index"""
+        """Delete a comment given its index or UUID"""
         args = message_delete_parser.parse_args()
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-        elif cidx == 0:
+        message = self._resolve_message(discussion, cidx)
+        if message == discussion.discussion[0]:
             api.abort(400, "You cannot delete the first comment of a discussion")
 
-        message = discussion.discussion[cidx]
         message.permissions["delete"].test()
         send_legal_notice_on_deletion(message, args)
 
-        discussion.remove_message(cidx)
+        discussion.remove_message(message.id)
         return "", 204
 
 

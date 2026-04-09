@@ -195,6 +195,8 @@ class DatasetAPITest(APITestCase):
 
         temporal_coverage = DateRange(start="2022-05-03", end="2022-05-04")
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+        _ = DatasetFactory(access_type=AccessType.OPEN)
+        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
 
         owner_dataset = DatasetFactory(owner=owner)
         org_dataset = DatasetFactory(organization=org)
@@ -282,6 +284,12 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(temporal_coverage_dataset.id))
 
+        # filter on access_type
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))
+
         # filter on owner
         response = self.get(url_for("api.datasets", owner=owner.id))
         self.assert200(response)
@@ -322,6 +330,17 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(schema_version2_dataset.id))
+
+        # filter on access rights open (default)
+        response = self.get(url_for("api.datasets", access_type=AccessType.OPEN))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - 1)
+
+        # filter on access rights restricted
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))
 
         # filter on topic
         response = self.get(url_for("api.datasets", topic=topic.id))

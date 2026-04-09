@@ -47,7 +47,7 @@ def check_is_email(value, field, **_kwargs):
             raise FieldValidationError(_("Invalid email address"), field=field)
 
 
-@generate_fields(mask=",".join(MASK_FIELDS))
+@generate_fields(page_mask=",".join(MASK_FIELDS))
 class ContactPoint(Document, Owned):
     name = field(StringField(max_length=255, required=True), checks=[check_no_urls])
     email = field(StringField(max_length=255), checks=[check_is_email])
