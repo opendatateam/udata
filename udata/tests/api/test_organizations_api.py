@@ -95,6 +95,22 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
+    def test_organization_api_get_with_membership_request_without_created_by(self):
+        """Old membership requests may have created_by=None, the API should not 500"""
+        user = UserFactory()
+        request = MembershipRequest(user=user, comment="a comment", created_by=None)
+        organization = OrganizationFactory(requests=[request])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+
+    def test_organization_api_get_with_pending_membership_request_without_handled_by(self):
+        """Pending membership requests have handled_by=None, the API should not 500"""
+        user = UserFactory()
+        request = MembershipRequest(user=user, comment="a comment", status="pending")
+        organization = OrganizationFactory(requests=[request])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+
     def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
         organization = OrganizationFactory(deleted=datetime.now(UTC))

@@ -137,7 +137,7 @@ class MembershipRequest(EmbeddedDocument):
     created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
     handled_on = field(DateTimeField(), readonly=True)
-    handled_by = field(ReferenceField("User"), readonly=True)
+    handled_by = field(ReferenceField("User"), allow_null=True, readonly=True)
 
     comment = field(StringField(), checks=[required_if(kind="request")])
     refusal_comment = field(StringField(), readonly=True)
@@ -147,7 +147,7 @@ class MembershipRequest(EmbeddedDocument):
         readonly=True,
     )
     email = field(StringField(), readonly=True)
-    created_by = field(ReferenceField("User"), readonly=True)
+    created_by = field(ReferenceField("User"), allow_null=True, readonly=True)
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE), readonly=True)
     # Not wrapped with field() because GenericReferenceField choices (Dataset, Dataservice, Reuse)
     # are not yet registered at import time. Serialized via manual request_fields in api_fields.py.
