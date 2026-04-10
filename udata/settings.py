@@ -19,6 +19,7 @@ class Defaults(object):
         "de": "Deutsch",
     }
     DEFAULT_LANGUAGE = "en"
+    DEFAULT_COUNTRY_CODE = "fr"
     SECRET_KEY = "Default uData secret key"
     CONTACT_EMAIL = "contact@example.org"
 
@@ -27,9 +28,9 @@ class Defaults(object):
     MONGODB_HOST = "mongodb://localhost:27017/udata"
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
-    # Search service configuration
-    SEARCH_SERVICE_API_URL = None
-    SEARCH_SERVICE_REQUEST_TIMEOUT = 20
+    # Search configuration
+    ELASTICSEARCH_URL = None
+    ELASTICSEARCH_INDEX_BASENAME = None
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = "redis://localhost:6379"
@@ -192,14 +193,16 @@ class Defaults(object):
     TERMS_OF_USE_DELETION_ARTICLE = None
     TELERECOURS_URL = None
 
-    UDATA_INSTANCE_NAME = "udata"
-
     DATASET_HIDDEN_BADGES = []
 
     HARVESTER_BACKENDS = []
     THEME = None
 
     STATIC_DIRS = []
+
+    # API Token settings
+    API_TOKEN_PREFIX = "udata_"
+    API_TOKEN_SECRET = ""
 
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"
@@ -710,12 +713,14 @@ class Testing(object):
     SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
-    SEARCH_SERVICE_API_URL = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
+    API_TOKEN_SECRET = "test-secret"
     SPAM_WORDS = []
     SPAM_ALLOWED_LANGS = []
     DATASET_HIDDEN_BADGES = []
+    ELASTICSEARCH_URL = None
+    ELASTICSEARCH_INDEX_BASENAME = "udata-test"
 
 
 class Debug(Defaults):

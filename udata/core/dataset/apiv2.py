@@ -8,7 +8,8 @@ from flask_restx import marshal
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.access_type.models import AccessAudience
-from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.badges.models import Badge
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
@@ -16,7 +17,6 @@ from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
-    badge_fields,
     catalog_schema_fields,
     checksum_fields,
     dataset_harvest_fields,
@@ -129,7 +129,7 @@ dataset_fields = apiv2.model(
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The dataset badges", readonly=True
+            fields.Nested(Badge.__read_fields__), description="The dataset badges", readonly=True
         ),
         "resources": fields.Raw(
             attribute=lambda o: {
@@ -237,7 +237,7 @@ dataset_fields = apiv2.model(
             description="Site internal and specific object's data",
         ),
         "contact_points": fields.List(
-            fields.Nested(contact_point_fields),
+            fields.Nested(ContactPoint.__read_fields__),
             required=False,
             description="The dataset contact points",
         ),
@@ -276,7 +276,7 @@ specific_resource_fields = apiv2.model(
     },
 )
 
-apiv2.inherit("Badge", badge_fields)
+apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", org_ref_fields)
 apiv2.inherit("UserReference", user_ref_fields)
 apiv2.inherit("MemberUserWithEmail", member_user_with_email_fields)
@@ -289,7 +289,7 @@ apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
 apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
-apiv2.inherit("ContactPoint", contact_point_fields)
+apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 apiv2.inherit("Schema", schema_fields)
 apiv2.inherit("CatalogSchema", catalog_schema_fields)
 apiv2.inherit("DatasetPermissions", dataset_permissions_fields)

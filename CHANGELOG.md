@@ -1,5 +1,72 @@
 # Changelog
 
+## 16.2.0 (2026-04-09)
+
+- feat: remove pages to only keep edito blocs ([#3706](https://github.com/opendatateam/udata/pull/3706))
+- fix: mask rename to page_mask ([#3718](https://github.com/opendatateam/udata/pull/3718))
+
+
+## 16.1.0 (2026-04-08)
+
+- chore: add access_type filter on list api endpoints and rdf catalogs ([#3711](https://github.com/opendatateam/udata/pull/3711))
+- chore(deps): update dependencies ([#3709](https://github.com/opendatateam/udata/pull/3709))
+- feat: migrate badges to api fields ([#3694](https://github.com/opendatateam/udata/pull/3694))
+- feat: migrate contact points to new API fields ([#3659](https://github.com/opendatateam/udata/pull/3659))
+- feat: moderation dashboard improvements ([#3713](https://github.com/opendatateam/udata/pull/3713))
+- feat(RDF): harvest and expose access rights and rights in RDF ([#3667](https://github.com/opendatateam/udata/pull/3667))
+- feat(topics): private=true|false API param ([#3699](https://github.com/opendatateam/udata/pull/3699))
+- fix: duplicate dataset in test ([#3715](https://github.com/opendatateam/udata/pull/3715))
+- refactor: simplify udata-search-service ([#3691](https://github.com/opendatateam/udata/pull/3691))
+
+
+## 16.0.0 (2026-03-24)
+
+- **feat!: new api key system ([#3636](https://github.com/opendatateam/udata/pull/3636))**
+  - Replace the single User.apikey (JWS token stored on the user document)
+  with a dedicated ApiToken collection supporting multiple tokens per
+  user, HMAC-SHA256 hashed storage, revocation, expiration, and tracking
+  - New API endpoints: POST /api/1/me/api_tokens/ (create), GET
+  /api/1/me/api_tokens/ (list active), DELETE /api/1/me/api_tokens/<id>/ (revoke)
+  — the plaintext token is returned only once at creation
+  - Remove the apikey field from the User model and the me_fields /
+  apikey_fields API serializers, along with the old /me/apikey/ endpoint
+  - Add an idempotent migration that hashes existing JWS apikeys with
+  HMAC-SHA256 into the new api_token collection, preserving backward
+  compatibility for existing consumers
+  - Introduce API_TOKEN_SECRET and API_TOKEN_PREFIX settings for token
+  hashing and secret-scanning tool integration
+- chore(harvest): add harvest job dataservice index ([#3701](https://github.com/opendatateam/udata/pull/3701))
+- feat: allow editing the changelog before pushing ([#3705](https://github.com/opendatateam/udata/pull/3705))
+- feat: prevent calling tag-version.sh --help ([#3704](https://github.com/opendatateam/udata/pull/3704))
+- feat(search): add clean-es commands ([#3700](https://github.com/opendatateam/udata/pull/3700))
+- refactor: remove SpamInfo in profit of Report ([#3556](https://github.com/opendatateam/udata/pull/3556))
+
+
+## 15.4.1 (2026-03-19)
+
+- fix: sending int for daterange ([#3693](https://github.com/opendatateam/udata/pull/3693))
+- fix: topic search sort ([#3689](https://github.com/opendatateam/udata/pull/3689))
+
+
+## 15.4.0 (2026-03-19)
+
+- feat: partial editors ([#3668](https://github.com/opendatateam/udata/pull/3668))
+- feat: update translations for partial editor ([#3696](https://github.com/opendatateam/udata/pull/3696))
+- fix: circular imports in tests ([#3690](https://github.com/opendatateam/udata/pull/3690))
+- fix: import-fixture broken following partial editors change ([#3692](https://github.com/opendatateam/udata/pull/3692))
+- fix: shadowing translation function ([#3698](https://github.com/opendatateam/udata/pull/3698))
+- test: update ElasticSearch version in CI ([#3697](https://github.com/opendatateam/udata/pull/3697))
+
+
+## 15.3.0 (2026-03-16)
+
+- chore: working on types ([#3677](https://github.com/opendatateam/udata/pull/3677))
+- feat: create notification when matching invitation after account creation ([#3686](https://github.com/opendatateam/udata/pull/3686))
+- feat: include `udata-search-service` inside `udata` ([#3679](https://github.com/opendatateam/udata/pull/3679))
+- feat(storage): upgrade flask storage to add S3 extra args ([#3687](https://github.com/opendatateam/udata/pull/3687))
+- fix(topics): do not index private topics ([#3688](https://github.com/opendatateam/udata/pull/3688))
+
+
 ## 15.2.0 (2026-03-09)
 
 - chore(deps): update dependencies ([#3685](https://github.com/opendatateam/udata/pull/3685))

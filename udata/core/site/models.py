@@ -3,6 +3,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     DictField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     IntField,
     ListField,
     ReferenceField,
@@ -11,12 +12,12 @@ from mongoengine.fields import (
 from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, Bloc
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
+from udata.core.metrics.models import WithMetrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.models import WithMetrics
 from udata.mongo.document import UDataDocument as Document
 from udata.utils import get_udata_version
 
@@ -31,7 +32,7 @@ class SiteSettings(EmbeddedDocument):
     home_reuses = ListField(ReferenceField(Reuse))
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=SITE_BLOCS_FIELDS)
 class Site(WithMetrics, Document):
     id = field(StringField(primary_key=True), readonly=True)
     title = field(StringField(required=True), description="The site display title")
@@ -40,9 +41,9 @@ class Site(WithMetrics, Document):
     configs = DictField()
     themes = DictField()
     settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_page = field(ReferenceField("Page"), attribute="datasets_page.id")
-    reuses_page = field(ReferenceField("Page"), attribute="reuses_page.id")
-    dataservices_page = field(ReferenceField("Page"), attribute="dataservices_page.id")
+    datasets_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    reuses_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    dataservices_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
     __metrics_keys__ = [
         "max_dataset_followers",
@@ -125,6 +126,8 @@ class Site(WithMetrics, Document):
         self.save()
 
     def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
         self.metrics["dataservices"] = Dataservice.objects.visible().count()
         self.save()
 

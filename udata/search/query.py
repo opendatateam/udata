@@ -1,8 +1,9 @@
 import copy
+import json
 import logging
 import urllib.parse
 
-import requests
+from elasticsearch.exceptions import BadRequestError
 from flask import current_app, request
 
 from udata.search.result import SearchResult
@@ -34,38 +35,44 @@ class SearchQuery:
                 self._filters[key] = value
 
     def execute_search(self):
-        # If SEARCH_SERVICE_API_URL is set, the remote search service will be queried.
-        # Otherwise mongo search will be used instead.
-        if current_app.config["SEARCH_SERVICE_API_URL"]:
-            url = self.to_search_service_url()
-            r = requests.get(url, timeout=current_app.config["SEARCH_SERVICE_REQUEST_TIMEOUT"])
-            r.raise_for_status()
-            result = r.json()
-            return SearchResult(query=self, result=result.pop("data"), **result)
-        else:
-            query_args = {
-                "q": self._query,
-                "page": self.page,
-                "page_size": self.page_size,
-                "sort": self.sort,
-            }
-            query_args.update(self._filters)
-            result = self.adapter.mongo_search(query_args)
+        if current_app.config["ELASTICSEARCH_URL"]:
+            from udata.search import get_elastic_client
+
+            service = self.adapter.service_class(get_elastic_client())
+            try:
+                results, total, total_pages, facets = service.search(self.to_search_params())
+            except BadRequestError as e:
+                log.error(
+                    "Elasticsearch BadRequestError for %s: %s",
+                    self.adapter.__name__,
+                    json.dumps(e.body, indent=2, default=str),
+                )
+                raise
+            result_dicts = [{"id": r.id} for r in results]
             return SearchResult(
-                query=self, mongo_objects=list(result), total=result.total, **query_args
+                query=self,
+                result=result_dicts,
+                page=self.page,
+                page_size=self.page_size,
+                total=total,
+                facets=facets,
+            )
+        else:
+            params = self.to_search_params()
+            result = self.adapter.mongo_search(params)
+            return SearchResult(
+                query=self, mongo_objects=list(result), total=result.total, **params
             )
 
-    def to_search_service_url(self):
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
-        if self.sort:
-            url = url + f"&sort={self.sort}"
-        for name, value in self._filters.items():
-            if isinstance(value, (list, tuple)):
-                for v in value:
-                    url = url + f"&{name}={v}"
-            else:
-                url = url + f"&{name}={value}"
-        return url
+    def to_search_params(self):
+        params = {
+            "q": self._query,
+            "page": self.page,
+            "page_size": self.page_size,
+            "sort": self.sort,
+        }
+        params.update(self._filters)
+        return params
 
     # FIXME: unused?
     def to_url(self, url=None, replace=False, **kwargs):

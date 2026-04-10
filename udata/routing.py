@@ -9,6 +9,7 @@ from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 
 from udata import models
+from udata.core.api_token.models import ApiToken
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.core.visualizations.models import Chart
@@ -122,10 +123,6 @@ class DatasetConverter(ModelConverter):
     model = models.Dataset
 
 
-class PageConverter(ModelConverter):
-    model = models.Page
-
-
 class DatasetWithoutResourcesConverter(ModelConverter):
     model = models.Dataset
 
@@ -175,6 +172,10 @@ class ReportConverter(ModelConverter):
 
 class NotificationConverter(ModelConverter):
     model = Notification
+
+
+class ApiTokenConverter(ModelConverter):
+    model = ApiToken
 
 
 class VisualizationConverter(ModelConverter):
@@ -257,13 +258,16 @@ def init_app(app):
     app.url_map.converters["reuse"] = ReuseConverter
     app.url_map.converters["user"] = UserConverter
     app.url_map.converters["topic"] = TopicConverter
-    app.url_map.converters["page"] = PageConverter
     app.url_map.converters["post"] = PostConverter
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
+<<<<<<< HEAD
     app.url_map.converters["visualization"] = VisualizationConverter
+=======
+    app.url_map.converters["api_token"] = ApiTokenConverter
+>>>>>>> main
 
     app.jinja_env.globals["cdata_url"] = cdata_url
     app.jinja_env.globals["homepage_url"] = homepage_url

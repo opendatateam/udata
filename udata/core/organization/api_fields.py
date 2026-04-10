@@ -2,9 +2,17 @@ from flask import request
 
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
-from udata.core.badges.fields import badge_fields
+from udata.core.badges.models import Badge
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+
+generic_reference_fields = api.model(
+    "GenericReference",
+    {
+        "class": fields.String(attribute=lambda o: o.__class__.__name__),
+        "id": fields.String(attribute=lambda o: str(o.id)),
+    },
+)
 
 org_permissions_fields = api.model(
     "OrganizationPermissions",
@@ -44,7 +52,9 @@ org_ref_fields = api.inherit(
             "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
         ),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The organization badges", readonly=True
+            fields.Nested(Badge.__read_fields__),
+            description="The organization badges",
+            readonly=True,
         ),
         "permissions": fields.Nested(org_permissions_fields, readonly=True),
     },
@@ -119,6 +129,10 @@ request_fields = api.model(
             description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
         "comment": fields.String(description="A request comment from the user"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 
@@ -131,6 +145,10 @@ invite_fields = api.model(
             description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
         "comment": fields.String(description="Invitation message"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 
@@ -144,6 +162,10 @@ pending_invitation_fields = api.model(
         ),
         "comment": fields.String(description="Invitation message"),
         "created": fields.ISODateTime(description="The invitation creation date", readonly=True),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
     },
 )
 
@@ -216,7 +238,9 @@ org_fields = api.model(
             fields.Nested(member_fields, description="The organization members")
         ),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The organization badges", readonly=True
+            fields.Nested(Badge.__read_fields__),
+            description="The organization badges",
+            readonly=True,
         ),
         "permissions": fields.Nested(org_permissions_fields, readonly=True),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),

@@ -8,7 +8,6 @@ from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
 from udata.auth import current_user
-from udata.core.badges.fields import badge_fields
 
 from .signals import on_badge_added, on_badge_removed
 
@@ -17,17 +16,11 @@ log = logging.getLogger(__name__)
 
 __all__ = ["Badge", "BadgeMixin", "BadgesList"]
 
-DEFAULT_BADGES_LIST_PARAMS = {
-    "readonly": True,
-    "inner_field_info": {"nested_fields": badge_fields},
-}
-
 
 @generate_fields(default_filterable_field="kind")
 class Badge(EmbeddedDocument):
     meta = {"allow_inheritance": True}
-    # The following field should be overloaded in descendants.
-    kind = StringField(required=True)
+    kind = field(StringField(required=True))
     created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     created_by = ReferenceField("User")
 
@@ -40,9 +33,13 @@ class BadgesList(EmbeddedDocumentListField):
         return super(BadgesList, self).__init__(badge_model, *args, **kwargs)
 
 
+DEFAULT_BADGES_LIST_PARAMS = {
+    "readonly": True,
+}
+
+
 class BadgeMixin:
     default_badges_list_params = DEFAULT_BADGES_LIST_PARAMS
-    # The following field should be overloaded in descendants.
     badges = field(BadgesList(Badge), **DEFAULT_BADGES_LIST_PARAMS)
 
     @classmethod

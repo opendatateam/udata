@@ -63,7 +63,10 @@ class TopicsListAPITest(APITestCase):
             set([t["id"] for t in response.json["data"]]),
         )
 
-        response = self.get(url_for("apiv2.topics_list", include_private="true"))
+        response = self.get(url_for("apiv2.topics_list", private="true"))
+        assert response.status_code == 401
+
+        response = self.get(url_for("apiv2.topics_list", private="false"))
         assert response.status_code == 200
         assert len(response.json["data"]) == 7
         # we're not logged in, so the private topic does not appear
@@ -228,18 +231,30 @@ class TopicsListAPITest(APITestCase):
     def test_topic_api_list_authenticated(self):
         owner = self.login()
 
+        public_topic = TopicFactory()
         private_topic = TopicFactory(private=True)
         private_topic_owner = TopicFactory(private=True, owner=owner)
 
+        # Default: authenticated user sees public topics and their own private topics
         response = self.get(url_for("apiv2.topics_list"))
         assert response.status_code == 200
-        assert len(response.json["data"]) == 0
+        assert len(response.json["data"]) == 2
+        assert str(public_topic.id) in [t["id"] for t in response.json["data"]]
+        assert str(private_topic_owner.id) in [t["id"] for t in response.json["data"]]
+        assert str(private_topic.id) not in [t["id"] for t in response.json["data"]]
 
-        response = self.get(url_for("apiv2.topics_list", include_private="true"))
+        # private=true: only private topics visible to the user
+        response = self.get(url_for("apiv2.topics_list", private="true"))
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
-        assert str(private_topic.id) not in [t["id"] for t in response.json["data"]]
         assert str(private_topic_owner.id) in [t["id"] for t in response.json["data"]]
+        assert str(private_topic.id) not in [t["id"] for t in response.json["data"]]
+
+        # private=false: only public topics
+        response = self.get(url_for("apiv2.topics_list", private="false"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert str(public_topic.id) in [t["id"] for t in response.json["data"]]
 
     def test_topic_api_get(self):
         """It should fetch a topic from the API"""

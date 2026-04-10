@@ -22,10 +22,8 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member, Organization
-from udata.core.pages.factories import PageFactory
-from udata.core.pages.models import (
+from udata.core.edito_blocs.models import (
+    SITE_BLOCS_FIELDS,
     AccordionItemBloc,
     AccordionListBloc,
     DataservicesListBloc,
@@ -34,9 +32,10 @@ from udata.core.pages.models import (
     LinkInBloc,
     LinksListBloc,
     MarkdownBloc,
-    Page,
     ReusesListBloc,
 )
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Member, Organization
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
@@ -56,7 +55,6 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 POST_URL = "/api/1/posts"
 SITE_URL = "/api/1/site"
-PAGE_URL = "/api/1/pages"
 
 
 DEFAULT_FIXTURE_FILE: str = str(
@@ -94,8 +92,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "preview_url",
         "permissions",
     ],
-    "discussion": ["subject", "url", "self_web_url", "class", "permissions"],
-    "discussion_message": ["permissions"],
+    "discussion": ["subject", "url", "self_web_url", "class", "permissions", "spam"],
+    "discussion_message": ["permissions", "spam"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
@@ -116,13 +114,6 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "reuses",
         "owner",
         "permissions",
-    ],
-    "page": [
-        "permissions",
-        "owner",
-        "organization",
-        "last_modified",
-        "created_at",
     ],
     "site": [
         "version",
@@ -186,18 +177,22 @@ def create_bloc_from_dict(data: dict):
     elif cls_name == "AccordionListBloc" and "items" in data:
         items = []
         for item in data["items"]:
-            content = [create_bloc_from_dict(b) for b in item.get("content", [])]
-            items.append(AccordionItemBloc(title=item["title"], content=[c for c in content if c]))
+            content = create_blocs_from_dicts(item.get("content", []))
+            items.append(AccordionItemBloc(title=item["title"], content=content))
         data["items"] = items
 
     return bloc_class(**data)
+
+
+def create_blocs_from_dicts(dicts):
+    return [b for b in (create_bloc_from_dict(d) for d in dicts) if b is not None]
 
 
 @cli.command()
 @click.argument("data-source")
 @click.argument("results-filename", default=DEFAULT_FIXTURES_RESULTS_FILENAME)
 def generate_fixtures_file(data_source: str, results_filename: str) -> None:
-    """Build sample fixture file (datasets, posts, pages, site) from a remote udata instance."""
+    """Build sample fixture file (datasets, posts, site) from a remote udata instance."""
     results_file = pathlib.Path(results_filename)
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
     json_datasets = []
@@ -264,41 +259,28 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
             json_datasets.append(json_fixture)
 
-    # Fetch posts
+    # Fetch posts (detail endpoint to get blocs)
     print("Fetching posts...")
-    json_posts = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
-    page_ids = set()
-    for post in json_posts:
-        remove_unwanted_keys(post, "post")
-        if post.get("content_as_page"):
-            content_as_page = post["content_as_page"]
-            if isinstance(content_as_page, dict):
-                page_ids.add(content_as_page["id"])
-                post["content_as_page"] = content_as_page["id"]
-            else:
-                page_ids.add(content_as_page)
-
-    # Fetch site
-    print("Fetching site...")
-    json_site = requests.get(f"{data_source}{SITE_URL}/").json()
-    remove_unwanted_keys(json_site, "site")
-    for page_field in ("datasets_page", "reuses_page", "dataservices_page"):
-        if json_site.get(page_field):
-            page_ids.add(json_site[page_field])
-
-    # Fetch all referenced pages
-    json_pages = []
-    for page_id in page_ids:
-        page = requests.get(f"{data_source}{PAGE_URL}/{page_id}/").json()
-        remove_unwanted_keys(page, "page")
-        for bloc in page.get("blocs", []):
+    json_posts_list = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
+    json_posts = []
+    for post_summary in json_posts_list:
+        post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
+        remove_unwanted_keys(post_detail, "post")
+        for bloc in post_detail.get("blocs", []):
             clean_bloc_for_generate(bloc)
-        json_pages.append(page)
+        json_posts.append(post_detail)
+
+    # Fetch site (with blocs via X-Fields)
+    print("Fetching site...")
+    json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
+    remove_unwanted_keys(json_site, "site")
+    for blocs_field in SITE_BLOCS_FIELDS:
+        for bloc in json_site.get(blocs_field, []):
+            clean_bloc_for_generate(bloc)
 
     json_output = {
         "datasets": json_datasets,
         "posts": json_posts,
-        "pages": json_pages,
         "site": json_site,
     }
 
@@ -344,7 +326,7 @@ def get_or_create_contact_point(data):
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
-    """Build sample fixture data (datasets, posts, pages, site) from local or remote file."""
+    """Build sample fixture data (datasets, posts, site) from local or remote file."""
     if source.startswith("http"):
         response = requests.get(source)
         response.raise_for_status()
@@ -353,21 +335,13 @@ def import_fixtures(source):
         with open(source) as f:
             json_fixtures = json.load(f)
 
-    # Import pages first (site references them)
-    for page_data in json_fixtures.get("pages", []):
-        page_data = remove_unwanted_keys(page_data, "page")
-        blocs = [create_bloc_from_dict(b) for b in page_data.pop("blocs", [])]
-        blocs = [b for b in blocs if b is not None]
-        if not Page.objects(id=page_data["id"]).first():
-            PageFactory(**page_data, blocs=blocs)
-
     # Import site
     site_data = json_fixtures.get("site")
     if site_data:
         site_data = remove_unwanted_keys(site_data, "site")
-        for page_field in ("datasets_page", "reuses_page", "dataservices_page"):
-            if site_data.get(page_field):
-                site_data[page_field] = Page.objects(id=site_data[page_field]).first()
+        for blocs_field in SITE_BLOCS_FIELDS:
+            if blocs_field in site_data:
+                site_data[blocs_field] = create_blocs_from_dicts(site_data.pop(blocs_field))
         if not Site.objects(id=site_data["id"]).first():
             SiteFactory(**site_data)
 
@@ -410,9 +384,11 @@ def import_fixtures(source):
                 discussion = remove_unwanted_keys(discussion, "discussion")
                 discussion["closed_by"] = get_or_create(discussion, "closed_by", User, UserFactory)
                 for message in discussion["discussion"]:
+                    message = remove_unwanted_keys(message, "discussion_message")
                     message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
                 discussion["discussion"] = [
-                    MessageDiscussionFactory(**message) for message in discussion["discussion"]
+                    MessageDiscussionFactory(**remove_unwanted_keys(message, "discussion_message"))
+                    for message in discussion["discussion"]
                 ]
                 discussion["user"] = get_or_create_user(discussion)
                 DiscussionFactory(**discussion, subject=dataset)
@@ -429,15 +405,12 @@ def import_fixtures(source):
     for post_data in json_fixtures.get("posts", []):
         post_data = remove_unwanted_keys(post_data, "post")
         user = UserFactory()
-        content_as_page_id = post_data.pop("content_as_page", None)
-        content_as_page = (
-            Page.objects(id=content_as_page_id).first() if content_as_page_id else None
-        )
+        blocs = create_blocs_from_dicts(post_data.pop("blocs", []))
         if not Post.objects(id=post_data["id"]).first():
             PostFactory(
                 **post_data,
                 owner=user,
-                content_as_page=content_as_page,
+                blocs=blocs,
                 datasets=[],
                 reuses=[],
             )
