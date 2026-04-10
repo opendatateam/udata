@@ -53,7 +53,21 @@ class GenericFilter(EmbeddedDocument):
 @generate_fields()
 class Filter(GenericFilter):
     column = field(StringField(required=True))
-    condition = field(StringField(required=True, choices=["exact", "differs", "is_null", "is_not_null", "greater", "less", "strictly_greater", "strictly_less"]))
+    condition = field(
+        StringField(
+            required=True,
+            choices=[
+                "exact",
+                "differs",
+                "is_null",
+                "is_not_null",
+                "greater",
+                "less",
+                "strictly_greater",
+                "strictly_less",
+            ],
+        )
+    )
     value = field(StringField())
 
 
@@ -101,19 +115,6 @@ class YAxis(EmbeddedDocument):
     label = field(StringField())
     unit = field(StringField())
     unit_position = field(StringField(choices=["prefix", "suffix"], default="suffix"))
-
-
-# Chart model contains the following base fields (previously from Visualization class):
-# - title: Required title field (sortable, used for display)
-# - slug: Auto-generated from title (unique, used in URLs)
-# - description: Required markdown description
-# - private: Boolean flag for private visualizations (default: False)
-# - extras: Extra metadata storage
-# - deleted_at: Soft delete timestamp
-# - owner/organization: From Owned mixin (one required)
-# - created_at/last_modified: From Datetimed mixin
-# - permissions: Edit/delete/read permissions (from OwnablePermission)
-# - metrics: Views tracking (from WithMetrics)
 
 
 @generate_fields()
@@ -193,8 +194,3 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
 
     def sources(self):
         return "toutes_les_ressources_from_yaxis"
-
-
-# Map will be implemented later if needed
-# class Map(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
-#     pass
