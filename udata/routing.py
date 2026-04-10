@@ -263,11 +263,8 @@ def init_app(app):
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
-<<<<<<< HEAD
     app.url_map.converters["visualization"] = VisualizationConverter
-=======
     app.url_map.converters["api_token"] = ApiTokenConverter
->>>>>>> main
 
     app.jinja_env.globals["cdata_url"] = cdata_url
     app.jinja_env.globals["homepage_url"] = homepage_url
