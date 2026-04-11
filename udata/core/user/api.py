@@ -545,17 +545,7 @@ class SuggestUsersAPI(API):
         users = User.objects(
             deleted=None, slug__icontains=slugify(args["q"], separator="-", to_lower=True)
         )
-        return [
-            {
-                "id": user.id,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "avatar_url": user.avatar,
-                "email": user.email,
-                "slug": user.slug,
-            }
-            for user in users.order_by(DEFAULT_SORTING).limit(args["size"])
-        ]
+        return list(users.order_by(DEFAULT_SORTING).limit(args["size"]))
 
 
 @ns.route("/roles/", endpoint="user_roles")

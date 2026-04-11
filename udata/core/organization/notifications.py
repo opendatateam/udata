@@ -4,7 +4,6 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
@@ -18,7 +17,7 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
     request_organization = field(
         ReferenceField(Organization),
         readonly=True,
-        nested_fields=org_ref_fields,
+        nested_fields=Organization.__ref_fields__,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -44,7 +43,7 @@ class NewBadgeNotificationDetails(EmbeddedDocument):
     organization = field(
         ReferenceField(Organization),
         readonly=True,
-        nested_fields=org_ref_fields,
+        nested_fields=Organization.__ref_fields__,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -63,7 +62,7 @@ class MembershipAcceptedNotificationDetails(EmbeddedDocument):
     organization = field(
         ReferenceField(Organization),
         readonly=True,
-        nested_fields=org_ref_fields,
+        nested_fields=Organization.__ref_fields__,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -75,7 +74,7 @@ class MembershipRefusedNotificationDetails(EmbeddedDocument):
     organization = field(
         ReferenceField(Organization),
         readonly=True,
-        nested_fields=org_ref_fields,
+        nested_fields=Organization.__ref_fields__,
         auditable=False,
         allow_null=True,
         filterable={},
