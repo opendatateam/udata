@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+import mongoengine
 from flask import request
 from flask_login import current_user
 
@@ -22,7 +23,9 @@ class VisualizationsAPI(API):
     @api.marshal_with(Chart.__page_fields__)
     def get(self):
         """List or search all visualizations"""
-        query = Chart.objects(private__ne=True, deleted_at=None)
+        query = Chart.objects.visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, deleted_at=None)
+        )
 
         return Chart.apply_pagination(Chart.apply_sort_filters(query))
 

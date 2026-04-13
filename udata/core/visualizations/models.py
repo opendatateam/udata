@@ -18,7 +18,7 @@ from udata.core.dataset.models import get_resource
 from udata.core.dataset.permissions import OwnablePermission, OwnableReadPermission
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
-from udata.core.owned import Owned
+from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument
@@ -43,6 +43,13 @@ visualization_permissions_fields = api.model(
         "edit": fields.Permission(),
     },
 )
+
+class ChartQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(deleted_at=None, private=False)
+
+    def hidden(self):
+        return self(Q(private=True) | Q(deleted_at__ne=None))
 
 
 @generate_fields()
@@ -118,7 +125,7 @@ class YAxis(EmbeddedDocument):
 
 
 @generate_fields()
-class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
+class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[ChartQuerySet]):
     title = field(
         StringField(required=True),
         sortable=True,
@@ -184,6 +191,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
         ]
         + Owned.meta["indexes"],
         "ordering": ["-created_at"],
+        "queryset_class": ChartQuerySet,
         "auto_create_index_on_save": True,
     }
 
