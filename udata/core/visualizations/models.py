@@ -1,6 +1,6 @@
 from blinker import Signal
 from flask.helpers import url_for
-from mongoengine import EmbeddedDocument
+from mongoengine import EmbeddedDocument, Q
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
