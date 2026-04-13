@@ -192,6 +192,3 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
     on_update = Signal()
 
     verbose_name = _("chart")
-
-    def sources(self):
-        return "toutes_les_ressources_from_yaxis"
