@@ -140,6 +140,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument):
 
     deleted_at = field(
         DateTimeField(),
+        readonly=True,
         auditable=False,
     )
 
