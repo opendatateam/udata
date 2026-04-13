@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
@@ -8,8 +10,6 @@ from udata.core.organization.tasks import notify_membership_response
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
-from datetime import UTC, datetime
-
 from udata.tests.api import DBTestCase, PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
@@ -150,7 +150,6 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
 
     def test_full_membership_request_cycle_with_refusal_then_approval(self):
         """Test full cycle: request -> refused -> new request -> approved"""
-        from datetime import datetime
 
         applicant = UserFactory()
         admin = UserFactory()
