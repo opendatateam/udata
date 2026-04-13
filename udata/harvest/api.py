@@ -6,7 +6,7 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
-from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.harvest.backends import get_enabled_backends
 
@@ -158,7 +158,7 @@ source_fields = api.model(
             user_ref_fields, allow_null=True, description="The owner information"
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="The producer organization"
+            Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "deleted": fields.ISODateTime(description="The source deletion date", readonly=True),
         "schedule": fields.String(

@@ -8,7 +8,6 @@ from udata.api import API, api, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.user.api_fields import user_ref_fields
@@ -37,7 +36,9 @@ message_fields = api.model(
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_by_organization": fields.Nested(
-            org_ref_fields, description="The organization to show to users", allow_null=True
+            Organization.__ref_fields__,
+            description="The organization to show to users",
+            allow_null=True,
         ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
         "last_modified_at": fields.ISODateTime(description="The message last edit date"),
@@ -59,7 +60,7 @@ discussion_fields = api.model(
         "title": fields.String(description="The discussion title"),
         "user": fields.Nested(user_ref_fields, description="The discussion author"),
         "organization": fields.Nested(
-            org_ref_fields, description="The discussion author", allow_null=True
+            Organization.__ref_fields__, description="The discussion author", allow_null=True
         ),
         "created": fields.ISODateTime(description="The discussion creation date"),
         "closed": fields.ISODateTime(description="The discussion closing date"),
@@ -67,7 +68,7 @@ discussion_fields = api.model(
             user_ref_fields, allow_null=True, description="The user who closed the discussion"
         ),
         "closed_by_organization": fields.Nested(
-            org_ref_fields,
+            Organization.__ref_fields__,
             allow_null=True,
             description="The organization who closed the discussion",
         ),
@@ -92,7 +93,9 @@ start_discussion_fields = api.model(
             api.model_reference, description="The discussion target object", required=True
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="Publish in the name of this organization"
+            Organization.__ref_fields__,
+            allow_null=True,
+            description="Publish in the name of this organization",
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },

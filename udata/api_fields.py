@@ -270,8 +270,17 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
         # when returning from an endpoint)
         nested_fields: dict | None = info.get("nested_fields")
-        if nested_fields is None and hasattr(field.document_type_obj, "__ref_fields__"):
-            nested_fields = field.document_type_obj.__ref_fields__
+        # Resolve string references (e.g. "User") to actual classes before checking
+        # __ref_fields__. MongoEngine keeps string references unresolved until first
+        # use, but the target class may already be registered and have __ref_fields__.
+        document_type = field.document_type_obj
+        if isinstance(document_type, str):
+            try:
+                document_type = db.resolve_model(document_type)
+            except ValueError:
+                document_type = None
+        if nested_fields is None and document_type and hasattr(document_type, "__ref_fields__"):
+            nested_fields = document_type.__ref_fields__
 
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.

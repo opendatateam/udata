@@ -1,7 +1,7 @@
 from flask import url_for
 
 from udata.api import api, apiv2, fields
-from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import Organization
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.user.api_fields import user_ref_fields
@@ -43,7 +43,7 @@ topic_fields = apiv2.model(
             description="The topic last modification date", readonly=True
         ),
         "organization": fields.Nested(
-            org_ref_fields,
+            Organization.__ref_fields__,
             allow_null=True,
             description="The publishing organization",
             readonly=True,

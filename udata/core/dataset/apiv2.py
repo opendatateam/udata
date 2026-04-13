@@ -11,7 +11,7 @@ from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
-from udata.core.organization.api_fields import member_user_with_email_fields
+from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
 from udata.utils import get_by
 
@@ -22,7 +22,6 @@ from .api_fields import (
     dataset_harvest_fields,
     dataset_internal_fields,
     dataset_permissions_fields,
-    org_ref_fields,
     resource_fields,
     resource_harvest_fields,
     resource_internal_fields,
@@ -192,7 +191,7 @@ dataset_fields = apiv2.model(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="The producer organization"
+            Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
@@ -277,9 +276,9 @@ specific_resource_fields = apiv2.model(
 )
 
 apiv2.inherit("Badge (read)", Badge.__read_fields__)
-apiv2.inherit("OrganizationReference", org_ref_fields)
+apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("UserReference", user_ref_fields)
-apiv2.inherit("MemberUserWithEmail", member_user_with_email_fields)
+apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
 apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
 apiv2.inherit("TemporalCoverage", temporal_coverage_fields)
