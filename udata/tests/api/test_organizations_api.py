@@ -95,6 +95,20 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
+    def test_organization_api_get_member_user_is_nested_object(self):
+        """Member user must be serialized as a nested object, not a string."""
+        user = UserFactory(first_name="Normal", last_name="User")
+        organization = OrganizationFactory(members=[Member(user=user, role="editor")])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        member = response.json["members"][0]
+        assert isinstance(member["user"], dict), (
+            f"member.user should be a dict, got {type(member['user'])}: {member['user']}"
+        )
+        assert member["user"]["first_name"] == "Normal"
+        assert member["user"]["last_name"] == "User"
+        assert "id" in member["user"]
+
     def test_organization_api_get_with_membership_request_without_created_by(self):
         """Old membership requests may have created_by=None, the API should not 500"""
         user = UserFactory()
