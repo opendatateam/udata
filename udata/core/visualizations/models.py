@@ -44,6 +44,7 @@ visualization_permissions_fields = api.model(
     },
 )
 
+
 class ChartQuerySet(OwnedQuerySet):
     def visible(self):
         return self(deleted_at=None, private=False)
