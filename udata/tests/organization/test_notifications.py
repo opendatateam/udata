@@ -8,6 +8,8 @@ from udata.core.organization.tasks import notify_membership_response
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
+from datetime import UTC, datetime
+
 from udata.tests.api import DBTestCase, PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
@@ -171,7 +173,7 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
         first_request = org.requests[0]
         first_request.status = "refused"
         first_request.handled_by = admin
-        first_request.handled_on = datetime.utcnow()
+        first_request.handled_on = datetime.now(UTC)
         first_request.refusal_comment = "Not now"
         org.save()
         MembershipRequest.after_handle.send(first_request, org=org)
@@ -212,7 +214,7 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
         second_request = org.pending_requests[0]
         second_request.status = "accepted"
         second_request.handled_by = admin
-        second_request.handled_on = datetime.utcnow()
+        second_request.handled_on = datetime.now(UTC)
         member = Member(user=applicant, role="editor")
         org.members.append(member)
         org.save()

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import request
 from flask_login import current_user
@@ -76,6 +76,6 @@ class VisualizationAPI(API):
 
         visualization.permissions["delete"].test()
 
-        visualization.deleted_at = datetime.utcnow()
+        visualization.deleted_at = datetime.now(UTC)
         visualization.save()
         return "", 204

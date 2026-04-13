@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import request as flask_request
 from flask_security import current_user, logout_user
@@ -296,7 +296,7 @@ class AcceptOrgInvitationAPI(API):
 
                     req.status = "accepted"
                     req.handled_by = user
-                    req.handled_on = datetime.utcnow()
+                    req.handled_on = datetime.now(UTC)
 
                     member = Member(user=user, role=req.role)
                     org.members.append(member)
@@ -344,7 +344,7 @@ class RefuseOrgInvitationAPI(API):
 
                     req.status = "refused"
                     req.handled_by = user
-                    req.handled_on = datetime.utcnow()
+                    req.handled_on = datetime.now(UTC)
                     org.save()
                     MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))

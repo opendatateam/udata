@@ -495,7 +495,7 @@ class MembershipCancelAPI(MembershipAPI):
 
         membership_request.status = "canceled"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
+        membership_request.handled_on = datetime.now(UTC)
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)

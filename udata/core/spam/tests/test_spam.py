@@ -78,7 +78,7 @@ class SpamTest(APITestCase):
         When spam is in an embedded document (Message) and the report is dismissed,
         adding a new comment should NOT create a new report for the same embed.
         """
-        from datetime import datetime
+        from datetime import UTC, datetime
 
         user = UserFactory()
         dataset = DatasetFactory()
@@ -102,7 +102,7 @@ class SpamTest(APITestCase):
         report = Report.objects(
             subject=discussion, reason=REASON_AUTO_SPAM, subject_embed_id=spam_message.id
         ).first()
-        report.dismissed_at = datetime.utcnow()
+        report.dismissed_at = datetime.now(UTC)
         report.save()
 
         self.assertFalse(self.has_spam_report(discussion, spam_message.id))

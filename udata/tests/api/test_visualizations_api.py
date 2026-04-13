@@ -30,7 +30,7 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_list_excludes_deleted(self):
         """It should not list deleted visualizations"""
         ChartFactory()
-        ChartFactory(deleted_at=datetime.utcnow())
+        ChartFactory(deleted_at=datetime.now(UTC))
         response = self.get(url_for("api.visualizations"))
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
@@ -51,14 +51,14 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
 
     def test_visualization_api_get_deleted(self):
         """It should return 410 for deleted visualization"""
-        visualization = ChartFactory(deleted_at=datetime.utcnow())
+        visualization = ChartFactory(deleted_at=datetime.now(UTC))
         response = self.get(url_for("api.visualization", visualization=visualization))
         assert response.status_code == 410
 
     def test_visualization_api_get_deleted_but_authorized(self):
         """It should fetch deleted visualization if user is owner"""
         user = self.login()
-        visualization = ChartFactory(deleted_at=datetime.utcnow(), owner=user)
+        visualization = ChartFactory(deleted_at=datetime.now(UTC), owner=user)
         response = self.get(url_for("api.visualization", visualization=visualization))
         assert response.status_code == 200
 
@@ -150,7 +150,7 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_update_deleted(self):
         """It should return 410 when updating deleted visualization"""
         user = self.login()
-        visualization = ChartFactory(owner=user, deleted_at=datetime.utcnow())
+        visualization = ChartFactory(owner=user, deleted_at=datetime.now(UTC))
 
         response = self.patch(
             url_for("api.visualization", visualization=visualization),
@@ -181,7 +181,7 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_delete_already_deleted(self):
         """It should return 410 when deleting already deleted visualization"""
         user = self.login()
-        visualization = ChartFactory(owner=user, deleted_at=datetime.utcnow())
+        visualization = ChartFactory(owner=user, deleted_at=datetime.now(UTC))
 
         response = self.delete(url_for("api.visualization", visualization=visualization))
         assert response.status_code == 410
