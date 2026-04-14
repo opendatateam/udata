@@ -500,10 +500,34 @@ def remote_url_from_rdf(rdf: RdfResource, graph: Graph, remote_url_prefix: str |
     Otherwise, use DCAT.landingPage if found and uri validation succeeds.
     In this latter case, use RDF identifier as fallback if uri validation succeeds.
     """
-    if remote_url_prefix and (
-        primary_topic_identifier := primary_topic_identifier_from_rdf(graph, rdf)
-    ):
-        return f"{remote_url_prefix.rstrip('/')}/{primary_topic_identifier}"
+    if remote_url_prefix and (identifier := primary_topic_identifier_from_rdf(graph, rdf)):
+        # Some ISO-19115-3 GeoNetwork templates set a codespace for the record IDs (e.g. the
+        # geodata-multilingual.xml template,), i.e. they set:
+        # - mdb:metadataIdentifier/mcc:MD_Identifier/mcc:code to the record ID, and
+        # - mdb:metadataIdentifier/mcc:MD_Identifier/mcc:codeSpace to "urn:uuid".
+        # It is not clear why only some templates set a codespace, git blame didn't yield any clue.
+        #
+        # That codespace ends up collapsed in the record dct:identifier, since dct:identifier has no
+        # separate codespace. This means dct:identifier differs (by the codespace) from the record
+        # ID that GeoNetwork uses internally, and we need to extract that original record ID from
+        # dct:identifier to build a valid remote_url.
+        #
+        # It is impractical to reliably infer the codespace from dct:identifier since parsing of
+        # URNs is namespace dependent. So we restrict the heuristic to the "uuid" namespace, which
+        # is both clearly specified (RFC-4122) and used in the wild by GeoNetwork (e.g. OFB,
+        # Sextant, and likely most future ISO-19115-3 catalogs given it's in the templates).
+        #
+        # Note that the test on datatype being xsd:anyURI is important, because some ISO-19139
+        # catalogs (e.g. Geo2France) are using "urn:...:" prefixes in their gmd:fileIdentifier.
+        # ISO-19139 having no concept of codespace (for fileIdentifier), that prefix is treated as
+        # as a regular part of the gco:CharacterString record ID, meaning:
+        # - dct:identifier is typed xsd:string, and
+        # - the prefix is part of the record URL, so it must stay in remote_url.
+        uuid_prefix = "urn:uuid:"
+        if identifier.datatype == XSD.anyURI and identifier.value.startswith(uuid_prefix):
+            offset = len(uuid_prefix)
+            identifier = identifier.value[offset:]
+        return f"{remote_url_prefix.rstrip('/')}/{identifier}"
 
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     uri = rdf.identifier.toPython()
