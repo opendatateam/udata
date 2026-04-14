@@ -29,6 +29,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
+from udata.core.user.models import User
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
@@ -98,12 +99,12 @@ class Team(EmbeddedDocument):
     slug = SlugField(max_length=255, required=True, populate_from="name", update=True, unique=False)
     description = StringField()
 
-    members = ListField(ReferenceField("User"))
+    members = ListField(ReferenceField(User))
 
 
 @generate_fields()
 class Member(EmbeddedDocument):
-    user = field(ReferenceField("User"), readonly=True)
+    user = field(ReferenceField(User), readonly=True)
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
     since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
@@ -131,13 +132,13 @@ class MembershipRequest(EmbeddedDocument):
     """
 
     id = field(AutoUUIDField(), readonly=True)
-    user = field(ReferenceField("User"), allow_null=True, readonly=True)
+    user = field(ReferenceField(User), allow_null=True, readonly=True)
     status = field(StringField(choices=list(MEMBERSHIP_STATUS), default="pending"), readonly=True)
 
     created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
     handled_on = field(DateTimeField(), readonly=True)
-    handled_by = field(ReferenceField("User"), allow_null=True, readonly=True)
+    handled_by = field(ReferenceField(User), allow_null=True, readonly=True)
 
     comment = field(StringField(), checks=[required_if(kind="request")])
     refusal_comment = field(StringField(), readonly=True)
@@ -147,7 +148,7 @@ class MembershipRequest(EmbeddedDocument):
         readonly=True,
     )
     email = field(StringField(), readonly=True)
-    created_by = field(ReferenceField("User"), allow_null=True, readonly=True)
+    created_by = field(ReferenceField(User), allow_null=True, readonly=True)
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE), readonly=True)
     # Not wrapped with field() because GenericReferenceField choices (Dataset, Dataservice, Reuse)
     # are not yet registered at import time. Serialized via manual request_fields in api_fields.py.
