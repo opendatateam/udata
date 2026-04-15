@@ -26,7 +26,6 @@ For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
-from collections import OrderedDict
 from datetime import datetime
 from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
@@ -377,53 +376,6 @@ def save_class_by_parents(cls):
         classes_by_parents[parent].add(cls)
 
 
-class VersionAwareModel(RestxModel):
-    """A Flask-RestX Model that resolves fields based on the API version header.
-
-    For Swagger documentation, it behaves like the latest version model (the super() data).
-    At marshal time, items() and __mask__ resolve dynamically based on X-API-Version.
-    """
-
-    def __init__(self, latest_model, version_builder):
-        # Initialize with latest model's data — this is what Swagger sees
-        super().__init__(latest_model.name, dict(latest_model))
-        self._latest_mask = latest_model.__mask__
-        self.__apidoc__ = getattr(latest_model, "__apidoc__", {})
-        self._version_builder = version_builder
-        self._version_cache: dict[str, RestxModel] = {}
-
-    def _resolve(self) -> RestxModel | None:
-        """Return a version-specific model, or None to use self (latest)."""
-        from udata.api.versioning import LATEST_API_VERSION, get_request_version
-
-        try:
-            version = get_request_version()
-        except RuntimeError:
-            return None  # Outside request context → latest
-        if version >= LATEST_API_VERSION:
-            return None
-        key = str(version)
-        if key not in self._version_cache:
-            self._version_cache[key] = self._version_builder(version)
-        return self._version_cache[key]
-
-    def items(self):
-        resolved = self._resolve()
-        if resolved is None:
-            return OrderedDict.items(self)
-        return resolved.items()
-
-    @property
-    def __mask__(self):
-        resolved = self._resolve()
-        if resolved is None:
-            return self._latest_mask
-        return resolved.__mask__
-
-    @__mask__.setter
-    def __mask__(self, value):
-        self._latest_mask = value
-
 
 def _build_read_fields_for_version(cls, version) -> RestxModel:
     """Rebuild __read_fields__ for a specific API version using stored recipes."""
@@ -703,6 +655,9 @@ def generate_fields(**kwargs) -> Callable:
             **kwargs,
         )
 
+        cls.__read_fields__ = latest_read
+        cls.__page_fields__ = latest_page
+
         if has_version_changes:
             # Store recipes for version rebuilding
             cls.__version_recipes__ = {
@@ -717,19 +672,35 @@ def generate_fields(**kwargs) -> Callable:
                 "model_changes": model_changes,
             }
 
-            # Wrap models to resolve dynamically based on API version
-            def read_builder(version):
-                return _build_read_fields_for_version(cls, version)
+            # Attach version resolvers — UDataApi.marshal_with calls these at request time
+            read_cache: dict[str, RestxModel] = {}
+            page_cache: dict[str, RestxModel] = {}
 
-            def page_builder(version):
-                read_model = _build_read_fields_for_version(cls, version)
-                return _build_page_fields_for_version(cls, version, read_model)
+            def resolve_read():
+                from udata.api.versioning import LATEST_API_VERSION, get_request_version
 
-            cls.__read_fields__ = VersionAwareModel(latest_read, read_builder)
-            cls.__page_fields__ = VersionAwareModel(latest_page, page_builder)
-        else:
-            cls.__read_fields__ = latest_read
-            cls.__page_fields__ = latest_page
+                version = get_request_version()
+                if version >= LATEST_API_VERSION:
+                    return latest_read
+                key = str(version)
+                if key not in read_cache:
+                    read_cache[key] = _build_read_fields_for_version(cls, version)
+                return read_cache[key]
+
+            def resolve_page():
+                from udata.api.versioning import LATEST_API_VERSION, get_request_version
+
+                version = get_request_version()
+                if version >= LATEST_API_VERSION:
+                    return latest_page
+                key = str(version)
+                if key not in page_cache:
+                    read_model = _build_read_fields_for_version(cls, version)
+                    page_cache[key] = _build_page_fields_for_version(cls, version, read_model)
+                return page_cache[key]
+
+            latest_read._version_resolver = resolve_read
+            latest_page._version_resolver = resolve_page
 
         # Parser for index sort/filters
         paginable: bool = kwargs.get("paginable", True)

@@ -14,7 +14,9 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.marshalling import marshal
 from flask_restx.reqparse import RequestParser
+from flask_restx.utils import merge, unpack
 from flask_storage import UnauthorizedFileType
 
 from udata import tracking
@@ -41,6 +43,51 @@ class UDataApi(Api):
         kwargs["decorators"] = [self.authentify] + decorators
         super(UDataApi, self).__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
+
+    def marshal_with(self, fields, as_list=False, code=200, description=None, **kwargs):
+        """Override marshal_with to support API versioning.
+
+        If the model has a _version_resolver attribute, the resolver is called at
+        request time to pick the right model for the requested API version.
+        Swagger documentation always uses the latest (static) model.
+        """
+        resolver = getattr(fields, "_version_resolver", None)
+        if not resolver:
+            return super().marshal_with(fields, as_list, code, description, **kwargs)
+
+        def decorator(func):
+            # Register Swagger docs with the latest (static) model — same as parent
+            doc = {
+                "responses": {
+                    str(code): (
+                        (description, [fields], kwargs)
+                        if as_list
+                        else (description, fields, kwargs)
+                    )
+                },
+                "__mask__": kwargs.get("mask", True),
+            }
+            func.__apidoc__ = merge(getattr(func, "__apidoc__", {}), doc)
+
+            @wraps(func)
+            def wrapper(*args, **kw):
+                resolved = resolver()
+                resp = func(*args, **kw)
+                mask = getattr(resolved, "__mask__", None)
+                mask_header = current_app.config.get("RESTX_MASK_HEADER", "X-Fields")
+                mask = request.headers.get(mask_header) or mask
+                if isinstance(resp, tuple):
+                    data, resp_code, headers = unpack(resp)
+                    return (
+                        marshal(data, resolved, mask=mask, ordered=self.ordered),
+                        resp_code,
+                        headers,
+                    )
+                return marshal(resp, resolved, mask=mask, ordered=self.ordered)
+
+            return wrapper
+
+        return decorator
 
     def secure(self, func):
         """Enforce authentication on a given method/verb
