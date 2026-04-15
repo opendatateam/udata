@@ -228,7 +228,7 @@ def add_version_header(response):
 
     try:
         version = get_request_version()
-        response.headers[VERSION_HEADER] = version.isoformat()
+        response.headers[VERSION_HEADER] = str(version)
     except Exception:
         pass
     return response
@@ -360,8 +360,8 @@ class APIVersionsAPI(API):
         from udata.api.versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES
 
         return {
-            "latest": LATEST_API_VERSION.isoformat(),
-            "oldest": OLDEST_API_VERSION.isoformat(),
+            "latest": str(LATEST_API_VERSION),
+            "oldest": str(OLDEST_API_VERSION),
             "changes": sorted(VERSION_CHANGES, key=lambda c: c["date"], reverse=True),
         }
 

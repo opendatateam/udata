@@ -15,6 +15,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
 from udata.tests.api import APITestCase, PytestOnlyAPITestCase
+from udata.api.versioning import VERSION_HEADER
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -813,3 +814,120 @@ class ReuseReferencesAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.reuse_topics"))
         assert200(response)
         assert len(response.json) == len(REUSE_TOPICS)
+
+
+class ReuseAPIVersioningTest(PytestOnlyAPITestCase):
+    def test_reuse_datasets_href_with_latest_version(self):
+        """With the latest API version, datasets should be an href object."""
+        user = self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory(owner=user, datasets=[dataset])
+
+        response = self.get(
+            url_for("api.reuse", reuse=reuse),
+            headers={VERSION_HEADER: "16.3.0"},
+        )
+        assert200(response)
+        datasets_field = response.json["datasets"]
+        assert isinstance(datasets_field, dict)
+        assert "href" in datasets_field
+        assert "total" in datasets_field
+        assert datasets_field["total"] == 1
+        assert datasets_field["rel"] == "subsection"
+        assert datasets_field["type"] == "GET"
+        assert str(reuse.id) in datasets_field["href"]
+
+    def test_reuse_datasets_list_without_version_header(self):
+        """Without a version header, datasets should be a full list (oldest version)."""
+        user = self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory(owner=user, datasets=[dataset])
+
+        response = self.get(url_for("api.reuse", reuse=reuse))
+        assert200(response)
+        datasets_field = response.json["datasets"]
+        assert isinstance(datasets_field, list)
+        assert len(datasets_field) == 1
+        assert datasets_field[0]["title"] == dataset.title
+
+    def test_reuse_datasets_list_with_old_version(self):
+        """With an old API version, datasets should be a full list."""
+        user = self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory(owner=user, datasets=[dataset])
+
+        response = self.get(
+            url_for("api.reuse", reuse=reuse),
+            headers={VERSION_HEADER: "16.2.0"},
+        )
+        assert200(response)
+        datasets_field = response.json["datasets"]
+        assert isinstance(datasets_field, list)
+        assert len(datasets_field) == 1
+        assert datasets_field[0]["title"] == dataset.title
+
+    def test_reuse_list_page_with_latest_version(self):
+        """Paginated list with latest version should include datasets as href."""
+        user = self.login()
+        dataset = DatasetFactory()
+        ReuseFactory(owner=user, datasets=[dataset])
+
+        response = self.get(
+            url_for("api.reuses"),
+            headers={VERSION_HEADER: "16.3.0"},
+        )
+        assert200(response)
+        reuse_data = response.json["data"][0]
+        assert isinstance(reuse_data["datasets"], dict)
+        assert "href" in reuse_data["datasets"]
+
+    def test_reuse_list_page_with_old_version(self):
+        """Paginated list with old version should include datasets as masked list."""
+        user = self.login()
+        dataset = DatasetFactory()
+        ReuseFactory(owner=user, datasets=[dataset])
+
+        response = self.get(
+            url_for("api.reuses"),
+            headers={VERSION_HEADER: "16.2.0"},
+        )
+        assert200(response)
+        reuse_data = response.json["data"][0]
+        assert isinstance(reuse_data["datasets"], list)
+        assert len(reuse_data["datasets"]) == 1
+        # Old page_mask should filter to id, title, uri, page
+        assert "title" in reuse_data["datasets"][0]
+
+    def test_version_header_in_response(self):
+        """The response should include the X-API-Version header."""
+        user = self.login()
+        ReuseFactory(owner=user, visible=True)
+
+        response = self.get(
+            url_for("api.reuses"),
+            headers={VERSION_HEADER: "16.3.0"},
+        )
+        assert200(response)
+        assert VERSION_HEADER in response.headers
+        assert response.headers[VERSION_HEADER] == "16.3.0"
+
+    def test_version_header_default_in_response(self):
+        """Without a version header, the response should include the oldest version."""
+        user = self.login()
+        ReuseFactory(owner=user, visible=True)
+
+        response = self.get(url_for("api.reuses"))
+        assert200(response)
+        assert VERSION_HEADER in response.headers
+        assert response.headers[VERSION_HEADER] == "1.0.0"
+
+    def test_invalid_version_header(self):
+        """An invalid version header should return 400."""
+        user = self.login()
+        ReuseFactory(owner=user, visible=True)
+
+        response = self.get(
+            url_for("api.reuses"),
+            headers={VERSION_HEADER: "not-a-date"},
+        )
+        assert400(response)

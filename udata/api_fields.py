@@ -27,7 +27,7 @@ For field-specific metadata, see the `field()` function documentation.
 
 import functools
 from collections import OrderedDict
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
@@ -402,7 +402,7 @@ class VersionAwareModel(RestxModel):
             return None  # Outside request context → latest
         if version >= LATEST_API_VERSION:
             return None
-        key = version.isoformat()
+        key = str(version)
         if key not in self._version_cache:
             self._version_cache[key] = self._version_builder(version)
         return self._version_cache[key]
@@ -425,7 +425,7 @@ class VersionAwareModel(RestxModel):
         self._latest_mask = value
 
 
-def _build_read_fields_for_version(cls, version: date) -> RestxModel:
+def _build_read_fields_for_version(cls, version) -> RestxModel:
     """Rebuild __read_fields__ for a specific API version using stored recipes."""
     from udata.api.versioning import ChangeAttribute, RemoveField, RenameField
 
@@ -439,19 +439,19 @@ def _build_read_fields_for_version(cls, version: date) -> RestxModel:
         before = info.get("before", [])
 
         # If field was removed at this version or later, skip it
-        if any(isinstance(c, RemoveField) and version >= c.date for c in before):
+        if any(isinstance(c, RemoveField) and version >= c.version for c in before):
             continue
 
         # Start with the original info (without before) and apply version changes
         effective_info = {k: v for k, v in info.items() if k != "before"}
-        for change in sorted(before, key=lambda c: c.date):
-            if isinstance(change, ChangeAttribute) and version < change.date:
+        for change in sorted(before, key=lambda c: c.version):
+            if isinstance(change, ChangeAttribute) and version < change.version:
                 effective_info = change.apply(effective_info)
 
         # Determine the field key (handle renames)
         effective_key = key
         for change in before:
-            if isinstance(change, RenameField) and version < change.date:
+            if isinstance(change, RenameField) and version < change.version:
                 effective_key = change.old_name
 
         read, _ = convert_db_to_field(effective_key, mongo_field, effective_info)
@@ -465,7 +465,7 @@ def _build_read_fields_for_version(cls, version: date) -> RestxModel:
     # Compute mask for this version
     model_kwargs = dict(recipes["model_kwargs"])
     for change in recipes.get("model_changes", []):
-        if version < change.date:
+        if version < change.version:
             model_kwargs = change.apply(model_kwargs)
 
     read_mask_exclude = model_kwargs.get("read_mask_exclude")
@@ -478,13 +478,13 @@ def _build_read_fields_for_version(cls, version: date) -> RestxModel:
     return model
 
 
-def _build_page_fields_for_version(cls, version: date, read_model: RestxModel) -> RestxModel:
+def _build_page_fields_for_version(cls, version, read_model: RestxModel) -> RestxModel:
     """Rebuild __page_fields__ for a specific API version."""
     recipes = cls.__version_recipes__
 
     model_kwargs = dict(recipes["model_kwargs"])
     for change in recipes.get("model_changes", []):
-        if version < change.date:
+        if version < change.version:
             model_kwargs = change.apply(model_kwargs)
 
     page_mask_exclude = model_kwargs.get("page_mask_exclude")
@@ -518,7 +518,7 @@ def generate_fields(**kwargs) -> Callable:
     """
 
     def wrapper(cls) -> Callable:
-        from udata.api.versioning import RemoveField, VersionChange
+        from udata.api.versioning import RemoveField
 
         read_fields: dict = {}
         write_fields: dict = {}

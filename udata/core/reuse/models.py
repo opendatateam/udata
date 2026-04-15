@@ -86,14 +86,12 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     nested_filters={"organization_badge": "organization.badges"},
-    page_mask_exclude=["datasets"],
     before=[
         ChangeModelAttribute(
-            "2026-04-15",
+            "16.3.0",
             page_mask="*,datasets{id,title,uri,page}",
-            page_mask_exclude=None,
-            description="Page mask changed: datasets are now excluded from paginated responses "
-            "(replaced by href). Before, datasets were included with {id,title,uri,page}.",
+            description="Before this version, datasets were included in paginated responses "
+            "with a subset of fields {id,title,uri,page}.",
         ),
     ],
 )
@@ -151,7 +149,7 @@ class Reuse(
         href=lambda reuse: url_for("api.datasets", reuse=reuse.id, _external=True),
         before=[
             ChangeAttribute(
-                "2026-04-15",
+                "16.3.0",
                 href=None,
                 description="The datasets field now returns an href link to /datasets?reuse=xxx "
                 "instead of the full list of datasets.",

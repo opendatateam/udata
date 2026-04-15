@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from datetime import date
+from packaging.version import Version
 
 from flask import g, request
 
 VERSION_HEADER = "X-API-Version"
-LATEST_API_VERSION = date(2026, 4, 15)
-OLDEST_API_VERSION = date(2026, 4, 14)
+LATEST_API_VERSION = Version("16.3.0")
+OLDEST_API_VERSION = Version("1.0.0")
 
 # Registry of all version changes, populated at import time via change classes
 VERSION_CHANGES: list[dict] = []
 
 
-def get_request_version() -> date:
+def get_request_version() -> Version:
     """Return the API version requested via header. Cached on flask.g."""
     if hasattr(g, "_api_version"):
         return g._api_version
@@ -22,11 +22,13 @@ def get_request_version() -> date:
         version = OLDEST_API_VERSION
     else:
         try:
-            version = date.fromisoformat(header)
-        except ValueError:
+            version = Version(header)
+        except Exception:
             from udata.api import api
 
-            api.abort(400, f"Invalid {VERSION_HEADER} header. Expected YYYY-MM-DD format.")
+            api.abort(
+                400, f"Invalid {VERSION_HEADER} header. Expected a version like '16.3.0'."
+            )
 
     g._api_version = version
     return version
@@ -35,9 +37,9 @@ def get_request_version() -> date:
 class VersionChange:
     """Base class for API version changes."""
 
-    def __init__(self, version_date: str, description: str | None = None):
-        self.version_date = version_date
-        self.date = date.fromisoformat(version_date)
+    def __init__(self, version: str, description: str | None = None):
+        self.version_str = version
+        self.version = Version(version)
         self.description = description
 
     def auto_description(self) -> str:
@@ -46,7 +48,7 @@ class VersionChange:
     def register(self, model_name: str, field_name: str | None = None):
         VERSION_CHANGES.append(
             {
-                "date": self.version_date,
+                "version": self.version_str,
                 "model": model_name,
                 "field": field_name,
                 "description": self.description or self.auto_description(),
@@ -55,21 +57,21 @@ class VersionChange:
 
 
 class ChangeAttribute(VersionChange):
-    """Before this date, some field attributes were different.
+    """Before this version, some field attributes were different.
 
     Usage:
         datasets = field(
             ListField(...),
             href=lambda reuse: url_for(...),
             before=[
-                ChangeAttribute("2026-04-15", href=None,
+                ChangeAttribute("16.3.0", href=None,
                     description="datasets returned inline instead of href"),
             ],
         )
     """
 
-    def __init__(self, version_date: str, description: str | None = None, **attrs):
-        super().__init__(version_date, description)
+    def __init__(self, version: str, description: str | None = None, **attrs):
+        super().__init__(version, description)
         self.attrs = attrs
 
     def auto_description(self) -> str:
@@ -83,19 +85,19 @@ class ChangeAttribute(VersionChange):
 
 
 class RenameField(VersionChange):
-    """Before this date, this field had a different name.
+    """Before this version, this field had a different name.
 
     Usage:
         new_name = field(
             StringField(),
             before=[
-                RenameField("2026-04-15", old_name="old_name"),
+                RenameField("16.3.0", old_name="old_name"),
             ],
         )
     """
 
-    def __init__(self, version_date: str, old_name: str, description: str | None = None):
-        super().__init__(version_date, description)
+    def __init__(self, version: str, old_name: str, description: str | None = None):
+        super().__init__(version, description)
         self.old_name = old_name
 
     def auto_description(self) -> str:
@@ -103,13 +105,13 @@ class RenameField(VersionChange):
 
 
 class RemoveField(VersionChange):
-    """At this date, this field was removed. Before this date it existed.
+    """At this version, this field was removed. Before this version it existed.
 
     Usage:
         legacy_field = field(
             StringField(),
             before=[
-                RemoveField("2026-04-15",
+                RemoveField("16.3.0",
                     description="legacy_field has been removed"),
             ],
         )
@@ -120,20 +122,19 @@ class RemoveField(VersionChange):
 
 
 class ChangeModelAttribute(VersionChange):
-    """Before this date, model-level attributes (masks, etc.) were different.
+    """Before this version, model-level attributes (masks, etc.) were different.
 
     Usage:
         @generate_fields(
-            page_mask_exclude=["datasets"],
             before=[
-                ChangeModelAttribute("2026-04-15",
+                ChangeModelAttribute("16.3.0",
                     page_mask="*,datasets{id,title,uri,page}"),
             ],
         )
     """
 
-    def __init__(self, version_date: str, description: str | None = None, **attrs):
-        super().__init__(version_date, description)
+    def __init__(self, version: str, description: str | None = None, **attrs):
+        super().__init__(version, description)
         self.attrs = attrs
 
     def auto_description(self) -> str:
