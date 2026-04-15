@@ -53,7 +53,7 @@ class UDataApi(Api):
         """
         resolver = getattr(fields, "_version_resolver", None)
         if not resolver:
-            return super().marshal_with(fields, as_list, code, description, **kwargs)
+            return self.default_namespace.marshal_with(fields, as_list, code, description, **kwargs)
 
         def decorator(func):
             # Register Swagger docs with the latest (static) model — same as parent
