@@ -1,8 +1,9 @@
 import factory
+import factory.fuzzy
 
 from udata.factories import ModelFactory
 
-from .models import Chart, DataSeries, XAxis, YAxis
+from .models import Chart, DataSeries, Filter, XAxis, YAxis
 
 
 class XAxisFactory(ModelFactory):
@@ -27,6 +28,26 @@ class DataSeriesFactory(ModelFactory):
     type = "line"
     column_y = factory.Faker("word")
     resource_id = factory.Faker("uuid4")
+
+
+class FilterFactory(ModelFactory):
+    class Meta:
+        model = Filter
+
+    column = factory.Faker("word")
+    condition = factory.fuzzy.FuzzyChoice(
+        [
+            "exact",
+            "differs",
+            "is_null",
+            "is_not_null",
+            "greater",
+            "less",
+            "strictly_greater",
+            "strictly_less",
+        ]
+    )
+    value = factory.Faker("word")
 
 
 class ChartFactory(ModelFactory):

@@ -5,8 +5,8 @@ from flask import url_for
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
-from udata.core.visualizations.factories import ChartFactory
-from udata.core.visualizations.models import Chart
+from udata.core.visualizations.factories import ChartFactory, FilterFactory
+from udata.core.visualizations.models import AndFilters, Chart
 
 from . import PytestOnlyAPITestCase
 
@@ -79,6 +79,42 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         """It should create a visualization"""
         user = self.login()
         chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        response = self.post(
+            url_for("api.visualizations"),
+            chart.to_dict(),
+        )
+        assert response.status_code == 201
+        assert Chart.objects.count() == 1
+
+        visualization = Chart.objects.first()
+        assert visualization.title == chart.title
+        assert visualization.description == chart.description
+        assert visualization.owner == user
+
+    def test_visualization_api_create_filter(self):
+        """It should create a visualization"""
+        user = self.login()
+        chart = ChartFactory.build(owner=user, series__0__filters=FilterFactory())
+        chart.owner = str(user.id)
+        response = self.post(
+            url_for("api.visualizations"),
+            chart.to_dict(),
+        )
+        assert response.status_code == 201
+        assert Chart.objects.count() == 1
+
+        visualization = Chart.objects.first()
+        assert visualization.title == chart.title
+        assert visualization.description == chart.description
+        assert visualization.owner == user
+
+    def test_visualization_api_create_and_filter(self):
+        """It should create a visualization"""
+        user = self.login()
+        chart = ChartFactory.build(
+            owner=user, series__0__filters=AndFilters(filters=[FilterFactory(), FilterFactory()])
+        )
         chart.owner = str(user.id)
         response = self.post(
             url_for("api.visualizations"),
