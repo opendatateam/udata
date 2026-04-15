@@ -26,16 +26,6 @@ from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url
 
-__all__ = (
-    "Chart",
-    "DataSeries",
-    "XAxis",
-    "YAxis",
-    "Filter",
-    "GenericFilter",
-    "AndFilters",
-)
-
 visualization_permissions_fields = api.model(
     "VisualizationPermissions",
     {
