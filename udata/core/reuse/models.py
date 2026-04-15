@@ -16,6 +16,7 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api.versioning import ChangeAttribute, ChangeModelAttribute
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
@@ -85,7 +86,16 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     nested_filters={"organization_badge": "organization.badges"},
-    page_mask="*,datasets{id,title,uri,page}",
+    page_mask_exclude=["datasets"],
+    before=[
+        ChangeModelAttribute(
+            "2026-04-15",
+            page_mask="*,datasets{id,title,uri,page}",
+            page_mask_exclude=None,
+            description="Page mask changed: datasets are now excluded from paginated responses "
+            "(replaced by href). Before, datasets were included with {id,title,uri,page}.",
+        ),
+    ],
 )
 class Reuse(
     Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, Document[ReuseQuerySet]
@@ -138,6 +148,15 @@ class Reuse(
         filterable={
             "key": "dataset",
         },
+        href=lambda reuse: url_for("api.datasets", reuse=reuse.id, _external=True),
+        before=[
+            ChangeAttribute(
+                "2026-04-15",
+                href=None,
+                description="The datasets field now returns an href link to /datasets?reuse=xxx "
+                "instead of the full list of datasets.",
+            ),
+        ],
     )
     dataservices = field(
         ListField(

@@ -223,6 +223,19 @@ def extract_name_from_path(path):
 
 @apiv1_blueprint.after_request
 @apiv2_blueprint.after_request
+def add_version_header(response):
+    from udata.api.versioning import VERSION_HEADER, get_request_version
+
+    try:
+        version = get_request_version()
+        response.headers[VERSION_HEADER] = version.isoformat()
+    except Exception:
+        pass
+    return response
+
+
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get("TRACKING_BLACKLIST", [])
@@ -334,6 +347,23 @@ def marshal_page(page, page_fields):
 
 def marshal_page_with(func):
     pass
+
+
+ns_versions = api.namespace("versions", "API versioning information")
+
+
+@ns_versions.route("/", endpoint="api_versions")
+class APIVersionsAPI(API):
+    @api.doc("list_api_versions")
+    def get(self):
+        """List all API version changes"""
+        from udata.api.versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES
+
+        return {
+            "latest": LATEST_API_VERSION.isoformat(),
+            "oldest": OLDEST_API_VERSION.isoformat(),
+            "changes": sorted(VERSION_CHANGES, key=lambda c: c["date"], reverse=True),
+        }
 
 
 def init_app(app):
