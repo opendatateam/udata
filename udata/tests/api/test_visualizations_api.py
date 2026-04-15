@@ -179,7 +179,7 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert response.status_code == 403
 
     def test_visualization_api_delete_already_deleted(self):
-        """It should return 410 when deleting already deleted visualization"""
+        """It should return 410 when deleting already deleted chart"""
         user = self.login()
         visualization = ChartFactory(owner=user, deleted_at=datetime.now(UTC))
 
@@ -189,7 +189,7 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
 
 class ChartAPITest(PytestOnlyAPITestCase):
     def test_chart_api_get(self):
-        """It should fetch a chart (subclass of visualization)"""
+        """It should fetch a chart"""
         chart = ChartFactory()
         response = self.get(url_for("api.visualization", visualization=chart))
         assert response.status_code == 200
