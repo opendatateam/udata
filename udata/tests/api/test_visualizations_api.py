@@ -84,7 +84,6 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
             url_for("api.visualizations"),
             chart.to_dict(),
         )
-        print(response.text)
         assert response.status_code == 201
         assert Chart.objects.count() == 1
 
@@ -105,7 +104,6 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
             url_for("api.visualizations"),
             chart.to_dict(),
         )
-        print(response.text)
         assert response.status_code == 201
 
         visualization = Chart.objects.first()
