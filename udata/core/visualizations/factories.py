@@ -26,6 +26,7 @@ class DataSeriesFactory(ModelFactory):
 
     type = "line"
     column_y = factory.Faker("word")
+    resource_id = factory.Faker("uuid4")
 
 
 class ChartFactory(ModelFactory):
@@ -34,3 +35,6 @@ class ChartFactory(ModelFactory):
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
+    x_axis = factory.SubFactory(XAxisFactory)
+    y_axis = factory.SubFactory(YAxisFactory)
+    series = factory.List([factory.SubFactory(DataSeriesFactory)])

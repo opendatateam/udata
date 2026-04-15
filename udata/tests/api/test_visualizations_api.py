@@ -78,18 +78,19 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_create(self):
         """It should create a visualization"""
         user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
         response = self.post(
             url_for("api.visualizations"),
-            {
-                "title": "My Visualization",
-                "description": "A test visualization",
-            },
+            chart.to_dict(),
         )
+        print(response.text)
         assert response.status_code == 201
         assert Chart.objects.count() == 1
 
         visualization = Chart.objects.first()
-        assert visualization.title == "My Visualization"
+        assert visualization.title == chart.title
+        assert visualization.description == chart.description
         assert visualization.owner == user
 
     def test_visualization_api_create_for_org(self):
@@ -98,15 +99,13 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory()
         org.members.append(Member(user=user, role="admin"))
         org.save()
-
+        chart = ChartFactory.build(organization=org)
+        chart.organization = str(org.id)
         response = self.post(
             url_for("api.visualizations"),
-            {
-                "title": "Org Visualization",
-                "description": "A test visualization",
-                "organization": str(org.id),
-            },
+            chart.to_dict(),
         )
+        print(response.text)
         assert response.status_code == 201
 
         visualization = Chart.objects.first()

@@ -142,9 +142,9 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
         auditable=False,
     )
 
-    x_axis = field(EmbeddedDocumentField(XAxis))
+    x_axis = field(EmbeddedDocumentField(XAxis, required=True))
     y_axis = field(EmbeddedDocumentField(YAxis))
-    series = field(EmbeddedDocumentListField(DataSeries))
+    series = field(EmbeddedDocumentListField(DataSeries, required=True))
 
     @property
     @field(
