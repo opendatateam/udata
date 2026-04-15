@@ -33,6 +33,7 @@ from udata.core.dataset.rdf import (
     infer_dataset_access_rights,
     license_to_rdf,
     licenses_from_rdf,
+    provenances_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
     rights_to_rdf,
@@ -1699,3 +1700,54 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         assert len(rights) == 1
         assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
         assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+
+    def test_provenances_from_rdf(self):
+        """Test a bunch of cases of provenances detection from RDF"""
+        rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+            <rdf:RDF
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+            xmlns:foaf="http://xmlns.com/foaf/0.1/"
+            xmlns:dct="http://purl.org/dc/terms/"
+            xmlns:cc="http://creativecommons.org/ns#"
+            xmlns:ex="http://example.org/">
+
+            <rdf:Description rdf:about="http://example.org/dataset1">
+                <dct:title>Comprehensive Provenance Example Dataset</dct:title>
+                <!-- old DCAT* specs -->
+                <dct:provenance>
+                    <dct:ProvenanceStatement>
+                        <rdfs:label>Provenance from label</rdfs:label>
+                    </dct:ProvenanceStatement>
+                </dct:provenance>
+                <!-- new DCAT* specs -->
+                <dct:provenance>
+                    <dct:ProvenanceStatement>
+                        <dct:description>Provenance from description</dct:description>
+                    </dct:ProvenanceStatement>
+                </dct:provenance>
+                <!-- supported theoretical(?) cases -->
+                <dct:provenance>Provenance from value</dct:provenance>
+                <dct:provenance rdf:resource="http://example.org/provenance"/>
+            </rdf:Description>
+
+            <rdf:Description rdf:about="http://example.org/provenance">
+                <dct:description>Provenance from resource</dct:description>
+            </rdf:Description>
+
+            </rdf:RDF>
+        """
+        g = Graph()
+        g.parse(data=rdf_xml_data, format="xml")
+        ex = Namespace("http://example.org/")
+        dataset = RdfResource(g, ex.dataset1)
+        licences = provenances_from_rdf(dataset)
+        expected_licences = set(
+            [
+                "Provenance from label",
+                "Provenance from description",
+                "Provenance from value",
+                "Provenance from resource",
+            ]
+        )
+        assert expected_licences == licences

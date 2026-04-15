@@ -34,6 +34,7 @@ from udata.rdf import (
     GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
+    RDFS,
     SCHEMA,
     SCV,
     SKOS,
@@ -604,7 +605,7 @@ def frequency_from_rdf(term) -> UpdateFrequency | None:
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
+    mime = rdf_value(resource, DCAT.mediaType, unwrap=[RDFS.label])
     if not mime:
         return
     if IANAFORMAT in mime:
@@ -614,7 +615,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format, parse_label=True)
+    format = rdf_value(resource, DCT.format, unwrap=[RDFS.label])
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
@@ -651,7 +652,7 @@ def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_unique_values(resource, DCT.accessRights, parse_label=True)
+    return rdf_unique_values(resource, DCT.accessRights, unwrap=[RDFS.label, DCT.description])
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
@@ -660,7 +661,7 @@ def licenses_from_rdf(resource: RdfResource) -> set[str]:
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_unique_values(resource, DCT.license, parse_label=True)
+    return rdf_unique_values(resource, DCT.license, unwrap=[RDFS.label, DCT.description])
 
 
 def rights_from_rdf(resource: RdfResource) -> set[str]:
@@ -668,7 +669,7 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract rights from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_unique_values(resource, DCT.rights, parse_label=True)
+    return rdf_unique_values(resource, DCT.rights, unwrap=[RDFS.label, DCT.description])
 
 
 def provenances_from_rdf(resource: RdfResource) -> set[str]:
@@ -676,7 +677,7 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     Extract provenance from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_unique_values(resource, DCT.provenance, parse_label=True)
+    return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
 def infer_dataset_access_rights(

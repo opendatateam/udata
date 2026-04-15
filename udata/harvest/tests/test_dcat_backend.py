@@ -583,7 +583,9 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.extras["dcat"]["accessRights"] == [
             "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
         ]
-        assert dataset.extras["dcat"]["provenance"] == ["Description de la provenance des données"]
+        assert dataset.extras["dcat"]["provenance"] == [
+            "Description de la provenance des données du dataset 3"
+        ]
 
         assert "observation-de-la-terre-et-environnement" in dataset.tags
         assert "hvd" in dataset.tags
@@ -601,6 +603,9 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.frequency is None
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
+        assert dataset.extras["dcat"]["provenance"] == [
+            "Description de la provenance des données du dataset 1"
+        ]
 
         assert len(dataset.resources) == 4
 
