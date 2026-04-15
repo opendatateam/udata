@@ -376,7 +376,6 @@ def save_class_by_parents(cls):
         classes_by_parents[parent].add(cls)
 
 
-
 def _build_read_fields_for_version(cls, version) -> RestxModel:
     """Rebuild __read_fields__ for a specific API version using stored recipes."""
     from udata.api.versioning import ChangeAttribute, RemoveField, RenameField
