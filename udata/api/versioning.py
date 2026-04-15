@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from packaging.version import Version
-
 from flask import g, request
+from packaging.version import Version
 
 VERSION_HEADER = "X-API-Version"
 LATEST_API_VERSION = Version("16.3.0")
@@ -26,9 +25,7 @@ def get_request_version() -> Version:
         except Exception:
             from udata.api import api
 
-            api.abort(
-                400, f"Invalid {VERSION_HEADER} header. Expected a version like '16.3.0'."
-            )
+            api.abort(400, f"Invalid {VERSION_HEADER} header. Expected a version like '16.3.0'.")
 
     g._api_version = version
     return version

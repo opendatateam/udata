@@ -497,9 +497,7 @@ def _build_page_fields_for_version(cls, version, read_model: RestxModel) -> Rest
     elif page_mask_str is not None:
         page_mask = "data{{{0}}},*".format(page_mask_str)
 
-    model = RestxModel(
-        f"{cls.__name__}Page ({version})", custom_restx_fields.pager(read_model)
-    )
+    model = RestxModel(f"{cls.__name__}Page ({version})", custom_restx_fields.pager(read_model))
     model.__mask__ = page_mask
     return model
 
@@ -687,9 +685,7 @@ def generate_fields(**kwargs) -> Callable:
         if read_mask_exclude:
             read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
 
-        latest_read = api.model(
-            f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs
-        )
+        latest_read = api.model(f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 

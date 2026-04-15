@@ -6,6 +6,7 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata.api.versioning import VERSION_HEADER
 from udata.core.badges.factories import badge_factory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -15,7 +16,6 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
 from udata.tests.api import APITestCase, PytestOnlyAPITestCase
-from udata.api.versioning import VERSION_HEADER
 from udata.tests.helpers import (
     assert200,
     assert201,
