@@ -816,6 +816,21 @@ class ReuseReferencesAPITest(PytestOnlyAPITestCase):
         assert len(response.json) == len(REUSE_TOPICS)
 
 
+class APIVersionsEndpointTest(PytestOnlyAPITestCase):
+    def test_list_api_versions(self):
+        response = self.get(url_for("api.api_versions"))
+        assert200(response)
+        assert "latest" in response.json
+        assert "oldest" in response.json
+        assert "changes" in response.json
+        assert isinstance(response.json["changes"], list)
+        assert len(response.json["changes"]) > 0
+        change = response.json["changes"][0]
+        assert "version" in change
+        assert "model" in change
+        assert "description" in change
+
+
 class ReuseAPIVersioningTest(PytestOnlyAPITestCase):
     def test_reuse_datasets_href_with_latest_version(self):
         """With the latest API version, datasets should be an href object."""

@@ -271,13 +271,10 @@ def extract_name_from_path(path):
 @apiv1_blueprint.after_request
 @apiv2_blueprint.after_request
 def add_version_header(response):
-    from udata.api.versioning import VERSION_HEADER, get_request_version
+    from udata.api.versioning import VERSION_HEADER
 
-    try:
-        version = get_request_version()
-        response.headers[VERSION_HEADER] = str(version)
-    except Exception:
-        pass
+    if hasattr(g, "_api_version"):
+        response.headers[VERSION_HEADER] = str(g._api_version)
     return response
 
 
@@ -409,7 +406,7 @@ class APIVersionsAPI(API):
         return {
             "latest": str(LATEST_API_VERSION),
             "oldest": str(OLDEST_API_VERSION),
-            "changes": sorted(VERSION_CHANGES, key=lambda c: c["date"], reverse=True),
+            "changes": sorted(VERSION_CHANGES, key=lambda c: c["version"], reverse=True),
         }
 
 
