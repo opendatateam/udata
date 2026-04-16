@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField, StringField
@@ -92,7 +92,7 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
         details__source=source, details__status=VALIDATION_PENDING, handled_at=None
     )
     for notification in pending_notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
     for recipient in recipients:
@@ -124,7 +124,7 @@ def on_harvest_source_refused(source: HarvestSource, **kwargs):
         details__source=source, details__status=VALIDATION_PENDING, handled_at=None
     )
     for notification in pending_notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
     for recipient in recipients:

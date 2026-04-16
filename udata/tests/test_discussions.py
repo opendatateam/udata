@@ -195,7 +195,7 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion):
             response = self.patch(
                 url_for("api.report", report=report),
-                {"dismissed_at": datetime.utcnow().isoformat()},
+                {"dismissed_at": datetime.now(UTC).isoformat()},
             )
             self.assertStatus(response, 403)
             self.assertTrue(self.has_spam_report(discussion.reload()))
@@ -211,7 +211,7 @@ class DiscussionsTest(APITestCase):
         with assert_emit(on_new_discussion):
             response = self.patch(
                 url_for("api.report", report=report),
-                {"dismissed_at": datetime.utcnow().isoformat()},
+                {"dismissed_at": datetime.now(UTC).isoformat()},
             )
             self.assertStatus(response, 200)
             self.assertFalse(self.has_spam_report(discussion.reload()))
@@ -676,7 +676,7 @@ class DiscussionsTest(APITestCase):
         with assert_emit(on_new_discussion_comment):
             response = self.patch(
                 url_for("api.report", report=report),
-                {"dismissed_at": datetime.utcnow().isoformat()},
+                {"dismissed_at": datetime.now(UTC).isoformat()},
             )
             self.assertStatus(response, 200)
             discussion.reload()
@@ -1251,7 +1251,7 @@ class NotifyDiscussionsTest(APITestCase):
             notify_new_discussion_comment(discussion.id, message=1)
 
             # Properly close the discussion to ensure closed_by is set
-            discussion.closed = datetime.utcnow()
+            discussion.closed = datetime.now(UTC)
             discussion.closed_by = commenter
             discussion.save()
 

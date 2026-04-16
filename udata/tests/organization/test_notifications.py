@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
@@ -148,7 +150,6 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
 
     def test_full_membership_request_cycle_with_refusal_then_approval(self):
         """Test full cycle: request -> refused -> new request -> approved"""
-        from datetime import datetime
 
         applicant = UserFactory()
         admin = UserFactory()
@@ -171,7 +172,7 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
         first_request = org.requests[0]
         first_request.status = "refused"
         first_request.handled_by = admin
-        first_request.handled_on = datetime.utcnow()
+        first_request.handled_on = datetime.now(UTC)
         first_request.refusal_comment = "Not now"
         org.save()
         MembershipRequest.after_handle.send(first_request, org=org)
@@ -212,7 +213,7 @@ class MembershipResponseNotificationTest(PytestOnlyAPITestCase):
         second_request = org.pending_requests[0]
         second_request.status = "accepted"
         second_request.handled_by = admin
-        second_request.handled_on = datetime.utcnow()
+        second_request.handled_on = datetime.now(UTC)
         member = Member(user=applicant, role="editor")
         org.members.append(member)
         org.save()

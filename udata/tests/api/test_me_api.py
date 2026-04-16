@@ -442,7 +442,7 @@ class MeAPITest(APITestCase):
         # Simulate a naive datetime as MongoDB might return.
         # Without the timezone fix, this would raise:
         # TypeError: can't compare offset-naive and offset-aware datetimes
-        future_naive = datetime.utcnow() + timedelta(days=30)
+        future_naive = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30)
         token, plaintext = ApiToken.generate(user, expires_at=future_naive)
 
         result, error = ApiToken.authenticate(plaintext)
@@ -450,7 +450,7 @@ class MeAPITest(APITestCase):
         self.assertIsNone(error)
 
         # Also verify the expired naive case
-        past_naive = datetime.utcnow() - timedelta(hours=1)
+        past_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
         token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
 
         result2, error2 = ApiToken.authenticate(plaintext2)
