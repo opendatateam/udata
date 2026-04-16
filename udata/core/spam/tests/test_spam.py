@@ -124,6 +124,35 @@ class SpamTest(APITestCase):
         )
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_discussion_first_message_spam_rechecked_when_other_message_edited(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        first_message = Message(content="this is spam", posted_by=user)
+        second_message = Message(content="normal comment", posted_by=user)
+        discussion = Discussion(
+            subject=dataset,
+            user=user,
+            title="Normal title",
+            discussion=[first_message, second_message],
+        )
+        discussion.save()
+
+        self.assertTrue(self.has_spam_report(discussion))
+
+        report = Report.objects(subject=discussion, reason=REASON_AUTO_SPAM).first()
+        report.delete()
+
+        # Editing the second message should trigger re-check of
+        # discussion.0.content because both share the "discussion" root field.
+        # _get_changed_fields() returns "discussion.1.content" which must match
+        # field_name "discussion.0.content" via the root field "discussion".
+        discussion.reload()
+        discussion.discussion[1].content = "edited comment"
+        discussion.save()
+
+        self.assertTrue(self.has_spam_report(discussion))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_dataset_spam_in_title(self):
         dataset = DatasetFactory(title="This is spam content")
         self.assertTrue(self.has_spam_report(dataset))
@@ -151,6 +180,20 @@ class SpamTest(APITestCase):
 
         dataset.reload()
         dataset.description = "Updated description"
+        dataset.save()
+
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_unchanged_description_not_rechecked_when_description_short_changes(self):
+        dataset = DatasetFactory(title="Normal title", description="This contains spam word")
+        self.assertTrue(self.has_spam_report(dataset))
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        report.delete()
+
+        dataset.reload()
+        dataset.description_short = "Short summary"
         dataset.save()
 
         self.assertFalse(self.has_spam_report(dataset))
