@@ -697,6 +697,9 @@ class Dataset(
     def fields_to_check_for_spam(self):
         return {"title": self.title, "description": self.description}
 
+    def spam_is_whitelisted(self) -> bool:
+        return self.organization and self.organization.certified
+
     @cached_property
     def resources_len(self):
         # :ResourcesLengthProperty

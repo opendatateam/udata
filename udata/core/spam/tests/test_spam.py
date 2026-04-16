@@ -5,7 +5,9 @@ import pytest
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion, Message
+from udata.core.organization.constants import CERTIFIED
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
@@ -257,3 +259,34 @@ class SpamTest(APITestCase):
     def test_user_no_spam(self):
         user = UserFactory(about="Normal bio", website="https://example.com")
         self.assertFalse(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_dataset_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_non_certified_org_dataset_flagged(self):
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_reuse_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        reuse = ReuseFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_dataservice_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        dataservice = DataserviceFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_not_flagged(self):
+        org = OrganizationFactory(
+            name="Spam Organization", badges=[OrganizationBadge(kind=CERTIFIED)]
+        )
+        self.assertFalse(self.has_spam_report(org))

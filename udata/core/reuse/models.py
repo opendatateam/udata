@@ -226,6 +226,9 @@ class Reuse(
     def fields_to_check_for_spam(self):
         return {"title": self.title, "description": self.description}
 
+    def spam_is_whitelisted(self) -> bool:
+        return self.organization and self.organization.certified
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Emit before_save

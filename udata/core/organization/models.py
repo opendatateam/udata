@@ -322,6 +322,9 @@ class Organization(
     def fields_to_check_for_spam(self):
         return {"name": self.name, "description": self.description}
 
+    def spam_is_whitelisted(self) -> bool:
+        return self.certified
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
