@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -81,7 +83,6 @@ class SpamTest(APITestCase):
         When spam is in an embedded document (Message) and the report is dismissed,
         adding a new comment should NOT create a new report for the same embed.
         """
-        from datetime import datetime
 
         user = UserFactory()
         dataset = DatasetFactory()
@@ -169,7 +170,6 @@ class SpamTest(APITestCase):
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_dataset_spam_not_reflagged_after_dismiss(self):
-        from datetime import datetime
 
         dataset = DatasetFactory(title="This is spam content")
         self.assertTrue(self.has_spam_report(dataset))
