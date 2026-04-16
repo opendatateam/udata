@@ -42,6 +42,13 @@ from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
+from udata.api.versioning import (
+    LATEST_API_VERSION,
+    ChangeAttribute,
+    RemoveField,
+    RenameField,
+    get_request_version,
+)
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -403,8 +410,6 @@ def _compute_page_mask(read_fields, page_mask_exclude, page_mask_str) -> str | N
 
 def _build_read_fields_for_version(cls, version) -> RestxModel:
     """Rebuild __read_fields__ for a specific API version using stored recipes."""
-    from udata.api.versioning import ChangeAttribute, RemoveField, RenameField
-
     recipes = cls.__version_recipes__
     read_fields: dict = {}
 
@@ -473,8 +478,6 @@ def generate_fields(**kwargs) -> Callable:
     """
 
     def wrapper(cls) -> Callable:
-        from udata.api.versioning import RemoveField
-
         read_fields: dict = {}
         write_fields: dict = {}
         ref_fields: dict = {}
@@ -507,7 +510,9 @@ def generate_fields(**kwargs) -> Callable:
                     change.register(cls.__name__, key)
 
             # For the latest version, skip fields that have been removed
-            is_removed = any(isinstance(c, RemoveField) for c in before)
+            is_removed = any(
+                isinstance(c, RemoveField) and LATEST_API_VERSION >= c.version for c in before
+            )
 
             sortable_key: bool = info.get("sortable", False)
             if sortable_key:
@@ -670,34 +675,30 @@ def generate_fields(**kwargs) -> Callable:
             }
 
             # Attach version resolvers — UDataApi.marshal_with calls these at request time
-            read_cache: dict[str, RestxModel] = {}
-            page_cache: dict[str, RestxModel] = {}
+            def _make_version_resolver(latest_model, builder):
+                cache: dict[str, RestxModel] = {}
 
-            def resolve_read():
-                from udata.api.versioning import LATEST_API_VERSION, get_request_version
+                def resolver():
+                    version = get_request_version()
+                    if version >= LATEST_API_VERSION:
+                        return latest_model
+                    key = str(version)
+                    if key not in cache:
+                        cache[key] = builder(version)
+                    return cache[key]
 
-                version = get_request_version()
-                if version >= LATEST_API_VERSION:
-                    return latest_read
-                key = str(version)
-                if key not in read_cache:
-                    read_cache[key] = _build_read_fields_for_version(cls, version)
-                return read_cache[key]
+                return resolver
 
-            def resolve_page():
-                from udata.api.versioning import LATEST_API_VERSION, get_request_version
-
-                version = get_request_version()
-                if version >= LATEST_API_VERSION:
-                    return latest_page
-                key = str(version)
-                if key not in page_cache:
-                    read_model = _build_read_fields_for_version(cls, version)
-                    page_cache[key] = _build_page_fields_for_version(cls, version, read_model)
-                return page_cache[key]
-
-            latest_read._version_resolver = resolve_read
-            latest_page._version_resolver = resolve_page
+            latest_read._version_resolver = _make_version_resolver(
+                latest_read,
+                lambda v: _build_read_fields_for_version(cls, v),
+            )
+            latest_page._version_resolver = _make_version_resolver(
+                latest_page,
+                lambda v: _build_page_fields_for_version(
+                    cls, v, _build_read_fields_for_version(cls, v)
+                ),
+            )
 
         # Parser for index sort/filters
         paginable: bool = kwargs.get("paginable", True)

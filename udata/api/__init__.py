@@ -27,6 +27,7 @@ from udata.utils import safe_unicode
 
 from . import fields
 from .signals import on_api_call
+from .versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES, VERSION_HEADER
 
 log = logging.getLogger(__name__)
 
@@ -271,8 +272,6 @@ def extract_name_from_path(path):
 @apiv1_blueprint.after_request
 @apiv2_blueprint.after_request
 def add_version_header(response):
-    from udata.api.versioning import VERSION_HEADER
-
     if hasattr(g, "_api_version"):
         response.headers[VERSION_HEADER] = str(g._api_version)
     return response
@@ -401,8 +400,6 @@ class APIVersionsAPI(API):
     @api.doc("list_api_versions")
     def get(self):
         """List all API version changes"""
-        from udata.api.versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES
-
         return {
             "latest": str(LATEST_API_VERSION),
             "oldest": str(OLDEST_API_VERSION),

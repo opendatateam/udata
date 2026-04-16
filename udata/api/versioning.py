@@ -1,14 +1,24 @@
 from __future__ import annotations
 
+from typing import TypedDict
+
 from flask import g, request
-from packaging.version import Version
+from packaging.version import InvalidVersion, Version
 
 VERSION_HEADER = "X-API-Version"
 LATEST_API_VERSION = Version("16.3.0")
 OLDEST_API_VERSION = Version("1.0.0")
 
+
+class VersionChangeInfo(TypedDict):
+    version: str
+    model: str
+    field: str | None
+    description: str
+
+
 # Registry of all version changes, populated at import time via change classes
-VERSION_CHANGES: list[dict] = []
+VERSION_CHANGES: list[VersionChangeInfo] = []
 
 
 def get_request_version() -> Version:
@@ -22,7 +32,7 @@ def get_request_version() -> Version:
     else:
         try:
             version = Version(header)
-        except Exception:
+        except InvalidVersion:
             from udata.api import api
 
             api.abort(400, f"Invalid {VERSION_HEADER} header. Expected a version like '16.3.0'.")
