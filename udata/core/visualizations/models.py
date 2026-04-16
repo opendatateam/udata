@@ -6,8 +6,8 @@ from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
     EmbeddedDocumentListField,
-    GenericEmbeddedDocumentField,
     FloatField,
+    GenericEmbeddedDocumentField,
     StringField,
     UUIDField,
 )
