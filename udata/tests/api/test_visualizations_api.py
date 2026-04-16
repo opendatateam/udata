@@ -95,7 +95,8 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_create_filter(self):
         """It should create a visualization"""
         user = self.login()
-        chart = ChartFactory.build(owner=user, series__0__filters=FilterFactory())
+        filter = FilterFactory()
+        chart = ChartFactory.build(owner=user, series__0__filters=filter)
         chart.owner = str(user.id)
         response = self.post(
             url_for("api.visualizations"),
@@ -108,13 +109,13 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.title == chart.title
         assert visualization.description == chart.description
         assert visualization.owner == user
+        assert visualization.series[0].filters == filter
 
     def test_visualization_api_create_and_filter(self):
         """It should create a visualization"""
         user = self.login()
-        chart = ChartFactory.build(
-            owner=user, series__0__filters=AndFilters(filters=[FilterFactory(), FilterFactory()])
-        )
+        filters = AndFilters(filters=[FilterFactory(), FilterFactory()])
+        chart = ChartFactory.build(owner=user, series__0__filters=filters)
         chart.owner = str(user.id)
         response = self.post(
             url_for("api.visualizations"),
@@ -124,9 +125,12 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert Chart.objects.count() == 1
 
         visualization = Chart.objects.first()
+        print(visualization.series[0].filters)
+        print(filters)
         assert visualization.title == chart.title
         assert visualization.description == chart.description
         assert visualization.owner == user
+        assert visualization.series[0].filters == filters
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
