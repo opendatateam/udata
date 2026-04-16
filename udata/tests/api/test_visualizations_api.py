@@ -35,6 +35,15 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
 
+    def test_visualization_api_list_includes_own_private(self):
+        """It should list private visualizations owned by the authenticated user"""
+        user = self.login()
+        ChartFactory()
+        ChartFactory(owner=user, private=True)
+        response = self.get(url_for("api.visualizations"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+
     def test_visualization_api_get(self):
         """It should fetch a visualization from the API"""
         visualization = ChartFactory()
@@ -133,8 +142,6 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert Chart.objects.count() == 1
 
         visualization = Chart.objects.first()
-        print(visualization.series[0].filters)
-        print(filters)
         assert visualization.title == chart.title
         assert visualization.description == chart.description
         assert visualization.owner == user
@@ -157,6 +164,19 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         visualization = Chart.objects.first()
         assert visualization.organization == org
 
+    def test_visualization_api_create_assigns_current_user_as_owner(self):
+        """It should assign current user as owner when no owner or org is provided"""
+        user = self.login()
+        chart = ChartFactory.build()
+        data = chart.to_dict()
+        data.pop("owner", None)
+        data.pop("organization", None)
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+
+        visualization = Chart.objects.first()
+        assert visualization.owner == user
+
     def test_visualization_api_create_requires_auth(self):
         """It should require authentication to create"""
         response = self.post(
@@ -172,6 +192,19 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         """It should update a visualization"""
         user = self.login()
         visualization = ChartFactory(owner=user)
+
+        response = self.patch(
+            url_for("api.visualization", visualization=visualization),
+            {"title": "Updated Title"},
+        )
+        assert response.status_code == 200
+        assert response.json["title"] == "Updated Title"
+
+    def test_visualization_api_update_as_org_editor(self):
+        """It should allow an org editor to update an org-owned visualization"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        visualization = ChartFactory(organization=org)
 
         response = self.patch(
             url_for("api.visualization", visualization=visualization),
