@@ -6,6 +6,7 @@ from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
     EmbeddedDocumentListField,
+    GenericEmbeddedDocumentField,
     FloatField,
     StringField,
     UUIDField,
@@ -44,12 +45,7 @@ class ChartQuerySet(OwnedQuerySet):
 
 
 @generate_fields()
-class GenericFilter(EmbeddedDocument):
-    meta = {"allow_inheritance": True}
-
-
-@generate_fields()
-class Filter(GenericFilter):
+class Filter(EmbeddedDocument):
     column = field(StringField(required=True))
     condition = field(
         StringField(
@@ -70,8 +66,8 @@ class Filter(GenericFilter):
 
 
 @generate_fields()
-class AndFilters(GenericFilter):
-    filters = field(EmbeddedDocumentListField(GenericFilter))
+class AndFilters(EmbeddedDocument):
+    filters = field(EmbeddedDocumentListField(Filter))
 
 
 @generate_fields()
@@ -84,7 +80,11 @@ class DataSeries(EmbeddedDocument):
     # if the column x name in this resource does not match the one from XAxis
     column_x_name_override = field(StringField())
 
-    filters = field(EmbeddedDocumentField(GenericFilter, allow_null=True))
+    filters = field(
+        GenericEmbeddedDocumentField(choices=[AndFilters, Filter], allow_null=True),
+        generic=True,
+        generic_key="_cls"
+    )
 
     @property
     def resource(self):
