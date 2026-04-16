@@ -83,7 +83,7 @@ class DataSeries(EmbeddedDocument):
     filters = field(
         GenericEmbeddedDocumentField(choices=[AndFilters, Filter], allow_null=True),
         generic=True,
-        generic_key="_cls"
+        generic_key="_cls",
     )
 
     @property
