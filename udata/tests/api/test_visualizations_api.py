@@ -111,6 +111,14 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.owner == user
         assert visualization.series[0].filters == filter
 
+        # GET should serialize the filter fields, not return an empty dict
+        response = self.get(url_for("api.visualization", visualization=visualization))
+        assert response.status_code == 200
+        filters_data = response.json["series"][0]["filters"]
+        assert filters_data["column"] == filter.column
+        assert filters_data["condition"] == filter.condition
+        assert filters_data["value"] == filter.value
+
     def test_visualization_api_create_and_filter(self):
         """It should create a visualization"""
         user = self.login()
