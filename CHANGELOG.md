@@ -1,5 +1,11 @@
 # Changelog
 
+## 16.2.0 (2026-04-09)
+
+- feat: remove pages to only keep edito blocs ([#3706](https://github.com/opendatateam/udata/pull/3706))
+- fix: mask rename to page_mask ([#3718](https://github.com/opendatateam/udata/pull/3718))
+
+
 ## 16.1.0 (2026-04-08)
 
 - chore: add access_type filter on list api endpoints and rdf catalogs ([#3711](https://github.com/opendatateam/udata/pull/3711))

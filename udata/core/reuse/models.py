@@ -86,7 +86,7 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     nested_filters={"organization_badge": "organization.badges"},
-    mask="*,datasets{id,title,uri,page}",
+    page_mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(
     Datetimed,

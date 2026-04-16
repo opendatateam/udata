@@ -38,7 +38,8 @@
         </dct:temporal>
         <dct:provenance>
           <dct:ProvenanceStatement>
-            <rdfs:label xml:lang="fr">Description de la provenance des données</rdfs:label>
+            <!-- older DCAT* standards -->
+            <rdfs:label xml:lang="fr">Description de la provenance des données du dataset 3</rdfs:label>
           </dct:ProvenanceStatement>
         </dct:provenance>
       </dcat:Dataset>
@@ -73,6 +74,11 @@
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/2"/>
         <dcterms:hasPart rdf:resource="http://data.test.org/datasets/1/resources/3"/>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/4"/>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <dct:description xml:lang="fr">Description de la provenance des données du dataset 1</dct:description>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>

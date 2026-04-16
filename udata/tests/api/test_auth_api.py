@@ -678,8 +678,10 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        assert_status(response, 400)
-        assert response.json["error"] == "unsupported_response_type"
+        # Authlib 1.6.10+ redirects implicit grants to error instead of returning 400
+        assert_status(response, 302)
+        # Verify implicit grant is rejected with error parameter
+        assert "error=unsupported_response_type" in response.location
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, oauth):
