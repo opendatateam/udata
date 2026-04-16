@@ -376,6 +376,31 @@ def save_class_by_parents(cls):
         classes_by_parents[parent].add(cls)
 
 
+def _resolve_model_kwargs(recipes, version) -> dict:
+    """Apply model-level version changes and return effective kwargs."""
+    model_kwargs = dict(recipes["model_kwargs"])
+    for change in recipes.get("model_changes", []):
+        if version < change.version:
+            model_kwargs = change.apply(model_kwargs)
+    return model_kwargs
+
+
+def _compute_read_mask(read_fields, read_mask_exclude) -> str | None:
+    if read_mask_exclude:
+        return ",".join(k for k in read_fields if k not in read_mask_exclude)
+    return None
+
+
+def _compute_page_mask(read_fields, page_mask_exclude, page_mask_str) -> str | None:
+    if page_mask_exclude:
+        return "data{{{0}}},*".format(
+            ",".join(k for k in read_fields if k not in page_mask_exclude)
+        )
+    elif page_mask_str is not None:
+        return "data{{{0}}},*".format(page_mask_str)
+    return None
+
+
 def _build_read_fields_for_version(cls, version) -> RestxModel:
     """Rebuild __read_fields__ for a specific API version using stored recipes."""
     from udata.api.versioning import ChangeAttribute, RemoveField, RenameField
@@ -413,16 +438,8 @@ def _build_read_fields_for_version(cls, version) -> RestxModel:
     for method_name, read_field in recipes["method_fields"].items():
         read_fields[method_name] = read_field
 
-    # Compute mask for this version
-    model_kwargs = dict(recipes["model_kwargs"])
-    for change in recipes.get("model_changes", []):
-        if version < change.version:
-            model_kwargs = change.apply(model_kwargs)
-
-    read_mask_exclude = model_kwargs.get("read_mask_exclude")
-    read_mask = None
-    if read_mask_exclude:
-        read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
+    model_kwargs = _resolve_model_kwargs(recipes, version)
+    read_mask = _compute_read_mask(read_fields, model_kwargs.get("read_mask_exclude"))
 
     model = RestxModel(f"{cls.__name__} (read, {version})", read_fields)
     model.__mask__ = read_mask
@@ -432,21 +449,10 @@ def _build_read_fields_for_version(cls, version) -> RestxModel:
 def _build_page_fields_for_version(cls, version, read_model: RestxModel) -> RestxModel:
     """Rebuild __page_fields__ for a specific API version."""
     recipes = cls.__version_recipes__
-
-    model_kwargs = dict(recipes["model_kwargs"])
-    for change in recipes.get("model_changes", []):
-        if version < change.version:
-            model_kwargs = change.apply(model_kwargs)
-
-    page_mask_exclude = model_kwargs.get("page_mask_exclude")
-    page_mask_str = model_kwargs.get("page_mask")
-    page_mask = None
-    if page_mask_exclude:
-        page_mask = "data{{{0}}},*".format(
-            ",".join(k for k in read_model if k not in page_mask_exclude)
-        )
-    elif page_mask_str is not None:
-        page_mask = "data{{{0}}},*".format(page_mask_str)
+    model_kwargs = _resolve_model_kwargs(recipes, version)
+    page_mask = _compute_page_mask(
+        read_model, model_kwargs.get("page_mask_exclude"), model_kwargs.get("page_mask")
+    )
 
     model = RestxModel(f"{cls.__name__}Page ({version})", custom_restx_fields.pager(read_model))
     model.__mask__ = page_mask
@@ -632,21 +638,13 @@ def generate_fields(**kwargs) -> Callable:
         page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
         page_mask: str | None = kwargs.pop("page_mask", None)
 
-        read_mask = None
-        if read_mask_exclude:
-            read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
+        read_mask = _compute_read_mask(read_fields, read_mask_exclude)
 
         latest_read = api.model(f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        computed_page_mask = None
-        if page_mask_exclude:
-            computed_page_mask = "data{{{0}}},*".format(
-                ",".join(k for k in read_fields if k not in page_mask_exclude)
-            )
-        elif page_mask is not None:
-            computed_page_mask = "data{{{0}}},*".format(page_mask)
+        computed_page_mask = _compute_page_mask(read_fields, page_mask_exclude, page_mask)
         latest_page = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(latest_read),
@@ -825,7 +823,7 @@ class _FieldKwargs(TypedDict, total=False):
     generic_key: str | None
     convert_to: Callable | None
     allow_null: bool | None
-    before: dict[str, dict] | None
+    before: list | None
 
 
 @overload
@@ -878,7 +876,7 @@ def field(
     generic_key: str | None = None,
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
-    before: dict[str, dict] | None = None,
+    before: list | None = None,
     **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.
