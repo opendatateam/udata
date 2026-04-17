@@ -1,5 +1,7 @@
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
+from udata.core.organization.models import Organization
+from udata.core.user.models import _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
 
@@ -30,8 +32,6 @@ user_ref_fields = api.inherit(
     },
 )
 
-from udata.core.organization.api_fields import member_email_with_visibility_check, org_ref_fields  # noqa
-
 user_fields = api.model(
     "User",
     {
@@ -56,7 +56,8 @@ user_fields = api.model(
         "roles": fields.List(fields.String, description="Site wide user roles"),
         "active": fields.Boolean(),
         "organizations": fields.List(
-            fields.Nested(org_ref_fields), description="The organization the user belongs to"
+            fields.Nested(Organization.__ref_fields__),
+            description="The organization the user belongs to",
         ),
         "since": fields.ISODateTime(
             attribute="created_at", description="The registeration date", required=True
@@ -82,14 +83,6 @@ user_fields = api.model(
     },
 )
 
-me_fields = api.inherit(
-    "Me",
-    user_fields,
-    {
-        "apikey": fields.String(description="The user API Key", readonly=True),
-    },
-)
-
 me_metrics_fields = api.model(
     "MyMetrics",
     {
@@ -108,13 +101,6 @@ me_metrics_fields = api.model(
     },
 )
 
-apikey_fields = api.model(
-    "ApiKey",
-    {
-        "apikey": fields.String(description="The user API Key", readonly=True),
-    },
-)
-
 user_page_fields = api.model("UserPage", fields.pager(user_fields))
 
 user_suggestion_fields = api.model(
@@ -124,10 +110,13 @@ user_suggestion_fields = api.model(
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user last name", readonly=True),
         "avatar_url": fields.ImageField(
-            size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
+            attribute="avatar",
+            size=BIGGEST_AVATAR_SIZE,
+            description="The user avatar URL",
+            readonly=True,
         ),
         "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o["email"]),
+            attribute=lambda o: _visible_email(o),
             description="The user email (only the domain for non-admin user)",
             readonly=True,
         ),

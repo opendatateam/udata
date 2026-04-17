@@ -1,9 +1,9 @@
 from udata.api import api, base_reference, fields
 from udata.core.access_type.models import AccessAudience
-from udata.core.badges.fields import badge_fields
-from udata.core.contact_point.api_fields import contact_point_fields
-from udata.core.organization.api_fields import org_ref_fields
+from udata.core.badges.models import Badge
+from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
+from udata.core.organization.models import Organization
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 
@@ -237,7 +237,7 @@ community_resource_fields = api.inherit(
             dataset_ref_fields, allow_null=True, description="Reference to the associated dataset"
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="The producer organization"
+            Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
@@ -353,7 +353,7 @@ dataset_fields = api.model(
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
-            fields.Nested(badge_fields), description="The dataset badges", readonly=True
+            fields.Nested(Badge.__read_fields__), description="The dataset badges", readonly=True
         ),
         "resources": fields.List(
             fields.Nested(resource_fields, description="The dataset resources")
@@ -386,7 +386,7 @@ dataset_fields = api.model(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="The producer organization"
+            Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
@@ -428,7 +428,7 @@ dataset_fields = api.model(
             description="Site internal and specific object's data",
         ),
         "contact_points": fields.List(
-            fields.Nested(contact_point_fields, description="The dataset contact points"),
+            fields.Nested(ContactPoint.__read_fields__, description="The dataset contact points"),
         ),
         "permissions": fields.Nested(dataset_permissions_fields),
     },

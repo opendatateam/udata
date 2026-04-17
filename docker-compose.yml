@@ -7,6 +7,10 @@ services:
           - "27017"
         ports:
         - "27017:27017"
+        ulimits:
+          nofile:
+            soft: 4096
+            hard: 4096
 
     broker:
         image: redis
@@ -17,6 +21,27 @@ services:
         ports:
           - "6379:6379"
 
+    search:
+        image: elasticsearch:7.17.28
+        environment:
+          - node.name=es01
+          - cluster.name=es-docker-cluster
+          - cluster.initial_master_nodes=es01
+          - ES_JAVA_OPTS=-Xms750m -Xmx750m
+        volumes:
+          - es-data:/usr/share/elasticsearch/data
+        expose:
+          - "9200"
+        ports:
+          - "9200:9200"
+        command: >
+          bash -c "
+            if ! elasticsearch-plugin list | grep -q analysis-icu; then
+              elasticsearch-plugin install --batch analysis-icu
+            fi &&
+            /usr/local/bin/docker-entrypoint.sh eswrapper
+          "
+
     mailpit:
         image: axllent/mailpit
         ports:
@@ -25,3 +50,6 @@ services:
         environment:
             MP_SMTP_AUTH_ACCEPT_ANY: 1
             MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+    es-data:

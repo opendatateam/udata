@@ -1,25 +1,49 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
-from flask import url_for
+from flask import current_app, url_for
 from flask_babel import LazyString
+from flask_storage.mongo import ImageField
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    GenericEmbeddedDocumentField,
+    GenericReferenceField,
+    ListField,
+    MapField,
+    ReferenceField,
+    StringField,
+)
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field, generate_fields
+from udata.api import api
+from udata.api import fields as api_fields
+from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
+from udata.core.user.models import User
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.datetime_fields import Datetimed
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
+from udata.mongo.extras_fields import OrganizationExtrasField
+from udata.mongo.queryset import UDataQuerySet
+from udata.mongo.slug_fields import SlugField
+from udata.mongo.url_field import URLField
+from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import cdata_url
 
 from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
@@ -32,9 +56,33 @@ from .constants import (
     ORG_BID_SIZE_LIMIT,
     ORG_ROLES,
     PUBLIC_SERVICE,
+    REQUEST_TYPES,
 )
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
+
+
+def check_siret(value, field, **_kwargs):
+    if not value:
+        return
+    if current_app.config.get("ORG_BID_FORMAT") != "siret":
+        return
+    siret_number = str(value)
+    if len(siret_number) != 14:
+        raise FieldValidationError(_("A siret number is made of 14 digits"), field=field)
+    # Exception for the french postal service.
+    if siret_number == "35600000000048":
+        return
+    try:
+        chiffres = [int(chiffre) for chiffre in siret_number[:9]]
+        chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
+        chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
+        total = sum(chiffres)
+    except ValueError:
+        raise FieldValidationError(_("A siret number is only made of digits"), field=field)
+    if total % 10 != 0:
+        raise FieldValidationError(_("Invalid Siret number"), field=field)
+
 
 BADGES: dict[str, LazyString] = {
     PUBLIC_SERVICE: _("Public Service"),
@@ -46,44 +94,65 @@ BADGES: dict[str, LazyString] = {
 
 
 @generate_fields()
-class Team(db.EmbeddedDocument):
-    name = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, unique=False
-    )
-    description = db.StringField()
+class Team(EmbeddedDocument):
+    name = StringField(required=True)
+    slug = SlugField(max_length=255, required=True, populate_from="name", update=True, unique=False)
+    description = StringField()
 
-    members = db.ListField(db.ReferenceField("User"))
+    members = ListField(ReferenceField(User))
 
 
 @generate_fields()
-class Member(db.EmbeddedDocument):
-    user = db.ReferenceField("User")
-    role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = db.DateTimeField(default=datetime.utcnow, required=True)
+class Member(EmbeddedDocument):
+    user = field(ReferenceField(User), readonly=True)
+    role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
+    since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
     @property
+    @field(readonly=True)
     def label(self):
         return ORG_ROLES[self.role]
 
 
 @generate_fields()
-class MembershipRequest(db.EmbeddedDocument):
+class MembershipRequest(EmbeddedDocument):
     """
-    Pending organization membership requests
+    Pending organization membership requests or invitations.
+
+    For requests (user asks to join):
+        - kind = "request"
+        - user = the requesting user
+        - created_by = None
+
+    For invitations (org invites user):
+        - kind = "invitation"
+        - user = the invited user (or None if email invitation)
+        - email = email for non-registered users
+        - created_by = admin who created the invitation
     """
 
-    id = db.AutoUUIDField()
-    user = db.ReferenceField("User")
-    status = db.StringField(choices=list(MEMBERSHIP_STATUS), default="pending")
+    id = field(AutoUUIDField(), readonly=True)
+    user = field(ReferenceField(User), allow_null=True, readonly=True)
+    status = field(StringField(choices=list(MEMBERSHIP_STATUS), default="pending"), readonly=True)
 
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
+    created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
-    handled_on = db.DateTimeField()
-    handled_by = db.ReferenceField("User")
+    handled_on = field(DateTimeField(), readonly=True)
+    handled_by = field(ReferenceField(User), allow_null=True, readonly=True)
 
-    comment = db.StringField()
-    refusal_comment = db.StringField()
+    comment = field(StringField(), checks=[required_if(kind="request")])
+    refusal_comment = field(StringField(), readonly=True)
+
+    kind = field(
+        StringField(choices=list(REQUEST_TYPES), default="request"),
+        readonly=True,
+    )
+    email = field(StringField(), readonly=True)
+    created_by = field(ReferenceField(User), allow_null=True, readonly=True)
+    role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE), readonly=True)
+    # Not wrapped with field() because GenericReferenceField choices (Dataset, Dataservice, Reuse)
+    # are not yet registered at import time. Serialized via manual request_fields in api_fields.py.
+    assignments = ListField(GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES))
 
     after_create = Signal()
     after_handle = Signal()
@@ -93,7 +162,7 @@ class MembershipRequest(db.EmbeddedDocument):
         return MEMBERSHIP_STATUS[self.status]
 
 
-class OrganizationQuerySet(db.BaseQuerySet):
+class OrganizationQuerySet(UDataQuerySet):
     def visible(self):
         return self(deleted=None)
 
@@ -107,13 +176,17 @@ class OrganizationQuerySet(db.BaseQuerySet):
         return self(badges__kind=kind)
 
 
+# Uses __badges__ (not available_badges) so that existing badges in DB
+# remain valid even if they are hidden via settings.
+# Uses a standalone function (not a model method) because OrganizationBadge is
+# defined before Organization in the file — Organization is resolved lazily at call time.
 def validate_badge(value):
     if value not in Organization.__badges__.keys():
-        raise db.ValidationError("Unknown badge type")
+        raise ValidationError("Unknown badge type")
 
 
 class OrganizationBadge(Badge):
-    kind = db.StringField(required=True, validation=validate_badge)
+    kind = StringField(required=True, validation=validate_badge)
 
 
 class OrganizationBadgeMixin(BadgeMixin):
@@ -123,25 +196,43 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
+org_permissions_fields = api.model(
+    "OrganizationPermissions",
+    {
+        "edit": api_fields.Permission(),
+        "delete": api_fields.Permission(),
+        "members": api_fields.Permission(),
+        "harvest": api_fields.Permission(),
+        "private": api_fields.Permission(),
+    },
+)
+
+
 @generate_fields()
 class Organization(
-    Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
+    Auditable,
+    WithMetrics,
+    OrganizationBadgeMixin,
+    Linkable,
+    Datetimed,
+    Document[OrganizationQuerySet],
 ):
-    name = field(db.StringField(required=True), show_as_ref=True)
-    acronym = field(db.StringField(max_length=128), show_as_ref=True)
+    name = field(StringField(required=True), show_as_ref=True)
+    acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
         show_as_ref=True,
+        readonly=True,
     )
     description = field(
-        db.StringField(required=True),
+        StringField(required=True),
         markdown=True,
     )
-    url = field(db.URLField())
-    image_url = field(db.StringField())
+    url = field(URLField())
+    image_url = field(StringField())
     logo = field(
-        db.ImageField(
+        ImageField(
             fs=avatars,
             basename=default_image_basename,
             max_size=LOGO_MAX_SIZE,
@@ -152,17 +243,17 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
+    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret])
 
-    members = field(db.ListField(db.EmbeddedDocumentField(Member)))
-    teams = field(db.ListField(db.EmbeddedDocumentField(Team)))
-    requests = field(db.ListField(db.EmbeddedDocumentField(MembershipRequest)))
+    members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
+    teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
+    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
 
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
-    zone = field(db.StringField())
-    extras = field(db.OrganizationExtrasField(), auditable=False)
+    ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
+    zone = field(StringField(), readonly=True)
+    extras = field(OrganizationExtrasField(), auditable=False)
 
-    deleted = field(db.DateTimeField())
+    deleted = field(DateTimeField(), readonly=True)
 
     meta = {
         "indexes": [
@@ -184,6 +275,19 @@ class Organization(
 
     def __str__(self):
         return self.name or ""
+
+    @property
+    @field(nested_fields=org_permissions_fields, show_as_ref=True)
+    def permissions(self):
+        from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+
+        return {
+            "edit": EditOrganizationPermission(self),
+            "delete": EditOrganizationPermission(self),
+            "members": EditOrganizationPermission(self),
+            "harvest": EditOrganizationPermission(self),
+            "private": OrganizationPrivatePermission(self),
+        }
 
     __metrics_keys__ = [
         "dataservices",
@@ -273,7 +377,11 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if request.user == user and request.status == "pending":
+            if (
+                request.user == user
+                and request.status == "pending"
+                and request.kind != "invitation"
+            ):
                 return request
         return None
 
@@ -336,6 +444,79 @@ class Organization(
         self.requests.append(membership_request)
         self.save()
         MembershipRequest.after_create.send(membership_request, org=self)
+
+    def create_invitation(
+        self,
+        invited_by,
+        user=None,
+        email=None,
+        role=DEFAULT_ROLE,
+        comment=None,
+        assignment_subjects=None,
+    ):
+        """Create a membership invitation after validating constraints.
+
+        Either user or email must be provided, not both.
+        Raises FieldValidationError on validation failure.
+        """
+        if user and email:
+            raise FieldValidationError(field="user", message="Cannot provide both user and email")
+        if not user and not email:
+            raise FieldValidationError(field="user", message="Either user or email is required")
+
+        if email:
+            from udata.core.contact_point.models import check_is_email
+
+            check_is_email(email, field="email")
+
+        if role not in ORG_ROLES:
+            raise FieldValidationError(field="role", message=f"Invalid role '{role}'")
+
+        # Resolve email to existing user
+        if email and not user:
+            from udata.core.user.models import User
+
+            user = User.objects(email=email.lower()).first()
+            if user:
+                email = None
+
+        # Check duplicates
+        email_lower = email.lower() if email else None
+        for member in self.members:
+            if user and member.user == user:
+                raise FieldValidationError(field="user", message="User is already a member")
+        for req in self.requests:
+            if req.status != "pending":
+                continue
+            if user and req.user == user:
+                raise FieldValidationError(
+                    field="user", message="A request or invitation is already pending for this user"
+                )
+            if email_lower and req.email and req.email.lower() == email_lower:
+                raise FieldValidationError(
+                    field="email", message="An invitation is already pending for this email"
+                )
+
+        # Validate assignments
+        if assignment_subjects and role != "partial_editor":
+            raise FieldValidationError(
+                field="assignments",
+                message="Assignments can only be set for partial_editor role",
+            )
+
+        invitation = MembershipRequest(
+            kind="invitation",
+            user=user,
+            email=email_lower,
+            created_by=invited_by,
+            role=role,
+            comment=comment,
+            assignments=assignment_subjects or [],
+        )
+        self.requests.append(invitation)
+        self.save()
+        MembershipRequest.after_create.send(invitation, org=self)
+        return invitation
 
     def count_members(self):
         self.metrics["members"] = len(self.members)

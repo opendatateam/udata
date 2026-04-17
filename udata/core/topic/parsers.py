@@ -1,11 +1,13 @@
 from bson.objectid import ObjectId
+from flask import abort
 from flask_restx.inputs import boolean
+from flask_security import current_user
+from mongoengine import Q
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
-from udata.mongo.engine import db
 
 
 class TopicElementsParser(ModelApiParser):
@@ -54,10 +56,14 @@ class TopicApiParser(ModelApiParser):
         "last_modified": "last_modified",
     }
 
-    def __init__(self, with_include_private=True):
+    def __init__(self):
         super().__init__()
-        if with_include_private:
-            self.parser.add_argument("include_private", type=bool, location="args")
+        self.parser.add_argument(
+            "private",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on private topics only. If set to false, it will exclude private topics. User must be authenticated and results are limited to user visibility",
+        )
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
@@ -75,7 +81,7 @@ class TopicApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
 
             # Search topics by their own content
-            topic_text_filter = db.Q(__raw__={"$text": {"$search": phrase_query}})
+            topic_text_filter = Q(__raw__={"$text": {"$search": phrase_query}})
 
             # Find topics that have elements matching the search
             matching_elements = TopicElement.objects.search_text(phrase_query)
@@ -83,14 +89,16 @@ class TopicApiParser(ModelApiParser):
 
             # Combine with OR
             if element_topic_ids:
-                element_filter = db.Q(id__in=element_topic_ids)
+                element_filter = Q(id__in=element_topic_ids)
                 topics = topics.filter(topic_text_filter | element_filter)
             else:
                 topics = topics.filter(topic_text_filter)
         if args.get("tag"):
             topics = topics.filter(tags__all=args["tag"])
-        if not args.get("include_private"):
-            topics = topics.filter(private=False)
+        if args.get("private") is not None:
+            if args["private"] and current_user.is_anonymous:
+                abort(401)
+            topics = topics.filter(private=args["private"])
         if args.get("geozone"):
             topics = topics.filter(spatial__zones=args["geozone"])
         if args.get("granularity"):

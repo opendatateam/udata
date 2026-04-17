@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from flask import url_for
@@ -9,7 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
-from udata.core.discussions.notifications import discussions_notifications
+from udata.core.discussions.notifications import DiscussionStatus
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -23,19 +23,33 @@ from udata.core.discussions.tasks import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
+from udata.core.reports.constants import REASON_AUTO_SPAM
+from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.features.notifications.models import Notification
 from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from .api import APITestCase, DBTestCase
+from .api import APITestCase
 from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
+    def get_spam_report(self, subject, subject_embed_id=None):
+        return Report.objects(
+            subject=subject,
+            reason=REASON_AUTO_SPAM,
+            dismissed_at=None,
+            subject_embed_id=subject_embed_id,
+        ).first()
+
+    def has_spam_report(self, subject, subject_embed_id=None):
+        return self.get_spam_report(subject, subject_embed_id) is not None
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_new_discussion(self):
         user = self.login()
@@ -69,13 +83,13 @@ class DiscussionsTest(APITestCase):
         self.assertIsNone(discussion.closed)
         self.assertIsNone(discussion.closed_by)
         self.assertEqual(discussion.title, "test title")
-        self.assertFalse(discussion.is_spam())
+        self.assertFalse(self.has_spam_report(discussion))
 
         message = discussion.discussion[0]
         self.assertEqual(message.content, "bla bla")
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
-        self.assertFalse(message.is_spam())
+        self.assertFalse(self.has_spam_report(discussion, message.id))
 
     def test_new_discussion_on_behalf_of_org(self):
         user = self.login()
@@ -168,38 +182,46 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(len(discussions), 1)
 
         discussion = discussions[0]
-        self.assertTrue(discussion.is_spam())
-        self.assertFalse(discussion.discussion[0].is_spam())
-        self.assertTrue("signal_new" in discussion.spam.callbacks)
+        self.assertTrue(self.has_spam_report(discussion))
+        self.assertFalse(self.has_spam_report(discussion, discussion.discussion[0].id))
 
+        # Check that the Report was created with callbacks
+        report = self.get_spam_report(discussion)
+        self.assertIsNotNone(report)
+        self.assertEqual(report.reason, REASON_AUTO_SPAM)
+        self.assertTrue("signal_new" in report.callbacks)
+
+        # Non-admin cannot dismiss the report
         with assert_not_emit(on_new_discussion):
-            response = self.delete(url_for("api.discussion_spam", id=discussion.id))
+            response = self.patch(
+                url_for("api.report", report=report),
+                {"dismissed_at": datetime.now(UTC).isoformat()},
+            )
             self.assertStatus(response, 403)
-            self.assertTrue(discussion.reload().is_spam())
+            self.assertTrue(self.has_spam_report(discussion.reload()))
 
+        # Admin can list auto-spam reports
         self.login(AdminFactory())
-        response = self.get(url_for("api.spam"))
+        response = self.get(url_for("api.reports", reason=REASON_AUTO_SPAM, handled=False))
         self.assertStatus(response, 200)
-        self.assertEqual(
-            response.json,
-            [
-                {
-                    "message": discussion.spam_report_message([discussion]),
-                }
-            ],
-        )
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["id"], str(report.id))
 
+        # Admin can dismiss the report (mark as not spam) which executes callbacks
         with assert_emit(on_new_discussion):
-            response = self.delete(url_for("api.discussion_spam", id=discussion.id))
+            response = self.patch(
+                url_for("api.report", report=report),
+                {"dismissed_at": datetime.now(UTC).isoformat()},
+            )
             self.assertStatus(response, 200)
-            self.assertFalse(discussion.reload().is_spam())
+            self.assertFalse(self.has_spam_report(discussion.reload()))
 
         # Adding a new comment / modifying the not spam discussion
         response = self.post(
             url_for("api.discussion", id=discussion.id), {"comment": "A new normal comment"}
         )
         self.assertStatus(response, 200)
-        self.assertFalse(discussion.reload().is_spam())
+        self.assertFalse(self.has_spam_report(discussion.reload()))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_spam_by_owner(self):
@@ -251,8 +273,10 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(len(discussions), 1)
 
         discussion = discussions[0]
-        self.assertTrue(discussion.is_spam())
-        self.assertFalse(discussion.discussion[0].is_spam())
+        # Spam is on the discussion (first comment content is checked at discussion level)
+        self.assertTrue(self.has_spam_report(discussion))
+        # The message itself doesn't have its own spam report
+        self.assertFalse(self.has_spam_report(discussion, discussion.discussion[0].id))
 
     def test_new_discussion_missing_comment(self):
         self.login()
@@ -348,7 +372,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title="test discussion {}".format(i),
                 discussion=[message],
-                closed=datetime.utcnow(),
+                closed=datetime.now(UTC),
                 closed_by=user,
             )
             closed_discussions.append(discussion)
@@ -380,7 +404,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title="test discussion {}".format(i),
                 discussion=[message],
-                closed=datetime.utcnow(),
+                closed=datetime.now(UTC),
                 closed_by=user,
             )
             closed_discussions.append(discussion)
@@ -605,7 +629,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data["discussion"][1]["content"], "new bla bla")
         self.assertEqual(data["discussion"][1]["posted_by"]["id"], str(poster.id))
         self.assertIsNotNone(data["discussion"][1]["posted_on"])
-        self.assertFalse(discussion.discussion[1].is_spam())
+        discussion.reload()
+        self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_spam_comment_to_discussion(self):
@@ -630,26 +655,32 @@ class DiscussionsTest(APITestCase):
                 self.assert200(response)
 
         discussion.reload()
-        self.assertFalse(discussion.is_spam())
-        self.assertTrue(discussion.discussion[1].is_spam())
-        self.assertTrue("signal_comment" in discussion.discussion[1].spam.callbacks)
+        spam_message = discussion.discussion[1]
+        self.assertFalse(self.has_spam_report(discussion))
+        self.assertTrue(self.has_spam_report(discussion, spam_message.id))
 
+        # Check that the Report was created with callbacks on the message
+        report = self.get_spam_report(discussion, spam_message.id)
+        self.assertIsNotNone(report)
+        self.assertEqual(report.reason, REASON_AUTO_SPAM)
+        self.assertEqual(report.subject_embed_id, spam_message.id)
+        self.assertTrue("signal_comment" in report.callbacks)
+
+        # Admin can list auto-spam reports
         self.login(AdminFactory())
-        response = self.get(url_for("api.spam"))
+        response = self.get(url_for("api.reports", reason=REASON_AUTO_SPAM, handled=False))
         self.assertStatus(response, 200)
-        self.assertEqual(
-            response.json,
-            [
-                {
-                    "message": discussion.spam_report_message([discussion]),
-                }
-            ],
-        )
+        self.assertEqual(response.json["total"], 1)
 
+        # Admin can dismiss the report (mark as not spam) which executes callbacks
         with assert_emit(on_new_discussion_comment):
-            response = self.delete(url_for("api.discussion_comment_spam", id=discussion.id, cidx=1))
+            response = self.patch(
+                url_for("api.report", report=report),
+                {"dismissed_at": datetime.now(UTC).isoformat()},
+            )
             self.assertStatus(response, 200)
-            self.assertFalse(discussion.reload().discussion[1].is_spam())
+            discussion.reload()
+            self.assertFalse(self.has_spam_report(discussion, spam_message.id))
 
         response = self.post(
             url_for("api.discussion", id=discussion.id), {"comment": "New comment"}
@@ -657,7 +688,8 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         # The spam comment marked as no spam is still a no spam
-        self.assertFalse(discussion.reload().discussion[1].is_spam())
+        discussion.reload()
+        self.assertFalse(self.has_spam_report(discussion, spam_message.id))
 
     def test_close_discussion(self):
         owner = self.login()
@@ -955,6 +987,42 @@ class DiscussionsTest(APITestCase):
         )
         self.assertStatus(response, 403)
 
+    def test_edit_discussion_comment_by_uuid(self):
+        admin = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=admin)
+        message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
+        )
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message.id)),
+            {"comment": "edited by uuid"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        self.assertEqual(discussion.discussion[0].content, "edited by uuid")
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message2.id)),
+            {"comment": "second edited by uuid"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        self.assertEqual(discussion.discussion[1].content, "second edited by uuid")
+
+        response = self.put(
+            url_for(
+                "api.discussion_comment",
+                id=discussion.id,
+                cidx="00000000-0000-0000-0000-000000000000",
+            ),
+            {"comment": "unknown uuid"},
+        )
+        self.assertStatus(response, 404)
+
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
         user = UserFactory()
@@ -984,6 +1052,42 @@ class DiscussionsTest(APITestCase):
         # delete again to test last comment deletion
         response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=0))
         self.assertStatus(response, 400)
+
+    def test_delete_discussion_comment_by_uuid(self):
+        owner = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=owner)
+        message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        # delete first comment by UUID should fail
+        response = self.delete(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message.id))
+        )
+        self.assertStatus(response, 400)
+
+        # delete second comment by UUID
+        response = self.delete(
+            url_for("api.discussion_comment", id=discussion.id, cidx=str(message2.id))
+        )
+        self.assertStatus(response, 204)
+        discussion.reload()
+        self.assertEqual(len(discussion.discussion), 1)
+        self.assertEqual(discussion.discussion[0].content, "bla bla")
+
+        # delete with unknown UUID
+        response = self.delete(
+            url_for(
+                "api.discussion_comment",
+                id=discussion.id,
+                cidx="00000000-0000-0000-0000-000000000000",
+            )
+        )
+        self.assertStatus(response, 404)
 
     def test_delete_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
@@ -1015,79 +1119,7 @@ class DiscussionsTest(APITestCase):
         self.assert403(response)
 
 
-class DiscussionsNotificationsTest(DBTestCase):
-    def test_notify_user_discussions(self):
-        owner = UserFactory()
-        dataset = DatasetFactory(owner=owner)
-
-        open_discussions = {}
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            discussion = Discussion.objects.create(
-                subject=dataset, user=user, title=faker.sentence(), discussion=[message]
-            )
-            open_discussions[discussion.id] = discussion
-        # Creating a closed discussion that shouldn't show up in response.
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset,
-            user=user,
-            title=faker.sentence(),
-            discussion=[message],
-            closed=datetime.utcnow(),
-            closed_by=user,
-        )
-
-        notifications = discussions_notifications(owner)
-
-        self.assertEqual(len(notifications), len(open_discussions))
-
-        for dt, details in notifications:
-            discussion = open_discussions[details["id"]]
-            self.assertEqual(details["title"], discussion.title)
-            self.assertEqual(details["subject"]["id"], discussion.subject.id)
-            self.assertEqual(details["subject"]["type"], "dataset")
-
-    def test_notify_org_discussions(self):
-        recipient = UserFactory()
-        member = Member(user=recipient, role="editor")
-        org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(organization=org)
-
-        open_discussions = {}
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            discussion = Discussion.objects.create(
-                subject=dataset, user=user, title=faker.sentence(), discussion=[message]
-            )
-            open_discussions[discussion.id] = discussion
-        # Creating a closed discussion that shouldn't show up in response.
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset,
-            user=user,
-            title=faker.sentence(),
-            discussion=[message],
-            closed=datetime.utcnow(),
-            closed_by=user,
-        )
-
-        notifications = discussions_notifications(recipient)
-
-        self.assertEqual(len(notifications), len(open_discussions))
-
-        for dt, details in notifications:
-            discussion = open_discussions[details["id"]]
-            self.assertEqual(details["title"], discussion.title)
-            self.assertEqual(details["subject"]["id"], discussion.subject.id)
-            self.assertEqual(details["subject"]["type"], "dataset")
-
-
-class DiscussionsMailsTest(APITestCase):
+class NotifyDiscussionsTest(APITestCase):
     def test_new_discussion_mail(self):
         user = UserFactory()
         owner = UserFactory()
@@ -1105,6 +1137,11 @@ class DiscussionsMailsTest(APITestCase):
         # Should have sent one mail to the owner
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].recipients[0], owner.email)
+
+        # Verify notification was created for the owner
+        notifications = Notification.objects(user=owner)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_DISCUSSION)
 
     def test_new_discussion_comment_mail(self):
         owner = UserFactory()
@@ -1132,6 +1169,37 @@ class DiscussionsMailsTest(APITestCase):
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(commenter.email, mail.recipients)
 
+        # Verify notification was created for the owner
+        notifications = Notification.objects(user=owner)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
+        self.assertEqual(notifications[0].details.message_id, new_message.id)
+
+    def test_new_discussion_comment_handle_previous_notifications(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=owner)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, new_message],
+        )
+
+        with capture_mails():
+            notify_new_discussion(discussion.id)
+            notify_new_discussion_comment(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Verify previous notifications were handled
+        notifications = Notification.objects(
+            user=commenter, details__status=DiscussionStatus.NEW_DISCUSSION
+        )
+        for notification in notifications:
+            assert notification.handled_at is not None
+
     def test_closed_discussion_mail(self):
         owner = UserFactory()
         poster = UserFactory()
@@ -1144,7 +1212,7 @@ class DiscussionsMailsTest(APITestCase):
             user=poster,
             title=faker.sentence(),
             discussion=[message, second_message, closing_message],
-            closed=datetime.utcnow(),
+            closed=datetime.now(UTC),
             closed_by=owner,
         )
 
@@ -1158,3 +1226,41 @@ class DiscussionsMailsTest(APITestCase):
         for mail in mails:
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(owner.email, mail.recipients)
+
+        # Verify notifications were created for the expected recipients
+        notifications = Notification.objects(user__in=[poster, commenter])
+        assert len(notifications) == len(expected_recipients)
+        assert notifications[0].details.status == DiscussionStatus.CLOSED
+
+    def test_new_discussion_closed_handle_previous_notifications(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=owner)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, new_message],
+        )
+
+        with capture_mails():
+            notify_new_discussion(discussion.id)
+            notify_new_discussion_comment(discussion.id, message=1)
+
+            # Properly close the discussion to ensure closed_by is set
+            discussion.closed = datetime.now(UTC)
+            discussion.closed_by = commenter
+            discussion.save()
+
+            notify_discussion_closed(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Verify previous notifications (NEW_DISCUSSION and NEW_COMMENT) were handled
+        notifications = Notification.objects(
+            user=commenter, details__status__ne=DiscussionStatus.CLOSED
+        )
+        for notification in notifications:
+            print(notification)
+            assert notification.handled_at is not None

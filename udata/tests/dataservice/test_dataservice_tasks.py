@@ -1,3 +1,4 @@
+from udata.core.activity.models import Activity
 from udata.core.dataservices import tasks
 from udata.core.dataservices.models import Dataservice
 from udata.core.user.factories import UserFactory
@@ -34,6 +35,8 @@ class DataserviceTasksTest(PytestOnlyDBTestCase):
 
         follower = Follow.objects.create(follower=user, following=dataservices[0])
 
+        activity = Activity.objects.create(actor=UserFactory(), related_to=dataservices[0].id)
+
         HarvestJobFactory(items=[HarvestItem(dataservice=dataservices[0])])
 
         tasks.purge_dataservices()
@@ -43,6 +46,7 @@ class DataserviceTasksTest(PytestOnlyDBTestCase):
         assert Discussion.objects.filter(id=discussion.id).count() == 0
         assert Follow.objects.filter(id=follower.id).count() == 0
         assert HarvestJob.objects.filter(items__dataservice=dataservices[0].id).count() == 0
+        assert Activity.objects.filter(id=activity.id).count() == 0
 
     def test_purge_dataservices_cleans_all_harvest_items_references(self):
         """Test that purging dataservices cleans all HarvestItem references in a job.

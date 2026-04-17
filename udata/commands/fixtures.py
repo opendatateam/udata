@@ -1,7 +1,7 @@
-"""Commands to download fixtures from the udata-fixtures repository, import them locally.
+"""Commands to generate and import fixtures locally.
 
 When "downloading" (generating) the fixtures, save the json as is.
-When "importing" the fixtures, massage them so then can be loaded properly.
+When "importing" the fixtures, massage them so they can be loaded properly.
 """
 
 import json
@@ -22,9 +22,25 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.edito_blocs.models import (
+    SITE_BLOCS_FIELDS,
+    AccordionItemBloc,
+    AccordionListBloc,
+    DataservicesListBloc,
+    DatasetsListBloc,
+    HeroBloc,
+    LinkInBloc,
+    LinksListBloc,
+    MarkdownBloc,
+    ReusesListBloc,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
+from udata.core.post.factories import PostFactory
+from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.site.factories import SiteFactory
+from udata.core.site.models import Site
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 
@@ -37,10 +53,13 @@ ORG_URL = "/api/1/organizations"
 REUSE_URL = "/api/1/reuses"
 COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
+POST_URL = "/api/1/posts"
+SITE_URL = "/api/1/site"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v7.0.0"
-DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
+DEFAULT_FIXTURE_FILE: str = str(
+    pathlib.Path(__file__).resolve().parent.parent / "fixtures" / "results.json"
+)
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
 
@@ -56,7 +75,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "permissions",
     ],
     "resource": ["latest", "preview_url", "last_modified"],
-    "organization": ["class", "page", "uri", "logo_thumbnail"],
+    "organization": ["class", "page", "uri", "logo_thumbnail", "permissions"],
     "reuse": [
         "datasets",
         "image_thumbnail",
@@ -73,8 +92,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "preview_url",
         "permissions",
     ],
-    "discussion": ["subject", "url", "self_web_url", "class", "permissions"],
-    "discussion_message": ["permissions"],
+    "discussion": ["subject", "url", "self_web_url", "class", "permissions", "spam"],
+    "discussion_message": ["permissions", "spam"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
@@ -85,6 +104,31 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "self_web_url",
         "permissions",
     ],
+    "post": [
+        "uri",
+        "page",
+        "image_thumbnail",
+        "image",
+        "last_modified",
+        "datasets",
+        "reuses",
+        "owner",
+        "permissions",
+    ],
+    "site": [
+        "version",
+        "settings",
+    ],
+}
+
+BLOC_CLASSES = {
+    "DatasetsListBloc": DatasetsListBloc,
+    "ReusesListBloc": ReusesListBloc,
+    "DataservicesListBloc": DataservicesListBloc,
+    "LinksListBloc": LinksListBloc,
+    "HeroBloc": HeroBloc,
+    "MarkdownBloc": MarkdownBloc,
+    "AccordionListBloc": AccordionListBloc,
 }
 
 
@@ -110,16 +154,50 @@ def fix_dates(obj: dict) -> dict:
     return obj
 
 
+def clean_bloc_for_generate(bloc: dict) -> dict:
+    """Strip expanded reference objects from blocs, keep only structural content."""
+    for ref_field in ("datasets", "reuses", "dataservices"):
+        bloc.pop(ref_field, None)
+    if bloc.get("items"):
+        for item in bloc["items"]:
+            for sub_bloc in item.get("content", []):
+                clean_bloc_for_generate(sub_bloc)
+    return bloc
+
+
+def create_bloc_from_dict(data: dict):
+    """Convert a bloc dict from the fixture JSON into a MongoEngine EmbeddedDocument."""
+    cls_name = data.pop("class", None)
+    bloc_class = BLOC_CLASSES.get(cls_name)
+    if not bloc_class:
+        return None
+
+    if cls_name == "LinksListBloc" and "links" in data:
+        data["links"] = [LinkInBloc(**link) for link in data["links"]]
+    elif cls_name == "AccordionListBloc" and "items" in data:
+        items = []
+        for item in data["items"]:
+            content = create_blocs_from_dicts(item.get("content", []))
+            items.append(AccordionItemBloc(title=item["title"], content=content))
+        data["items"] = items
+
+    return bloc_class(**data)
+
+
+def create_blocs_from_dicts(dicts):
+    return [b for b in (create_bloc_from_dict(d) for d in dicts) if b is not None]
+
+
 @cli.command()
 @click.argument("data-source")
 @click.argument("results-filename", default=DEFAULT_FIXTURES_RESULTS_FILENAME)
 def generate_fixtures_file(data_source: str, results_filename: str) -> None:
-    """Build sample fixture file based on datasets slugs list (users, datasets, reuses, dataservices)."""
+    """Build sample fixture file (datasets, posts, site) from a remote udata instance."""
     results_file = pathlib.Path(results_filename)
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
-    json_result = []
+    json_datasets = []
 
-    with click.progressbar(datasets_slugs) as bar:
+    with click.progressbar(datasets_slugs, label="Fetching datasets") as bar:
         for slug in bar:
             json_fixture = {}
 
@@ -131,7 +209,8 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
             json_dataset = response.json()
             json_dataset = remove_unwanted_keys(json_dataset, "dataset")
             json_resources = json_dataset.pop("resources")
-            json_resources = remove_unwanted_keys(json_resources, "resources")
+            for resource in json_resources:
+                remove_unwanted_keys(resource, "resource")
             if json_dataset["organization"] is None:
                 json_owner = json_dataset.pop("owner")
                 if json_owner:
@@ -149,21 +228,21 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
                 f"{data_source}{REUSE_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for reuse in json_reuses:
-                reuse = remove_unwanted_keys(reuse, "reuse")
+                remove_unwanted_keys(reuse, "reuse")
             json_fixture["reuses"] = json_reuses
 
             json_community = requests.get(
                 f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for community_resource in json_community:
-                community_resource = remove_unwanted_keys(community_resource, "community")
+                remove_unwanted_keys(community_resource, "community")
             json_fixture["community_resources"] = json_community
 
             json_discussion = requests.get(
                 f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}"
             ).json()["data"]
             for discussion in json_discussion:
-                discussion = remove_unwanted_keys(discussion, "discussion")
+                remove_unwanted_keys(discussion, "discussion")
                 for index, message in enumerate(discussion["discussion"]):
                     discussion["discussion"][index] = remove_unwanted_keys(
                         message, "discussion_message"
@@ -175,13 +254,38 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
                 f"{data_source}{DATASERVICES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for dataservice in json_dataservices:
-                dataservice = remove_unwanted_keys(dataservice, "dataservice")
+                remove_unwanted_keys(dataservice, "dataservice")
             json_fixture["dataservices"] = json_dataservices
 
-            json_result.append(json_fixture)
+            json_datasets.append(json_fixture)
+
+    # Fetch posts (detail endpoint to get blocs)
+    print("Fetching posts...")
+    json_posts_list = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
+    json_posts = []
+    for post_summary in json_posts_list:
+        post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
+        remove_unwanted_keys(post_detail, "post")
+        for bloc in post_detail.get("blocs", []):
+            clean_bloc_for_generate(bloc)
+        json_posts.append(post_detail)
+
+    # Fetch site (with blocs via X-Fields)
+    print("Fetching site...")
+    json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
+    remove_unwanted_keys(json_site, "site")
+    for blocs_field in SITE_BLOCS_FIELDS:
+        for bloc in json_site.get(blocs_field, []):
+            clean_bloc_for_generate(bloc)
+
+    json_output = {
+        "datasets": json_datasets,
+        "posts": json_posts,
+        "site": json_site,
+    }
 
     with results_file.open("w") as f:
-        json.dump(json_result, f, indent=2)
+        json.dump(json_output, f, indent=2)
         print(f"Fixtures saved to file {results_filename}")
 
 
@@ -222,7 +326,7 @@ def get_or_create_contact_point(data):
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
-    """Build sample fixture data (users, datasets, reuses, dataservices) from local or remote file."""
+    """Build sample fixture data (datasets, posts, site) from local or remote file."""
     if source.startswith("http"):
         response = requests.get(source)
         response.raise_for_status()
@@ -231,7 +335,18 @@ def import_fixtures(source):
         with open(source) as f:
             json_fixtures = json.load(f)
 
-    with click.progressbar(json_fixtures) as bar:
+    # Import site
+    site_data = json_fixtures.get("site")
+    if site_data:
+        site_data = remove_unwanted_keys(site_data, "site")
+        for blocs_field in SITE_BLOCS_FIELDS:
+            if blocs_field in site_data:
+                site_data[blocs_field] = create_blocs_from_dicts(site_data.pop(blocs_field))
+        if not Site.objects(id=site_data["id"]).first():
+            SiteFactory(**site_data)
+
+    # Import datasets
+    with click.progressbar(json_fixtures["datasets"], label="Importing datasets") as bar:
         for fixture in bar:
             user = UserFactory()
             dataset = fixture["dataset"]
@@ -269,9 +384,11 @@ def import_fixtures(source):
                 discussion = remove_unwanted_keys(discussion, "discussion")
                 discussion["closed_by"] = get_or_create(discussion, "closed_by", User, UserFactory)
                 for message in discussion["discussion"]:
+                    message = remove_unwanted_keys(message, "discussion_message")
                     message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
                 discussion["discussion"] = [
-                    MessageDiscussionFactory(**message) for message in discussion["discussion"]
+                    MessageDiscussionFactory(**remove_unwanted_keys(message, "discussion_message"))
+                    for message in discussion["discussion"]
                 ]
                 discussion["user"] = get_or_create_user(discussion)
                 DiscussionFactory(**discussion, subject=dataset)
@@ -283,3 +400,17 @@ def import_fixtures(source):
                 dataservice["contact_points"] = contact_points
                 dataservice["organization"] = get_or_create_organization(dataservice)
                 DataserviceFactory(**dataservice, datasets=[dataset])
+
+    # Import posts
+    for post_data in json_fixtures.get("posts", []):
+        post_data = remove_unwanted_keys(post_data, "post")
+        user = UserFactory()
+        blocs = create_blocs_from_dicts(post_data.pop("blocs", []))
+        if not Post.objects(id=post_data["id"]).first():
+            PostFactory(
+                **post_data,
+                owner=user,
+                blocs=blocs,
+                datasets=[],
+                reuses=[],
+            )

@@ -1,14 +1,21 @@
+from datetime import UTC, datetime
+
+from flask import request as flask_request
 from flask_security import current_user, logout_user
 from slugify import slugify
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
+from udata.core.api_token.api import apitoken_created_fields
+from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
+from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -18,8 +25,6 @@ from udata.core.user.models import Role
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
-    apikey_fields,
-    me_fields,
     me_metrics_fields,
     user_fields,
     user_page_fields,
@@ -58,15 +63,15 @@ filter_parser.add_argument(
 class MeAPI(API):
     @api.secure
     @api.doc("get_me")
-    @api.marshal_with(me_fields)
+    @api.marshal_with(user_fields)
     def get(self):
         """Fetch the current user (me) identity"""
         return current_user._get_current_object()
 
     @api.secure
     @api.doc("update_me")
-    @api.expect(me_fields)
-    @api.marshal_with(me_fields)
+    @api.expect(user_fields)
+    @api.marshal_with(user_fields)
     @api.response(400, "Validation error")
     def put(self, **kwargs):
         """Update my profile"""
@@ -193,26 +198,160 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-@me.route("/apikey/", endpoint="my_apikey")
-class ApiKeyAPI(API):
+@me.route("/api_tokens/", endpoint="my_api_tokens")
+class ApiTokenListAPI(API):
     @api.secure
-    @api.doc("generate_apikey")
-    @api.marshal_with(apikey_fields)
-    @api.response(201, "API Key generated")
-    def post(self):
-        """(Re)Generate my API Key"""
-        current_user.generate_api_key()
-        current_user.save()
-        return current_user, 201
+    @api.doc("list_api_tokens")
+    @api.marshal_list_with(ApiToken.__read_fields__)
+    def get(self):
+        """List all my active API tokens"""
+        return list(ApiToken.objects(user=current_user.id, revoked_at=None))
 
     @api.secure
-    @api.doc("clear_apikey")
-    @api.response(204, "API Key deleted/cleared")
-    def delete(self):
-        """Clear/destroy an apikey"""
-        current_user.apikey = None
-        current_user.save()
+    @api.doc("create_api_token")
+    @api.expect(ApiToken.__write_fields__)
+    @api.marshal_with(apitoken_created_fields, code=201)
+    def post(self):
+        """Create a new API token. The plaintext token is returned only once."""
+        data = flask_request.json or {}
+        user = current_user._get_current_object()
+        expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
+        token, plaintext = ApiToken.generate(
+            user,
+            name=data.get("name"),
+            expires_at=expires_at,
+            scopes=data.get("scopes"),
+        )
+        token._plaintext = plaintext
+        return token, 201
+
+
+@me.route("/api_tokens/<api_token:api_token>/", endpoint="my_api_token")
+class ApiTokenAPI(API):
+    @api.secure
+    @api.doc("revoke_api_token")
+    @api.response(204, "Token revoked")
+    @api.response(404, "Token not found")
+    @api.response(410, "Token already revoked")
+    def delete(self, api_token):
+        """Revoke an API token"""
+        if api_token.user != current_user._get_current_object():
+            api.abort(404, "Token not found")
+        if api_token.revoked_at is not None:
+            api.abort(410, "Token already revoked")
+        api_token.revoke()
         return "", 204
+
+
+@me.route("/org_invitations/", endpoint="my_org_invitations")
+class MyOrgInvitationsAPI(API):
+    @api.secure
+    @api.doc("list_org_invitations")
+    @api.marshal_list_with(pending_invitation_fields)
+    def get(self):
+        """List pending organization invitations for current user."""
+        from udata.core.organization.models import Organization
+
+        user = current_user._get_current_object()
+        invitations = []
+
+        for org in Organization.objects(
+            requests__kind="invitation", requests__user=user, requests__status="pending"
+        ):
+            for req in org.requests:
+                if req.kind == "invitation" and req.user == user and req.status == "pending":
+                    invitations.append(
+                        {
+                            "id": str(req.id),
+                            "organization": org,
+                            "role": req.role,
+                            "comment": req.comment,
+                            "created": req.created,
+                            "assignments": req.assignments or [],
+                        }
+                    )
+
+        return invitations
+
+
+@me.route("/org_invitations/<uuid:id>/accept/", endpoint="accept_org_invitation")
+class AcceptOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("accept_org_invitation")
+    @api.response(200, "Invitation accepted")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Accept an organization invitation."""
+        from udata.core.organization.assignment import Assignment
+        from udata.core.organization.models import Member, MembershipRequest, Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "accepted"
+                    req.handled_by = user
+                    req.handled_on = datetime.now(UTC)
+
+                    member = Member(user=user, role=req.role)
+                    org.members.append(member)
+                    org.count_members()
+                    org.save()
+
+                    if req.assignments:
+                        for subject in req.assignments:
+                            if not subject:
+                                continue
+                            if not hasattr(subject, "organization") or subject.organization != org:
+                                continue
+                            Assignment(
+                                user=user,
+                                organization=org,
+                                subject=subject,
+                            ).save()
+
+                    MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
+
+                    return {"message": "Invitation accepted"}, 200
+
+        api.abort(404, "Invitation not found")
+
+
+@me.route("/org_invitations/<uuid:id>/refuse/", endpoint="refuse_org_invitation")
+class RefuseOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("refuse_org_invitation")
+    @api.response(200, "Invitation refused")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Refuse an organization invitation."""
+        from udata.core.organization.models import MembershipRequest, Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "refused"
+                    req.handled_by = user
+                    req.handled_on = datetime.now(UTC)
+                    org.save()
+                    MembershipRequest.after_handle.send(req, org=org)
+                    notify_membership_invitation_response.delay(str(org.id), str(req.id))
+
+                    return {"message": "Invitation refused"}, 200
+
+        api.abort(404, "Invitation not found")
 
 
 @ns.route("/", endpoint="users")
@@ -334,20 +473,18 @@ class UserAPI(API):
 
 
 # These imports are not at the top of the file to avoid circular imports
-from udata.core.contact_point.api import ContactPointApiParser  # noqa
-from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
 from udata.models import ContactPoint  # noqa
 
-contact_point_parser = ContactPointApiParser()
+contact_point_parser = ContactPoint.__index_parser__
 
 
 @ns.route("/<user:user>/contacts/", endpoint="user_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_user_contact_point")
-    @api.marshal_with(contact_point_page_fields)
+    @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, user):
         """List all user contact points"""
-        args = contact_point_parser.parse()
+        args = contact_point_parser.parse_args()
         contact_points = ContactPoint.objects.owned_by(user)
         return contact_points.paginate(args["page"], args["page_size"])
 
@@ -408,17 +545,7 @@ class SuggestUsersAPI(API):
         users = User.objects(
             deleted=None, slug__icontains=slugify(args["q"], separator="-", to_lower=True)
         )
-        return [
-            {
-                "id": user.id,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "avatar_url": user.avatar,
-                "email": user.email,
-                "slug": user.slug,
-            }
-            for user in users.order_by(DEFAULT_SORTING).limit(args["size"])
-        ]
+        return list(users.order_by(DEFAULT_SORTING).limit(args["size"]))
 
 
 @ns.route("/roles/", endpoint="user_roles")

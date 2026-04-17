@@ -11,7 +11,7 @@ Head directly to [the dedicated repository][docker-repository] for an up to date
 [Docker Compose][] makes it easy to spawn [system dependencies](system-dependencies.md) out of the box by running the following command:
 
 ```shell
-docker compose up
+docker compose up -d
 ```
 
 [Docker]: https://www.docker.com/

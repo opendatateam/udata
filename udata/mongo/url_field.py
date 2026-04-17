@@ -10,20 +10,22 @@ class URLField(StringField):
     The URL spaces are automatically stripped.
 
     Non-specified parameters fallback app level settings,
-    ie. ``URLS_ALLOW_PRIVATE``, ``URLS_ALLOW_LOCAL``
+    ie. ``URLS_ALLOW_PRIVATE``, ``URLS_ALLOW_LOCAL``, ``URLS_RESOLVE_HOSTNAME``,
     ``URLS_ALLOWED_SCHEMES`` and ``URLS_ALLOWED_TLDS``
 
     :params bool private: Allow private URLs
     :params bool local: Allow local URLs
+    :params bool resolve: Resolve hostname for target IPs validation
     :params list schemes: List of allowed schemes
     :params list tlds: List of allowed TLDs
 
     """
 
-    def __init__(self, private=None, local=None, schemes=None, tlds=None, **kwargs):
+    def __init__(self, private=None, local=None, resolve=None, schemes=None, tlds=None, **kwargs):
         super(URLField, self).__init__(**kwargs)
         self.private = private
         self.local = local
+        self.resolve = resolve
         self.schemes = schemes
         self.tlds = tlds
 
@@ -36,7 +38,7 @@ class URLField(StringField):
         super(URLField, self).validate(value)
         kwargs = {
             a: getattr(self, a)
-            for a in ("private", "local", "schemes", "tlds")
+            for a in ("private", "local", "resolve", "schemes", "tlds")
             if getattr(self, a) is not None
         }
         try:

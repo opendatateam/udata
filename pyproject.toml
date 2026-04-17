@@ -76,7 +76,6 @@ dependencies = [
     "pydenticon>=0.3.1,<1.0.0",
     "pymongo>=4.11.3,<5.0.0",
     "python-dateutil>=2.9.0.post0,<3.0.0",
-    "pytz",
     "rdflib>=7.1.3,<8.0.0",
     "redis>=5.0.0,<8.0.0",
     "requests>=2.32.4,<3.0.0",
@@ -93,6 +92,10 @@ dependencies = [
     "wtforms[email]>=3.2.1,<4.0.0",
     "wtforms-json>=0.3.5,<1.0.0",
     "qrcode>=8.2,<9.0",
+    "elasticsearch>=8.19.3,<9.0.0",
+    "elasticsearch-dsl>=8.18.0,<9.0.0",
+    "beautifulsoup4>=4.14.3,<5.0.0",
+    "markdown>=3.10,<4.0",
 ]
 
 [project.urls]
@@ -137,6 +140,7 @@ dev = [
     "pytest-flask >= 1.3.0, < 2.0",
     "pytest-mock >= 3.14.0, < 4.0",
     "pytest-sugar >= 1.0.0, < 2.0",
+    "pytest-xdist>=3.5.0,<4.0",
     "requests-mock >= 1.12.1, < 2.0",
     "ruff >= 0.11.0, < 1.0",
 ]
@@ -183,10 +187,10 @@ lint = { extend-select = [
 line-length = 100
 
 [tool.setuptools]
-packages = ["udata"]
+packages = ["udata", "udata_search_service"]
 
 [tool.setuptools.package-data]
-udata = ["templates/*", "translations/*"]
+udata = ["templates/*", "translations/*", "fixtures/*"]
 
 [tool.wheel]
 universal = true

@@ -13,6 +13,9 @@ The `@generate_fields` decorator parameters:
 - additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
 - nested_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
 - standalone_filters: filter on something else than a field. Should be a list of dicts with filterable attributes, as returned by `compute_filter`.
+- page_mask: explicit mask string applied to `__page_fields__` (e.g. "*,datasets{id,title}").
+- read_mask_exclude: list of field names to exclude from `__read_fields__` default response.
+- page_mask_exclude: list of field names to exclude from `__page_fields__` (paginated list) default response.
 
 Generated attributes on decorated classes:
 - ref_fields: Minimal fields for embedded/referenced documents
@@ -23,7 +26,8 @@ For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
-from typing import Any, Callable, Iterable
+from datetime import datetime
+from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -46,7 +50,7 @@ def required_if(**conditions):
 
     Usage:
         page_id = field(
-            db.ReferenceField("Page"),
+            ReferenceField("Page"),
             checks=[required_if(body_type="blocs")],
         )
     """
@@ -139,8 +143,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
-        params["min"] = field.min  # TODO min_value?
-        params["max"] = field.max
+        params["min"] = field.min_value
+        params["max"] = field.max_value
     elif isinstance(field, mongo_fields.IntField):
         constructor = restx_fields.Integer
         params["min"] = field.min_value
@@ -254,7 +258,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
 
             def constructor_write(**kwargs):
-                return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+                return restx_fields.Nested(lazy_reference, **kwargs)
         else:
 
             def constructor(**kwargs):
@@ -266,8 +270,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
         # when returning from an endpoint)
         nested_fields: dict | None = info.get("nested_fields")
-        if nested_fields is None and hasattr(field.document_type_obj, "__ref_fields__"):
-            nested_fields = field.document_type_obj.__ref_fields__
+        document_type = field.document_type_obj
+        if isinstance(document_type, str):
+            document_type = db.resolve_model(document_type)
+        if nested_fields is None and hasattr(document_type, "__ref_fields__"):
+            nested_fields = document_type.__ref_fields__
 
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
@@ -356,10 +363,10 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
 
 
 def save_class_by_parents(cls):
-    from udata.mongo.engine import db
+    from udata.mongo.document import UDataDocument
 
     for parent in cls.__bases__:
-        if parent == db.Document:
+        if parent == UDataDocument:
             return
 
         classes_by_parents[parent] = (
@@ -382,8 +389,6 @@ def generate_fields(**kwargs) -> Callable:
     """
 
     def wrapper(cls) -> Callable:
-        from udata.models import db
-
         read_fields: dict = {}
         write_fields: dict = {}
         ref_fields: dict = {}
@@ -394,7 +399,7 @@ def generate_fields(**kwargs) -> Callable:
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
             kwargs.get("nested_filters", {})
         )
-        if issubclass(cls, db.Document) or issubclass(cls, db.DynamicDocument):
+        if issubclass(cls, mongoengine.Document) or issubclass(cls, mongoengine.DynamicDocument):
             read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         classes_by_names[cls.__name__] = cls
@@ -421,7 +426,7 @@ def generate_fields(**kwargs) -> Callable:
                 ):
                     raise Exception("Cannot use nested_filters on a field that is not a ref.")
 
-                ref_model: db.Document = field.document_type
+                ref_model: mongoengine.Document = field.document_type
 
                 for child in nested_filter.get("children", []):
                     inner_field: str = getattr(ref_model, child["key"])
@@ -503,17 +508,39 @@ def generate_fields(**kwargs) -> Callable:
             if additional_field_info.get("show_as_ref", False):
                 ref_fields[method_name] = read_fields[method_name]
 
-        cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
+        # Masks allow excluding heavy fields from responses (e.g. blocs on list endpoints)
+        # without removing them from the model entirely — clients can still request them
+        # via the X-Fields header. This is not ideal: masks are a runtime concern and are
+        # not reflected in the Swagger documentation, so excluded fields appear in the docs
+        # even though they're not returned by default. A better approach would be to generate
+        # distinct API models per context (list vs detail, lightweight vs full) so that the
+        # schema accurately describes each endpoint's response. This would also replace the
+        # manual mask= usage on models like Reuse and Dataset.
+        read_mask_exclude: list | None = kwargs.pop("read_mask_exclude", None)
+        page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
+        page_mask: str | None = kwargs.pop("page_mask", None)
+
+        read_mask = None
+        if read_mask_exclude:
+            read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
+
+        cls.__read_fields__ = api.model(
+            f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs
+        )
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        mask: str | None = kwargs.pop("mask", None)
-        if mask is not None:
-            mask = "data{{{0}}},*".format(mask)
+        page_mask = None
+        if page_mask_exclude:
+            page_mask = "data{{{0}}},*".format(
+                ",".join(k for k in read_fields if k not in page_mask_exclude)
+            )
+        elif page_mask is not None:
+            page_mask = "data{{{0}}},*".format(page_mask)
         cls.__page_fields__ = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(cls.__read_fields__),
-            mask=mask,
+            mask=page_mask,
             **kwargs,
         )
 
@@ -620,6 +647,57 @@ def generate_fields(**kwargs) -> Callable:
     return wrapper
 
 
+class _FieldKwargs(TypedDict, total=False):
+    sortable: bool | str | None
+    filterable: dict[str, Any] | None
+    readonly: bool | None
+    show_as_ref: bool | None
+    markdown: bool | None
+    description: str | None
+    auditable: bool | None
+    checks: list[Callable] | None
+    attribute: str | None
+    thumbnail_info: dict[str, Any] | None
+    example: str | None
+    nested_fields: dict[str, Any] | None
+    inner_field_info: dict[str, Any] | None
+    size: int | None
+    is_thumbnail: bool | None
+    href: Callable | None
+    generic: bool | None
+    generic_key: str | None
+    convert_to: Callable | None
+    allow_null: bool | None
+
+
+@overload
+def field(inner: mongo_fields.StringField, **kwargs: Unpack[_FieldKwargs]) -> str: ...
+
+
+@overload
+def field(inner: mongo_fields.IntField, **kwargs: Unpack[_FieldKwargs]) -> int: ...
+
+
+@overload
+def field(inner: mongo_fields.BooleanField, **kwargs: Unpack[_FieldKwargs]) -> bool: ...
+
+
+@overload
+def field(inner: mongo_fields.FloatField, **kwargs: Unpack[_FieldKwargs]) -> float: ...
+
+
+@overload
+def field(inner: mongo_fields.DateTimeField, **kwargs: Unpack[_FieldKwargs]) -> datetime: ...
+
+
+@overload
+def field(inner: None = None, **kwargs: Unpack[_FieldKwargs]) -> Callable: ...
+
+
+@overload
+def field(inner: mongoengine.fields.BaseField, **kwargs: Unpack[_FieldKwargs]) -> Any: ...  # type: ignore[reportOverlappingOverload]
+
+
 def field(
     inner=None,
     sortable: bool | str | None = None,
@@ -649,7 +727,7 @@ def field(
     Can be used in two ways:
 
     1. As a wrapper for MongoEngine fields:
-        title = field(db.StringField(required=True),
+        title = field(StringField(required=True),
                      sortable=True,
                      description="The title of the item")
 
@@ -720,7 +798,10 @@ def run_check(check, value, key, obj, data):
     )
 
 
-def patch(obj, request) -> type:
+_T = TypeVar("_T")
+
+
+def patch(obj: _T, request) -> _T:
     """Patch the object with the data from the request.
 
     Only fields decorated with the `field()` decorator will be read (and not readonly).
@@ -835,7 +916,7 @@ def is_value_modified(old_value, new_value) -> bool:
     return new_value != old_value
 
 
-def patch_and_save(obj, request) -> type:
+def patch_and_save(obj: _T, request) -> _T:
     obj = patch(obj, request)
     obj.save()
 
@@ -989,12 +1070,12 @@ def validation_to_type(validation: Callable) -> Callable:
     In mongo, a field's validation function cannot return anything, so this
     helper wraps the mongo field's validation to return the value if it validated.
     """
-    from udata.models import db
+    from mongoengine.errors import ValidationError
 
     def wrapper(value: str) -> str:
         try:
             validation(value)
-        except db.ValidationError:
+        except ValidationError:
             raise
         return value
 

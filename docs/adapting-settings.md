@@ -36,6 +36,12 @@ The default fallback language when no language prefix is provided in URLs.
 A secret key used as salt for cryptographic parts.
 **You must specify your own secure key and use the same in all your instances**.
 
+### API_TOKEN_SECRET
+
+A secret key used for HMAC-SHA256 hashing of API tokens.
+**You must specify your own secure key, different from `SECRET_KEY`**.
+The app refuses to start without it.
+
 ### SITE_ID
 
 **default**: `'default'`
@@ -44,9 +50,9 @@ The site identifier. It is used to attached some database configuration, metrics
 
 ### THEME
 
-**default**: ``'default'``
+**default**: ``None``
 
-The enabled theme name.
+The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
 
 ### TEMPLATE_CACHE_DURATION
 
@@ -137,6 +143,13 @@ Whether or not to allow private URLs (private IPs...) submission
 Whether or not to allow local URLs (localhost...) submission.
 When developping you might need to set this to `True`.
 
+### URLS_RESOLVE_HOSTNAME
+
+**default**: `True`
+
+Whether or not to resolve hostname to in URI validation to check private or local IP.
+⚠ It may impact performances when validating URIs. Be sure to use DNS caching (ex with `dnsmasq` caching).
+
 ### URLS_ALLOW_CREDENTIALS
 
 **default**: `True`
@@ -187,19 +200,28 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 **default**: `200`
 
-### SEARCH_SERVICE_API_URL
+### ELASTICSEARCH_URL
 
 **default**: None
 
-The independent search service api url to use if available.
-If not specified, mongo full text search is used.
+The Elasticsearch URL to use for search.
+If not specified, mongo full text search is used as a fallback.
 
 Ex:
 ```python
-SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+ELASTICSEARCH_URL = 'http://localhost:9200'
 ```
 
-See [udata-search-service][udata-search-service] for more information on using a search service.
+Before running the application, initialize the Elasticsearch indices:
+```shell
+udata search init-es
+```
+
+### ELASTICSEARCH_INDEX_BASENAME
+
+**default**: `None` (no prefix)
+
+Optional prefix for Elasticsearch index names. When set, each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`). When `None` or empty, index names match model names directly (e.g. `dataset`, `organization`).
 
 ## Spatial configuration
 
@@ -548,6 +570,7 @@ DEBUG = True
 SEND_MAIL = False
 
 SECRET_KEY = 'A unique secret key'
+API_TOKEN_SECRET = 'A different unique secret key'
 
 SERVER_NAME = 'www.data.dev'
 
@@ -568,7 +591,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-mail-doc]: https://flask-mail.readthedocs.io/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
-[udata-search-service]: https://github.com/opendatateam/udata-search-service
+
 
 ## Resources modifications publishing
 

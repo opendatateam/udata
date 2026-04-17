@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
+from mongoengine.errors import ValidationError
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
@@ -11,7 +12,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization, OrganizationBadge
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, Follow, Member, Reuse, db
+from udata.models import Dataset, Follow, Member, Reuse
 from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
@@ -37,7 +38,7 @@ class OrganizationModelTest(DBTestCase):
             HiddenDatasetFactory(organization=org)
         with assert_emit(on_follow):
             follow = Follow.objects.create(
-                following=org, follower=UserFactory(), since=datetime.utcnow()
+                following=org, follower=UserFactory(), since=datetime.now(UTC)
             )
 
         assert org.get_metrics()["datasets"] == 1
@@ -46,16 +47,16 @@ class OrganizationModelTest(DBTestCase):
         assert org.get_metrics()["followers"] == 1
 
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.utcnow()
+            reuse.deleted = datetime.now(UTC)
             reuse.save()
         with assert_emit(Dataservice.on_delete):
-            dataservice.deleted_at = datetime.utcnow()
+            dataservice.deleted_at = datetime.now(UTC)
             dataservice.save()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.utcnow()
+            dataset.deleted = datetime.now(UTC)
             dataset.save()
         with assert_emit(on_unfollow):
-            follow.until = datetime.utcnow()
+            follow.until = datetime.now(UTC)
             follow.save()
 
         assert org.get_metrics()["datasets"] == 0
@@ -83,12 +84,12 @@ class OrganizationModelTest(DBTestCase):
         assert org_certified_association in associations
 
     def test_organization__url(self):
-        with pytest.raises(db.ValidationError):
+        with pytest.raises(ValidationError):
             OrganizationFactory(url="not-an-url")
 
 
 class OrganizationBadgeTest(DBTestCase):
-    # Model badges can be extended in plugins, for example in udata-front
+    # Model badges can be extended in plugins, for example in our previous plugin udata-front
     # for french only badges.
     Organization.__badges__["new"] = "new"
 
@@ -100,6 +101,6 @@ class OrganizationBadgeTest(DBTestCase):
         badge = OrganizationBadge(kind="new")
         badge.validate()
 
-        with self.assertRaises(db.ValidationError):
+        with self.assertRaises(ValidationError):
             badge = OrganizationBadge(kind="doesnotexist")
             badge.validate()

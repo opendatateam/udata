@@ -1,0 +1,11 @@
+{% set title = title|default(_("Reauthenticate")) %}
+{% import 'macros/forms.html' as forms with context %}
+
+{% block content %}
+  <h1>{{ _fsdomain("Reauthenticate") }}</h1>
+  <form action="{{ url_for('security.verify') }}" method="post" name="verify_form">
+    {{ verify_form.hidden_tag() }}
+    {{ forms.field(verify_form.password) }}
+    {{ forms.field(verify_form.submit) }}
+  </form>
+{% endblock content %}

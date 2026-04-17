@@ -6,7 +6,7 @@ from flask import current_app
 from .base import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter  # noqa
 
 
-def get_backend(name: str) -> type[BaseBackend] | None:
+def get_backend(name: str) -> type[BaseBackend]:
     backend = get_enabled_backends().get(name)
     if not backend:
         raise ValueError(f"Backend {name} unknown. Make sure it is declared in HARVESTER_BACKENDS.")

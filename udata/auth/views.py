@@ -22,6 +22,7 @@ from flask_security.views import (
     two_factor_rescue,
     two_factor_setup,
     two_factor_token_validation,
+    verify,
 )
 from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
@@ -232,6 +233,11 @@ def create_security_blueprint(app, state, import_name):
             methods=["GET", "POST"],
             endpoint="two_factor_rescue",
         )(two_factor_rescue)
+
+    if app.config["SECURITY_FRESHNESS"].total_seconds() >= 0:
+        bp.route(app.config["SECURITY_VERIFY_URL"], methods=["GET", "POST"], endpoint="verify")(
+            verify
+        )
 
     return bp
 

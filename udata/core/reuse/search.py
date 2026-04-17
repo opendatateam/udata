@@ -14,6 +14,8 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+from udata_search_service.consumers import ReuseConsumer
+from udata_search_service.services import ReuseService
 
 __all__ = ("ReuseSearch",)
 
@@ -21,7 +23,8 @@ __all__ = ("ReuseSearch",)
 @register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
-    search_url = "reuses/"
+    service_class = ReuseService
+    consumer_class = ReuseConsumer
 
     sorts = {
         "created": "created_at",
@@ -30,6 +33,8 @@ class ReuseSearch(ModelSearchAdapter):
         "views": "metrics.views",
     }
 
+    # Uses __badges__ (not available_badges) so that users can still filter
+    # by any existing badge, even hidden ones.
     filters = {
         "tag": ListFilter(),
         "organization": ModelTermsFilter(model=Organization),
@@ -87,6 +92,7 @@ class ReuseSearch(ModelSearchAdapter):
             "description": reuse.description,
             "url": reuse.url,
             "created_at": to_iso_datetime(reuse.created_at),
+            "last_modified": to_iso_datetime(reuse.last_modified),
             "archived": to_iso_datetime(reuse.archived) if reuse.archived else None,
             "views": reuse.metrics.get("views", 0),
             "followers": reuse.metrics.get("followers", 0),

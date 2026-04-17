@@ -32,7 +32,7 @@ udata is a customizable and skinnable social platform dedicated to (open) data. 
   - OAuth2 authentication support in `oauth2.py`
 
 - **udata/frontend/**: Minimal frontend utilities (markdown rendering)
-  - Most frontend is in separate `udata-front` repository
+  - Most frontend is in separate `cdata` (formerly udata-front) repository
 
 - **udata/search/**: Search integration layer
   - Can integrate with external search services
@@ -216,7 +216,7 @@ from udata.harvest.backends.base import BaseBackend
 
 class MyBackend(BaseBackend):
     name = "mybackend"
-    
+
     def harvest_single_item(self, item):
         # Implementation
         pass

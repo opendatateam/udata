@@ -1,18 +1,19 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission, current_user
 from udata.core import csv
 from udata.core.badges import api as badges_api
-from udata.core.badges.fields import badge_fields
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
+from udata.core.badges.models import Badge
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataservices.search import DataserviceApiParser
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
@@ -28,32 +29,55 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
-from udata.models import ContactPoint
+from udata.mongo import db
+from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .api_fields import (
-    member_fields,
-    org_fields,
-    org_page_fields,
+    invite_fields,
     org_role_fields,
     org_suggestion_fields,
     refuse_membership_fields,
     request_fields,
 )
-from .constants import ORG_ROLES
-from .forms import (
-    MemberForm,
-    MembershipRefuseForm,
-    MembershipRequestForm,
-    OrganizationForm,
-)
+from .assignment import Assignment
+from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
 from .models import Member, MembershipRequest, Organization
-from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .rdf import build_org_catalog
-from .tasks import notify_membership_request, notify_membership_response, notify_new_member
+from .tasks import (
+    notify_membership_invitation,
+    notify_membership_invitation_canceled,
+    notify_membership_request,
+    notify_membership_response,
+)
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
+
+
+def resolve_assignment_subjects(raw_assignments, org):
+    """Resolve raw {class, id} dicts into model instances belonging to org."""
+    subjects = []
+    for raw in raw_assignments:
+        cls_name = raw.get("class")
+        obj_id = raw.get("id")
+        if cls_name not in ASSIGNABLE_OBJECT_TYPES:
+            raise FieldValidationError(
+                field="assignments", message=f"Invalid object class '{cls_name}'"
+            )
+        model_cls = db.resolve_model(cls_name)
+        obj = model_cls.objects(id=obj_id).first()
+        if not obj:
+            raise FieldValidationError(
+                field="assignments", message=f"{cls_name} '{obj_id}' not found"
+            )
+        if not hasattr(obj, "organization") or obj.organization != org:
+            raise FieldValidationError(
+                field="assignments",
+                message=f"{cls_name} '{obj_id}' does not belong to this organization",
+            )
+        subjects.append(obj)
+    return subjects
 
 
 class OrgApiParser(ModelApiParser):
@@ -69,6 +93,8 @@ class OrgApiParser(ModelApiParser):
 
     def __init__(self):
         super().__init__()
+        # Uses __badges__ (not available_badges) so that users can still filter
+        # by any existing badge, even hidden ones.
         self.parser.add_argument(
             "badge",
             type=str,
@@ -117,7 +143,7 @@ class OrganizationListAPI(API):
 
     @api.doc("list_organizations")
     @api.expect(organization_parser.parser)
-    @api.marshal_with(org_page_fields)
+    @api.marshal_with(Organization.__page_fields__)
     def get(self):
         """List or search all organizations"""
         args = organization_parser.parse()
@@ -129,12 +155,16 @@ class OrganizationListAPI(API):
 
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})
-    @api.expect(org_fields)
-    @api.marshal_with(org_fields, code=201)
+    @api.expect(Organization.__write_fields__)
+    @api.marshal_with(Organization.__read_fields__, code=201)
     def post(self):
         """Create a new organization"""
-        form = api.validate(OrganizationForm)
-        organization = form.save()
+        organization = patch(Organization(), request)
+        user = current_user._get_current_object()
+        member = Member(user=user, role="admin")
+        organization.members.append(member)
+        organization.count_members()
+        organization.save()
         return organization, 201
 
 
@@ -146,17 +176,17 @@ org_delete_parser = add_send_legal_notice_argument(api.parser())
 @api.response(410, "Organization has been deleted")
 class OrganizationAPI(API):
     @api.doc("get_organization")
-    @api.marshal_with(org_fields)
+    @api.marshal_with(Organization.__read_fields__)
     def get(self, org):
         """Get a organization given its identifier"""
-        if org.deleted and not OrganizationPrivatePermission(org).can():
+        if org.deleted and not org.permissions["private"].can():
             api.abort(410, "Organization has been deleted")
         return org
 
     @api.secure
     @api.doc("update_organization")
-    @api.expect(org_fields)
-    @api.marshal_with(org_fields)
+    @api.expect(Organization.__write_fields__)
+    @api.marshal_with(Organization.__read_fields__)
     @api.response(400, errors.VALIDATION_ERROR)
     @api.response(410, "Organization has been deleted")
     def put(self, org):
@@ -168,9 +198,8 @@ class OrganizationAPI(API):
         request_deleted = request.json.get("deleted", True)
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
-        form = api.validate(OrganizationForm, org)
-        return form.save()
+        org.permissions["edit"].test()
+        return patch_and_save(org, request)
 
     @api.secure
     @api.doc("delete_organization")
@@ -181,10 +210,10 @@ class OrganizationAPI(API):
         args = org_delete_parser.parse_args()
         if org.deleted:
             api.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["delete"].test()
         send_legal_notice_on_deletion(org, args)
 
-        org.deleted = datetime.utcnow()
+        org.deleted = datetime.now(UTC)
         org.save()
         return "", 204
 
@@ -262,12 +291,10 @@ class OrganizationRdfFormatAPI(API):
             Dataset.objects(organization=org).visible(), params
         )
         datasets = datasets.paginate(params["page"], params["page_size"])
-
-        dataservices = (
-            Dataservice.objects(organization=org)
-            .visible()
-            .filter_by_dataset_pagination(datasets, params["page"])
+        dataservices = DataserviceApiParser.parse_filters(
+            Dataservice.objects(organization=org).visible(), params
         )
+        dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
         catalog = build_org_catalog(org, datasets, dataservices, _format=_format, **params)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
@@ -279,14 +306,14 @@ class AvailableOrganizationBadgesAPI(API):
     @api.doc("available_organization_badges")
     def get(self):
         """List all available organization badges and their labels"""
-        return Organization.__badges__
+        return Organization.available_badges()
 
 
 @ns.route("/<org:org>/badges/", endpoint="organization_badges")
 class OrganizationBadgesAPI(API):
     @api.doc("add_organization_badge", **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(Badge.__write_fields__)
+    @api.marshal_with(Badge.__read_fields__)
     @api.secure(admin_permission)
     def post(self, org):
         """Create a new badge for a given organization"""
@@ -302,16 +329,16 @@ class OrganizationBadgeAPI(API):
         return badges_api.remove(org, badge_kind)
 
 
-contact_point_parser = ContactPointApiParser()
+contact_point_parser = ContactPoint.__index_parser__
 
 
 @ns.route("/<org:org>/contacts/", endpoint="org_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_organization_contact_point")
-    @api.marshal_with(contact_point_page_fields)
+    @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, org):
         """List all organization contact points"""
-        args = contact_point_parser.parse()
+        args = contact_point_parser.parse_args()
         contact_points = ContactPoint.objects.owned_by(org)
         return contact_points.paginate(args["page"], args["page_size"])
 
@@ -329,7 +356,7 @@ suggest_parser.add_argument(
 class ContactPointSuggestAPI(API):
     @api.doc("suggest_org_contact_points")
     @api.expect(suggest_parser)
-    @api.marshal_list_with(contact_point_fields)
+    @api.marshal_list_with(ContactPoint.__read_fields__)
     def get(self, org):
         """Contact points suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
@@ -362,8 +389,7 @@ class MembershipRequestAPI(API):
         args = requests_parser.parse_args()
         if args["user"]:
             if not current_user.is_authenticated or (
-                str(current_user.id) != args["user"]
-                and not OrganizationPrivatePermission(org).can()
+                str(current_user.id) != args["user"] and not org.permissions["members"].can()
             ):
                 api.abort(
                     403,
@@ -376,27 +402,29 @@ class MembershipRequestAPI(API):
                     if (r.status == args["status"] and str(r.user.id) == args["user"])
                 ]
             return [r for r in org.requests if str(r.user.id) == args["user"]]
-        OrganizationPrivatePermission(org).test()
+        org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
         else:
             return org.requests
 
     @api.secure
+    @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
-        membership_request = org.pending_request(current_user._get_current_object())
+        user = current_user._get_current_object()
+        membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
-        form = api.validate(MembershipRequestForm, membership_request)
-
         if membership_request:
-            form.populate_obj(membership_request)
+            patch(membership_request, request)
+        else:
+            membership_request = patch(MembershipRequest(user=user), request)
+
+        if code == 200:
             org.save()
         else:
-            membership_request = MembershipRequest()
-            form.populate_obj(membership_request)
             org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
@@ -416,18 +444,21 @@ class MembershipAPI(API):
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
     @api.doc("accept_membership", **common_doc)
-    @api.marshal_with(member_fields)
+    @api.marshal_with(Member.__read_fields__)
     def post(self, org, id):
         """Accept user membership to a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
 
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
         membership_request.status = "accepted"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
+        membership_request.handled_on = datetime.now(UTC)
         member = Member(user=membership_request.user, role="editor")
 
         org.members.append(member)
@@ -447,13 +478,23 @@ class MembershipRefuseAPI(MembershipAPI):
     @api.doc("refuse_membership", **common_doc)
     def post(self, org, id):
         """Refuse user membership to a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         membership_request = self.get_or_404(org, id)
-        form = api.validate(MembershipRefuseForm)
+
+        if membership_request.kind == "invitation":
+            api.abort(400, "Use the cancel endpoint for invitations")
+
+        # TODO: use patch() here. Currently blocked because the API payload uses
+        # "comment" but the model field is "refusal_comment" — patch() would set
+        # the wrong field. Requires changing the API contract to use "refusal_comment".
+        comment = (request.json or {}).get("comment")
+        if not comment:
+            raise FieldValidationError(field="comment", message="Comment is required")
+
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
-        membership_request.refusal_comment = form.comment.data
+        membership_request.handled_on = datetime.now(UTC)
+        membership_request.refusal_comment = comment
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)
@@ -463,41 +504,90 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
+@ns.route("/<org:org>/membership/<uuid:id>/cancel/", endpoint="cancel_membership")
+class MembershipCancelAPI(MembershipAPI):
+    @api.secure
+    @api.doc("cancel_membership", **common_doc)
+    @api.response(400, "Membership request is not pending")
+    def post(self, org, id):
+        """Cancel a pending invitation for a given organization."""
+        org.permissions["members"].test()
+        membership_request = self.get_or_404(org, id)
+
+        if membership_request.kind != "invitation":
+            api.abort(400, "Only invitations can be canceled")
+
+        if membership_request.status != "pending":
+            api.abort(400, "Only pending invitations can be canceled")
+
+        membership_request.status = "canceled"
+        membership_request.handled_by = current_user._get_current_object()
+        membership_request.handled_on = datetime.now(UTC)
+
+        org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
+
+        notify_membership_invitation_canceled.delay(str(org.id), str(membership_request.id))
+
+        return {}, 200
+
+
+@ns.route("/<org:org>/member/", endpoint="invite_member", doc=common_doc)
+class MemberInviteAPI(API):
+    @api.secure
+    @api.expect(invite_fields)
+    @api.marshal_with(request_fields, code=201)
+    @api.doc("invite_organization_member")
+    @api.response(403, "Not Authorized")
+    @api.response(400, "Bad Request")
+    def post(self, org):
+        """Invite a user or email to join the organization."""
+        from udata.core.user.models import User
+
+        org.permissions["members"].test()
+        data = request.json or {}
+
+        user_id = data.get("user")
+        user = None
+        if user_id:
+            user = User.objects(id=user_id).first()
+            if not user:
+                raise FieldValidationError(field="user", message=f"Unknown user '{user_id}'")
+
+        # Resolve assignment references from request payload
+        raw_assignments = data.get("assignments") or []
+        assignment_subjects = resolve_assignment_subjects(raw_assignments, org)
+
+        invitation = org.create_invitation(
+            invited_by=current_user._get_current_object(),
+            user=user,
+            email=data.get("email"),
+            role=data.get("role") or DEFAULT_ROLE,
+            comment=data.get("comment"),
+            assignment_subjects=assignment_subjects,
+        )
+
+        notify_membership_invitation.delay(str(org.id), str(invitation.id))
+
+        return invitation, 201
+
+
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
-    @api.expect(member_fields)
-    @api.marshal_with(member_fields, code=201)
-    @api.doc("create_organization_member")
-    @api.response(403, "Not Authorized")
-    @api.response(409, "User is already member", member_fields)
-    def post(self, org, user):
-        """Add a member into a given organization."""
-        EditOrganizationPermission(org).test()
-        if org.is_member(user):
-            return org.member(user), 409
-        member = Member(user=user)
-        form = api.validate(MemberForm, member)
-        form.populate_obj(member)
-        org.members.append(member)
-        org.count_members()
-        org.save()
-
-        notify_new_member.delay(str(org.id), str(member.user.email))
-
-        return member, 201
-
-    @api.secure
-    @api.expect(member_fields)
-    @api.marshal_with(member_fields)
+    @api.expect(Member.__write_fields__)
+    @api.marshal_with(Member.__read_fields__)
     @api.doc("update_organization_member", responses={403: "Not Authorized"})
     def put(self, org, user):
         """Update member status into a given organization."""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         member = org.member(user)
-        form = api.validate(MemberForm, member)
-        form.populate_obj(member)
+        old_role = member.role
+        patch(member, request)
         org.save()
+
+        if old_role == "partial_editor" and member.role != "partial_editor":
+            Assignment.objects(user=user, organization=org).delete()
 
         return member
 
@@ -505,15 +595,67 @@ class MemberAPI(API):
     @api.doc("delete_organization_member", responses={403: "Not Authorized"})
     def delete(self, org, user):
         """Delete member from an organization"""
-        EditOrganizationPermission(org).test()
+        org.permissions["members"].test()
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
+            Assignment.objects(user=user, organization=org).delete()
             org.reload()
             org.count_members()
             return "", 204
         else:
             api.abort(404)
+
+
+@ns.route("/<org:org>/assignments/", endpoint="organization_assignments", doc=common_doc)
+class AssignmentListAPI(API):
+    @api.secure
+    @api.doc("list_organization_assignments")
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def get(self, org):
+        """List assignments for this organization"""
+        org.permissions["members"].test()
+        return list(Assignment.objects(organization=org))
+
+
+@ns.route(
+    "/<org:org>/member/<user:user>/assignments/",
+    endpoint="member_assignments",
+    doc=common_doc,
+)
+class MemberAssignmentsAPI(API):
+    @api.secure
+    @api.doc("sync_member_assignments", responses={403: "Not Authorized"})
+    @api.marshal_list_with(Assignment.__read_fields__)
+    def put(self, org, user):
+        """Sync assignments for a partial_editor member.
+
+        Replaces all current assignments with the provided list.
+        """
+        org.permissions["members"].test()
+
+        member = org.member(user)
+        if not member or member.role != "partial_editor":
+            api.abort(400, "User must be a partial_editor member of this organization")
+
+        desired_subjects = resolve_assignment_subjects(request.json or [], org)
+
+        current = list(Assignment.objects(user=user, organization=org))
+        current_by_subject = {(a.subject.__class__.__name__, str(a.subject.id)): a for a in current}
+        desired_keys = {(s.__class__.__name__, str(s.id)) for s in desired_subjects}
+
+        # Delete removed
+        for key, assignment in current_by_subject.items():
+            if key not in desired_keys:
+                assignment.delete()
+
+        # Create new
+        for subject in desired_subjects:
+            key = (subject.__class__.__name__, str(subject.id))
+            if key not in current_by_subject:
+                Assignment(user=user, organization=org, subject=subject).save()
+
+        return list(Assignment.objects(user=user, organization=org))
 
 
 @ns.route("/<id>/followers/", endpoint="organization_followers")
@@ -559,7 +701,7 @@ class AvatarAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def post(self, org):
         """Upload a new logo"""
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         org.save()
         return {"image": org.logo}
@@ -570,7 +712,7 @@ class AvatarAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def put(self, org):
         """Set the logo BBox"""
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         return {"image": org.logo}
 
@@ -587,7 +729,7 @@ class OrgDatasetsAPI(API):
         """List organization datasets (including private ones when member)"""
         args = dataset_parser.parse()
         qs = Dataset.objects.owned_by(org)
-        if not OrganizationPrivatePermission(org).can():
+        if not org.permissions["private"].can():
             qs = qs(private__ne=True)
         return qs.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
@@ -599,7 +741,7 @@ class OrgReusesAPI(API):
     def get(self, org):
         """List organization reuses (including private ones when member)"""
         qs = Reuse.objects.owned_by(org)
-        if not OrganizationPrivatePermission(org).can():
+        if not org.permissions["private"].can():
             qs = qs(private__ne=True)
         return list(qs)
 

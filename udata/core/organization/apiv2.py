@@ -2,17 +2,22 @@ from flask import request
 
 from udata import search
 from udata.api import API, apiv2, fields
-from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.contact_point.models import ContactPoint
 
-from .api_fields import member_fields, org_fields, org_page_fields
-from .permissions import EditOrganizationPermission
+from .models import Member, MembershipRequest, Organization, Team, org_permissions_fields
 from .search import OrganizationSearch
 
-apiv2.inherit("OrganizationPage", org_page_fields)
-apiv2.inherit("Organization", org_fields)
-apiv2.inherit("Member", member_fields)
-apiv2.inherit("ContactPoint", contact_point_fields)
-org_search_page_fields = apiv2.model("OrganizationSearchPage", fields.search_pager(org_fields))
+apiv2.inherit("Organization (read)", Organization.__read_fields__)
+apiv2.inherit("OrganizationPage", Organization.__page_fields__)
+apiv2.inherit("Team (read)", Team.__read_fields__)
+apiv2.inherit("Member (read)", Member.__read_fields__)
+apiv2.inherit("MembershipRequest (read)", MembershipRequest.__read_fields__)
+apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
+apiv2.inherit("OrganizationPermissions", org_permissions_fields)
+
+org_search_page_fields = apiv2.model(
+    "OrganizationSearchPage", fields.search_pager(Organization.__read_fields__)
+)
 
 
 ns = apiv2.namespace("organizations", "Organization related operations")
@@ -56,7 +61,7 @@ class OrganizationExtrasAPI(API):
             apiv2.abort(400, "Wrong payload format, dict expected")
         if org.deleted:
             apiv2.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             org.extras.pop(key, None)
@@ -76,7 +81,7 @@ class OrganizationExtrasAPI(API):
             apiv2.abort(400, "Wrong payload format, list expected")
         if org.deleted:
             apiv2.abort(410, "Organization has been deleted")
-        EditOrganizationPermission(org).test()
+        org.permissions["edit"].test()
         for key in data:
             try:
                 del org.extras[key]

@@ -1,28 +1,46 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 from flask_login import current_user
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    GenericReferenceField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
+from mongoengine.signals import post_save
 
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
+from udata.mongo.document import UDataDocument as Document
+from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.uuid_fields import AutoUUIDField
 
-from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
+from .signals import (
+    on_discussion_closed,
+    on_discussion_deleted,
+    on_discussion_message_deleted,
+    on_new_discussion,
+    on_new_discussion_comment,
+)
 
 log = logging.getLogger(__name__)
 
 
-class Message(SpamMixin, db.EmbeddedDocument):
+class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
-    id = db.AutoUUIDField()
-    content = db.StringField(required=True)
-    posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
-    posted_by = db.ReferenceField("User")
-    posted_by_organization = db.ReferenceField("Organization")
-    last_modified_at = db.DateTimeField()
+    id = AutoUUIDField()
+    content = StringField(required=True)
+    posted_on = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    posted_by = ReferenceField("User")
+    posted_by_organization = ReferenceField("Organization")
+    last_modified_at = DateTimeField()
 
     @property
     def permissions(self):
@@ -45,8 +63,8 @@ class Message(SpamMixin, db.EmbeddedDocument):
     def posted_by_org_or_user(self):
         return self.posted_by_organization or self.posted_by
 
-    def texts_to_check_for_spam(self):
-        return [self.content]
+    def fields_to_check_for_spam(self):
+        return {"content": self.content}
 
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
@@ -72,20 +90,20 @@ class Message(SpamMixin, db.EmbeddedDocument):
         return message
 
 
-class Discussion(SpamMixin, Linkable, db.Document):
+class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
-    user = db.ReferenceField("User")
-    organization = db.ReferenceField("Organization")
+    user = ReferenceField("User")
+    organization = ReferenceField("Organization")
 
-    subject = db.GenericReferenceField()
-    title = db.StringField(required=True)
-    discussion = db.ListField(db.EmbeddedDocumentField(Message))
-    created = db.DateTimeField(default=datetime.utcnow, required=True)
-    closed = db.DateTimeField()
-    closed_by = db.ReferenceField("User")
-    closed_by_organization = db.ReferenceField("Organization")
-    extras = db.ExtrasField()
+    subject = GenericReferenceField()
+    title = StringField(required=True)
+    discussion = ListField(EmbeddedDocumentField(Message))
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    closed = DateTimeField()
+    closed_by = ReferenceField("User")
+    closed_by_organization = ReferenceField("Organization")
+    extras = ExtrasField()
 
     meta = {
         "indexes": [
@@ -137,9 +155,12 @@ class Discussion(SpamMixin, Linkable, db.Document):
         """
         return any(message.posted_by == person for message in self.discussion)
 
-    def texts_to_check_for_spam(self):
+    def fields_to_check_for_spam(self):
+        fields = {"title": self.title}
         # Discussion should always have a first message but it's not the case in some tests…
-        return [self.title, self.discussion[0].content if len(self.discussion) else ""]
+        if len(self.discussion):
+            fields["discussion.0.content"] = self.discussion[0].content
+        return fields
 
     def embeds_to_check_for_spam(self):
         return self.discussion[1:]
@@ -175,6 +196,19 @@ class Discussion(SpamMixin, Linkable, db.Document):
 
         return message
 
+    def owner_recipients(self, sender=None):
+        """Return the list of users that should be notified about this discussion."""
+        recipients = {m.posted_by.id: m.posted_by for m in self.discussion}
+        if getattr(self.subject, "organization", None):
+            for member in self.subject.organization.members:
+                recipients[member.user.id] = member.user
+        elif getattr(self.subject, "owner", None):
+            recipients[self.subject.owner.id] = self.subject.owner
+
+        if sender:
+            recipients.pop(sender.id, None)
+        return list(recipients.values())
+
     @spam_protected()
     def signal_new(self):
         on_new_discussion.send(self)
@@ -186,3 +220,26 @@ class Discussion(SpamMixin, Linkable, db.Document):
     @spam_protected(lambda discussion, message: discussion.discussion[message])
     def signal_comment(self, message):
         on_new_discussion_comment.send(self, message=message)
+
+    def delete(self, *args, **kwargs):
+        """Delete the discussion and send deletion signal"""
+        result = super().delete(*args, **kwargs)
+        on_discussion_deleted.send(self)
+        return result
+
+    def remove_message(self, message_id):
+        """Remove a message by its UUID and trigger deletion signal"""
+        for i, message in enumerate(self.discussion):
+            if message.id == message_id:
+                self.discussion.pop(i)
+                self.save()
+
+                from udata.core.reports.models import Report
+
+                Report.mark_subject_deleted_by_embed_id(self, message.id)
+
+                on_discussion_message_deleted.send(self, message=message)
+                return
+
+
+post_save.connect(Discussion.post_save, sender=Discussion)

@@ -1,6 +1,17 @@
 import pytest
 
 
+def pytest_configure(config):
+    # Each xdist worker gets its own MongoDB database to avoid conflicts
+    # when tests drop/recreate the database.
+    workerinput = getattr(config, "workerinput", None)
+    if workerinput is not None:
+        worker_id = workerinput["workerid"]
+        from udata import settings
+
+        settings.Testing.MONGODB_HOST_TEST = f"mongodb://localhost:27017/udata_test_{worker_id}"
+
+
 @pytest.fixture
 def rmock():
     """A requests-mock fixture"""

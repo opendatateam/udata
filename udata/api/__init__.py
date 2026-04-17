@@ -96,20 +96,25 @@ class UDataApi(Api):
         @wraps(func)
         def wrapper(*args, **kwargs):
             from udata.api.oauth2 import check_credentials
-            from udata.core.user.models import User
 
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
 
             apikey = request.headers.get(HEADER_API_KEY)
             if apikey:
-                try:
-                    user = User.objects.get(apikey=apikey)
-                except User.DoesNotExist:
-                    self.abort(401, "Invalid API Key")
+                from udata.core.api_token.models import ApiToken
 
-                if not login_user(user, False):
+                api_token, error = ApiToken.authenticate(apikey)
+                if api_token is None:
+                    if error == "revoked":
+                        self.abort(401, "Revoked API token")
+                    elif error == "expired":
+                        self.abort(401, "Expired API token")
+                    self.abort(401, "Invalid API token")
+
+                if not login_user(api_token.user, False):
                     self.abort(401, "Inactive user")
+                api_token.update_usage(request.headers.get("User-Agent"))
             else:
                 check_credentials()
             return func(*args, **kwargs)
@@ -129,7 +134,7 @@ class UDataApi(Api):
         return form
 
     def render_ui(self):
-        return redirect(current_app.config.get("API_DOC_EXTERNAL_LINK"))
+        return redirect(current_app.config["API_DOC_EXTERNAL_LINK"])
 
     def unauthorized(self, response):
         """Override to change the WWW-Authenticate challenge"""
@@ -342,13 +347,13 @@ def init_app(app):
     import udata.core.dataset.apiv2  # noqa
     import udata.core.dataservices.api  # noqa
     import udata.core.dataservices.apiv2  # noqa
+    import udata.core.visualizations.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.discussions.apiv2  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
     import udata.core.organization.apiv2  # noqa
-    import udata.core.pages.api  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa

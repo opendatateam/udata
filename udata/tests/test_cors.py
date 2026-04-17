@@ -28,12 +28,12 @@ class CorsTest(APITestCase):
 
         # Resource permalink
         response = self.get(f"/datasets/r/{dataset.resources[0].id}", headers=cors_headers)
-        assert_status(response, 404)  # The route is defined in udata-front
+        assert_status(response, 404)  # The route is defined in cdata (formerly udata-front)
         assert "Access-Control-Allow-Origin" in response.headers
 
         # Oauth
         response = self.get("/oauth/", headers=cors_headers)
-        assert_status(response, 404)  # Oauth is defined in udata-front
+        assert_status(response, 404)  # Oauth is defined in cdata (formerly udata-front)
         assert "Access-Control-Allow-Origin" in response.headers
 
     def test_cors_redirects(self):

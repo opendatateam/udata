@@ -1,91 +1,14 @@
-from flask import request
+from udata.api import api, fields
+from udata.core.user.models import User
 
-from udata.api import api, base_reference, fields
-from udata.auth.helpers import current_user_is_admin_or_self
-from udata.core.badges.fields import badge_fields
-from udata.core.organization.permissions import OrganizationPrivatePermission
+from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
+from .models import Organization
 
-from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES
-
-org_ref_fields = api.inherit(
-    "OrganizationReference",
-    base_reference,
+generic_reference_fields = api.model(
+    "GenericReference",
     {
-        "name": fields.String(description="The organization name", readonly=True),
-        "acronym": fields.String(description="The organization acronym"),
-        "slug": fields.String(
-            description="The organization string used as permalink", readonly=True
-        ),
-        "uri": fields.String(
-            attribute=lambda o: o.self_api_url(),
-            description="The API URI for this organization",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda o: o.self_web_url(),
-            description="The organization web page URL",
-            readonly=True,
-        ),
-        "logo": fields.ImageField(original=True, description="The organization logo URL"),
-        "logo_thumbnail": fields.ImageField(
-            attribute="logo",
-            size=BIGGEST_LOGO_SIZE,
-            description="The organization logo thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
-        ),
-        "badges": fields.List(
-            fields.Nested(badge_fields), description="The organization badges", readonly=True
-        ),
-    },
-)
-
-
-def check_can_access_user_private_info():
-    # This endpoint is secure, only organization member has access.
-    if request.endpoint == "api.request_membership":
-        return True
-
-    if request.endpoint != "api.organization":
-        return False
-
-    org = request.view_args.get("org")
-    if org is None:
-        return False
-
-    return OrganizationPrivatePermission(org).can()
-
-
-def member_email_with_visibility_check(email):
-    if current_user_is_admin_or_self():
-        return email
-    name, domain = email.split("@")
-    if check_can_access_user_private_info():
-        # Obfuscate email partially for other members
-        name = name[:2] + "*" * (len(name) - 2)
-        return f"{name}@{domain}"
-    # Return only domain for other users
-    return f"***@{domain}"
-
-
-# This import is not at the top of the file to avoid circular imports
-from udata.core.user.api_fields import user_ref_fields  # noqa
-
-member_user_with_email_fields = api.inherit(
-    "MemberUserWithEmail",
-    user_ref_fields,
-    {
-        "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o.email),
-            description="The user email (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
-            readonly=True,
-        ),
-        "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at
-            if check_can_access_user_private_info()
-            else None,
-            description="The user last connection date (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
-            readonly=True,
-        ),
+        "class": fields.String(attribute=lambda o: o.__class__.__name__),
+        "id": fields.String(attribute=lambda o: str(o.id)),
     },
 )
 
@@ -93,91 +16,60 @@ request_fields = api.model(
     "MembershipRequest",
     {
         "id": fields.String(readonly=True),
-        "user": fields.Nested(member_user_with_email_fields),
+        "user": fields.Nested(User.__ref_fields__, allow_null=True),
+        "email": fields.String(description="Email for non-registered user invitations"),
+        "kind": fields.String(
+            description="The request kind (request or invitation)",
+            enum=list(REQUEST_TYPES),
+            default="request",
+        ),
         "created": fields.ISODateTime(description="The request creation date", readonly=True),
         "status": fields.String(
             description="The current request status", required=True, enum=list(MEMBERSHIP_STATUS)
         ),
-        "comment": fields.String(description="A request comment from the user", required=True),
-    },
-)
-
-member_fields = api.model(
-    "Member",
-    {
-        "user": fields.Nested(member_user_with_email_fields),
         "role": fields.String(
-            description="The member role in the organization",
-            required=True,
-            enum=list(ORG_ROLES),
-            default=DEFAULT_ROLE,
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
-        "label": fields.String(readonly=True),
-        "since": fields.ISODateTime(
-            description="The date the user joined the organization", readonly=True
+        "comment": fields.String(description="A request comment from the user"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
         ),
     },
 )
 
-org_fields = api.model(
-    "Organization",
+invite_fields = api.model(
+    "MembershipInvite",
     {
-        "id": fields.String(description="The organization identifier", readonly=True),
-        "name": fields.String(description="The organization name", required=True),
-        "acronym": fields.String(description="The organization acronym"),
-        "url": fields.String(description="The organization website URL"),
-        "slug": fields.String(
-            description="The organization string used as permalink", readonly=True
+        "user": fields.String(description="User ID to invite"),
+        "email": fields.String(description="Email to invite (if user not registered)"),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
         ),
-        "description": fields.Markdown(
-            description="The organization description in Markdown", required=True
+        "comment": fields.String(description="Invitation message"),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
         ),
-        "business_number_id": fields.String(
-            description="The organization's business identification number."
-        ),
-        "created_at": fields.ISODateTime(
-            description="The organization creation date", readonly=True
-        ),
-        "last_modified": fields.ISODateTime(
-            description="The organization last modification date", readonly=True
-        ),
-        "deleted": fields.ISODateTime(
-            description="The organization deletion date if deleted", readonly=True
-        ),
-        "metrics": fields.Raw(
-            attribute=lambda o: o.get_metrics(),
-            description="The organization metrics",
-            readonly=True,
-        ),
-        "uri": fields.String(
-            attribute=lambda o: o.self_api_url(),
-            description="The API URI for this organization",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda o: o.self_web_url(),
-            description="The organization web page URL",
-            readonly=True,
-        ),
-        "logo": fields.ImageField(original=True, description="The organization logo URL"),
-        "logo_thumbnail": fields.ImageField(
-            attribute="logo",
-            size=BIGGEST_LOGO_SIZE,
-            description="The organization logo thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_LOGO_SIZE),
-        ),
-        "members": fields.List(
-            fields.Nested(member_fields, description="The organization members")
-        ),
-        "badges": fields.List(
-            fields.Nested(badge_fields), description="The organization badges", readonly=True
-        ),
-        "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )
 
-org_page_fields = api.model("OrganizationPage", fields.pager(org_fields))
-
+pending_invitation_fields = api.model(
+    "PendingInvitation",
+    {
+        "id": fields.String(readonly=True),
+        "organization": fields.Nested(Organization.__ref_fields__),
+        "role": fields.String(
+            description="The role to assign", enum=list(ORG_ROLES), default=DEFAULT_ROLE
+        ),
+        "comment": fields.String(description="Invitation message"),
+        "created": fields.ISODateTime(description="The invitation creation date", readonly=True),
+        "assignments": fields.List(
+            fields.Nested(generic_reference_fields),
+            description="Objects to assign on acceptance (for partial_editor invitations)",
+        ),
+    },
+)
 
 refuse_membership_fields = api.model(
     "RefuseMembership",
