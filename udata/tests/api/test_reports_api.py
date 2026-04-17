@@ -7,7 +7,9 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.discussions.models import Discussion, Message
 from udata.core.reports.constants import (
+    REASON_AUTO_SPAM,
     REASON_ILLEGAL_CONTENT,
     REASON_SPAM,
     reports_reasons_translations,
@@ -515,3 +517,45 @@ class ReportsAPITest(APITestCase):
         report_on_discussion.reload()
         self.assertIsNone(report_on_discussion.subject_deleted_at)
         self.assertIsNone(report_on_discussion.subject_deleted_by)
+
+    def test_reports_api_callbacks_count_returned_in_response(self):
+        """The API should return the callbacks count, not the full callbacks dict."""
+        admin = AdminFactory()
+        user = UserFactory()
+
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="Test", discussion=[message]
+        )
+
+        report = Report(
+            subject=discussion,
+            reason=REASON_AUTO_SPAM,
+            callbacks={"signal_new": {"args": [], "kwargs": {}}},
+        ).save()
+
+        self.login(admin)
+
+        # GET single report — should have count, not the full dict
+        response = self.get(url_for("api.report", report=report))
+        self.assert200(response)
+        self.assertNotIn("callbacks", response.json)
+        self.assertEqual(response.json["callbacks_count"], 1)
+
+        # GET list
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertNotIn("callbacks", response.json["data"][0])
+        self.assertEqual(response.json["data"][0]["callbacks_count"], 1)
+
+        # PATCH dismiss — callbacks are executed and cleared
+        response = self.patch(
+            url_for("api.report", report=report),
+            {"dismissed_at": datetime.now(UTC).isoformat()},
+        )
+        self.assert200(response)
+        self.assertEqual(response.json["callbacks_count"], 0)
+
+        report.reload()
+        self.assertEqual(report.callbacks, {})
