@@ -14,7 +14,9 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.marshalling import marshal
 from flask_restx.reqparse import RequestParser
+from flask_restx.utils import merge, unpack
 from flask_storage import UnauthorizedFileType
 
 from udata import tracking
@@ -25,6 +27,7 @@ from udata.utils import safe_unicode
 
 from . import fields
 from .signals import on_api_call
+from .versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES, VERSION_HEADER
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +44,63 @@ class UDataApi(Api):
         kwargs["decorators"] = [self.authentify] + decorators
         super(UDataApi, self).__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
+
+    def marshal_with(self, fields, as_list=False, code=200, description=None, **kwargs):
+        """Override marshal_with to support API versioning.
+
+        Always marshals with the latest model (for Swagger docs). Then, at request
+        time, applies registered version transforms for older API versions.
+        """
+        from .versioning import TRANSFORMS, apply_transforms, get_request_version
+
+        name = fields.name
+        is_page = name.endswith("Page")
+        model_name = name[:-4] if is_page else name.split(" (")[0]
+
+        if model_name not in TRANSFORMS:
+            return self.default_namespace.marshal_with(fields, as_list, code, description, **kwargs)
+
+        def decorator(func):
+            doc = {
+                "responses": {
+                    str(code): (
+                        (description, [fields], kwargs)
+                        if as_list
+                        else (description, fields, kwargs)
+                    )
+                },
+                "__mask__": kwargs.get("mask", True),
+            }
+            func.__apidoc__ = merge(getattr(func, "__apidoc__", {}), doc)
+
+            @wraps(func)
+            def wrapper(*args, **kw):
+                resp = func(*args, **kw)
+                if isinstance(resp, tuple):
+                    raw_data, resp_code, headers = unpack(resp)
+                else:
+                    raw_data, resp_code, headers = resp, 200, {}
+
+                mask = getattr(fields, "__mask__", None)
+                mask_header = current_app.config.get("RESTX_MASK_HEADER", "X-Fields")
+                mask = request.headers.get(mask_header) or mask
+                marshalled = marshal(raw_data, fields, mask=mask, ordered=self.ordered)
+
+                version = get_request_version()
+                if version < LATEST_API_VERSION:
+                    if is_page and hasattr(raw_data, "objects"):
+                        for item, orig in zip(marshalled.get("data", []), raw_data.objects):
+                            apply_transforms(model_name, item, orig, "page", version)
+                    else:
+                        apply_transforms(model_name, marshalled, raw_data, "read", version)
+
+                if isinstance(resp, tuple):
+                    return marshalled, resp_code, headers
+                return marshalled
+
+            return wrapper
+
+        return decorator
 
     def secure(self, func):
         """Enforce authentication on a given method/verb
@@ -223,6 +283,14 @@ def extract_name_from_path(path):
 
 @apiv1_blueprint.after_request
 @apiv2_blueprint.after_request
+def add_version_header(response):
+    if hasattr(g, "_api_version"):
+        response.headers[VERSION_HEADER] = str(g._api_version)
+    return response
+
+
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get("TRACKING_BLACKLIST", [])
@@ -334,6 +402,21 @@ def marshal_page(page, page_fields):
 
 def marshal_page_with(func):
     pass
+
+
+ns_versions = api.namespace("versions", "API versioning information")
+
+
+@ns_versions.route("/", endpoint="api_versions")
+class APIVersionsAPI(API):
+    @api.doc("list_api_versions")
+    def get(self):
+        """List all API version changes"""
+        return {
+            "latest": str(LATEST_API_VERSION),
+            "oldest": str(OLDEST_API_VERSION),
+            "changes": sorted(VERSION_CHANGES, key=lambda c: c["version"], reverse=True),
+        }
 
 
 def init_app(app):
