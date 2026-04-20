@@ -356,6 +356,34 @@ class TopicsListAPITest(APITestCase):
         self.assertEqual(topic.spatial.geom, SAMPLE_GEOM)
         self.assertEqual(topic.spatial.granularity, granularity)
 
+    def test_topic_api_create_with_invalid_element_leaves_partial_state(self):
+        """Locks current behavior: the topic is saved first, then elements are
+        iterated and saved one by one. A validation error mid-loop leaves the
+        topic (and any already-saved elements) in the database and returns a
+        400 to the client. This pre-existed the api_fields migration (the old
+        TopicForm.save had the same order, it just silently dropped invalid
+        elements instead of raising). If we ever decide to make topic creation
+        atomic, this test will fail and remind us to revisit.
+        """
+        self.login()
+        dataset = DatasetFactory()
+        data = {
+            "name": "partial topic",
+            "description": "desc",
+            "tags": ["tag"],
+            "elements": [
+                {"title": "valid", "element": {"class": "Dataset", "id": str(dataset.id)}},
+                # Wrong class for the given id -> raises "Unknown reference"
+                {"element": {"class": "Reuse", "id": str(dataset.id)}},
+            ],
+        }
+        response = self.post(url_for("apiv2.topics_list"), data)
+        assert response.status_code == 400
+
+        topic = Topic.objects(name="partial topic").first()
+        assert topic is not None
+        assert len(topic.elements) == 1
+
 
 class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
@@ -421,6 +449,35 @@ class TopicAPITest(APITestCase):
         self.assertEqual(topic.name, "Updated topic name")
         self.assertEqual(topic.description, "Updated description")
         self.assertEqual(topic.tags, ["updated-tag"])
+
+    def test_topic_api_update_with_invalid_element_deletes_existing_elements(self):
+        """Locks current behavior: PUT deletes the topic's existing elements
+        before iterating and validating the new ones. A validation error mid-
+        loop leaves the topic updated, its old elements gone, and returns a
+        400 to the client. This pre-existed the api_fields migration (the old
+        TopicForm.save had the same order, it just silently dropped invalid
+        elements instead of raising). If we ever decide to validate the full
+        element list before touching existing data, this test will fail and
+        remind us to revisit.
+        """
+        user = self.login()
+        topic = TopicWithElementsFactory(owner=user)
+        dataset = DatasetFactory()
+        self.assertGreater(len(topic.elements), 0)
+
+        data = {
+            "name": "updated name",
+            "description": topic.description,
+            "tags": topic.tags,
+            # Wrong class for the given id -> raises "Unknown reference"
+            "elements": [{"element": {"class": "Reuse", "id": str(dataset.id)}}],
+        }
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        assert response.status_code == 400
+
+        topic.reload()
+        assert topic.name == "updated name"
+        assert len(topic.elements) == 0
 
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""
