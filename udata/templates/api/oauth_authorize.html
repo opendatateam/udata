@@ -1,0 +1,64 @@
+{% block main_content %}
+<section class="fr-py-3w fr-py-md-9v bg-grey-50">
+    <div class="fr-container">
+        <div class="fr-grid-row fr-grid-row--center">
+            <div class="fr-col-12 fr-col-md-8 fr-col-lg-6 bg-white">
+                <div class="fr-px-7v fr-py-5w border-bottom border-default-grey">
+                    <div class="fr-grid-row fr-grid-row--middle">
+                        {% if grant.client.organization %}
+                            <div class="fr-mr-4w fr-mb-3w">
+                                <img
+                                    alt="{{ grant.client.organization.name|placeholder_alt(grant.client.organization.logo) }}"
+                                    src="{{ grant.client.organization.logo(120)|placeholder('organization') }}"
+                                    class="client-logo"
+                                />
+                            </div>
+                        {% endif %}
+                        {% if grant.client.image %}
+                        <div class="fr-col-4 fr-mb-3w">
+                            <img src="{{ grant.client.image }}" alt="" class="fr-responsive-img client-logo">
+                        </div>
+                        {% endif %}
+                        <p class="fr-text--lead fr-mb-0">
+                            {{ _(
+                            '%(app)s want to access your %(site)s account.',
+                            app='<strong>%s</strong>'|format(grant.client.name)|safe,
+                            site='<strong>%s</strong>'|format(config.SITE_TITLE)|safe
+                        ) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="fr-px-7v fr-py-5w">
+                    <div>
+                        <p class="fr-text--sm fr-mb-5v">{{ _('This site request the following rights:') }}</p>
+                        <dl>
+                            <dt class="fr-text--bold">{{ _('Access your profile') }}</dt>
+                            <dd class="fr-text--sm fr-pb-3w fr-mb-5v border-bottom border-default-grey">{{ _('Read your profile, your email address, the organization you belong to, your publications') }}</dd>
+                            <dt class="fr-text--bold">{{ _('Publish data') }}</dt>
+                            <dd class="fr-text--sm fr-pb-3w fr-mb-5w border-bottom border-default-grey">{{ _('Publish datasets, reuses, follow or unfollow') }}</dd>
+                        </dl>
+                    </div>
+                    <form class="fr-grid-row fr-grid-row--center" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="scope" value="{{ (grant.scopes or ['default']) | join(' ') }}" />
+                        <button
+                            type="submit"
+                            name="decline"
+                            class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mr-5w"
+                        >
+                            {{ _('Refuse') }}
+                        </button>
+                        <button
+                            type="submit"
+                            name="accept"
+                            class="fr-btn"
+                        >
+                            {{ _('Accept') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
