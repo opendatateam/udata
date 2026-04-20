@@ -13,6 +13,9 @@ The `@generate_fields` decorator parameters:
 - additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
 - nested_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
 - standalone_filters: filter on something else than a field. Should be a list of dicts with filterable attributes, as returned by `compute_filter`.
+- page_mask: explicit mask string applied to `__page_fields__` (e.g. "*,datasets{id,title}").
+- read_mask_exclude: list of field names to exclude from `__read_fields__` default response.
+- page_mask_exclude: list of field names to exclude from `__page_fields__` (paginated list) default response.
 
 Generated attributes on decorated classes:
 - ref_fields: Minimal fields for embedded/referenced documents
@@ -140,8 +143,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
-        params["min"] = field.min  # TODO min_value?
-        params["max"] = field.max
+        params["min"] = field.min_value
+        params["max"] = field.max_value
     elif isinstance(field, mongo_fields.IntField):
         constructor = restx_fields.Integer
         params["min"] = field.min_value
@@ -267,8 +270,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
         # when returning from an endpoint)
         nested_fields: dict | None = info.get("nested_fields")
-        if nested_fields is None and hasattr(field.document_type_obj, "__ref_fields__"):
-            nested_fields = field.document_type_obj.__ref_fields__
+        document_type = field.document_type_obj
+        if isinstance(document_type, str):
+            document_type = db.resolve_model(document_type)
+        if nested_fields is None and hasattr(document_type, "__ref_fields__"):
+            nested_fields = document_type.__ref_fields__
 
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
@@ -504,17 +510,39 @@ def generate_fields(**kwargs) -> Callable:
             if additional_field_info.get("show_as_ref", False):
                 ref_fields[method_name] = read_fields[method_name]
 
-        cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
+        # Masks allow excluding heavy fields from responses (e.g. blocs on list endpoints)
+        # without removing them from the model entirely — clients can still request them
+        # via the X-Fields header. This is not ideal: masks are a runtime concern and are
+        # not reflected in the Swagger documentation, so excluded fields appear in the docs
+        # even though they're not returned by default. A better approach would be to generate
+        # distinct API models per context (list vs detail, lightweight vs full) so that the
+        # schema accurately describes each endpoint's response. This would also replace the
+        # manual mask= usage on models like Reuse and Dataset.
+        read_mask_exclude: list | None = kwargs.pop("read_mask_exclude", None)
+        page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
+        page_mask: str | None = kwargs.pop("page_mask", None)
+
+        read_mask = None
+        if read_mask_exclude:
+            read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
+
+        cls.__read_fields__ = api.model(
+            f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs
+        )
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        mask: str | None = kwargs.pop("mask", None)
-        if mask is not None:
-            mask = "data{{{0}}},*".format(mask)
+        page_mask = None
+        if page_mask_exclude:
+            page_mask = "data{{{0}}},*".format(
+                ",".join(k for k in read_fields if k not in page_mask_exclude)
+            )
+        elif page_mask is not None:
+            page_mask = "data{{{0}}},*".format(page_mask)
         cls.__page_fields__ = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(cls.__read_fields__),
-            mask=mask,
+            mask=page_mask,
             **kwargs,
         )
 

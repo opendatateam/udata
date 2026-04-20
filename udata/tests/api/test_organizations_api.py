@@ -95,6 +95,36 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
+    def test_organization_api_get_member_user_is_nested_object(self):
+        """Member user must be serialized as a nested object, not a string."""
+        user = UserFactory(first_name="Normal", last_name="User")
+        organization = OrganizationFactory(members=[Member(user=user, role="editor")])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        member = response.json["members"][0]
+        assert isinstance(member["user"], dict), (
+            f"member.user should be a dict, got {type(member['user'])}: {member['user']}"
+        )
+        assert member["user"]["first_name"] == "Normal"
+        assert member["user"]["last_name"] == "User"
+        assert "id" in member["user"]
+
+    def test_organization_api_get_with_membership_request_without_created_by(self):
+        """Old membership requests may have created_by=None, the API should not 500"""
+        user = UserFactory()
+        request = MembershipRequest(user=user, comment="a comment", created_by=None)
+        organization = OrganizationFactory(requests=[request])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+
+    def test_organization_api_get_with_pending_membership_request_without_handled_by(self):
+        """Pending membership requests have handled_by=None, the API should not 500"""
+        user = UserFactory()
+        request = MembershipRequest(user=user, comment="a comment", status="pending")
+        organization = OrganizationFactory(requests=[request])
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+
     def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
         organization = OrganizationFactory(deleted=datetime.now(UTC))
@@ -156,20 +186,20 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         data["business_number_id"] = "110014016"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _(
-            "A siret number is made of 14 digits"
+        assert response.json["errors"]["business_number_id"] == str(
+            _("A siret number is made of 14 digits")
         )
 
         data["business_number_id"] = "12345678901234"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _("Invalid Siret number")
+        assert response.json["errors"]["business_number_id"] == str(_("Invalid Siret number"))
 
         data["business_number_id"] = "tttttttttttttt"
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
-        assert response.json["errors"]["business_number_id"][0] == _(
-            "A siret number is only made of digits"
+        assert response.json["errors"]["business_number_id"] == str(
+            _("A siret number is only made of digits")
         )
 
     def test_organization_api_update_deleted(self):
@@ -253,6 +283,16 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_on is None
         assert request.handled_by is None
         assert request.refusal_comment is None
+
+    def test_request_membership_without_comment(self):
+        organization = OrganizationFactory()
+        self.login()
+
+        response = self.post(url_for("api.request_membership", org=organization), {})
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
 
     def test_request_existing_pending_membership_do_not_duplicate_it(self):
         user = self.login()
@@ -506,6 +546,21 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert response.json["message"] == "Unknown membership request id"
 
+    def test_refuse_membership_without_comment(self):
+        user = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="test")
+        member = Member(user=user, role="admin")
+        organization = OrganizationFactory(members=[member], requests=[membership_request])
+
+        api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
+        response = self.post(api_url, {})
+        assert400(response)
+
+        organization.reload()
+        assert organization.requests[0].status == "pending"
+        assert organization.requests[0].refusal_comment is None
+
     def test_accept_membership_rejects_invitation(self):
         """Test that accept_membership rejects invitations."""
         user = self.login()
@@ -692,6 +747,19 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         api_url = url_for("api.invite_member", org=organization)
         response = self.post(api_url, {"email": "not-an-email", "role": "editor"})
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_invite_member_unknown_user_id(self):
+        """Test that inviting with an unknown user ID is rejected."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": "deadbeefdeadbeefdeadbeef", "role": "editor"})
 
         assert400(response)
 

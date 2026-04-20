@@ -5,7 +5,6 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
@@ -92,7 +91,7 @@ class Owned(object):
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
-        nested_fields=org_ref_fields,
+        nested_fields=Organization.__ref_fields__,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,

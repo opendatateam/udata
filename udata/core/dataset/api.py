@@ -33,6 +33,7 @@ from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.core import storages
+from udata.core.access_type.constants import AccessType
 from udata.core.badges import api as badges_api
 from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
@@ -112,6 +113,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
+        self.parser.add_argument("access_type", type=str, choices=list(AccessType), location="args")
         self.parser.add_argument("organization", type=str, location="args")
         # Uses __badges__ (not available_badges) so that users can still filter
         # by any existing badge, even hidden ones.
@@ -137,6 +139,9 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
+        self.parser.add_argument(
+            "access_type", choices=[elem.value for elem in AccessType], location="args"
+        )
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
@@ -182,6 +187,8 @@ class DatasetApiParser(ModelApiParser):
                 temporal_coverage__start__gte=args["temporal_coverage"][:9],
                 temporal_coverage__start__lte=args["temporal_coverage"][11:],
             )
+        if args.get("access_type"):
+            datasets = datasets.filter(access_type=args["access_type"])
         if args.get("featured") is not None:
             datasets = datasets.filter(featured=args["featured"])
         if args.get("badge"):
@@ -213,6 +220,8 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.filter(resources__schema__name=args["schema"])
         if args.get("schema_version"):
             datasets = datasets.filter(resources__schema__version=args["schema_version"])
+        if args.get("access_type"):
+            datasets = datasets.filter(access_type=args["access_type"])
         if args.get("topic"):
             if not ObjectId.is_valid(args["topic"]):
                 api.abort(400, "Topic arg must be an identifier")

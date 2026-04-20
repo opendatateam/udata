@@ -229,37 +229,39 @@ CONTEXT = {
 }
 
 
-def serialize_value(value, parse_label=False):
+def serialize_value(value, unwrap: list[URIRef] | None = None):
     """
     If the value is a URIRef or a Literal, return it as a string.
     If the value is a RdfResource:
-        - Return the label of the RdfResource if any and `parse_label`,
-        - or the identifier of the RdfResource.
+        - if `unwrap` is set, look for children of the RdfResource in the order they are listed in
+          `unwrap`, and return the value of the first matching element (if any),
+        - otherwise return the identifier of the RdfResource.
     """
     if isinstance(value, (URIRef, Literal)):
         return value.toPython()
     elif isinstance(value, RdfResource):
-        if parse_label and (rdfs_label := rdf_value(value, RDFS.label)):
-            return rdfs_label
+        for uriref in unwrap or []:
+            if val := rdf_value(value, uriref):
+                return val
         return value.identifier.toPython()
 
 
-def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
+def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> set[str]:
     """Returns a set of serialized values for a predicate from a RdfResource"""
     return {
         value
         for info in resource.objects(predicate=predicate)
-        if (value := serialize_value(info, parse_label=parse_label))
+        if (value := serialize_value(info, unwrap=unwrap))
     }
 
 
-def rdf_value(obj, predicate, default=None, parse_label=False):
+def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
     """
     Serialize the value for a predicate on a RdfResource,
     expecting one value only or (at most) one per language for Literals.
     """
     value = default_lang_value(obj, predicate)
-    return serialize_value(value, parse_label=parse_label) if value else default
+    return serialize_value(value, unwrap=unwrap) if value else default
 
 
 def default_lang_value(obj, predicate):

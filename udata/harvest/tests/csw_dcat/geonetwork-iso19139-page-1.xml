@@ -309,7 +309,7 @@ Mentionner le producteur des référentiels géographiques : ©IGN (BD Parcellai
                 <gmd:MD_RestrictionCode codeListValue="license" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_RestrictionCode">license</gmd:MD_RestrictionCode>
               </gmd:useConstraints>
               <gmd:otherConstraints>
-                <gco:CharacterString>Pas de restriction d'accès public selon INSPIRE</gco:CharacterString>
+                <gco:CharacterString>L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)</gco:CharacterString>
               </gmd:otherConstraints>
             </gmd:MD_LegalConstraints>
           </gmd:resourceConstraints>

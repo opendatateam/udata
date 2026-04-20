@@ -136,7 +136,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
             url_for("security.login"), {"email": user.email, "password": "password123"}
         )
         self.assertStatus(response, 200)
-        assert "tf_required" not in response.json["response"]
+        assert response.json["response"]["tf_required"] is False
         assert "tf_state" not in response.json["response"]
 
         # Should be None by default (2FA not set up)

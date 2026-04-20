@@ -13,10 +13,9 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.edito_blocs.models import HeroBloc, LinkInBloc, LinksListBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.pages.factories import PageFactory
-from udata.core.pages.models import HeroBloc, LinkInBloc, LinksListBloc
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.site.factories import SiteFactory
@@ -57,25 +56,27 @@ class FixturesTest(PytestOnlyAPITestCase):
         )
         DataserviceFactory(datasets=[dataset], organization=org, contact_points=[contact_point])
 
-        page = PageFactory(
-            blocs=[
+        PostFactory(
+            name="Test Post",
+            headline="A test post",
+            owner=user,
+            content="Some content",
+        )
+        SiteFactory(
+            id=self.app.config["SITE_ID"],
+            title="Test Site",
+            datasets_blocs=[
                 HeroBloc(title="Test Hero", description="A test hero bloc"),
                 LinksListBloc(
                     title="Test Links",
                     links=[LinkInBloc(title="Example", url="https://example.com")],
                 ),
-            ]
-        )
-        PostFactory(name="Test Post", headline="A test post", owner=user, content="Some content")
-        site = SiteFactory(
-            id=self.app.config["SITE_ID"],
-            title="Test Site",
-            datasets_page=page,
+            ],
         )
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
             # Get the fixtures from the local instance by redirecting requests.get to the test client
-            mocker.patch.object(requests, "get", side_effect=lambda url: self.get(url))
+            mocker.patch.object(requests, "get", side_effect=lambda url, **kw: self.get(url, **kw))
             mocker.patch.object(Response, "json", Response.get_json)
             mocker.patch.object(Response, "ok", True, create=True)
             result = self.cli("generate-fixtures-file", "", fixtures_fd.name)
@@ -90,7 +91,6 @@ class FixturesTest(PytestOnlyAPITestCase):
             models.User.drop_collection()
             models.Dataservice.drop_collection()
             models.ContactPoint.drop_collection()
-            models.Page.drop_collection()
             models.Post.drop_collection()
             models.Site.drop_collection()
 
@@ -101,7 +101,6 @@ class FixturesTest(PytestOnlyAPITestCase):
             assert models.User.objects.count() == 0
             assert models.Dataservice.objects.count() == 0
             assert models.ContactPoint.objects.count() == 0
-            assert models.Page.objects.count() == 0
             assert models.Post.objects.count() == 0
             assert models.Site.objects.count() == 0
 
@@ -131,20 +130,15 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert result_dataservice.organization == org
         assert result_dataservice.contact_points == [contact_point]
 
-        assert models.Page.objects.count() > 0
-        result_page = models.Page.objects.first()
-        assert len(result_page.blocs) == 2
-        assert result_page.blocs[0].title == "Test Hero"
-        assert result_page.blocs[1].title == "Test Links"
-
         assert models.Post.objects.count() > 0
         result_post = models.Post.objects.first()
         assert result_post.name == "Test Post"
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        assert result_site.id == site.id
-        assert result_site.datasets_page == page
+        assert len(result_site.datasets_blocs) == 2
+        assert result_site.datasets_blocs[0].title == "Test Hero"
+        assert result_site.datasets_blocs[1].title == "Test Links"
 
     def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
@@ -158,5 +152,4 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert models.User.objects.count() > 0
         assert models.Dataservice.objects.count() > 0
         assert models.Post.objects.count() > 0
-        assert models.Page.objects.count() > 0
         assert models.Site.objects.count() > 0

@@ -5,6 +5,7 @@ from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission, current_user
 from udata.core import csv
 from udata.core.badges import api as badges_api
@@ -12,6 +13,7 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataservices.search import DataserviceApiParser
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
@@ -33,9 +35,6 @@ from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .api_fields import (
     invite_fields,
-    member_fields,
-    org_fields,
-    org_page_fields,
     org_role_fields,
     org_suggestion_fields,
     refuse_membership_fields,
@@ -43,13 +42,6 @@ from .api_fields import (
 )
 from .assignment import Assignment
 from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
-from .forms import (
-    MemberForm,
-    MembershipInviteForm,
-    MembershipRefuseForm,
-    MembershipRequestForm,
-    OrganizationForm,
-)
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
@@ -61,6 +53,31 @@ from .tasks import (
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
+
+
+def resolve_assignment_subjects(raw_assignments, org):
+    """Resolve raw {class, id} dicts into model instances belonging to org."""
+    subjects = []
+    for raw in raw_assignments:
+        cls_name = raw.get("class")
+        obj_id = raw.get("id")
+        if cls_name not in ASSIGNABLE_OBJECT_TYPES:
+            raise FieldValidationError(
+                field="assignments", message=f"Invalid object class '{cls_name}'"
+            )
+        model_cls = db.resolve_model(cls_name)
+        obj = model_cls.objects(id=obj_id).first()
+        if not obj:
+            raise FieldValidationError(
+                field="assignments", message=f"{cls_name} '{obj_id}' not found"
+            )
+        if not hasattr(obj, "organization") or obj.organization != org:
+            raise FieldValidationError(
+                field="assignments",
+                message=f"{cls_name} '{obj_id}' does not belong to this organization",
+            )
+        subjects.append(obj)
+    return subjects
 
 
 class OrgApiParser(ModelApiParser):
@@ -126,7 +143,7 @@ class OrganizationListAPI(API):
 
     @api.doc("list_organizations")
     @api.expect(organization_parser.parser)
-    @api.marshal_with(org_page_fields)
+    @api.marshal_with(Organization.__page_fields__)
     def get(self):
         """List or search all organizations"""
         args = organization_parser.parse()
@@ -138,12 +155,16 @@ class OrganizationListAPI(API):
 
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})
-    @api.expect(org_fields)
-    @api.marshal_with(org_fields, code=201)
+    @api.expect(Organization.__write_fields__)
+    @api.marshal_with(Organization.__read_fields__, code=201)
     def post(self):
         """Create a new organization"""
-        form = api.validate(OrganizationForm)
-        organization = form.save()
+        organization = patch(Organization(), request)
+        user = current_user._get_current_object()
+        member = Member(user=user, role="admin")
+        organization.members.append(member)
+        organization.count_members()
+        organization.save()
         return organization, 201
 
 
@@ -155,7 +176,7 @@ org_delete_parser = add_send_legal_notice_argument(api.parser())
 @api.response(410, "Organization has been deleted")
 class OrganizationAPI(API):
     @api.doc("get_organization")
-    @api.marshal_with(org_fields)
+    @api.marshal_with(Organization.__read_fields__)
     def get(self, org):
         """Get a organization given its identifier"""
         if org.deleted and not org.permissions["private"].can():
@@ -164,8 +185,8 @@ class OrganizationAPI(API):
 
     @api.secure
     @api.doc("update_organization")
-    @api.expect(org_fields)
-    @api.marshal_with(org_fields)
+    @api.expect(Organization.__write_fields__)
+    @api.marshal_with(Organization.__read_fields__)
     @api.response(400, errors.VALIDATION_ERROR)
     @api.response(410, "Organization has been deleted")
     def put(self, org):
@@ -178,8 +199,7 @@ class OrganizationAPI(API):
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
         org.permissions["edit"].test()
-        form = api.validate(OrganizationForm, org)
-        return form.save()
+        return patch_and_save(org, request)
 
     @api.secure
     @api.doc("delete_organization")
@@ -271,12 +291,10 @@ class OrganizationRdfFormatAPI(API):
             Dataset.objects(organization=org).visible(), params
         )
         datasets = datasets.paginate(params["page"], params["page_size"])
-
-        dataservices = (
-            Dataservice.objects(organization=org)
-            .visible()
-            .filter_by_dataset_pagination(datasets, params["page"])
+        dataservices = DataserviceApiParser.parse_filters(
+            Dataservice.objects(organization=org).visible(), params
         )
+        dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
         catalog = build_org_catalog(org, datasets, dataservices, _format=_format, **params)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
@@ -391,20 +409,22 @@ class MembershipRequestAPI(API):
             return org.requests
 
     @api.secure
+    @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
-        membership_request = org.pending_request(current_user._get_current_object())
+        user = current_user._get_current_object()
+        membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
-        form = api.validate(MembershipRequestForm, membership_request)
-
         if membership_request:
-            form.populate_obj(membership_request)
+            patch(membership_request, request)
+        else:
+            membership_request = patch(MembershipRequest(user=user), request)
+
+        if code == 200:
             org.save()
         else:
-            membership_request = MembershipRequest()
-            form.populate_obj(membership_request)
             org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
@@ -424,7 +444,7 @@ class MembershipAPI(API):
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
     @api.doc("accept_membership", **common_doc)
-    @api.marshal_with(member_fields)
+    @api.marshal_with(Member.__read_fields__)
     def post(self, org, id):
         """Accept user membership to a given organization."""
         org.permissions["members"].test()
@@ -464,11 +484,17 @@ class MembershipRefuseAPI(MembershipAPI):
         if membership_request.kind == "invitation":
             api.abort(400, "Use the cancel endpoint for invitations")
 
-        form = api.validate(MembershipRefuseForm)
+        # TODO: use patch() here. Currently blocked because the API payload uses
+        # "comment" but the model field is "refusal_comment" — patch() would set
+        # the wrong field. Requires changing the API contract to use "refusal_comment".
+        comment = (request.json or {}).get("comment")
+        if not comment:
+            raise FieldValidationError(field="comment", message="Comment is required")
+
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
         membership_request.handled_on = datetime.now(UTC)
-        membership_request.refusal_comment = form.comment.data
+        membership_request.refusal_comment = comment
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)
@@ -496,7 +522,7 @@ class MembershipCancelAPI(MembershipAPI):
 
         membership_request.status = "canceled"
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.utcnow()
+        membership_request.handled_on = datetime.now(UTC)
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)
@@ -519,97 +545,27 @@ class MemberInviteAPI(API):
         from udata.core.user.models import User
 
         org.permissions["members"].test()
-        form = api.validate(MembershipInviteForm)
+        data = request.json or {}
 
-        user_id = form.user.data
-        email = form.email.data
-        role = form.role.data or DEFAULT_ROLE
-        comment = form.comment.data
-
-        if user_id and email:
-            raise FieldValidationError(field="user", message="Cannot provide both user and email")
-
+        user_id = data.get("user")
         user = None
-
-        # If user ID provided, get user
         if user_id:
             user = User.objects(id=user_id).first()
             if not user:
                 raise FieldValidationError(field="user", message=f"Unknown user '{user_id}'")
 
-        # If email provided (and no user), check if it matches an existing user
-        if email and not user:
-            user = User.objects(email=email.lower()).first()
-            if user:
-                email = None  # User found, use user instead of email
+        # Resolve assignment references from request payload
+        raw_assignments = data.get("assignments") or []
+        assignment_subjects = resolve_assignment_subjects(raw_assignments, org)
 
-        # Validate we have either user or email
-        if not user and not email:
-            raise FieldValidationError(field="user", message="Either user or email is required")
-
-        # Check if user is already a member or has a pending request/invitation
-        email_lower = email.lower() if email else None
-        for member in org.members:
-            if user and member.user == user:
-                raise FieldValidationError(field="user", message="User is already a member")
-
-        for req in org.requests:
-            if req.status != "pending":
-                continue
-            if user and req.user == user:
-                raise FieldValidationError(
-                    field="user", message="A request or invitation is already pending for this user"
-                )
-            if email_lower and req.email and req.email.lower() == email_lower:
-                raise FieldValidationError(
-                    field="email", message="An invitation is already pending for this email"
-                )
-
-        # Resolve assignments for partial_editor invitations
-        raw_assignments = request.json.get("assignments", []) or []
-        assignment_subjects = []
-        if raw_assignments:
-            if role != "partial_editor":
-                raise FieldValidationError(
-                    field="assignments",
-                    message="Assignments can only be set for partial_editor role",
-                )
-            allowed_classes = ASSIGNABLE_OBJECT_TYPES
-            for raw in raw_assignments:
-                cls_name = raw.get("class")
-                obj_id = raw.get("id")
-                if cls_name not in allowed_classes:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"Invalid object class '{cls_name}'",
-                    )
-                model_cls = db.resolve_model(cls_name)
-                obj = model_cls.objects(id=obj_id).first()
-                if not obj:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"{cls_name} '{obj_id}' not found",
-                    )
-                if not hasattr(obj, "organization") or obj.organization != org:
-                    raise FieldValidationError(
-                        field="assignments",
-                        message=f"{cls_name} '{obj_id}' does not belong to this organization",
-                    )
-                assignment_subjects.append(obj)
-
-        # Create invitation
-        invitation = MembershipRequest(
-            kind="invitation",
+        invitation = org.create_invitation(
+            invited_by=current_user._get_current_object(),
             user=user,
-            email=email.lower() if email else None,
-            created_by=current_user._get_current_object(),
-            role=role,
-            comment=comment,
-            assignments=assignment_subjects,
+            email=data.get("email"),
+            role=data.get("role") or DEFAULT_ROLE,
+            comment=data.get("comment"),
+            assignment_subjects=assignment_subjects,
         )
-        org.requests.append(invitation)
-        org.save()
-        MembershipRequest.after_create.send(invitation, org=org)
 
         notify_membership_invitation.delay(str(org.id), str(invitation.id))
 
@@ -619,16 +575,15 @@ class MemberInviteAPI(API):
 @ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
-    @api.expect(member_fields)
-    @api.marshal_with(member_fields)
+    @api.expect(Member.__write_fields__)
+    @api.marshal_with(Member.__read_fields__)
     @api.doc("update_organization_member", responses={403: "Not Authorized"})
     def put(self, org, user):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
         old_role = member.role
-        form = api.validate(MemberForm, member)
-        form.populate_obj(member)
+        patch(member, request)
         org.save()
 
         if old_role == "partial_editor" and member.role != "partial_editor":
@@ -683,22 +638,7 @@ class MemberAssignmentsAPI(API):
         if not member or member.role != "partial_editor":
             api.abort(400, "User must be a partial_editor member of this organization")
 
-        raw_subjects = request.json or []
-        allowed_classes = ASSIGNABLE_OBJECT_TYPES
-
-        desired_subjects = []
-        for raw in raw_subjects:
-            cls_name = raw.get("class")
-            obj_id = raw.get("id")
-            if cls_name not in allowed_classes:
-                api.abort(400, f"Invalid object class '{cls_name}'")
-            model_cls = db.resolve_model(cls_name)
-            obj = model_cls.objects(id=obj_id).first()
-            if not obj:
-                api.abort(400, f"{cls_name} '{obj_id}' not found")
-            if not hasattr(obj, "organization") or obj.organization != org:
-                api.abort(400, f"{cls_name} '{obj_id}' does not belong to this organization")
-            desired_subjects.append(obj)
+        desired_subjects = resolve_assignment_subjects(request.json or [], org)
 
         current = list(Assignment.objects(user=user, organization=org))
         current_by_subject = {(a.subject.__class__.__name__, str(a.subject.id)): a for a in current}
