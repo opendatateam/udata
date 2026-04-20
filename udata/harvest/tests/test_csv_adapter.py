@@ -1,9 +1,11 @@
 import json
+
 from udata.models import Dataset  # noqa
-from ..models import VALIDATION_PENDING, HarvestSource
-from ..csv import HarvestSourceCsvAdapter
-from .factories import HarvestSourceFactory
 from udata.tests.api import PytestOnlyDBTestCase
+
+from ..csv import HarvestSourceCsvAdapter
+from ..models import VALIDATION_PENDING, HarvestSource
+from .factories import HarvestSourceFactory
 
 
 class HarvestSourceCSVAdapterTest(PytestOnlyDBTestCase):

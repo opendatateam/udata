@@ -1,4 +1,5 @@
 import json
+
 from udata.core import csv
 
 from .models import HarvestSource
