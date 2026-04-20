@@ -92,6 +92,8 @@ def set_admin(email):
 @click.argument("email")
 def password(email):
     user: User = datastore.find_user(email=email)
+    if not user:
+        exit_with_error(f"User {email} does not exist")
     password = click.prompt("Enter new password", hide_input=True)
     user.password = hash_password(password)
     user.save()
@@ -105,17 +107,21 @@ def rotate_password(email):
     Ask user for password rotation on next login and reset any current session
     """
     user: User = datastore.find_user(email=email)
+    if not user:
+        exit_with_error(f"User {email} does not exist")
     user.password_rotation_demanded = datetime.now(UTC)
     user.save()
     # Reset ongoing sessions by uniquifier
     datastore.set_uniquifier(user)
-    success(f"Password rotated for user {email}")
+    success(f"Password rotated for user {email}. Last login at: {user.current_login_at}")
 
 
 @grp.command()
 @click.argument("email")
 def unset_two_factor(email):
     user: User = datastore.find_user(email=email)
+    if not user:
+        exit_with_error(f"User {email} does not exist")
     user.tf_primary_method = None
     user.tf_totp_secret = None
     user.save()
