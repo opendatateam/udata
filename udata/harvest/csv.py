@@ -1,3 +1,4 @@
+import json
 from udata.core import csv
 
 from .models import HarvestSource
@@ -14,4 +15,5 @@ class HarvestSourceCsvAdapter(csv.Adapter):
         "backend",
         "created_at",
         ("validation", lambda o: o.validation.state),
+        ("config", lambda o: json.dumps(o.config, default=str)),
     )
