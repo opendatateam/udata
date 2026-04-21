@@ -26,6 +26,7 @@ For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
+import typing
 from datetime import datetime
 from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
@@ -43,6 +44,12 @@ import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+
+PYTHON_TYPE_TO_RESTX_FIELD = {
+    int: restx_fields.Integer,
+    float: restx_fields.Float,
+    bool: restx_fields.Boolean,
+}
 
 
 def required_if(**conditions):
@@ -495,8 +502,8 @@ def generate_fields(**kwargs) -> Callable:
 
             nested_fields: dict | None = additional_field_info.get("nested_fields")
             if nested_fields is None:
-                # If there is no `nested_fields` convert the object to the string representation.
-                field_constructor = restx_fields.String
+                return_type = typing.get_type_hints(method).get("return")
+                field_constructor = PYTHON_TYPE_TO_RESTX_FIELD.get(return_type, restx_fields.String)
             else:
 
                 def field_constructor(**kwargs):
