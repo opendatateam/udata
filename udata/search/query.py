@@ -4,11 +4,13 @@ import logging
 import urllib.parse
 
 from elasticsearch.exceptions import BadRequestError
-from flask import current_app, request
+from flask import abort, current_app, request
 
 from udata.search.result import SearchResult
 
 DEFAULT_PAGE_SIZE = 20
+# Elasticsearch default max_result_window is 10000
+ES_MAX_RESULT_WINDOW = 10000
 log = logging.getLogger(__name__)
 
 
@@ -17,8 +19,17 @@ class SearchQuery:
     model = None
 
     def __init__(self, params):
-        self.page = int(params.pop("page", 1))
-        self.page_size = int(params.pop("page_size", DEFAULT_PAGE_SIZE))
+        self.page = max(1, int(params.pop("page", 1)))
+        self.page_size = max(1, int(params.pop("page_size", DEFAULT_PAGE_SIZE)))
+        offset = (self.page - 1) * self.page_size + self.page_size
+        if offset > ES_MAX_RESULT_WINDOW:
+            max_page = ES_MAX_RESULT_WINDOW // self.page_size
+            abort(
+                400,
+                f"Result window is too large: page {self.page} with page_size {self.page_size} "
+                f"exceeds the maximum of {ES_MAX_RESULT_WINDOW} results. "
+                f"Maximum page for this page_size is {max_page}.",
+            )
         self._query = params.pop("q", "")
         self.sort = params.pop("sort", None)
         self._filters = {}
