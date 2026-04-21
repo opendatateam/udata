@@ -82,6 +82,8 @@ def delete():
 def set_admin(email):
     """Set an user as administrator"""
     user: User = datastore.find_user(email=email)
+    if not user:
+        exit_with_error(f"User {email} does not exist")
     log.info("Adding admin role to user %s (%s)", user.fullname, user.email)
     role = datastore.find_or_create_role("admin")
     datastore.add_role_to_user(user, role)
