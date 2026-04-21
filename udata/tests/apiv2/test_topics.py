@@ -384,6 +384,41 @@ class TopicsListAPITest(APITestCase):
         assert topic is not None
         assert len(topic.elements) == 1
 
+    def test_topic_api_create_with_malformed_element_returns_400(self):
+        """Regression test: a malformed element payload (unknown `class` or
+        missing `class` key) on topic creation must return 400, not 500.
+        `patch()` raises a raw `ValueError` (unknown class from
+        `db.resolve_model()`) or `KeyError` (missing `class` key from
+        `value["class"]`) inside the elements loop, and neither is caught
+        by the current POST handler.
+        """
+        self.login()
+        dataset = DatasetFactory()
+        base = {"name": "topic", "description": "desc", "tags": ["tag"]}
+
+        # Unknown class -> ValueError from db.resolve_model().
+        response = self.post(
+            url_for("apiv2.topics_list"),
+            {**base, "elements": [{"element": {"class": "NotAModel", "id": "abc"}}]},
+        )
+        assert response.status_code == 400
+
+        # Missing `class` key -> KeyError from value["class"].
+        response = self.post(
+            url_for("apiv2.topics_list"),
+            {**base, "elements": [{"element": {"id": str(dataset.id)}}]},
+        )
+        assert response.status_code == 400
+
+    def test_topic_api_create_with_non_object_body_returns_400(self):
+        """Regression test: a non-object JSON body must return 400, not 500.
+        `request.json.copy()` + `data.pop("elements", None)` raises a raw
+        `TypeError` on a list body (and `AttributeError` on null/string/int).
+        """
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), [{"not": "a topic"}])
+        assert response.status_code == 400
+
 
 class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
@@ -478,6 +513,16 @@ class TopicAPITest(APITestCase):
         topic.reload()
         assert topic.name == "updated name"
         assert len(topic.elements) == 0
+
+    def test_topic_api_update_with_non_object_body_returns_400(self):
+        """Regression test: a non-object JSON body on PUT must return 400,
+        not 500. Same root cause as the POST case: `request.json.copy()` +
+        `data.pop("elements", None)` raises a raw `TypeError` on a list.
+        """
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.put(url_for("apiv2.topic", topic=topic), [{"not": "a topic"}])
+        assert response.status_code == 400
 
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""
@@ -782,6 +827,31 @@ class TopicElementsAPITest(APITestCase):
         )
         assert response.status_code == 400
         assert "Unknown reference" in response.json["errors"][0]["element"][0]
+
+    def test_add_element_with_malformed_class_returns_400(self):
+        """Regression test: an unknown `class` or missing `class` key in an
+        element reference must return 400, not 500. `patch()` raises a raw
+        `ValueError` from `db.resolve_model()` for unknown classes and a
+        `KeyError` from `value["class"]` for missing keys, and the endpoint's
+        `except FieldValidationError` catches neither.
+        """
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+
+        # Unknown class -> ValueError.
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"class": "NotAModel", "id": "abc"}}],
+        )
+        assert response.status_code == 400
+
+        # Missing `class` key -> KeyError.
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"id": str(dataset.id)}}],
+        )
+        assert response.status_code == 400
 
     def test_add_empty_element(self):
         owner = self.login()

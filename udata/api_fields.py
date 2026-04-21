@@ -841,11 +841,20 @@ def patch(obj: _T, request) -> _T:
                     mongoengine.fields.GenericLazyReferenceField,
                 ),
             ):
+                if not isinstance(value, dict) or "class" not in value or "id" not in value:
+                    raise FieldValidationError(
+                        message="Expected an object with `class` and `id` keys",
+                        field=key,
+                    )
+                try:
+                    document_type = db.resolve_model(value["class"])
+                except ValueError as e:
+                    raise FieldValidationError(message=str(e), field=key)
                 value = wrap_primary_key(
                     key,
                     model_attribute,
                     value["id"],
-                    document_type=db.resolve_model(value["class"]),
+                    document_type=document_type,
                 )
             elif value and isinstance(
                 model_attribute,

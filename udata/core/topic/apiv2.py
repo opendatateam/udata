@@ -106,13 +106,16 @@ class TopicsAPI(API):
     @apiv2.response(400, "Validation error")
     def post(self):
         """Create a topic"""
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, "Expected a JSON object")
+
         # Elements are a reverse relationship (TopicElement → Topic), not a field
         # on Topic itself, so patch() can't handle them. We extract them from the
         # payload and manage them manually after saving the topic.
         # TODO: patch() could support virtual fields for reverse relationships to
         # avoid this manual handling.
-        data = request.json.copy()
-        elements_data = data.pop("elements", None)
+        elements_data = data.get("elements")
 
         topic = patch(Topic(), data)
 
@@ -150,8 +153,11 @@ class TopicAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        data = request.json.copy()
-        elements_data = data.pop("elements", None)
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, "Expected a JSON object")
+
+        elements_data = data.get("elements")
 
         patch_and_save(topic, data)
 
