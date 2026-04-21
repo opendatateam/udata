@@ -60,7 +60,7 @@ class TopicElement(Auditable, Document):
         checks=[check_title_or_element_required],
     )
     # Not exposed in the API (not wrapped with field()), only used internally.
-    topic = ReferenceField("Topic", required=False)
+    topic = ReferenceField("Topic", required=True)
 
     meta = {
         "indexes": [

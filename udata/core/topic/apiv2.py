@@ -275,7 +275,7 @@ class TopicElementAPI(API):
 
     @apiv2.secure
     @apiv2.doc("topic_element_update")
-    @apiv2.expect(TopicElement.__read_fields__)
+    @apiv2.expect(TopicElement.__write_fields__)
     @apiv2.marshal_with(TopicElement.__read_fields__)
     @apiv2.response(404, "Topic not found")
     @apiv2.response(404, "Element not found in topic")
