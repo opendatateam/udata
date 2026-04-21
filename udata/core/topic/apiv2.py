@@ -6,7 +6,7 @@ from flask_security import current_user
 
 from udata import search
 from udata.api import API, api, apiv2, fields
-from udata.api_fields import patch, patch_and_save
+from udata.api_fields import lazy_reference, patch, patch_and_save
 from udata.core.discussions.models import Discussion
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import Topic, TopicElement
@@ -16,7 +16,9 @@ from udata.core.topic.search import TopicSearch
 from udata.mongo.errors import FieldValidationError
 
 apiv2.inherit("ModelReference", api.model_reference)
+apiv2.inherit("LazyReference", lazy_reference)
 apiv2.inherit("TopicElement (read)", TopicElement.__read_fields__)
+apiv2.inherit("TopicElement (write)", TopicElement.__write_fields__)
 
 topic_fields = apiv2.clone(
     "Topic",
