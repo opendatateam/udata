@@ -115,7 +115,7 @@ def rotate_password(email):
     user.save()
     # Reset ongoing sessions by uniquifier
     datastore.set_uniquifier(user)
-    success(f"Password rotated for user {email}. Last login at: {user.current_login_at}")
+    success(f"Password rotated for user {email}. Last login at: {user.current_login_at or 'never'}")
 
 
 @grp.command()
