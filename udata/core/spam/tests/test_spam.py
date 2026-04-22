@@ -1,9 +1,16 @@
+from datetime import UTC, datetime
+
 import pytest
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion, Message
+from udata.core.organization.constants import CERTIFIED
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 
@@ -78,8 +85,6 @@ class SpamTest(APITestCase):
         When spam is in an embedded document (Message) and the report is dismissed,
         adding a new comment should NOT create a new report for the same embed.
         """
-        from datetime import UTC, datetime
-
         user = UserFactory()
         dataset = DatasetFactory()
         first_message = Message(content="bla bla", posted_by=user)
@@ -119,3 +124,168 @@ class SpamTest(APITestCase):
             Report.objects(subject=discussion, reason=REASON_AUTO_SPAM, dismissed_at=None).count(),
             0,
         )
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_discussion_first_message_spam_rechecked_when_other_message_edited(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        first_message = Message(content="this is spam", posted_by=user)
+        second_message = Message(content="normal comment", posted_by=user)
+        discussion = Discussion(
+            subject=dataset,
+            user=user,
+            title="Normal title",
+            discussion=[first_message, second_message],
+        )
+        discussion.save()
+
+        self.assertTrue(self.has_spam_report(discussion))
+
+        report = Report.objects(subject=discussion, reason=REASON_AUTO_SPAM).first()
+        report.delete()
+
+        # Editing the second message should trigger re-check of
+        # discussion.0.content because both share the "discussion" root field.
+        # _get_changed_fields() returns "discussion.1.content" which must match
+        # field_name "discussion.0.content" via the root field "discussion".
+        discussion.reload()
+        discussion.discussion[1].content = "edited comment"
+        discussion.save()
+
+        self.assertTrue(self.has_spam_report(discussion))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_in_title(self):
+        dataset = DatasetFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_in_description(self):
+        dataset = DatasetFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_no_spam(self):
+        dataset = DatasetFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_spam_not_reflagged_after_dismiss(self):
+
+        dataset = DatasetFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataset))
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        report.dismissed_at = datetime.utcnow()
+        report.save()
+
+        dataset.reload()
+        dataset.description = "Updated description"
+        dataset.save()
+
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataset_unchanged_description_not_rechecked_when_description_short_changes(self):
+        dataset = DatasetFactory(title="Normal title", description="This contains spam word")
+        self.assertTrue(self.has_spam_report(dataset))
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        report.delete()
+
+        dataset.reload()
+        dataset.description_short = "Short summary"
+        dataset.save()
+
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_spam_in_title(self):
+        reuse = ReuseFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_spam_in_description(self):
+        reuse = ReuseFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_reuse_no_spam(self):
+        reuse = ReuseFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_spam_in_name(self):
+        org = OrganizationFactory(name="Spam Organization")
+        self.assertTrue(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_spam_in_description(self):
+        org = OrganizationFactory(name="Normal Org", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_organization_no_spam(self):
+        org = OrganizationFactory(name="Normal Org", description="Normal description")
+        self.assertFalse(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_spam_in_title(self):
+        dataservice = DataserviceFactory(title="This is spam content")
+        self.assertTrue(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_spam_in_description(self):
+        dataservice = DataserviceFactory(title="Normal title", description="Buy spam products now")
+        self.assertTrue(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dataservice_no_spam(self):
+        dataservice = DataserviceFactory(title="Normal title", description="Normal description")
+        self.assertFalse(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_spam_in_about(self):
+        user = UserFactory(about="Buy spam products now")
+        self.assertTrue(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_spam_in_website(self):
+        user = UserFactory(website="https://spam.example.com")
+        self.assertTrue(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_user_no_spam(self):
+        user = UserFactory(about="Normal bio", website="https://example.com")
+        self.assertFalse(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_dataset_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_non_certified_org_dataset_flagged(self):
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+        self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_reuse_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        reuse = ReuseFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(reuse))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_dataservice_not_flagged(self):
+        org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
+        dataservice = DataserviceFactory(title="This is spam content", organization=org)
+        self.assertFalse(self.has_spam_report(dataservice))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_certified_org_not_flagged(self):
+        org = OrganizationFactory(
+            name="Spam Organization", badges=[OrganizationBadge(kind=CERTIFIED)]
+        )
+        self.assertFalse(self.has_spam_report(org))
