@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      day: "monday"
+      time: "02:00"
+      interval: "weekly"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
