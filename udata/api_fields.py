@@ -35,6 +35,7 @@ import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
 from flask import Request, request
+from flask_restx import Model as RestxModel
 from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
@@ -42,6 +43,13 @@ from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
+from udata.api.versioning import (
+    LATEST_API_VERSION,
+    ChangeAttribute,
+    RemoveField,
+    RenameField,
+    get_request_version,
+)
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -384,6 +392,87 @@ def save_class_by_parents(cls):
         classes_by_parents[parent].add(cls)
 
 
+def _resolve_model_kwargs(recipes, version) -> dict:
+    """Apply model-level version changes and return effective kwargs."""
+    model_kwargs = dict(recipes["model_kwargs"])
+    for change in recipes.get("model_changes", []):
+        if version < change.version:
+            model_kwargs = change.apply(model_kwargs)
+    return model_kwargs
+
+
+def _compute_read_mask(read_fields, read_mask_exclude) -> str | None:
+    if read_mask_exclude:
+        return ",".join(k for k in read_fields if k not in read_mask_exclude)
+    return None
+
+
+def _compute_page_mask(read_fields, page_mask_exclude, page_mask_str) -> str | None:
+    if page_mask_exclude:
+        return "data{{{0}}},*".format(
+            ",".join(k for k in read_fields if k not in page_mask_exclude)
+        )
+    elif page_mask_str is not None:
+        return "data{{{0}}},*".format(page_mask_str)
+    return None
+
+
+def _build_read_fields_for_version(cls, version) -> RestxModel:
+    """Rebuild __read_fields__ for a specific API version using stored recipes."""
+    recipes = cls.__version_recipes__
+    read_fields: dict = {}
+
+    if recipes["is_document"]:
+        read_fields["id"] = restx_fields.String(required=True, readonly=True)
+
+    for key, mongo_field, info in recipes["field_recipes"]:
+        before = info.get("before", [])
+
+        # If field was removed at this version or later, skip it
+        if any(isinstance(c, RemoveField) and version >= c.version for c in before):
+            continue
+
+        # Start with the original info (without before) and apply version changes
+        effective_info = {k: v for k, v in info.items() if k != "before"}
+        for change in sorted(before, key=lambda c: c.version):
+            if isinstance(change, ChangeAttribute) and version < change.version:
+                effective_info = change.apply(effective_info)
+
+        # Determine the field key (handle renames)
+        effective_key = key
+        for change in before:
+            if isinstance(change, RenameField) and version < change.version:
+                effective_key = change.old_name
+
+        read, _ = convert_db_to_field(effective_key, mongo_field, effective_info)
+        if read:
+            read_fields[effective_key] = read
+
+    # Add method-based fields (not versioned)
+    for method_name, read_field in recipes["method_fields"].items():
+        read_fields[method_name] = read_field
+
+    model_kwargs = _resolve_model_kwargs(recipes, version)
+    read_mask = _compute_read_mask(read_fields, model_kwargs.get("read_mask_exclude"))
+
+    model = RestxModel(f"{cls.__name__} (read, {version})", read_fields)
+    model.__mask__ = read_mask
+    return model
+
+
+def _build_page_fields_for_version(cls, version, read_model: RestxModel) -> RestxModel:
+    """Rebuild __page_fields__ for a specific API version."""
+    recipes = cls.__version_recipes__
+    model_kwargs = _resolve_model_kwargs(recipes, version)
+    page_mask = _compute_page_mask(
+        read_model, model_kwargs.get("page_mask_exclude"), model_kwargs.get("page_mask")
+    )
+
+    model = RestxModel(f"{cls.__name__}Page ({version})", custom_restx_fields.pager(read_model))
+    model.__mask__ = page_mask
+    return model
+
+
 def generate_fields(**kwargs) -> Callable:
     """Mongoengine document decorator.
 
@@ -408,13 +497,32 @@ def generate_fields(**kwargs) -> Callable:
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
             kwargs.get("nested_filters", {})
         )
-        if issubclass(cls, mongoengine.Document) or issubclass(cls, mongoengine.DynamicDocument):
+        is_document = issubclass(cls, mongoengine.Document) or issubclass(
+            cls, mongoengine.DynamicDocument
+        )
+        if is_document:
             read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
 
+        # Collect field recipes for version rebuilding
+        field_recipes: list[tuple] = []
+        has_version_changes = False
+
         for key, field, info in get_fields(cls):
+            before = info.get("before", [])
+            if before:
+                has_version_changes = True
+                # Register version changes for the changelog
+                for change in before:
+                    change.register(cls.__name__, key)
+
+            # For the latest version, skip fields that have been removed
+            is_removed = any(
+                isinstance(c, RemoveField) and LATEST_API_VERSION >= c.version for c in before
+            )
+
             sortable_key: bool = info.get("sortable", False)
             if sortable_key:
                 sortables.append(
@@ -461,6 +569,12 @@ def generate_fields(**kwargs) -> Callable:
                     filterable["query"] = functools.partial(query, filterable)
                     filterables.append(filterable)
 
+            # Store the recipe for version rebuilding (before filtering removed fields)
+            field_recipes.append((key, field, info))
+
+            if is_removed:
+                continue  # Don't include removed fields in the latest version
+
             read, write = convert_db_to_field(key, field, info)
 
             if read:
@@ -475,6 +589,7 @@ def generate_fields(**kwargs) -> Callable:
         # If a function has an `__additional_field_info__` attribute it means
         # it has been decorated with `@field()` and should be included
         # in the API response.
+        method_fields: dict = {}
         for method_name in dir(cls):
             if method_name == "objects":
                 continue
@@ -511,11 +626,13 @@ def generate_fields(**kwargs) -> Callable:
                 def field_constructor(**kwargs):
                     return restx_fields.Nested(nested_fields, **kwargs)
 
-            read_fields[method_name] = field_constructor(
+            read_field = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
+            read_fields[method_name] = read_field
+            method_fields[method_name] = read_field
             if additional_field_info.get("show_as_ref", False):
-                ref_fields[method_name] = read_fields[method_name]
+                ref_fields[method_name] = read_field
 
         # Masks allow excluding heavy fields from responses (e.g. blocs on list endpoints)
         # without removing them from the model entirely — clients can still request them
@@ -525,33 +642,72 @@ def generate_fields(**kwargs) -> Callable:
         # distinct API models per context (list vs detail, lightweight vs full) so that the
         # schema accurately describes each endpoint's response. This would also replace the
         # manual mask= usage on models like Reuse and Dataset.
+        model_changes: list = kwargs.pop("before", [])
+        if model_changes:
+            has_version_changes = True
+            for change in model_changes:
+                change.register(cls.__name__)
+
         read_mask_exclude: list | None = kwargs.pop("read_mask_exclude", None)
         page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
         page_mask: str | None = kwargs.pop("page_mask", None)
 
-        read_mask = None
-        if read_mask_exclude:
-            read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
+        read_mask = _compute_read_mask(read_fields, read_mask_exclude)
 
-        cls.__read_fields__ = api.model(
-            f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs
-        )
+        latest_read = api.model(f"{cls.__name__} (read)", read_fields, mask=read_mask, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        page_mask = None
-        if page_mask_exclude:
-            page_mask = "data{{{0}}},*".format(
-                ",".join(k for k in read_fields if k not in page_mask_exclude)
-            )
-        elif page_mask is not None:
-            page_mask = "data{{{0}}},*".format(page_mask)
-        cls.__page_fields__ = api.model(
+        computed_page_mask = _compute_page_mask(read_fields, page_mask_exclude, page_mask)
+        latest_page = api.model(
             f"{cls.__name__}Page",
-            custom_restx_fields.pager(cls.__read_fields__),
-            mask=page_mask,
+            custom_restx_fields.pager(latest_read),
+            mask=computed_page_mask,
             **kwargs,
         )
+
+        cls.__read_fields__ = latest_read
+        cls.__page_fields__ = latest_page
+
+        if has_version_changes:
+            # Store recipes for version rebuilding
+            cls.__version_recipes__ = {
+                "is_document": is_document,
+                "field_recipes": field_recipes,
+                "method_fields": method_fields,
+                "model_kwargs": {
+                    "read_mask_exclude": read_mask_exclude,
+                    "page_mask_exclude": page_mask_exclude,
+                    "page_mask": page_mask,
+                },
+                "model_changes": model_changes,
+            }
+
+            # Attach version resolvers — UDataApi.marshal_with calls these at request time
+            def _make_version_resolver(latest_model, builder):
+                cache: dict[str, RestxModel] = {}
+
+                def resolver():
+                    version = get_request_version()
+                    if version >= LATEST_API_VERSION:
+                        return latest_model
+                    key = str(version)
+                    if key not in cache:
+                        cache[key] = builder(version)
+                    return cache[key]
+
+                return resolver
+
+            latest_read._version_resolver = _make_version_resolver(
+                latest_read,
+                lambda v: _build_read_fields_for_version(cls, v),
+            )
+            latest_page._version_resolver = _make_version_resolver(
+                latest_page,
+                lambda v: _build_page_fields_for_version(
+                    cls, v, _build_read_fields_for_version(cls, v)
+                ),
+            )
 
         # Parser for index sort/filters
         paginable: bool = kwargs.get("paginable", True)
@@ -677,6 +833,7 @@ class _FieldKwargs(TypedDict, total=False):
     generic_key: str | None
     convert_to: Callable | None
     allow_null: bool | None
+    before: list | None
 
 
 @overload
@@ -729,6 +886,7 @@ def field(
     generic_key: str | None = None,
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
+    before: list | None = None,
     **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.

@@ -14,7 +14,9 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.marshalling import marshal
 from flask_restx.reqparse import RequestParser
+from flask_restx.utils import merge, unpack
 from flask_storage import UnauthorizedFileType
 
 from udata import tracking
@@ -25,6 +27,7 @@ from udata.utils import safe_unicode
 
 from . import fields
 from .signals import on_api_call
+from .versioning import LATEST_API_VERSION, OLDEST_API_VERSION, VERSION_CHANGES, VERSION_HEADER
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +44,51 @@ class UDataApi(Api):
         kwargs["decorators"] = [self.authentify] + decorators
         super(UDataApi, self).__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
+
+    def marshal_with(self, fields, as_list=False, code=200, description=None, **kwargs):
+        """Override marshal_with to support API versioning.
+
+        If the model has a _version_resolver attribute, the resolver is called at
+        request time to pick the right model for the requested API version.
+        Swagger documentation always uses the latest (static) model.
+        """
+        resolver = getattr(fields, "_version_resolver", None)
+        if not resolver:
+            return self.default_namespace.marshal_with(fields, as_list, code, description, **kwargs)
+
+        def decorator(func):
+            # Register Swagger docs with the latest (static) model — same as parent
+            doc = {
+                "responses": {
+                    str(code): (
+                        (description, [fields], kwargs)
+                        if as_list
+                        else (description, fields, kwargs)
+                    )
+                },
+                "__mask__": kwargs.get("mask", True),
+            }
+            func.__apidoc__ = merge(getattr(func, "__apidoc__", {}), doc)
+
+            @wraps(func)
+            def wrapper(*args, **kw):
+                resolved = resolver()
+                resp = func(*args, **kw)
+                mask = getattr(resolved, "__mask__", None)
+                mask_header = current_app.config.get("RESTX_MASK_HEADER", "X-Fields")
+                mask = request.headers.get(mask_header) or mask
+                if isinstance(resp, tuple):
+                    data, resp_code, headers = unpack(resp)
+                    return (
+                        marshal(data, resolved, mask=mask, ordered=self.ordered),
+                        resp_code,
+                        headers,
+                    )
+                return marshal(resp, resolved, mask=mask, ordered=self.ordered)
+
+            return wrapper
+
+        return decorator
 
     def secure(self, func):
         """Enforce authentication on a given method/verb
@@ -223,6 +271,14 @@ def extract_name_from_path(path):
 
 @apiv1_blueprint.after_request
 @apiv2_blueprint.after_request
+def add_version_header(response):
+    if hasattr(g, "_api_version"):
+        response.headers[VERSION_HEADER] = str(g._api_version)
+    return response
+
+
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get("TRACKING_BLACKLIST", [])
@@ -334,6 +390,21 @@ def marshal_page(page, page_fields):
 
 def marshal_page_with(func):
     pass
+
+
+ns_versions = api.namespace("versions", "API versioning information")
+
+
+@ns_versions.route("/", endpoint="api_versions")
+class APIVersionsAPI(API):
+    @api.doc("list_api_versions")
+    def get(self):
+        """List all API version changes"""
+        return {
+            "latest": str(LATEST_API_VERSION),
+            "oldest": str(OLDEST_API_VERSION),
+            "changes": sorted(VERSION_CHANGES, key=lambda c: c["version"], reverse=True),
+        }
 
 
 def init_app(app):
