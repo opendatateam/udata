@@ -38,13 +38,14 @@ class BaseService:
         page_size = filters.pop("page_size")
         search_text = filters.pop("q")
         sort = self.format_sort(filters.pop("sort", None))
+        facet_sizes = filters.pop("facet_sizes", {})
 
         offset = page_size * (page - 1) if page > 1 else 0
 
         self.format_filters(filters)
 
         results_number, search_results, facets = self._client_query(
-            search_text, offset, page_size, filters, sort
+            search_text, offset, page_size, filters, sort, facet_sizes=facet_sizes
         )
         results = [self.entity_class.load_from_dict(hit) for hit in search_results]
         total_pages = ceil(results_number / page_size) or 1
