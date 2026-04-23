@@ -13,6 +13,7 @@ class ModelSearchAdapter:
     model = None
     sorts = None
     filters = {}
+    configurable_size_facets = []
     service_class = None
     consumer_class = None
 
@@ -56,6 +57,13 @@ class ModelSearchAdapter:
             )
             parser.add_argument(
                 "page_size", type=int, location="args", default=20, help="The page size"
+            )
+        for facet_name in cls.configurable_size_facets:
+            parser.add_argument(
+                f"facet_size__{facet_name}",
+                type=int,
+                location="args",
+                help=f"Number of {facet_name} facet values to return",
             )
         return parser
 

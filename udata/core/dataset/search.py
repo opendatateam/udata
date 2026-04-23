@@ -34,6 +34,7 @@ class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     service_class = DatasetService
     consumer_class = DatasetConsumer
+    configurable_size_facets = ["organization_id_with_name"]
 
     sorts = {
         "created": "created_at_internal",
