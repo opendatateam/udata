@@ -1,13 +1,10 @@
 {
   "extends": [
-    "config:base"
+    "config:best-practices"
   ],
   "baseBranches": ["main"],
   "enabledManagers": ["pep621"],
   "pep621": {
     "fileMatch": ["pyproject.toml"]
-  },
-  "automerge": true,
-  "prHourlyLimit": 5,
-  "masterIssueApproval": true
+  }
 }
