@@ -3,7 +3,6 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from udata.models import Dataset  # noqa
 from udata.tests.api import PytestOnlyDBTestCase
 
 from ..csv import HarvestSourceCsvAdapter
