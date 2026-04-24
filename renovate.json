@@ -2,9 +2,13 @@
   "extends": [
     "config:best-practices"
   ],
-  "baseBranches": ["main"],
+  "baseBranchPatterns": [
+    "main"
+  ],
   "enabledManagers": ["pep621"],
   "pep621": {
-    "fileMatch": ["pyproject.toml"]
+    "managerFilePatterns": [
+      "/pyproject.toml/"
+    ]
   }
 }
