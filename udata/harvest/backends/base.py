@@ -95,6 +95,7 @@ class BaseBackend(object):
 
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
+    # Filters are public, don't store sensitive information
     filters = tuple()
 
     # Define some allowed filters on the backend
@@ -103,6 +104,7 @@ class BaseBackend(object):
 
     # Define some allowed extras config variables on the backend
     # This a Sequence[HarvestExtraConfig]
+    # Extra configs are public, don't store sensitive information
     extra_configs = tuple()
 
     def __init__(self, source_or_job, dryrun=False, max_items=None):
