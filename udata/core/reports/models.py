@@ -125,10 +125,7 @@ class Report(Document[ReportQuerySet]):
 
     # Callbacks to execute when report is dismissed (for auto-spam reports)
     # Format: {"method_name": {"args": [...], "kwargs": {...}}}
-    callbacks = field(
-        DictField(default=dict),
-        readonly=True,
-    )
+    callbacks = DictField(default=dict)
 
     meta = {
         "queryset_class": ReportQuerySet,
@@ -143,6 +140,10 @@ class Report(Document[ReportQuerySet]):
                 or getattr(subject, "name", None)
                 or getattr(subject, "slug", None)
             )
+
+    @field(description="Number of pending callbacks to execute when dismissed")
+    def callbacks_count(self) -> int:
+        return len(self.callbacks)
 
     @field(description="Link to the API endpoint for this report")
     def self_api_url(self):

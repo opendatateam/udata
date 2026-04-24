@@ -1,27 +1,60 @@
 import logging
 
 import mongoengine
-from flask import abort, request
+from flask import abort, request, url_for
 from flask_security import current_user
 
 from udata import search
-from udata.api import API, api, apiv2
+from udata.api import API, api, apiv2, fields
+from udata.api_fields import lazy_reference, patch, patch_and_save
 from udata.core.discussions.models import Discussion
-from udata.core.topic.api_fields import (
-    element_fields,
-    element_page_fields,
-    topic_fields,
-    topic_input_fields,
-    topic_page_fields,
-    topic_search_page_fields,
-)
-from udata.core.topic.forms import TopicElementForm, TopicForm
+from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
+from udata.mongo.errors import FieldValidationError
 
 apiv2.inherit("ModelReference", api.model_reference)
+apiv2.inherit("LazyReference", lazy_reference)
+apiv2.inherit("TopicElement (read)", TopicElement.__read_fields__)
+apiv2.inherit("TopicElement (write)", TopicElement.__write_fields__)
+
+topic_fields = apiv2.clone(
+    "Topic",
+    Topic.__read_fields__,
+    {
+        "elements": fields.Raw(
+            attribute=lambda o: {
+                "rel": "subsection",
+                "href": url_for(
+                    "apiv2.topic_elements",
+                    topic=o.id,
+                    page=1,
+                    page_size=DEFAULT_PAGE_SIZE,
+                    _external=True,
+                ),
+                "type": "GET",
+                "total": o.elements.count(),
+            },
+            description="Link to the topic elements",
+        ),
+    },
+)
+
+topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
+topic_search_page_fields = apiv2.model("TopicSearchPage", fields.search_pager(topic_fields))
+apiv2.inherit("TopicElementPage", TopicElement.__page_fields__)
+
+topic_input_fields = apiv2.clone(
+    "TopicInput",
+    Topic.__write_fields__,
+    {
+        "elements": fields.List(
+            fields.Nested(TopicElement.__read_fields__), description="The topic elements"
+        ),
+    },
+)
 
 DEFAULT_SORTING = "-created_at"
 
@@ -75,8 +108,31 @@ class TopicsAPI(API):
     @apiv2.response(400, "Validation error")
     def post(self):
         """Create a topic"""
-        form = apiv2.validate(TopicForm)
-        return form.save(), 201
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, "Expected a JSON object")
+
+        # Elements are a reverse relationship (TopicElement → Topic), not a field
+        # on Topic itself, so patch() can't handle them. We extract them from the
+        # payload and manage them manually after saving the topic.
+        # TODO: patch() could support virtual fields for reverse relationships to
+        # avoid this manual handling.
+        elements_data = data.get("elements")
+
+        topic = patch(Topic(), data)
+
+        if not topic.owner and not topic.organization:
+            topic.owner = current_user._get_current_object()
+
+        topic.save()
+
+        if elements_data is not None:
+            for element_data in elements_data:
+                element = patch(TopicElement(), element_data)
+                element.topic = topic
+                element.save()
+
+        return topic, 201
 
 
 @ns.route("/<topic:topic>/", endpoint="topic", doc=common_doc)
@@ -98,8 +154,23 @@ class TopicAPI(API):
         """Update a given topic"""
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
-        form = apiv2.validate(TopicForm, topic)
-        return form.save()
+
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, "Expected a JSON object")
+
+        elements_data = data.get("elements")
+
+        patch_and_save(topic, data)
+
+        if elements_data is not None:
+            TopicElement.objects(topic=topic).delete()
+            for element_data in elements_data:
+                element = patch(TopicElement(), element_data)
+                element.topic = topic
+                element.save()
+
+        return topic
 
     @apiv2.secure
     @apiv2.doc("delete_topic")
@@ -119,7 +190,7 @@ class TopicAPI(API):
 class TopicElementsAPI(API):
     @apiv2.doc("topic_elements")
     @apiv2.expect(elements_parser.parser)
-    @apiv2.marshal_with(element_page_fields)
+    @apiv2.marshal_with(TopicElement.__page_fields__)
     def get(self, topic):
         """Get a given topic's elements with pagination."""
         args = elements_parser.parse()
@@ -132,7 +203,7 @@ class TopicElementsAPI(API):
     @apiv2.secure
     @apiv2.doc("topic_elements_create")
     @apiv2.expect([api.model_reference])
-    @apiv2.marshal_list_with(element_fields)
+    @apiv2.marshal_list_with(TopicElement.__read_fields__)
     @apiv2.response(400, "Expecting a list")
     @apiv2.response(404, "Topic not found")
     @apiv2.response(403, "Forbidden")
@@ -148,18 +219,18 @@ class TopicElementsAPI(API):
         errors = []
         elements = []
         for element_data in data:
-            form = TopicElementForm.from_json(element_data, meta={"csrf": False})
-            if not form.validate():
-                errors.append(form.errors)
-            else:
-                element = TopicElement()
-                form.populate_obj(element)
+            try:
+                element = patch(TopicElement(), element_data)
                 element.topic = topic
-                element.save()
                 elements.append(element)
+            except FieldValidationError as e:
+                errors.append({e.field: [str(e)]})
 
         if errors:
             apiv2.abort(400, errors=errors)
+
+        for element in elements:
+            element.save()
 
         topic.save()
 
@@ -206,8 +277,8 @@ class TopicElementAPI(API):
 
     @apiv2.secure
     @apiv2.doc("topic_element_update")
-    @apiv2.expect(element_fields)
-    @apiv2.marshal_with(element_fields)
+    @apiv2.expect(TopicElement.__write_fields__)
+    @apiv2.marshal_with(TopicElement.__read_fields__)
     @apiv2.response(404, "Topic not found")
     @apiv2.response(404, "Element not found in topic")
     @apiv2.response(204, "Success")
@@ -217,8 +288,6 @@ class TopicElementAPI(API):
             apiv2.abort(403, "Forbidden")
 
         element = TopicElement.objects.get_or_404(pk=element_id)
-        form = apiv2.validate(TopicElementForm, element)
-        form.populate_obj(element)
-        element.save()
+        patch_and_save(element, request)
 
         return element

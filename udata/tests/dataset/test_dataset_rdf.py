@@ -5,7 +5,7 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, ORG, RDF, RDFS
+from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
@@ -58,6 +58,7 @@ from udata.rdf import (
     VCARD,
     default_lang_value,
     primary_topic_identifier_from_rdf,
+    remote_url_from_rdf,
 )
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
@@ -1391,6 +1392,58 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         pti = primary_topic_identifier_from_rdf(g, g.resource(node))
         assert pti == Literal("primary-topic-identifier")
+
+    def test_remote_url_from_rdf_urnuuid_iso191153(self):
+        """
+        Check that ISO-19115-3 records with a "urn:uuid" codeSpace return their ID *without* the codeSpace.
+        See remote_url_from_rdf() for details.
+        """
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add(
+            (
+                primary_topic_node,
+                DCT.identifier,
+                Literal("urn:uuid:ff685ba4-587e-4bb3-bc87-eae919b56857", datatype=XSD.anyURI),
+            )
+        )
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        remote_url = remote_url_from_rdf(g.resource(node), g, "http://example.com/dataset")
+        assert remote_url == "http://example.com/dataset/ff685ba4-587e-4bb3-bc87-eae919b56857"
+
+    def test_remote_url_from_rdf_urnuuid_iso19139(self):
+        """
+        Check that ISO-19139 records with a "urn:uuid" prefix return their ID *with* the prefix.
+        See remote_url_from_rdf() for details.
+        """
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add(
+            (
+                primary_topic_node,
+                DCT.identifier,
+                Literal("urn:uuid:ff685ba4-587e-4bb3-bc87-eae919b56857", datatype=XSD.string),
+            )
+        )
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        remote_url = remote_url_from_rdf(g.resource(node), g, "http://example.com/dataset")
+        assert (
+            remote_url == "http://example.com/dataset/urn:uuid:ff685ba4-587e-4bb3-bc87-eae919b56857"
+        )
 
     def test_rdf_value_with_preferred_language(self, app):
         """Check that rdf_value gets the Literal with preferred language if multiple exists"""
