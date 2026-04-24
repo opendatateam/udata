@@ -1,4 +1,7 @@
 import json
+from datetime import datetime
+
+from bson import ObjectId
 
 from udata.models import Dataset  # noqa
 from udata.tests.api import PytestOnlyDBTestCase
@@ -11,7 +14,17 @@ from .factories import HarvestSourceFactory
 class HarvestSourceCSVAdapterTest(PytestOnlyDBTestCase):
     def test_harvest_source_csv_adapter(self):
         source = HarvestSourceFactory(validation={"state": VALIDATION_PENDING})
-        config = {"extra_filters": [{"key": "test", "value": "test", "type": "test"}]}
+        config = {
+            "filters": [
+                {"key": "date", "type": "include", "value": datetime(year=2026, month=4, day=24)},
+                {
+                    "key": "organization",
+                    "type": "include",
+                    "value": ObjectId("646b7187b50b2a93b1ae3d45"),
+                },
+            ],
+            "extra_filters": [{"key": "test", "value": "test", "type": "test"}],
+        }
         source_with_config = HarvestSourceFactory(config=config)
 
         adapter = HarvestSourceCsvAdapter(HarvestSource.objects.all())
@@ -27,4 +40,4 @@ class HarvestSourceCSVAdapterTest(PytestOnlyDBTestCase):
         assert source_values["validation"] == "pending"
 
         source_values = csv[str(source_with_config.id)]
-        assert source_values["config"] == json.dumps(config)
+        assert source_values["config"] == json.dumps(config, default=str)
