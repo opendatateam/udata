@@ -60,7 +60,7 @@ dependencies = [
     "geomet>=1.1.0,<2.0.0",
     "html2text==2025.4.15",
     "humanfriendly>=10.0,<11.0.0",
-    "importlib-resources>=6.5.2,<7.0.0",
+    "importlib-resources>=7.1.0,<7.2.0",
     "itsdangerous>=2.2.0,<3.0.0",
     "jinja2>=3.1.6,<4.0.0",
     "jsonschema>=4.23.0,<5.0.0",
