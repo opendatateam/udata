@@ -1,5 +1,26 @@
 # Changelog
 
+## 16.3.0 (2026-04-27)
+
+- chore(config): migrate Renovate config ([#3743](https://github.com/opendatateam/udata/pull/3743))
+- chore(deps): update dependency lxml to v6.1.0 [security] ([#3736](https://github.com/opendatateam/udata/pull/3736))
+- chore(deps): update deps ([#3723](https://github.com/opendatateam/udata/pull/3723))
+- chore(deps): update deps ([#3730](https://github.com/opendatateam/udata/pull/3730))
+- chore: use renovate best practices config ([#3740](https://github.com/opendatateam/udata/pull/3740))
+- feat: add harvest config in csv export ([#3734](https://github.com/opendatateam/udata/pull/3734))
+- feat: add spam detection to all objects ([#3717](https://github.com/opendatateam/udata/pull/3717))
+- feat: add viz poc 1 ([#3680](https://github.com/opendatateam/udata/pull/3680))
+- feat: better user commands output ([#3733](https://github.com/opendatateam/udata/pull/3733))
+- feat: expose callbacks_count for reports ([#3726](https://github.com/opendatateam/udata/pull/3726))
+- feat: migrate organizations to new API fields ([#3710](https://github.com/opendatateam/udata/pull/3710))
+- feat: migrate topics to api fields ([#3695](https://github.com/opendatateam/udata/pull/3695))
+- fix: errors on high pages on search endpoints ([#3729](https://github.com/opendatateam/udata/pull/3729))
+- fix(harvest): invalid remote URL on record identifiers with "urn:uuid" codespace ([#3724](https://github.com/opendatateam/udata/pull/3724))
+- fix(harvest): missing new (Geo)DCAT-AP mapping for dct:provenance and dct:*rights ([#3720](https://github.com/opendatateam/udata/pull/3720))
+- fix: marshalling nested reference by string ([#3719](https://github.com/opendatateam/udata/pull/3719))
+- fix: reintroduce oauth_authorize template ([#3731](https://github.com/opendatateam/udata/pull/3731))
+
+
 ## 16.2.0 (2026-04-09)
 
 - feat: remove pages to only keep edito blocs ([#3706](https://github.com/opendatateam/udata/pull/3706))
