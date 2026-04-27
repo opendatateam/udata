@@ -28,6 +28,7 @@ from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.core.user.models import User
 from udata.frontend.markdown import mdstrip
@@ -211,6 +212,7 @@ org_permissions_fields = api.model(
 @generate_fields()
 class Organization(
     Auditable,
+    SpamMixin,
     WithMetrics,
     OrganizationBadgeMixin,
     Linkable,
@@ -316,6 +318,12 @@ class Organization(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.compute_aggregate_metrics = True
+
+    def fields_to_check_for_spam(self):
+        return {"name": self.name, "description": self.description}
+
+    def spam_is_whitelisted(self) -> bool:
+        return self.certified
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
@@ -569,3 +577,4 @@ class Organization(
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
+post_save.connect(SpamMixin.post_save, sender=Organization)
