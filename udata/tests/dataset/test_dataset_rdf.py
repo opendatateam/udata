@@ -28,6 +28,7 @@ from udata.core.dataset.rdf import (
     access_right_to_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
+    format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
     infer_dataset_access_rights,
@@ -1867,3 +1868,84 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         dataset = graph.resource(URIRef("http://example.org/dataset"))
         provenances = provenances_from_rdf(dataset)
         assert provenances == expected_provenances
+
+    @pytest.mark.parametrize(
+        "xml, expected_format",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_format, id=id)
+            for id, xml_fragment, expected_format in [
+                # DCAT* and GeoDCAT-AP for distributions other than services
+                (
+                    "dct:format",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title xml:lang="fr">Accès au téléchargement des données</dct:title>
+                          <dcat:accessURL rdf:resource="https://telechargement-test.open-datara.fr/download/e4e022e0-bb65-402c-82f1-131c2dfee7a7"/>
+                          <dct:format>
+                             <dct:MediaType rdf:about="http://publications.europa.eu/resource/authority/file-type/ZIP"/>
+                          </dct:format>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "zip",
+                ),
+                # DCAT* and older GeoDCAT-AP for service distributions
+                (
+                    "dct:conformsTo",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title>IFR_GRA_HAL_R_NOU</dct:title>
+                          <dcat:accessURL rdf:resource="https://sextant.ifremer.fr/services/wms/granulats_marins"/>
+                          <dcat:accessService>
+                             <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+                                <dct:title>IFR_GRA_HAL_R_NOU</dct:title>
+                                <dcat:endpointURL rdf:resource="https://sextant.ifremer.fr/services/wms/granulats_marins"/>
+                                <dct:conformsTo>
+                                   <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms"/>
+                                </dct:conformsTo>
+                             </rdf:Description>
+                          </dcat:accessService>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "wms",
+                ),
+                # GeoDCAT-AP 3+ for service distributions
+                (
+                    "geodcatap:serviceProtocol",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title>habitat:eco_atl_n2000_carte_habitats_simplifies_version2_ofb_pol_3857</dct:title>
+                          <dcat:accessService rdf:parseType="Resource">
+                             <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+                             <dct:title>habitat:eco_atl_n2000_carte_habitats_simplifies_version2_ofb_pol_3857</dct:title>
+                             <dcat:endpointURL rdf:resource="https://wxs.ofb.fr/geoserver/habitat/ows"/>
+                             <geodcatap:serviceProtocol>
+                                <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs"/>
+                             </geodcatap:serviceProtocol>
+                          </dcat:accessService>
+                          <dcat:accessURL rdf:resource="https://wxs.ofb.fr/geoserver/habitat/ows?version=2.0.0&amp;service=WFS&amp;request=GetCapabilities"/>
+                          <dct:format>
+                             <dct:MediaType>
+                                <rdfs:label>OGC:OWS-C</rdfs:label>
+                             </dct:MediaType>
+                          </dct:format>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "wfs",
+                ),
+            ]
+        ],
+    )
+    def test_format_from_rdf(self, xml: str, expected_format: str):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        distribution = graph.value(predicate=RDF.type, object=DCAT.Distribution)
+        resource = graph.resource(distribution)
+        format = format_from_rdf(resource)
+        assert format == expected_format

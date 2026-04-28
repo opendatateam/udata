@@ -51,6 +51,7 @@ IANAFORMAT = Namespace("https://www.iana.org/assignments/media-types/")
 DCT = DCTERMS  # More common usage
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 GEODCAT = Namespace("http://data.europa.eu/930/")
+OGC = Namespace("http://www.opengeospatial.org/standards/")
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind("adms", ADMS)
@@ -262,6 +263,11 @@ def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
     """
     value = default_lang_value(obj, predicate)
     return serialize_value(value, unwrap=unwrap) if value else default
+
+
+def vocabulary_key(uri: str, vocabulary: Namespace) -> str | None:
+    if uri.startswith(vocabulary):
+        return uri.removeprefix(vocabulary)
 
 
 def default_lang_value(obj, predicate):
