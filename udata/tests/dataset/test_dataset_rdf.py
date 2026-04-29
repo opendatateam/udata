@@ -4,7 +4,7 @@ from xml.etree.ElementTree import XML
 import pytest
 import requests
 from flask import url_for
-from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD
 from rdflib.resource import Resource as RdfResource
 
@@ -28,6 +28,7 @@ from udata.core.dataset.rdf import (
     access_right_to_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
+    format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
     infer_dataset_access_rights,
@@ -72,6 +73,21 @@ except requests.exceptions.RequestException:
     GOV_UK_REF_IS_UP = False
 else:
     GOV_UK_REF_IS_UP = True
+
+
+XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:geodcatap="http://data.europa.eu/930/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+   <rdf:Description rdf:about="http://example.org/dataset">
+      <dct:title>Example dataset</dct:title>
+      {xml_fragment}
+   </rdf:Description>
+</rdf:RDF>
+"""
 
 
 class DatasetToRdfTest(PytestOnlyAPITestCase):
@@ -1582,57 +1598,81 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
 
 
 class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
-    def test_licenses_from_rdf(self):
-        """Test a bunch of cases of licenses detection from RDF"""
-        rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
-            <rdf:RDF
-            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-            xmlns:foaf="http://xmlns.com/foaf/0.1/"
-            xmlns:dct="http://purl.org/dc/terms/"
-            xmlns:cc="http://creativecommons.org/ns#"
-            xmlns:ex="http://example.org/">
-
-            <rdf:Description rdf:about="http://example.org/dataset1">
-                <dct:title>Comprehensive License Example Dataset</dct:title>
-                <dct:license rdf:resource="http://example.org/custom-license"/>
-                <dct:license>This is a literal license statement</dct:license>
-                <dct:license>
-                    <rdf:Description>
-                        <rdfs:label>Embedded License Description</rdfs:label>
+    @pytest.mark.parametrize(
+        "xml, expected_licenses",
+        [
+            pytest.param(
+                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_licenses, id=id
+            )
+            for id, xml_fragment, expected_licenses in [
+                (
+                    "uriref",
+                    """
+                    <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    """,
+                    {"https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"},
+                ),
+                (
+                    "value",
+                    """
+                    <dct:license>License from value</dct:license>
+                    """,
+                    {"License from value"},
+                ),
+                (
+                    "label",
+                    """
+                    <dct:license>
+                       <rdf:Description>
+                          <rdfs:label>License from label</rdfs:label>
+                       </rdf:Description>
+                    </dct:license>
+                    """,
+                    {"License from label"},
+                ),
+                (
+                    "uriref-precedence",
+                    """
+                    <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
+                       No conditions apply to access and use.
+                    </dct:license>
+                    """,
+                    {
+                        "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+                    },
+                ),
+                (
+                    "resource",
+                    """
+                       <dct:license rdf:resource="http://example.org/custom-license"/>
                     </rdf:Description>
-                </dct:license>
-                <dct:license
-                    xmlns:dct="http://purl.org/dc/terms/"
-                    rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
-                >
-                    No conditions apply to access and use.
-                </dct:license>
-                <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
-            </rdf:Description>
-
-            <rdf:Description rdf:about="http://example.org/custom-license">
-                <rdfs:label>Custom Organizational License</rdfs:label>
-                <dct:description>A license specific to our organization</dct:description>
-            </rdf:Description>
-
-            </rdf:RDF>
-        """
-        g = Graph()
-        g.parse(data=rdf_xml_data, format="xml")
-        ex = Namespace("http://example.org/")
-        dataset = RdfResource(g, ex.dataset1)
-        licences = licenses_from_rdf(dataset)
-        expected_licences = set(
-            [
-                "Custom Organizational License",
-                "This is a literal license statement",
-                "Embedded License Description",
-                "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
-                "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply",
+                    <rdf:Description rdf:about="http://example.org/custom-license">
+                       <rdfs:label>License from resource</rdfs:label>
+                       <dct:description>A license specific to our organization</dct:description>
+                    """,
+                    {"License from resource"},
+                ),
+                (
+                    "multiple",
+                    """
+                    <dct:license>License 1</dct:license>
+                    <dct:license>
+                       <rdf:Description>
+                          <rdfs:label>License 2</rdfs:label>
+                       </rdf:Description>
+                    </dct:license>
+                    """,
+                    {"License 1", "License 2"},
+                ),
             ]
-        )
-        assert expected_licences == licences
+        ],
+    )
+    def test_licenses_from_rdf(self, xml: str, expected_licenses: set[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        licenses = licenses_from_rdf(dataset)
+        assert licenses == expected_licenses
 
     def test_access_rights_from_rdf(self, app):
         node = BNode()
@@ -1754,53 +1794,158 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
         assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
 
-    def test_provenances_from_rdf(self):
-        """Test a bunch of cases of provenances detection from RDF"""
-        rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
-            <rdf:RDF
-            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-            xmlns:foaf="http://xmlns.com/foaf/0.1/"
-            xmlns:dct="http://purl.org/dc/terms/"
-            xmlns:cc="http://creativecommons.org/ns#"
-            xmlns:ex="http://example.org/">
-
-            <rdf:Description rdf:about="http://example.org/dataset1">
-                <dct:title>Comprehensive Provenance Example Dataset</dct:title>
-                <!-- old DCAT* specs -->
-                <dct:provenance>
-                    <dct:ProvenanceStatement>
-                        <rdfs:label>Provenance from label</rdfs:label>
-                    </dct:ProvenanceStatement>
-                </dct:provenance>
-                <!-- new DCAT* specs -->
-                <dct:provenance>
-                    <dct:ProvenanceStatement>
-                        <dct:description>Provenance from description</dct:description>
-                    </dct:ProvenanceStatement>
-                </dct:provenance>
-                <!-- supported theoretical(?) cases -->
-                <dct:provenance>Provenance from value</dct:provenance>
-                <dct:provenance rdf:resource="http://example.org/provenance"/>
-            </rdf:Description>
-
-            <rdf:Description rdf:about="http://example.org/provenance">
-                <dct:description>Provenance from resource</dct:description>
-            </rdf:Description>
-
-            </rdf:RDF>
-        """
-        g = Graph()
-        g.parse(data=rdf_xml_data, format="xml")
-        ex = Namespace("http://example.org/")
-        dataset = RdfResource(g, ex.dataset1)
-        licences = provenances_from_rdf(dataset)
-        expected_licences = set(
-            [
-                "Provenance from label",
-                "Provenance from description",
-                "Provenance from value",
-                "Provenance from resource",
+    @pytest.mark.parametrize(
+        "xml, expected_provenances",
+        [
+            pytest.param(
+                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_provenances, id=id
+            )
+            for id, xml_fragment, expected_provenances in [
+                # Old DCAT* specs
+                (
+                    "label",
+                    """
+                    <dct:provenance>
+                       <dct:ProvenanceStatement>
+                          <rdfs:label>Provenance from label</rdfs:label>
+                       </dct:ProvenanceStatement>
+                    </dct:provenance>
+                    """,
+                    {"Provenance from label"},
+                ),
+                # New DCAT* specs
+                (
+                    "description",
+                    """
+                    <dct:provenance>
+                       <dct:ProvenanceStatement>
+                          <dct:description>Provenance from description</dct:description>
+                       </dct:ProvenanceStatement>
+                    </dct:provenance>
+                    """,
+                    {"Provenance from description"},
+                ),
+                (
+                    "multiple",
+                    """
+                    <dct:provenance>
+                       <dct:ProvenanceStatement>
+                          <dct:description>Statement 1</dct:description>
+                       </dct:ProvenanceStatement>
+                    </dct:provenance>
+                    <dct:provenance>
+                       <dct:ProvenanceStatement>
+                          <dct:description>Statement 2</dct:description>
+                       </dct:ProvenanceStatement>
+                    </dct:provenance>
+                    """,
+                    {"Statement 1", "Statement 2"},
+                ),
+                # Supported theoretical(?) cases
+                (
+                    "value",
+                    """
+                    <dct:provenance>Provenance from value</dct:provenance>
+                    """,
+                    {"Provenance from value"},
+                ),
+                (
+                    "resource",
+                    """
+                       <dct:provenance rdf:resource="http://example.org/provenance"/>
+                    </rdf:Description>
+                    <rdf:Description rdf:about="http://example.org/provenance">
+                       <dct:description>Provenance from separate resource</dct:description>
+                    """,
+                    {"Provenance from separate resource"},
+                ),
             ]
-        )
-        assert expected_licences == licences
+        ],
+    )
+    def test_provenances_from_rdf(self, xml: str, expected_provenances: set[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        provenances = provenances_from_rdf(dataset)
+        assert provenances == expected_provenances
+
+    @pytest.mark.parametrize(
+        "xml, expected_format",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_format, id=id)
+            for id, xml_fragment, expected_format in [
+                # DCAT* and GeoDCAT-AP for distributions other than services
+                (
+                    "dct:format",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title xml:lang="fr">Accès au téléchargement des données</dct:title>
+                          <dcat:accessURL rdf:resource="https://telechargement-test.open-datara.fr/download/e4e022e0-bb65-402c-82f1-131c2dfee7a7"/>
+                          <dct:format>
+                             <dct:MediaType rdf:about="http://publications.europa.eu/resource/authority/file-type/ZIP"/>
+                          </dct:format>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "zip",
+                ),
+                # DCAT* and older GeoDCAT-AP for service distributions
+                (
+                    "dct:conformsTo",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title>IFR_GRA_HAL_R_NOU</dct:title>
+                          <dcat:accessURL rdf:resource="https://sextant.ifremer.fr/services/wms/granulats_marins"/>
+                          <dcat:accessService>
+                             <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+                                <dct:title>IFR_GRA_HAL_R_NOU</dct:title>
+                                <dcat:endpointURL rdf:resource="https://sextant.ifremer.fr/services/wms/granulats_marins"/>
+                                <dct:conformsTo>
+                                   <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms"/>
+                                </dct:conformsTo>
+                             </rdf:Description>
+                          </dcat:accessService>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "wms",
+                ),
+                # GeoDCAT-AP 3+ for service distributions
+                (
+                    "geodcatap:serviceProtocol",
+                    """
+                    <dcat:distribution>
+                       <dcat:Distribution>
+                          <dct:title>habitat:eco_atl_n2000_carte_habitats_simplifies_version2_ofb_pol_3857</dct:title>
+                          <dcat:accessService rdf:parseType="Resource">
+                             <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+                             <dct:title>habitat:eco_atl_n2000_carte_habitats_simplifies_version2_ofb_pol_3857</dct:title>
+                             <dcat:endpointURL rdf:resource="https://wxs.ofb.fr/geoserver/habitat/ows"/>
+                             <geodcatap:serviceProtocol>
+                                <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs"/>
+                             </geodcatap:serviceProtocol>
+                          </dcat:accessService>
+                          <dcat:accessURL rdf:resource="https://wxs.ofb.fr/geoserver/habitat/ows?version=2.0.0&amp;service=WFS&amp;request=GetCapabilities"/>
+                          <dct:format>
+                             <dct:MediaType>
+                                <rdfs:label>OGC:OWS-C</rdfs:label>
+                             </dct:MediaType>
+                          </dct:format>
+                       </dcat:Distribution>
+                    </dcat:distribution>
+                    """,
+                    "wfs",
+                ),
+            ]
+        ],
+    )
+    def test_format_from_rdf(self, xml: str, expected_format: str):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        distribution = graph.value(predicate=RDF.type, object=DCAT.Distribution)
+        resource = graph.resource(distribution)
+        format = format_from_rdf(resource)
+        assert format == expected_format

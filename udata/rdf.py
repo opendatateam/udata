@@ -39,18 +39,18 @@ log = logging.getLogger(__name__)
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
+DCT = DCTERMS  # More common usage
+EUFORMAT = Namespace("http://publications.europa.eu/resource/authority/file-type/")
+EUFREQ = Namespace("http://publications.europa.eu/resource/authority/frequency/")  # noqa: E501
+FREQ = Namespace("http://purl.org/cld/freq/")
+GEODCAT = Namespace("http://data.europa.eu/930/")
 HYDRA = Namespace("http://www.w3.org/ns/hydra/core#")
+IANAFORMAT = Namespace("https://www.iana.org/assignments/media-types/")
+OGC = Namespace("http://www.opengeospatial.org/standards/")
 SCHEMA = Namespace("http://schema.org/")
 SCV = Namespace("http://purl.org/NET/scovo#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
-FREQ = Namespace("http://purl.org/cld/freq/")
-EUFREQ = Namespace("http://publications.europa.eu/resource/authority/frequency/")  # noqa: E501
-EUFORMAT = Namespace("http://publications.europa.eu/resource/authority/file-type/")
-IANAFORMAT = Namespace("https://www.iana.org/assignments/media-types/")
-DCT = DCTERMS  # More common usage
-VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
-GEODCAT = Namespace("http://data.europa.eu/930/")
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind("adms", ADMS)
@@ -58,14 +58,13 @@ namespace_manager.bind("dcat", DCAT)
 namespace_manager.bind("dcatap", DCATAP)
 namespace_manager.bind("dct", DCT)
 namespace_manager.bind("foaf", FOAF)
-namespace_manager.bind("foaf", FOAF)
+namespace_manager.bind("freq", FREQ)
 namespace_manager.bind("hydra", HYDRA)
 namespace_manager.bind("rdfs", RDFS)
 namespace_manager.bind("scv", SCV)
 namespace_manager.bind("skos", SKOS)
 namespace_manager.bind("vcard", VCARD)
 namespace_manager.bind("xsd", XSD)
-namespace_manager.bind("freq", FREQ)
 
 # Support JSON-LD in format detection
 FORMAT_MAP = SUFFIX_FORMAT_MAP.copy()
@@ -264,6 +263,11 @@ def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
     return serialize_value(value, unwrap=unwrap) if value else default
 
 
+def vocabulary_key(uri: str, vocabulary: Namespace) -> str | None:
+    if uri.startswith(vocabulary):
+        return uri.removeprefix(vocabulary)
+
+
 def default_lang_value(obj, predicate):
     """
     Return the value with the default language if multiple Literal values exist in different languages.
@@ -310,10 +314,7 @@ def url_from_rdf(rdf, prop):
     It can be expressed in many forms as a URIRef or a Literal
     """
     value = rdf.value(prop)
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
-        return value.identifier.toPython()
+    return serialize_value(value)
 
 
 def theme_labels_from_rdf(rdf):
