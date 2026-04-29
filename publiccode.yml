@@ -1,26 +1,48 @@
-publiccodeYmlVersion: "0.2"
+publiccodeYmlVersion: '0'
 name: udata
 url: https://github.com/opendatateam/udata
-landingURL: http://udata.readthedocs.org
-creationDate: 2014-04-25
-latestRelease:
-  date: ""
-  version: ""
+landingURL: https://udata.readthedocs.io
+softwareVersion: v16.3.0
+releaseDate: '2026-04-27'
+platforms:
+  - web
 logo: https://github.com/opendatateam.png
-usedBy: []
+developmentStatus: stable
+softwareType: standalone/web
+categories:
+  - data-collection
+  - data-analytics
 fundedBy:
   - name: Direction interministérielle du numérique
-    url: https://lannuaire.service-public.fr/gouvernement/d1a97841-b4bf-46df-a089-1003e4e266b4
-softwareType: ""
+    uri: https://lannuaire.service-public.fr/gouvernement/d1a97841-b4bf-46df-a089-1003e4e266b4
 description:
   en:
     shortDescription: Customizable and skinnable social platform dedicated to open data.
-    documentation: ""
+    longDescription: >
+      udata is an open source platform designed to catalog, publish and
+      share open data. It powers data.gouv.fr, the French government
+      open data portal. udata provides dataset management, user
+      contributions, harvesting from remote catalogs, spatial and
+      temporal indexing, and a plugin architecture for customization.
+      It supports multiple output formats and provides a full REST API.
+    documentation: https://udata.readthedocs.io
+    features:
+      - Dataset cataloging and publishing
+      - Harvesting from remote sources
+      - Community contributions and discussions
+      - Spatial and temporal search
+      - Plugin and theme architecture
+      - Full REST API
 legal:
-  license: agpl-3.0
-  authorsFile: ""
+  license: AGPL-3.0-only
 maintenance:
   type: community
   contacts:
-    - name: ""
-      email: ""
+    - name: Open Data Team
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - fr
+    - es
+    - pt
