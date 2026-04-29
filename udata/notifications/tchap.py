@@ -1,6 +1,6 @@
-from markdown import markdown
 import requests
 from flask import current_app
+from markdown import markdown
 
 from udata.core.spam.signals import on_new_potential_spam
 
