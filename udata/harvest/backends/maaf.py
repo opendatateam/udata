@@ -191,7 +191,7 @@ class MaafBackend(BaseBackend):
                 dataset.spatial.zones = [ZONES[metadata["territorial_coverage_code"]]]
 
         dataset.resources = []
-        cle = get_by(metadata["resources"], "format", "cle")
+        cle = get_by(metadata["resources"], format="cle")
         for row in metadata["resources"]:
             if row["format"] == "cle":
                 continue

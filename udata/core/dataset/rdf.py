@@ -759,19 +759,23 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
 
     resource.filetype = "remote"
-    resource.format = format_from_rdf(distrib)
-    resource.title = title_from_rdf(distrib, url, resource.format)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
