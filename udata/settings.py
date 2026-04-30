@@ -637,7 +637,8 @@ class Defaults(object):
 
     # Notification settings
     ###########################################################################
-    MATTERMOST_WEBHOOK = None
+    TCHAP_ROOM_URL = None
+    TCHAP_BOT_TOKEN = None
 
     # Tabular API Dataservice ID
     ###########################################################################
