@@ -1422,3 +1422,20 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
         assert "inspire" in dataset.tags
+
+    def test_geoplateforme(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw(rmock, "geoplateforme-iso19139-IGNF_RPG.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects.first()
+
+        assert dataset.title == "RPG"
+        assert len(dataset.resources) == 70  # 24 WFS + 23 WMS + 23 WMTS
