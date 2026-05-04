@@ -353,6 +353,43 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
 
+    def test_get_membership_requests_filtered_by_user_skips_orphan_requests(self):
+        # An email invitation has no user attached (user=None). Filtering by
+        # user id must not crash on those entries (regression: AttributeError
+        # 'NoneType' object has no attribute 'id').
+        applicant = self.login()
+        orphan_invitation = MembershipRequest(user=None, email="invited@example.org")
+        applicant_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(
+            members=[], requests=[orphan_invitation, applicant_request]
+        )
+
+        response = self.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id)},
+        )
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["comment"] == "test"
+
+    def test_get_membership_requests_filtered_by_user_and_status_skips_orphan_requests(self):
+        # Same regression as above but on the branch where ``status`` is also
+        # provided — both list comprehensions must guard against r.user=None.
+        applicant = self.login()
+        orphan_invitation = MembershipRequest(user=None, email="invited@example.org")
+        applicant_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(
+            members=[], requests=[orphan_invitation, applicant_request]
+        )
+
+        response = self.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id), "status": "pending"},
+        )
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["comment"] == "test"
+
     @pytest.mark.parametrize(
         "searched_status",
         [
