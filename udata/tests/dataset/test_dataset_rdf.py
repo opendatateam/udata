@@ -1093,8 +1093,6 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
         g.add((distrib, DCAT.accessService, service))
 
-        print(g.serialize(format="xml"))
-
         resource = resource_from_rdf(g, dataset)
         resource.validate()
 

@@ -765,7 +765,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if dataset:
         fields = {"url": url}
         if format in OGC_SERVICE_FORMATS:
-            # In ISO-19139/19115-3, GeoNetwork generates per-layer resrouces for OGC services, all
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
             # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
             # correct resource.
             # GeoNetwork uses the layer name as title, so it should be stable enough that we can
@@ -774,7 +774,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             # We however don't use the title for other types of resources, because it is more
             # likely to be editorialized, and therefore change over time while still describing
             # the same resource.
-            fields |= {"title": title}
+            fields["title"] = title
         resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
