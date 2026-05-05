@@ -12,7 +12,7 @@ from udata.core.access_type.constants import AccessType, InspireLimitationCatego
 from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -1057,6 +1057,48 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(resource, Resource)
         assert resource.title == new_title
         assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_and_title(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(existing_resource.title)))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_only(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(faker.sentence())))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id != existing_resource.id
 
     def test_can_extract_from_rdf_resource(self):
         node = BNode()

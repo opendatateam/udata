@@ -6,21 +6,17 @@ from datetime import date
 import pytest
 import requests
 from flask import current_app
-from lxml import etree
-from rdflib import Graph
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
-from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.backends import get_backend
 from udata.harvest.backends.dcat import CswDcatBackend
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
-from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -32,44 +28,60 @@ log = logging.getLogger(__name__)
 
 
 TEST_DOMAIN = "data.test.org"  # Need to be used in fixture file
-DCAT_URL_PATTERN = "http://{domain}/{path}"
+TEST_URL_PATTERN = "http://{domain}/{path}"
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "dcat")
 CSW_DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "csw_dcat")
 
 
-def mock_dcat(rmock, filename, path=None):
-    url = DCAT_URL_PATTERN.format(path=path or filename, domain=TEST_DOMAIN)
-    with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
-        body = dcatfile.read()
-    rmock.get(url, text=body)
+def _mock_single(rmock, method, filesdir, filename, path=None):
+    url = TEST_URL_PATTERN.format(path=path or filename, domain=TEST_DOMAIN)
+    with open(os.path.join(filesdir, filename)) as f:
+        body = f.read()
+    rmock.register_uri(method, url, text=body)
     return url
 
 
-def mock_pagination(rmock, path, pattern):
-    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
+def mock_dcat(rmock, filename, path=None):
+    return _mock_single(rmock, "GET", DCAT_FILES_DIR, filename, path)
+
+
+def mock_csw(rmock, filename, path=None):
+    return _mock_single(rmock, "POST", CSW_DCAT_FILES_DIR, filename, path)
+
+
+def _mock_pagination(rmock, method, filesdir, pattern, get_page, path):
+    url = TEST_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
 
     def callback(request, context):
-        page = request.qs.get("page", [1])[0]
-        filename = pattern.format(page=page)
         context.status_code = 200
-        with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
-            return dcatfile.read()
+        page = get_page(request)
+        filename = pattern.format(page=page)
+        with open(os.path.join(filesdir, filename)) as f:
+            return f.read()
 
-    rmock.get(rmock.ANY, text=callback)
+    rmock.register_uri(method, rmock.ANY, text=callback)
     return url
+
+
+def mock_dcat_pagination(rmock, path, pattern):
+    def get_page(request):
+        return request.qs.get("page", [1])[0]
+
+    return _mock_pagination(rmock, "GET", DCAT_FILES_DIR, pattern, get_page, path)
 
 
 def mock_csw_pagination(rmock, path, pattern):
-    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
-
-    def callback(request, context):
+    def get_page(request):
         request_tree = ET.fromstring(request.body)
-        page = int(request_tree.get("startPosition"))
-        with open(os.path.join(CSW_DCAT_FILES_DIR, pattern.format(page))) as cswdcatfile:
-            return cswdcatfile.read()
+        return int(request_tree.get("startPosition"))
 
-    rmock.post(rmock.ANY, text=callback)
-    return url
+    return _mock_pagination(rmock, "POST", CSW_DCAT_FILES_DIR, pattern, get_page, path)
+
+
+def mock_xslt(rmock, filename="XSLT.xml"):
+    with open(os.path.join(CSW_DCAT_FILES_DIR, filename), "r") as f:
+        xslt = f.read()
+    rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["dcat"])
@@ -501,7 +513,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(datasets["3"].resources) == 1
 
     def test_hydra_partial_collection_view_pagination(self, rmock):
-        url = mock_pagination(rmock, "catalog.jsonld", "partial-collection-{page}.jsonld")
+        url = mock_dcat_pagination(rmock, "catalog.jsonld", "partial-collection-{page}.jsonld")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
@@ -513,7 +525,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 4
 
     def test_hydra_legacy_paged_collection_pagination(self, rmock):
-        url = mock_pagination(rmock, "catalog.jsonld", "paged-collection-{page}.jsonld")
+        url = mock_dcat_pagination(rmock, "catalog.jsonld", "paged-collection-{page}.jsonld")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
@@ -525,7 +537,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 4
 
     def test_failure_on_initialize(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(url, text="should fail")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -853,7 +865,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
 
     def test_unsupported_mime_type(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": "text/html; charset=utf-8"})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -871,7 +883,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert error.message == 'Unsupported mime type "text/html"'
 
     def test_unable_to_detect_format(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": ""})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -891,7 +903,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
     def test_use_replaced_uris(self, rmock, mocker):
         # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(
             url,
             json={
@@ -924,7 +936,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
     def test_target_404(self, rmock):
         filename = "obvious-format.jsonld"
-        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
         rmock.get(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
@@ -937,7 +949,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "404 Client Error" in job.errors[0].message
 
         filename = "need-to-head-to-guess-format"
-        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
         rmock.head(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
@@ -961,7 +973,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
     )
     def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
         """Connection exceptions should be logged as warning, not sent to Sentry."""
-        url = DCAT_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
         rmock.get(url, exc=exception)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
@@ -1015,7 +1027,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         geodcatap = schema_name == "geodcatap"
 
         url = mock_csw_pagination(
-            rmock, "geonetwork/srv/fre/csw", f"geonetwork-{schema_name}-page-{{}}.xml"
+            rmock, "geonetwork/srv/fre/csw", f"geonetwork-{schema_name}-page-{{page}}.xml"
         )
         source = HarvestSourceFactory(
             backend="csw-dcat",
@@ -1078,7 +1090,9 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             assert resource.format == "ogc:wms"
 
     def test_user_agent_post(self, rmock):
-        url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
         get_mock = rmock.post(url)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
@@ -1246,12 +1260,10 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         ],
     )
     def test_geo2france(self, rmock, remote_url_prefix: str):
-        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
-            xslt = f.read()
+        mock_xslt(rmock)
         url = mock_csw_pagination(
-            rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{}.xml"
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{page}.xml"
         )
-        rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
@@ -1364,29 +1376,26 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.extras["dcat"].get("rights") is None
         assert resource.extras["dcat"].get("rights") is None
 
-    def test_geo_ide(self):
+    def test_geoide(self, rmock):
         # this is the string used in geo-ide for now
         lov1 = LicenseFactory(
             id="lov1",
             url="http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
         )
 
-        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
-            xslt = f.read()
-        with open(
-            os.path.join(CSW_DCAT_FILES_DIR, "geoide-iso19139-single-dataset.xml"), "rb"
-        ) as f:
-            csw = f.read()
+        mock_xslt(rmock)
+        url = mock_csw(rmock, "geoide-iso19139-single-dataset.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
 
-        # apply xslt transformation manually instead of using the harvest backend since we're only processing one dataset
-        transform = etree.XSLT(etree.fromstring(xslt))
-        tree_before_transform = etree.fromstring(csw)
-        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
-        subgraph = Graph(namespace_manager=namespace_manager)
-        subgraph.parse(etree.tostring(tree), format="application/rdf+xml")
-        node = next(subgraph.subjects(RDF.type, DCAT.Dataset))
+        actions.run(source)
+        source.reload()
 
-        dataset = dataset_from_rdf(subgraph, dataset=None, node=node)
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects.first()
+
         assert dataset.title == "Plan local d'urbanisme de la commune de Combles"
         assert len(dataset.resources) == 6
         assert dataset.license == lov1
@@ -1413,3 +1422,20 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
         assert "inspire" in dataset.tags
+
+    def test_geoplateforme(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw(rmock, "geoplateforme-iso19139-IGNF_RPG.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects.first()
+
+        assert dataset.title == "RPG"
+        assert len(dataset.resources) == 70  # 24 WFS + 23 WMS + 23 WMTS

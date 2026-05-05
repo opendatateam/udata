@@ -649,7 +649,7 @@ class NestedModelList(fields.FieldList):
             initial = None
             if hasattr(self.nested_model, "id") and "id" in field.data:
                 id = self.nested_model.id.to_python(field.data["id"])
-                initial = get_by(initial_values, "id", id)
+                initial = get_by(initial_values, id=id)
 
             holder.nested = initial or self.nested_model()
             field.populate_obj(holder, "nested")
@@ -669,7 +669,7 @@ class NestedModelList(fields.FieldList):
                 formdata[idkey] = formdata.pop(prefix)
             if hasattr(self.nested_model, "id") and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
-                data = get_by(self.initial_data, "id", id)
+                data = get_by(self.initial_data, id=id)
 
                 initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
 
