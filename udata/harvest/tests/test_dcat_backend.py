@@ -1191,6 +1191,37 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert job.status == "done"
         assert len(job.items) == 1
 
+    def test_ignore_xml_comments(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/test/">
+                <dct:identifier>https://example.com/test/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>test</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+            <!-- this should be ignored -->
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done"
+        assert len(job.items) == 1
+
     @pytest.mark.parametrize(
         "remote_url_prefix",
         [

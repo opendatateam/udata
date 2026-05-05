@@ -402,6 +402,9 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 return
 
             for result in search_results.children:
+                if result.node_kind_str != "element":
+                    # Saxonche returns all children, including comments and other non-element nodes
+                    continue
                 subgraph = Graph(namespace_manager=namespace_manager)
                 doc = self.as_dcat(result).to_string("utf-8")
                 subgraph.parse(data=doc, format=fmt)
