@@ -40,7 +40,7 @@ def get(obj, field: str) -> Any | None:
         return getattr(obj, field, None)
 
 
-def get_by(lst, **fields: dict[str, Any]) -> Any | None:
+def get_by(lst, **fields: Any) -> Any | None:
     """Find an object in a list given field(s) value(s)"""
     for row in lst:
         if all(get(row, field) == value for field, value in fields.items()):
