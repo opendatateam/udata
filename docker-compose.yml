@@ -2,7 +2,7 @@ services:
     db:
         image: mongo:7.0.28
         volumes:
-          - ./data/db:/data/db
+          - db-data:/data/db
         expose:
           - "27017"
         ports:
@@ -15,7 +15,7 @@ services:
     broker:
         image: redis
         volumes:
-          - ./data/broker:/data
+          - broker-data:/data
         expose:
           - "6379"
         ports:
@@ -29,7 +29,7 @@ services:
           - cluster.initial_master_nodes=es01
           - ES_JAVA_OPTS=-Xms750m -Xmx750m
         volumes:
-          - es-data:/usr/share/elasticsearch/data
+          - search-data:/usr/share/elasticsearch/data
         expose:
           - "9200"
         ports:
@@ -52,4 +52,6 @@ services:
             MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
 volumes:
-    es-data:
+    db-data:
+    broker-data:
+    search-data:
