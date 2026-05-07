@@ -37,8 +37,6 @@ def on_dataservice_created(dataservice):
     """Create notifications when a dataservice is created"""
     from udata.features.notifications.models import Notification
 
-    if not dataservice.datasets:
-        return
     for dataset in dataservice.datasets:
         for owner in get_responsible_users(dataset):
             if owner:
