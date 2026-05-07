@@ -1,5 +1,17 @@
 # Changelog
 
+## 16.4.0 (2026-05-07)
+
+- feat: ask user password rotation via API ([#3762](https://github.com/opendatateam/udata/pull/3762))
+- feat(harvest): use distribution service protocol as format when available ([#3749](https://github.com/opendatateam/udata/pull/3749))
+- feat: use volumes for all services ([#3761](https://github.com/opendatateam/udata/pull/3761))
+- fix(harvest): csw-* harvesters fail on some XML comments ([#3758](https://github.com/opendatateam/udata/pull/3758))
+- fix(harvest): distributions of separate WFS/WMS/WMTS layers override eachother ([#3752](https://github.com/opendatateam/udata/pull/3752))
+- fix: incorrect mask on topic element ([#3756](https://github.com/opendatateam/udata/pull/3756))
+- fix: membership api with user=None ([#3754](https://github.com/opendatateam/udata/pull/3754))
+- refactor: ping on tchap ([#3750](https://github.com/opendatateam/udata/pull/3750))
+
+
 ## 16.3.0 (2026-04-27)
 
 - chore(config): migrate Renovate config ([#3743](https://github.com/opendatateam/udata/pull/3743))
