@@ -57,7 +57,7 @@ def on_reuse_created(reuse):
 def cleanup_reuse_notifications(reuse, **kwargs):
     """Clean up notifications when a reuse is deleted"""
     from udata.features.notifications.models import Notification
-    
+
     try:
         Notification.objects(details__reuse=reuse).delete()
     except Exception as e:

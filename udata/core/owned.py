@@ -163,13 +163,13 @@ OrgRole = Literal[tuple(ORG_ROLES.keys())]
 def get_responsible_users(owned_obj: Owned, role: OrgRole = "admin") -> list[User]:
     """
     Get all users responsible for an owned object (owner + org members with role).
-    
+
     Useful for notifications, permissions, emails, etc.
-    
+
     Args:
         owned_obj: An object with owner and organization attributes (from Owned mixin)
         role: The organization member role to include (default: "admin")
-    
+
     Returns:
         List of User objects (owner + org members with specified role)
     """

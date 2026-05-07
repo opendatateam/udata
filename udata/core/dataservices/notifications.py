@@ -57,7 +57,7 @@ def on_dataservice_created(dataservice):
 def cleanup_dataservice_notifications(dataservice, **kwargs):
     """Clean up notifications when a dataservice is deleted"""
     from udata.features.notifications.models import Notification
-    
+
     try:
         Notification.objects(details__dataservice=dataservice).delete()
     except Exception as e:

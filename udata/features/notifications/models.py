@@ -3,8 +3,8 @@ from mongoengine import NULLIFY, Q
 from mongoengine.fields import DateTimeField, GenericEmbeddedDocumentField, ReferenceField
 
 from udata.api_fields import field, generate_fields
-from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
     MembershipRefusedNotificationDetails,
