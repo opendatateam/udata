@@ -1,12 +1,10 @@
 import logging
-from typing import Literal
 
 from blinker import signal
 from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
-from udata.core.organization.constants import ORG_ROLES
 from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
@@ -109,7 +107,7 @@ class Owned(object):
         ],
         "queryset_class": OwnedQuerySet,
     }
-s
+
     def clean(self):
         """
         Verify owner consistency and fetch original owner before the new one erase it.
@@ -139,6 +137,7 @@ s
                 # Need to fetch previous value in base
                 original = self.__class__.objects.only("owner").get(pk=self.pk)
                 self._previous_owner = original.owner
+
 
 def owned_post_save(sender, document, **kwargs):
     """
