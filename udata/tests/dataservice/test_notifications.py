@@ -1,7 +1,6 @@
 from datetime import UTC, datetime
 
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
