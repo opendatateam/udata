@@ -385,6 +385,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         if notify:
             mails.account_deletion().send(copied_user)
 
+    def request_password_rotation(self):
+        """Mark the user for password rotation on next login and invalidate
+        all ongoing sessions by changing its uniquifier."""
+        self.password_rotation_demanded = datetime.now(UTC)
+        self.save()
+        datastore.set_uniquifier(self)
+
     def count_datasets(self):
         from udata.models import Dataset
 
