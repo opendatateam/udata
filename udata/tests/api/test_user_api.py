@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from flask import url_for
 
 from udata.core import storages
@@ -436,6 +438,81 @@ class UserAPITest(APITestCase):
         assert Discussion.objects(id=discussion_only_user.id).first() is None
         discussion_with_other.reload()
         assert discussion_with_other.discussion[1].content == "DELETED"
+
+    def test_rotate_password_as_admin(self):
+        """A sysadmin can request a password rotation for any user."""
+        self.login(AdminFactory())
+        user = UserFactory()
+        previous_uniquifier = user.fs_uniquifier
+
+        response = self.post(url_for("api.rotate_user_password", user=user))
+        self.assert204(response)
+
+        user.reload()
+        assert user.password_rotation_demanded is not None
+        # The uniquifier must change to invalidate any active session
+        assert user.fs_uniquifier != previous_uniquifier
+
+    def test_rotate_password_as_non_admin(self):
+        """A non-admin user cannot rotate another user's password."""
+        self.login()
+        target = UserFactory()
+
+        response = self.post(url_for("api.rotate_user_password", user=target))
+        self.assert403(response)
+
+        target.reload()
+        assert target.password_rotation_demanded is None
+
+    def test_rotate_password_unauthenticated(self):
+        """An unauthenticated request cannot rotate a password."""
+        target = UserFactory()
+
+        response = self.post(url_for("api.rotate_user_password", user=target))
+        self.assert401(response)
+
+        target.reload()
+        assert target.password_rotation_demanded is None
+
+    def test_password_rotation_fields_visible_to_admin(self):
+        """The password rotation fields are exposed to sysadmins."""
+        self.login(AdminFactory())
+        rotation_demanded = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        rotation_performed = datetime(2025, 1, 16, 11, 0, 0, tzinfo=UTC)
+        user = UserFactory(
+            password_rotation_demanded=rotation_demanded,
+            password_rotation_performed=rotation_performed,
+        )
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is not None
+        assert response.json["password_rotation_performed"] is not None
+
+    def test_password_rotation_fields_hidden_from_non_admin(self):
+        """The password rotation fields are not exposed to non-admins."""
+        self.login()
+        user = UserFactory(
+            password_rotation_demanded=datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
+        )
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is None
+        assert response.json["password_rotation_performed"] is None
+
+    def test_password_rotation_fields_visible_on_me(self):
+        """The password rotation fields are exposed on the /me endpoint for the user themselves."""
+        rotation_demanded = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(password_rotation_demanded=rotation_demanded)
+        self.login(user)
+
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is not None
 
     def test_contact_points(self):
         user = AdminFactory()
