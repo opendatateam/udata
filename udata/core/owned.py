@@ -109,7 +109,7 @@ class Owned(object):
         ],
         "queryset_class": OwnedQuerySet,
     }
-
+s
     def clean(self):
         """
         Verify owner consistency and fetch original owner before the new one erase it.
@@ -140,7 +140,6 @@ class Owned(object):
                 original = self.__class__.objects.only("owner").get(pk=self.pk)
                 self._previous_owner = original.owner
 
-
 def owned_post_save(sender, document, **kwargs):
     """
     Owned mongoengine.post_save signal handler
@@ -157,10 +156,7 @@ def owned_post_save(sender, document, **kwargs):
 post_save.connect(owned_post_save)
 
 
-OrgRole = Literal[tuple(ORG_ROLES.keys())]
-
-
-def get_responsible_users(owned_obj: Owned, role: OrgRole = "admin") -> list[User]:
+def get_responsible_users(owned_obj: Owned, role: str = "admin") -> list[User]:
     """
     Get all users responsible for an owned object (owner + org members with role).
 
