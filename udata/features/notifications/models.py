@@ -4,12 +4,14 @@ from mongoengine.fields import DateTimeField, GenericEmbeddedDocumentField, Refe
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.notifications import DiscussionNotificationDetails
+from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
     MembershipRefusedNotificationDetails,
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
 )
+from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
@@ -72,6 +74,8 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
                 MembershipAcceptedNotificationDetails,
                 MembershipRefusedNotificationDetails,
                 ValidateHarvesterNotificationDetails,
+                ReuseCreatedNotificationDetails,
+                DataserviceCreatedNotificationDetails,
             )
         ),
         generic=True,

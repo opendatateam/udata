@@ -12,6 +12,95 @@ from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import APITestCase, DBTestCase
 
 
+class GetResponsibleUsersTest(DBTestCase):
+    """Tests for the get_responsible_users helper function."""
+
+    def test_returns_owner_only(self):
+        """Should return only the owner when object has no organization."""
+        owner = UserFactory()
+        owned_obj = Owned.objects.create(owner=owner)
+        
+        recipients = owned.get_responsible_users(owned_obj)
+        
+        assert len(recipients) == 1
+        assert recipients[0] == owner
+
+    def test_returns_org_admins_only(self):
+        """Should return org admins when object has no owner."""
+        admin1 = UserFactory()
+        admin2 = UserFactory()
+        org = OrganizationFactory(members=[
+            Member(user=admin1, role="admin"),
+            Member(user=admin2, role="admin"),
+        ])
+        owned_obj = Owned.objects.create(organization=org)
+        
+        recipients = owned.get_responsible_users(owned_obj)
+        
+        assert len(recipients) == 2
+        assert admin1 in recipients
+        assert admin2 in recipients
+
+    def test_returns_owner_and_org_admins(self):
+        """Should return both owner and org admins."""
+        owner = UserFactory()
+        admin1 = UserFactory()
+        admin2 = UserFactory()
+        org = OrganizationFactory(members=[
+            Member(user=admin1, role="admin"),
+            Member(user=admin2, role="admin"),
+        ])
+        owned_obj = Owned.objects.create(owner=owner, organization=org)
+        
+        recipients = owned.get_responsible_users(owned_obj)
+        
+        assert len(recipients) == 3
+        assert owner in recipients
+        assert admin1 in recipients
+        assert admin2 in recipients
+
+    def test_filters_by_role(self):
+        """Should only return members with the specified role."""
+        owner = UserFactory()
+        admin = UserFactory()
+        editor = UserFactory()
+        org = OrganizationFactory(members=[
+            Member(user=admin, role="admin"),
+            Member(user=editor, role="editor"),
+        ])
+        owned_obj = Owned.objects.create(owner=owner, organization=org)
+        
+        # Default role is "admin"
+        recipients = owned.get_responsible_users(owned_obj)
+        assert len(recipients) == 2
+        assert owner in recipients
+        assert admin in recipients
+        assert editor not in recipients
+        
+        # With editor role
+        recipients = owned.get_responsible_users(owned_obj, role="editor")
+        assert len(recipients) == 2
+        assert owner in recipients
+        assert editor in recipients
+        assert admin not in recipients
+
+    def test_returns_empty_list_when_no_owner_and_no_org(self):
+        """Should return empty list when object has no owner and no organization."""
+        owned_obj = Owned.objects.create()
+        
+        recipients = owned.get_responsible_users(owned_obj)
+        
+        assert len(recipients) == 0
+
+    def test_handles_none_values(self):
+        """Should handle None values gracefully."""
+        owned_obj = Owned.objects.create(owner=None, organization=None)
+        
+        recipients = owned.get_responsible_users(owned_obj)
+        
+        assert len(recipients) == 0
+
+
 class CustomQuerySet(owned.OwnedQuerySet):
     def visible(self):
         return self(private__ne=True)
