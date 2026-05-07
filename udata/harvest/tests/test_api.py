@@ -741,10 +741,12 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
 
     def test_list_items(self):
         """It should fetch the harvest items list from the dedicated paginated endpoint"""
+        dataset = DatasetFactory()
+        dataservice = DataserviceFactory()
         job = HarvestJobFactory(
             items=[
-                HarvestItem(dataset=DatasetFactory()),
-                HarvestItem(dataservice=DataserviceFactory()),
+                HarvestItem(dataset=dataset),
+                HarvestItem(dataservice=dataservice),
                 HarvestItem(dataset=DatasetFactory(), remote_url="https://my.remote.example.com"),
             ],
         )
@@ -776,6 +778,22 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         # Make sure remote_url is exposed if exists
         assert response.json["data"][1]["remote_url"] is None
         assert response.json["data"][2]["remote_url"] == "https://my.remote.example.com"
+
+        # Dataset and dataservice references must expose enough info for the frontend
+        # to render a link (title + URLs), not just {id, class}.
+        dataset_ref = response.json["data"][0]["dataset"]
+        assert dataset_ref["id"] == str(dataset.id)
+        assert dataset_ref["class"] == "Dataset"
+        assert dataset_ref["title"] == dataset.title
+        assert dataset_ref["self_web_url"] == dataset.self_web_url()
+        assert dataset_ref["self_api_url"] == dataset.self_api_url()
+
+        dataservice_ref = response.json["data"][1]["dataservice"]
+        assert dataservice_ref["id"] == str(dataservice.id)
+        assert dataservice_ref["class"] == "Dataservice"
+        assert dataservice_ref["title"] == dataservice.title
+        assert dataservice_ref["self_web_url"] == dataservice.self_web_url()
+        assert dataservice_ref["self_api_url"] == dataservice.self_api_url()
 
     def test_list_items_paginated(self):
         """Items endpoint paginates with page/page_size"""
