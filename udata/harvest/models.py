@@ -108,6 +108,7 @@ class HarvestItem(EmbeddedDocument):
             required=True,
         ),
         description="The item status",
+        filterable={},
     )
     created = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),

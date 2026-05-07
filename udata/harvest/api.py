@@ -318,15 +318,20 @@ class JobAPI(API):
 @ns.route("/job/<string:ident>/items/", endpoint="harvest_job_items")
 class JobItemsAPI(API):
     @api.doc("list_harvest_job_items")
-    @api.expect(page_parser)
+    @api.expect(HarvestItem.__index_parser__)
     @api.marshal_with(HarvestItem.__page_fields__)
     def get(self, ident):
         """List the items of a given harvest job (paginated)"""
         job = actions.get_job(ident)
-        args = page_parser.parse_args()
+        args = HarvestItem.__index_parser__.parse_args()
+        # Items are embedded documents on the job, so the auto-generated
+        # apply_sort_filters (which calls queryset.filter) does not apply here.
+        items = job.items
+        if args["status"]:
+            items = [item for item in items if item.status == args["status"]]
         # Wrap in DBPaginator so the pager marshaller can compute
         # next_page/previous_page URLs from has_next/has_prev.
-        return DBPaginator(Pagination(job.items, args["page"], args["page_size"]))
+        return DBPaginator(Pagination(items, args["page"], args["page_size"]))
 
 
 @ns.route("/backends/", endpoint="harvest_backends")

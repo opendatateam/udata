@@ -808,6 +808,31 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert "page=2" in last.json["previous_page"]
         assert last.json["next_page"] is None
 
+    def test_list_items_filtered_by_status(self):
+        """Items endpoint accepts a status filter"""
+        job = HarvestJobFactory(
+            items=[
+                HarvestItem(status="done"),
+                HarvestItem(status="done"),
+                HarvestItem(status="failed"),
+                HarvestItem(status="skipped"),
+            ],
+        )
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="done"))
+        assert200(response)
+        assert response.json["total"] == 2
+        assert {item["status"] for item in response.json["data"]} == {"done"}
+
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="failed"))
+        assert200(response)
+        assert response.json["total"] == 1
+
+    def test_list_items_filtered_by_unknown_status(self):
+        """Status filter rejects unknown values"""
+        job = HarvestJobFactory(items=[HarvestItem()])
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="bogus"))
+        assert400(response)
+
     def test_get_source_permissions_as_anonymous(self):
         """It should return all permissions as False for anonymous users"""
         source = HarvestSourceFactory()
