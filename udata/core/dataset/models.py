@@ -574,7 +574,7 @@ class Dataset(
     Linkable,
     Document[DatasetQuerySet],
 ):
-    title = field(StringField(required=True), show_as_ref=True)
+    title = field(StringField(required=True))
     acronym = field(StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
@@ -787,11 +787,9 @@ class Dataset(
             "read": OwnableReadPermission(self),
         }
 
-    @field(description="Link to the udata web page for this dataset", show_as_ref=True)
     def self_web_url(self, **kwargs):
         return cdata_url(f"/datasets/{self._link_id(**kwargs)}", **kwargs)
 
-    @field(description="Link to the API endpoint for this dataset", show_as_ref=True)
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataset", dataset=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)

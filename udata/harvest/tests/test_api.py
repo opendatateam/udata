@@ -785,8 +785,8 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert dataset_ref["id"] == str(dataset.id)
         assert dataset_ref["class"] == "Dataset"
         assert dataset_ref["title"] == dataset.title
-        assert dataset_ref["self_web_url"] == dataset.self_web_url()
-        assert dataset_ref["self_api_url"] == dataset.self_api_url()
+        assert dataset_ref["page"] == dataset.self_web_url()
+        assert dataset_ref["uri"] == dataset.self_api_url()
 
         dataservice_ref = response.json["data"][1]["dataservice"]
         assert dataservice_ref["id"] == str(dataservice.id)

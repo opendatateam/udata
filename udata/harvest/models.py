@@ -21,6 +21,7 @@ from udata.api_fields import field, generate_fields, required_if
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
@@ -97,7 +98,12 @@ class HarvestLog(EmbeddedDocument):
 class HarvestItem(EmbeddedDocument):
     remote_id = field(StringField(), description="The item remote ID to process")
     remote_url = field(StringField(), description="The item remote url (if available)")
-    dataset = field(ReferenceField(Dataset), description="The processed dataset", allow_null=True)
+    dataset = field(
+        ReferenceField(Dataset),
+        nested_fields=dataset_ref_fields,
+        description="The processed dataset",
+        allow_null=True,
+    )
     dataservice = field(
         ReferenceField(Dataservice), description="The processed dataservice", allow_null=True
     )
