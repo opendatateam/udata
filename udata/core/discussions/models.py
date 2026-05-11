@@ -1,9 +1,12 @@
+import fnmatch
 import logging
 from datetime import UTC, datetime
+from urllib.parse import urlparse
 
-from flask import url_for
+from flask import current_app, url_for
 from flask_login import current_user
 from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -90,6 +93,73 @@ class Message(SpamMixin, EmbeddedDocument):
         return message
 
 
+def is_valid_notification_external_url(url) -> bool:
+    """True if `url` is an http(s) URL whose domain is in the allow-list.
+
+    Used both as the write-time validator (via `NotificationExtra`) and the
+    read-time filter (in `Discussion.notification_url`). Keeping a single
+    source of truth means a config change is reflected on both sides.
+    """
+    if not url or not isinstance(url, str):
+        return False
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    # Reject non-http(s) schemes: `urlparse("javascript://host/...").netloc`
+    # returns the host, so the netloc allow-list alone would let dangerous
+    # schemes land in a clickable `<a href>` in the notification mail.
+    if parsed.scheme not in ("http", "https"):
+        return False
+    # Reject any userinfo: `urlparse("http://attacker.com\@eco.example.com")`
+    # keeps `attacker.com\` as `username` and `eco.example.com` as `hostname`,
+    # but WHATWG-conformant clients (browsers, mail readers) normalize `\` to
+    # `/` for http(s), routing the click to `attacker.com`. Userinfo also has
+    # no legitimate use in a notification URL, so we reject it outright.
+    if parsed.username or parsed.password:
+        return False
+    host = parsed.hostname or ""
+    if not host:
+        return False
+    allowed = current_app.config.get("DISCUSSION_ALLOWED_EXTERNAL_DOMAINS", [])
+    # `fnmatchcase` keeps the match deterministic across OSes (`fnmatch` is
+    # case-insensitive on Windows). `hostname` is already lowercased by Python.
+    return any(fnmatch.fnmatchcase(host, pattern) for pattern in allowed)
+
+
+def _validate_notification_external_url(value):
+    if not is_valid_notification_external_url(value):
+        raise ValidationError("Invalid or disallowed notification.external_url")
+
+
+def is_valid_notification_model_name(subject, name) -> bool:
+    """True if `name` is allow-listed as a `model_name` for `subject`'s class.
+
+    Used both by the form validator (write-time) and `notification_subject_type`
+    (read-time). The per-class allow-list prevents a label intended for one
+    subject type (e.g. "bouquet" for Topic) from being applied to a different
+    one (e.g. a Dataset relabeled as "bouquet").
+    """
+    if not name:
+        return False
+    subject_cls = type(subject).__name__ if subject is not None else None
+    allowed_per_class = current_app.config.get("DISCUSSION_ALTERNATE_MODEL_NAMES", {})
+    return name in allowed_per_class.get(subject_cls, [])
+
+
+class NotificationExtra(EmbeddedDocument):
+    """Typed sub-document of `Discussion.extras["notification"]`.
+
+    `external_url` is validated here (self-contained allow-list check).
+    `model_name` carries no validator at this layer because the per-class
+    allow-list check needs the discussion's subject, which is not reachable
+    from inside an `EmbeddedDocument` validator — it stays in the form.
+    """
+
+    external_url = StringField(validation=_validate_notification_external_url)
+    model_name = StringField()
+
+
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
@@ -103,7 +173,7 @@ class Discussion(SpamMixin, Linkable, Document):
     closed = DateTimeField()
     closed_by = ReferenceField("User")
     closed_by_organization = ReferenceField("Organization")
-    extras = ExtrasField()
+    extras = ExtrasField({"notification": NotificationExtra})
 
     meta = {
         "indexes": [
@@ -188,6 +258,48 @@ class Discussion(SpamMixin, Linkable, Document):
 
     def self_api_url(self, **kwargs):
         return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
+
+    def _notification_meta(self) -> dict:
+        """Return `extras["notification"]` as a dict, coercing missing/None to {}.
+
+        Raw DB writes (imports, migrations) bypassing mongoengine validation
+        can leave the key set to `None`, so both layers are coerced on read.
+        """
+        return (self.extras or {}).get("notification") or {}
+
+    @property
+    def notification_subject_type(self):
+        """Subject type label used in notification emails.
+
+        Returns the value of `extras.notification.model_name` when it passes
+        the per-class allow-list check, otherwise the subject's `verbose_name`.
+        """
+        meta_name = self._notification_meta().get("model_name")
+        if is_valid_notification_model_name(self.subject, meta_name):
+            return meta_name
+        return self.subject.verbose_name
+
+    def notification_url(self):
+        """URL to point to in notification emails.
+
+        Falls back to `url_for()` when no valid external URL is provided.
+        Returns None when the subject has no canonical udata page (e.g. Topic)
+        and no valid external URL is provided — in that case the caller should
+        skip the notification entirely.
+
+        Defense in depth: re-validate the stored `external_url` at read-time.
+        Data written before the validator existed, raw DB writes (imports,
+        migrations), or a config change tightening the allow-list could all
+        leave an unsafe URL in storage.
+        """
+        from .constants import NOTIFY_REQUIRES_EXTERNAL_URL
+
+        meta_url = self._notification_meta().get("external_url")
+        if is_valid_notification_external_url(meta_url):
+            return f"{meta_url}#discussion-{self.id}"
+        if isinstance(self.subject, NOTIFY_REQUIRES_EXTERNAL_URL):
+            return None
+        return self.url_for()
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
