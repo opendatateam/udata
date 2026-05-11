@@ -11,7 +11,20 @@ from udata.search.result import SearchResult
 DEFAULT_PAGE_SIZE = 20
 # Elasticsearch default max_result_window is 10000
 ES_MAX_RESULT_WINDOW = 10000
+DEFAULT_MAX_FACET_SIZE = 500
 log = logging.getLogger(__name__)
+
+
+def parse_facet_size(key, raw, max_facet_size):
+    try:
+        value = int(raw)
+    except (ValueError, TypeError):
+        abort(400, f"Invalid value for {key}: {raw!r} is not an integer.")
+    if value < 1:
+        abort(400, f"Invalid value for {key}: must be at least 1.")
+    if value > max_facet_size:
+        abort(400, f"Invalid value for {key}: must be at most {max_facet_size}.")
+    return value
 
 
 class SearchQuery:
@@ -32,6 +45,11 @@ class SearchQuery:
             )
         self._query = params.pop("q", "")
         self.sort = params.pop("sort", None)
+        max_facet_size = current_app.config.get("MAX_FACET_SIZE", DEFAULT_MAX_FACET_SIZE)
+        self._facet_sizes = {}
+        for key in [k for k in list(params.keys()) if k.startswith("facet_size__")]:
+            facet_name = key[len("facet_size__") :]
+            self._facet_sizes[facet_name] = parse_facet_size(key, params.pop(key), max_facet_size)
         self._filters = {}
         self.extract_filters(params)
 
@@ -81,6 +99,7 @@ class SearchQuery:
             "page": self.page,
             "page_size": self.page_size,
             "sort": self.sort,
+            "facet_sizes": self._facet_sizes,
         }
         params.update(self._filters)
         return params
