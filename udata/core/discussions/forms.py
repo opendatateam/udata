@@ -25,7 +25,14 @@ class DiscussionCreateForm(ModelForm):
         # subject — not reachable from inside an EmbeddedDocument validator.
         ok = super().validate(extra_validators=extra_validators)
         subject = self.subject.data
-        model_name = ((self.extras.data or {}).get("notification") or {}).get("model_name")
+        # `ExtrasField._parse_value` returns the raw value untouched for the
+        # `notification` key (NotificationExtra is not in KNOWN_TYPES). A
+        # non-dict value is already flagged by `super().validate()` via
+        # mongoengine, so just skip the per-class check rather than crashing.
+        notification = (self.extras.data or {}).get("notification")
+        if not isinstance(notification, dict):
+            return ok
+        model_name = notification.get("model_name")
         if model_name is None or is_valid_notification_model_name(subject, model_name):
             return ok
 

@@ -1700,3 +1700,26 @@ class DiscussionExternalNotificationTest(APITestCase):
             self.assert400(response)
 
         assert Discussion.objects(subject=topic).count() == 0
+
+    def test_create_discussion_with_non_dict_notification_returns_400(self):
+        # `ExtrasField._parse_value` returns the raw value untouched for the
+        # `notification` key (NotificationExtra is not in KNOWN_TYPES). A
+        # non-dict value (string, list, int) used to crash the form validator
+        # with `AttributeError: 'str' object has no attribute 'get'` and
+        # surface as a 500. The form must reject it cleanly.
+        self.login()
+        topic = TopicFactory()
+
+        for value in ("evil", ["a"], 42):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": value},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
