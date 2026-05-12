@@ -143,15 +143,18 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     password_rotation_demanded = field(DateTimeField(), auditable=False)
     password_rotation_performed = field(DateTimeField(), auditable=False)
 
-    # The 5 fields below are required for Flask-security
-    # when SECURITY_TRACKABLE is True
-    last_login_at = field(DateTimeField(), auditable=False)
-    current_login_at = field(
+    # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
+    # Flask-Security's naming is counter-intuitive: `current_login_at` is the most recent
+    # login and `last_login_at` is the *previous* one. We rename this in the public API:
+    # the field exposed as `last_login_at` actually returns the value of `current_login_at`
+    # (the most recent login), which is what "last login" naturally means to API consumers.
+    last_login_at = field(
         DateTimeField(),
         auditable=False,
         show_as_ref=True,
         attribute=_visible_login_date,
     )
+    current_login_at = field(DateTimeField(), auditable=False)
     last_login_ip = field(StringField(), auditable=False)
     current_login_ip = field(StringField(), auditable=False)
     login_count = field(IntField(), auditable=False)

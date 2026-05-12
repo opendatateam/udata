@@ -514,6 +514,39 @@ class UserAPITest(APITestCase):
 
         assert response.json["password_rotation_demanded"] is not None
 
+    def test_last_login_at_visible_to_admin(self):
+        """The last_login_at field is exposed to sysadmins."""
+        self.login(AdminFactory())
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is not None
+
+    def test_last_login_at_hidden_from_non_admin(self):
+        """The last_login_at field is not exposed to non-admins, even on their own user page."""
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+        self.login(user)
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is None
+
+    def test_last_login_at_visible_on_me(self):
+        """The last_login_at field is exposed on the /me endpoint for the user themselves."""
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+        self.login(user)
+
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is not None
+
     def test_contact_points(self):
         user = AdminFactory()
         self.login(user)
