@@ -2,7 +2,7 @@ from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .constants import COMMENT_SIZE_LIMIT
-from .models import Discussion
+from .models import Discussion, is_valid_notification_model_name
 
 __all__ = ("DiscussionCreateForm", "DiscussionCommentForm")
 
@@ -17,6 +17,42 @@ class DiscussionCreateForm(ModelForm):
     )
     subject = fields.ModelField(_("Subject"), [validators.DataRequired()])
     extras = fields.ExtrasField()
+
+    def validate(self, extra_validators=None):
+        # `external_url` is validated by `NotificationExtra` registered on
+        # `Discussion.extras` (called from `super().validate()`). The per-class
+        # `model_name` check stays here because it needs the discussion's
+        # subject — not reachable from inside an EmbeddedDocument validator.
+        ok = super().validate(extra_validators=extra_validators)
+        subject = self.subject.data
+        # `ExtrasField._parse_value` returns the raw value untouched for the
+        # `notification` key (NotificationExtra is not in KNOWN_TYPES). A
+        # non-dict value is already flagged by `super().validate()` via
+        # mongoengine, so just skip the per-class check rather than crashing.
+        notification = (self.extras.data or {}).get("notification")
+        if not isinstance(notification, dict):
+            return ok
+        model_name = notification.get("model_name")
+        if model_name is None or is_valid_notification_model_name(subject, model_name):
+            return ok
+
+        subject_cls = type(subject).__name__ if subject is not None else "<unknown>"
+        error = _(
+            "notification.model_name %(name)s is not allowed for subject type %(type)s",
+            name=model_name,
+            type=subject_cls,
+        )
+        # `ExtrasField.errors` can be a list (process errors, single mongo
+        # message), a dict (per-key field errors or mongoengine error dict),
+        # or None. Merge into the existing shape so an earlier failure
+        # (e.g. a bad `external_url`) is not silently dropped.
+        if isinstance(self.extras.errors, dict):
+            self.extras.errors["notification.model_name"] = str(error)
+        elif isinstance(self.extras.errors, list):
+            self.extras.errors.append(error)
+        else:
+            self.extras.errors = [error]
+        return False
 
 
 class DiscussionEditForm(ModelForm):

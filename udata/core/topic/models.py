@@ -98,6 +98,8 @@ class TopicElement(Auditable, Document):
 
 @generate_fields()
 class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
+    verbose_name = _("topic")
+
     name = field(StringField(required=True), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
