@@ -478,6 +478,47 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert members[1]["role"] == "editor"
         assert members[1]["user"]["email"] == "editor@example.org"
 
+    def test_get_members_last_login_at(self):
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        admin = Member(user=UserFactory(current_login_at=last_login), role="admin")
+        editor = Member(user=UserFactory(current_login_at=last_login), role="editor")
+        other = UserFactory()
+
+        organization = OrganizationFactory(members=[admin, editor])
+
+        # Organization admin sees last_login_at for each member
+        self.login(admin.user)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
+        assert "current_login_at" not in members[0]["user"]
+
+        # Organization editor also sees last_login_at
+        self.login(editor.user)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
+
+        # Non-member user does not see last_login_at
+        self.login(other)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is None
+        assert members[1]["user"]["last_login_at"] is None
+
+        # Sysadmin sees last_login_at
+        self.login(AdminFactory())
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
+
     def test_accept_membership(self):
         user = self.login()
         applicant = UserFactory()
