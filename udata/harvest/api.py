@@ -56,7 +56,7 @@ preview_item_fields = api.clone(
             preview_dataset_fields, description="The processed dataset", allow_null=True
         ),
         "dataservice": fields.Nested(
-            preview_dataservice_fields, description="The processed dataset", allow_null=True
+            preview_dataservice_fields, description="The processed dataservice", allow_null=True
         ),
     },
 )
@@ -132,7 +132,7 @@ source_parser.add_argument(
     type=bool,
     location="args",
     default=False,
-    help="Include sources flaggued as deleted",
+    help="Include sources flagged as deleted",
 )
 
 
