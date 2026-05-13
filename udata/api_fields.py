@@ -182,6 +182,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         href = info.get("href", None)
         if href:
+            href_extra = info.get("href_extra", None)
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
@@ -190,6 +191,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         "href": href(o),
                         "type": "GET",
                         "total": len(o[key]),
+                        **(href_extra(o) if href_extra else {}),
                     },
                     description="Visit this API link to see the list.",
                     **kwargs,
@@ -686,6 +688,7 @@ class _FieldKwargs(TypedDict, total=False):
     size: int | None
     is_thumbnail: bool | None
     href: Callable | None
+    href_extra: Callable | None
     generic: bool | None
     generic_key: str | None
     convert_to: Callable | None
@@ -738,6 +741,7 @@ def field(
     size: int | None = None,
     is_thumbnail: bool | None = None,
     href: Callable | None = None,
+    href_extra: Callable | None = None,
     generic: bool | None = None,
     generic_key: str | None = None,
     convert_to: Callable | None = None,
@@ -776,6 +780,8 @@ def field(
         size: Image size for thumbnails
         is_thumbnail: If True, this is a thumbnail field
         href: Function to generate API link
+        href_extra: Function returning extra keys to merge into the href object
+            (e.g. counters by status). Only applies when used together with `href`.
         generic: If True, handle generic embedded documents
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX
@@ -908,6 +914,40 @@ def patch(obj: _T, request) -> _T:
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
+
+            # Validate `choices` here because patch() never goes through
+            # MongoEngine's validate(): without this, an invalid choice would only
+            # be caught at save() time — and not at all on embedded documents that
+            # we patch but never save (e.g. ValidateSourceAPI builds a
+            # HarvestSourceValidation just to read its `state` and branch). The
+            # ideal would be to call obj.clean()/validate() after patching, but
+            # in udata clean() currently bundles pure validation with stateful
+            # side effects (activity tracking, spam detection, …) that must not
+            # run without an actual save. Same story for regex / max_length /
+            # min_value / max_value / custom `validation` callables: those are
+            # also silently skipped by patch() today and should be reinstated
+            # once clean() is split into a pure-validation half and a stateful
+            # half. Until then, this duplication of MongoEngine's `choices`
+            # logic is the minimal fix for the most common bug class (invalid
+            # enum values silently accepted).
+            # Restricted to StringField on purpose: GenericReferenceField &
+            # ReferenceField also accept `choices` but those constrain the
+            # allowed *document classes*, not the value itself, and are
+            # validated separately at save() time.
+            choices = getattr(model_attribute, "choices", None)
+            if (
+                value is not None
+                and choices
+                and isinstance(model_attribute, mongo_fields.StringField)
+            ):
+                valid_choices = [
+                    choice[0] if isinstance(choice, (list, tuple)) else choice for choice in choices
+                ]
+                if value not in valid_choices:
+                    raise FieldValidationError(
+                        field=key,
+                        message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
+                    )
 
             # Run checks if value is modified.
             # We run checks here (before setattr) to compare old vs new value.

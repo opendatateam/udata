@@ -20,6 +20,7 @@ from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
     VALIDATION_REFUSED,
+    HarvestError,
     HarvestItem,
     HarvestSource,
     HarvestSourceValidation,
@@ -453,6 +454,30 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert source.validation.comment == "Not valid"
         assert source.validation.by == user
 
+    def test_validate_source_rejects_unknown_state(self):
+        """An unknown `state` value must be rejected with 400, not silently treated as a refusal"""
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = {"state": "not_a_real_state", "comment": "anything"}
+        response = self.post(url_for("api.validate_harvest_source", source=source), data)
+        assert400(response)
+
+        source.reload()
+        assert source.validation.state == VALIDATION_PENDING
+
+    def test_reject_source_without_comment_fails(self):
+        """Rejection requires a comment (required_if check on the comment field)"""
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = {"state": VALIDATION_REFUSED}
+        response = self.post(url_for("api.validate_harvest_source", source=source), data)
+        assert400(response)
+
+        source.reload()
+        assert source.validation.state == VALIDATION_PENDING
+
     def test_validate_source_is_admin_only(self):
         """It should allow to validate a source if admin"""
         self.login()
@@ -652,8 +677,44 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         source.reload()
         assert source.periodic_task is not None
 
-    def test_list_items(self):
-        """It should fetch the harvest items list from the API for a specific job"""
+    def test_get_job_error_details_hidden_from_non_admin(self):
+        """Error `details` (stack traces / internal info) must only be exposed to admins.
+
+        Regression test: before this was fixed, the lambda checked truthiness of the
+        `admin_permission` object instead of `.can()`, which leaked details to everyone.
+        """
+        job = HarvestJobFactory(
+            errors=[HarvestError(message="oops", details="secret stack trace")],
+        )
+
+        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        assert200(response)
+        assert response.json["errors"][0]["message"] == "oops"
+        assert response.json["errors"][0]["details"] is None
+
+        self.login(AdminFactory())
+        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        assert200(response)
+        assert response.json["errors"][0]["details"] == "secret stack trace"
+
+    def test_get_job_source_is_a_reference_object(self):
+        """A job exposes its source as a {id, class} reference, not a bare string ID.
+
+        This is a contract change vs the v1 API (which returned the source ID as a string).
+        Locking it here so the breaking change shows up in the diff if it's ever reverted.
+        """
+        source = HarvestSourceFactory()
+        job = HarvestJobFactory(source=source)
+
+        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        assert200(response)
+        assert response.json["source"] == {
+            "id": str(source.id),
+            "class": "HarvestSource",
+        }
+
+    def test_get_job_items_link(self):
+        """A job exposes its items as a paginated subresource link with counters"""
         job = HarvestJobFactory(
             items=[
                 HarvestItem(dataset=DatasetFactory()),
@@ -663,8 +724,37 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         )
         response = self.get(url_for("api.harvest_job", ident=str(job.id)))
         assert200(response)
-        assert len(response.json["items"]) == 3
-        assert set(response.json["items"][0].keys()) == set(
+        items_link = response.json["items"]
+        assert items_link["rel"] == "subsection"
+        assert items_link["type"] == "GET"
+        assert items_link["href"].endswith(f"/harvest/job/{job.id}/items/")
+        assert items_link["total"] == 3
+        assert items_link["by_status"] == {
+            "pending": 3,
+            "started": 0,
+            "done": 0,
+            "failed": 0,
+            "skipped": 0,
+            "archived": 0,
+        }
+        assert items_link["by_type"] == {"dataset": 2, "dataservice": 1}
+
+    def test_list_items(self):
+        """It should fetch the harvest items list from the dedicated paginated endpoint"""
+        dataset = DatasetFactory()
+        dataservice = DataserviceFactory()
+        job = HarvestJobFactory(
+            items=[
+                HarvestItem(dataset=dataset),
+                HarvestItem(dataservice=dataservice),
+                HarvestItem(dataset=DatasetFactory(), remote_url="https://my.remote.example.com"),
+            ],
+        )
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id)))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert len(response.json["data"]) == 3
+        assert set(response.json["data"][0].keys()) == set(
             [
                 "created",
                 "started",
@@ -681,13 +771,85 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
             ]
         )
         # Make sure appropriate dataset or dataservice is set
-        assert response.json["items"][0]["dataset"] is not None
-        assert response.json["items"][0]["dataservice"] is None
-        assert response.json["items"][1]["dataset"] is None
-        assert response.json["items"][1]["dataservice"] is not None
+        assert response.json["data"][0]["dataset"] is not None
+        assert response.json["data"][0]["dataservice"] is None
+        assert response.json["data"][1]["dataset"] is None
+        assert response.json["data"][1]["dataservice"] is not None
         # Make sure remote_url is exposed if exists
-        assert response.json["items"][1]["remote_url"] is None
-        assert response.json["items"][2]["remote_url"] == "https://my.remote.example.com"
+        assert response.json["data"][1]["remote_url"] is None
+        assert response.json["data"][2]["remote_url"] == "https://my.remote.example.com"
+
+        # Dataset and dataservice references must expose enough info for the frontend
+        # to render a link (title + URLs), not just {id, class}.
+        dataset_ref = response.json["data"][0]["dataset"]
+        assert dataset_ref["id"] == str(dataset.id)
+        assert dataset_ref["class"] == "Dataset"
+        assert dataset_ref["title"] == dataset.title
+        assert dataset_ref["page"] == dataset.self_web_url()
+        assert dataset_ref["uri"] == dataset.self_api_url()
+
+        dataservice_ref = response.json["data"][1]["dataservice"]
+        assert dataservice_ref["id"] == str(dataservice.id)
+        assert dataservice_ref["class"] == "Dataservice"
+        assert dataservice_ref["title"] == dataservice.title
+        assert dataservice_ref["self_web_url"] == dataservice.self_web_url()
+        assert dataservice_ref["self_api_url"] == dataservice.self_api_url()
+
+    def test_list_items_paginated(self):
+        """Items endpoint paginates with page/page_size"""
+        job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
+        response = self.get(
+            url_for("api.harvest_job_items", ident=str(job.id), page=2, page_size=2)
+        )
+        assert200(response)
+        assert response.json["total"] == 5
+        assert response.json["page"] == 2
+        assert response.json["page_size"] == 2
+        assert len(response.json["data"]) == 2
+
+    def test_list_items_paginated_links(self):
+        """Items endpoint exposes next_page/previous_page URLs at the right places"""
+        job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
+
+        first = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=1, page_size=2))
+        assert200(first)
+        assert first.json["previous_page"] is None
+        assert "page=2" in first.json["next_page"]
+
+        middle = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=2, page_size=2))
+        assert200(middle)
+        assert "page=1" in middle.json["previous_page"]
+        assert "page=3" in middle.json["next_page"]
+
+        last = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=3, page_size=2))
+        assert200(last)
+        assert "page=2" in last.json["previous_page"]
+        assert last.json["next_page"] is None
+
+    def test_list_items_filtered_by_status(self):
+        """Items endpoint accepts a status filter"""
+        job = HarvestJobFactory(
+            items=[
+                HarvestItem(status="done"),
+                HarvestItem(status="done"),
+                HarvestItem(status="failed"),
+                HarvestItem(status="skipped"),
+            ],
+        )
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="done"))
+        assert200(response)
+        assert response.json["total"] == 2
+        assert {item["status"] for item in response.json["data"]} == {"done"}
+
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="failed"))
+        assert200(response)
+        assert response.json["total"] == 1
+
+    def test_list_items_filtered_by_unknown_status(self):
+        """Status filter rejects unknown values"""
+        job = HarvestJobFactory(items=[HarvestItem()])
+        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="bogus"))
+        assert400(response)
 
     def test_get_source_permissions_as_anonymous(self):
         """It should return all permissions as False for anonymous users"""

@@ -3,172 +3,73 @@ from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
-from udata.auth import admin_permission
+from udata.api_fields import patch
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
-from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
+from udata.flask_mongoengine.pagination import Pagination
 from udata.harvest.backends import get_enabled_backends
+from udata.mongo.queryset import DBPaginator
 
 from . import actions
-from .forms import HarvestSourceForm, HarvestSourceValidationForm
+from .forms import HarvestSourceForm
 from .models import (
-    HARVEST_ITEM_STATUS,
-    HARVEST_JOB_STATUS,
     VALIDATION_ACCEPTED,
-    VALIDATION_STATES,
+    HarvestItem,
     HarvestJob,
     HarvestSource,
+    HarvestSourceValidation,
 )
 
 ns = api.namespace("harvest", "Harvest related operations")
 
 
-error_fields = api.model(
-    "HarvestError",
+# Manual preview-specific models: previews don't have a stable ID/URL since
+# they describe an unsaved harvest, so we expose them with stubbed `uri`/`page`/...
+preview_dataservice_fields = api.clone(
+    "DataservicePreview",
+    Dataservice.__ref_fields__,
     {
-        "created_at": fields.ISODateTime(
-            description="The error creation date", required=True, readonly=True
+        "self_web_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice webpage URL (fake)"
         ),
-        "message": fields.String(description="The error short message", required=True),
-        "details": fields.Raw(
-            attribute=lambda o: o.details if admin_permission else None,
-            description="Optional details (only for super-admins)",
-            readonly=True,
+        "self_api_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice API URL (fake)"
         ),
     },
 )
 
 
-log_fields = api.model(
-    "HarvestError",
+preview_dataset_fields = api.clone(
+    "DatasetPreview",
+    dataset_fields,
     {
-        "level": fields.String(required=True),
-        "message": fields.String(required=True),
+        "uri": fields.Raw(attribute=lambda _d: None, description="The dataset API URL (fake)"),
+        "page": fields.Raw(attribute=lambda _d: None, description="The dataset page URL (fake)"),
     },
 )
 
-
-item_fields = api.model(
-    "HarvestItem",
+preview_item_fields = api.clone(
+    "HarvestItemPreview",
+    HarvestItem.__read_fields__,
     {
-        "remote_id": fields.String(description="The item remote ID to process", required=True),
-        "remote_url": fields.String(description="The item remote url (if available)"),
         "dataset": fields.Nested(
-            dataset_ref_fields, description="The processed dataset", allow_null=True
+            preview_dataset_fields, description="The processed dataset", allow_null=True
         ),
         "dataservice": fields.Nested(
-            Dataservice.__ref_fields__, description="The processed dataservice", allow_null=True
+            preview_dataservice_fields, description="The processed dataservice", allow_null=True
         ),
-        "status": fields.String(
-            description="The item status", required=True, enum=list(HARVEST_ITEM_STATUS)
-        ),
-        "created": fields.ISODateTime(description="The item creation date", required=True),
-        "started": fields.ISODateTime(description="The item start date"),
-        "ended": fields.ISODateTime(description="The item end date"),
-        "errors": fields.List(fields.Nested(error_fields), description="The item errors"),
-        "logs": fields.List(fields.Nested(log_fields), description="The item logs"),
-        "args": fields.List(fields.String, description="The item positional arguments", default=[]),
-        "kwargs": fields.Raw(description="The item keyword arguments", default={}),
     },
 )
 
-job_fields = api.model(
-    "HarvestJob",
+preview_job_fields = api.clone(
+    "HarvestJobPreview",
+    HarvestJob.__read_fields__,
     {
-        "id": fields.String(description="The job execution ID", required=True),
-        "created": fields.ISODateTime(description="The job creation date", required=True),
-        "started": fields.ISODateTime(description="The job start date"),
-        "ended": fields.ISODateTime(description="The job end date"),
-        "status": fields.String(
-            description="The job status", required=True, enum=list(HARVEST_JOB_STATUS)
-        ),
-        "errors": fields.List(
-            fields.Nested(error_fields), description="The job initialization errors"
-        ),
-        "items": fields.List(fields.Nested(item_fields), description="The job collected items"),
-        "source": fields.String(description="The source owning the job", required=True),
-    },
-)
-
-job_page_fields = api.model("HarvestJobPage", fields.pager(job_fields))
-
-validation_fields = api.model(
-    "HarvestSourceValidation",
-    {
-        "state": fields.String(
-            description="Is it validated or not", enum=list(VALIDATION_STATES), required=True
-        ),
-        "by": fields.Nested(
-            user_ref_fields,
-            allow_null=True,
-            readonly=True,
-            description="Who performed the validation",
-        ),
-        "on": fields.ISODateTime(
-            readonly=True, description="Date date on which validation was performed"
-        ),
-        "comment": fields.String(
-            description="A comment about the validation. Required on rejection"
+        "items": fields.List(
+            fields.Nested(preview_item_fields), description="The job collected items"
         ),
     },
 )
-
-source_permissions_fields = api.model(
-    "HarvestSourcePermissions",
-    {
-        "edit": fields.Permission(),
-        "delete": fields.Permission(),
-        "run": fields.Permission(),
-        "preview": fields.Permission(),
-        "validate": fields.Permission(),
-        "schedule": fields.Permission(),
-    },
-)
-
-source_fields = api.model(
-    "HarvestSource",
-    {
-        "id": fields.String(description="The source unique identifier", readonly=True),
-        "name": fields.String(description="The source display name", required=True),
-        "description": fields.Markdown(description="The source description"),
-        "url": fields.String(description="The source base URL", required=True),
-        "backend": fields.String(
-            description="The source backend",
-            enum=lambda: list(get_enabled_backends().keys()),
-            required=True,
-        ),
-        "config": fields.Raw(description="The configuration as key-value pairs"),
-        "created_at": fields.ISODateTime(
-            description="The source creation date", required=True, readonly=True
-        ),
-        "active": fields.Boolean(description="Is this source active", required=True, default=False),
-        "autoarchive": fields.Boolean(
-            description="If enabled, datasets not present on the remote source will be automatically archived",  # noqa
-            required=True,
-            default=True,
-        ),
-        "validation": fields.Nested(
-            validation_fields, readonly=True, description="Has the source been validated"
-        ),
-        "last_job": fields.Nested(
-            job_fields, description="The last job for this source", allow_null=True, readonly=True
-        ),
-        "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The owner information"
-        ),
-        "organization": fields.Nested(
-            Organization.__ref_fields__, allow_null=True, description="The producer organization"
-        ),
-        "deleted": fields.ISODateTime(description="The source deletion date", readonly=True),
-        "schedule": fields.String(
-            description="The source schedule (interval or cron expression)", readonly=True
-        ),
-        "permissions": fields.Nested(source_permissions_fields, readonly=True),
-    },
-)
-
-source_page_fields = api.model("HarvestSourcePage", fields.pager(source_fields))
 
 
 filter_fields = api.model(
@@ -219,67 +120,27 @@ backend_fields = api.model(
     },
 )
 
-preview_dataservice_fields = api.clone(
-    "DataservicePreview",
-    Dataservice.__ref_fields__,
-    {
-        "self_web_url": fields.Raw(
-            attribute=lambda _d: None, description="The dataservice webpage URL (fake)"
-        ),
-        "self_api_url": fields.Raw(
-            attribute=lambda _d: None, description="The dataservice API URL (fake)"
-        ),
-    },
-)
 
-
-preview_dataset_fields = api.clone(
-    "DatasetPreview",
-    dataset_fields,
-    {
-        "uri": fields.Raw(attribute=lambda _d: None, description="The dataset API URL (fake)"),
-        "page": fields.Raw(attribute=lambda _d: None, description="The dataset page URL (fake)"),
-    },
-)
-
-preview_item_fields = api.clone(
-    "HarvestItemPreview",
-    item_fields,
-    {
-        "dataset": fields.Nested(
-            preview_dataset_fields, description="The processed dataset", allow_null=True
-        ),
-        "dataservice": fields.Nested(
-            preview_dataservice_fields, description="The processed dataset", allow_null=True
-        ),
-    },
-)
-
-preview_job_fields = api.clone(
-    "HarvestJobPreview",
-    job_fields,
-    {
-        "items": fields.List(
-            fields.Nested(preview_item_fields), description="The job collected items"
-        ),
-    },
-)
-
-source_parser = api.page_parser()
+# Source listing accepts owner/deleted filters that are not auto-generated
+# from the model fields, so we extend the index parser.
+source_parser = HarvestSource.__index_parser__.copy()
 source_parser.add_argument(
     "owner", type=str, location="args", help="The organization or user ID to filter on"
 )
 source_parser.add_argument(
-    "deleted", type=bool, location="args", default=False, help="Include sources flaggued as deleted"
+    "deleted",
+    type=bool,
+    location="args",
+    default=False,
+    help="Include sources flagged as deleted",
 )
-source_parser.add_argument("q", type=str, location="args", help="The search query")
 
 
 @ns.route("/sources/", endpoint="harvest_sources")
 class SourcesAPI(API):
     @api.doc("list_harvest_sources")
     @api.expect(source_parser)
-    @api.marshal_list_with(source_page_fields)
+    @api.marshal_list_with(HarvestSource.__page_fields__)
     def get(self):
         """List all harvest sources"""
         args = source_parser.parse_args()
@@ -289,6 +150,9 @@ class SourcesAPI(API):
         if not args["deleted"]:
             sources = sources.visible()
 
+        # `owner` is overloaded here: it matches sources owned by the user
+        # OR by the organization, so we cannot reuse the auto-generated
+        # `owner` filter from the Owned mixin (which only matches `owner=`).
         if args["owner"]:
             sources = sources.owned_by(args["owner"])
 
@@ -300,8 +164,8 @@ class SourcesAPI(API):
 
     @api.secure
     @api.doc("create_harvest_source")
-    @api.expect(source_fields)
-    @api.marshal_with(source_fields)
+    @api.expect(HarvestSource.__write_fields__)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def post(self):
         """Create a new harvest source"""
         form = api.validate(HarvestSourceForm)
@@ -314,15 +178,15 @@ class SourcesAPI(API):
 @ns.route("/source/<harvest_source:source>/", endpoint="harvest_source")
 class SourceAPI(API):
     @api.doc("get_harvest_source")
-    @api.marshal_with(source_fields)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def get(self, source: HarvestSource):
         """Get a single source given an ID or a slug"""
         return source
 
     @api.secure
     @api.doc("update_harvest_source")
-    @api.expect(source_fields)
-    @api.marshal_with(source_fields)
+    @api.expect(HarvestSource.__write_fields__)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def put(self, source: HarvestSource):
         """Update a harvest source"""
         source.permissions["edit"].test()
@@ -332,7 +196,7 @@ class SourceAPI(API):
 
     @api.secure
     @api.doc("delete_harvest_source")
-    @api.marshal_with(source_fields)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def delete(self, source: HarvestSource):
         source.permissions["delete"].test()
         return actions.delete_source(source), 204
@@ -342,23 +206,22 @@ class SourceAPI(API):
 class ValidateSourceAPI(API):
     @api.doc("validate_harvest_source")
     @api.secure
-    @api.expect(validation_fields)
-    @api.marshal_with(source_fields)
+    @api.expect(HarvestSourceValidation.__write_fields__)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def post(self, source: HarvestSource):
         """Validate or reject an harvest source"""
         source.permissions["validate"].test()
-        form = api.validate(HarvestSourceValidationForm)
-        if form.state.data == VALIDATION_ACCEPTED:
-            return actions.validate_source(source, form.comment.data)
-        else:
-            return actions.reject_source(source, form.comment.data)
+        validation = patch(HarvestSourceValidation(), request)
+        if validation.state == VALIDATION_ACCEPTED:
+            return actions.validate_source(source, validation.comment)
+        return actions.reject_source(source, validation.comment)
 
 
 @ns.route("/source/<harvest_source:source>/run/", endpoint="run_harvest_source")
 class RunSourceAPI(API):
     @api.doc("run_harvest_source")
     @api.secure
-    @api.marshal_with(source_fields)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def post(self, source: HarvestSource):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
         if not enabled and not current_user.sysadmin:
@@ -382,7 +245,7 @@ class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
     @api.secure
     @api.expect((str, "A cron expression"))
-    @api.marshal_with(source_fields)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def post(self, source: HarvestSource):
         """Schedule an harvest source"""
         source.permissions["schedule"].test()
@@ -395,7 +258,7 @@ class ScheduleSourceAPI(API):
 
     @api.doc("unschedule_harvest_source")
     @api.secure
-    @api.marshal_with(source_fields)
+    @api.marshal_with(HarvestSource.__read_fields__)
     def delete(self, source: HarvestSource):
         """Unschedule an harvest source"""
         source.permissions["schedule"].test()
@@ -405,7 +268,7 @@ class ScheduleSourceAPI(API):
 @ns.route("/source/preview/", endpoint="preview_harvest_source_config")
 class PreviewSourceConfigAPI(API):
     @api.secure
-    @api.expect(source_fields)
+    @api.expect(HarvestSource.__write_fields__)
     @api.doc("preview_harvest_source_config")
     @api.marshal_with(preview_job_fields)
     def post(self):
@@ -427,21 +290,17 @@ class PreviewSourceAPI(API):
         return actions.preview(source)
 
 
-parser = api.parser()
-parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-parser.add_argument(
-    "page_size", type=int, default=20, location="args", help="The page size to fetch"
-)
+page_parser = api.page_parser()
 
 
 @ns.route("/source/<harvest_source:source>/jobs/", endpoint="harvest_jobs")
 class JobsAPI(API):
     @api.doc("list_harvest_jobs")
-    @api.expect(parser)
-    @api.marshal_with(job_page_fields)
+    @api.expect(page_parser)
+    @api.marshal_with(HarvestJob.__page_fields__)
     def get(self, source: HarvestSource):
         """List all jobs for a given source"""
-        args = parser.parse_args()
+        args = page_parser.parse_args()
         qs = HarvestJob.objects(source=source)
         qs = qs.order_by("-created")
         return qs.paginate(args["page"], args["page_size"])
@@ -450,11 +309,29 @@ class JobsAPI(API):
 @ns.route("/job/<string:ident>/", endpoint="harvest_job")
 class JobAPI(API):
     @api.doc("get_harvest_job")
-    @api.expect(parser)
-    @api.marshal_with(job_fields)
+    @api.marshal_with(HarvestJob.__read_fields__)
     def get(self, ident):
         """Get a single job given an ID"""
         return actions.get_job(ident)
+
+
+@ns.route("/job/<string:ident>/items/", endpoint="harvest_job_items")
+class JobItemsAPI(API):
+    @api.doc("list_harvest_job_items")
+    @api.expect(HarvestItem.__index_parser__)
+    @api.marshal_with(HarvestItem.__page_fields__)
+    def get(self, ident):
+        """List the items of a given harvest job (paginated)"""
+        job = actions.get_job(ident)
+        args = HarvestItem.__index_parser__.parse_args()
+        # Items are embedded documents on the job, so the auto-generated
+        # apply_sort_filters (which calls queryset.filter) does not apply here.
+        items = job.items
+        if args["status"]:
+            items = [item for item in items if item.status == args["status"]]
+        # Wrap in DBPaginator so the pager marshaller can compute
+        # next_page/previous_page URLs from has_next/has_prev.
+        return DBPaginator(Pagination(items, args["page"], args["page_size"]))
 
 
 @ns.route("/backends/", endpoint="harvest_backends")
