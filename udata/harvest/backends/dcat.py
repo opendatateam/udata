@@ -1,6 +1,7 @@
 import logging
+import traceback
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import ClassVar, Generator
 
 from flask import current_app
@@ -25,6 +26,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
+from udata.utils import safe_unicode
 
 from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
@@ -383,6 +385,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         start = 1
 
         while True:
+            log.debug(f"Requesting CSW from start={start}")
             data = self.CSW_REQUEST.format(output_schema=output_schema, start=start)
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
@@ -406,8 +409,24 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     # Saxonche returns all children, including comments and other non-element nodes
                     continue
                 subgraph = Graph(namespace_manager=namespace_manager)
-                doc = self.as_dcat(result).to_string("utf-8")
-                subgraph.parse(data=doc, format=fmt)
+                try:
+                    doc = self.as_dcat(result).to_string("utf-8")
+                    subgraph.parse(data=doc, format=fmt)
+                except Exception as e:
+                    ts = datetime.now(UTC)
+                    item = HarvestItem(status="failed", started=ts, ended=ts)
+                    self.job.items.append(item)
+                    # Record the original XML even when as_dcat() succeeds, because the conversion
+                    # might lose some information needed to understand the problem.
+                    xml = result.to_string("utf-8")
+                    log.error(f"Error parsing source record: {e}\n{xml}")
+                    item.errors.append(
+                        HarvestError(
+                            message=safe_unicode(e), detail=f"{xml}\n{traceback.format_exc()}"
+                        )
+                    )
+                    self.save_job()
+                    continue
 
                 if not subgraph.subjects(
                     RDF.type, [DCAT.Dataset, DCAT.DatasetSeries, DCAT.DataService]
