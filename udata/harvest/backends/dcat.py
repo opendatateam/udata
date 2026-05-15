@@ -1,4 +1,5 @@
 import logging
+import traceback
 from abc import ABC, abstractmethod
 from datetime import date
 from typing import ClassVar, Generator
@@ -25,6 +26,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
+from udata.utils import safe_unicode
 
 from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
@@ -383,6 +385,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         start = 1
 
         while True:
+            log.debug(f"Requesting CSW from start={start}")
             data = self.CSW_REQUEST.format(output_schema=output_schema, start=start)
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
@@ -406,8 +409,26 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     # Saxonche returns all children, including comments and other non-element nodes
                     continue
                 subgraph = Graph(namespace_manager=namespace_manager)
-                doc = self.as_dcat(result).to_string("utf-8")
-                subgraph.parse(data=doc, format=fmt)
+                try:
+                    doc = self.as_dcat(result).to_string("utf-8")
+                    subgraph.parse(data=doc, format=fmt)
+                except Exception as e:
+                    # Record the original XML even when as_dcat() succeeds, because the conversion
+                    # might lose some information needed to understand the problem.
+                    xml = result.to_string("utf-8")
+                    log.error(f"Error parsing source record: {e}\nSource XML: {xml}")
+                    self.add_item(
+                        HarvestItem(
+                            status="failed",
+                            errors=[
+                                HarvestError(
+                                    message=safe_unicode(e),
+                                    details=f"Source XML: {xml}\n{traceback.format_exc()}",
+                                )
+                            ],
+                        )
+                    )
+                    continue
 
                 if not subgraph.subjects(
                     RDF.type, [DCAT.Dataset, DCAT.DatasetSeries, DCAT.DataService]
