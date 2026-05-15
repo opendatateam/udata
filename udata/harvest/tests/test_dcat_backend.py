@@ -1277,6 +1277,50 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             # If it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior.
             assert dataset.harvest.remote_url == "http://data.example.com/datasets/dataset-1"
 
+    def test_parsing_error(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="2" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item1/">
+                <dct:identifier>https://example.com/item1/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title xml:lang="***">invalid xml:lang</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item2/">
+                <dct:identifier>https://example.com/item2/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>valid item</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done-errors"
+        assert len(job.items) == 2
+
+        item = job.items[0]
+        assert item.status == "failed"
+        error = item.errors[0]
+        assert "'***' is not a valid language tag!" in error.message
+        assert '<dct:title xml:lang="***">invalid xml:lang</dct:title>' in error.details
+
+        assert job.items[1].status == "done"
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):

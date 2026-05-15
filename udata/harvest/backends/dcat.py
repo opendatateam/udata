@@ -416,14 +416,14 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
                     xml = result.to_string("utf-8")
-                    log.error(f"Error parsing source record: {e}\n{xml}")
+                    log.error(f"Error parsing source record: {e}\nSource XML: {xml}")
                     self.add_item(
                         HarvestItem(
                             status="failed",
                             errors=[
                                 HarvestError(
                                     message=safe_unicode(e),
-                                    detail=f"{xml}\n{traceback.format_exc()}",
+                                    details=f"Source XML: {xml}\n{traceback.format_exc()}",
                                 )
                             ],
                         )
