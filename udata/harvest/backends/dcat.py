@@ -1,7 +1,7 @@
 import logging
 import traceback
 from abc import ABC, abstractmethod
-from datetime import UTC, date, datetime
+from datetime import date
 from typing import ClassVar, Generator
 
 from flask import current_app
@@ -413,19 +413,21 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     doc = self.as_dcat(result).to_string("utf-8")
                     subgraph.parse(data=doc, format=fmt)
                 except Exception as e:
-                    ts = datetime.now(UTC)
-                    item = HarvestItem(status="failed", started=ts, ended=ts)
-                    self.job.items.append(item)
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
                     xml = result.to_string("utf-8")
                     log.error(f"Error parsing source record: {e}\n{xml}")
-                    item.errors.append(
-                        HarvestError(
-                            message=safe_unicode(e), detail=f"{xml}\n{traceback.format_exc()}"
+                    self.add_item(
+                        HarvestItem(
+                            status="failed",
+                            errors=[
+                                HarvestError(
+                                    message=safe_unicode(e),
+                                    detail=f"{xml}\n{traceback.format_exc()}",
+                                )
+                            ],
                         )
                     )
-                    self.save_job()
                     continue
 
                 if not subgraph.subjects(
