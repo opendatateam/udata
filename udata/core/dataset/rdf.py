@@ -6,6 +6,7 @@ import calendar
 import json
 import logging
 from datetime import date
+from fractions import Fraction
 from itertools import chain
 
 from dateutil.parser import parse as parse_dt
@@ -29,6 +30,7 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    DQV,
     EUFORMAT,
     EUFREQ,
     FREQ,
@@ -36,9 +38,11 @@ from udata.rdf import (
     HVD_LEGISLATION,
     IANAFORMAT,
     OGC,
+    QUDT,
     RDFS,
     SCHEMA,
     SCV,
+    SDMXA,
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
@@ -58,7 +62,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
-from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import OGC_SERVICE_FORMATS, DistanceUom, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -134,6 +138,12 @@ EUFREQ_ID_TO_UDATA = {
 
 # Merge order matters: we want FREQ to win over EUFREQ
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
+
+QUDT_TO_UDATA = {
+    QUDT.FT: DistanceUom.FOOT,
+    QUDT.KiloM: DistanceUom.KILOMETER,
+    QUDT.M: DistanceUom.METER,
+}
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -507,9 +517,9 @@ def temporal_from_rdf(period_of_time):
         log.warning("Unable to parse temporal coverage", exc_info=True)
 
 
-def spatial_from_rdf(graph):
+def spatial_from_rdf(resource: RdfResource) -> SpatialCoverage | None:
     geojsons = []
-    for term in graph.objects(DCT.spatial):
+    for term in resource.objects(DCT.spatial):
         try:
             # This may not be official in the norm but some ArcGis return
             # bbox as literal directly in DCT.spatial.
@@ -589,6 +599,65 @@ def spatial_from_rdf(graph):
     except ValidationError as e:
         log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
+
+
+def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
+    # Spatial resolution refers to the level of detail of the dataset.
+    #
+    # ISO-19139 (INSPIRE) supports the following two representations:
+    # - Resolution distance [0..n]: `//gmd:MD_Resolution/gmd:distance`.
+    # - Equivalent scale [0..n]: `//gmd:MD_Resolution/gmd:equivalentScale`.
+    #
+    # GeoDCAT-AP supports the above two:
+    # - Distance [0..n]: `dcat:spatialResolutionInMeters`.
+    # - Scale [0..n]: `dqv:hasQualityMeasurement` with `dqv:isMeasurementOf` set to
+    #   `geodcatap:spatialResolutionAsScale`.
+    # plus:
+    # - Other distance units [0..n]: `dqv:isMeasurementOf` set to either:
+    #   - `geodcatap:spatialResolutionAsDistance` (configurable UOM, somewhat redundant with
+    #     `dcat:spatialResolutionInMeters`),
+    #   - `geodcatap:spatialResolutionAsAngularDistance` (angles not in ISO-19139),
+    #   - `geodcatap:spatialResolutionAsVerticalDistance` (?).
+    # - Free text [0..1]: `geodcatap:spatialResolutionAsText`.
+    #
+    # Why the 0..n cardinality?
+    # - INSPIRE TG only provide description for 0..2, with 2 being an interval of bounding values.
+    #   It is not clear if intervals only apply to distance, or to scales as well.
+    # - GeoDCAT-AP doesn't explain cardinality at all.
+    #
+    # We implement the following minimalist heuristic:
+    # - Only support INSPIRE representations (no practical examples for others so far).
+    # - Return an acceptable textual representation instead of a typed object (which would require
+    #   storing a type+value tuple).
+    # - If several representations are present, we pick distance over scale (arbitrary).
+    # - If cardinality > 1, we use the largest value we find. We don't go for the smallest to avoid
+    #   giving a false sense of precision.
+
+    # FIXME: this can raise on UOM lookup
+    if resolutions_as_distance := [
+        (obj.value(DQV.value).toPython(), QUDT_TO_UDATA[obj.value(SDMXA.unitMeasure).identifier])
+        for obj in resource.objects(DQV.hasQualityMeasurement)
+        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
+    ]:
+        resolution = max(resolutions_as_distance, key=lambda r: r[1].in_meters(r[0]))
+        return f"{resolution[0]} {resolution[1].symbol}"
+
+    if resolutions_in_meters := [
+        obj.toPython() for obj in resource.objects(DCAT.spatialResolutionInMeters)
+    ]:
+        resolution = max(resolutions_in_meters)
+        return f"{resolution} {DistanceUom.METER.symbol}"
+
+    if resolutions_as_scale := [
+        obj.value(DQV.value).toPython()
+        for obj in resource.objects(DQV.hasQualityMeasurement)
+        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
+    ]:
+        resolution = max(resolutions_as_scale)
+        # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with a
+        # fairly limited set of denominator values), which hopefully survive the decimal/fraction
+        # conversion reasonably well.
+        return str(Fraction(resolution))
 
 
 def frequency_from_rdf(term) -> UpdateFrequency | None:
@@ -881,6 +950,10 @@ def dataset_from_rdf(
     spatial_coverage = spatial_from_rdf(d)
     if spatial_coverage:
         dataset.spatial = spatial_coverage
+
+    spatial_resolution = spatial_resolution_from_rdf(d)
+    if spatial_resolution:
+        add_dcat_extra(dataset, "spatial_resolution", spatial_resolution)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

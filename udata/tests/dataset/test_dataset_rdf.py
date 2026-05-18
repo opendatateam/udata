@@ -38,6 +38,7 @@ from udata.core.dataset.rdf import (
     resource_from_rdf,
     resource_to_rdf,
     rights_to_rdf,
+    spatial_resolution_from_rdf,
     temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -48,11 +49,14 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    DQV,
     EUFREQ,
     FREQ,
     GEODCAT,
     HVD_LEGISLATION,
+    QUDT,
     SCHEMA,
+    SDMXA,
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
@@ -1414,6 +1418,102 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert temporal_from_rdf(g.resource(node)) is None
         assert temporal_from_rdf(Literal("unparseable")) is None
+
+    @pytest.mark.parametrize("uom, uom_str", [(QUDT.FT, "ft"), (QUDT.KiloM, "km"), (QUDT.M, "m")])
+    def test_parse_spatial_resolution_as_distance(self, uom, uom_str):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((qm, SDMXA.unitMeasure, uom))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"50.0 {uom_str}"
+
+    def test_parse_spatial_resolution_as_distance_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm1 = BNode()
+        g.add((qm1, RDF.type, DQV.QualityMeasurement))
+        g.add((qm1, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm1, DQV.value, Literal("200.0", datatype=XSD.decimal)))
+        g.add((qm1, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm1))
+
+        qm2 = BNode()
+        g.add((qm2, RDF.type, DQV.QualityMeasurement))
+        g.add((qm2, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm2, DQV.value, Literal("1.0", datatype=XSD.decimal)))
+        g.add((qm2, SDMXA.unitMeasure, QUDT.KiloM))
+        g.add((dataset, DQV.hasQualityMeasurement, qm2))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 km"
+
+    def test_parse_spatial_resolution_in_meters(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("50.0", datatype=XSD.decimal)))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "50.0 m"
+
+    def test_parse_spatial_resolution_in_meters_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("49.0", datatype=XSD.decimal)))
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("51.0", datatype=XSD.decimal)))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "51.0 m"
+
+    def test_parse_spatial_resolution_as_scale(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/25000"
+
+    def test_parse_spatial_resolution_as_scale_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm1 = BNode()
+        g.add((qm1, RDF.type, DQV.QualityMeasurement))
+        g.add((qm1, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm1, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm1))
+
+        qm2 = BNode()
+        g.add((qm2, RDF.type, DQV.QualityMeasurement))
+        g.add((qm2, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm2, DQV.value, Literal("0.00002", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm2))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/25000"
+
+    def test_parse_spatial_resolution_conflicting(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("1.0", datatype=XSD.decimal)))
+
+        measurement = BNode()
+        g.add((measurement, RDF.type, DQV.QualityMeasurement))
+        g.add((measurement, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((measurement, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, measurement))
+
+        # distance always win (arbitrary)
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 m"
 
     def test_unicode(self):
         g = Graph()
