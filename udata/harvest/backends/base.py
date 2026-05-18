@@ -514,17 +514,26 @@ class BaseBackend(object):
         return Dataservice()
 
     def ensure_unique_ownership(self, item):
+        """Raise if item already belongs to some other owner.
+
+        Ressources (datasets, services, ...) must have universally unique
+        identifiers, but some catalogs fail to enforce it. Cases seen
+        in the wild:
+        - Copy-pasting record metadata without changing the identifier.
+        - Using the table name of the originating data as identifier, and
+          generating several datasets out of the same table.
+        - "TODO", "A REMPLIR", etc. in the identifier field.
+        """
         other_owner = None
-        if item.organization:
-            if item.organization != self.source.organization:
-                other_owner = item.organization
-        elif item.owner:
-            if item.owner != self.source.owner:
-                other_owner = item.owner
-        if other_owner:
-            raise HarvestValidationError(
-                f"Item has another owner: {other_owner.page() or other_owner.id}"
-            )
+        if item.organization and item.organization != self.source.organization:
+            other_owner = item.organization
+        elif item.owner and item.owner != self.source.owner:
+            other_owner = item.owner
+        else:
+            return
+        raise HarvestValidationError(
+            f"Item has another owner: {other_owner.page() or other_owner.id}"
+        )
 
     def validate(self, data, schema):
         """Perform a data validation against a given schema.

@@ -12,6 +12,7 @@ from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 from udata.harvest.models import HarvestItem
 from udata.models import Dataset
 from udata.tests.api import PytestOnlyDBTestCase
@@ -518,10 +519,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 assert job.remote_id in job.errors[0].message
 
     @pytest.mark.options(CDATA_BASE_URL="http://localhost")
-    def test_unique_ownership_same_uri_remote_id(self):
+    @pytest.mark.parametrize(
+        "owner_param, owner_factory",
+        [("organization", OrganizationFactory), ("owner", UserFactory)],
+    )
+    def test_unique_ownership_same_uri_remote_id(self, owner_param, owner_factory):
         backend1 = FakeBackend(
             HarvestSourceFactory(
-                organization=OrganizationFactory(),
                 url="https://data.example.com/catalog",
                 config={
                     "dataset_remote_ids": [
@@ -530,6 +534,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                     ],
                     # dataservices don't check on uri remote_id (bug?)
                 },
+                **{owner_param: owner_factory()},
             )
         )
         job1 = backend1.harvest()
@@ -538,7 +543,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         backend2 = FakeBackend(
             HarvestSourceFactory(
-                organization=OrganizationFactory(),
                 url="https://other.example.com/catalog",
                 config={
                     "dataset_remote_ids": [
@@ -546,6 +550,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                         "https://other.example.com/catalog/dataset-unique",
                     ],
                 },
+                **{owner_param: owner_factory()},
             )
         )
         job2 = backend2.harvest()
@@ -555,20 +560,23 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             if not item.remote_id.endswith("-repeat"):
                 assert item.status == "done"
             else:
-                print(item.remote_id)
                 assert item.status == "failed"
-                assert backend1.source.organization.page() in item.errors[0].message
+                assert getattr(backend1.source, owner_param).page() in item.errors[0].message
 
     @pytest.mark.options(CDATA_BASE_URL="http://localhost")
-    def test_unique_ownership_same_domain(self):
+    @pytest.mark.parametrize(
+        "owner_param, owner_factory",
+        [("organization", OrganizationFactory), ("owner", UserFactory)],
+    )
+    def test_unique_ownership_same_domain(self, owner_param, owner_factory):
         backend1 = FakeBackend(
             HarvestSourceFactory(
-                organization=OrganizationFactory(),
                 url="https://data.example.com/catalog",
                 config={
                     "dataset_remote_ids": ["dataset-repeat", "dataset-unique-1"],
                     "dataservice_remote_ids": ["dataservice-repeat", "dataservice-unique-1"],
                 },
+                **{owner_param: owner_factory()},
             )
         )
         job1 = backend1.harvest()
@@ -577,12 +585,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         backend2 = FakeBackend(
             HarvestSourceFactory(
-                organization=OrganizationFactory(),
                 url="https://data.example.com/other-catalog",  # same domain as backend1
                 config={
                     "dataset_remote_ids": ["dataset-repeat", "dataset-unique-2"],
                     "dataservice_remote_ids": ["dataservice-repeat", "dataservice-unique-2"],
                 },
+                **{owner_param: owner_factory()},
             )
         )
         job2 = backend2.harvest()
@@ -593,7 +601,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 assert item.status == "done"
             else:
                 assert item.status == "failed"
-                assert backend1.source.organization.page() in item.errors[0].message
+                assert getattr(backend1.source, owner_param).page() in item.errors[0].message
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
