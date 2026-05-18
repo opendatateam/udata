@@ -11,6 +11,7 @@ from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
+from udata.core.edito_blocs.models import MarkdownBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -259,6 +260,69 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert403(response)
         assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is None
+
+
+class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
+    def test_blocs_hidden_by_default(self):
+        """Blocs are an opt-in field — they should not appear in the default response."""
+        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello")])
+        response = self.get(url_for("api.organization", org=org))
+        assert200(response)
+        assert "blocs" not in response.json
+
+    def test_blocs_returned_with_x_fields(self):
+        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello", title="Welcome")])
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        assert len(response.json["blocs"]) == 1
+        assert response.json["blocs"][0]["class"] == "MarkdownBloc"
+        assert response.json["blocs"][0]["title"] == "Welcome"
+        assert response.json["blocs"][0]["content"] == "Hello"
+
+    def test_admin_can_update_blocs(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data = org.to_dict()
+        data["blocs"] = [
+            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"},
+            {
+                "class": "LinksListBloc",
+                "title": "Useful links",
+                "links": [{"title": "Doc", "url": "https://example.com"}],
+            },
+        ]
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert len(org.blocs) == 2
+        assert org.blocs[0].__class__.__name__ == "MarkdownBloc"
+        assert org.blocs[0].title == "Edito"
+        assert org.blocs[1].__class__.__name__ == "LinksListBloc"
+        assert org.blocs[1].links[0].title == "Doc"
+
+    def test_editor_cannot_update_blocs(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        data = org.to_dict()
+        data["blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        response = self.put(url_for("api.organization", org=org), data)
+        assert403(response)
+        org.reload()
+        assert org.blocs == []
+
+    def test_non_member_cannot_update_blocs(self):
+        self.login()
+        org = OrganizationFactory()
+        data = org.to_dict()
+        data["blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        response = self.put(url_for("api.organization", org=org), data)
+        assert403(response)
+        org.reload()
+        assert org.blocs == []
 
 
 class MembershipAPITest(PytestOnlyAPITestCase):

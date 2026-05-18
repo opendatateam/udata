@@ -10,6 +10,7 @@ from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
     ListField,
@@ -25,6 +26,7 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.edito_blocs.models import Bloc
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -209,7 +211,7 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=["blocs"])
 class Organization(
     Auditable,
     SpamMixin,
@@ -254,6 +256,8 @@ class Organization(
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)
     extras = field(OrganizationExtrasField(), auditable=False)
+
+    blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
     deleted = field(DateTimeField(), readonly=True)
 

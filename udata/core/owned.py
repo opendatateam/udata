@@ -5,7 +5,6 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
-from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
@@ -30,7 +29,7 @@ class OwnedQuerySet(UDataQuerySet):
         if user.sysadmin:
             return self()
 
-        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owners = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
@@ -90,8 +89,7 @@ class Owned(object):
         filterable={},
     )
     organization = field(
-        ReferenceField(Organization, reverse_delete_rule=NULLIFY),
-        nested_fields=Organization.__ref_fields__,
+        ReferenceField("Organization", reverse_delete_rule=NULLIFY),
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,

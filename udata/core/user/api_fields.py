@@ -1,6 +1,5 @@
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
-from udata.core.organization.models import Organization
 from udata.core.user.models import _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
@@ -32,77 +31,6 @@ user_ref_fields = api.inherit(
     },
 )
 
-user_fields = api.model(
-    "User",
-    {
-        "id": fields.String(description="The user identifier", readonly=True),
-        "slug": fields.String(description="The user permalink string", readonly=True),
-        "first_name": fields.String(description="The user first name", required=True),
-        "last_name": fields.String(description="The user last name", required=True),
-        "email": fields.Raw(
-            attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
-            description="The user email",
-            readonly=True,
-        ),
-        "avatar": fields.ImageField(original=True, description="The user avatar URL"),
-        "avatar_thumbnail": fields.ImageField(
-            attribute="avatar",
-            size=BIGGEST_AVATAR_SIZE,
-            description="The user avatar thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_AVATAR_SIZE),
-        ),
-        "website": fields.String(description="The user website"),
-        "about": fields.Markdown(description="The user self description"),
-        "roles": fields.List(fields.String, description="Site wide user roles"),
-        "active": fields.Boolean(),
-        "organizations": fields.List(
-            fields.Nested(Organization.__ref_fields__),
-            description="The organization the user belongs to",
-        ),
-        "since": fields.ISODateTime(
-            attribute="created_at", description="The registeration date", required=True
-        ),
-        "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
-            description="The user last connection date (only present for global admins and on /me)",
-            readonly=True,
-        ),
-        "password_rotation_demanded": fields.Raw(
-            attribute=lambda o: (
-                o.password_rotation_demanded if current_user_is_admin_or_self() else None
-            ),
-            description=(
-                "Date at which a password rotation was requested for this user "
-                "(only present for global admins and on /me)"
-            ),
-            readonly=True,
-        ),
-        "password_rotation_performed": fields.Raw(
-            attribute=lambda o: (
-                o.password_rotation_performed if current_user_is_admin_or_self() else None
-            ),
-            description=(
-                "Date at which the user performed the requested password rotation "
-                "(only present for global admins and on /me)"
-            ),
-            readonly=True,
-        ),
-        "uri": fields.String(
-            attribute=lambda u: u.self_api_url(),
-            description="The API URI for this user",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda u: u.self_web_url(),
-            description="The user web page URL",
-            readonly=True,
-        ),
-        "metrics": fields.Raw(
-            attribute=lambda o: o.get_metrics(), description="The user metrics", readonly=True
-        ),
-    },
-)
-
 me_metrics_fields = api.model(
     "MyMetrics",
     {
@@ -120,8 +48,6 @@ me_metrics_fields = api.model(
         "followers_count": fields.Integer(description="The user's followers number", readonly=True),
     },
 )
-
-user_page_fields = api.model("UserPage", fields.pager(user_fields))
 
 user_suggestion_fields = api.model(
     "UserSuggestion",

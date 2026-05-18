@@ -4,9 +4,10 @@ from flask import request as flask_request
 from flask_security import current_user, logout_user
 from slugify import slugify
 
-from udata.api import API, api
+from udata.api import API, api, fields
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
@@ -15,23 +16,99 @@ from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.models import Organization
 from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.user.constants import BIGGEST_AVATAR_SIZE
 from udata.core.user.models import Role
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
     me_metrics_fields,
-    user_fields,
-    user_page_fields,
     user_role_fields,
     user_suggestion_fields,
 )
 from .forms import UserProfileAdminForm, UserProfileForm
+
+# `user_fields` lives here (not in `api_fields.py`) because it embeds
+# `Organization.__ref_fields__`, which would create a circular import:
+# organization.models → owned.py → user.api_fields → organization.models.
+user_fields = api.model(
+    "User",
+    {
+        "id": fields.String(description="The user identifier", readonly=True),
+        "slug": fields.String(description="The user permalink string", readonly=True),
+        "first_name": fields.String(description="The user first name", required=True),
+        "last_name": fields.String(description="The user last name", required=True),
+        "email": fields.Raw(
+            attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
+            description="The user email",
+            readonly=True,
+        ),
+        "avatar": fields.ImageField(original=True, description="The user avatar URL"),
+        "avatar_thumbnail": fields.ImageField(
+            attribute="avatar",
+            size=BIGGEST_AVATAR_SIZE,
+            description="The user avatar thumbnail URL. This is the square "
+            "({0}x{0}) and cropped version.".format(BIGGEST_AVATAR_SIZE),
+        ),
+        "website": fields.String(description="The user website"),
+        "about": fields.Markdown(description="The user self description"),
+        "roles": fields.List(fields.String, description="Site wide user roles"),
+        "active": fields.Boolean(),
+        "organizations": fields.List(
+            fields.Nested(Organization.__ref_fields__),
+            description="The organization the user belongs to",
+        ),
+        "since": fields.ISODateTime(
+            attribute="created_at", description="The registeration date", required=True
+        ),
+        "last_login_at": fields.Raw(
+            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
+            description="The user last connection date (only present for global admins and on /me)",
+            readonly=True,
+        ),
+        "password_rotation_demanded": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_demanded if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which a password rotation was requested for this user "
+                "(only present for global admins and on /me)"
+            ),
+            readonly=True,
+        ),
+        "password_rotation_performed": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_performed if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which the user performed the requested password rotation "
+                "(only present for global admins and on /me)"
+            ),
+            readonly=True,
+        ),
+        "uri": fields.String(
+            attribute=lambda u: u.self_api_url(),
+            description="The API URI for this user",
+            readonly=True,
+        ),
+        "page": fields.String(
+            attribute=lambda u: u.self_web_url(),
+            description="The user web page URL",
+            readonly=True,
+        ),
+        "metrics": fields.Raw(
+            attribute=lambda o: o.get_metrics(), description="The user metrics", readonly=True
+        ),
+    },
+)
+
+user_page_fields = api.model("UserPage", fields.pager(user_fields))
 
 DEFAULT_SORTING = "-created_at"
 

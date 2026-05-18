@@ -139,15 +139,17 @@ SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
 
 def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post and Site."""
+    """Remove references to a deleted object from all blocs in Post, Site and Organization."""
+    from udata.core.organization.models import Organization
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
-    Post._get_collection().update_many(
-        {f"blocs.{ref_field}": obj_id},
-        {"$pull": {f"blocs.$[b].{ref_field}": obj_id}},
-        array_filters=[{f"b.{ref_field}": obj_id}],
-    )
+    for model in (Post, Organization):
+        model._get_collection().update_many(
+            {f"blocs.{ref_field}": obj_id},
+            {"$pull": {f"blocs.$[b].{ref_field}": obj_id}},
+            array_filters=[{f"b.{ref_field}": obj_id}],
+        )
     for blocs_field in SITE_BLOCS_FIELDS:
         Site._get_collection().update_many(
             {f"{blocs_field}.{ref_field}": obj_id},
