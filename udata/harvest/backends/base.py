@@ -249,9 +249,9 @@ class BaseBackend(object):
         log.debug(f"Processing dataset {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        self.job.items.append(item)
-        self.save_job()
+        item = self.add_item(
+            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
+        )
 
         log_catcher = LogCatcher()
 
@@ -312,9 +312,9 @@ class BaseBackend(object):
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        self.job.items.append(item)
-        self.save_job()
+        item = self.add_item(
+            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
+        )
 
         try:
             if not remote_id:
@@ -401,6 +401,11 @@ class BaseBackend(object):
 
         return harvest
 
+    def add_item(self, item: HarvestItem) -> HarvestItem:
+        self.job.items.append(item)
+        self.save_job()
+        return item
+
     def save_job(self):
         if not self.dryrun:
             self.job.save()
@@ -434,13 +439,11 @@ class BaseBackend(object):
                 archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.job.items.append(
+            self.add_item(
                 HarvestItem(
                     remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
                 )
             )
-
-            self.save_job()
 
         for dataservice in local_dataservices_not_on_remote:
             if not dataservice.harvest.archived_at:
@@ -449,15 +452,13 @@ class BaseBackend(object):
                 )
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.job.items.append(
+            self.add_item(
                 HarvestItem(
                     remote_id=str(dataservice.harvest.remote_id),
                     dataservice=dataservice,
                     status="archived",
                 )
             )
-
-            self.save_job()
 
     def get_dataset(self, remote_id):
         """Get or create a dataset given its remote ID (and its source)
