@@ -78,7 +78,7 @@ def mock_csw_pagination(rmock, path, pattern):
     return _mock_pagination(rmock, "POST", CSW_DCAT_FILES_DIR, pattern, get_page, path)
 
 
-def mock_xslt(rmock, filename="XSLT.xml"):
+def mock_xslt(rmock, filename="iso-19139-to-dcat-ap.xsl"):
     with open(os.path.join(CSW_DCAT_FILES_DIR, filename), "r") as f:
         xslt = f.read()
     rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
