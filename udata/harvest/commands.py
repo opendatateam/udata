@@ -77,7 +77,7 @@ def sources(scheduled=False):
         sources = [s for s in sources if s.periodic_task]
     if sources:
         for source in sources:
-            msg = "{source.name} ({source.backend}): {cron}"
+            msg = "{source.name} [{source.slug}] ({source.backend}): {cron}"
             if source.periodic_task:
                 cron = source.periodic_task.schedule_display
             else:
