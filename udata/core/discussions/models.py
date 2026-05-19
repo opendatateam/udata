@@ -26,6 +26,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
+from .constants import COMMENT_SIZE_LIMIT
 from .signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -53,7 +54,7 @@ class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
     id = field(AutoUUIDField(), readonly=True)
-    content = field(StringField(required=True))
+    content = field(StringField(required=True, max_length=COMMENT_SIZE_LIMIT))
     posted_on = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
@@ -141,7 +142,7 @@ class Discussion(SpamMixin, Linkable, Document):
     )
 
     subject = field(
-        GenericReferenceField(),
+        GenericReferenceField(required=True),
         nested_fields=api.model_reference,
         description="The discussion target object",
     )

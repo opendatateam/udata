@@ -6,7 +6,7 @@ from flask_restx.inputs import boolean
 from flask_security import current_user
 
 from udata.api import API, api, fields
-from udata.api_fields import patch
+from udata.api_fields import patch, patch_and_save
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
@@ -16,7 +16,6 @@ from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
 from udata.utils import id_or_404
 
-from .constants import COMMENT_SIZE_LIMIT
 from .models import (
     Discussion,
     Message,
@@ -111,16 +110,10 @@ discussion_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
 def _resolve_publish_as_organization(data):
-    """Resolve and validate an `organization` reference from a comment/start payload.
-
-    Returns the Organization document or None. Raises FieldValidationError if the
-    organization is unknown or the current user is not allowed to publish on its
-    behalf.
-    """
+    """Resolve and validate an `organization` from a payload, for use on fields the
+    generic `patch()` flow cannot reach (e.g. `Message.posted_by_organization` which
+    is readonly on the model)."""
     org_input = data.get("organization")
-    if not org_input:
-        return None
-
     org_id = org_input.get("id") if isinstance(org_input, dict) else org_input
     if not org_id:
         return None
@@ -128,7 +121,6 @@ def _resolve_publish_as_organization(data):
     organization = Organization.objects(id=org_id).first()
     if organization is None:
         raise FieldValidationError(message="Unknown organization", field="organization")
-
     check_organization_is_valid_for_current_user(organization)
     return organization
 
@@ -163,14 +155,6 @@ class DiscussionAPI(API):
         close = bool(data.get("close", False))
         comment = data.get("comment")
 
-        if comment is not None and not isinstance(comment, str):
-            api.abort(400, "`comment` must be a string")
-        if comment and len(comment) > COMMENT_SIZE_LIMIT:
-            raise FieldValidationError(
-                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
-                field="comment",
-            )
-
         if not close and not comment:
             api.abort(
                 400, "Can only close without message. Please provide either `close` or a `comment`."
@@ -178,6 +162,7 @@ class DiscussionAPI(API):
 
         organization = _resolve_publish_as_organization(data)
 
+        message_idx = None
         if comment:
             message = Message(
                 content=comment,
@@ -186,8 +171,6 @@ class DiscussionAPI(API):
             )
             discussion.discussion.append(message)
             message_idx = len(discussion.discussion) - 1
-        else:
-            message_idx = None
 
         if close:
             discussion.permissions["close"].test()
@@ -212,14 +195,7 @@ class DiscussionAPI(API):
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         discussion.permissions["edit"].test()
 
-        data = request.json or {}
-        title = data.get("title")
-        if not title or not isinstance(title, str):
-            raise FieldValidationError(message="Title is required", field="title")
-
-        discussion.title = title
-        discussion.save()
-        return discussion
+        return patch_and_save(discussion, {"title": (request.json or {}).get("title")})
 
     @api.secure
     @api.doc("delete_discussion")
@@ -270,17 +246,7 @@ class DiscussionCommentAPI(API):
         message = self._resolve_message(discussion, cidx)
         message.permissions["edit"].test()
 
-        data = request.json or {}
-        comment = data.get("comment")
-        if not comment or not isinstance(comment, str):
-            raise FieldValidationError(message="Comment is required", field="comment")
-        if len(comment) > COMMENT_SIZE_LIMIT:
-            raise FieldValidationError(
-                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
-                field="comment",
-            )
-
-        message.content = comment
+        patch(message, {"content": (request.json or {}).get("comment")})
         message.last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
@@ -350,40 +316,19 @@ class DiscussionsAPI(API):
         """Create a new Discussion"""
         data = request.json or {}
 
-        title = data.get("title")
-        if not title or not isinstance(title, str):
-            raise FieldValidationError(message="Title is required", field="title")
-
-        comment = data.get("comment")
-        if not comment or not isinstance(comment, str):
-            raise FieldValidationError(message="Comment is required", field="comment")
-        if len(comment) > COMMENT_SIZE_LIMIT:
-            raise FieldValidationError(
-                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
-                field="comment",
-            )
-
-        if not data.get("subject"):
-            raise FieldValidationError(message="Subject is required", field="subject")
-
-        organization = _resolve_publish_as_organization(data)
-
-        # Build the Discussion through patch() so the model-level `field()` metadata
-        # (e.g. organization checks, subject resolution) is honored. The `comment`
-        # key from the request payload is handled separately because it ends up
-        # inside the first Message, not on the Discussion itself.
-        discussion = patch(Discussion(), {k: v for k, v in data.items() if k != "comment"})
-
+        # `comment` lives in the top-level payload but ends up inside the first Message,
+        # which is why we cannot rely on Discussion's `patch()` alone for it.
+        discussion = patch(Discussion(), data)
         discussion.user = current_user._get_current_object()
         discussion.discussion = [
             Message(
-                content=comment,
+                content=data.get("comment"),
                 posted_by=current_user.id,
-                posted_by_organization=organization,
+                posted_by_organization=discussion.organization,
             )
         ]
-        discussion.save()
 
+        discussion.save()
         discussion.signal_new()
 
         return discussion, 201
