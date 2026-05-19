@@ -110,7 +110,7 @@ def reject_source(source: HarvestSource, comment):
     source.validation.on = datetime.now(UTC)
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
     signals.harvest_source_refused.send(source)
