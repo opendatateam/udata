@@ -26,17 +26,19 @@ from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
     FREQ_TERM_TO_UDATA,
     access_right_to_rdf,
+    access_rights_from_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
-    infer_dataset_access_rights,
+    infer_access_conditions,
     license_to_rdf,
     licenses_from_rdf,
     provenances_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
+    rights_from_rdf,
     rights_to_rdf,
     temporal_from_rdf,
 )
@@ -1639,7 +1641,59 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         )
 
 
-class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
+class DatasetToRdfUtilsTest(PytestOnlyDBTestCase):
+    def test_rights_to_rdf_with_license_with_url_and_access_type_open(self, app):
+        dataset = DatasetFactory(
+            license=LicenseFactory(title="the license title", url="https://example.com/license"),
+            access_type=AccessType.OPEN,
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+        license = license_to_rdf(dataset)
+
+        assert len(rights) == 0  # the license is exposed as DCT.license
+        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
+        assert license == URIRef("https://example.com/license")
+
+    def test_rights_to_rdf_with_license_without_url_and_access_type_open(self, app):
+        license_without_url = LicenseFactory(url=None)
+        dataset = DatasetFactory(license=license_without_url, access_type=AccessType.OPEN)
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+        license = license_to_rdf(dataset)
+
+        assert len(rights) == 1
+        assert rights[0] == Literal(license_without_url.title)
+        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
+        assert license is None
+
+    def test_rights_to_rdf_with_access_type_restricted(self, app):
+        dataset = DatasetFactory(license=None, access_type=AccessType.RESTRICTED)
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+
+        assert len(rights) == 0
+        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+
+    def test_rights_to_rdf_with_access_type_restricted_and_reason_category(self, app):
+        dataset = DatasetFactory(
+            license=None,
+            access_type=AccessType.RESTRICTED,
+            access_type_reason_category=InspireLimitationCategory.PUBLIC_AUTHORITIES,
+        )
+        graph = Graph()
+        rights = list(rights_to_rdf(dataset, graph))
+        access_right = access_right_to_rdf(dataset, graph)
+
+        assert len(rights) == 1
+        assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
+        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+
+
+class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "xml, expected_licenses",
         [
@@ -1716,125 +1770,109 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         licenses = licenses_from_rdf(dataset)
         assert licenses == expected_licenses
 
-    def test_access_rights_from_rdf(self, app):
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Pas de restriction d'accès public selon INSPIRE")))
-
-        dataset = g.resource(node)
-        resources_access_rights = [{"resource rights 1"}, {"resource rights 2"}]
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Pas de restriction d'accès public selon INSPIRE"}
-        assert access_type is None
-        assert inspire_category is None
-
-    def test_with_inspire_support_enabled_matches_category(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
-        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
-
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add(
-            (
-                node,
-                DCT.accessRights,
-                Literal(
-                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-                ),
+    # TODO
+    @pytest.mark.parametrize(
+        "xml, expected_access_rights",
+        [
+            pytest.param(
+                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_access_rights, id=id
             )
-        )
+            for id, xml_fragment, expected_access_rights in [
+                # TODO
+            ]
+        ],
+    )
+    def test_access_rights_from_rdf(self, xml: str, expected_access_rights: set[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        access_rights = access_rights_from_rdf(dataset)
+        assert access_rights == expected_access_rights
 
-        dataset = g.resource(node)
-        resources_access_rights = []
+    @pytest.mark.parametrize(
+        "xml, expected_rights",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_rights, id=id)
+            for id, xml_fragment, expected_rights in [
+                # TODO
+            ]
+        ],
+    )
+    def test_rights_from_rdf(self, xml: str, expected_rights: set[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        rights = rights_from_rdf(dataset)
+        assert rights == expected_rights
 
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {
-            "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-        }
-        assert access_type == AccessType.RESTRICTED
-        assert inspire_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
-
-    def test_with_inspire_support_enabled_no_match(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
+    @pytest.mark.parametrize(
+        "inspire_support, access_rights, expected_access_type, expected_inspire_category",
+        [
+            pytest.param(
+                inspire_support,
+                access_rights,
+                expected_access_type,
+                expected_inspire_category,
+                id=id,
+            )
+            for id, inspire_support, access_rights, expected_access_type, expected_inspire_category in [
+                (
+                    "single_inspire_restriction",
+                    True,
+                    {
+                        "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                    },
+                    AccessType.RESTRICTED,
+                    InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                ),
+                (
+                    # FIXME: should be restricted?
+                    "multiple_inspire_restrictions",
+                    True,
+                    {
+                        "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)",
+                        "L124-5-II-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)",
+                    },
+                    None,
+                    None,
+                ),
+                (
+                    "inspire_no_restriction",
+                    True,
+                    {"Pas de restriction d'accès public selon INSPIRE"},
+                    None,
+                    None,
+                ),
+                (
+                    "unknown_rights",
+                    True,
+                    {"Some unknown rights"},
+                    None,
+                    None,
+                ),
+                (
+                    # don't detect a valid restriction when INSPIRE_SUPPORT is disabled
+                    "inspire_off",
+                    False,
+                    {
+                        "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                    },
+                    None,
+                    None,
+                ),
+            ]
+        ],
+    )
+    def test_access_conditions(
+        self, app, inspire_support, access_rights, expected_access_type, expected_inspire_category
+    ):
+        app.config["INSPIRE_SUPPORT"] = inspire_support
         app.config["DEFAULT_COUNTRY_CODE"] = "fr"
 
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Some unknown rights")))
+        access_type, inspire_category = infer_access_conditions(access_rights)
 
-        dataset = g.resource(node)
-        resources_access_rights = []
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Some unknown rights"}
-        assert access_type is None
-        assert inspire_category is None
-
-    def test_rights_to_rdf_with_license_with_url_and_access_type_open(self, app):
-        dataset = DatasetFactory(
-            license=LicenseFactory(title="the license title", url="https://example.com/license"),
-            access_type=AccessType.OPEN,
-        )
-        graph = Graph()
-        rights = list(rights_to_rdf(dataset, graph))
-        access_right = access_right_to_rdf(dataset, graph)
-        license = license_to_rdf(dataset)
-
-        assert len(rights) == 0  # the license is exposed as DCT.license
-        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
-        assert license == URIRef("https://example.com/license")
-
-    def test_rights_to_rdf_with_license_without_url_and_access_type_open(self, app):
-        license_without_url = LicenseFactory(url=None)
-        dataset = DatasetFactory(license=license_without_url, access_type=AccessType.OPEN)
-        graph = Graph()
-        rights = list(rights_to_rdf(dataset, graph))
-        access_right = access_right_to_rdf(dataset, graph)
-        license = license_to_rdf(dataset)
-
-        assert len(rights) == 1
-        assert rights[0] == Literal(license_without_url.title)
-        assert access_right and access_right.identifier == URIRef(AccessType.OPEN.url)
-        assert license is None
-
-    def test_rights_to_rdf_with_access_type_restricted(self, app):
-        dataset = DatasetFactory(license=None, access_type=AccessType.RESTRICTED)
-        graph = Graph()
-        rights = list(rights_to_rdf(dataset, graph))
-        access_right = access_right_to_rdf(dataset, graph)
-
-        assert len(rights) == 0
-        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
-
-    def test_rights_to_rdf_with_access_type_restricted_and_reason_category(self, app):
-        dataset = DatasetFactory(
-            license=None,
-            access_type=AccessType.RESTRICTED,
-            access_type_reason_category=InspireLimitationCategory.PUBLIC_AUTHORITIES,
-        )
-        graph = Graph()
-        rights = list(rights_to_rdf(dataset, graph))
-        access_right = access_right_to_rdf(dataset, graph)
-
-        assert len(rights) == 1
-        assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
-        assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
+        assert access_type is expected_access_type
+        assert inspire_category is expected_inspire_category
 
     @pytest.mark.parametrize(
         "xml, expected_provenances",
