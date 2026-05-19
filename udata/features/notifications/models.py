@@ -12,7 +12,6 @@ from udata.core.organization.notifications import (
     NewBadgeNotificationDetails,
 )
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
@@ -58,7 +57,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     )
     user = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
+        nested_fields=User.__ref_fields__,
         readonly=True,
         allow_null=True,
         auditable=False,

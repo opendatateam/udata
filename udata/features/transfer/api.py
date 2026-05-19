@@ -4,7 +4,6 @@ from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
@@ -45,7 +44,7 @@ transfer_response_fields = api.model(
 )
 
 person_mapping = {
-    User: user_ref_fields,
+    User: User.__ref_fields__,
     Organization: Organization.__ref_fields__,
 }
 
@@ -60,7 +59,7 @@ transfer_fields = api.model(
     {
         "id": fields.String(readonly=True, description="The transfer unique identifier"),
         "user": fields.Nested(
-            user_ref_fields,
+            User.__ref_fields__,
             description="The user who requested the transfer",
             readonly=True,
             allow_null=True,

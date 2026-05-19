@@ -13,6 +13,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
+from udata.core.user.models import User
 from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
@@ -28,7 +29,6 @@ from .api_fields import (
     schema_fields,
     spatial_coverage_fields,
     temporal_coverage_fields,
-    user_ref_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset
@@ -194,7 +194,7 @@ dataset_fields = apiv2.model(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
@@ -277,7 +277,7 @@ specific_resource_fields = apiv2.model(
 
 apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
-apiv2.inherit("UserReference", user_ref_fields)
+apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
 apiv2.inherit("SpatialCoverage", spatial_coverage_fields)

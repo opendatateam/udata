@@ -5,7 +5,6 @@ from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.models import MembershipRequest, Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
 
@@ -24,7 +23,7 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
     )
     request_user = field(
         ReferenceField(User),
-        nested_fields=user_ref_fields,
+        nested_fields=User.__ref_fields__,
         readonly=True,
         auditable=False,
         allow_null=True,

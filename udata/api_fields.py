@@ -414,6 +414,7 @@ def generate_fields(**kwargs) -> Callable:
         read_fields: dict = {}
         write_fields: dict = {}
         ref_fields: dict = {}
+        api_key_to_attribute: dict[str, str] = {}
         sortables: list = kwargs.get("additional_sorts", [])
         default_sort: list = kwargs.get("default_sort", None)
 
@@ -476,13 +477,20 @@ def generate_fields(**kwargs) -> Callable:
 
             read, write = convert_db_to_field(key, field, info)
 
+            # `rename` lets a field appear in the API under a different name than its
+            # Python attribute (e.g. `created_at` exposed as `since`). Patch needs the
+            # reverse mapping to know which attribute to assign to.
+            api_key = info.get("rename") or key
+            if api_key != key:
+                api_key_to_attribute[api_key] = key
+
             if read:
-                read_fields[key] = read
+                read_fields[api_key] = read
             if write:
-                write_fields[key] = write
+                write_fields[api_key] = write
 
             if read and info.get("show_as_ref", False):
-                ref_fields[key] = read
+                ref_fields[api_key] = read
 
         # The goal of this loop is to fetch all functions (getters) of the class
         # If a function has an `__additional_field_info__` attribute it means
@@ -524,11 +532,15 @@ def generate_fields(**kwargs) -> Callable:
                 def field_constructor(**kwargs):
                     return restx_fields.Nested(nested_fields, **kwargs)
 
-            read_fields[method_name] = field_constructor(
+            api_method_key = additional_field_info.get("rename") or method_name
+            if api_method_key != method_name:
+                api_key_to_attribute[api_method_key] = method_name
+
+            read_fields[api_method_key] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
-                ref_fields[method_name] = read_fields[method_name]
+                ref_fields[api_method_key] = read_fields[api_method_key]
 
         # Masks allow excluding heavy fields from responses (e.g. blocs on list endpoints)
         # without removing them from the model entirely — clients can still request them
@@ -664,6 +676,7 @@ def generate_fields(**kwargs) -> Callable:
         cls.apply_sort_filters = apply_sort_filters
         cls.apply_pagination = apply_pagination
         cls.__additional_class_info__ = kwargs
+        cls.__api_key_to_attribute__ = api_key_to_attribute
         return cls
 
     return wrapper
@@ -679,6 +692,7 @@ class _FieldKwargs(TypedDict, total=False):
     auditable: bool | None
     checks: list[Callable] | None
     attribute: str | None
+    rename: str | None
     thumbnail_info: dict[str, Any] | None
     example: str | None
     nested_fields: dict[str, Any] | None
@@ -731,6 +745,7 @@ def field(
     auditable: bool | None = None,
     checks: list[Callable] | None = None,
     attribute: str | None = None,
+    rename: str | None = None,
     thumbnail_info: dict[str, Any] | None = None,
     example: str | None = None,
     nested_fields: dict[str, Any] | None = None,
@@ -769,6 +784,9 @@ def field(
         auditable: If False, exclude from audit trail
         checks: List of validation functions
         attribute: Custom attribute name for serialization
+        rename: Expose this field under a different name in the API while keeping
+            the original Python attribute name on the model (e.g. expose
+            `created_at` as `since`). Useful to preserve historic API contracts.
         thumbnail_info: Thumbnail configuration dict
         example: Example value for documentation
         nested_fields: RestX model for nested objects
@@ -832,10 +850,12 @@ def patch(obj: _T, request) -> _T:
     from udata.mongo.engine import db
 
     data = request.json if isinstance(request, Request) else request
+    api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
 
-    for key, value in data.items():
-        field = obj.__write_fields__.get(key)
+    for api_key, value in data.items():
+        field = obj.__write_fields__.get(api_key)
         if field is not None and not field.readonly:
+            key = api_key_to_attribute.get(api_key, api_key)
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
@@ -914,7 +934,8 @@ def patch(obj: _T, request) -> _T:
             checks = info.get("checks", [])
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
-                    run_check(check, value, key, obj, data)
+                    # Pass the API key so error messages match the payload the caller sent.
+                    run_check(check, value, api_key, obj, data)
 
             setattr(obj, key, value)
 
@@ -923,7 +944,8 @@ def patch(obj: _T, request) -> _T:
     # from the request, because they validate cross-field constraints based on
     # other fields in the request (e.g. "page_id is required if body_type is blocs").
     for key, _, info in get_fields(obj.__class__):
-        if key in data:
+        api_key = info.get("rename") or key
+        if api_key in data:
             continue
         checks = info.get("checks", [])
         value = getattr(obj, key, None)
@@ -931,7 +953,7 @@ def patch(obj: _T, request) -> _T:
         for check in checks:
             if not getattr(check, "run_even_if_missing", False):
                 continue
-            run_check(check, value, key, obj, data)
+            run_check(check, value, api_key, obj, data)
 
     return obj
 
