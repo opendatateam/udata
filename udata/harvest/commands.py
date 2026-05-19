@@ -51,6 +51,7 @@ def validate(identifier):
 
 
 @grp.command()
+@click.argument("identifier")
 def delete(identifier):
     """Delete a harvest source"""
     log.info('Deleting source "%s"', identifier)
