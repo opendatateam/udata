@@ -6,15 +6,8 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
-from udata.mongo.uuid_fields import AutoUUIDField
-
-
-@generate_fields()
-class Bloc(EmbeddedDocument):
-    meta = {"allow_inheritance": True}
-
-    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:

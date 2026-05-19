@@ -26,7 +26,7 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
-from udata.core.edito_blocs.models import Bloc
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics

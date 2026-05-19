@@ -1,5 +1,4 @@
 from udata.api import api, base_reference, fields
-from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.user.models import _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
