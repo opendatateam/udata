@@ -1386,11 +1386,12 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
             "coordinates": [
                 [
                     [
-                        [3.28133559, 50.48188019],
-                        [1.31279111, 50.48188019],
-                        [1.31279111, 49.38547516],
-                        [3.28133559, 49.38547516],
-                        [3.28133559, 50.48188019],
+                        # FIXME: temporary approximation to match SEMIC main, will patch upstream
+                        [3.2813356, 50.4818802],
+                        [1.3127911, 50.4818802],
+                        [1.3127911, 49.3854752],
+                        [3.2813356, 49.3854752],
+                        [3.2813356, 50.4818802],
                     ]
                 ]
             ],
@@ -1431,25 +1432,25 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
                 == "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
             )
 
-        # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
-        access_right = [
+        # dataset rights inherited from the iso resources converted to dcat distributions
+        rights = dataset.extras["dcat"]["rights"]
+        assert len(rights) == 6
+        assert (
             "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
-        ]
-        assert dataset.extras["dcat"]["accessRights"] == access_right
-        # also present on the resource level
-        assert resource.extras["dcat"]["accessRights"] == access_right
-        # it is also interpreted as a known INSPIRE restriction
+            in rights
+        )
+
+        # also present at the resource level
+        assert resource.extras["dcat"]["rights"] == rights
+        # also interpreted as a known INSPIRE restriction
         assert dataset.access_type == AccessType.RESTRICTED
         assert (
             dataset.access_type_reason_category
             == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
         )
 
-        # see `test_geo_ide` for detailed explanation of the following
         assert dataset.extras["dcat"].get("license") is None
-        assert len(resource.extras["dcat"]["license"]) == 6
-        assert dataset.extras["dcat"].get("rights") is None
-        assert resource.extras["dcat"].get("rights") is None
+        assert dataset.extras["dcat"].get("accessRights") is None
 
     def test_geoide(self, rmock):
         # this is the string used in geo-ide for now
@@ -1475,25 +1476,18 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         assert len(dataset.resources) == 6
         assert dataset.license == lov1
 
-        # accessRights is retrieved from the resources
-        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
-        assert dataset.extras["dcat"]["accessRights"] == access_right
-        # also present on the resource level
+        # dataset rights inherited from the iso resources converted to dcat distributions
+        rights = dataset.extras["dcat"]["rights"]
+        assert len(rights) == 6
+        # FIXME: should be fixed upstream, but do we want to be more clever to extract license/accessRights?
+        assert "Pas de restriction d'accès public selon INSPIRE" in rights
+        assert "Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence." in rights
+        # also present at the resource level
         for resource in dataset.resources:
-            assert resource.extras["dcat"]["accessRights"] == access_right
+            assert resource.extras["dcat"]["rights"] == rights
 
-        # _no_ licence extra on dataset level, since they're in resources
         assert dataset.extras["dcat"].get("license") is None
-        # all useLimitations have been duplicated on resources as dct:license
-        for resource in dataset.resources:
-            r_licenses = resource.extras["dcat"]["license"]
-            assert len(r_licenses) == 6
-            assert any("Licence Ouverte 1.0" in x for x in r_licenses)
-
-        # no dct:rights anywhere, everything is in dct:license (at least for now)
-        assert dataset.extras["dcat"].get("rights") is None
-        for resource in dataset.resources:
-            assert resource.extras["dcat"].get("rights") is None
+        assert dataset.extras["dcat"].get("accessRights") is None
 
         # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
         assert "inspire" in dataset.tags

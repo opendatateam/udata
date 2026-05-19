@@ -931,7 +931,14 @@ def dataset_from_rdf(
     if dataset_licenses:
         add_dcat_extra(dataset, "license", dataset_licenses)
     default_license = dataset.license or License.default()
-    dataset.license = License.guess(*(dataset_licenses | dataset_rights), default=default_license)
+    # FIXME: resources_licenses_flat reproduces existing behavior, but differs from logic above,
+    # which is bump resource-level properties to dataset-level only if they're unanimous.
+    resources_licenses_flat = set(
+        license for resource_licenses in resources_licenses for license in resource_licenses
+    )
+    dataset.license = License.guess(
+        *(dataset_licenses | dataset_rights | resources_licenses_flat), default=default_license
+    )
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
