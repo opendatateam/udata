@@ -24,7 +24,6 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
-from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
@@ -364,6 +363,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             ]
             organization.save()
         if delete_comments:
+            from udata.core.discussions.models import Discussion
+
             for discussion in Discussion.objects(discussion__posted_by=self):
                 # Remove all discussions with current user as only participant
                 if all(message.posted_by == self for message in discussion.discussion):

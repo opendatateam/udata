@@ -6,7 +6,6 @@ from mongoengine.fields import EnumField, ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.actions import discussions_for
-from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.features.notifications.actions import notifier
@@ -38,7 +37,7 @@ class DiscussionNotificationDetails(EmbeddedDocument):
     discussion = field(
         ReferenceField(Discussion),
         readonly=True,
-        nested_fields=discussion_fields,
+        nested_fields=Discussion.__read_fields__,
         auditable=False,
         allow_null=True,
         filterable={},

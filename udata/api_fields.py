@@ -249,40 +249,37 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
-        if field.choices:
-            # When the user supplies a single shared `nested_fields` model (e.g.
-            # `api.model_reference`), expose it as a `Nested` so X-Fields masks can
-            # traverse the reference (e.g. `element{id}`). Without this, the field
-            # is exposed as a `Raw`-based GenericField and any nested mask fails
-            # with "Mask is inconsistent with model".
-            shared_nested_fields = info.get("nested_fields")
-            if shared_nested_fields is not None:
+        # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
+        # expose read as a `Nested` so X-Fields masks can traverse the reference. Without
+        # this, the field is exposed as a `Raw`-based GenericField (with choices) or as a
+        # `lazy_reference` Nested (without choices) — both fail on resolved documents that
+        # don't have a `document_type` attribute.
+        shared_nested_fields = info.get("nested_fields")
+        if shared_nested_fields is not None:
 
-                def constructor_read(**kwargs):
-                    return restx_fields.Nested(shared_nested_fields, **kwargs)
-            else:
-                generic_fields = {}
-                for cls in field.choices:
-                    cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                    generic_fields[cls.__name__] = convert_db_to_field(
-                        f"{key}.{cls.__name__}",
-                        # Instead of having GenericReferenceField() we'll create fields for each
-                        # of the subclasses with ReferenceField(Organization)…
-                        mongoengine.fields.ReferenceField(cls),
-                        info,
-                    )
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(shared_nested_fields, **kwargs)
+        elif field.choices:
+            generic_fields = {}
+            for cls in field.choices:
+                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                generic_fields[cls.__name__] = convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericReferenceField() we'll create fields for each
+                    # of the subclasses with ReferenceField(Organization)…
+                    mongoengine.fields.ReferenceField(cls),
+                    info,
+                )
 
-                def constructor_read(**kwargs):
-                    return GenericField(
-                        {k: v[0].model for k, v in generic_fields.items()}, **kwargs
-                    )
-
-            def constructor_write(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
+            def constructor_read(**kwargs):
+                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
         else:
 
-            def constructor(**kwargs):
+            def constructor_read(**kwargs):
                 return restx_fields.Nested(lazy_reference, **kwargs)
+
+        def constructor_write(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.

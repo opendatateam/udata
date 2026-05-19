@@ -1,89 +1,33 @@
 from datetime import UTC, datetime
 
 from bson import ObjectId
+from flask import request
 from flask_restx.inputs import boolean
 from flask_security import current_user
 
 from udata.api import API, api, fields
+from udata.api_fields import patch
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
+from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.reuse.models import Reuse
-from udata.core.user.api_fields import user_ref_fields
+from udata.mongo.errors import FieldValidationError
 from udata.utils import id_or_404
 
-from .forms import (
-    DiscussionCommentForm,
-    DiscussionCreateForm,
-    DiscussionEditCommentForm,
-    DiscussionEditForm,
+from .constants import COMMENT_SIZE_LIMIT
+from .models import (
+    Discussion,
+    Message,
 )
-from .models import Discussion, Message
 
 ns = api.namespace("discussions", "Discussion related operations")
 
 
-message_permissions_fields = api.model(
-    "DiscussionMessagePermissions",
-    {"delete": fields.Permission(), "edit": fields.Permission()},
-)
-
-message_fields = api.model(
-    "DiscussionMessage",
-    {
-        "id": fields.String(description="The message identifier"),
-        "content": fields.String(description="The message body"),
-        "posted_by": fields.Nested(user_ref_fields, description="The message author"),
-        "posted_by_organization": fields.Nested(
-            Organization.__ref_fields__,
-            description="The organization to show to users",
-            allow_null=True,
-        ),
-        "posted_on": fields.ISODateTime(description="The message posting date"),
-        "last_modified_at": fields.ISODateTime(description="The message last edit date"),
-        "permissions": fields.Nested(message_permissions_fields),
-    },
-)
-
-discussion_permissions_fields = api.model(
-    "DiscussionPermissions",
-    {"delete": fields.Permission(), "edit": fields.Permission(), "close": fields.Permission()},
-)
-
-discussion_fields = api.model(
-    "Discussion",
-    {
-        "id": fields.String(description="The discussion identifier"),
-        "subject": fields.Nested(api.model_reference, description="The discussion target object"),
-        "class": fields.ClassName(description="The object class", discriminator=True),
-        "title": fields.String(description="The discussion title"),
-        "user": fields.Nested(user_ref_fields, description="The discussion author"),
-        "organization": fields.Nested(
-            Organization.__ref_fields__, description="The discussion author", allow_null=True
-        ),
-        "created": fields.ISODateTime(description="The discussion creation date"),
-        "closed": fields.ISODateTime(description="The discussion closing date"),
-        "closed_by": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user who closed the discussion"
-        ),
-        "closed_by_organization": fields.Nested(
-            Organization.__ref_fields__,
-            allow_null=True,
-            description="The organization who closed the discussion",
-        ),
-        "discussion": fields.Nested(message_fields),
-        "url": fields.String(
-            attribute=lambda d: d.self_api_url(), description="The discussion API URI"
-        ),
-        "self_web_url": fields.String(
-            attribute=lambda d: d.self_web_url(), description="The discussion web URL"
-        ),
-        "extras": fields.Raw(description="Extra attributes as key-value pairs"),
-        "permissions": fields.Nested(discussion_permissions_fields),
-    },
-)
-
+# Input model only used for the POST /discussions/ payload, which doesn't match
+# Discussion.__write_fields__: the top-level `comment` ends up inside the first
+# Message of the discussion, not on the Discussion itself.
 start_discussion_fields = api.model(
     "DiscussionStart",
     {
@@ -105,6 +49,11 @@ comment_discussion_fields = api.model(
     "DiscussionResponse",
     {
         "comment": fields.String(description="The comment to submit", required=True),
+        "organization": fields.Nested(
+            Organization.__ref_fields__,
+            allow_null=True,
+            description="Publish in the name of this organization",
+        ),
         "close": fields.Boolean(
             description="Is this a closing response. Only subject owner can close"
         ),
@@ -125,7 +74,7 @@ edit_discussion_fields = api.model(
     },
 )
 
-discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fields))
+discussion_page_fields = api.model("DiscussionPage", fields.pager(Discussion.__read_fields__))
 
 parser = api.parser()
 sorting_keys: list[str] = ["created", "title", "closed", "discussion.posted_on"]
@@ -161,6 +110,29 @@ parser.add_argument(
 discussion_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
+def _resolve_publish_as_organization(data):
+    """Resolve and validate an `organization` reference from a comment/start payload.
+
+    Returns the Organization document or None. Raises FieldValidationError if the
+    organization is unknown or the current user is not allowed to publish on its
+    behalf.
+    """
+    org_input = data.get("organization")
+    if not org_input:
+        return None
+
+    org_id = org_input.get("id") if isinstance(org_input, dict) else org_input
+    if not org_id:
+        return None
+
+    organization = Organization.objects(id=org_id).first()
+    if organization is None:
+        raise FieldValidationError(message="Unknown organization", field="organization")
+
+    check_organization_is_valid_for_current_user(organization)
+    return organization
+
+
 @ns.route("/<id>/", endpoint="discussion")
 class DiscussionAPI(API):
     """
@@ -168,7 +140,7 @@ class DiscussionAPI(API):
     """
 
     @api.doc("get_discussion")
-    @api.marshal_with(discussion_fields)
+    @api.marshal_with(Discussion.__read_fields__)
     def get(self, id):
         """Get a discussion given its ID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
@@ -180,25 +152,37 @@ class DiscussionAPI(API):
     @api.response(
         403, "Not allowed to close this discussion OR can't add comments on a closed discussion"
     )
-    @api.marshal_with(discussion_fields)
+    @api.marshal_with(Discussion.__read_fields__)
     def post(self, id):
         """Add comment and optionally close a discussion given its ID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
-        form = api.validate(DiscussionCommentForm)
 
-        close = form.close.data
-        if not close and not form.comment.data:
+        data = request.json or {}
+        close = bool(data.get("close", False))
+        comment = data.get("comment")
+
+        if comment is not None and not isinstance(comment, str):
+            api.abort(400, "`comment` must be a string")
+        if comment and len(comment) > COMMENT_SIZE_LIMIT:
+            raise FieldValidationError(
+                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
+                field="comment",
+            )
+
+        if not close and not comment:
             api.abort(
                 400, "Can only close without message. Please provide either `close` or a `comment`."
             )
 
-        if form.comment.data:
+        organization = _resolve_publish_as_organization(data)
+
+        if comment:
             message = Message(
-                content=form.comment.data,
+                content=comment,
                 posted_by=current_user.id,
-                posted_by_organization=form.organization.data,
+                posted_by_organization=organization,
             )
             discussion.discussion.append(message)
             message_idx = len(discussion.discussion) - 1
@@ -208,7 +192,7 @@ class DiscussionAPI(API):
         if close:
             discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
-            discussion.closed_by_organization = form.organization.data
+            discussion.closed_by_organization = organization
             discussion.closed = datetime.now(UTC)
 
         discussion.save()
@@ -221,16 +205,20 @@ class DiscussionAPI(API):
     @api.secure
     @api.doc("update_discussion")
     @api.response(403, "Not allowed to update this discussion")
-    @api.expect(edit_comment_discussion_fields)
-    @api.marshal_with(discussion_fields)
+    @api.expect(edit_discussion_fields)
+    @api.marshal_with(Discussion.__read_fields__)
     def put(self, id):
         """Update a discussion given its ID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         discussion.permissions["edit"].test()
 
-        form = api.validate(DiscussionEditForm, discussion)
-        form.save()
+        data = request.json or {}
+        title = data.get("title")
+        if not title or not isinstance(title, str):
+            raise FieldValidationError(message="Title is required", field="title")
 
+        discussion.title = title
+        discussion.save()
         return discussion
 
     @api.secure
@@ -275,16 +263,24 @@ class DiscussionCommentAPI(API):
     @api.doc("edit_discussion_comment")
     @api.response(403, "Not allowed to edit this comment")
     @api.expect(edit_comment_discussion_fields)
-    @api.marshal_with(discussion_fields)
+    @api.marshal_with(Discussion.__read_fields__)
     def put(self, id, cidx):
         """Edit a comment given its index or UUID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         message = self._resolve_message(discussion, cidx)
         message.permissions["edit"].test()
 
-        form = api.validate(DiscussionEditCommentForm)
+        data = request.json or {}
+        comment = data.get("comment")
+        if not comment or not isinstance(comment, str):
+            raise FieldValidationError(message="Comment is required", field="comment")
+        if len(comment) > COMMENT_SIZE_LIMIT:
+            raise FieldValidationError(
+                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
+                field="comment",
+            )
 
-        message.content = form.comment.data
+        message.content = comment
         message.last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
@@ -349,18 +345,43 @@ class DiscussionsAPI(API):
     @api.secure
     @api.doc("create_discussion")
     @api.expect(start_discussion_fields)
-    @api.marshal_with(discussion_fields)
+    @api.marshal_with(Discussion.__read_fields__)
     def post(self):
         """Create a new Discussion"""
-        form = api.validate(DiscussionCreateForm)
+        data = request.json or {}
 
-        message = Message(
-            content=form.comment.data,
-            posted_by=current_user.id,
-            posted_by_organization=form.organization.data,
-        )
-        discussion = Discussion(user=current_user.id, discussion=[message])
-        form.populate_obj(discussion)
+        title = data.get("title")
+        if not title or not isinstance(title, str):
+            raise FieldValidationError(message="Title is required", field="title")
+
+        comment = data.get("comment")
+        if not comment or not isinstance(comment, str):
+            raise FieldValidationError(message="Comment is required", field="comment")
+        if len(comment) > COMMENT_SIZE_LIMIT:
+            raise FieldValidationError(
+                message=f"Comment cannot exceed {COMMENT_SIZE_LIMIT} characters",
+                field="comment",
+            )
+
+        if not data.get("subject"):
+            raise FieldValidationError(message="Subject is required", field="subject")
+
+        organization = _resolve_publish_as_organization(data)
+
+        # Build the Discussion through patch() so the model-level `field()` metadata
+        # (e.g. organization checks, subject resolution) is honored. The `comment`
+        # key from the request payload is handled separately because it ends up
+        # inside the first Message, not on the Discussion itself.
+        discussion = patch(Discussion(), {k: v for k, v in data.items() if k != "comment"})
+
+        discussion.user = current_user._get_current_object()
+        discussion.discussion = [
+            Message(
+                content=comment,
+                posted_by=current_user.id,
+                posted_by_organization=organization,
+            )
+        ]
         discussion.save()
 
         discussion.signal_new()
