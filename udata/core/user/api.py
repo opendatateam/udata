@@ -1,11 +1,12 @@
 from datetime import UTC, datetime
 
-from flask import request as flask_request
+from flask import request
 from flask_security import current_user, logout_user
 from slugify import slugify
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
@@ -21,19 +22,31 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
-from udata.core.user.models import Role
+from udata.core.user.models import Role, datastore
 from udata.models import CommunityResource, Dataset, Reuse, User
+from udata.mongo.errors import FieldValidationError
 
 from .api_fields import (
     me_metrics_fields,
-    user_fields,
-    user_page_fields,
     user_role_fields,
     user_suggestion_fields,
 )
-from .forms import UserProfileAdminForm, UserProfileForm
 
 DEFAULT_SORTING = "-created_at"
+
+
+def _apply_admin_only_fields(user: User, data: dict) -> None:
+    """Apply admin-only fields (roles, active) that aren't in __write_fields__."""
+    if "roles" in data:
+        roles = []
+        for name in data["roles"] or []:
+            role = datastore.find_role(name)
+            if role is None:
+                raise FieldValidationError(field="roles", message=f"The role {name} does not exist")
+            roles.append(role)
+        user.roles = roles
+    if "active" in data:
+        user.active = bool(data["active"])
 
 
 class UserApiParser(ModelApiParser):
@@ -63,21 +76,20 @@ filter_parser.add_argument(
 class MeAPI(API):
     @api.secure
     @api.doc("get_me")
-    @api.marshal_with(user_fields)
+    @api.marshal_with(User.__read_fields__)
     def get(self):
         """Fetch the current user (me) identity"""
         return current_user._get_current_object()
 
     @api.secure
     @api.doc("update_me")
-    @api.expect(user_fields)
-    @api.marshal_with(user_fields)
+    @api.expect(User.__write_fields__)
+    @api.marshal_with(User.__read_fields__)
     @api.response(400, "Validation error")
     def put(self, **kwargs):
         """Update my profile"""
         user = current_user._get_current_object()
-        form = api.validate(UserProfileForm, user)
-        return form.save()
+        return patch_and_save(user, request)
 
     @api.secure
     @api.doc("delete_me")
@@ -213,7 +225,7 @@ class ApiTokenListAPI(API):
     @api.marshal_with(apitoken_created_fields, code=201)
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
-        data = flask_request.json or {}
+        data = request.json or {}
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
         token, plaintext = ApiToken.generate(
@@ -357,13 +369,11 @@ class RefuseOrgInvitationAPI(API):
 @ns.route("/", endpoint="users")
 class UserListAPI(API):
     model = User
-    fields = user_fields
-    form = UserProfileForm
 
     @api.secure(admin_permission)
     @api.doc("list_users")
     @api.expect(user_parser.parser)
-    @api.marshal_with(user_page_fields)
+    @api.marshal_with(User.__page_fields__)
     def get(self):
         """List all users"""
         args = user_parser.parse()
@@ -382,13 +392,15 @@ class UserListAPI(API):
 
     @api.secure(admin_permission)
     @api.doc("create_user")
-    @api.expect(user_fields)
-    @api.marshal_with(user_fields, code=201)
+    @api.expect(User.__write_fields__)
+    @api.marshal_with(User.__read_fields__, code=201)
     @api.response(400, "Validation error")
     def post(self):
-        """Create a new object"""
-        form = api.validate(UserProfileAdminForm)
-        user = form.save()
+        """Create a new user"""
+        data = request.json or {}
+        user = patch(User(), data)
+        _apply_admin_only_fields(user, data)
+        user.save()
         return user, 201
 
 
@@ -430,7 +442,7 @@ delete_parser.add_argument(
 @api.response(410, "User is not active or has been deleted")
 class UserAPI(API):
     @api.doc("get_user")
-    @api.marshal_with(user_fields)
+    @api.marshal_with(User.__read_fields__)
     def get(self, user):
         """Get a user given its identifier"""
         if current_user.is_anonymous or not current_user.sysadmin:
@@ -442,13 +454,16 @@ class UserAPI(API):
 
     @api.secure(admin_permission)
     @api.doc("update_user")
-    @api.expect(user_fields)
-    @api.marshal_with(user_fields)
+    @api.expect(User.__write_fields__)
+    @api.marshal_with(User.__read_fields__)
     @api.response(400, "Validation error")
     def put(self, user):
         """Update a user given its identifier"""
-        form = api.validate(UserProfileAdminForm, user)
-        return form.save()
+        data = request.json or {}
+        user = patch(user, data)
+        _apply_admin_only_fields(user, data)
+        user.save()
+        return user
 
     @api.secure(admin_permission)
     @api.doc("delete_user")

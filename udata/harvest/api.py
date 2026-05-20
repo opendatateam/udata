@@ -7,7 +7,7 @@ from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.harvest.backends import get_enabled_backends
 
 from . import actions
@@ -100,7 +100,7 @@ validation_fields = api.model(
             description="Is it validated or not", enum=list(VALIDATION_STATES), required=True
         ),
         "by": fields.Nested(
-            user_ref_fields,
+            User.__ref_fields__,
             allow_null=True,
             readonly=True,
             description="Who performed the validation",
@@ -155,7 +155,7 @@ source_fields = api.model(
             job_fields, description="The last job for this source", allow_null=True, readonly=True
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The owner information"
+            User.__ref_fields__, allow_null=True, description="The owner information"
         ),
         "organization": fields.Nested(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"

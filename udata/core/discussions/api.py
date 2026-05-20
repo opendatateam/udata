@@ -10,7 +10,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.utils import id_or_404
 
 from .forms import (
@@ -34,7 +34,7 @@ message_fields = api.model(
     {
         "id": fields.String(description="The message identifier"),
         "content": fields.String(description="The message body"),
-        "posted_by": fields.Nested(user_ref_fields, description="The message author"),
+        "posted_by": fields.Nested(User.__ref_fields__, description="The message author"),
         "posted_by_organization": fields.Nested(
             Organization.__ref_fields__,
             description="The organization to show to users",
@@ -58,14 +58,14 @@ discussion_fields = api.model(
         "subject": fields.Nested(api.model_reference, description="The discussion target object"),
         "class": fields.ClassName(description="The object class", discriminator=True),
         "title": fields.String(description="The discussion title"),
-        "user": fields.Nested(user_ref_fields, description="The discussion author"),
+        "user": fields.Nested(User.__ref_fields__, description="The discussion author"),
         "organization": fields.Nested(
             Organization.__ref_fields__, description="The discussion author", allow_null=True
         ),
         "created": fields.ISODateTime(description="The discussion creation date"),
         "closed": fields.ISODateTime(description="The discussion closing date"),
         "closed_by": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user who closed the discussion"
+            User.__ref_fields__, allow_null=True, description="The user who closed the discussion"
         ),
         "closed_by_organization": fields.Nested(
             Organization.__ref_fields__,

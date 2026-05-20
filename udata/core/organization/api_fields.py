@@ -1,5 +1,5 @@
 from udata.api import api, fields
-from udata.core.user.models import User
+from udata.core.user.models import user_with_email_ref_fields
 
 from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES, REQUEST_TYPES
 from .models import Organization
@@ -16,7 +16,7 @@ request_fields = api.model(
     "MembershipRequest",
     {
         "id": fields.String(readonly=True),
-        "user": fields.Nested(User.__ref_fields__, allow_null=True),
+        "user": fields.Nested(user_with_email_ref_fields, allow_null=True),
         "email": fields.String(description="Email for non-registered user invitations"),
         "kind": fields.String(
             description="The request kind (request or invitation)",

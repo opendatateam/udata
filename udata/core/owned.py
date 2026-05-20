@@ -6,7 +6,6 @@ from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 from udata.mongo.errors import FieldValidationError
@@ -83,7 +82,7 @@ class Owned(object):
 
     owner = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
+        nested_fields=User.__ref_fields__,
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
         checks=[check_owner_is_current_user, only_creation],
         allow_null=True,

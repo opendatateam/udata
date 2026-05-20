@@ -5,7 +5,7 @@ from flask_security import current_user
 
 from udata import tracking
 from udata.api import API, api, fields
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.models import Follow
 from udata.utils import id_or_404
 
@@ -15,7 +15,7 @@ follow_fields = api.model(
     "Follow",
     {
         "id": fields.String(description="The follow object technical ID", readonly=True),
-        "follower": fields.Nested(user_ref_fields, description="The follower", readonly=True),
+        "follower": fields.Nested(User.__ref_fields__, description="The follower", readonly=True),
         "since": fields.ISODateTime(
             description="The date from which the user started following", readonly=True
         ),
