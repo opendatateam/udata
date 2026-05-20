@@ -468,6 +468,27 @@
     </xsl:choose>
   </xsl:function>
 
+  <!--
+    Function to normalize a decimal number represented as string.
+    Makes sure the normalized output can be parsed as decimal while preserving input precision.
+    See https://github.com/SEMICeu/iso-19139-to-dcat-ap/issues/112 for context.
+  -->
+  <xsl:function name="local:normalize-number" as="xs:string">
+    <xsl:param name="val" as="xs:string"/>
+    <xsl:choose>
+      <xsl:when test="contains($val, '.')">
+        <xsl:value-of select="concat(
+          string(number(substring-before($val, '.'))),
+          '.',
+          substring-after($val, '.')
+        )"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="string(number($val))"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+
 <!--
 
   Master template
@@ -2613,10 +2634,10 @@
   <xsl:template name="GeographicBoundingBox" match="gmd:identificationInfo[1]/*/*[self::gmd:extent|self::srv:extent]/*/gmd:geographicElement/gmd:EX_GeographicBoundingBox">
 -->
   <xsl:template name="GeographicBoundingBox" match="gmd:EX_GeographicBoundingBox">
-    <xsl:param name="north" select="format-number(gmd:northBoundLatitude/gco:Decimal, '0.0######')"/>
-    <xsl:param name="east"  select="format-number(gmd:eastBoundLongitude/gco:Decimal, '0.0######')"/>
-    <xsl:param name="south" select="format-number(gmd:southBoundLatitude/gco:Decimal, '0.0######')"/>
-    <xsl:param name="west"  select="format-number(gmd:westBoundLongitude/gco:Decimal, '0.0######')"/>
+    <xsl:param name="north" select="local:normalize-number(gmd:northBoundLatitude/gco:Decimal)"/>
+    <xsl:param name="east"  select="local:normalize-number(gmd:eastBoundLongitude/gco:Decimal)"/>
+    <xsl:param name="south" select="local:normalize-number(gmd:southBoundLatitude/gco:Decimal)"/>
+    <xsl:param name="west"  select="local:normalize-number(gmd:westBoundLongitude/gco:Decimal)"/>
 
 <!-- Bbox as a dct:Box -->
 <!-- Need to check whether this is correct - in particular, the "projection" parameter -->
