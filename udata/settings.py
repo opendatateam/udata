@@ -75,7 +75,18 @@ class Defaults(object):
     # Flask security settings
 
     SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+    # 'Lax' prevents the session cookie from being sent on cross-site subrequests
+    # (the CSRF/CORS exfiltration vector), while still flowing on same-site
+    # requests from the front-end (cdata shares udata's registrable domain) and
+    # on top-level navigations. Can be tightened to 'Strict' or, if the front-end
+    # lives on a different registrable domain, set to 'None' (requires Secure).
+    # See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    # Origins allowed to make *credentialed* cross-origin requests to the API.
+    # Other origins still get anonymous (`Access-Control-Allow-Origin: *`) access.
+    # The `CDATA_BASE_URL` origin is always allowed (see `udata.cors`).
+    CORS_ALLOWED_ORIGINS = []
     SECURITY_USE_REGISTER_V2 = True
 
     # Flask-Security-Too settings
