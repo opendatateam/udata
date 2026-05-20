@@ -13,7 +13,6 @@ from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_no
 from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.reuse.models import Reuse
-from udata.mongo.errors import FieldValidationError
 from udata.utils import id_or_404
 
 from .models import (
@@ -110,11 +109,10 @@ def _resolve_publish_as_organization(data):
     if not org_id:
         return None
 
-    organization = Organization.objects(id=org_id).first()
-    if organization is None:
-        raise FieldValidationError(message="Unknown organization", field="organization")
-    check_organization_is_valid_for_current_user(organization)
-    return organization
+    # `check_…` already resolves the org by id (raising on unknown/forbidden) and returns
+    # the fetched document, so we pass a lightweight reference and reuse its result instead
+    # of querying the organization twice.
+    return check_organization_is_valid_for_current_user(Organization(id=org_id))
 
 
 @ns.route("/<id>/", endpoint="discussion")

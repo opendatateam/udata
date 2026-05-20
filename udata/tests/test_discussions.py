@@ -1,11 +1,13 @@
 from datetime import UTC, datetime
 
 import pytest
+from bson import ObjectId
 from flask import url_for
 from werkzeug.test import TestResponse
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.constants import COMMENT_SIZE_LIMIT
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
@@ -145,6 +147,21 @@ class DiscussionsTest(APITestCase):
         response = self.post(
             url_for("api.discussion", id=response.json["id"]),
             {"organization": other_org.id, "comment": "A comment"},
+        )
+        self.assert400(response)
+
+    def test_comment_on_behalf_of_unknown_org(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": str(ObjectId()), "comment": "A comment"},
         )
         self.assert400(response)
 
@@ -632,6 +649,42 @@ class DiscussionsTest(APITestCase):
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
 
+    def test_comment_size_limit(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        too_long = "a" * (COMMENT_SIZE_LIMIT + 1)
+
+        # On creation, the comment is stored in the first message.
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": too_long,
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+        self.assert400(response)
+
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        # When adding a comment to an existing discussion.
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"comment": too_long},
+        )
+        self.assert400(response)
+
+        # When editing an existing comment.
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": too_long},
+        )
+        self.assert400(response)
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_spam_comment_to_discussion(self):
         dataset = Dataset.objects.create(title="Test dataset")
@@ -1022,6 +1075,20 @@ class DiscussionsTest(APITestCase):
             {"comment": "unknown uuid"},
         )
         self.assertStatus(response, 404)
+
+    def test_edit_discussion_comment_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": ""},
+        )
+        self.assert400(response)
 
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())

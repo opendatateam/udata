@@ -18,7 +18,7 @@ from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
-from udata.core.owned import check_organization_is_valid_for_current_user
+from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
@@ -142,7 +142,7 @@ class Discussion(SpamMixin, Linkable, Document):
         nested_fields=Organization.__ref_fields__,
         allow_null=True,
         description="The organization to publish on behalf of",
-        checks=[check_organization_is_valid_for_current_user],
+        checks=[check_organization_is_valid_for_current_user, only_creation],
     )
 
     subject = field(
