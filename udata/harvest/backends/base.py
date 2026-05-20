@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import requests
+from bson import ObjectId
 from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
@@ -275,6 +276,12 @@ class BaseBackend(object):
 
             if self.dryrun:
                 dataset.validate()
+                # A preview never saves, so the dataset would keep no pk and could not
+                # be referenced by a dataservice harvested in the same run. Give it the
+                # client-side id that save() would have generated so cross-references
+                # between previewed objects stay valid and distinct.
+                if dataset.pk is None:
+                    dataset.id = ObjectId()
             else:
                 dataset.save()
             item.dataset = dataset
