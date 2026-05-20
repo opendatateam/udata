@@ -1,9 +1,5 @@
 # Changelog
 
-## Current (in progress)
-
-- fix(security): only allow credentialed CORS requests from trusted origins and set the session cookie to `SameSite=Lax`
-
 ## 16.5.0 (2026-05-18)
 
 - chore(deps): update dependency faker to >=40.18, <40.19 ([#3769](https://github.com/opendatateam/udata/pull/3769))
