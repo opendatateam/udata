@@ -26,6 +26,7 @@ For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
+import typing
 from datetime import datetime
 from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
 
@@ -43,6 +44,12 @@ import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+
+PYTHON_TYPE_TO_RESTX_FIELD = {
+    int: restx_fields.Integer,
+    float: restx_fields.Float,
+    bool: restx_fields.Boolean,
+}
 
 
 def required_if(**conditions):
@@ -243,19 +250,32 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
         if field.choices:
-            generic_fields = {}
-            for cls in field.choices:
-                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                generic_fields[cls.__name__] = convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having GenericReferenceField() we'll create fields for each
-                    # of the subclasses with ReferenceField(Organization)…
-                    mongoengine.fields.ReferenceField(cls),
-                    info,
-                )
+            # When the user supplies a single shared `nested_fields` model (e.g.
+            # `api.model_reference`), expose it as a `Nested` so X-Fields masks can
+            # traverse the reference (e.g. `element{id}`). Without this, the field
+            # is exposed as a `Raw`-based GenericField and any nested mask fails
+            # with "Mask is inconsistent with model".
+            shared_nested_fields = info.get("nested_fields")
+            if shared_nested_fields is not None:
 
-            def constructor_read(**kwargs):
-                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+                def constructor_read(**kwargs):
+                    return restx_fields.Nested(shared_nested_fields, **kwargs)
+            else:
+                generic_fields = {}
+                for cls in field.choices:
+                    cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                    generic_fields[cls.__name__] = convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having GenericReferenceField() we'll create fields for each
+                        # of the subclasses with ReferenceField(Organization)…
+                        mongoengine.fields.ReferenceField(cls),
+                        info,
+                    )
+
+                def constructor_read(**kwargs):
+                    return GenericField(
+                        {k: v[0].model for k, v in generic_fields.items()}, **kwargs
+                    )
 
             def constructor_write(**kwargs):
                 return restx_fields.Nested(lazy_reference, **kwargs)
@@ -323,6 +343,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
             )
 
+    elif isinstance(field, mongo_fields.MultiPolygonField):
+        constructor = restx_fields.Raw
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
@@ -495,8 +517,8 @@ def generate_fields(**kwargs) -> Callable:
 
             nested_fields: dict | None = additional_field_info.get("nested_fields")
             if nested_fields is None:
-                # If there is no `nested_fields` convert the object to the string representation.
-                field_constructor = restx_fields.String
+                return_type = typing.get_type_hints(method).get("return")
+                field_constructor = PYTHON_TYPE_TO_RESTX_FIELD.get(return_type, restx_fields.String)
             else:
 
                 def field_constructor(**kwargs):
@@ -832,18 +854,27 @@ def patch(obj: _T, request) -> _T:
                 model_attribute, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
             ):
                 value = wrap_primary_key(key, model_attribute, value)
-            elif isinstance(
+            elif value and isinstance(
                 model_attribute,
                 (
                     mongoengine.fields.GenericReferenceField,
                     mongoengine.fields.GenericLazyReferenceField,
                 ),
             ):
+                if not isinstance(value, dict) or "class" not in value or "id" not in value:
+                    raise FieldValidationError(
+                        message="Expected an object with `class` and `id` keys",
+                        field=key,
+                    )
+                try:
+                    document_type = db.resolve_model(value["class"])
+                except ValueError as e:
+                    raise FieldValidationError(message=str(e), field=key)
                 value = wrap_primary_key(
                     key,
                     model_attribute,
                     value["id"],
-                    document_type=db.resolve_model(value["class"]),
+                    document_type=document_type,
                 )
             elif value and isinstance(
                 model_attribute,

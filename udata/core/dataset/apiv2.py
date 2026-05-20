@@ -500,7 +500,7 @@ class ResourceAPI(API):
                 if not dataset.private and dataset.deleted:
                     apiv2.abort(410, "Dataset has been deleted")
                 apiv2.abort(404)
-            resource = get_by(dataset.resources, "id", rid)
+            resource = get_by(dataset.resources, id=rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
             if resource:

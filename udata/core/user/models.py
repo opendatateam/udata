@@ -28,6 +28,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -96,7 +97,7 @@ class UserSettings(EmbeddedDocument):
 
 
 @generate_fields()
-class User(WithMetrics, UserMixin, Linkable, Document):
+class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
@@ -142,15 +143,18 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     password_rotation_demanded = field(DateTimeField(), auditable=False)
     password_rotation_performed = field(DateTimeField(), auditable=False)
 
-    # The 5 fields below are required for Flask-security
-    # when SECURITY_TRACKABLE is True
-    last_login_at = field(DateTimeField(), auditable=False)
-    current_login_at = field(
+    # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
+    # Flask-Security's naming is counter-intuitive: `current_login_at` is the most recent
+    # login and `last_login_at` is the *previous* one. We rename this in the public API:
+    # the field exposed as `last_login_at` actually returns the value of `current_login_at`
+    # (the most recent login), which is what "last login" naturally means to API consumers.
+    last_login_at = field(
         DateTimeField(),
         auditable=False,
         show_as_ref=True,
         attribute=_visible_login_date,
     )
+    current_login_at = field(DateTimeField(), auditable=False)
     last_login_ip = field(StringField(), auditable=False)
     current_login_ip = field(StringField(), auditable=False)
     login_count = field(IntField(), auditable=False)
@@ -190,6 +194,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     }
 
     verbose_name = _("account")
+
+    def fields_to_check_for_spam(self):
+        return {"about": self.about, "website": self.website}
 
     __metrics_keys__ = [
         "datasets",
@@ -418,6 +425,13 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         if notify:
             mails.account_deletion().send(copied_user)
 
+    def request_password_rotation(self):
+        """Mark the user for password rotation on next login and invalidate
+        all ongoing sessions by changing its uniquifier."""
+        self.password_rotation_demanded = datetime.now(UTC)
+        self.save()
+        datastore.set_uniquifier(self)
+
     def count_datasets(self):
         from udata.models import Dataset
 
@@ -453,6 +467,7 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
+post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):

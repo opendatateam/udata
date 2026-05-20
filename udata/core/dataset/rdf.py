@@ -6,6 +6,7 @@ import calendar
 import json
 import logging
 from datetime import date
+from itertools import chain
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -34,6 +35,7 @@ from udata.rdf import (
     GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
+    OGC,
     RDFS,
     SCHEMA,
     SCV,
@@ -52,6 +54,7 @@ from udata.rdf import (
     set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
+    vocabulary_key,
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
@@ -608,41 +611,56 @@ def mime_from_rdf(resource):
     mime = rdf_value(resource, DCAT.mediaType, unwrap=[RDFS.label])
     if not mime:
         return
-    if IANAFORMAT in mime:
-        return "/".join(mime.split("/")[-2:])
+    if key := vocabulary_key(mime, IANAFORMAT):
+        return key
     if isinstance(mime, str):
         return mime
 
 
-def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format, unwrap=[RDFS.label])
-    if not format:
-        return
-    if EUFORMAT in format or IANAFORMAT in format:
-        _, _, format = namespace_manager.compute_qname(URIRef(format))
+def format_from_rdf(resource: RdfResource):
+    """
+    Return what udata considers to be the format.
+    - For services, return the service protocol if available, otherwise the distribution format.
+    - For other distribution types, return the distribution format.
+    """
+    # DCAT.accessService is 0..n, but since other 0..n distribution properties such as accessURL or
+    # downloadURL are treated as 0..1, we do the same here to stay consistent.
+    if service := resource.value(DCAT.accessService):
+        # Support both GEODCAT.serviceProtocol (GeoDCAT-AP 3+) and DCT.conformsTo (DCAT and older
+        # GeoDCAT-AP) mappings. Using chain() instead of objects(...|...) to enforce deterministic
+        # order.
+        for standard in chain(
+            service.objects(GEODCAT.serviceProtocol), service.objects(DCT.conformsTo)
+        ):
+            if key := vocabulary_key(standard.identifier, OGC):
+                return key.lower()
+
+    if format := rdf_value(resource, DCT.format, unwrap=[RDFS.label]):
+        if key := vocabulary_key(format, EUFORMAT):
+            return key.lower()
+        if key := vocabulary_key(format, IANAFORMAT):
+            return key.split("/")[-1].lower()
         return format.lower()
-    return format.lower()
 
 
-def title_from_rdf(rdf, url):
+def title_from_rdf(resource: RdfResource, url: str | None = None, format: str | None = None) -> str:
     """
     Try to extract a distribution title from a property.
     As it's not a mandatory property,
     it fallback on building a title from the URL
     then the format and in last ressort a generic resource name.
     """
-    title = rdf_value(rdf, DCT.title)
+    title = rdf_value(resource, DCT.title)
     if title:
         return title
     if url:
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
-        if fmt:
-            return i18n._("{format} resource").format(format=fmt.lower())
+        if format:
+            return i18n._("{format} resource").format(format=format.lower())
         else:
             return i18n._("Nameless resource")
 
@@ -741,19 +759,35 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        if format in OGC_SERVICE_FORMATS:
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
+            # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
+            # correct resource.
+            # GeoNetwork uses the layer name as title, so it should be stable enough that we can
+            # use it in our composite key. If the layer name changes, it's OK to treat it as a
+            # different resource.
+            # We however don't use the title for other types of resources, because it is more
+            # likely to be editorialized, and therefore change over time while still describing
+            # the same resource.
+            fields["title"] = title
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
+
     resource.filetype = "remote"
-    resource.title = title_from_rdf(distrib, url)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
-    resource.format = format_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
         resource.schema = schema
@@ -778,6 +812,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+
     if is_additionnal:
         resource.type = "other"
     elif distrib.value(DCAT.accessService):

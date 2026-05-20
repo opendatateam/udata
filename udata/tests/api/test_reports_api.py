@@ -7,7 +7,9 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.discussions.models import Discussion, Message
 from udata.core.reports.constants import (
+    REASON_AUTO_SPAM,
     REASON_ILLEGAL_CONTENT,
     REASON_SPAM,
     reports_reasons_translations,
@@ -126,6 +128,27 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(REASON_SPAM, reports[1]["reason"])
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
+
+    def test_reports_api_create_with_user_subject(self):
+        user = UserFactory()
+
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "subject": {
+                    "class": "User",
+                    "id": user.id,
+                },
+                "message": "Spam profile",
+                "reason": REASON_SPAM,
+            },
+        )
+        self.assert201(response)
+
+        report = Report.objects.first()
+        self.assertEqual(report.subject.pk, user.id)
+        self.assertEqual(report.reason, REASON_SPAM)
+        self.assertEqual(report.subject_label, user.slug)
 
     def test_reports_api_list_with_raw_dbref_subject(self):
         """Listing reports should not crash when the subject was stored as a raw DBRef
@@ -515,3 +538,45 @@ class ReportsAPITest(APITestCase):
         report_on_discussion.reload()
         self.assertIsNone(report_on_discussion.subject_deleted_at)
         self.assertIsNone(report_on_discussion.subject_deleted_by)
+
+    def test_reports_api_callbacks_count_returned_in_response(self):
+        """The API should return the callbacks count, not the full callbacks dict."""
+        admin = AdminFactory()
+        user = UserFactory()
+
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="Test", discussion=[message]
+        )
+
+        report = Report(
+            subject=discussion,
+            reason=REASON_AUTO_SPAM,
+            callbacks={"signal_new": {"args": [], "kwargs": {}}},
+        ).save()
+
+        self.login(admin)
+
+        # GET single report — should have count, not the full dict
+        response = self.get(url_for("api.report", report=report))
+        self.assert200(response)
+        self.assertNotIn("callbacks", response.json)
+        self.assertEqual(response.json["callbacks_count"], 1)
+
+        # GET list
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        self.assertNotIn("callbacks", response.json["data"][0])
+        self.assertEqual(response.json["data"][0]["callbacks_count"], 1)
+
+        # PATCH dismiss — callbacks are executed and cleared
+        response = self.patch(
+            url_for("api.report", report=report),
+            {"dismissed_at": datetime.now(UTC).isoformat()},
+        )
+        self.assert200(response)
+        self.assertEqual(response.json["callbacks_count"], 0)
+
+        report.reload()
+        self.assertEqual(report.callbacks, {})

@@ -399,9 +399,15 @@ class MembershipRequestAPI(API):
                 return [
                     r
                     for r in org.requests
-                    if (r.status == args["status"] and str(r.user.id) == args["user"])
+                    if (
+                        r.status == args["status"]
+                        and r.user is not None
+                        and str(r.user.id) == args["user"]
+                    )
                 ]
-            return [r for r in org.requests if str(r.user.id) == args["user"]]
+            return [
+                r for r in org.requests if r.user is not None and str(r.user.id) == args["user"]
+            ]
         org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
