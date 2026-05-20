@@ -122,7 +122,11 @@ class Message(SpamMixin, EmbeddedDocument):
         return message
 
 
-@generate_fields()
+@generate_fields(
+    searchable=True,
+    default_sort="-created",
+    additional_sorts=[{"key": "discussion.posted_on", "value": "discussion.posted_on"}],
+)
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
@@ -146,7 +150,7 @@ class Discussion(SpamMixin, Linkable, Document):
         nested_fields=api.model_reference,
         description="The discussion target object",
     )
-    title = field(StringField(required=True), description="The discussion title")
+    title = field(StringField(required=True), sortable=True, description="The discussion title")
     discussion = field(
         ListField(EmbeddedDocumentField(Message)),
         readonly=True,
@@ -155,11 +159,13 @@ class Discussion(SpamMixin, Linkable, Document):
     created = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
+        sortable=True,
         description="The discussion creation date",
     )
     closed = field(
         DateTimeField(),
         readonly=True,
+        sortable=True,
         allow_null=True,
         description="The discussion closing date",
     )
