@@ -25,6 +25,7 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.checks import check_is_email
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -482,8 +483,6 @@ class Organization(
             raise FieldValidationError(field="user", message="Either user or email is required")
 
         if email:
-            from udata.core.contact_point.models import check_is_email
-
             check_is_email(email, field="email")
 
         if role not in ORG_ROLES:

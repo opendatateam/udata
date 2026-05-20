@@ -19,7 +19,6 @@ from mongoengine.fields import (
     StringField,
 )
 from mongoengine.signals import post_save, pre_save
-from urlextract import URLExtract
 from werkzeug.utils import cached_property
 
 from udata.api import api
@@ -27,6 +26,7 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
+from udata.core.checks import check_is_email, check_no_urls
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
@@ -37,7 +37,6 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 from udata.mongo.document import UDataDocument as Document
-from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
@@ -97,14 +96,6 @@ def _visible_password_rotation_performed(user):
     return None
 
 
-_url_extractor = URLExtract()
-
-
-def check_no_urls(value, field, **_kwargs):
-    if value and _url_extractor.find_urls(value):
-        raise FieldValidationError(_("URLs not allowed in this field"), field=field)
-
-
 # TODO: use simple text for role
 class Role(Document, RoleMixin):
     ADMIN = "admin"
@@ -131,6 +122,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     email = field(
         StringField(max_length=255, required=True, unique=True),
         attribute=_visible_email,
+        checks=[check_is_email],
     )
     password = StringField()
     # Admin-only writable, handled manually in the admin endpoints.

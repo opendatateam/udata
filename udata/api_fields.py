@@ -483,6 +483,11 @@ def generate_fields(**kwargs) -> Callable:
             api_key = info.get("rename") or key
             if api_key != key:
                 api_key_to_attribute[api_key] = key
+                # The read field is stored under the renamed API key, so without an
+                # explicit `attribute` flask-restx would resolve the value from a
+                # non-existent `api_key` attribute and always serialize null.
+                if read is not None and read.attribute is None:
+                    read.attribute = key
 
             if read:
                 read_fields[api_key] = read
