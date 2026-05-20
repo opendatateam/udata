@@ -61,6 +61,7 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
 )
+from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -498,7 +499,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.acronym == acronym
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
-        assert set(dataset.tags) == set(tags)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags}
         assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
@@ -790,7 +791,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         dataset.validate()
 
         assert isinstance(dataset, Dataset)
-        assert set(dataset.tags) == set(tags + themes)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags + themes}
 
     def test_keyword_as_uriref(self):
         """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
