@@ -22,7 +22,6 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api import api
-from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
@@ -468,25 +467,18 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 datastore = MongoEngineUserDatastore(db, User, Role)
 
 
-# Extended User reference exposing `email` and `last_login_at` with the same
-# visibility logic as on the full User read fields. Used in contexts where org
+# Extended User reference exposing `email` and `last_login_at`. Reuses the
+# generated read fields (keeping their `_visible_email`/`_visible_login_date`
+# visibility logic) instead of redeclaring them. Used in contexts where org
 # admins/editors are allowed to see member contact info — e.g. organization
-# `members` and `requests`. Kept off the default `__ref_fields__` so it doesn't
-# leak in activity/follow/post nested user references.
+# `members` and `requests`. These fields are kept off the default `__ref_fields__`
+# so they don't leak in activity/follow/post nested user references.
 user_with_email_ref_fields = api.inherit(
     "UserReferenceWithEmail",
     User.__ref_fields__,
     {
-        "email": api_fields.String(
-            attribute=_visible_email,
-            description="The user email (visible to org members and admins/self)",
-            readonly=True,
-        ),
-        "last_login_at": api_fields.ISODateTime(
-            attribute=_visible_login_date,
-            description="The user's most recent login date (visible to org members and admins/self)",
-            readonly=True,
-        ),
+        "email": User.__read_fields__["email"],
+        "last_login_at": User.__read_fields__["last_login_at"],
     },
 )
 

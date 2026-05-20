@@ -26,7 +26,7 @@ from udata.core.storages import tmp
 from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectField
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
-from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.models import ContactPoint, Dataset, Organization, Reuse, User, db
 from udata.mongo.datetime_fields import DateField as MongoDateField
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.extras_fields import ExtrasField as MongoExtrasField
@@ -167,19 +167,6 @@ class DateField(WTFDateTimeField):
         super(DateField, self).process_formdata(valuelist)
         if self.data is not None and hasattr(self.data, "date"):
             self.data = self.data.date()
-
-
-class RolesField(Field):
-    def process_formdata(self, valuelist):
-        self.data = []
-        for name in valuelist:
-            role = datastore.find_role(name)
-            if role is not None:
-                self.data.append(role)
-            else:
-                raise validators.ValidationError(
-                    _("The role {role} does not exist").format(role=name)
-                )
 
 
 class DateTimeField(Field, WTFDateTimeField):

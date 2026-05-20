@@ -310,6 +310,33 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert403(response)
 
+    def test_user_api_create_with_roles_and_active(self):
+        """An admin should be able to set roles and active when creating a user"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["admin"],
+            "active": False,
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert201(response)
+        self.assertEqual(response.json["roles"], ["admin"])
+        self.assertFalse(response.json["active"])
+
+    def test_user_api_create_with_a_non_existing_role(self):
+        """It should raise a 400 when creating a user with an unknown role"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["non_existing_role"],
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
