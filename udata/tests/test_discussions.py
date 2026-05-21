@@ -560,6 +560,33 @@ class DiscussionsTest(APITestCase):
             # Clean slate
             Discussion.objects.delete()
 
+    def test_list_discussions_sort_by_message_posted_on(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+
+        older = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="older", posted_by=user, posted_on=datetime(2023, 1, 1, tzinfo=UTC))
+            ],
+        )
+        newer = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="newer", posted_by=user, posted_on=datetime(2024, 1, 1, tzinfo=UTC))
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", sort="discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(older.id), str(newer.id)])
+
+        response = self.get(url_for("api.discussions", sort="-discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(newer.id), str(older.id)])
+
     def test_list_discussions_user(self):
         dataset = DatasetFactory()
         discussions = []
@@ -801,6 +828,26 @@ class DiscussionsTest(APITestCase):
             )
             self.assert200(response)
 
+    def test_close_discussion_on_behalf_of_org(self):
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": True, "organization": org.id},
+        )
+        self.assert200(response)
+        assert response.json["closed_by"]["id"] == str(user.id)
+        assert response.json["closed_by_organization"]["id"] == str(org.id)
+
+        discussion.reload()
+        assert discussion.closed_by_organization == org
+
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
         user = UserFactory()
@@ -999,6 +1046,23 @@ class DiscussionsTest(APITestCase):
             {"title": "not allowed"},
         )
         self.assertStatus(response, 403)
+
+    def test_edit_discussion_title_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {"title": ""})
+        self.assert400(response)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {})
+        self.assert400(response)
+
+        discussion.reload()
+        assert discussion.title == "test discussion"
 
     def test_edit_discussion_comment(self):
         admin = self.login(AdminFactory())
