@@ -95,7 +95,18 @@ class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
-        self.fields_by_type = fields_by_type
+        # `fields_by_type` may be a callable resolved lazily on first use (and then
+        # memoized). This lets generic embedded lists discover their subclasses at
+        # marshalling time rather than at class-decoration time, when the subclass
+        # registry can still be incomplete because of import ordering / cycles
+        # (e.g. `Organization.blocs`, decorated before the `Bloc` subclasses are loaded).
+        self._fields_by_type = fields_by_type
+
+    @property
+    def fields_by_type(self):
+        if callable(self._fields_by_type):
+            self._fields_by_type = self._fields_by_type()
+        return self._fields_by_type
 
     def format(self, value):
         # Value is one of the generic object
@@ -206,26 +217,29 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         generic = info.get("generic", False)
 
-        allowed_classes = (
-            classes_by_parents[field.field.document_type_obj]
-            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
-            and field.field.document_type_obj in classes_by_parents
-            else set()
-        )
-        if generic and allowed_classes:
-            generic_fields = {
-                cls.__name__: convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
-                    mongoengine.fields.EmbeddedDocumentField(cls),
-                    nested_info,
-                )
-                for cls in allowed_classes
-            }
+        if generic and isinstance(field.field, mongoengine.fields.EmbeddedDocumentField):
+            # Resolve the allowed subclasses lazily (at marshalling time) rather than now.
+            # `classes_by_parents` is populated as each subclass module is imported, and an
+            # import cycle can decorate the parent before its subclasses are registered
+            # (e.g. `Organization.blocs`). Deferring the lookup to the first marshalling —
+            # which happens from the API layer, after every model is loaded — guarantees the
+            # registry is complete, instead of falling back to the bare `{id}` parent model.
+            parent = field.field.document_type_obj
 
-            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
-            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+            def generic_fields():
+                return {
+                    cls.__name__: convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        mongoengine.fields.EmbeddedDocumentField(cls),
+                        nested_info,
+                    )
+                    for cls in classes_by_parents.get(parent, set())
+                }
+
+            field_read = GenericField(lambda: {k: v[0].model for k, v in generic_fields().items()})
+            field_write = GenericField(lambda: {k: v[1].model for k, v in generic_fields().items()})
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
