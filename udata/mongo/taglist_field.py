@@ -1,5 +1,4 @@
 from mongoengine.fields import ListField, StringField
-from slugify import slugify
 
 from udata import tags
 from udata.i18n import lazy_gettext as _
@@ -20,7 +19,7 @@ class TagListField(ListField):
             return []
 
     def clean(self, value):
-        return sorted(list(set([slugify(v, to_lower=True) for v in value])))
+        return sorted({n for n in (tags.normalize(v) for v in value) if n})
 
     def to_python(self, value):
         return super(TagListField, self).to_python(self.clean(value))
@@ -29,6 +28,8 @@ class TagListField(ListField):
         return super(TagListField, self).to_mongo(self.clean(value))
 
     def validate(self, values):
+        if values is not None:
+            values[:] = self.clean(values)
         super(TagListField, self).validate(values)
 
         for tag in values:
