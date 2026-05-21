@@ -1,3 +1,5 @@
+import os
+import sys
 from datetime import datetime
 from os.path import join
 from sys import exit
@@ -9,6 +11,25 @@ from invoke import task
 from .helpers import ROOT, header, info, success
 
 I18N_DOMAIN = "udata"
+
+
+# Diagnostic probe: see PR #3783 — investigating an invoke v3 TTY crash
+# that hit one PR 100% but not others. Fires once at module import,
+# captures fd 0 properties so we can compare runs.
+try:
+    _pgrp = f"tcgetpgrp(0)={os.tcgetpgrp(0)}"
+except OSError as _e:
+    _pgrp = f"tcgetpgrp(0) FAILS: {_e}"
+try:
+    _mode = f"mode=0o{os.fstat(0).st_mode:o}"
+except OSError as _e:
+    _mode = f"fstat: {_e}"
+print(
+    f"[stdin-diag] sys.stdin.isatty()={sys.stdin.isatty()} "
+    f"os.isatty(0)={os.isatty(0)} getpgrp()={os.getpgrp()} {_pgrp} fd0 {_mode}",
+    file=sys.stderr,
+    flush=True,
+)
 
 
 @task
