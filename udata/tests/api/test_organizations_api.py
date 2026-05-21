@@ -11,7 +11,7 @@ from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.edito_blocs.models import MarkdownBloc
+from udata.core.edito_blocs.models import AccordionItemBloc, AccordionListBloc, MarkdownBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -321,6 +321,59 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         data["blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
+        org.reload()
+        assert org.blocs == []
+
+    def test_accordion_blocs_serialized_recursively(self):
+        """A generic bloc nested inside an accordion item must serialize with its concrete
+        class and fields. This exercises the generic resolution at two levels
+        (`Organization.blocs` -> `AccordionItemBloc.content`), which is the path most
+        affected by resolving the allowed subclasses at marshalling time."""
+        org = OrganizationFactory(
+            blocs=[
+                AccordionListBloc(
+                    title="FAQ",
+                    items=[
+                        AccordionItemBloc(
+                            title="Question",
+                            content=[MarkdownBloc(title="Answer", content="**Hello**")],
+                        )
+                    ],
+                )
+            ]
+        )
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        accordion = response.json["blocs"][0]
+        assert accordion["class"] == "AccordionListBloc"
+        assert accordion["title"] == "FAQ"
+        item = accordion["items"][0]
+        assert item["title"] == "Question"
+        nested = item["content"][0]
+        assert nested["class"] == "MarkdownBloc"
+        assert nested["title"] == "Answer"
+        assert nested["content"] == "**Hello**"
+
+    def test_accordion_rejects_disallowed_nested_blocs(self):
+        """`check_no_recursive_blocs` forbids nesting an accordion (or hero) inside an
+        accordion item, both on the model and through the API write path."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data = org.to_dict()
+        data["blocs"] = [
+            {
+                "class": "AccordionListBloc",
+                "title": "FAQ",
+                "items": [
+                    {"title": "Question", "content": [{"class": "HeroBloc", "title": "nope"}]}
+                ],
+            }
+        ]
+        response = self.put(url_for("api.organization", org=org), data)
+        assert400(response)
         org.reload()
         assert org.blocs == []
 
