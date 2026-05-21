@@ -1,9 +1,12 @@
 import time
 
 import pytest
+import requests_mock
+import yaml
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.search import _fetch_and_parse_documentation
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization import constants as org_constants
@@ -29,6 +32,7 @@ class SearchIntegrationTest(APITestCase):
         es_client = get_elastic_client()
         es_client.es.indices.delete(index="udata-test-*", ignore=[404])
         es_client.init_indices()
+        _fetch_and_parse_documentation.cache_clear()
         yield
 
     def test_dataset_fuzzy_search(self):
@@ -144,6 +148,83 @@ class SearchIntegrationTest(APITestCase):
         response = self.get("/api/2/dataservices/search/?q=transports")
         self.assert200(response)
         assert response.json["total"] == 0
+
+    def test_dataservice_swagger_indexing(self):
+        """Search should surface a dataservice via terms only present in its swagger.
+
+        Reproduces the "transfert de siège" bouquet case (issue data.gouv.fr#1905):
+        the term lives deep in a shared OpenAPI spec, well past the old 100 KB
+        truncation cap, AND must be scoped to the right bouquet fiche.
+        """
+        swagger_url = "https://example.com/openapi.yml"
+        spec = {
+            "openapi": "3.0.1",
+            "info": {"title": "API Entreprise"},
+            "paths": {
+                "/v3/insee/sirene/etablissements/{siret}/successions": {
+                    "get": {
+                        "summary": "Liens de succession",
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "transfert_siege": {
+                                                    "title": "Transfert de siège",
+                                                    "description": (
+                                                        "Indique si la succession est "
+                                                        "un transfert de siège"
+                                                    ),
+                                                }
+                                            },
+                                        }
+                                    }
+                                },
+                            }
+                        },
+                    }
+                },
+                "/v3/fntp/unites_legales/{siren}/carte_professionnelle_travaux_publics": {
+                    "get": {
+                        "summary": "Carte professionnelle travaux publics",
+                        "responses": {"200": {"description": "OK"}},
+                    }
+                },
+            },
+        }
+
+        with requests_mock.Mocker() as rmock:
+            rmock.get(swagger_url, text=yaml.safe_dump(spec, allow_unicode=True))
+
+            # The "succession" fiche: should match "transfert de siège" via swagger.
+            succession = DataserviceFactory(
+                title="API Liens de succession - Insee | Bouquet API Entreprise",
+                machine_documentation_url=swagger_url,
+            )
+            # The "travaux publics" fiche: shares the swagger but should NOT match.
+            travaux = DataserviceFactory(
+                title="API Carte professionnelle travaux publics - FNTP | Bouquet API Entreprise",
+                machine_documentation_url=swagger_url,
+            )
+
+        time.sleep(1)
+
+        try:
+            response = self.get("/api/2/dataservices/search/?q=transfert+de+siege")
+            self.assert200(response)
+            titles = [d["title"] for d in response.json["data"]]
+            assert succession.title in titles
+            assert travaux.title not in titles, (
+                "Bouquet fiche scoping failed: 'travaux publics' fiche matched a term "
+                "from a sibling endpoint in the shared swagger"
+            )
+        finally:
+            succession.delete()
+            travaux.delete()
+            time.sleep(1)
 
     def test_organization_search(self):
         """Test organization search endpoint."""
