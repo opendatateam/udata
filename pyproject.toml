@@ -30,8 +30,6 @@ dependencies = [
     "authlib>=1.5.1,<2.0.0",
     "awesome-slugify>=1.6.5,<2.0.0",
     "babel>=2.17.0,<3.0.0",
-    # bcrypt 5.0 doesn't support truncating password of more than 72 bytes
-    # used somewhere in flask-security I think? Maybe see after updating flask and flask-security
     "bcrypt>=5.0.0,<5.1.0",
     "bleach[css]>=6.2.0,<7.0.0",
     "blinker>=1.5,<2.0",
