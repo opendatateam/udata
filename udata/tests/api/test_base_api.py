@@ -1,3 +1,4 @@
+import pytest
 from flask import url_for
 
 from udata.api import API, api
@@ -25,6 +26,7 @@ class FakeFormAPI(API):
 
 
 class OptionsCORSTest(APITestCase):
+    @pytest.mark.options(CORS_ALLOWED_ORIGINS=["http://localhost"])
     def test_should_allow_options_and_cors(self):
         """Should allow OPTIONS operation and give cors parameters"""
         response = self.options(
