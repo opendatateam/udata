@@ -11,6 +11,7 @@ from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, prefetch_blocs_references
 from udata.core.organization.api import OrgApiParser
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
@@ -34,6 +35,10 @@ class SiteAPI(API):
     @api.marshal_with(Site.__read_fields__)
     def get(self):
         """Site-wide variables"""
+        # Batch-load the references embedded in blocs to avoid N+1 dereferencing
+        # (one query per card's organization) when marshalling the response. Skipped
+        # when the response mask excludes blocs (the default `/site/` response).
+        prefetch_blocs_references(Site, current_site, *SITE_BLOCS_FIELDS)
         return current_site
 
     @api.secure(admin_permission)
