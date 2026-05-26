@@ -29,6 +29,16 @@ from .factories import HarvestJobFactory, HarvestSourceFactory, MockBackendsMixi
 log = logging.getLogger(__name__)
 
 
+def assert_preview_datasets_have_no_link(response):
+    """A preview lists datasets that are not persisted yet: it must not expose links
+    (page/API URL) pointing to resources that do not exist."""
+    datasets = [item["dataset"] for item in response.json["items"] if item["dataset"] is not None]
+    assert datasets
+    for dataset in datasets:
+        assert dataset["uri"] is None
+        assert dataset["page"] is None
+
+
 class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
     def test_list_backends(self):
         """It should fetch the harvest backends list from the API"""
@@ -483,6 +493,8 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         response = self.get(url)
         assert200(response)
 
+        assert_preview_datasets_have_no_link(response)
+
     @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
     def test_run_source(self, mocker: MockerFixture):
         launch = mocker.patch.object(actions.harvest, "delay")
@@ -557,6 +569,8 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         data = {"name": faker.word(), "url": faker.url(), "backend": "factory"}
         response = self.post(url_for("api.preview_harvest_source_config"), data)
         assert200(response)
+
+        assert_preview_datasets_have_no_link(response)
 
     def test_delete_source(self):
         user = self.login()
