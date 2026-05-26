@@ -61,6 +61,7 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
 )
+from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -498,7 +499,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.acronym == acronym
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
-        assert set(dataset.tags) == set(tags)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags}
         assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
@@ -790,7 +791,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         dataset.validate()
 
         assert isinstance(dataset, Dataset)
-        assert set(dataset.tags) == set(tags + themes)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags + themes}
 
     def test_keyword_as_uriref(self):
         """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
@@ -807,6 +808,28 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert "literal-tag" in dataset.tags
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_dirty_keyword_does_not_abort_validation(self, app):
+        """Regression test: a dirty dcat:keyword (punctuation-only, too short or
+        too long) must be normalized away instead of aborting the whole document.
+
+        Harvesters set keywords by attribute (`dataset.tags = themes_from_rdf(d)`),
+        which bypasses TagListField.clean(). Before the fix, a single bad keyword
+        raised at the Mongo-level validator, losing the dataset and its resources.
+        """
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        for keyword in ["valid-tag", "&", "df", "waytoolongkeyword"]:
+            g.add((node, DCAT.keyword, Literal(keyword)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()  # Must not raise.
+
+        assert set(dataset.tags) == {"valid-tag", "waytoolong"}
 
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None

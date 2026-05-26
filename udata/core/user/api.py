@@ -24,7 +24,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.constants import BIGGEST_AVATAR_SIZE
-from udata.core.user.models import Role
+from udata.core.user.models import Role, _visible_login_date
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
@@ -68,8 +68,11 @@ user_fields = api.model(
             attribute="created_at", description="The registeration date", required=True
         ),
         "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
-            description="The user last connection date (only present for global admins and on /me)",
+            attribute=_visible_login_date,
+            description=(
+                "The user's most recent login date (present for global admins, on /me, "
+                "and for organization members in their org context)"
+            ),
             readonly=True,
         ),
         "password_rotation_demanded": fields.Raw(

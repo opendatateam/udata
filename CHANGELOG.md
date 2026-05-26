@@ -1,5 +1,16 @@
 # Changelog
 
+## 16.5.0 (2026-05-18)
+
+- chore(deps): update dependency faker to >=40.18, <40.19 ([#3769](https://github.com/opendatateam/udata/pull/3769))
+- chore(deps): update dependency faker to v40 ([#3742](https://github.com/opendatateam/udata/pull/3742))
+- chore(deps): update dependency invoke to v3 ([#3744](https://github.com/opendatateam/udata/pull/3744))
+- feat: send notifications for a new reuse and dataservice on one of your datasets ([#3763](https://github.com/opendatateam/udata/pull/3763))
+- feat: upgrade dependencies
+- fix(deps): update dependency importlib-resources to v7 ([#3747](https://github.com/opendatateam/udata/pull/3747))
+- fix: missing last_login_at in org members response ([#3766](https://github.com/opendatateam/udata/pull/3766))
+
+
 ## 16.4.0 (2026-05-07)
 
 - feat: ask user password rotation via API ([#3762](https://github.com/opendatateam/udata/pull/3762))
