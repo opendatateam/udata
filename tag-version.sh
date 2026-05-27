@@ -309,13 +309,11 @@ fi
 echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
 
 # Update publiccode.yml
-if [ -f "publiccode.yml" ]; then
-    sed -i "s/^softwareVersion: .*/softwareVersion: v$VERSION/" publiccode.yml
-    sed -i "s/^releaseDate: .*/releaseDate: '$DATE'/" publiccode.yml
-    echo "publiccode.yml updated: softwareVersion=v$VERSION, releaseDate=$DATE"
-else
-    echo "Warning: publiccode.yml not found, skipping update"
-fi
+sed -e "s/^softwareVersion: .*/softwareVersion: v$VERSION/" \
+    -e "s/^releaseDate: .*/releaseDate: '$DATE'/" \
+    publiccode.yml > publiccode.yml.tmp
+mv publiccode.yml.tmp publiccode.yml
+echo "publiccode.yml updated: softwareVersion=v$VERSION, releaseDate=$DATE"
 
 if [ "$EDIT_CHANGELOG" = true ]; then
     ${EDITOR:-vi} CHANGELOG.md
