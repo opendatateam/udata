@@ -525,9 +525,7 @@ def spatial_from_rdf(graph):
                 if isinstance(object, Literal):
                     if object.datatype in (
                         GEOSPARQL.geoJSONLiteral,
-                        URIRef(  # older
-                            "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
-                        ),
+                        IANAFORMAT["application/vnd.geo+json"], #older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
