@@ -1080,6 +1080,25 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             assert "tes" in suggestion["name"]
             assert response.json[0]["id"] == str(max_follower_organization.id)
 
+    def test_suggest_organizations_only_with_dataservices(self):
+        """With dataservices=true, only orgs that have at least one API are suggested"""
+        with_api = OrganizationFactory(name="test-with-api", metrics={"dataservices": 2})
+        OrganizationFactory(name="test-no-api", metrics={"dataservices": 0})
+        OrganizationFactory(name="test-unset-api")  # no dataservices metric at all
+
+        # Without the flag, all three matching orgs are returned (regression guard).
+        response = self.get(url_for("api.suggest_organizations", q="test", size=5))
+        assert200(response)
+        assert len(response.json) == 3
+
+        # With the flag, only the org that has APIs is returned.
+        response = self.get(
+            url_for("api.suggest_organizations", q="test", size=5, dataservices="true")
+        )
+        assert200(response)
+        returned_ids = [org["id"] for org in response.json]
+        assert returned_ids == [str(with_api.id)]
+
     def test_suggest_organizations_with_special_chars(self):
         """It should suggest organizations with special caracters"""
         for i in range(4):
