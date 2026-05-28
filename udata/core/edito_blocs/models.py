@@ -1,6 +1,12 @@
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
-from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
+from mongoengine.fields import (
+    EmbeddedDocumentListField,
+    ListField,
+    ReferenceField,
+    StringField,
+    UUIDField,
+)
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
@@ -107,6 +113,13 @@ class MarkdownBloc(Bloc):
         StringField(required=True),
         markdown=True,
     )
+
+
+@generate_fields()
+class ExploreBloc(Bloc):
+    title = field(StringField())
+    subtitle = field(StringField())
+    resource_id = field(UUIDField(required=True, binary=False))
 
 
 BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
