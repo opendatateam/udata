@@ -261,7 +261,7 @@ class CkanBackend(BaseBackend):
             if res["resource_type"] not in ALLOWED_RESOURCE_TYPES:
                 continue
             try:
-                resource = get_by(dataset.resources, "id", UUID(res["id"]))
+                resource = get_by(dataset.resources, id=UUID(res["id"]))
             except Exception:
                 log.error("Unable to parse resource ID %s", res["id"])
                 continue

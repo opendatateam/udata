@@ -9,6 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
+from udata.mongo.taglist_field import TagListField
 from udata.tags import normalize, slug, tags_list
 from udata.tests import PytestOnlyTestCase
 from udata.tests.helpers import assert200
@@ -105,3 +106,24 @@ class TagsUtilsTest(PytestOnlyTestCase):
         assert normalize("aaa") == "aaa"
         assert normalize("aaaaaaaaaaa") == "aaaaaaaaaa"
         assert normalize("aAa a") == "aaa-a"
+
+
+class TagListFieldCleanTest(PytestOnlyTestCase):
+    def test_clean_drops_values_normalizing_to_empty(self):
+        assert TagListField().clean(["valid", "", "   ", "--", "&", "df", "a"]) == ["valid"]
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_clean_truncates_too_long_tags(self, app):
+        assert TagListField().clean(["aaaaaaaaaaaaaaa"]) == ["aaaaaaaaaa"]
+
+    def test_clean_preserves_valid_tags(self):
+        assert TagListField().clean(["Open Data", "Élégant", "open-data"]) == [
+            "elegant",
+            "open-data",
+        ]
+
+    def test_validate_drops_invalid_tags_from_harvester_input(self):
+        dataset = DatasetFactory.build(tags=["valid"])
+        dataset.tags = ["valid", "", "   ", "--", "df", "Open Data"]
+        dataset.validate()
+        assert dataset.tags == ["open-data", "valid"]

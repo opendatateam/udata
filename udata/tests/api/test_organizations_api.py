@@ -353,6 +353,43 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
 
+    def test_get_membership_requests_filtered_by_user_skips_orphan_requests(self):
+        # An email invitation has no user attached (user=None). Filtering by
+        # user id must not crash on those entries (regression: AttributeError
+        # 'NoneType' object has no attribute 'id').
+        applicant = self.login()
+        orphan_invitation = MembershipRequest(user=None, email="invited@example.org")
+        applicant_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(
+            members=[], requests=[orphan_invitation, applicant_request]
+        )
+
+        response = self.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id)},
+        )
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["comment"] == "test"
+
+    def test_get_membership_requests_filtered_by_user_and_status_skips_orphan_requests(self):
+        # Same regression as above but on the branch where ``status`` is also
+        # provided — both list comprehensions must guard against r.user=None.
+        applicant = self.login()
+        orphan_invitation = MembershipRequest(user=None, email="invited@example.org")
+        applicant_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(
+            members=[], requests=[orphan_invitation, applicant_request]
+        )
+
+        response = self.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id), "status": "pending"},
+        )
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["comment"] == "test"
+
     @pytest.mark.parametrize(
         "searched_status",
         [
@@ -440,6 +477,47 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert members[1]["role"] == "editor"
         assert members[1]["user"]["email"] == "editor@example.org"
+
+    def test_get_members_last_login_at(self):
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        admin = Member(user=UserFactory(current_login_at=last_login), role="admin")
+        editor = Member(user=UserFactory(current_login_at=last_login), role="editor")
+        other = UserFactory()
+
+        organization = OrganizationFactory(members=[admin, editor])
+
+        # Organization admin sees last_login_at for each member
+        self.login(admin.user)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
+        assert "current_login_at" not in members[0]["user"]
+
+        # Organization editor also sees last_login_at
+        self.login(editor.user)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
+
+        # Non-member user does not see last_login_at
+        self.login(other)
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is None
+        assert members[1]["user"]["last_login_at"] is None
+
+        # Sysadmin sees last_login_at
+        self.login(AdminFactory())
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        members = response.json["members"]
+        assert members[0]["user"]["last_login_at"] is not None
+        assert members[1]["user"]["last_login_at"] is not None
 
     def test_accept_membership(self):
         user = self.login()

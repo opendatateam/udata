@@ -1,7 +1,7 @@
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.organization.models import Organization
-from udata.core.user.models import _visible_email
+from udata.core.user.models import _visible_email, _visible_login_date
 
 from .constants import BIGGEST_AVATAR_SIZE
 
@@ -63,8 +63,31 @@ user_fields = api.model(
             attribute="created_at", description="The registeration date", required=True
         ),
         "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
-            description="The user last connection date (only present for global admins and on /me)",
+            attribute=_visible_login_date,
+            description=(
+                "The user's most recent login date (present for global admins, on /me, "
+                "and for organization members in their org context)"
+            ),
+            readonly=True,
+        ),
+        "password_rotation_demanded": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_demanded if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which a password rotation was requested for this user "
+                "(only present for global admins and on /me)"
+            ),
+            readonly=True,
+        ),
+        "password_rotation_performed": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_performed if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which the user performed the requested password rotation "
+                "(only present for global admins and on /me)"
+            ),
             readonly=True,
         ),
         "uri": fields.String(

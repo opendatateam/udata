@@ -5,14 +5,14 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD
+from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD, Namespace
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -21,6 +21,7 @@ from udata.core.dataset.models import (
     HarvestResourceMetadata,
     License,
     Resource,
+    SpatialCoverage,
 )
 from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
@@ -38,6 +39,7 @@ from udata.core.dataset.rdf import (
     resource_from_rdf,
     resource_to_rdf,
     rights_to_rdf,
+    spatial_from_rdf,
     temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -51,7 +53,9 @@ from udata.rdf import (
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
+    LOCN,
     SCHEMA,
     SKOS,
     SPDX,
@@ -61,6 +65,7 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
 )
+from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -88,6 +93,14 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
    </rdf:Description>
 </rdf:RDF>
 """
+
+
+def _to_geojson(coords):
+    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+
+
+def _to_wkt(coords):
+    return f"""Polygon(({", ".join([f"{x} {y}" for x, y in coords])}))"""
 
 
 class DatasetToRdfTest(PytestOnlyAPITestCase):
@@ -498,7 +511,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.acronym == acronym
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
-        assert set(dataset.tags) == set(tags)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags}
         assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
@@ -790,7 +803,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         dataset.validate()
 
         assert isinstance(dataset, Dataset)
-        assert set(dataset.tags) == set(tags + themes)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags + themes}
 
     def test_keyword_as_uriref(self):
         """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
@@ -807,6 +820,28 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert "literal-tag" in dataset.tags
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_dirty_keyword_does_not_abort_validation(self, app):
+        """Regression test: a dirty dcat:keyword (punctuation-only, too short or
+        too long) must be normalized away instead of aborting the whole document.
+
+        Harvesters set keywords by attribute (`dataset.tags = themes_from_rdf(d)`),
+        which bypasses TagListField.clean(). Before the fix, a single bad keyword
+        raised at the Mongo-level validator, losing the dataset and its resources.
+        """
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        for keyword in ["valid-tag", "&", "df", "waytoolongkeyword"]:
+            g.add((node, DCAT.keyword, Literal(keyword)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()  # Must not raise.
+
+        assert set(dataset.tags) == {"valid-tag", "waytoolong"}
 
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None
@@ -1057,6 +1092,48 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(resource, Resource)
         assert resource.title == new_title
         assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_and_title(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(existing_resource.title)))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_only(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(faker.sentence())))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id != existing_resource.id
 
     def test_can_extract_from_rdf_resource(self):
         node = BNode()
@@ -1349,6 +1426,114 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert temporal_from_rdf(g.resource(node)) is None
         assert temporal_from_rdf(Literal("unparseable")) is None
+
+    @pytest.mark.parametrize(
+        "node_type, geom_type, datatype, serialize",
+        (
+            pytest.param(*params, id=id)
+            for id, *params in [
+                (
+                    "bbox-geojson",
+                    DCT.Location,
+                    DCAT.bbox,
+                    GEOSPARQL.geoJSONLiteral,
+                    _to_geojson,
+                ),
+                (  # replaced by GEOSPARQL.geoJSONLiteral
+                    "bbox-geojson-deprecated",
+                    DCT.Location,
+                    DCAT.bbox,
+                    "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
+                    _to_geojson,
+                ),
+                (
+                    "bbox-wkt",
+                    DCT.Location,
+                    DCAT.bbox,
+                    GEOSPARQL.wktLiteral,
+                    _to_wkt,
+                ),
+                (
+                    "geometry-geojson",
+                    DCT.Location,
+                    LOCN.geometry,
+                    GEOSPARQL.geoJSONLiteral,
+                    _to_geojson,
+                ),
+                (
+                    "geometry-wkt",
+                    DCT.Location,
+                    LOCN.geometry,
+                    GEOSPARQL.wktLiteral,
+                    _to_wkt,
+                ),
+                (  # old GeoNetwork dcat exposition
+                    "polygon-geometry",
+                    Namespace("http://www.opengis.net/rdf#").Polygon,
+                    LOCN.geometry,
+                    "http://www.opengis.net/rdf#wktLiteral",
+                    _to_wkt,
+                ),
+                (  # old GeoNetwork dcat exposition
+                    "polygon-aswkt",
+                    Namespace("http://www.opengis.net/rdf#").Polygon,
+                    GEOSPARQL.asWKT,
+                    "http://www.opengis.net/rdf#wktLiteral",
+                    _to_wkt,
+                ),
+            ]
+        ),
+    )
+    def test_parse_spatial_geometry(self, node_type, geom_type, datatype, serialize):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        spatial = BNode()
+        g.add((spatial, RDF.type, node_type))
+        g.add((spatial, geom_type, Literal(serialize(coords), datatype=datatype)))
+        g.add((dataset, DCT.spatial, spatial))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
+
+    def test_parse_spatial_geometry_redundant(self):
+        """
+        The same coordinates should only occur once in the result, even if they are represented
+        multiple times (in different formats) in the input.
+        """
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        for geom_type in [DCAT.bbox, LOCN.geometry]:
+            for geom_coords in [
+                Literal(_to_geojson(coords), datatype=GEOSPARQL.geoJSONLiteral),
+                Literal(_to_wkt(coords), datatype=GEOSPARQL.wktLiteral),
+            ]:
+                geom = BNode()
+                g.add((geom, RDF.type, DCT.Location))
+                g.add((geom, geom_type, geom_coords))
+                g.add((dataset, DCT.spatial, geom))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
 
     def test_unicode(self):
         g = Graph()

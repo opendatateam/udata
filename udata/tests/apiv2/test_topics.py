@@ -610,6 +610,27 @@ class TopicElementsAPITest(APITestCase):
         no_elt = next(_elt for _elt in data if not _elt["element"])
         assert no_elt["element"] is None
 
+    def test_elements_list_with_nested_x_fields_mask(self):
+        """X-Fields mask should be able to traverse the `element` nested reference.
+
+        Regression test for https://github.com/opendatateam/udata/issues/3755:
+        requesting `data{id,element{id}}` returned a 400 "Mask is inconsistent
+        with model" because the GenericReferenceField was exposed as a Raw field
+        instead of a Nested model.
+        """
+        topic = TopicFactory()
+        dataset_elt = TopicElementDatasetFactory(topic=topic)
+
+        response = self.get(
+            url_for("apiv2.topic_elements", topic=topic),
+            headers={"X-Fields": "data{id,element{id}},next_page"},
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(dataset_elt.id)
+        assert data[0]["element"] == {"id": str(dataset_elt.element.id)}
+
     def test_elements_list_pagination(self):
         topic = TopicFactory()
         for i in range(DEFAULT_PAGE_SIZE + 1):

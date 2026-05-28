@@ -111,10 +111,7 @@ def rotate_password(email):
     user: User = datastore.find_user(email=email)
     if not user:
         exit_with_error(f"User {email} does not exist")
-    user.password_rotation_demanded = datetime.now(UTC)
-    user.save()
-    # Reset ongoing sessions by uniquifier
-    datastore.set_uniquifier(user)
+    user.request_password_rotation()
     success(f"Password rotated for user {email}. Last login at: {user.current_login_at or 'never'}")
 
 

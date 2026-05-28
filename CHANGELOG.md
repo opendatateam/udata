@@ -1,5 +1,28 @@
 # Changelog
 
+## 16.5.0 (2026-05-18)
+
+- chore(deps): update dependency faker to >=40.18, <40.19 ([#3769](https://github.com/opendatateam/udata/pull/3769))
+- chore(deps): update dependency faker to v40 ([#3742](https://github.com/opendatateam/udata/pull/3742))
+- chore(deps): update dependency invoke to v3 ([#3744](https://github.com/opendatateam/udata/pull/3744))
+- feat: send notifications for a new reuse and dataservice on one of your datasets ([#3763](https://github.com/opendatateam/udata/pull/3763))
+- feat: upgrade dependencies
+- fix(deps): update dependency importlib-resources to v7 ([#3747](https://github.com/opendatateam/udata/pull/3747))
+- fix: missing last_login_at in org members response ([#3766](https://github.com/opendatateam/udata/pull/3766))
+
+
+## 16.4.0 (2026-05-07)
+
+- feat: ask user password rotation via API ([#3762](https://github.com/opendatateam/udata/pull/3762))
+- feat(harvest): use distribution service protocol as format when available ([#3749](https://github.com/opendatateam/udata/pull/3749))
+- feat: use volumes for all services ([#3761](https://github.com/opendatateam/udata/pull/3761))
+- fix(harvest): csw-* harvesters fail on some XML comments ([#3758](https://github.com/opendatateam/udata/pull/3758))
+- fix(harvest): distributions of separate WFS/WMS/WMTS layers override eachother ([#3752](https://github.com/opendatateam/udata/pull/3752))
+- fix: incorrect mask on topic element ([#3756](https://github.com/opendatateam/udata/pull/3756))
+- fix: membership api with user=None ([#3754](https://github.com/opendatateam/udata/pull/3754))
+- refactor: ping on tchap ([#3750](https://github.com/opendatateam/udata/pull/3750))
+
+
 ## 16.3.0 (2026-04-27)
 
 - chore(config): migrate Renovate config ([#3743](https://github.com/opendatateam/udata/pull/3743))

@@ -1252,6 +1252,6 @@ def get_resource(id):
     """Fetch a resource given its UUID"""
     dataset = Dataset.objects(resources__id=id).first()
     if dataset:
-        return get_by(dataset.resources, "id", id)
+        return get_by(dataset.resources, id=id)
     else:
         return CommunityResource.objects(id=id).first()

@@ -33,6 +33,7 @@ from udata.rdf import (
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
     IANAFORMAT,
     OGC,
@@ -522,16 +523,19 @@ def spatial_from_rdf(graph):
 
             for object in term.objects():
                 if isinstance(object, Literal):
-                    if (
-                        object.datatype.__str__()
-                        == "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+                    if object.datatype in (
+                        GEOSPARQL.geoJSONLiteral,
+                        IANAFORMAT["application/vnd.geo+json"],  # older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
                         except ValueError as e:
                             log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
                             continue
-                    elif object.datatype.__str__() == "http://www.opengis.net/rdf#wktLiteral":
+                    elif object.datatype in (
+                        GEOSPARQL.wktLiteral,
+                        URIRef("http://www.opengis.net/rdf#wktLiteral"),  # old OGC prefix
+                    ):
                         try:
                             # .upper() si here because geomet doesn't support Polygon but only POLYGON
                             geojson = wkt.loads(object.toPython().strip().upper())
@@ -542,6 +546,7 @@ def spatial_from_rdf(graph):
                         continue
 
                     geojsons.append(geojson)
+
         except Exception as e:
             log.exception(
                 f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True
@@ -759,19 +764,34 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        if format in OGC_SERVICE_FORMATS:
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
+            # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
+            # correct resource.
+            # GeoNetwork uses the layer name as title, so it should be stable enough that we can
+            # use it in our composite key. If the layer name changes, it's OK to treat it as a
+            # different resource.
+            # We however don't use the title for other types of resources, because it is more
+            # likely to be editorialized, and therefore change over time while still describing
+            # the same resource.
+            fields["title"] = title
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
 
     resource.filetype = "remote"
-    resource.format = format_from_rdf(distrib)
-    resource.title = title_from_rdf(distrib, url, resource.format)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
