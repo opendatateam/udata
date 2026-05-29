@@ -256,7 +256,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         definitive answer in the authentication path.
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         """
-        return current_app.config["SECURITY_TWO_FACTOR_REQUIRED"] or (
+        return super().check_tf_required_setup() or (
             current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
         )
 
