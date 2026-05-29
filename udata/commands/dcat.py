@@ -72,7 +72,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
         _subgraph = Graph(namespace_manager=namespace_manager)
         graph += _subgraph.parse(data=serialized, format=format)
 
-        for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+        for node in subgraph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
             identifier = subgraph.value(node, DCT.identifier)
             kwargs = {"nid": str(node), "page": page_number}
             kwargs["type"] = "uriref" if isinstance(node, URIRef) else "blank"

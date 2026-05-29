@@ -205,6 +205,21 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_datasetseries(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        source = HarvestSourceFactory(
+            backend="dcat",
+            url=mock_dcat(rmock, "series.xml"),
+            organization=OrganizationFactory(),
+        )
+        actions.run(source)
+
+        datasets = Dataset.objects
+
+        assert len(datasets) == 1
+        assert datasets[0].title == "DCE – Bassin Artois-Picardie - Etat global"
+
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
 
