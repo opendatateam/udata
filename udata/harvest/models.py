@@ -1,5 +1,5 @@
 import logging
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from datetime import UTC, datetime
 from urllib.parse import urlparse
 
@@ -346,13 +346,14 @@ class HarvestJob(Document):
         # `item.dataservice` so counting set references never dereferences each
         # one from Mongo (which is exactly what these counters exist to avoid).
         self.items_total = len(self.items)
-        self.items_by_status = {
-            status: sum(1 for item in self.items if item.status == status)
-            for status in HARVEST_ITEM_STATUS
-        }
+        status_counts = Counter(item.status for item in self.items)
+        self.items_by_status = {status: status_counts[status] for status in HARVEST_ITEM_STATUS}
+        type_counts = Counter(
+            key for item in self.items for key in ("dataset", "dataservice") if item._data.get(key)
+        )
         self.items_by_type = {
-            "dataset": sum(1 for item in self.items if item._data.get("dataset")),
-            "dataservice": sum(1 for item in self.items if item._data.get("dataservice")),
+            "dataset": type_counts["dataset"],
+            "dataservice": type_counts["dataservice"],
         }
 
 

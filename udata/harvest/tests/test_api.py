@@ -772,6 +772,31 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["total"] == 3
 
+    def test_list_jobs_exposes_item_counters_from_stored_metrics(self):
+        """Listing jobs excludes the embedded `items` (and `data`) from the query,
+        so the `items` link counters must come from the stored metrics — not from
+        len(job.items), which would force loading and dereferencing every item.
+
+        Asserting correct counters while the items are excluded is the functional
+        proof that they are read from the stored fields and never from the items.
+        """
+        source = HarvestSourceFactory()
+        HarvestJobFactory(
+            source=source,
+            items=[
+                HarvestItem(status="done", dataset=DatasetFactory()),
+                HarvestItem(status="failed", dataservice=DataserviceFactory()),
+            ],
+        )
+
+        response = self.get(url_for("api.harvest_jobs", source=source))
+        assert200(response)
+        items_link = response.json["data"][0]["items"]
+        assert items_link["total"] == 2
+        assert items_link["by_status"]["done"] == 1
+        assert items_link["by_status"]["failed"] == 1
+        assert items_link["by_type"] == {"dataset": 1, "dataservice": 1}
+
     def test_job_counters_recomputed_on_save(self):
         """The stored item counters are kept up to date on every save."""
         job = HarvestJobFactory(items=[HarvestItem(status="done", dataset=DatasetFactory())])
@@ -930,6 +955,15 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(last)
         assert "page=2" in last.json["previous_page"]
         assert last.json["next_page"] is None
+
+    def test_list_items_past_last_page_returns_404(self):
+        """Requesting a page beyond the last one returns 404 (Pagination aborts
+        when a non-first page holds no item)."""
+        job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
+        response = self.get(
+            url_for("api.harvest_job_items", ident=str(job.id), page=4, page_size=2)
+        )
+        assert404(response)
 
     def test_list_items_filtered_by_status(self):
         """Items endpoint accepts a status filter"""
