@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import pytest
@@ -934,6 +934,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.checksum.value == sha1
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
+        assert resource.harvest.last_update - datetime.now(UTC) < timedelta(seconds=1)
         assert resource.format == "csv"
 
     def test_resource_future_modified_at(self):

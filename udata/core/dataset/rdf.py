@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import UTC, date, datetime
 from itertools import chain
 
 from dateutil.parser import parse as parse_dt
@@ -833,6 +833,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
+    resource.harvest.last_update = datetime.now(UTC)
 
     # :FutureHarvestModifiedAt
     resource.harvest.modified_at = safe_harvest_datetime(
