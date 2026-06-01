@@ -121,12 +121,11 @@ backend_fields = api.model(
 )
 
 
-# Source listing accepts owner/deleted filters that are not auto-generated
-# from the model fields, so we extend the index parser.
+# `owner`/`organization` filters, `q` search, sort and pagination are all
+# auto-generated from the model fields (Owned mixin + searchable). The only
+# harvest-specific argument is `deleted`, whose default (exclude deleted) can't
+# be expressed as a standard filterable, so we add it manually.
 source_parser = HarvestSource.__index_parser__.copy()
-source_parser.add_argument(
-    "owner", type=str, location="args", help="The organization or user ID to filter on"
-)
 source_parser.add_argument(
     "deleted",
     type=bool,
@@ -143,24 +142,11 @@ class SourcesAPI(API):
     @api.marshal_list_with(HarvestSource.__page_fields__)
     def get(self):
         """List all harvest sources"""
-        args = source_parser.parse_args()
-
-        sources = HarvestSource.objects()
-
-        if not args["deleted"]:
-            sources = sources.visible()
-
-        # `owner` is overloaded here: it matches sources owned by the user
-        # OR by the organization, so we cannot reuse the auto-generated
-        # `owner` filter from the Owned mixin (which only matches `owner=`).
-        if args["owner"]:
-            sources = sources.owned_by(args["owner"])
-
-        if args["q"]:
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            sources = sources.search_text(phrase_query)
-
-        return sources.paginate(args["page"], args["page_size"])
+        deleted = source_parser.parse_args()["deleted"]
+        base = HarvestSource.objects() if deleted else HarvestSource.objects().visible()
+        # owner/organization/q/sort handled by the auto-generated index parser.
+        sources = HarvestSource.apply_sort_filters(base)
+        return HarvestSource.apply_pagination(sources)
 
     @api.secure
     @api.doc("create_harvest_source")
@@ -301,7 +287,10 @@ class JobsAPI(API):
     def get(self, source: HarvestSource):
         """List all jobs for a given source"""
         args = page_parser.parse_args()
-        qs = HarvestJob.objects(source=source)
+        # Items are exposed as a counters link (read from stored metrics) and
+        # `data` is a large blob never serialized here: exclude both so listing
+        # jobs neither loads nor dereferences the items of every job.
+        qs = HarvestJob.objects(source=source).exclude("items", "data")
         qs = qs.order_by("-created")
         return qs.paginate(args["page"], args["page_size"])
 
@@ -312,7 +301,8 @@ class JobAPI(API):
     @api.marshal_with(HarvestJob.__read_fields__)
     def get(self, ident):
         """Get a single job given an ID"""
-        return actions.get_job(ident)
+        # Items are exposed as a counters link only, so don't load them.
+        return actions.get_job(ident, with_items=False)
 
 
 @ns.route("/job/<string:ident>/items/", endpoint="harvest_job_items")

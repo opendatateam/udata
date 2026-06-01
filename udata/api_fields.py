@@ -183,6 +183,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         href = info.get("href", None)
         if href:
             href_extra = info.get("href_extra", None)
+            # `href_total` lets a field provide the total from a stored counter
+            # instead of `len(o[key])`, which would load (and dereference) the
+            # whole list just to count it.
+            href_total = info.get("href_total", None)
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
@@ -190,7 +194,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         "rel": "subsection",
                         "href": href(o),
                         "type": "GET",
-                        "total": len(o[key]),
+                        "total": href_total(o) if href_total else len(o[key]),
                         **(href_extra(o) if href_extra else {}),
                     },
                     description="Visit this API link to see the list.",
@@ -689,6 +693,7 @@ class _FieldKwargs(TypedDict, total=False):
     is_thumbnail: bool | None
     href: Callable | None
     href_extra: Callable | None
+    href_total: Callable | None
     generic: bool | None
     generic_key: str | None
     convert_to: Callable | None
@@ -742,6 +747,7 @@ def field(
     is_thumbnail: bool | None = None,
     href: Callable | None = None,
     href_extra: Callable | None = None,
+    href_total: Callable | None = None,
     generic: bool | None = None,
     generic_key: str | None = None,
     convert_to: Callable | None = None,
@@ -782,6 +788,9 @@ def field(
         href: Function to generate API link
         href_extra: Function returning extra keys to merge into the href object
             (e.g. counters by status). Only applies when used together with `href`.
+        href_total: Function returning the list total, used instead of `len(value)`
+            so the (potentially huge / dereferencing) list isn't loaded just to be
+            counted. Only applies when used together with `href`.
         generic: If True, handle generic embedded documents
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX

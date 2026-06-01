@@ -44,9 +44,17 @@ def list_sources(owner=None, deleted=False):
     return list(sources)
 
 
-def get_job(ident):
-    """Get an harvest job given its ID"""
-    return HarvestJob.objects.get(id=ident)
+def get_job(ident, *, with_items=True):
+    """Get an harvest job given its ID.
+
+    `with_items=False` drops the embedded items (and the heavy `data` blob) from
+    the query: use it when items are exposed only as a counters link, so we never
+    load or dereference them.
+    """
+    qs = HarvestJob.objects
+    if not with_items:
+        qs = qs.exclude("items", "data")
+    return qs.get(id=ident)
 
 
 def create_source(

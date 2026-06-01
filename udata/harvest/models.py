@@ -10,6 +10,7 @@ from mongoengine.fields import (
     DateTimeField,
     DictField,
     EmbeddedDocumentField,
+    IntField,
     ListField,
     ReferenceField,
     StringField,
@@ -303,21 +304,17 @@ class HarvestJob(Document):
         readonly=True,
         description="The job initialization errors",
     )
-    # Items are exposed as a paginated subresource link with status/type counters,
-    # to avoid loading thousands of dereferenced items for every job in a list.
+    # Items are exposed as a paginated subresource link with status/type counters
+    # (read from the stored `items_by_*` below), to avoid loading thousands of
+    # dereferenced items for every job in a list.
     items = field(
         ListField(EmbeddedDocumentField(HarvestItem)),
         readonly=True,
         href=lambda o: url_for("api.harvest_job_items", ident=o.id),
+        href_total=lambda o: o.items_total,
         href_extra=lambda o: {
-            "by_status": {
-                status: sum(1 for item in o.items if item.status == status)
-                for status in HARVEST_ITEM_STATUS
-            },
-            "by_type": {
-                "dataset": sum(1 for item in o.items if item.dataset),
-                "dataservice": sum(1 for item in o.items if item.dataservice),
-            },
+            "by_status": o.items_by_status,
+            "by_type": o.items_by_type,
         },
     )
     source = field(
@@ -326,6 +323,12 @@ class HarvestJob(Document):
         description="The source owning the job",
     )
     data = DictField()
+    # Item counters, recomputed on every save (see `clean`) so the `items` link
+    # exposes total/by_status/by_type without loading or dereferencing items at
+    # read time. Plain fields: internal storage, not part of the API fields.
+    items_total = IntField(default=0)
+    items_by_status = DictField()
+    items_by_type = DictField()
 
     meta = {
         "indexes": [
@@ -337,6 +340,20 @@ class HarvestJob(Document):
         ],
         "ordering": ["-created"],
     }
+
+    def clean(self):
+        # Read the raw reference via `_data` rather than `item.dataset` /
+        # `item.dataservice` so counting set references never dereferences each
+        # one from Mongo (which is exactly what these counters exist to avoid).
+        self.items_total = len(self.items)
+        self.items_by_status = {
+            status: sum(1 for item in self.items if item.status == status)
+            for status in HARVEST_ITEM_STATUS
+        }
+        self.items_by_type = {
+            "dataset": sum(1 for item in self.items if item._data.get("dataset")),
+            "dataservice": sum(1 for item in self.items if item._data.get("dataservice")),
+        }
 
 
 HarvestSource.__read_fields__["last_job"] = fields.Nested(
