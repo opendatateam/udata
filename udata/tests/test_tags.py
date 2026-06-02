@@ -127,3 +127,28 @@ class TagListFieldCleanTest(PytestOnlyTestCase):
         dataset.tags = ["valid", "", "   ", "--", "df", "Open Data"]
         dataset.validate()
         assert dataset.tags == ["open-data", "valid"]
+
+
+class TagListFieldCleanNoAppTest:
+    """
+    This test runs in a context where Flask app isn't loaded, ex in celery unpickling.
+    """
+
+    def test_taglist_field_deserialization_no_error(self):
+        """Regression test: TagListField deserialization should not raise errors.
+
+        This ensures the original bug (TypeError from LocalProxy during unpickling)
+        is fixed by verifying clean() doesn't call normalize() during to_python().
+        """
+        import pickle
+
+        from udata.mongo.taglist_field import TagListField
+
+        field = TagListField()
+        pickled = pickle.dumps(field)
+        unpickled_field = pickle.loads(pickled)
+
+        # Should not raise any error during unpickling
+        assert unpickled_field is not None
+        # Test that clean works without calling normalize
+        assert unpickled_field.clean(["test", "Test"]) == ["test"]
