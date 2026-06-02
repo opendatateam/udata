@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -270,6 +271,27 @@ class SpamTest(APITestCase):
         org = OrganizationFactory()
         dataset = DatasetFactory(title="This is spam content", organization=org)
         self.assertTrue(self.has_spam_report(dataset))
+
+    @pytest.mark.options(
+        SPAM_WORDS=["spam"],
+        TCHAP_ROOM_URL="https://matrix.example.org/_matrix/send",
+        TCHAP_BOT_TOKEN="token",
+    )
+    def test_tchap_notification_is_queued_not_sent_during_request(self):
+        """The Tchap notification must be queued, never sent inside the request.
+
+        Sending it synchronously (the prod incident) made a misconfigured URL
+        crash the dataset save with a 400. It must run in a worker instead.
+        """
+        with patch("udata.notifications.tchap.send_message.delay") as delay:
+            dataset = DatasetFactory(title="This is spam content")
+
+        # The user action completed and the spam report was created...
+        self.assertTrue(self.has_spam_report(dataset))
+        # ...while the actual Tchap send was only enqueued, not executed here.
+        delay.assert_called_once()
+        (message,), _ = delay.call_args
+        self.assertTrue(message.startswith("⚠️ @all "))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_certified_org_reuse_not_flagged(self):
