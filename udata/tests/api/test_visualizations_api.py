@@ -296,7 +296,7 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
         from udata.core.user.factories import UserFactory
         from udata.tests.helpers import create_test_image
 
-        user = self.login()
+        self.login()
         other_user = UserFactory()
         visualization = ChartFactory(owner=other_user)
         file = create_test_image()
