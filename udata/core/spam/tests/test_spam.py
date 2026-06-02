@@ -301,26 +301,26 @@ class SpamTest(APITestCase):
         TCHAP_BOT_TOKEN="token",
     )
     def test_tchap_send_message_builds_matrix_url(self):
-        with patch("udata.notifications.tchap.requests.put") as put:
+        with patch("udata.notifications.tchap.requests.post") as post:
             send_message.run("hello")
 
-        put.assert_called_once()
-        url, _ = put.call_args
-        # Room id is URL-encoded and the path ends with a transaction id.
-        self.assertRegex(
+        post.assert_called_once()
+        url, _ = post.call_args
+        # Room id is URL-encoded in the path.
+        self.assertEqual(
             url[0],
-            r"^https://matrix\.example\.org/_matrix/client/v3/rooms/"
-            r"%21room%3Aexample\.org/send/m\.room\.message/[0-9a-f]+$",
+            "https://matrix.example.org/_matrix/client/v3/rooms/"
+            "%21room%3Aexample.org/send/m.room.message",
         )
-        self.assertEqual(put.call_args.kwargs["json"]["body"], "hello")
-        self.assertEqual(put.call_args.kwargs["headers"]["authorization"], "Bearer token")
+        self.assertEqual(post.call_args.kwargs["json"]["body"], "hello")
+        self.assertEqual(post.call_args.kwargs["headers"]["authorization"], "Bearer token")
 
     @pytest.mark.options(TCHAP_HOMESERVER=None, TCHAP_ROOM_ID="!room:example.org")
     def test_tchap_send_message_noop_without_config(self):
-        with patch("udata.notifications.tchap.requests.put") as put:
+        with patch("udata.notifications.tchap.requests.post") as post:
             send_message.run("hello")
 
-        put.assert_not_called()
+        post.assert_not_called()
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_certified_org_reuse_not_flagged(self):

@@ -1,4 +1,3 @@
-import uuid
 from urllib.parse import quote
 
 import requests
@@ -43,15 +42,13 @@ def send_message(text: str):
     if not (homeserver and room_id and token):
         return
 
-    # Matrix idempotent send: PUT on .../send/{eventType}/{txnId}. The room id
-    # is URL-encoded as it contains reserved chars (e.g. `!` and `:`).
-    txn = uuid.uuid4().hex
+    # The room id is URL-encoded as it contains reserved chars (e.g. `!` and `:`).
     url = (
         f"{homeserver.rstrip('/')}/_matrix/client/v3/rooms/"
-        f"{quote(room_id, safe='')}/send/m.room.message/{txn}"
+        f"{quote(room_id, safe='')}/send/m.room.message"
     )
 
-    r = requests.put(
+    r = requests.post(
         url,
         headers={
             "content-type": "application/json",
