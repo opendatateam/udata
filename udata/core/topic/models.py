@@ -83,6 +83,8 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
+        if document.topic:
+            reindex.delay(*as_task_param(document.topic))
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -90,6 +92,8 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
+            if document.topic:
+                reindex.delay(*as_task_param(document.topic))
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
