@@ -13,6 +13,7 @@ from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.notifications.tchap import send_message
 from udata.tests.api import APITestCase
 
 
@@ -274,7 +275,8 @@ class SpamTest(APITestCase):
 
     @pytest.mark.options(
         SPAM_WORDS=["spam"],
-        TCHAP_ROOM_URL="https://matrix.example.org/_matrix/send",
+        TCHAP_HOMESERVER="https://matrix.example.org",
+        TCHAP_ROOM_ID="!room:example.org",
         TCHAP_BOT_TOKEN="token",
     )
     def test_tchap_notification_is_queued_not_sent_during_request(self):
@@ -292,6 +294,33 @@ class SpamTest(APITestCase):
         delay.assert_called_once()
         (message,), _ = delay.call_args
         self.assertTrue(message.startswith("⚠️ @all "))
+
+    @pytest.mark.options(
+        TCHAP_HOMESERVER="https://matrix.example.org",
+        TCHAP_ROOM_ID="!room:example.org",
+        TCHAP_BOT_TOKEN="token",
+    )
+    def test_tchap_send_message_builds_matrix_url(self):
+        with patch("udata.notifications.tchap.requests.put") as put:
+            send_message.run("hello")
+
+        put.assert_called_once()
+        url, _ = put.call_args
+        # Room id is URL-encoded and the path ends with a transaction id.
+        self.assertRegex(
+            url[0],
+            r"^https://matrix\.example\.org/_matrix/client/v3/rooms/"
+            r"%21room%3Aexample\.org/send/m\.room\.message/[0-9a-f]+$",
+        )
+        self.assertEqual(put.call_args.kwargs["json"]["body"], "hello")
+        self.assertEqual(put.call_args.kwargs["headers"]["authorization"], "Bearer token")
+
+    @pytest.mark.options(TCHAP_HOMESERVER=None, TCHAP_ROOM_ID="!room:example.org")
+    def test_tchap_send_message_noop_without_config(self):
+        with patch("udata.notifications.tchap.requests.put") as put:
+            send_message.run("hello")
+
+        put.assert_not_called()
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_certified_org_reuse_not_flagged(self):

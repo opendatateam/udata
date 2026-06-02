@@ -1,3 +1,6 @@
+import uuid
+from urllib.parse import quote
+
 import requests
 from flask import current_app
 from markdown import markdown
@@ -34,12 +37,21 @@ def send_message(text: str):
     Args:
         text (str): Text to send to the room
     """
-    url = current_app.config.get("TCHAP_ROOM_URL")
+    homeserver = current_app.config.get("TCHAP_HOMESERVER")
+    room_id = current_app.config.get("TCHAP_ROOM_ID")
     token = current_app.config.get("TCHAP_BOT_TOKEN")
-    if not (url and token):
+    if not (homeserver and room_id and token):
         return
 
-    r = requests.post(
+    # Matrix idempotent send: PUT on .../send/{eventType}/{txnId}. The room id
+    # is URL-encoded as it contains reserved chars (e.g. `!` and `:`).
+    txn = uuid.uuid4().hex
+    url = (
+        f"{homeserver.rstrip('/')}/_matrix/client/v3/rooms/"
+        f"{quote(room_id, safe='')}/send/m.room.message/{txn}"
+    )
+
+    r = requests.put(
         url,
         headers={
             "content-type": "application/json",
