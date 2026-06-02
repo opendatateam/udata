@@ -132,32 +132,15 @@ def _validate_notification_external_url(value):
         raise ValidationError("Invalid or disallowed notification.external_url")
 
 
-def is_valid_notification_model_name(subject, name) -> bool:
-    """True if `name` is allow-listed as a `model_name` for `subject`'s class.
-
-    Used both by the form validator (write-time) and `notification_subject_type`
-    (read-time). The per-class allow-list prevents a label intended for one
-    subject type (e.g. "bouquet" for Topic) from being applied to a different
-    one (e.g. a Dataset relabeled as "bouquet").
-    """
-    if not name:
-        return False
-    subject_cls = type(subject).__name__ if subject is not None else None
-    allowed_per_class = current_app.config.get("DISCUSSION_ALTERNATE_MODEL_NAMES", {})
-    return name in allowed_per_class.get(subject_cls, [])
-
-
 class NotificationExtra(EmbeddedDocument):
     """Typed sub-document of `Discussion.extras["notification"]`.
 
-    `external_url` is validated here (self-contained allow-list check).
-    `model_name` carries no validator at this layer because the per-class
-    allow-list check needs the discussion's subject, which is not reachable
-    from inside an `EmbeddedDocument` validator — it stays in the form.
+    `external_url` lets a third-party frontend (e.g. Ecosphères) override the
+    URL pointed to in notification emails; it is validated here against the
+    `DISCUSSION_ALLOWED_EXTERNAL_DOMAINS` allow-list.
     """
 
     external_url = StringField(validation=_validate_notification_external_url)
-    model_name = StringField()
 
 
 class Discussion(SpamMixin, Linkable, Document):
@@ -268,37 +251,21 @@ class Discussion(SpamMixin, Linkable, Document):
         return (self.extras or {}).get("notification") or {}
 
     @property
-    def notification_subject_type(self):
-        """Subject type label used in notification emails.
-
-        Returns the value of `extras.notification.model_name` when it passes
-        the per-class allow-list check, otherwise the subject's `verbose_name`.
-        """
-        meta_name = self._notification_meta().get("model_name")
-        if is_valid_notification_model_name(self.subject, meta_name):
-            return meta_name
-        return self.subject.verbose_name
-
     def notification_url(self):
         """URL to point to in notification emails.
 
-        Falls back to `url_for()` when no valid external URL is provided.
-        Returns None when the subject has no canonical udata page (e.g. Topic)
-        and no valid external URL is provided — in that case the caller should
-        skip the notification entirely.
+        Returns the allow-listed `extras.notification.external_url` when present
+        and valid (e.g. a Topic displayed on a third-party platform such as
+        Ecosphères), otherwise the subject's canonical page via `url_for()`.
 
         Defense in depth: re-validate the stored `external_url` at read-time.
         Data written before the validator existed, raw DB writes (imports,
         migrations), or a config change tightening the allow-list could all
         leave an unsafe URL in storage.
         """
-        from .constants import NOTIFY_REQUIRES_EXTERNAL_URL
-
         meta_url = self._notification_meta().get("external_url")
         if is_valid_notification_external_url(meta_url):
             return f"{meta_url}#discussion-{self.id}"
-        if isinstance(self.subject, NOTIFY_REQUIRES_EXTERNAL_URL):
-            return None
         return self.url_for()
 
     def spam_report_message(self, breadcrumb):

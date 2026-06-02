@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, datetime
 
 import pytest
@@ -1271,16 +1270,13 @@ class NotifyDiscussionsTest(APITestCase):
 class DiscussionExternalNotificationTest(APITestCase):
     """
     Tests for the discussion notification customization (notification.external_url
-    and notification.model_name in extras), used by external frontends like
-    Ecosphères to receive notifications with proper labels and links.
+    in extras), used by external frontends like Ecosphères to receive
+    notifications linking to their own pages.
 
     See https://github.com/ecolabdata/ecospheres/issues/263.
     """
 
-    @pytest.mark.options(
-        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"],
-        DISCUSSION_ALTERNATE_MODEL_NAMES={"Topic": ["bouquet"]},
-    )
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
     def test_create_discussion_with_notification_extras_via_api(self):
         self.login()
         topic = TopicFactory()
@@ -1293,7 +1289,6 @@ class DiscussionExternalNotificationTest(APITestCase):
                 "subject": {"class": "Topic", "id": topic.id},
                 "extras": {
                     "notification": {
-                        "model_name": "bouquet",
                         "external_url": "https://eco.example.com/bouquets/foo/",
                     }
                 },
@@ -1301,7 +1296,6 @@ class DiscussionExternalNotificationTest(APITestCase):
         )
         self.assert201(response)
         discussion = Discussion.objects(subject=topic).first()
-        assert discussion.extras["notification"]["model_name"] == "bouquet"
         assert (
             discussion.extras["notification"]["external_url"]
             == "https://eco.example.com/bouquets/foo/"
@@ -1327,100 +1321,8 @@ class DiscussionExternalNotificationTest(APITestCase):
         self.assert400(response)
         assert Discussion.objects(subject=topic).count() == 0
 
-    def test_create_discussion_model_name_not_allowed_is_rejected(self):
-        self.login()
-        topic = TopicFactory()
-
-        response = self.post(
-            url_for("api.discussions"),
-            {
-                "title": "test",
-                "comment": "bla",
-                "subject": {"class": "Topic", "id": topic.id},
-                "extras": {"notification": {"model_name": "arbitrary"}},
-            },
-        )
-        self.assert400(response)
-
-    def test_create_discussion_both_external_url_and_model_name_invalid(self):
-        # Both `external_url` and `model_name` are rejected separately.
-        # Validate that the form merges errors instead of overwriting the
-        # ExtrasField error dict — both invalid values must surface so the
-        # client can fix them in one round-trip.
-        self.login()
-        topic = TopicFactory()
-
-        response = self.post(
-            url_for("api.discussions"),
-            {
-                "title": "test",
-                "comment": "bla",
-                "subject": {"class": "Topic", "id": topic.id},
-                "extras": {
-                    "notification": {
-                        "external_url": "https://evil.example.org/phishing",
-                        "model_name": "arbitrary",
-                    }
-                },
-            },
-        )
-        self.assert400(response)
-        payload = json.dumps(response.json.get("errors", {}))
-        assert "external_url" in payload
-        assert "model_name" in payload
-
-    @pytest.mark.options(
-        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"],
-        DISCUSSION_ALTERNATE_MODEL_NAMES={"Topic": ["bouquet"]},
-    )
-    def test_model_name_cannot_be_applied_to_wrong_subject_type(self):
-        """Even if "bouquet" is allowed for Topic, it must be rejected on a Dataset
-        — a label intended for one model cannot be applied to a different one."""
-        self.login()
-        dataset = DatasetFactory()
-
-        response = self.post(
-            url_for("api.discussions"),
-            {
-                "title": "test",
-                "comment": "bla",
-                "subject": {"class": "Dataset", "id": dataset.id},
-                "extras": {"notification": {"model_name": "bouquet"}},
-            },
-        )
-        self.assert400(response)
-        assert Discussion.objects(subject=dataset).count() == 0
-
-    @pytest.mark.options(
-        DISCUSSION_ALTERNATE_MODEL_NAMES={"Topic": ["bouquet"]},
-    )
-    def test_notification_subject_type_falls_back_for_wrong_subject_type(self):
-        """Defense-in-depth: if a Dataset discussion was somehow stored with a
-        Topic-only model_name (e.g. config changed since), the verbose_name is
-        used in the notification — never the misleading label."""
-        owner = UserFactory()
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=DatasetFactory(owner=owner),
-            user=user,
-            title=faker.sentence(),
-            discussion=[message],
-            extras={"notification": {"model_name": "bouquet"}},
-        )
-
-        with capture_mails() as mails:
-            notify_new_discussion(discussion.id)
-
-        assert len(mails) == 1
-        assert "bouquet" not in mails[0].subject
-        assert "bouquet" not in mails[0].body
-
-    @pytest.mark.options(
-        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"],
-        DISCUSSION_ALTERNATE_MODEL_NAMES={"Topic": ["bouquet"]},
-    )
-    def test_notify_uses_external_url_and_model_name(self):
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_notify_uses_external_url(self):
         owner = UserFactory()
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
@@ -1429,12 +1331,7 @@ class DiscussionExternalNotificationTest(APITestCase):
             user=user,
             title=faker.sentence(),
             discussion=[message],
-            extras={
-                "notification": {
-                    "model_name": "bouquet",
-                    "external_url": "https://eco.example.com/bouquets/foo/",
-                }
-            },
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
         )
 
         with capture_mails() as mails:
@@ -1443,33 +1340,32 @@ class DiscussionExternalNotificationTest(APITestCase):
         assert len(mails) == 1
         mail = mails[0]
         assert mail.recipients[0] == owner.email
-        assert "bouquet" in mail.subject
-        assert "bouquet" in mail.body
+        # The subject type label comes from the Topic's verbose_name.
+        assert "collection" in mail.subject
         assert f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in mail.body
 
-    def test_notify_topic_without_external_url_skips_mail(self):
-        """A Topic discussion with no external_url cannot link anywhere — no
-        mail sent and no Notification created, on all three notify tasks."""
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    def test_notify_topic_without_external_url_links_to_canonical_page(self):
+        """A Topic discussion with no external_url still notifies: now that
+        topics have a canonical cdata page, the mail falls back to the topic's
+        own `url_for()` instead of being skipped."""
         owner = UserFactory()
         poster = UserFactory()
+        topic = TopicFactory(owner=owner)
         message = Message(content=faker.sentence(), posted_by=poster)
-        comment = Message(content=faker.sentence(), posted_by=poster)
         discussion = Discussion.objects.create(
-            subject=TopicFactory(owner=owner),
+            subject=topic,
             user=poster,
             title=faker.sentence(),
-            discussion=[message, comment],
-            closed=datetime.now(UTC),
-            closed_by=owner,
+            discussion=[message],
         )
 
         with capture_mails() as mails:
             notify_new_discussion(discussion.id)
-            notify_new_discussion_comment(discussion.id, message=1)
-            notify_discussion_closed(discussion.id, message=1)
 
-        assert len(mails) == 0
-        assert Notification.objects(user=owner).count() == 0
+        assert len(mails) == 1
+        assert f"https://www.data.gouv.fr/topics/{topic.slug}" in mails[0].body
+        assert Notification.objects(user=owner).count() == 1
 
     @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.allowed.com"])
     def test_notify_falls_back_when_external_url_domain_no_longer_allowed(self):
@@ -1499,10 +1395,7 @@ class DiscussionExternalNotificationTest(APITestCase):
         assert "https://eco.example.com" not in mails[0].body
         assert discussion.url_for() in mails[0].body
 
-    @pytest.mark.options(
-        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"],
-        DISCUSSION_ALTERNATE_MODEL_NAMES={"Topic": ["bouquet"]},
-    )
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
     def test_notify_comment_and_close_use_external_url(self):
         owner = UserFactory()
         poster = UserFactory()
@@ -1514,12 +1407,7 @@ class DiscussionExternalNotificationTest(APITestCase):
             user=poster,
             title=faker.sentence(),
             discussion=[message, comment],
-            extras={
-                "notification": {
-                    "model_name": "bouquet",
-                    "external_url": "https://eco.example.com/bouquets/foo/",
-                }
-            },
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
         )
 
         with capture_mails() as mails:
@@ -1586,7 +1474,6 @@ class DiscussionExternalNotificationTest(APITestCase):
                 "extras": {
                     "notification": {
                         "external_url": "https://evil.example.org/phishing",
-                        "model_name": "arbitrary",
                     }
                 },
             },

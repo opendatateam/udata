@@ -4,7 +4,7 @@ from udata.mail import LabelledContent, MailCTA, MailMessage, ParagraphWithLinks
 
 
 def new_discussion(discussion: Discussion, url: str) -> MailMessage:
-    subject_type = discussion.notification_subject_type
+    subject_type = discussion.subject.verbose_name
     return MailMessage(
         subject=_(
             "A new discussion has been opened on your %(type)s",
@@ -34,7 +34,7 @@ def new_discussion_comment(discussion: Discussion, comment: Message, url: str) -
                 _(
                     "You have a new comment from %(user_or_org)s on your %(type)s %(object)s",
                     user_or_org=comment.posted_by_org_or_user,
-                    type=discussion.notification_subject_type,
+                    type=discussion.subject.verbose_name,
                     object=discussion.subject,
                 )
             ),
@@ -53,7 +53,7 @@ def discussion_closed(discussion: Discussion, comment: Message | None, url: str)
                 _(
                     "The discussion you participated in on the %(type)s %(object)s has been closed by %(user_or_org)s.",
                     user_or_org=discussion.closed_by_org_or_user,
-                    type=discussion.notification_subject_type,
+                    type=discussion.subject.verbose_name,
                     object=discussion.subject,
                 )
             ),

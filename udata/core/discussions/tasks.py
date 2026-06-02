@@ -13,25 +13,16 @@ log = get_logger(__name__)
 
 
 def _resolve_notification_url(discussion):
-    """Return the notification URL or `None` to skip, logging the reason.
+    """Return the notification URL, or `None` to skip when the subject type is
+    unrecognised.
 
-    Centralises the two preconditions shared by every `notify_*` task:
-    the subject type must be recognised, and a URL must be available
-    (either canonical or an allow-listed `extras.notification.external_url`).
+    Every `notify_*` task sends to the subject's owner; an unrecognised subject
+    type has no recipients and must be skipped.
     """
     if not isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
         return None
-    url = discussion.notification_url()
-    if not url:
-        log.warning(
-            "Skipping notification for discussion %s: no URL available "
-            "(subject %s requires a valid extras.notification.external_url)",
-            discussion.id,
-            type(discussion.subject).__name__,
-        )
-        return None
-    return url
+    return discussion.notification_url
 
 
 @connect(on_new_discussion, by_id=True)
