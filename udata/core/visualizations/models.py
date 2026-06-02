@@ -151,12 +151,12 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     series = field(EmbeddedDocumentListField(DataSeries, required=True))
 
     image = field(
-      ImageField(
-        fs=images,
-        basename=default_image_basename,
-        max_size=MAX_SIZE,
-      ),
-      show_as_ref=True,
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+            max_size=MAX_SIZE,
+        ),
+        show_as_ref=True,
     )
 
     @property
