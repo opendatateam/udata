@@ -649,7 +649,8 @@ class Defaults(object):
 
     # Notification settings
     ###########################################################################
-    TCHAP_ROOM_URL = None
+    TCHAP_HOMESERVER = None
+    TCHAP_ROOM_ID = None
     TCHAP_BOT_TOKEN = None
 
     # Tabular API Dataservice ID
