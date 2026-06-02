@@ -12,7 +12,6 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 
-
 from .models import Chart
 
 ns = api.namespace("visualizations", "Visualizations related operations")

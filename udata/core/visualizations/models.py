@@ -31,7 +31,6 @@ from udata.uris import cdata_url
 
 from .constants import MAX_SIZE
 
-
 visualization_permissions_fields = api.model(
     "VisualizationPermissions",
     {
