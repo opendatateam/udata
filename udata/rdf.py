@@ -29,6 +29,7 @@ from rdflib.util import guess_format as raw_guess_format
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
 from udata.frontend.markdown import parse_html
+from udata.harvest.filters import normalize_tag
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
@@ -369,7 +370,8 @@ def themes_from_rdf(rdf):
             continue
         tags.append(tag.toPython())
     tags += theme_labels_from_rdf(rdf)
-    return list(set(tags))
+    normalized_tags = [normalize_tag(tag) for tag in tags if normalize_tag(tag)]
+    return list(set(normalized_tags))
 
 
 def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
