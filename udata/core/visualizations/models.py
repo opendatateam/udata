@@ -1,5 +1,6 @@
 from blinker import Signal
 from flask.helpers import url_for
+from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument, Q
 from mongoengine.fields import (
     BooleanField,
@@ -20,12 +21,16 @@ from udata.core.dataset.permissions import OwnablePermission, OwnableReadPermiss
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url
+
+from .constants import MAX_SIZE
+
 
 visualization_permissions_fields = api.model(
     "VisualizationPermissions",
@@ -145,6 +150,15 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     x_axis = field(EmbeddedDocumentField(XAxis, required=True))
     y_axis = field(EmbeddedDocumentField(YAxis))
     series = field(EmbeddedDocumentListField(DataSeries, required=True))
+
+    image = field(
+      ImageField(
+        fs=images,
+        basename=default_image_basename,
+        max_size=MAX_SIZE,
+      ),
+      show_as_ref=True,
+    )
 
     @property
     @field(

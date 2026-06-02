@@ -6,6 +6,12 @@ from flask_login import current_user
 
 from udata.api import API, api
 from udata.api_fields import patch
+from udata.core.storages.api import (
+    image_parser,
+    parse_uploaded_image,
+    uploaded_image_fields,
+)
+
 
 from .models import Chart
 
@@ -82,3 +88,19 @@ class VisualizationAPI(API):
         visualization.deleted_at = datetime.now(UTC)
         visualization.save()
         return "", 204
+
+
+@ns.route("/<visualization:visualization>/image/", endpoint="visualization_image")
+@api.doc(**common_doc)
+class VisualizationImageAPI(API):
+    @api.secure
+    @api.doc("visualization_image")
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, visualization):
+        """Upload a new visualization image"""
+        visualization.permissions["edit"].test()
+        parse_uploaded_image(visualization.image)
+        visualization.save()
+
+        return visualization

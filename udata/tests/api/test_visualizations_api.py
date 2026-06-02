@@ -272,3 +272,52 @@ class ChartAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.visualization", visualization=chart))
         assert response.status_code == 200
         assert response.json["title"] == chart.title
+
+
+class VisualizationImageAPITest(PytestOnlyAPITestCase):
+    def test_upload_image_success(self):
+        """It should upload an image to a visualization"""
+        from udata.tests.helpers import create_test_image
+
+        user = self.login()
+        visualization = ChartFactory(owner=user)
+        file = create_test_image()
+
+        response = self.post(
+            url_for("api.visualization_image", visualization=visualization),
+            {"file": (file, "test.png")},
+            json=False,
+        )
+        assert response.status_code == 200
+        assert "image" in response.json
+
+    def test_upload_image_permission_denied(self):
+        """It should deny upload for non-owner"""
+        from udata.core.user.factories import UserFactory
+        from udata.tests.helpers import create_test_image
+
+        user = self.login()
+        other_user = UserFactory()
+        visualization = ChartFactory(owner=other_user)
+        file = create_test_image()
+
+        response = self.post(
+            url_for("api.visualization_image", visualization=visualization),
+            {"file": (file, "test.png")},
+            json=False,
+        )
+        assert response.status_code == 403
+
+    def test_upload_image_invalid_format(self):
+        """It should reject non-image files"""
+        from io import BytesIO
+
+        user = self.login()
+        visualization = ChartFactory(owner=user)
+
+        response = self.post(
+            url_for("api.visualization_image", visualization=visualization),
+            {"file": (BytesIO(b"not an image"), "test.txt")},
+            json=False,
+        )
+        assert response.status_code == 400
