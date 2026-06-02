@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import UTC, datetime
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -279,6 +280,7 @@ class CkanBackend(BaseBackend):
             resource.hash = res.get("hash")
             resource.harvest.issued_at = res["created"]
             resource.harvest.modified_at = res["last_modified"]
+            resource.harvest.last_update = datetime.now(UTC)
 
         return dataset
 
