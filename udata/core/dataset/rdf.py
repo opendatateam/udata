@@ -5,8 +5,10 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
+from collections.abc import Collection, Set
 from datetime import date
 from itertools import chain
+from typing import TypeVar
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -135,6 +137,8 @@ EUFREQ_ID_TO_UDATA = {
 
 # Merge order matters: we want FREQ to win over EUFREQ
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
+
+DatasetOrResource = TypeVar("DatasetOrResource", bound=Dataset | Resource)
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -670,24 +674,26 @@ def title_from_rdf(resource: RdfResource, url: str | None = None, format: str | 
             return i18n._("Nameless resource")
 
 
-def access_rights_from_rdf(resource: RdfResource) -> set[str]:
+def access_rights_from_rdf(resource: RdfResource) -> Set[str]:
     """
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
+    # FIXME: support anchor-only elements
     return rdf_unique_values(resource, DCT.accessRights, unwrap=[RDFS.label, DCT.description])
 
 
-def licenses_from_rdf(resource: RdfResource) -> set[str]:
+def licenses_from_rdf(resource: RdfResource) -> Set[str]:
     """
     Extract licences from a RDF distribution.
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
+    # FIXME: support anchor-only elements
     return rdf_unique_values(resource, DCT.license, unwrap=[RDFS.label, DCT.description])
 
 
-def rights_from_rdf(resource: RdfResource) -> set[str]:
+def rights_from_rdf(resource: RdfResource) -> Set[str]:
     """
     Extract rights from a RDF distribution.
     Cardinality is 0..n.
@@ -695,7 +701,7 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.rights, unwrap=[RDFS.label, DCT.description])
 
 
-def provenances_from_rdf(resource: RdfResource) -> set[str]:
+def provenances_from_rdf(resource: RdfResource) -> Set[str]:
     """
     Extract provenance from a RDF distribution.
     Cardinality is 0..n.
@@ -703,38 +709,32 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
-def infer_dataset_access_rights(
-    dataset: RdfResource, resources_access_rights: list[set[str]]
-) -> tuple[set[str], AccessType | None, InspireLimitationCategory | None]:
+def infer_access_conditions(
+    access_rights: Collection[str],
+) -> tuple[AccessType | None, InspireLimitationCategory | None]:
     """
     Infer the dataset access rights from a RDF dataset or a list of resources access rights.
     If the dataset does not have access rights and all resources have the same set of access rights return it.
     """
-    dataset_access_rights = access_rights_from_rdf(dataset)
-    if not dataset_access_rights and resources_access_rights:
-        if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
-            dataset_access_rights = resources_access_rights[0]
+    if not current_app.config["INSPIRE_SUPPORT"]:
+        return None, None
 
-    if current_app.config["INSPIRE_SUPPORT"]:
-        # Try to match access rights to known inspire access rights limitation categories
-        country = current_app.config["DEFAULT_COUNTRY_CODE"]
-        access_right_categories = set(
-            [
-                InspireLimitationCategory.get_category_from_localized_label(access_right, country)
-                for access_right in dataset_access_rights
-            ]
-        )
-        access_right_categories.discard(None)
-        if len(access_right_categories) == 1:
-            return dataset_access_rights, AccessType.RESTRICTED, access_right_categories.pop()
+    # Try to match access rights to known inspire access rights limitation categories
+    country = current_app.config["DEFAULT_COUNTRY_CODE"]
+    categories = set(
+        InspireLimitationCategory.get_category_from_localized_label(access_right, country)
+        for access_right in access_rights
+    )
+    categories.discard(None)
+    if len(categories) != 1:
+        # FIXME: len() > 1 should also return RESTRICTED, or raise
+        return None, None
 
-    return dataset_access_rights, None, None
+    return AccessType.RESTRICTED, categories.pop()
 
 
-def add_dcat_extra(
-    obj: Dataset | Resource, key: str, value: str | set | list
-) -> Dataset | Resource:
-    if type(value) is set:
+def add_dcat_extra(obj: DatasetOrResource, key: str, value: str | Collection) -> DatasetOrResource:
+    if not isinstance(value, str):
         value = list(value)
     obj.extras["dcat"] = {
         **obj.extras.get("dcat", {}),
@@ -743,7 +743,7 @@ def add_dcat_extra(
     return obj
 
 
-def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
+def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> Resource | None:
     """
     Map a Resource domain model to a DCAT/RDF graph
     """
@@ -901,40 +901,48 @@ def dataset_from_rdf(
     if provenances:
         add_dcat_extra(dataset, "provenance", provenances)
 
-    resources_licenses_hints = set()
-    resources_access_rights = []
+    resources_rights = set()
+    resources_access_rights = set()
+    resources_licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
-        resources_access_rights.append(access_rights_from_rdf(distrib))
-        # include both dct:license and dct:rights as licenses hints from resources
-        resources_licenses_hints |= licenses_from_rdf(distrib)
-        resources_licenses_hints |= rights_from_rdf(distrib)
+        resources_rights.add(rights_from_rdf(distrib))
+        resources_access_rights.add(access_rights_from_rdf(distrib))
+        resources_licenses.add(licenses_from_rdf(distrib))
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    access_rights, access_type, access_right_category = infer_dataset_access_rights(
-        d, resources_access_rights
-    )
-    if access_rights:
-        add_dcat_extra(dataset, "accessRights", access_rights)
-    if access_type:
-        dataset.access_type = access_type
-    if access_right_category:
-        dataset.access_type_reason_category = access_right_category
-
-    default_license = dataset.license or License.default()
-    dataset_licenses = licenses_from_rdf(d)
-    if dataset_licenses:
-        add_dcat_extra(dataset, "license", dataset_licenses)
     dataset_rights = rights_from_rdf(d)
+    if not dataset_rights and len(resources_rights) == 1:
+        dataset_rights = resources_rights.pop()
     if dataset_rights:
         add_dcat_extra(dataset, "rights", dataset_rights)
+
+    dataset_access_rights = access_rights_from_rdf(d)
+    if not dataset_access_rights and len(resources_access_rights) == 1:
+        dataset_access_rights = resources_access_rights.pop()
+    if dataset_access_rights:
+        add_dcat_extra(dataset, "accessRights", dataset_access_rights)
+    access_type, inspire_category = infer_access_conditions(dataset_access_rights | dataset_rights)
+    if access_type:
+        dataset.access_type = access_type
+    if inspire_category:
+        dataset.access_type_reason_category = inspire_category
+
+    dataset_licenses = licenses_from_rdf(d)
+    if not dataset_licenses and len(resources_licenses) == 1:
+        dataset_licenses = resources_licenses.pop()
+    if dataset_licenses:
+        add_dcat_extra(dataset, "license", dataset_licenses)
+    default_license = dataset.license or License.default()
+    # FIXME: resources_licenses_flat reproduces existing behavior, but differs from logic above,
+    # which is bump resource-level properties to dataset-level only if they're unanimous.
+    resources_licenses_flat = set(
+        license for resource_licenses in resources_licenses for license in resource_licenses
+    )
     dataset.license = License.guess(
-        *dataset_licenses,
-        *dataset_rights,
-        *resources_licenses_hints,
-        default=default_license,
+        *(dataset_licenses | dataset_rights | resources_licenses_flat), default=default_license
     )
 
     identifier = rdf_value(d, DCT.identifier)
