@@ -2,7 +2,13 @@ from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.edito_blocs.models import DataservicesListBloc, DatasetsListBloc, ReusesListBloc
+from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
+    DataservicesListBloc,
+    DatasetsListBloc,
+    ReusesListBloc,
+)
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
@@ -75,6 +81,70 @@ class PostsAPITest(APITestCase):
         owner = response.json["owner"]
         assert isinstance(owner, dict)
         assert owner["id"] == str(admin.id)
+
+    def test_post_api_get_with_dangling_dataset_reference(self):
+        """Getting a post should not crash when one of its datasets was hard-deleted,
+        leaving a dangling DBRef that bypassed `reverse_delete_rule=PULL`."""
+        kept = DatasetFactory()
+        deleted = DatasetFactory()
+        post = PostFactory(datasets=[kept, deleted])
+
+        # Hard-delete the dataset bypassing MongoEngine signals (and thus the
+        # reverse_delete_rule), so the post keeps a dangling DBRef.
+        deleted_id = deleted.id
+        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted_id})
+
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        dataset_ids = [d["id"] for d in response.json["datasets"]]
+        assert dataset_ids == [str(kept.id)]
+
+    def test_post_api_get_with_dangling_dataset_in_bloc(self):
+        """Getting a post should not crash when a `DatasetsListBloc` references a
+        hard-deleted dataset. Bloc references live in `EmbeddedDocument`s, which
+        MongoEngine never cleans through `reverse_delete_rule`, so dangling DBRefs
+        are expected there."""
+        kept = DatasetFactory()
+        deleted = DatasetFactory()
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[DatasetsListBloc(title="Featured", datasets=[kept, deleted])],
+        )
+
+        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
+
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        bloc_datasets = response.json["blocs"][0]["datasets"]
+        assert [d["id"] for d in bloc_datasets] == [str(kept.id)]
+
+    def test_post_api_get_with_dangling_dataset_in_nested_accordion_bloc(self):
+        """Reproduces the production crash: a `DatasetsListBloc` nested inside an
+        `AccordionListBloc` references a hard-deleted dataset. `purge_blocs_references`
+        does not descend into accordion items, so the dangling DBRef survives the purge."""
+        kept = DatasetFactory()
+        deleted = DatasetFactory()
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                AccordionListBloc(
+                    title="Accordion",
+                    items=[
+                        AccordionItemBloc(
+                            title="Item",
+                            content=[DatasetsListBloc(title="Featured", datasets=[kept, deleted])],
+                        )
+                    ],
+                )
+            ],
+        )
+
+        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
+
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        bloc_datasets = response.json["blocs"][0]["items"][0]["content"][0]["datasets"]
+        assert [d["id"] for d in bloc_datasets] == [str(kept.id)]
 
     def test_post_api_create(self):
         """It should create a post from the API"""
