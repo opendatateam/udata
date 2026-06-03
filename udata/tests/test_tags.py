@@ -1,4 +1,5 @@
 import logging
+import pickle
 from io import StringIO
 
 import pytest
@@ -142,10 +143,6 @@ class TagListFieldCleanNoAppTest:
         This ensures the original bug (TypeError from LocalProxy during unpickling)
         is fixed by verifying clean() doesn't call normalize() during to_python().
         """
-        import pickle
-
-        from udata.mongo.taglist_field import TagListField
-
         field = TagListField()
         pickled = pickle.dumps(field)
         unpickled_field = pickle.loads(pickled)
