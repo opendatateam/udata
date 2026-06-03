@@ -1,8 +1,8 @@
 from mongoengine.fields import ListField, StringField
-from slugify import slugify
 
 from udata import tags
 from udata.i18n import lazy_gettext as _
+from udata.tags import slug as slugify_tag
 
 
 class TagListField(ListField):
@@ -20,7 +20,7 @@ class TagListField(ListField):
             return []
 
     def clean(self, value):
-        return sorted(list(set([slugify(v, to_lower=True) for v in value])))
+        return sorted(list(set([slugify_tag(v) for v in value])))
 
     def to_python(self, value):
         return super(TagListField, self).to_python(self.clean(value))
