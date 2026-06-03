@@ -17,6 +17,7 @@ from mongoengine.fields import (
 )
 from mongoengine.signals import post_save
 
+from udata import uris
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
@@ -94,7 +95,7 @@ class Message(SpamMixin, EmbeddedDocument):
 
 
 def is_valid_notification_external_url(url) -> bool:
-    """True if `url` is an http(s) URL whose domain is in the allow-list.
+    """True if `url` is an http(s) URL whose host is in the allow-list.
 
     Used both as the write-time validator (via `NotificationExtra`) and the
     read-time filter (in `Discussion.notification_url`). Keeping a single
@@ -103,24 +104,16 @@ def is_valid_notification_external_url(url) -> bool:
     if not url or not isinstance(url, str):
         return False
     try:
-        parsed = urlparse(url)
-    except ValueError:
+        # Delegate scheme, credentials and well-formedness checks to the
+        # shared URL validator instead of reimplementing them. It also rejects
+        # malformed URLs (no `ValueError` from `urlparse` bubbles up), userinfo
+        # (a `attacker.com\@host` phishing vector) and dangerous schemes such
+        # as `javascript:`. The extra local/private/TLD checks it performs are
+        # safe here: the URL is only ever shown in a mail, never fetched.
+        uris.validate(url, schemes=("http", "https"), credentials=False)
+    except uris.ValidationError:
         return False
-    # Reject non-http(s) schemes: `urlparse("javascript://host/...").netloc`
-    # returns the host, so the netloc allow-list alone would let dangerous
-    # schemes land in a clickable `<a href>` in the notification mail.
-    if parsed.scheme not in ("http", "https"):
-        return False
-    # Reject any userinfo: `urlparse("http://attacker.com\@eco.example.com")`
-    # keeps `attacker.com\` as `username` and `eco.example.com` as `hostname`,
-    # but WHATWG-conformant clients (browsers, mail readers) normalize `\` to
-    # `/` for http(s), routing the click to `attacker.com`. Userinfo also has
-    # no legitimate use in a notification URL, so we reject it outright.
-    if parsed.username or parsed.password:
-        return False
-    host = parsed.hostname or ""
-    if not host:
-        return False
+    host = urlparse(url).hostname or ""
     allowed = current_app.config.get("DISCUSSION_ALLOWED_EXTERNAL_DOMAINS", [])
     # `fnmatchcase` keeps the match deterministic across OSes (`fnmatch` is
     # case-insensitive on Windows). `hostname` is already lowercased by Python.
@@ -242,14 +235,6 @@ class Discussion(SpamMixin, Linkable, Document):
     def self_api_url(self, **kwargs):
         return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
 
-    def _notification_meta(self) -> dict:
-        """Return `extras["notification"]` as a dict, coercing missing/None to {}.
-
-        Raw DB writes (imports, migrations) bypassing mongoengine validation
-        can leave the key set to `None`, so both layers are coerced on read.
-        """
-        return (self.extras or {}).get("notification") or {}
-
     @property
     def notification_url(self):
         """URL to point to in notification emails.
@@ -263,7 +248,10 @@ class Discussion(SpamMixin, Linkable, Document):
         migrations), or a config change tightening the allow-list could all
         leave an unsafe URL in storage.
         """
-        meta_url = self._notification_meta().get("external_url")
+        # Raw DB writes (imports, migrations) bypassing mongoengine validation
+        # can leave `notification` set to `None`, hence the `or {}` coercion.
+        notification = (self.extras or {}).get("notification") or {}
+        meta_url = notification.get("external_url")
         if is_valid_notification_external_url(meta_url):
             return f"{meta_url}#discussion-{self.id}"
         return self.url_for()

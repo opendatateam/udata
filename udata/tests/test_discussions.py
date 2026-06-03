@@ -1610,3 +1610,45 @@ class DiscussionExternalNotificationTest(APITestCase):
             self.assert400(response)
 
         assert Discussion.objects(subject=topic).count() == 0
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_allow_list_wildcard_does_not_leak_to_neighbour_domains(self):
+        # The `*.example.com` wildcard must match strict subdomains only, never
+        # a neighbour domain that merely embeds the allowed one. These are the
+        # core phishing vectors against the allow-list:
+        #   - `evil-example.com` ends in `-example.com`, not `.example.com`
+        #   - `example.com.attacker.com` puts the allowed domain in a prefix
+        #   - `example.com` (apex, no subdomain) lacks the leading `<sub>.`
+        self.login()
+        topic = TopicFactory()
+
+        for url in (
+            "https://evil-example.com/phishing",
+            "https://example.com.attacker.com/phishing",
+            "https://example.com/phishing",
+        ):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": {"external_url": url}},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
+
+        # A genuine subdomain of the allowed domain is accepted.
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test",
+                "comment": "bla",
+                "subject": {"class": "Topic", "id": topic.id},
+                "extras": {"notification": {"external_url": "https://sub.example.com/ok"}},
+            },
+        )
+        self.assert201(response)
+        assert Discussion.objects(subject=topic).count() == 1
