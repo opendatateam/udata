@@ -370,8 +370,7 @@ def themes_from_rdf(rdf):
             continue
         tags.append(tag.toPython())
     tags += theme_labels_from_rdf(rdf)
-    normalized_tags = [normalize_tag(tag) for tag in tags if normalize_tag(tag)]
-    return list(set(normalized_tags))
+    return sorted({normalize_tag(tag) for tag in tags if normalize_tag(tag)})
 
 
 def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
