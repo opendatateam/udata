@@ -20,7 +20,7 @@ class TagListField(ListField):
             return []
 
     def clean(self, value):
-        return sorted(list(set([slugify_tag(v) for v in value])))
+        return sorted({slugify_tag(v) for v in value})
 
     def to_python(self, value):
         return super(TagListField, self).to_python(self.clean(value))
