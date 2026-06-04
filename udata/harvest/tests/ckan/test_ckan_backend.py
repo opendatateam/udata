@@ -285,6 +285,23 @@ def spatial_uri(resource_data):
 
 
 @pytest.fixture
+def invalid_tags(resource_data):
+    data = {
+        "name": faker.unique_string(),
+        "title": faker.sentence(),
+        "notes": faker.paragraph(),
+        "tags": [
+            {"name": "a", "id": faker.unique_string()},  # too short
+            {"name": "duplicate", "id": faker.unique_string()},
+            {"name": "DuPliCate", "id": faker.unique_string()},
+            {"name": "WAY TOO LONG KEYWORD THAT WILL BE CROPPED", "id": faker.unique_string()},
+        ],
+        "resources": [resource_data],
+    }
+    return data, {"resource_url": resource_data["url"]}
+
+
+@pytest.fixture
 def skipped_no_resources():
     return {
         "name": faker.unique_string(),
@@ -531,6 +548,12 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset = dataset_for(result)
         assert dataset.extras["ckan:spatial-uri"] == kwargs["spatial"]
         assert dataset.spatial is None
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    @pytest.mark.ckan_data("invalid_tags")
+    def test_normalize_and_filter_invalid_tags(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert set(dataset.tags) == {"duplicate", "way-too-lo"}
 
 
 ##############################################################################
