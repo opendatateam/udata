@@ -64,8 +64,8 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
+    slugify_tag,
 )
-from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
