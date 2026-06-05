@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- feat(dataservices): compute the `reuses` metric so the dataservice reuses count is accurate [#XXXX](https://github.com/opendatateam/udata/pull/XXXX)
+
 ## 16.6.0 (2026-06-02)
 
 - Add 2FA requirement for sysadmin ([#3642](https://github.com/opendatateam/udata/pull/3642))

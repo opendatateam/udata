@@ -357,6 +357,7 @@ class Dataservice(
         "discussions_open",
         "followers",
         "followers_by_months",
+        "reuses",
         "views",
     ]
 
@@ -392,6 +393,14 @@ class Dataservice(
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.metrics["followers_by_months"] = get_stock_metrics(
             Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_reuses(self):
+        from udata.models import Reuse
+
+        self.metrics["reuses"] = (
+            Reuse.objects(dataservices=self).filter(private__ne=True, deleted=None).count()
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
