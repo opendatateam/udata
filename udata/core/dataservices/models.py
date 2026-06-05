@@ -424,6 +424,15 @@ class Dataservice(
 
         return result
 
+    @staticmethod
+    def normalize_score(score):
+        QUALITY_MAX_SCORE = 10
+        return score / QUALITY_MAX_SCORE
+
+    def compute_quality_score(self, quality):
+        score = sum(1 for value in quality.values() if value is True)
+        return self.normalize_score(score)
+
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
 post_save.connect(SpamMixin.post_save, sender=Dataservice)
