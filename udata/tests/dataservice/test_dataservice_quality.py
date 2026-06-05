@@ -138,3 +138,23 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             ]
         }
         assert ds.compute_quality_score(quality) == 1.0
+
+
+class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
+    def test_quality_property_includes_criteria_and_score(self):
+        ds = DataserviceFactory.build(description="x" * 200, base_api_url="https://api.example.com")
+        quality = ds.quality
+        assert "score" in quality
+        assert quality["has_description"] is True
+        assert quality["has_base_api_url"] is True
+        assert 0.0 <= quality["score"] <= 1.0
+
+
+class DataserviceQualityApiTest(PytestOnlyAPITestCase):
+    def test_quality_is_serialized_on_dataservice_api(self):
+        ds = DataserviceFactory(description="x" * 200, base_api_url="https://api.example.com")
+        response = self.get(f"/api/1/dataservices/{ds.id}/")
+        self.assert200(response)
+        assert "quality" in response.json
+        assert "score" in response.json["quality"]
+        assert response.json["quality"]["has_base_api_url"] is True
