@@ -158,3 +158,19 @@ class DataserviceQualityApiTest(PytestOnlyAPITestCase):
         assert "quality" in response.json
         assert "score" in response.json["quality"]
         assert response.json["quality"]["has_base_api_url"] is True
+
+
+class DataserviceQualityCacheTest(PytestOnlyAPITestCase):
+    def test_quality_cached_is_populated_on_save(self):
+        ds = DataserviceFactory(description="x" * 200, base_api_url="https://api.example.com")
+        ds.reload()
+        assert ds.quality_cached != {}
+        assert ds.quality_cached["has_base_api_url"] is True
+
+    def test_quality_cached_updates_when_fields_change(self):
+        ds = DataserviceFactory(license=None)
+        assert ds.quality_cached["license"] is False
+        ds.license = LicenseFactory()
+        ds.save()
+        ds.reload()
+        assert ds.quality_cached["license"] is True

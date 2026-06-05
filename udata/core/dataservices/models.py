@@ -411,6 +411,10 @@ class Dataservice(
         quality["score"] = self.compute_quality_score(quality)
         return quality
 
+    def clean(self):
+        super().clean()
+        self.quality_cached = self.compute_quality()
+
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self).count()
         self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
