@@ -82,3 +82,59 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
             access_type=AccessType.OPEN_WITH_ACCOUNT, authorization_request_url=None
         )
         assert ds.compute_quality()["access_conditions_clear"] is False
+
+
+class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
+    def test_score_is_count_of_true_criteria_over_ten(self):
+        ds = DataserviceFactory.build()
+        quality = {
+            "has_description": True,
+            "has_machine_documentation": True,
+            "has_technical_documentation": False,
+            "license": True,
+            "has_contact_point": False,
+            "has_base_api_url": True,
+            "availability_documented": False,
+            "rate_limiting_documented": False,
+            "has_business_documentation": False,
+            "access_conditions_clear": True,
+        }
+        assert ds.compute_quality_score(quality) == 0.5
+
+    def test_all_false_scores_zero(self):
+        ds = DataserviceFactory.build()
+        quality = {
+            k: False
+            for k in [
+                "has_description",
+                "has_machine_documentation",
+                "has_technical_documentation",
+                "license",
+                "has_contact_point",
+                "has_base_api_url",
+                "availability_documented",
+                "rate_limiting_documented",
+                "has_business_documentation",
+                "access_conditions_clear",
+            ]
+        }
+        assert ds.compute_quality_score(quality) == 0.0
+
+    def test_all_true_scores_one(self):
+        ds = DataserviceFactory.build()
+        quality = {
+            k: True
+            for k in [
+                "has_description",
+                "has_machine_documentation",
+                "has_technical_documentation",
+                "license",
+                "has_contact_point",
+                "has_base_api_url",
+                "availability_documented",
+                "rate_limiting_documented",
+                "has_business_documentation",
+                "access_conditions_clear",
+            ]
+        }
+        assert ds.compute_quality_score(quality) == 1.0
