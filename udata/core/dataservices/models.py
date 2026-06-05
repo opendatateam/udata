@@ -56,6 +56,23 @@ dataservice_permissions_fields = api.model(
     },
 )
 
+dataservice_quality_fields = api.model(
+    "DataserviceQuality",
+    {
+        "has_description": fields.Boolean(),
+        "has_machine_documentation": fields.Boolean(),
+        "has_technical_documentation": fields.Boolean(),
+        "has_business_documentation": fields.Boolean(),
+        "license": fields.Boolean(),
+        "has_contact_point": fields.Boolean(),
+        "has_base_api_url": fields.Boolean(),
+        "availability_documented": fields.Boolean(),
+        "rate_limiting_documented": fields.Boolean(),
+        "access_conditions_clear": fields.Boolean(),
+        "score": fields.Float(),
+    },
+)
+
 
 class DataserviceQuerySet(OwnedQuerySet):
     def visible(self):
@@ -386,6 +403,13 @@ class Dataservice(
             "edit": DataserviceEditPermission(self),
             "read": OwnableReadPermission(self),
         }
+
+    @property
+    @field(nested_fields=dataservice_quality_fields)
+    def quality(self):
+        quality = dict(self.quality_cached) if self.quality_cached else self.compute_quality()
+        quality["score"] = self.compute_quality_score(quality)
+        return quality
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self).count()
