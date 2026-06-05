@@ -1,13 +1,14 @@
 from datetime import UTC, datetime
 
 from blinker import Signal
-from flask import url_for
+from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import PULL, EmbeddedDocument, Q
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    DictField,
     EmbeddedDocumentField,
     FloatField,
     LazyReferenceField,
@@ -19,6 +20,7 @@ from mongoengine.signals import post_save
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
@@ -340,6 +342,8 @@ class Dataservice(
         auditable=False,
     )
 
+    quality_cached = DictField()
+
     @field(description="Link to the API endpoint for this dataservice", show_as_ref=True)
     def self_api_url(self, **kwargs):
         return url_for(
@@ -394,6 +398,31 @@ class Dataservice(
             Follow.objects(following=self), date_label="since"
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def compute_quality(self):
+        """Return a dict of boolean metadata-quality criteria for this dataservice."""
+        result = {}
+
+        result["has_description"] = len(self.description or "") > current_app.config.get(
+            "QUALITY_DESCRIPTION_LENGTH"
+        )
+        result["has_machine_documentation"] = bool(self.machine_documentation_url)
+        result["has_technical_documentation"] = bool(self.technical_documentation_url)
+        result["has_business_documentation"] = bool(self.business_documentation_url)
+        result["license"] = bool(self.license)
+        result["has_contact_point"] = bool(self.contact_points)
+        result["has_base_api_url"] = bool(self.base_api_url)
+        result["availability_documented"] = self.availability is not None or bool(
+            self.availability_url
+        )
+        result["rate_limiting_documented"] = bool(self.rate_limiting or self.rate_limiting_url)
+
+        if self.access_type == AccessType.OPEN:
+            result["access_conditions_clear"] = True
+        else:
+            result["access_conditions_clear"] = bool(self.authorization_request_url)
+
+        return result
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
