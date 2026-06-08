@@ -5,6 +5,7 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
@@ -89,7 +90,7 @@ class Owned(object):
         filterable={},
     )
     organization = field(
-        ReferenceField("Organization", reverse_delete_rule=NULLIFY),
+        ReferenceField(Organization, reverse_delete_rule=NULLIFY),
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,
