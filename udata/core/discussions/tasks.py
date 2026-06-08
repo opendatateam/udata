@@ -1,15 +1,21 @@
 from datetime import UTC, datetime
 
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.core.post.models import Post
+from udata.core.reuse.models import Reuse
+from udata.core.topic.models import Topic
 from udata.features.notifications.models import Notification
 from udata.tasks import connect, get_logger
 
 from . import mails
-from .constants import NOTIFY_DISCUSSION_SUBJECTS
 from .models import Discussion
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
 log = get_logger(__name__)
+
+NOTIFY_DISCUSSION_SUBJECTS = (Dataset, Reuse, Post, Dataservice, Topic)
 
 
 def _resolve_notification_url(discussion):

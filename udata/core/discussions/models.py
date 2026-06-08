@@ -18,13 +18,19 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save
 
 from udata import uris
+from udata.api import api, fields
+from udata.api_fields import field, generate_fields
 from udata.core.linkable import Linkable
+from udata.core.organization.models import Organization
+from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
 from udata.core.spam.models import SpamMixin, spam_protected
+from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
+from .constants import COMMENT_SIZE_LIMIT
 from .signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -36,17 +42,43 @@ from .signals import (
 log = logging.getLogger(__name__)
 
 
+message_permissions_fields = api.model(
+    "DiscussionMessagePermissions",
+    {"delete": fields.Permission(), "edit": fields.Permission()},
+)
+
+discussion_permissions_fields = api.model(
+    "DiscussionPermissions",
+    {"delete": fields.Permission(), "edit": fields.Permission(), "close": fields.Permission()},
+)
+
+
+@generate_fields()
 class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
-    id = AutoUUIDField()
-    content = StringField(required=True)
-    posted_on = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    posted_by = ReferenceField("User")
-    posted_by_organization = ReferenceField("Organization")
-    last_modified_at = DateTimeField()
+    id = field(AutoUUIDField(), readonly=True)
+    content = field(StringField(required=True, max_length=COMMENT_SIZE_LIMIT))
+    posted_on = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+    )
+    posted_by = field(
+        ReferenceField("User"),
+        readonly=True,
+        nested_fields=user_ref_fields,
+        allow_null=True,
+    )
+    posted_by_organization = field(
+        ReferenceField("Organization"),
+        readonly=True,
+        nested_fields=Organization.__ref_fields__,
+        allow_null=True,
+    )
+    last_modified_at = field(DateTimeField(), readonly=True, allow_null=True)
 
     @property
+    @field(nested_fields=message_permissions_fields)
     def permissions(self):
         from .permissions import DiscussionMessagePermission
 
@@ -90,7 +122,7 @@ class Message(SpamMixin, EmbeddedDocument):
             )
             return message
 
-        message += f" sur la discussion « [{discussion.title}]({discussion.url_for()}) »"
+        message += f" sur la discussion « [{discussion.title}]({discussion.url_for()}) »"
         return message
 
 
@@ -136,20 +168,71 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
+@generate_fields(
+    searchable=True,
+    default_sort="-created",
+    additional_sorts=[{"key": "discussion.posted_on", "value": "discussion.posted_on"}],
+)
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
-    user = ReferenceField("User")
-    organization = ReferenceField("Organization")
+    user = field(
+        ReferenceField("User"),
+        readonly=True,
+        nested_fields=user_ref_fields,
+        allow_null=True,
+        description="The discussion author",
+    )
+    organization = field(
+        ReferenceField("Organization"),
+        nested_fields=Organization.__ref_fields__,
+        allow_null=True,
+        description="The organization to publish on behalf of",
+        checks=[check_organization_is_valid_for_current_user, only_creation],
+    )
 
-    subject = GenericReferenceField()
-    title = StringField(required=True)
-    discussion = ListField(EmbeddedDocumentField(Message))
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    closed = DateTimeField()
-    closed_by = ReferenceField("User")
-    closed_by_organization = ReferenceField("Organization")
-    extras = ExtrasField({"notification": NotificationExtra})
+    subject = field(
+        GenericReferenceField(required=True),
+        nested_fields=api.model_reference,
+        description="The discussion target object",
+    )
+    title = field(StringField(required=True), sortable=True, description="The discussion title")
+    discussion = field(
+        ListField(EmbeddedDocumentField(Message)),
+        readonly=True,
+        description="The list of messages in the discussion",
+    )
+    created = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        sortable=True,
+        description="The discussion creation date",
+    )
+    closed = field(
+        DateTimeField(),
+        readonly=True,
+        sortable=True,
+        allow_null=True,
+        description="The discussion closing date",
+    )
+    closed_by = field(
+        ReferenceField("User"),
+        readonly=True,
+        nested_fields=user_ref_fields,
+        allow_null=True,
+        description="The user who closed the discussion",
+    )
+    closed_by_organization = field(
+        ReferenceField("Organization"),
+        readonly=True,
+        nested_fields=Organization.__ref_fields__,
+        allow_null=True,
+        description="The organization who closed the discussion",
+    )
+    extras = field(
+        ExtrasField({"notification": NotificationExtra}),
+        description="Extra attributes as key-value pairs",
+    )
 
     meta = {
         "indexes": [
@@ -167,6 +250,7 @@ class Discussion(SpamMixin, Linkable, Document):
     }
 
     @property
+    @field(nested_fields=discussion_permissions_fields)
     def permissions(self):
         from udata.core.discussions.permissions import (
             DiscussionAuthorOrSubjectOwnerPermission,
@@ -179,6 +263,10 @@ class Discussion(SpamMixin, Linkable, Document):
             "edit": DiscussionAuthorPermission(self),
             "close": DiscussionAuthorOrSubjectOwnerPermission(self),
         }
+
+    @field(description="The discussion API URI")
+    def url(self):
+        return self.self_api_url()
 
     @property
     def closed_by_name(self):
@@ -229,6 +317,7 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return OwnablePermission(self.subject).can()
 
+    @field(description="The discussion web URL")
     def self_web_url(self, **kwargs):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
 
@@ -257,7 +346,7 @@ class Discussion(SpamMixin, Linkable, Document):
         return self.url_for()
 
     def spam_report_message(self, breadcrumb):
-        message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
+        message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
         if self.user:
             message += f" de [{self.user.fullname}]({self.user.url_for()})"
 

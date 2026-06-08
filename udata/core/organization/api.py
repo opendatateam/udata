@@ -18,7 +18,6 @@ from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
@@ -755,7 +754,7 @@ class OrgReusesAPI(API):
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
-    @api.marshal_list_with(discussion_fields)
+    @api.marshal_list_with(Discussion.__read_fields__)
     def get(self, org):
         """List organization discussions"""
         reuses = Reuse.objects(organization=org).only("id")

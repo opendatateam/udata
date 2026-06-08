@@ -1,11 +1,13 @@
 from datetime import UTC, datetime
 
 import pytest
+from bson import ObjectId
 from flask import url_for
 from werkzeug.test import TestResponse
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.constants import COMMENT_SIZE_LIMIT
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
@@ -146,6 +148,21 @@ class DiscussionsTest(APITestCase):
         response = self.post(
             url_for("api.discussion", id=response.json["id"]),
             {"organization": other_org.id, "comment": "A comment"},
+        )
+        self.assert400(response)
+
+    def test_comment_on_behalf_of_unknown_org(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": str(ObjectId()), "comment": "A comment"},
         )
         self.assert400(response)
 
@@ -544,6 +561,33 @@ class DiscussionsTest(APITestCase):
             # Clean slate
             Discussion.objects.delete()
 
+    def test_list_discussions_sort_by_message_posted_on(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+
+        older = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="older", posted_by=user, posted_on=datetime(2023, 1, 1, tzinfo=UTC))
+            ],
+        )
+        newer = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="newer", posted_by=user, posted_on=datetime(2024, 1, 1, tzinfo=UTC))
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", sort="discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(older.id), str(newer.id)])
+
+        response = self.get(url_for("api.discussions", sort="-discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(newer.id), str(older.id)])
+
     def test_list_discussions_user(self):
         dataset = DatasetFactory()
         discussions = []
@@ -632,6 +676,42 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data["discussion"][1]["posted_on"])
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
+
+    def test_comment_size_limit(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        too_long = "a" * (COMMENT_SIZE_LIMIT + 1)
+
+        # On creation, the comment is stored in the first message.
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": too_long,
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+        self.assert400(response)
+
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        # When adding a comment to an existing discussion.
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"comment": too_long},
+        )
+        self.assert400(response)
+
+        # When editing an existing comment.
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": too_long},
+        )
+        self.assert400(response)
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_spam_comment_to_discussion(self):
@@ -748,6 +828,26 @@ class DiscussionsTest(APITestCase):
                 {"close": True},
             )
             self.assert200(response)
+
+    def test_close_discussion_on_behalf_of_org(self):
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": True, "organization": org.id},
+        )
+        self.assert200(response)
+        assert response.json["closed_by"]["id"] == str(user.id)
+        assert response.json["closed_by_organization"]["id"] == str(org.id)
+
+        discussion.reload()
+        assert discussion.closed_by_organization == org
 
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
@@ -948,6 +1048,23 @@ class DiscussionsTest(APITestCase):
         )
         self.assertStatus(response, 403)
 
+    def test_edit_discussion_title_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {"title": ""})
+        self.assert400(response)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {})
+        self.assert400(response)
+
+        discussion.reload()
+        assert discussion.title == "test discussion"
+
     def test_edit_discussion_comment(self):
         admin = self.login(AdminFactory())
         user = UserFactory()
@@ -1023,6 +1140,20 @@ class DiscussionsTest(APITestCase):
             {"comment": "unknown uuid"},
         )
         self.assertStatus(response, 404)
+
+    def test_edit_discussion_comment_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": ""},
+        )
+        self.assert400(response)
 
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())

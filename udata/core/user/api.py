@@ -11,7 +11,7 @@ from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
-from udata.core.discussions.api import discussion_fields
+from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
@@ -186,7 +186,7 @@ class MyOrgDiscussionsAPI(API):
     @api.secure
     @api.doc("my_org_discussions")
     @api.expect(filter_parser)
-    @api.marshal_list_with(discussion_fields)
+    @api.marshal_list_with(Discussion.__read_fields__)
     def get(self):
         """List all discussions related to my organizations."""
         q = filter_parser.parse_args().get("q")
