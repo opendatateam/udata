@@ -4,6 +4,18 @@
 
 - feat(dataservices): compute the `reuses` metric so the dataservice reuses count is accurate [#XXXX](https://github.com/opendatateam/udata/pull/XXXX)
 
+## 16.6.1 (2026-06-05)
+
+- chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))
+- chore(deps): update dependency faker to >=40.21, <40.22 ([#3806](https://github.com/opendatateam/udata/pull/3806))
+- feat: allow external URL and name for discussions ([#3765](https://github.com/opendatateam/udata/pull/3765))
+- feat(harvest): add resource harvest timestamp ([#3805](https://github.com/opendatateam/udata/pull/3805))
+- fix: dataset deleted in accordion ([#3812](https://github.com/opendatateam/udata/pull/3812))
+- fix(deps): downgrade saxonche to v12 ([#3817](https://github.com/opendatateam/udata/pull/3817))
+- fix(tags): move validation in harvest logic to fix tags unpickling ([#3810](https://github.com/opendatateam/udata/pull/3810))
+- test: add missing tests ([#3813](https://github.com/opendatateam/udata/pull/3813))
+
+
 ## 16.6.0 (2026-06-02)
 
 - Add 2FA requirement for sysadmin ([#3642](https://github.com/opendatateam/udata/pull/3642))
