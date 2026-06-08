@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
 import requests
+from bson import ObjectId
 from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
@@ -249,9 +250,9 @@ class BaseBackend(object):
         log.debug(f"Processing dataset {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        self.job.items.append(item)
-        self.save_job()
+        item = self.add_item(
+            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
+        )
 
         log_catcher = LogCatcher()
 
@@ -275,6 +276,12 @@ class BaseBackend(object):
 
             if self.dryrun:
                 dataset.validate()
+                # A preview never saves, so the dataset would keep no pk and could not
+                # be referenced by a dataservice harvested in the same run. Give it the
+                # client-side id that save() would have generated so cross-references
+                # between previewed objects stay valid and distinct.
+                if dataset.pk is None:
+                    dataset.id = ObjectId()
             else:
                 dataset.save()
             item.dataset = dataset
@@ -312,9 +319,9 @@ class BaseBackend(object):
         log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        self.job.items.append(item)
-        self.save_job()
+        item = self.add_item(
+            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
+        )
 
         try:
             if not remote_id:
@@ -401,6 +408,11 @@ class BaseBackend(object):
 
         return harvest
 
+    def add_item(self, item: HarvestItem) -> HarvestItem:
+        self.job.items.append(item)
+        self.save_job()
+        return item
+
     def save_job(self):
         if not self.dryrun:
             self.job.save()
@@ -434,13 +446,11 @@ class BaseBackend(object):
                 archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.job.items.append(
+            self.add_item(
                 HarvestItem(
                     remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
                 )
             )
-
-            self.save_job()
 
         for dataservice in local_dataservices_not_on_remote:
             if not dataservice.harvest.archived_at:
@@ -449,15 +459,13 @@ class BaseBackend(object):
                 )
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.job.items.append(
+            self.add_item(
                 HarvestItem(
                     remote_id=str(dataservice.harvest.remote_id),
                     dataservice=dataservice,
                     status="archived",
                 )
             )
-
-            self.save_job()
 
     def get_dataset(self, remote_id):
         """Get or create a dataset given its remote ID (and its source)
@@ -478,6 +486,7 @@ class BaseBackend(object):
             ).first()
 
         if dataset:
+            self.ensure_unique_ownership(dataset)
             return dataset
 
         if self.source.organization:
@@ -502,6 +511,7 @@ class BaseBackend(object):
         ).first()
 
         if dataservice:
+            self.ensure_unique_ownership(dataservice)
             return dataservice
 
         if self.source.organization:
@@ -510,6 +520,28 @@ class BaseBackend(object):
             return Dataservice(owner=self.source.owner)
 
         return Dataservice()
+
+    def ensure_unique_ownership(self, item):
+        """Raise if item already belongs to some other owner.
+
+        Ressources (datasets, services, ...) must have universally unique
+        identifiers, but some catalogs fail to enforce it. Cases seen
+        in the wild:
+        - Copy-pasting record metadata without changing the identifier.
+        - Using the table name of the originating data as identifier, and
+          generating several datasets out of the same table.
+        - "TODO", "A REMPLIR", etc. in the identifier field.
+        """
+        other_owner = None
+        if item.organization and item.organization != self.source.organization:
+            other_owner = item.organization
+        elif item.owner and item.owner != self.source.owner:
+            other_owner = item.owner
+        else:
+            return
+        raise HarvestValidationError(
+            f"Item has another owner: {other_owner.page() or other_owner.id}"
+        )
 
     def validate(self, data, schema):
         """Perform a data validation against a given schema.

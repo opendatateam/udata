@@ -205,6 +205,21 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_datasetseries(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        source = HarvestSourceFactory(
+            backend="dcat",
+            url=mock_dcat(rmock, "series.xml"),
+            organization=OrganizationFactory(),
+        )
+        actions.run(source)
+
+        datasets = Dataset.objects
+
+        assert len(datasets) == 1
+        assert datasets[0].title == "DCE – Bassin Artois-Picardie - Etat global"
+
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
 
@@ -1016,6 +1031,42 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         # No datasets should have been created either
         assert Dataset.objects.count() == 0
 
+    def test_preview_dataservice_serving_datasets(self, rmock):
+        """Preview a dataservice serving datasets that are created during the same run.
+
+        In dryrun the harvested datasets are never saved. They used to keep no pk, which
+        (1) made `dataservice.validate()` raise `ValidationError (... ['datasets'])` on
+        the `datasets` LazyReferenceField, and (2) collapsed every served dataset into a
+        single reference (they all compared equal through `pk=None`). Datasets now get a
+        client-side id during the preview, so both issues are gone.
+        """
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        url = mock_dcat(rmock, "bnodes.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        job = actions.preview(source)
+
+        assert job.status == "done"
+
+        dataservice_items = [item for item in job.items if item.dataservice is not None]
+        assert len(dataservice_items) == 1
+        dataservice_item = dataservice_items[0]
+        assert dataservice_item.status == "done", dataservice_item.errors
+        assert dataservice_item.dataservice.title == "Explore API v2"
+
+        # The dataservice serves dataset-2 and dataset-3: both stay attached as two
+        # distinct references (the dedup no longer collapses them through pk=None).
+        attached = dataservice_item.dataservice.datasets
+        assert len(attached) == 2
+        assert all(dataset.pk is not None for dataset in attached)
+        assert attached[0].pk != attached[1].pk
+
+        # A preview must not persist anything
+        assert Dataset.objects.count() == 0
+        assert Dataservice.objects.count() == 0
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
@@ -1276,6 +1327,50 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             # First `dct:landingPage` found in the resource.
             # If it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior.
             assert dataset.harvest.remote_url == "http://data.example.com/datasets/dataset-1"
+
+    def test_parsing_error(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="2" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item1/">
+                <dct:identifier>https://example.com/item1/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title xml:lang="***">invalid xml:lang</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item2/">
+                <dct:identifier>https://example.com/item2/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>valid item</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done-errors"
+        assert len(job.items) == 2
+
+        item = job.items[0]
+        assert item.status == "failed"
+        error = item.errors[0]
+        assert "'***' is not a valid language tag!" in error.message
+        assert '<dct:title xml:lang="***">invalid xml:lang</dct:title>' in error.details
+
+        assert job.items[1].status == "done"
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])

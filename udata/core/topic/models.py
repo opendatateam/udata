@@ -27,6 +27,7 @@ from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.search import reindex
 from udata.tasks import as_task_param
+from udata.uris import cdata_url
 
 __all__ = ("Topic", "TopicElement")
 
@@ -83,6 +84,8 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
+        if document.topic:
+            reindex.delay(*as_task_param(document.topic))
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -90,6 +93,8 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
+            if document.topic:
+                reindex.delay(*as_task_param(document.topic))
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
@@ -98,6 +103,8 @@ class TopicElement(Auditable, Document):
 
 @generate_fields()
 class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
+    verbose_name = _("collection")
+
     name = field(StringField(required=True), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -171,8 +178,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
         )
 
     def self_web_url(self, **kwargs):
-        # Useful for Discussions to call self_web_url on their `subject`
-        return None
+        return cdata_url(f"/topics/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(

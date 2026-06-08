@@ -233,10 +233,25 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 nested_info,
             )
 
+        # A `ListField(ReferenceField)` may hold dangling `DBRef`s pointing to
+        # deleted documents (e.g. a hard delete that bypassed `reverse_delete_rule`).
+        # MongoEngine leaves them as raw `DBRef`s on access, which crashes nested
+        # marshalling, so we filter them out at read time.
+        inner_is_reference = isinstance(
+            field.field,
+            mongo_fields.ReferenceField | mongo_fields.LazyReferenceField,
+        )
+
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
             # by the `href` code above.
             def constructor_read(**kwargs):
+                if inner_is_reference and "attribute" not in kwargs:
+                    kwargs["attribute"] = lambda obj, _key=key: [
+                        ref
+                        for ref in (getattr(obj, _key, None) or [])
+                        if not isinstance(ref, DBRef)
+                    ]
                 return restx_fields.List(field_read, **kwargs)
 
         # But we want to keep the `constructor_write` to allow changing the list.
