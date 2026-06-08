@@ -11,7 +11,7 @@ from udata.core.organization.constants import COMPANY, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
@@ -230,6 +230,104 @@ class SearchIntegrationTest(APITestCase):
         names = [t["name"] for t in response.json["data"]]
         assert names[0] == "new topic"
         assert names[1] == "old topic"
+
+    def test_topic_search_by_element_title(self):
+        """A topic should be findable by its elements' titles in ES."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        TopicElementFactory(
+            topic=topic, title="climate change data", description="some description"
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        ids = [t["id"] for t in response.json["data"]]
+        assert str(topic.id) in ids
+        assert response.json["total"] == 1
+
+    def test_topic_search_by_element_description(self):
+        """A topic should be findable by its elements' descriptions in ES."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        TopicElementFactory(
+            topic=topic, title="some title", description="environmental datasets about biodiversity"
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=biodiversity")
+        self.assert200(response)
+        ids = [t["id"] for t in response.json["data"]]
+        assert str(topic.id) in ids
+        assert response.json["total"] == 1
+
+    def test_topic_search_by_element_tag(self):
+        """A topic should be findable by its elements' tags in ES."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        TopicElementFactory(topic=topic, title="some title", tags=["renewable-energy"])
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=renewable-energy")
+        self.assert200(response)
+        ids = [t["id"] for t in response.json["data"]]
+        assert str(topic.id) in ids
+        assert response.json["total"] == 1
+
+    def test_topic_search_element_deleted(self):
+        """Deleting an element should remove its content from the topic's index."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        elem = TopicElementFactory(
+            topic=topic, title="climate change data", tags=["renewable-energy"]
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
+        elem.delete()
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        response = self.get("/api/2/topics/search/?q=renewable-energy")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+    def test_topic_search_element_updated(self):
+        """Updating an element should reflect new content in the topic's index."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        elem = TopicElementFactory(
+            topic=topic, title="climate change data", tags=["renewable-energy"]
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
+        elem.title = "ocean biodiversity data"
+        elem.tags = ["marine"]
+        elem.save()
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        response = self.get("/api/2/topics/search/?q=biodiversity")
+        self.assert200(response)
+        assert response.json["total"] == 1
 
     def test_discussion_search(self):
         """Test discussion search endpoint."""
