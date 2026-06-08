@@ -326,6 +326,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        facet_sizes: dict = {},
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableOrganization.search()
 
@@ -382,7 +383,12 @@ class ElasticClient:
                 )
             )
 
-        search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
+        search.aggs.bucket(
+            "producer_type",
+            "terms",
+            field="producer_type",
+            size=facet_sizes.get("producer_type", 50),
+        )
         search.aggs.metric("total_count", "cardinality", field="_id")
 
         if post_filters:
@@ -427,6 +433,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        facet_sizes: dict = {},
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableTopic.search()
 
@@ -503,10 +510,10 @@ class ElasticClient:
             tag_agg = search.aggs.bucket(
                 "tag_filtered", "filter", filter=query.Bool(must=tag_filters)
             )
-            tag_agg.bucket("tag", "terms", field="tags", size=50)
+            tag_agg.bucket("tag", "terms", field="tags", size=facet_sizes.get("tag", 50))
             tag_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("tag", "terms", field="tags", size=50)
+            search.aggs.bucket("tag", "terms", field="tags", size=facet_sizes.get("tag", 50))
             search.aggs.metric("tag_total", "cardinality", field="_id")
 
         org_filters = get_filters_except("organization_id_with_name")
@@ -515,12 +522,18 @@ class ElasticClient:
                 "organization_id_with_name_filtered", "filter", filter=query.Bool(must=org_filters)
             )
             org_agg.bucket(
-                "organization_id_with_name", "terms", field="organization_with_id", size=50
+                "organization_id_with_name",
+                "terms",
+                field="organization_with_id",
+                size=facet_sizes.get("organization_id_with_name", 50),
             )
             org_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
-                "organization_id_with_name", "terms", field="organization_with_id", size=50
+                "organization_id_with_name",
+                "terms",
+                field="organization_with_id",
+                size=facet_sizes.get("organization_id_with_name", 50),
             )
             search.aggs.metric("organization_id_with_name_total", "cardinality", field="_id")
 
@@ -529,10 +542,20 @@ class ElasticClient:
             producer_agg = search.aggs.bucket(
                 "producer_type_filtered", "filter", filter=query.Bool(must=producer_filters)
             )
-            producer_agg.bucket("producer_type", "terms", field="producer_type", size=50)
+            producer_agg.bucket(
+                "producer_type",
+                "terms",
+                field="producer_type",
+                size=facet_sizes.get("producer_type", 50),
+            )
             producer_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
+            search.aggs.bucket(
+                "producer_type",
+                "terms",
+                field="producer_type",
+                size=facet_sizes.get("producer_type", 50),
+            )
             search.aggs.metric("producer_type_total", "cardinality", field="_id")
 
         last_update_filters = get_filters_except("last_update_range")
@@ -642,6 +665,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        facet_sizes: dict = {},
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableDataset.search()
 
@@ -822,10 +846,20 @@ class ElasticClient:
             format_agg = search.aggs.bucket(
                 "format_family_filtered", "filter", filter=query.Bool(must=format_filters)
             )
-            format_agg.bucket("format_family", "terms", field="format_family", size=50)
+            format_agg.bucket(
+                "format_family",
+                "terms",
+                field="format_family",
+                size=facet_sizes.get("format_family", 50),
+            )
             format_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("format_family", "terms", field="format_family", size=50)
+            search.aggs.bucket(
+                "format_family",
+                "terms",
+                field="format_family",
+                size=facet_sizes.get("format_family", 50),
+            )
             search.aggs.metric("format_family_total", "cardinality", field="_id")
 
         access_filters = get_filters_except("access_type")
@@ -833,10 +867,14 @@ class ElasticClient:
             access_agg = search.aggs.bucket(
                 "access_type_filtered", "filter", filter=query.Bool(must=access_filters)
             )
-            access_agg.bucket("access_type", "terms", field="access_type", size=50)
+            access_agg.bucket(
+                "access_type", "terms", field="access_type", size=facet_sizes.get("access_type", 50)
+            )
             access_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("access_type", "terms", field="access_type", size=50)
+            search.aggs.bucket(
+                "access_type", "terms", field="access_type", size=facet_sizes.get("access_type", 50)
+            )
             search.aggs.metric("access_type_total", "cardinality", field="_id")
 
         producer_filters = get_filters_except("producer_type")
@@ -844,10 +882,20 @@ class ElasticClient:
             producer_agg = search.aggs.bucket(
                 "producer_type_filtered", "filter", filter=query.Bool(must=producer_filters)
             )
-            producer_agg.bucket("producer_type", "terms", field="producer_type", size=50)
+            producer_agg.bucket(
+                "producer_type",
+                "terms",
+                field="producer_type",
+                size=facet_sizes.get("producer_type", 50),
+            )
             producer_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("producer_type", "terms", field="producer_type", size=50)
+            search.aggs.bucket(
+                "producer_type",
+                "terms",
+                field="producer_type",
+                size=facet_sizes.get("producer_type", 50),
+            )
             search.aggs.metric("producer_type_total", "cardinality", field="_id")
 
         org_name_filters = get_filters_except("organization_id_with_name")
@@ -858,12 +906,18 @@ class ElasticClient:
                 filter=query.Bool(must=org_name_filters),
             )
             org_name_agg.bucket(
-                "organization_id_with_name", "terms", field="organization_with_id", size=50
+                "organization_id_with_name",
+                "terms",
+                field="organization_with_id",
+                size=facet_sizes.get("organization_id_with_name", 50),
             )
             org_name_agg.metric("total", "cardinality", field="_id")
         else:
             search.aggs.bucket(
-                "organization_id_with_name", "terms", field="organization_with_id", size=50
+                "organization_id_with_name",
+                "terms",
+                field="organization_with_id",
+                size=facet_sizes.get("organization_id_with_name", 50),
             )
             search.aggs.metric("organization_id_with_name_total", "cardinality", field="_id")
 
@@ -901,10 +955,10 @@ class ElasticClient:
             tag_agg = search.aggs.bucket(
                 "tag_filtered", "filter", filter=query.Bool(must=tag_filters)
             )
-            tag_agg.bucket("tag", "terms", field="tags", size=50)
+            tag_agg.bucket("tag", "terms", field="tags", size=facet_sizes.get("tag", 50))
             tag_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("tag", "terms", field="tags", size=50)
+            search.aggs.bucket("tag", "terms", field="tags", size=facet_sizes.get("tag", 50))
             search.aggs.metric("tag_total", "cardinality", field="_id")
 
         license_filters = get_filters_except("license")
@@ -912,10 +966,14 @@ class ElasticClient:
             license_agg = search.aggs.bucket(
                 "license_filtered", "filter", filter=query.Bool(must=license_filters)
             )
-            license_agg.bucket("license", "terms", field="license", size=50)
+            license_agg.bucket(
+                "license", "terms", field="license", size=facet_sizes.get("license", 50)
+            )
             license_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("license", "terms", field="license", size=50)
+            search.aggs.bucket(
+                "license", "terms", field="license", size=facet_sizes.get("license", 50)
+            )
             search.aggs.metric("license_total", "cardinality", field="_id")
 
         format_filters = get_filters_except("format")
@@ -923,10 +981,12 @@ class ElasticClient:
             format_agg = search.aggs.bucket(
                 "format_filtered", "filter", filter=query.Bool(must=format_filters)
             )
-            format_agg.bucket("format", "terms", field="format", size=50)
+            format_agg.bucket("format", "terms", field="format", size=facet_sizes.get("format", 50))
             format_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("format", "terms", field="format", size=50)
+            search.aggs.bucket(
+                "format", "terms", field="format", size=facet_sizes.get("format", 50)
+            )
             search.aggs.metric("format_total", "cardinality", field="_id")
 
         schema_filters = get_filters_except("schema")
@@ -934,10 +994,12 @@ class ElasticClient:
             schema_agg = search.aggs.bucket(
                 "schema_filtered", "filter", filter=query.Bool(must=schema_filters)
             )
-            schema_agg.bucket("schema", "terms", field="schema", size=50)
+            schema_agg.bucket("schema", "terms", field="schema", size=facet_sizes.get("schema", 50))
             schema_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("schema", "terms", field="schema", size=50)
+            search.aggs.bucket(
+                "schema", "terms", field="schema", size=facet_sizes.get("schema", 50)
+            )
             search.aggs.metric("schema_total", "cardinality", field="_id")
 
         geozone_filters = get_filters_except("geozone")
@@ -945,10 +1007,14 @@ class ElasticClient:
             geozone_agg = search.aggs.bucket(
                 "geozone_filtered", "filter", filter=query.Bool(must=geozone_filters)
             )
-            geozone_agg.bucket("geozone", "terms", field="geozones", size=50)
+            geozone_agg.bucket(
+                "geozone", "terms", field="geozones", size=facet_sizes.get("geozone", 50)
+            )
             geozone_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("geozone", "terms", field="geozones", size=50)
+            search.aggs.bucket(
+                "geozone", "terms", field="geozones", size=facet_sizes.get("geozone", 50)
+            )
             search.aggs.metric("geozone_total", "cardinality", field="_id")
 
         granularity_filters = get_filters_except("granularity")
@@ -956,10 +1022,14 @@ class ElasticClient:
             granularity_agg = search.aggs.bucket(
                 "granularity_filtered", "filter", filter=query.Bool(must=granularity_filters)
             )
-            granularity_agg.bucket("granularity", "terms", field="granularity", size=50)
+            granularity_agg.bucket(
+                "granularity", "terms", field="granularity", size=facet_sizes.get("granularity", 50)
+            )
             granularity_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("granularity", "terms", field="granularity", size=50)
+            search.aggs.bucket(
+                "granularity", "terms", field="granularity", size=facet_sizes.get("granularity", 50)
+            )
             search.aggs.metric("granularity_total", "cardinality", field="_id")
 
         badge_filters = get_filters_except("badge")
@@ -967,10 +1037,10 @@ class ElasticClient:
             badge_agg = search.aggs.bucket(
                 "badge_filtered", "filter", filter=query.Bool(must=badge_filters)
             )
-            badge_agg.bucket("badge", "terms", field="badges", size=50)
+            badge_agg.bucket("badge", "terms", field="badges", size=facet_sizes.get("badge", 50))
             badge_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("badge", "terms", field="badges", size=50)
+            search.aggs.bucket("badge", "terms", field="badges", size=facet_sizes.get("badge", 50))
             search.aggs.metric("badge_total", "cardinality", field="_id")
 
         topics_filters = get_filters_except("topics")
@@ -978,10 +1048,12 @@ class ElasticClient:
             topics_agg = search.aggs.bucket(
                 "topics_filtered", "filter", filter=query.Bool(must=topics_filters)
             )
-            topics_agg.bucket("topics", "terms", field="topics", size=50)
+            topics_agg.bucket("topics", "terms", field="topics", size=facet_sizes.get("topics", 50))
             topics_agg.metric("total", "cardinality", field="_id")
         else:
-            search.aggs.bucket("topics", "terms", field="topics", size=50)
+            search.aggs.bucket(
+                "topics", "terms", field="topics", size=facet_sizes.get("topics", 50)
+            )
             search.aggs.metric("topics_total", "cardinality", field="_id")
 
         post_filters = []
@@ -1063,6 +1135,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        facet_sizes: dict = {},
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableReuse.search()
 
@@ -1238,10 +1311,12 @@ class ElasticClient:
                 agg = search.aggs.bucket(
                     f"{agg_name}_filtered", "filter", filter=query.Bool(must=f)
                 )
-                agg.bucket(agg_name, "terms", field=es_field, size=50)
+                agg.bucket(agg_name, "terms", field=es_field, size=facet_sizes.get(agg_name, 50))
                 agg.metric("total", "cardinality", field="_id")
             else:
-                search.aggs.bucket(agg_name, "terms", field=es_field, size=50)
+                search.aggs.bucket(
+                    agg_name, "terms", field=es_field, size=facet_sizes.get(agg_name, 50)
+                )
                 search.aggs.metric(f"{agg_name}_total", "cardinality", field="_id")
 
         f = get_filters_except("last_update_range")
@@ -1355,6 +1430,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        facet_sizes: dict = {},
     ):
         search = SearchableDataservice.search()
 
@@ -1524,10 +1600,12 @@ class ElasticClient:
                 agg = search.aggs.bucket(
                     f"{agg_name}_filtered", "filter", filter=query.Bool(must=f)
                 )
-                agg.bucket(agg_name, "terms", field=es_field, size=50)
+                agg.bucket(agg_name, "terms", field=es_field, size=facet_sizes.get(agg_name, 50))
                 agg.metric("total", "cardinality", field="_id")
             else:
-                search.aggs.bucket(agg_name, "terms", field=es_field, size=50)
+                search.aggs.bucket(
+                    agg_name, "terms", field=es_field, size=facet_sizes.get(agg_name, 50)
+                )
                 search.aggs.metric(f"{agg_name}_total", "cardinality", field="_id")
 
         # last_update facet

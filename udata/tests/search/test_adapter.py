@@ -560,6 +560,22 @@ class ReuseSearchAdapterTest(APITestCase):
         assert serialized["producer_type"] == [USER]
 
 
+class ConfigurableSizeFacetsTest(APITestCase):
+    def test_facet_size_params_in_request_parser(self):
+        for adapter in [DatasetSearch, ReuseSearch, DataserviceSearch]:
+            parser = adapter.as_request_parser()
+            arg_names = [arg.name for arg in parser.args]
+            assert "facet_size__organization_id_with_name" in arg_names, (
+                f"{adapter.__name__} parser is missing facet_size__organization_id_with_name — "
+                f"it would be silently dropped from API requests"
+            )
+
+    def test_facet_size_param_is_int(self):
+        parser = DatasetSearch.as_request_parser()
+        arg = next(a for a in parser.args if a.name == "facet_size__organization_id_with_name")
+        assert arg.type is int
+
+
 class DataserviceSearchAdapterTest(APITestCase):
     def test_serialize_includes_access_type(self):
         """Test that DataserviceSearch.serialize includes access_type in the serialized document"""

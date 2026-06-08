@@ -25,6 +25,7 @@ class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     service_class = ReuseService
     consumer_class = ReuseConsumer
+    configurable_size_facets = ["organization_id_with_name"]
 
     sorts = {
         "created": "created_at",

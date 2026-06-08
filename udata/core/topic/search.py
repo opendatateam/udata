@@ -22,6 +22,7 @@ class TopicSearch(ModelSearchAdapter):
     model = Topic
     service_class = TopicService
     consumer_class = TopicConsumer
+    configurable_size_facets = ["organization_id_with_name"]
 
     sorts = {
         "name": "name",
