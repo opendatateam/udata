@@ -156,6 +156,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
             basename=default_image_basename,
             max_size=MAX_SIZE,
         ),
+        readonly=True,
         show_as_ref=True,
     )
 
