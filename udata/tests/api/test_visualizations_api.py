@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from io import BytesIO
 
 from flask import url_for
 
@@ -7,6 +8,7 @@ from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.core.visualizations.factories import ChartFactory, FilterFactory
 from udata.core.visualizations.models import AndFilters, Chart
+from udata.tests.helpers import create_test_image
 
 from . import PytestOnlyAPITestCase
 
@@ -277,8 +279,6 @@ class ChartAPITest(PytestOnlyAPITestCase):
 class VisualizationImageAPITest(PytestOnlyAPITestCase):
     def test_upload_image_success(self):
         """It should upload an image to a visualization"""
-        from udata.tests.helpers import create_test_image
-
         user = self.login()
         visualization = ChartFactory(owner=user)
         file = create_test_image()
@@ -293,9 +293,6 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
 
     def test_upload_image_permission_denied(self):
         """It should deny upload for non-owner"""
-        from udata.core.user.factories import UserFactory
-        from udata.tests.helpers import create_test_image
-
         self.login()
         other_user = UserFactory()
         visualization = ChartFactory(owner=other_user)
@@ -310,8 +307,6 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
 
     def test_upload_image_invalid_format(self):
         """It should reject non-image files"""
-        from io import BytesIO
-
         user = self.login()
         visualization = ChartFactory(owner=user)
 
