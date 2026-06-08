@@ -676,6 +676,12 @@ class Defaults(object):
     ###########################################################################
     METRICS_API = None
 
+    # Géoplateforme (geopf) integration
+    ###########################################################################
+    GEOPF_API_BASE = "https://data.geopf.fr/api"
+    GEOPF_TOKEN = None  # Bearer token for entrepôt API (required to enable push)
+    GEOPF_DATASTORE_ID = None  # Target datastore UUID (required to enable push)
+
     # Format families for search filtering
     ###########################################################################
     TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
