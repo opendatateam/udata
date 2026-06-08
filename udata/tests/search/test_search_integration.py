@@ -277,6 +277,58 @@ class SearchIntegrationTest(APITestCase):
         assert str(topic.id) in ids
         assert response.json["total"] == 1
 
+    def test_topic_search_element_deleted(self):
+        """Deleting an element should remove its content from the topic's index."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        elem = TopicElementFactory(
+            topic=topic, title="climate change data", tags=["renewable-energy"]
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
+        elem.delete()
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        response = self.get("/api/2/topics/search/?q=renewable-energy")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+    def test_topic_search_element_updated(self):
+        """Updating an element should reflect new content in the topic's index."""
+        topic = TopicFactory(name="unrelated topic name", description="unrelated description")
+        elem = TopicElementFactory(
+            topic=topic, title="climate change data", tags=["renewable-energy"]
+        )
+        TopicFactory(name="other topic", description="other description")
+
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
+        elem.title = "ocean biodiversity data"
+        elem.tags = ["marine"]
+        elem.save()
+        time.sleep(1)
+
+        response = self.get("/api/2/topics/search/?q=climate")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        response = self.get("/api/2/topics/search/?q=biodiversity")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
     def test_discussion_search(self):
         """Test discussion search endpoint."""
         dataset = DatasetFactory()
