@@ -47,13 +47,14 @@ def list_sources(owner=None, deleted=False):
 def get_job(ident, *, with_items=True):
     """Get an harvest job given its ID.
 
-    `with_items=False` drops the embedded items (and the heavy `data` blob) from
-    the query: use it when items are exposed only as a counters link, so we never
-    load or dereference them.
+    The heavy `data` blob is never serialized by the read endpoints, so it's
+    always excluded. `with_items=False` additionally drops the embedded items,
+    for routes that expose them only as a counters link and never load or
+    dereference them.
     """
-    qs = HarvestJob.objects
+    qs = HarvestJob.objects.exclude("data")
     if not with_items:
-        qs = qs.exclude("items", "data")
+        qs = qs.exclude("items")
     return qs.get(id=ident)
 
 

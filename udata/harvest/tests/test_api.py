@@ -519,6 +519,35 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         response = self.get(url)
         assert404(response)
 
+    def test_get_source_exposes_last_job_with_item_counters(self):
+        """A source exposes its last job nested, whose `items` link must carry the
+        stored counters — even though `last_job` is queried in a reduced form that
+        excludes the embedded items themselves (`get_last_job(reduced=True)`). This
+        locks that the counters survive the reduced/no_dereference query.
+        """
+        source = HarvestSourceFactory()
+        HarvestJobFactory(
+            source=source,
+            status="done",
+            items=[
+                HarvestItem(status="done", dataset=DatasetFactory()),
+                HarvestItem(status="failed", dataservice=DataserviceFactory()),
+            ],
+        )
+
+        response = self.get(url_for("api.harvest_source", source=source))
+        assert200(response)
+
+        last_job = response.json["last_job"]
+        assert last_job is not None
+        items_link = last_job["items"]
+        assert items_link["rel"] == "subsection"
+        assert items_link["href"].endswith("/items/")
+        assert items_link["total"] == 2
+        assert items_link["by_status"]["done"] == 1
+        assert items_link["by_status"]["failed"] == 1
+        assert items_link["by_type"] == {"dataset": 1, "dataservice": 1}
+
     def test_source_preview(self):
         user = self.login()
         source = HarvestSourceFactory(backend="factory", owner=user)
