@@ -520,6 +520,14 @@ class Defaults(object):
     # Notifications are deleted after being handled for 90 days
     DAYS_AFTER_NOTIFICATION_EXPIRED = 90
 
+    # Discussion settings
+    ###########################################################################
+    # Allow-list of domains accepted as `extras.notification.external_url`
+    # on a discussion. Supports fnmatch wildcards (e.g. `*.data.gouv.fr`).
+    # The accept-list prevents arbitrary external links from being injected
+    # in notification emails.
+    DISCUSSION_ALLOWED_EXTERNAL_DOMAINS = []
+
     # Post settings
     ###########################################################################
     # Discussions on posts are disabled by default

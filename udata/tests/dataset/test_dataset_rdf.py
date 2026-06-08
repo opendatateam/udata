@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import pytest
@@ -64,8 +64,8 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
+    slugify_tag,
 )
-from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -934,6 +934,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.checksum.value == sha1
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
+        assert resource.harvest.last_update - datetime.now(UTC) < timedelta(seconds=1)
         assert resource.format == "csv"
 
     def test_resource_future_modified_at(self):
