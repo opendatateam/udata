@@ -5,7 +5,8 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import UTC, date, datetime
+from itertools import chain
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -32,8 +33,11 @@ from udata.rdf import (
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
     IANAFORMAT,
+    OGC,
+    RDFS,
     SCHEMA,
     SCV,
     SKOS,
@@ -51,6 +55,7 @@ from udata.rdf import (
     set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
+    vocabulary_key,
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
@@ -518,16 +523,19 @@ def spatial_from_rdf(graph):
 
             for object in term.objects():
                 if isinstance(object, Literal):
-                    if (
-                        object.datatype.__str__()
-                        == "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+                    if object.datatype in (
+                        GEOSPARQL.geoJSONLiteral,
+                        IANAFORMAT["application/vnd.geo+json"],  # older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
                         except ValueError as e:
                             log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
                             continue
-                    elif object.datatype.__str__() == "http://www.opengis.net/rdf#wktLiteral":
+                    elif object.datatype in (
+                        GEOSPARQL.wktLiteral,
+                        URIRef("http://www.opengis.net/rdf#wktLiteral"),  # old OGC prefix
+                    ):
                         try:
                             # .upper() si here because geomet doesn't support Polygon but only POLYGON
                             geojson = wkt.loads(object.toPython().strip().upper())
@@ -538,6 +546,7 @@ def spatial_from_rdf(graph):
                         continue
 
                     geojsons.append(geojson)
+
         except Exception as e:
             log.exception(
                 f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True
@@ -604,44 +613,59 @@ def frequency_from_rdf(term) -> UpdateFrequency | None:
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
+    mime = rdf_value(resource, DCAT.mediaType, unwrap=[RDFS.label])
     if not mime:
         return
-    if IANAFORMAT in mime:
-        return "/".join(mime.split("/")[-2:])
+    if key := vocabulary_key(mime, IANAFORMAT):
+        return key
     if isinstance(mime, str):
         return mime
 
 
-def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format, parse_label=True)
-    if not format:
-        return
-    if EUFORMAT in format or IANAFORMAT in format:
-        _, _, format = namespace_manager.compute_qname(URIRef(format))
+def format_from_rdf(resource: RdfResource):
+    """
+    Return what udata considers to be the format.
+    - For services, return the service protocol if available, otherwise the distribution format.
+    - For other distribution types, return the distribution format.
+    """
+    # DCAT.accessService is 0..n, but since other 0..n distribution properties such as accessURL or
+    # downloadURL are treated as 0..1, we do the same here to stay consistent.
+    if service := resource.value(DCAT.accessService):
+        # Support both GEODCAT.serviceProtocol (GeoDCAT-AP 3+) and DCT.conformsTo (DCAT and older
+        # GeoDCAT-AP) mappings. Using chain() instead of objects(...|...) to enforce deterministic
+        # order.
+        for standard in chain(
+            service.objects(GEODCAT.serviceProtocol), service.objects(DCT.conformsTo)
+        ):
+            if key := vocabulary_key(standard.identifier, OGC):
+                return key.lower()
+
+    if format := rdf_value(resource, DCT.format, unwrap=[RDFS.label]):
+        if key := vocabulary_key(format, EUFORMAT):
+            return key.lower()
+        if key := vocabulary_key(format, IANAFORMAT):
+            return key.split("/")[-1].lower()
         return format.lower()
-    return format.lower()
 
 
-def title_from_rdf(rdf, url):
+def title_from_rdf(resource: RdfResource, url: str | None = None, format: str | None = None) -> str:
     """
     Try to extract a distribution title from a property.
     As it's not a mandatory property,
     it fallback on building a title from the URL
     then the format and in last ressort a generic resource name.
     """
-    title = rdf_value(rdf, DCT.title)
+    title = rdf_value(resource, DCT.title)
     if title:
         return title
     if url:
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
-        if fmt:
-            return i18n._("{format} resource").format(format=fmt.lower())
+        if format:
+            return i18n._("{format} resource").format(format=format.lower())
         else:
             return i18n._("Nameless resource")
 
@@ -651,7 +675,7 @@ def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_unique_values(resource, DCT.accessRights, parse_label=True)
+    return rdf_unique_values(resource, DCT.accessRights, unwrap=[RDFS.label, DCT.description])
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
@@ -660,7 +684,7 @@ def licenses_from_rdf(resource: RdfResource) -> set[str]:
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_unique_values(resource, DCT.license, parse_label=True)
+    return rdf_unique_values(resource, DCT.license, unwrap=[RDFS.label, DCT.description])
 
 
 def rights_from_rdf(resource: RdfResource) -> set[str]:
@@ -668,7 +692,7 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract rights from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_unique_values(resource, DCT.rights, parse_label=True)
+    return rdf_unique_values(resource, DCT.rights, unwrap=[RDFS.label, DCT.description])
 
 
 def provenances_from_rdf(resource: RdfResource) -> set[str]:
@@ -676,7 +700,7 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     Extract provenance from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_unique_values(resource, DCT.provenance, parse_label=True)
+    return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
 def infer_dataset_access_rights(
@@ -740,19 +764,35 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        if format in OGC_SERVICE_FORMATS:
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
+            # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
+            # correct resource.
+            # GeoNetwork uses the layer name as title, so it should be stable enough that we can
+            # use it in our composite key. If the layer name changes, it's OK to treat it as a
+            # different resource.
+            # We however don't use the title for other types of resources, because it is more
+            # likely to be editorialized, and therefore change over time while still describing
+            # the same resource.
+            fields["title"] = title
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
+
     resource.filetype = "remote"
-    resource.title = title_from_rdf(distrib, url)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
-    resource.format = format_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
         resource.schema = schema
@@ -777,6 +817,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+
     if is_additionnal:
         resource.type = "other"
     elif distrib.value(DCAT.accessService):
@@ -792,6 +833,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
+    resource.harvest.last_update = datetime.now(UTC)
 
     # :FutureHarvestModifiedAt
     resource.harvest.modified_at = safe_harvest_datetime(

@@ -1,24 +1,18 @@
-import mongoengine
-import pytest
-
-from udata.core.pages.factories import PageFactory
-from udata.core.pages.models import Page
+from udata.core.edito_blocs.models import DatasetsListBloc
 from udata.core.post.factories import PostFactory
 from udata.tests.api import PytestOnlyDBTestCase
 
 
 class PostTest(PytestOnlyDBTestCase):
-    def test_page_deletion_raises_if_reference_still_exists(self):
-        page = PageFactory()
-        post = PostFactory(body_type="blocs", content_as_page=page)
+    def test_blocs_body_type_without_blocs(self):
+        post = PostFactory(body_type="blocs", blocs=[])
+        post.reload()
+        assert post.body_type == "blocs"
+        assert post.blocs == []
 
-        assert Page.objects().count() == 1
-
-        with pytest.raises(mongoengine.errors.OperationError):
-            page.delete()
-
-        # Delete the post referencing the page before being able to delete the page itself
-        post.delete()
-        page.delete()
-
-        assert Page.objects().count() == 0
+    def test_blocs_body_type_with_blocs(self):
+        bloc = DatasetsListBloc(title="Test", datasets=[])
+        post = PostFactory(body_type="blocs", blocs=[bloc])
+        post.reload()
+        assert len(post.blocs) == 1
+        assert post.blocs[0].title == "Test"

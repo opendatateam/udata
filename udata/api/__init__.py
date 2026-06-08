@@ -347,13 +347,13 @@ def init_app(app):
     import udata.core.dataset.apiv2  # noqa
     import udata.core.dataservices.api  # noqa
     import udata.core.dataservices.apiv2  # noqa
+    import udata.core.visualizations.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.discussions.apiv2  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
     import udata.core.organization.apiv2  # noqa
-    import udata.core.pages.api  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa

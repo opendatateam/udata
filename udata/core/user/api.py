@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import request as flask_request
 from flask_security import current_user, logout_user
@@ -296,7 +296,7 @@ class AcceptOrgInvitationAPI(API):
 
                     req.status = "accepted"
                     req.handled_by = user
-                    req.handled_on = datetime.utcnow()
+                    req.handled_on = datetime.now(UTC)
 
                     member = Member(user=user, role=req.role)
                     org.members.append(member)
@@ -344,7 +344,7 @@ class RefuseOrgInvitationAPI(API):
 
                     req.status = "refused"
                     req.handled_by = user
-                    req.handled_on = datetime.utcnow()
+                    req.handled_on = datetime.now(UTC)
                     org.save()
                     MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))
@@ -472,6 +472,18 @@ class UserAPI(API):
         return "", 204
 
 
+@ns.route("/<user:user>/rotate_password/", endpoint="rotate_user_password")
+@api.response(404, "User not found")
+class UserRotatePasswordAPI(API):
+    @api.secure(admin_permission)
+    @api.doc("rotate_user_password")
+    @api.response(204, "Password rotation requested")
+    def post(self, user):
+        """Force a password rotation on the user's next login and reset their current sessions."""
+        user.request_password_rotation()
+        return "", 204
+
+
 # These imports are not at the top of the file to avoid circular imports
 from udata.models import ContactPoint  # noqa
 
@@ -545,17 +557,7 @@ class SuggestUsersAPI(API):
         users = User.objects(
             deleted=None, slug__icontains=slugify(args["q"], separator="-", to_lower=True)
         )
-        return [
-            {
-                "id": user.id,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "avatar_url": user.avatar,
-                "email": user.email,
-                "slug": user.slug,
-            }
-            for user in users.order_by(DEFAULT_SORTING).limit(args["size"])
-        ]
+        return list(users.order_by(DEFAULT_SORTING).limit(args["size"]))
 
 
 @ns.route("/roles/", endpoint="user_roles")

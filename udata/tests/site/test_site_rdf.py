@@ -5,9 +5,10 @@ from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
 from werkzeug.datastructures import ImmutableMultiDict
 
+from udata.core.access_type.constants import AccessType
 from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.factories import SiteFactory
@@ -369,3 +370,49 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
         assert len(dataservices) == 1
         assert str(graph.value(dataservices[0], DCT.identifier)) == str(dataservice_b.id)
+
+    def test_catalog_rdf_filter_access_type(self, client):
+        """Test that filter applies for both datasets and dataservices if supported"""
+        DatasetFactory.create(access_type=AccessType.OPEN)
+        restricted_dataset = DatasetFactory.create(access_type=AccessType.RESTRICTED)
+
+        DataserviceFactory.create(access_type=AccessType.OPEN)
+        restricted_dataservice_1 = DataserviceFactory.create(access_type=AccessType.RESTRICTED)
+        restricted_dataservice_2 = DataserviceFactory.create(access_type=AccessType.RESTRICTED)
+
+        url = url_for(
+            "api.site_rdf_catalog_format", _format="xml", access_type=AccessType.RESTRICTED
+        )
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+        graph = Graph().parse(data=response.data, format="xml")
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(restricted_dataset.id)
+
+        services = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(services) == 2
+        assert {str(graph.value(s, DCT.identifier)) for s in services} == {
+            str(restricted_dataservice_1.id),
+            str(restricted_dataservice_2.id),
+        }
+
+    def test_catalog_rdf_filter_format(self, client):
+        """Test that filter applies only to dataset if not supported for dataservices"""
+        DatasetFactory.create(resources=[ResourceFactory(format="json")])
+        csv_dataset = DatasetFactory.create(resources=[ResourceFactory(format="csv")])
+
+        DataserviceFactory.create()  # No format property or filter on dataservice
+
+        url = url_for("api.site_rdf_catalog_format", _format="xml", format="csv")
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+        graph = Graph().parse(data=response.data, format="xml")
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(csv_dataset.id)
+
+        services = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(services) == 1

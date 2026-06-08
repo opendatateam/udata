@@ -3,6 +3,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
+from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 
 REASON_PERSONAL_DATA = "personal_data"
@@ -31,4 +32,4 @@ def reports_reasons_translations() -> list:
 
 
 REPORT_REASONS_CHOICES: list[str] = [item["value"] for item in reports_reasons_translations()]
-REPORTABLE_MODELS = [Dataset, Reuse, Discussion, Organization, Dataservice]
+REPORTABLE_MODELS = [Dataset, Reuse, Discussion, Organization, Dataservice, User]

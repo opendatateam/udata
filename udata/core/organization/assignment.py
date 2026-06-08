@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import CASCADE
 from mongoengine.signals import post_save
@@ -24,7 +24,7 @@ class Assignment(db.Document):
     subject = field(
         db.GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES, required=True),
     )
-    created_at = field(db.DateTimeField(default=datetime.utcnow), readonly=True)
+    created_at = field(db.DateTimeField(default=lambda: datetime.now(UTC)), readonly=True)
 
     meta = {
         "indexes": [

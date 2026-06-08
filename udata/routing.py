@@ -12,6 +12,7 @@ from udata import models
 from udata.core.api_token.models import ApiToken
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
+from udata.core.visualizations.models import Chart
 from udata.features.notifications.models import Notification
 from udata.harvest.models import HarvestSource
 from udata.mongo.slug_fields import SlugField
@@ -122,10 +123,6 @@ class DatasetConverter(ModelConverter):
     model = models.Dataset
 
 
-class PageConverter(ModelConverter):
-    model = models.Page
-
-
 class DatasetWithoutResourcesConverter(ModelConverter):
     model = models.Dataset
 
@@ -179,6 +176,10 @@ class NotificationConverter(ModelConverter):
 
 class ApiTokenConverter(ModelConverter):
     model = ApiToken
+
+
+class VisualizationConverter(ModelConverter):
+    model = Chart
 
 
 class TerritoryConverter(PathConverter):
@@ -257,12 +258,12 @@ def init_app(app):
     app.url_map.converters["reuse"] = ReuseConverter
     app.url_map.converters["user"] = UserConverter
     app.url_map.converters["topic"] = TopicConverter
-    app.url_map.converters["page"] = PageConverter
     app.url_map.converters["post"] = PostConverter
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
+    app.url_map.converters["visualization"] = VisualizationConverter
     app.url_map.converters["api_token"] = ApiTokenConverter
 
     app.jinja_env.globals["cdata_url"] = cdata_url

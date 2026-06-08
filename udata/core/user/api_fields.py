@@ -1,5 +1,7 @@
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
+from udata.core.organization.models import Organization
+from udata.core.user.models import _visible_email, _visible_login_date
 
 from .constants import BIGGEST_AVATAR_SIZE
 
@@ -30,8 +32,6 @@ user_ref_fields = api.inherit(
     },
 )
 
-from udata.core.organization.api_fields import member_email_with_visibility_check, org_ref_fields  # noqa
-
 user_fields = api.model(
     "User",
     {
@@ -56,14 +56,38 @@ user_fields = api.model(
         "roles": fields.List(fields.String, description="Site wide user roles"),
         "active": fields.Boolean(),
         "organizations": fields.List(
-            fields.Nested(org_ref_fields), description="The organization the user belongs to"
+            fields.Nested(Organization.__ref_fields__),
+            description="The organization the user belongs to",
         ),
         "since": fields.ISODateTime(
             attribute="created_at", description="The registeration date", required=True
         ),
         "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
-            description="The user last connection date (only present for global admins and on /me)",
+            attribute=_visible_login_date,
+            description=(
+                "The user's most recent login date (present for global admins, on /me, "
+                "and for organization members in their org context)"
+            ),
+            readonly=True,
+        ),
+        "password_rotation_demanded": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_demanded if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which a password rotation was requested for this user "
+                "(only present for global admins and on /me)"
+            ),
+            readonly=True,
+        ),
+        "password_rotation_performed": fields.Raw(
+            attribute=lambda o: (
+                o.password_rotation_performed if current_user_is_admin_or_self() else None
+            ),
+            description=(
+                "Date at which the user performed the requested password rotation "
+                "(only present for global admins and on /me)"
+            ),
             readonly=True,
         ),
         "uri": fields.String(
@@ -109,10 +133,13 @@ user_suggestion_fields = api.model(
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user last name", readonly=True),
         "avatar_url": fields.ImageField(
-            size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
+            attribute="avatar",
+            size=BIGGEST_AVATAR_SIZE,
+            description="The user avatar URL",
+            readonly=True,
         ),
         "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o["email"]),
+            attribute=lambda o: _visible_email(o),
             description="The user email (only the domain for non-admin user)",
             readonly=True,
         ),

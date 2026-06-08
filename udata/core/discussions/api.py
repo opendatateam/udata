@@ -8,7 +8,6 @@ from udata.api import API, api, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.user.api_fields import user_ref_fields
@@ -37,7 +36,9 @@ message_fields = api.model(
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_by_organization": fields.Nested(
-            org_ref_fields, description="The organization to show to users", allow_null=True
+            Organization.__ref_fields__,
+            description="The organization to show to users",
+            allow_null=True,
         ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
         "last_modified_at": fields.ISODateTime(description="The message last edit date"),
@@ -59,7 +60,7 @@ discussion_fields = api.model(
         "title": fields.String(description="The discussion title"),
         "user": fields.Nested(user_ref_fields, description="The discussion author"),
         "organization": fields.Nested(
-            org_ref_fields, description="The discussion author", allow_null=True
+            Organization.__ref_fields__, description="The discussion author", allow_null=True
         ),
         "created": fields.ISODateTime(description="The discussion creation date"),
         "closed": fields.ISODateTime(description="The discussion closing date"),
@@ -67,7 +68,7 @@ discussion_fields = api.model(
             user_ref_fields, allow_null=True, description="The user who closed the discussion"
         ),
         "closed_by_organization": fields.Nested(
-            org_ref_fields,
+            Organization.__ref_fields__,
             allow_null=True,
             description="The organization who closed the discussion",
         ),
@@ -92,7 +93,9 @@ start_discussion_fields = api.model(
             api.model_reference, description="The discussion target object", required=True
         ),
         "organization": fields.Nested(
-            org_ref_fields, allow_null=True, description="Publish in the name of this organization"
+            Organization.__ref_fields__,
+            allow_null=True,
+            description="Publish in the name of this organization",
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
@@ -248,11 +251,25 @@ class DiscussionAPI(API):
 message_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
-@ns.route("/<id>/comments/<int:cidx>/", endpoint="discussion_comment")
+@ns.route("/<id>/comments/<cidx>/", endpoint="discussion_comment")
 class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
     """
+
+    def _resolve_message(self, discussion, cidx):
+        """Resolve a comment identifier (index or UUID) to the message."""
+        try:
+            idx = int(cidx)
+        except ValueError:
+            for message in discussion.discussion:
+                if str(message.id) == cidx:
+                    return message
+            api.abort(404, "Comment does not exist")
+        else:
+            if idx < 0 or idx >= len(discussion.discussion):
+                api.abort(404, "Comment does not exist")
+            return discussion.discussion[idx]
 
     @api.secure
     @api.doc("edit_discussion_comment")
@@ -260,18 +277,15 @@ class DiscussionCommentAPI(API):
     @api.expect(edit_comment_discussion_fields)
     @api.marshal_with(discussion_fields)
     def put(self, id, cidx):
-        """Edit a comment given its index"""
+        """Edit a comment given its index or UUID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-
-        message = discussion.discussion[cidx]
+        message = self._resolve_message(discussion, cidx)
         message.permissions["edit"].test()
 
         form = api.validate(DiscussionEditCommentForm)
 
-        discussion.discussion[cidx].content = form.comment.data
-        discussion.discussion[cidx].last_modified_at = datetime.now(UTC)
+        message.content = form.comment.data
+        message.last_modified_at = datetime.now(UTC)
         discussion.save()
         return discussion
 
@@ -280,19 +294,17 @@ class DiscussionCommentAPI(API):
     @api.expect(message_delete_parser)
     @api.response(403, "Not allowed to delete this comment")
     def delete(self, id, cidx):
-        """Delete a comment given its index"""
+        """Delete a comment given its index or UUID"""
         args = message_delete_parser.parse_args()
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-        if len(discussion.discussion) <= cidx:
-            api.abort(404, "Comment does not exist")
-        elif cidx == 0:
+        message = self._resolve_message(discussion, cidx)
+        if message == discussion.discussion[0]:
             api.abort(400, "You cannot delete the first comment of a discussion")
 
-        message = discussion.discussion[cidx]
         message.permissions["delete"].test()
         send_legal_notice_on_deletion(message, args)
 
-        discussion.remove_message(cidx)
+        discussion.remove_message(message.id)
         return "", 204
 
 

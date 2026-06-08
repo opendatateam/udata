@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timezone
 from itertools import chain
 
 from blinker import Signal
-from flask import url_for
+from flask import current_app, request, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument
@@ -22,11 +22,13 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, generate_fields
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
+from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -45,6 +47,40 @@ __all__ = ("User", "Role", "datastore")
 log = logging.getLogger(__name__)
 
 
+def _is_org_private_context():
+    """Check if the current request is an org endpoint where the user has private access."""
+    if request.endpoint == "api.request_membership":
+        return True
+    if request.endpoint != "api.organization":
+        return False
+    org = request.view_args.get("org")
+    return org is not None and org.permissions["private"].can()
+
+
+def _visible_email(user):
+    """Return user email with appropriate visibility level.
+
+    - sysadmin or /me endpoint → full email
+    - org member context with private access → partially obfuscated
+    - otherwise → domain only
+    """
+    if current_user_is_admin_or_self():
+        return user.email
+    if not user.email:
+        return None
+    name, domain = user.email.split("@")
+    if _is_org_private_context():
+        name = name[:2] + "*" * (len(name) - 2)
+        return f"{name}@{domain}"
+    return f"***@{domain}"
+
+
+def _visible_login_date(user):
+    if current_user_is_admin_or_self() or _is_org_private_context():
+        return user.current_login_at
+    return None
+
+
 # TODO: use simple text for role
 class Role(Document, RoleMixin):
     ADMIN = "admin"
@@ -61,13 +97,17 @@ class UserSettings(EmbeddedDocument):
 
 
 @generate_fields()
-class User(WithMetrics, UserMixin, Linkable, Document):
+class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
         show_as_ref=True,
     )
-    email = field(StringField(max_length=255, required=True, unique=True))
+    email = field(
+        StringField(max_length=255, required=True, unique=True),
+        show_as_ref=True,
+        attribute=_visible_email,
+    )
     password = field(StringField())
     active = field(BooleanField())
     fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
@@ -103,9 +143,17 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     password_rotation_demanded = field(DateTimeField(), auditable=False)
     password_rotation_performed = field(DateTimeField(), auditable=False)
 
-    # The 5 fields below are required for Flask-security
-    # when SECURITY_TRACKABLE is True
-    last_login_at = field(DateTimeField(), auditable=False)
+    # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
+    # Flask-Security's naming is counter-intuitive: `current_login_at` is the most recent
+    # login and `last_login_at` is the *previous* one. We rename this in the public API:
+    # the field exposed as `last_login_at` actually returns the value of `current_login_at`
+    # (the most recent login), which is what "last login" naturally means to API consumers.
+    last_login_at = field(
+        DateTimeField(),
+        auditable=False,
+        show_as_ref=True,
+        attribute=_visible_login_date,
+    )
     current_login_at = field(DateTimeField(), auditable=False)
     last_login_ip = field(StringField(), auditable=False)
     current_login_ip = field(StringField(), auditable=False)
@@ -147,6 +195,9 @@ class User(WithMetrics, UserMixin, Linkable, Document):
 
     verbose_name = _("account")
 
+    def fields_to_check_for_spam(self):
+        return {"about": self.about, "website": self.website}
+
     __metrics_keys__ = [
         "datasets",
         "reuses",
@@ -171,6 +222,43 @@ class User(WithMetrics, UserMixin, Linkable, Document):
     @property
     def sysadmin(self):
         return self.has_role("admin")
+
+    def check_tf_required(
+        self, tf_setup_methods: list[tuple[str, str]], tf_fresh: bool
+    ) -> tuple[bool, list[tuple[str, str]]]:
+        """Check if current user requires two-factor authentication.
+
+        :param tf_setup_methods: A tuple of (two_factor method, label) - methods
+            the user has already set up (from all two-factor implementations)
+        :param tf_fresh: if True then user has recently completed
+            two-factor authentication on the requesting device
+        :return: Whether TFA is required for this user and a possibly augmented
+            list of allowable methods
+
+        Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
+        This is called AFTER the user has successfully authenticated.
+        """
+        if (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED"]
+            or len(tf_setup_methods) > 0
+            or (current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
+        ):
+            if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
+                return True, tf_setup_methods
+        return False, tf_setup_methods
+
+    def check_tf_required_setup(self) -> bool:
+        """Check if current user requires two-factor authentication.
+        This is called as part of two-factor setup to inform the caller
+
+        N.B. this is only called from tf-setup - not from webauthn and
+        is only used to improve UX - the above method check_tf_required is the
+        definitive answer in the authentication path.
+        Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
+        """
+        return super().check_tf_required_setup() or (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
+        )
 
     def self_web_url(self, **kwargs):
         return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)
@@ -337,6 +425,13 @@ class User(WithMetrics, UserMixin, Linkable, Document):
         if notify:
             mails.account_deletion().send(copied_user)
 
+    def request_password_rotation(self):
+        """Mark the user for password rotation on next login and invalidate
+        all ongoing sessions by changing its uniquifier."""
+        self.password_rotation_demanded = datetime.now(UTC)
+        self.save()
+        datastore.set_uniquifier(self)
+
     def count_datasets(self):
         from udata.models import Dataset
 
@@ -372,6 +467,7 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
+post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):

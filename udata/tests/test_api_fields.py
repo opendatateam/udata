@@ -7,6 +7,7 @@ from mongoengine import PULL, EmbeddedDocument
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
+    FloatField,
     ListField,
     ReferenceField,
     StringField,
@@ -136,8 +137,13 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     deleted = field(
         DateTimeField(),
     )
+
     archived = field(
         DateTimeField(),
+    )
+
+    score = field(
+        FloatField(),
     )
 
     embedded = field(EmbeddedDocumentField(FakeEmbedded))
@@ -176,6 +182,7 @@ class FakeFactory(ModelFactory):
     description = factory.Faker("text")
     url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
     archived = None
+    score = factory.Faker("pyfloat", left_digits=1, right_digits=1)
 
 
 class IndexParserTest(PytestOnlyDBTestCase):
