@@ -63,6 +63,23 @@ class DatasetAPIV2Test(APITestCase):
         assert len(data["data"]) == 1
         assert data["data"][0]["title"] == dataset_with_reuse.title
 
+    def test_filter_by_dataservice(self):
+        DatasetFactory(title="Dataset without dataservice")
+
+        dataset_with_dataservice = DatasetFactory(title="Dataset with dataservice")
+        archived_dataset_with_dataservice = DatasetFactory(
+            title="Dataset with dataservice", archived=datetime(2022, 2, 22)
+        )
+        dataservice = DataserviceFactory(
+            datasets=[dataset_with_dataservice.id, archived_dataset_with_dataservice.id]
+        )
+
+        response = self.get(url_for("apiv2.datasets", dataservice=dataservice.id))
+        self.assert200(response)
+        data = response.json
+        assert len(data["data"]) == 1
+        assert data["data"][0]["title"] == dataset_with_dataservice.title
+
     def test_filter_by_reuse_does_not_dereference_datasets(self):
         # Regression: filtering datasets by reuse used to dereference the whole
         # reuse.datasets list, loading every referenced Dataset with its embedded
