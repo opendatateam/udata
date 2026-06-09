@@ -638,25 +638,29 @@ def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
     # - If cardinality > 1, we use the largest value we find. We don't go for the smallest to avoid
     #   giving a false sense of precision.
 
-    # FIXME: this can raise on UOM lookup
-    if resolutions_as_distance := [
-        (obj.value(DQV.value).toPython(), QUDT_TO_UDATA[obj.value(SDMXA.unitMeasure).identifier])
-        for obj in resource.objects(DQV.hasQualityMeasurement)
-        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
-    ]:
-        resolution = max(resolutions_as_distance, key=lambda r: r[1].in_meters(r[0]))
-        return f"{resolution[0]} {resolution[1].symbol}"
-
     if resolutions_in_meters := [
-        obj.toPython() for obj in resource.objects(DCAT.spatialResolutionInMeters)
+        value.toPython()
+        for value in resource.objects(DCAT.spatialResolutionInMeters)
+        if isinstance(value, Literal)
     ]:
         resolution = max(resolutions_in_meters)
         return f"{resolution} {DistanceUom.METER.symbol}"
 
+    if resolutions_as_distance := [
+        (value.toPython(), unit)
+        for obj in resource.objects(DQV.hasQualityMeasurement)
+        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
+        and (unit := QUDT_TO_UDATA.get(obj.value(SDMXA.unitMeasure).identifier))
+        and isinstance(value := obj.value(DQV.value), Literal)
+    ]:
+        resolution = max(resolutions_as_distance, key=lambda x: x[1].in_meters(x[0]))
+        return f"{resolution[0]} {resolution[1].symbol}"
+
     if resolutions_as_scale := [
-        obj.value(DQV.value).toPython()
+        value.toPython()
         for obj in resource.objects(DQV.hasQualityMeasurement)
         if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
+        and isinstance(value := obj.value(DQV.value), Literal)
     ]:
         resolution = max(resolutions_as_scale)
         # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with a
