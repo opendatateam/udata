@@ -7,7 +7,11 @@ from udata.core.dataset import tasks
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.edito_blocs.models import DatasetsListBloc
+from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
+    DatasetsListBloc,
+)
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
@@ -114,6 +118,45 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         org = Organization.objects.get(id=org.id)
         assert len(org.blocs[0].datasets) == 1
         assert org.blocs[0].datasets[0].id == dataset_keep.id
+
+    def test_purge_datasets_cleans_dataset_in_nested_accordion_bloc(self):
+        """Purging a dataset must remove it from `DatasetsListBloc`s nested inside an
+        `AccordionListBloc`, not only top-level blocs. Otherwise a dangling DBRef
+        survives the purge and crashes the post serialization."""
+        dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
+        dataset_keep = Dataset.objects.create(title="keep me")
+
+        nested_bloc = DatasetsListBloc(title="Featured", datasets=[dataset_to_delete, dataset_keep])
+        PostFactory(
+            body_type="blocs",
+            blocs=[
+                AccordionListBloc(
+                    title="Accordion",
+                    items=[AccordionItemBloc(title="Item", content=[nested_bloc])],
+                )
+            ],
+        )
+
+        tasks.purge_datasets()
+
+        inner = Post.objects.first().blocs[0].items[0].content[0]
+        assert len(inner.datasets) == 1
+        assert inner.datasets[0].id == dataset_keep.id
+
+    def test_purge_datasets_cleans_post_datasets_reference(self):
+        """Purging a dataset must pull it from `Post.datasets` (and `Post.reuses`)
+        thanks to `reverse_delete_rule=PULL`, otherwise a dangling DBRef remains
+        and crashes the post serialization."""
+        dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
+        dataset_keep = Dataset.objects.create(title="keep me")
+
+        post = PostFactory(datasets=[dataset_to_delete, dataset_keep])
+
+        tasks.purge_datasets()
+
+        post.reload()
+        assert len(post.datasets) == 1
+        assert post.datasets[0].id == dataset_keep.id
 
     def test_purge_datasets_community(self):
         dataset = Dataset.objects.create(title="delete me", deleted="2016-01-01")

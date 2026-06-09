@@ -175,7 +175,7 @@ class DcatBackend(BaseBackend):
             page_number += 1
 
     def process_one_datasets_page(self, page_number: int, page: Graph):
-        for node in page.subjects(RDF.type, DCAT.Dataset):
+        for node in page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
             remote_id = page.value(node, DCT.identifier)
             if self.is_dataset_external_to_this_page(page, node):
                 continue

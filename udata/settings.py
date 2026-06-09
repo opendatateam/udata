@@ -151,6 +151,7 @@ class Defaults(object):
     # Two-Factor Authentication settings
     SECURITY_TWO_FACTOR = False
     SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
+    SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN = False
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
@@ -519,6 +520,14 @@ class Defaults(object):
     # Notifications are deleted after being handled for 90 days
     DAYS_AFTER_NOTIFICATION_EXPIRED = 90
 
+    # Discussion settings
+    ###########################################################################
+    # Allow-list of domains accepted as `extras.notification.external_url`
+    # on a discussion. Supports fnmatch wildcards (e.g. `*.data.gouv.fr`).
+    # The accept-list prevents arbitrary external links from being injected
+    # in notification emails.
+    DISCUSSION_ALLOWED_EXTERNAL_DOMAINS = []
+
     # Post settings
     ###########################################################################
     # Discussions on posts are disabled by default
@@ -648,7 +657,8 @@ class Defaults(object):
 
     # Notification settings
     ###########################################################################
-    TCHAP_ROOM_URL = None
+    TCHAP_HOMESERVER = None
+    TCHAP_ROOM_ID = None
     TCHAP_BOT_TOKEN = None
 
     # Tabular API Dataservice ID

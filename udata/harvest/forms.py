@@ -3,9 +3,7 @@ from udata.harvest.backends import get_backend, get_enabled_backends
 from udata.i18n import lazy_gettext as _
 from udata.utils import safe_unicode
 
-from .models import VALIDATION_REFUSED, VALIDATION_STATES
-
-__all__ = "HarvestSourceForm", "HarvestSourceValidationForm"
+__all__ = ("HarvestSourceForm",)
 
 
 class HarvestConfigField(fields.DictField):
@@ -92,10 +90,3 @@ class HarvestSourceForm(Form):
     autoarchive = fields.BooleanField()
 
     config = HarvestConfigField()
-
-
-class HarvestSourceValidationForm(Form):
-    state = fields.SelectField(choices=list(VALIDATION_STATES.items()))
-    comment = fields.StringField(
-        _("Comment"), [validators.RequiredIfVal("state", VALIDATION_REFUSED)]
-    )

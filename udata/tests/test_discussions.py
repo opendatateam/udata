@@ -27,6 +27,7 @@ from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.features.notifications.models import Notification
@@ -1264,3 +1265,390 @@ class NotifyDiscussionsTest(APITestCase):
         for notification in notifications:
             print(notification)
             assert notification.handled_at is not None
+
+
+class DiscussionExternalNotificationTest(APITestCase):
+    """
+    Tests for the discussion notification customization (notification.external_url
+    in extras), used by external frontends like Ecosphères to receive
+    notifications linking to their own pages.
+
+    See https://github.com/ecolabdata/ecospheres/issues/263.
+    """
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_create_discussion_with_notification_extras_via_api(self):
+        self.login()
+        topic = TopicFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test",
+                "comment": "bla",
+                "subject": {"class": "Topic", "id": topic.id},
+                "extras": {
+                    "notification": {
+                        "external_url": "https://eco.example.com/bouquets/foo/",
+                    }
+                },
+            },
+        )
+        self.assert201(response)
+        discussion = Discussion.objects(subject=topic).first()
+        assert (
+            discussion.extras["notification"]["external_url"]
+            == "https://eco.example.com/bouquets/foo/"
+        )
+
+    def test_create_discussion_external_url_not_allowed_is_rejected(self):
+        self.login()
+        topic = TopicFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test",
+                "comment": "bla",
+                "subject": {"class": "Topic", "id": topic.id},
+                "extras": {
+                    "notification": {
+                        "external_url": "https://evil.example.org/phishing",
+                    }
+                },
+            },
+        )
+        self.assert400(response)
+        assert Discussion.objects(subject=topic).count() == 0
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_notify_uses_external_url(self):
+        owner = UserFactory()
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        assert len(mails) == 1
+        mail = mails[0]
+        assert mail.recipients[0] == owner.email
+        # The subject type label comes from the Topic's verbose_name.
+        assert "collection" in mail.subject
+        assert f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in mail.body
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    def test_notify_topic_without_external_url_links_to_canonical_page(self):
+        """A Topic discussion with no external_url still notifies: now that
+        topics have a canonical cdata page, the mail falls back to the topic's
+        own `url_for()` instead of being skipped."""
+        owner = UserFactory()
+        poster = UserFactory()
+        topic = TopicFactory(owner=owner)
+        message = Message(content=faker.sentence(), posted_by=poster)
+        discussion = Discussion.objects.create(
+            subject=topic,
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message],
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        assert len(mails) == 1
+        assert f"https://www.data.gouv.fr/topics/{topic.slug}" in mails[0].body
+        assert Notification.objects(user=owner).count() == 1
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.allowed.com"])
+    def test_notify_falls_back_when_external_url_domain_no_longer_allowed(self):
+        # Defense-in-depth: if a stored external_url domain is no longer in
+        # the allow-list (config tightened after the row was written), the
+        # mail must fall back to the default URL for subjects that have one.
+        # Simulated with a raw MongoDB write to bypass mongoengine validation.
+        owner = UserFactory()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+        )
+        Discussion._get_collection().update_one(
+            {"_id": discussion.id},
+            {"$set": {"extras.notification.external_url": "https://eco.example.com/bouquets/foo/"}},
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        assert len(mails) == 1
+        assert "https://eco.example.com" not in mails[0].body
+        assert discussion.url_for() in mails[0].body
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_notify_comment_and_close_use_external_url(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        comment = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, comment],
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion_comment(discussion.id, message=1)
+
+        assert len(mails) >= 1
+        assert all(
+            f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in m.body
+            for m in mails
+        )
+
+        discussion.closed = datetime.now(UTC)
+        discussion.closed_by = owner
+        discussion.save()
+
+        with capture_mails() as mails:
+            notify_discussion_closed(discussion.id, message=1)
+
+        assert len(mails) >= 1
+        assert all(
+            f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in m.body
+            for m in mails
+        )
+
+    def test_notify_with_extras_notification_explicitly_none(self):
+        # MongoEngine's DictField rejects `None` values at write time, but
+        # raw MongoDB writes (import scripts, migrations) can bypass that.
+        # The notification properties must not crash on such legacy rows.
+        owner = UserFactory()
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+        )
+        Discussion._get_collection().update_one(
+            {"_id": discussion.id}, {"$set": {"extras": {"notification": None}}}
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        assert len(mails) == 1
+
+    def test_edit_discussion_ignores_extras_in_payload(self):
+        # Guard-rail: `DiscussionEditForm` only declares `title`, so an
+        # `extras` field in the PUT payload must be silently discarded.
+        # If someone later adds `extras` to the edit form without porting
+        # the allow-list validation, this test will fail.
+        user = self.login()
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=user),
+            user=user,
+            title="original title",
+            discussion=[Message(content=faker.sentence(), posted_by=user)],
+        )
+
+        response = self.put(
+            url_for("api.discussion", id=discussion.id),
+            {
+                "title": "new title",
+                "extras": {
+                    "notification": {
+                        "external_url": "https://evil.example.org/phishing",
+                    }
+                },
+            },
+        )
+        self.assertStatus(response, 200)
+
+        discussion.reload()
+        assert discussion.title == "new title"
+        assert discussion.extras == {}
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_create_discussion_rejects_javascript_scheme(self):
+        # `urlparse("javascript://eco.example.com/...").netloc` returns the
+        # allow-listed domain, so the netloc check alone lets dangerous
+        # schemes through. The scheme itself must be restricted to http(s).
+        self.login()
+        topic = TopicFactory()
+
+        for url in (
+            "javascript://eco.example.com/%0aalert(1)",
+            "data://eco.example.com/foo",
+            "file://eco.example.com/etc/passwd",
+        ):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": {"external_url": url}},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
+
+    def test_create_discussion_with_malformed_external_url_returns_400(self):
+        # `urlparse("http://[invalid")` raises `ValueError: Invalid IPv6 URL`.
+        # The form must catch it and return 400, not bubble up as a 500.
+        self.login()
+        topic = TopicFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test",
+                "comment": "bla",
+                "subject": {"class": "Topic", "id": topic.id},
+                "extras": {"notification": {"external_url": "http://[invalid"}},
+            },
+        )
+        self.assert400(response)
+        assert Discussion.objects(subject=topic).count() == 0
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_notify_ignores_stored_url_with_dangerous_scheme(self):
+        # Defense-in-depth: if a dangerous-scheme URL ended up in storage
+        # (raw DB write bypassing mongoengine validation, legacy data from
+        # before the validator existed), the model must not surface it.
+        owner = UserFactory()
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+        )
+        Discussion._get_collection().update_one(
+            {"_id": discussion.id},
+            {
+                "$set": {
+                    "extras.notification.external_url": "javascript://eco.example.com/%0aalert(1)"
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        assert len(mails) == 1
+        assert "javascript:" not in mails[0].body
+        assert discussion.url_for() in mails[0].body
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_create_discussion_rejects_userinfo_bypass(self):
+        # `urlparse("http://attacker.com\\@eco.example.com").netloc` matches
+        # `*.example.com` because `netloc` includes the userinfo. The WHATWG
+        # URL standard (used by all modern browsers and mail clients) treats
+        # `\` as `/` for http(s), so a recipient clicking the link is routed
+        # to attacker.com — a phishing vector from the official mail sender.
+        # Userinfo has no legitimate use in a notification URL: reject it
+        # outright, regardless of the host check.
+        self.login()
+        topic = TopicFactory()
+
+        for url in (
+            r"http://attacker.com\@eco.example.com/phishing",
+            "http://user@eco.example.com/path",
+            "http://user:pass@eco.example.com/path",
+        ):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": {"external_url": url}},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
+
+    def test_create_discussion_with_non_dict_notification_returns_400(self):
+        # `ExtrasField._parse_value` returns the raw value untouched for the
+        # `notification` key (NotificationExtra is not in KNOWN_TYPES). A
+        # non-dict value (string, list, int) used to crash the form validator
+        # with `AttributeError: 'str' object has no attribute 'get'` and
+        # surface as a 500. The form must reject it cleanly.
+        self.login()
+        topic = TopicFactory()
+
+        for value in ("evil", ["a"], 42):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": value},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_allow_list_wildcard_does_not_leak_to_neighbour_domains(self):
+        # The `*.example.com` wildcard must match strict subdomains only, never
+        # a neighbour domain that merely embeds the allowed one. These are the
+        # core phishing vectors against the allow-list:
+        #   - `evil-example.com` ends in `-example.com`, not `.example.com`
+        #   - `example.com.attacker.com` puts the allowed domain in a prefix
+        #   - `example.com` (apex, no subdomain) lacks the leading `<sub>.`
+        self.login()
+        topic = TopicFactory()
+
+        for url in (
+            "https://evil-example.com/phishing",
+            "https://example.com.attacker.com/phishing",
+            "https://example.com/phishing",
+        ):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test",
+                    "comment": "bla",
+                    "subject": {"class": "Topic", "id": topic.id},
+                    "extras": {"notification": {"external_url": url}},
+                },
+            )
+            self.assert400(response)
+
+        assert Discussion.objects(subject=topic).count() == 0
+
+        # A genuine subdomain of the allowed domain is accepted.
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test",
+                "comment": "bla",
+                "subject": {"class": "Topic", "id": topic.id},
+                "extras": {"notification": {"external_url": "https://sub.example.com/ok"}},
+            },
+        )
+        self.assert201(response)
+        assert Discussion.objects(subject=topic).count() == 1

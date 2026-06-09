@@ -1,5 +1,42 @@
 # Changelog
 
+## 16.6.1 (2026-06-05)
+
+- chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))
+- chore(deps): update dependency faker to >=40.21, <40.22 ([#3806](https://github.com/opendatateam/udata/pull/3806))
+- feat: allow external URL and name for discussions ([#3765](https://github.com/opendatateam/udata/pull/3765))
+- feat(harvest): add resource harvest timestamp ([#3805](https://github.com/opendatateam/udata/pull/3805))
+- fix: dataset deleted in accordion ([#3812](https://github.com/opendatateam/udata/pull/3812))
+- fix(deps): downgrade saxonche to v12 ([#3817](https://github.com/opendatateam/udata/pull/3817))
+- fix(tags): move validation in harvest logic to fix tags unpickling ([#3810](https://github.com/opendatateam/udata/pull/3810))
+- test: add missing tests ([#3813](https://github.com/opendatateam/udata/pull/3813))
+
+
+## 16.6.0 (2026-06-02)
+
+- Add 2FA requirement for sysadmin ([#3642](https://github.com/opendatateam/udata/pull/3642))
+- chore(deps): lock file maintenance ([#3772](https://github.com/opendatateam/udata/pull/3772))
+- chore(deps): lock file maintenance ([#3788](https://github.com/opendatateam/udata/pull/3788))
+- chore(deps): lock file maintenance ([#3803](https://github.com/opendatateam/udata/pull/3803))
+- chore(deps): update dependency faker to >=40.19, <40.20 ([#3786](https://github.com/opendatateam/udata/pull/3786))
+- chore: update publiccode ([#3785](https://github.com/opendatateam/udata/pull/3785))
+- chore: use flask-security instead of flask-security-too ([#3801](https://github.com/opendatateam/udata/pull/3801))
+- Enhance/doc ([#3778](https://github.com/opendatateam/udata/pull/3778))
+- feat(harvest): harvest DCAT DatasetSeries as udata Dataset ([#3797](https://github.com/opendatateam/udata/pull/3797))
+- feat(harvest): report conflicting record ownership ([#3771](https://github.com/opendatateam/udata/pull/3771))
+- feat(harvest): support dct:spatial geoJSONLiteral datatype ([#3790](https://github.com/opendatateam/udata/pull/3790))
+- feat: improve cors ([#3781](https://github.com/opendatateam/udata/pull/3781))
+- Fix/cli ([#3776](https://github.com/opendatateam/udata/pull/3776))
+- fix(deps): update dependency bcrypt to v5 ([#3745](https://github.com/opendatateam/udata/pull/3745))
+- fix(deps): update dependency saxonche to v13 ([#3802](https://github.com/opendatateam/udata/pull/3802))
+- fix(harvest): add missing click argument to delete command ([#3774](https://github.com/opendatateam/udata/pull/3774))
+- fix(harvest): csw-dcat harvester fails on a record parsing error ([#3770](https://github.com/opendatateam/udata/pull/3770))
+- fix(harvest): normalize tag values in TagListField to match harvester input ([#3782](https://github.com/opendatateam/udata/pull/3782))
+- fix: harvest previews bugs ([#3779](https://github.com/opendatateam/udata/pull/3779))
+- fix: lint rdf file ([#3798](https://github.com/opendatateam/udata/pull/3798))
+- fix: tchap problems on spam ([#3807](https://github.com/opendatateam/udata/pull/3807))
+
+
 ## 16.5.0 (2026-05-18)
 
 - chore(deps): update dependency faker to >=40.18, <40.19 ([#3769](https://github.com/opendatateam/udata/pull/3769))
