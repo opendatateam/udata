@@ -452,11 +452,9 @@ class ResourcesAPI(API):
             page_size=page_size,
             condition={"$and": conditions} if conditions else None,
         )
-        offset = page_size * (page - 1) if page > 1 else 0
-
         return {
             "data": paginated_result,
-            "next_page": next_page if page_size + offset < total else None,
+            "next_page": next_page if page * page_size < total else None,
             "page": page,
             "page_size": page_size,
             "previous_page": previous_page if page > 1 else None,
