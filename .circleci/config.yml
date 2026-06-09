@@ -101,7 +101,12 @@ jobs:
           name: Run tests
           command: |
             mkdir -p reports/python
-            uv run inv test --report --ci
+            # Redirect stdin from /dev/null to avoid an invoke v3 crash:
+            # handle_stdin thread calls tcgetpgrp(stdin) which fails with
+            # ENOTTY on CircleCI when stdin is a TTY-flagged char device
+            # but the inv process isn't the session leader. /dev/null is
+            # not a TTY, so invoke's isatty() check short-circuits cleanly.
+            uv run inv test --report --ci < /dev/null
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -129,7 +134,7 @@ jobs:
       - run:
           name: Build a distributable package as a wheel release
           command: |
-            uv run inv pydist
+            uv run inv pydist < /dev/null
       - store_artifacts:
           path: dist
       - persist_to_workspace:

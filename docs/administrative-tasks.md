@@ -187,6 +187,61 @@ It's possible to index or reindex only last modified documents.
 time udata search index -f 2022-02-20-20-02
 ```
 
+### Dataservice swagger indexing
+
+When a dataservice has a `machine_documentation_url`, the search adapter
+fetches that document at indexation time and adds its content to the
+`documentation_content` field on the ES index, so users can find an API via
+terms only present in its swagger (parameter labels, response field
+descriptions, etc.).
+
+The raw document is capped at 3 MB. If it parses as a valid OpenAPI spec
+(JSON or YAML), only human-language strings are extracted; otherwise we fall
+back to the raw text (truncated to the cap).
+
+**What we extract from a parsed spec:**
+
+- `info.title` and `info.description`
+- For every operation on every kept path: `summary`, `description`, `tags`
+- For every parameter, request body, and response: `title` / `summary` /
+  `description` fields, walking nested schemas and resolving internal
+  `$ref`s (cycles are detected and stopped)
+- Path tokens: e.g. `/v3/insee/sirene/etablissements/{siret}/successions`
+  contributes `insee sirene etablissements successions` (placeholders and
+  version segments dropped)
+
+**Bouquet scoping**
+
+When a single OpenAPI document is shared across multiple dataservice fiches
+(API Entreprise, API Particulier), every fiche would otherwise match every
+term in the shared swagger. To avoid this noise, the adapter detects bouquet
+titles (containing `| Bouquet`) and restricts indexation to the operations
+whose summary matches the fiche name.
+
+Title parsing example:
+
+| Title | Extracted name | Provider |
+|---|---|---|
+| `API Liens de succession - Insee \| Bouquet API Entreprise` | Liens de succession | Insee |
+| `API Qualibat \| Bouquet API Entreprise` | Qualibat | — |
+
+Matching strategies (any one is enough to keep the path):
+
+1. Direct substring match between summary and name (lowercase, accents
+   stripped).
+2. Word-level: all words > 2 chars in the name appear in the summary words
+   (requires ≥ 3 such words).
+3. Provider fallback: the provider appears in the path AND ≥ 2 long words
+   are shared with the summary.
+
+If no path matches, the adapter falls back to indexing all paths (a fiche
+with an unusual title should still be searchable, even if scoping is
+imperfect).
+
+The port lives in `udata/core/dataservices/openapi_filter.py`. The same
+filter logic runs on the frontend (`cdata/utils/openapi-bouquet.ts`) to
+render only the relevant endpoints on the fiche page.
+
 ## Workers
 
 Start a worker with:

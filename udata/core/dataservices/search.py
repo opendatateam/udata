@@ -1,13 +1,16 @@
 import datetime
+import functools
 import warnings
 
 import requests
+import yaml
 from bson.objectid import ObjectId
 from flask_restx.inputs import boolean
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.access_type.constants import AccessType
+from udata.core.dataservices.openapi_filter import extract_indexable_text
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic, TopicElement
@@ -24,8 +27,14 @@ from udata.utils import raise_if_redirect, to_iso_datetime
 from udata_search_service.consumers import DataserviceConsumer
 from udata_search_service.services import DataserviceService
 
-# Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
-MAX_DOCUMENTATION_SIZE = 100 * 1024
+# Maximum size in bytes for fetched documentation content. Sized for large
+# bouquet swaggers (API Entreprise is ~2.2 MB) with headroom.
+MAX_DOCUMENTATION_SIZE = 3 * 1024 * 1024
+
+try:
+    _YamlLoader = yaml.CSafeLoader
+except AttributeError:
+    _YamlLoader = yaml.SafeLoader
 
 __all__ = ("DataserviceSearch",)
 
@@ -174,9 +183,13 @@ class DataserviceSearch(ModelSearchAdapter):
         for key, value in dataservice.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
 
-        documentation_content = cls.fetch_documentation_content(
+        documentation_content, spec = _fetch_and_parse_documentation(
             dataservice.machine_documentation_url
         )
+        if spec is not None:
+            extracted = extract_indexable_text(spec, dataservice.title)
+            if extracted:
+                documentation_content = extracted
 
         return {
             "id": str(dataservice.id),
@@ -204,3 +217,24 @@ class DataserviceSearch(ModelSearchAdapter):
             "producer_type": get_producer_type(dataservice),
             "documentation_content": documentation_content,
         }
+
+
+@functools.lru_cache(maxsize=32)
+def _fetch_and_parse_documentation(url: str | None) -> tuple[str | None, dict | None]:
+    """Fetch a swagger URL and parse it. Cached per URL.
+
+    Bouquet APIs share one swagger across many dataservice fiches (~30+ for
+    API Entreprise); bulk reindex would otherwise re-download and re-parse the
+    same 2 MB blob once per fiche. Returns ``(raw, spec)`` where ``spec`` is
+    None when the document is not valid YAML/JSON or not a mapping.
+    """
+    if not url:
+        return None, None
+    raw = DataserviceSearch.fetch_documentation_content(url)
+    if not raw:
+        return raw, None
+    try:
+        spec = yaml.load(raw, Loader=_YamlLoader)
+    except yaml.YAMLError:
+        return raw, None
+    return raw, spec if isinstance(spec, dict) else None
