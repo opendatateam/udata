@@ -85,6 +85,39 @@ class SearchIntegrationTest(APITestCase):
         assert "Dataset public service" in titles
         assert "Dataset user" not in titles
 
+    def test_dataset_facets_counts(self):
+        """Test that facets return correct counts, including the 'all' total."""
+        license_cc = LicenseFactory(id="cc-by")
+        license_odbl = LicenseFactory(id="odc-odbl")
+        DatasetFactory(title="DS1", license=license_cc, tags=["transport"])
+        DatasetFactory(title="DS2", license=license_cc, tags=["sante"])
+        DatasetFactory(title="DS3", license=license_odbl, tags=["transport"])
+
+        time.sleep(1)
+
+        # Without filter: all 3 datasets, facets show totals
+        response = self.get("/api/2/datasets/search/")
+        self.assert200(response)
+        assert response.json["total"] == 3
+        facets = response.json["facets"]
+        license_facet = facets["license"]
+        license_all = next(f for f in license_facet if f["name"] == "all")
+        assert license_all["count"] == 3
+        license_cc_bucket = next(f for f in license_facet if f["name"] == "cc-by")
+        assert license_cc_bucket["count"] == 2
+        license_odbl_bucket = next(f for f in license_facet if f["name"] == "odc-odbl")
+        assert license_odbl_bucket["count"] == 1
+
+        # With a tag filter: facet "all" for license should still be 2
+        # (docs matching tag=transport, regardless of license)
+        response = self.get("/api/2/datasets/search/?tag=transport")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        facets = response.json["facets"]
+        license_facet = facets["license"]
+        license_all = next(f for f in license_facet if f["name"] == "all")
+        assert license_all["count"] == 2
+
     def test_reuse_search(self):
         """Test reuse search endpoint."""
         VisibleReuseFactory(title="Réutilisation de données ouvertes")
