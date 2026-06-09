@@ -158,12 +158,30 @@ def _is_field_in_response_mask(read_fields, field_name) -> bool:
     return field_name in mask or "*" in mask
 
 
-# Heavy fields no bloc card ever displays. A dataset's `resources` list can hold dozens
-# of embedded sub-documents; loading the full document deserializes them all even though
-# the card only shows `organization`, `owner`, `quality`, etc. — and that deserialization,
-# not the queries, is what dominates the response time. We drop them from the load query.
-# Only fields that exist on a given model are excluded (reuses/dataservices have none).
-CARD_UNUSED_HEAVY_FIELDS = ("resources",)
+# List fields (references or embedded documents) that no bloc card displays. Loading them
+# is pure waste: `select_related` would dereference a reuse's `datasets`/`dataservices`
+# lists (and a dataset's `contact_points`) one document per item, and a dataset's
+# `resources` list deserializes dozens of embedded sub-documents — all for data the card
+# never serializes. That work, not the queries, dominates the response time, so we drop
+# these from the load query. Each is excluded only on models that actually have it.
+#
+# Why hardcode this instead of deriving it from the card masks? The masks are *include*
+# lists ("show these fields"), but a Mongo projection here needs the opposite: which heavy
+# fields to *exclude* from the load. Inverting one isn't a free `.only(mask)` either — the
+# masks list display names (`quality`, `page`, `uri`…) that don't map 1:1 to stored fields
+# (`quality_cached`, computed properties…), so a load projection can't be read straight off
+# them. Computing the exclusions automatically means introspecting each model's field types
+# to find the heavy lists absent from the mask — more machinery than the handful of names
+# below are worth. The day the string masks are replaced by serialization rules integrated
+# into `api_fields`, the framework would know each card's real fields and could derive this
+# projection on its own; until then an explicit list is the simplest correct option.
+CARD_UNUSED_HEAVY_FIELDS = (
+    "resources",  # Dataset: embedded list of resources
+    "datasets",  # Reuse / Dataservice: referenced datasets
+    "dataservices",  # Reuse: referenced dataservices
+    "contact_points",  # Dataset / Dataservice: referenced contact points
+    "access_audiences",  # Dataset / Dataservice: embedded access audiences
+)
 
 
 def prefetch_blocs_references(document_cls, obj, *bloc_fields):
