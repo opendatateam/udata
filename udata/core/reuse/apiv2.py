@@ -1,3 +1,7 @@
+import mongoengine
+from flask import url_for
+from flask_login import current_user
+
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.reuse.models import Reuse
@@ -5,18 +9,46 @@ from udata.core.reuse.models import Reuse
 from .api_fields import reuse_permissions_fields
 from .search import ReuseSearch
 
+DEFAULT_PAGE_SIZE = 50
+
 apiv2.inherit("ReusePermissions", reuse_permissions_fields)
-apiv2.inherit("ReusePage", Reuse.__page_fields__)
 apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
-reuse_search_page_fields = apiv2.model(
-    "ReuseSearchPage", fields.search_pager(Reuse.__read_fields__)
+
+#: Lightweight reuse model: the `datasets` reference list is replaced by a link
+#: to the datasets listing endpoint filtered on this reuse, so that listing
+#: reuses does not dereference every linked dataset.
+reuse_fields = apiv2.clone(
+    "Reuse",
+    Reuse.__read_fields__,
+    {
+        "datasets": fields.Raw(
+            attribute=lambda o: {
+                "rel": "subsection",
+                "href": url_for(
+                    "apiv2.datasets",
+                    reuse=o.id,
+                    page=1,
+                    page_size=DEFAULT_PAGE_SIZE,
+                    _external=True,
+                ),
+                "type": "GET",
+                # Read the count from the stored metric: `len(o.datasets)` would
+                # dereference every linked dataset (each can weigh several MB),
+                # which is exactly what this link is meant to avoid. This also
+                # works regardless of how the reuse was loaded (search vs listing).
+                "total": o.metrics.get("datasets", 0),
+            },
+            description="Link to the reuse datasets",
+        ),
+    },
 )
+
+reuse_page_fields = apiv2.model("ReusePage", fields.pager(reuse_fields))
+reuse_search_page_fields = apiv2.model("ReuseSearchPage", fields.search_pager(reuse_fields))
 
 ns = apiv2.namespace("reuses", "Reuse related operations")
 
 search_parser = ReuseSearch.as_request_parser(store_missing=False)
-
-DEFAULT_SORTING = "-created_at"
 
 
 @ns.route("/search/", endpoint="reuse_search")
@@ -30,3 +62,21 @@ class ReuseSearchAPI(API):
         """Search all reuses"""
         args = search_parser.parse_args()
         return search.query(ReuseSearch, **args)
+
+
+@ns.route("/", endpoint="reuses")
+class ReuseListAPI(API):
+    """Reuses collection endpoint"""
+
+    @apiv2.doc("list_reuses")
+    @apiv2.expect(Reuse.__index_parser__)
+    @apiv2.marshal_with(reuse_page_fields)
+    def get(self):
+        """List all reuses"""
+        # `no_dereference()` avoids loading the referenced documents (datasets,
+        # dataservices) when listing reuses; the datasets total is read from the
+        # stored metric (see `reuse_fields`).
+        query = Reuse.objects.no_dereference().visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, deleted=None)
+        )
+        return Reuse.apply_pagination(Reuse.apply_sort_filters(query))
