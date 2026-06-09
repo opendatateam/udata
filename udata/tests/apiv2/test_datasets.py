@@ -1,9 +1,12 @@
 from datetime import datetime
 
 from flask import url_for
+from mongoengine.context_managers import query_counter
 from mongoengine.fields import DateTimeField
 
 import udata.core.organization.constants as org_constants
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -59,6 +62,27 @@ class DatasetAPIV2Test(APITestCase):
         data = response.json
         assert len(data["data"]) == 1
         assert data["data"][0]["title"] == dataset_with_reuse.title
+
+    def test_filter_by_reuse_does_not_dereference_datasets(self):
+        # Regression: filtering datasets by reuse used to dereference the whole
+        # reuse.datasets list, loading every referenced Dataset with its embedded
+        # resources (megabytes for a dataset with thousands of resources) just to
+        # read their ids. Building the filter must hit the database exactly once
+        # (fetch the reuse's references), never dereferencing the datasets.
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(20)])
+        reuse = ReuseFactory(datasets=[dataset.id])
+
+        with query_counter() as counter:
+            DatasetApiParser.parse_filters(Dataset.objects, {"reuse": str(reuse.id)})
+            assert counter == 1
+
+    def test_filter_by_dataservice_does_not_dereference_datasets(self):
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(20)])
+        dataservice = DataserviceFactory(datasets=[dataset.id])
+
+        with query_counter() as counter:
+            DatasetApiParser.parse_filters(Dataset.objects, {"dataservice": str(dataservice.id)})
+            assert counter == 1
 
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]

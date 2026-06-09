@@ -235,20 +235,30 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["dataservice"]):
                 api.abort(400, "Dataservice arg must be an identifier")
             try:
-                dataservice = Dataservice.objects.get(id=args["dataservice"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources).
+                dataservice = (
+                    Dataservice.objects(id=args["dataservice"])
+                    .only("datasets")
+                    .no_dereference()
+                    .get()
+                )
             except Dataservice.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in dataservice.datasets])
         if args.get("reuse"):
             if not ObjectId.is_valid(args["reuse"]):
                 api.abort(400, "Reuse arg must be an identifier")
             try:
-                reuse = Reuse.objects.get(id=args["reuse"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources,
+                # which can be megabytes for a dataset with thousands of resources).
+                reuse = Reuse.objects(id=args["reuse"]).only("datasets").no_dereference().get()
             except Reuse.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in reuse.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in reuse.datasets])
         if args.get("archived") is not None:
             if current_user.is_anonymous:
                 abort(401)
