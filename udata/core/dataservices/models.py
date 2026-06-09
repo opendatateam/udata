@@ -1,13 +1,14 @@
 from datetime import UTC, datetime
 
 from blinker import Signal
-from flask import url_for
+from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import PULL, EmbeddedDocument, Q
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    DictField,
     EmbeddedDocumentField,
     FloatField,
     LazyReferenceField,
@@ -19,6 +20,7 @@ from mongoengine.signals import post_save
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
@@ -51,6 +53,23 @@ dataservice_permissions_fields = api.model(
     {
         "delete": fields.Permission(),
         "edit": fields.Permission(),
+    },
+)
+
+dataservice_quality_fields = api.model(
+    "DataserviceQuality",
+    {
+        "has_description": fields.Boolean(),
+        "has_machine_documentation": fields.Boolean(),
+        "has_technical_documentation": fields.Boolean(),
+        "has_business_documentation": fields.Boolean(),
+        "license": fields.Boolean(),
+        "has_contact_point": fields.Boolean(),
+        "has_base_api_url": fields.Boolean(),
+        "availability_documented": fields.Boolean(),
+        "rate_limiting_documented": fields.Boolean(),
+        "access_conditions_clear": fields.Boolean(),
+        "score": fields.Float(),
     },
 )
 
@@ -340,6 +359,8 @@ class Dataservice(
         auditable=False,
     )
 
+    quality_cached = DictField()
+
     @field(description="Link to the API endpoint for this dataservice", show_as_ref=True)
     def self_api_url(self, **kwargs):
         return url_for(
@@ -383,6 +404,17 @@ class Dataservice(
             "read": OwnableReadPermission(self),
         }
 
+    @property
+    @field(nested_fields=dataservice_quality_fields)
+    def quality(self):
+        quality = dict(self.quality_cached) if self.quality_cached else self.compute_quality()
+        quality["score"] = self.compute_quality_score(quality)
+        return quality
+
+    def clean(self):
+        super().clean()
+        self.quality_cached = self.compute_quality()
+
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self).count()
         self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
@@ -394,6 +426,40 @@ class Dataservice(
             Follow.objects(following=self), date_label="since"
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def compute_quality(self):
+        """Return a dict of boolean metadata-quality criteria for this dataservice."""
+        result = {}
+
+        result["has_description"] = len(self.description or "") > current_app.config.get(
+            "QUALITY_DESCRIPTION_LENGTH"
+        )
+        result["has_machine_documentation"] = bool(self.machine_documentation_url)
+        result["has_technical_documentation"] = bool(self.technical_documentation_url)
+        result["has_business_documentation"] = bool(self.business_documentation_url)
+        result["license"] = bool(self.license)
+        result["has_contact_point"] = bool(self.contact_points)
+        result["has_base_api_url"] = bool(self.base_api_url)
+        result["availability_documented"] = self.availability is not None or bool(
+            self.availability_url
+        )
+        result["rate_limiting_documented"] = bool(self.rate_limiting or self.rate_limiting_url)
+
+        if self.access_type == AccessType.OPEN:
+            result["access_conditions_clear"] = True
+        else:
+            result["access_conditions_clear"] = bool(self.authorization_request_url)
+
+        return result
+
+    @staticmethod
+    def normalize_score(score):
+        QUALITY_MAX_SCORE = 10
+        return score / QUALITY_MAX_SCORE
+
+    def compute_quality_score(self, quality):
+        score = sum(1 for value in quality.values() if value is True)
+        return self.normalize_score(score)
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
