@@ -32,10 +32,11 @@ reuse_fields = apiv2.clone(
                     _external=True,
                 ),
                 "type": "GET",
-                # The list endpoint fetches reuses with `no_dereference()`, so
-                # `datasets` holds raw references: len() counts them without
-                # triggering a query per linked dataset.
-                "total": len(o.datasets),
+                # Read the count from the stored metric: `len(o.datasets)` would
+                # dereference every linked dataset (each can weigh several MB),
+                # which is exactly what this link is meant to avoid. This also
+                # works regardless of how the reuse was loaded (search vs listing).
+                "total": o.metrics.get("datasets", 0),
             },
             description="Link to the reuse datasets",
         ),
@@ -72,8 +73,9 @@ class ReuseListAPI(API):
     @apiv2.marshal_with(reuse_page_fields)
     def get(self):
         """List all reuses"""
-        # `no_dereference()` keeps `datasets` as raw references so the lightweight
-        # `reuse_fields` model can count them without dereferencing each dataset.
+        # `no_dereference()` avoids loading the referenced documents (datasets,
+        # dataservices) when listing reuses; the datasets total is read from the
+        # stored metric (see `reuse_fields`).
         query = Reuse.objects.no_dereference().visible_by_user(
             current_user, mongoengine.Q(private__ne=True, deleted=None)
         )
