@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -104,3 +106,36 @@ class ReuseListAPIV2Test(APITestCase):
         assert200(response)
         ids = {r["id"] for r in response.json["data"]}
         assert ids == {str(public_reuse.id), str(private_reuse.id)}
+
+    def test_reuse_list_excludes_deleted(self):
+        """Deleted reuses are filtered out by the endpoint `deleted=None` clause;
+        `deleted` is not `filterable`, so only this test guards that exclusion."""
+        public_reuse = ReuseFactory()
+        ReuseFactory(deleted=datetime.utcnow())
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        ids = {r["id"] for r in response.json["data"]}
+        assert ids == {str(public_reuse.id)}
+
+    def test_reuse_list_sort_by_datasets(self):
+        """`?sort=-datasets` orders on the stored `metrics.datasets` counter."""
+        most, mid, least = ReuseFactory.create_batch(3)
+        Reuse.objects(id=most.id).update(set__metrics__datasets=10)
+        Reuse.objects(id=mid.id).update(set__metrics__datasets=5)
+        Reuse.objects(id=least.id).update(set__metrics__datasets=1)
+
+        response = self.get(url_for("apiv2.reuses", sort="-datasets"))
+        assert200(response)
+        ids = [r["id"] for r in response.json["data"]]
+        assert ids == [str(most.id), str(mid.id), str(least.id)]
+
+    def test_reuse_list_filter_type(self):
+        """The `type` filter exposed by `__index_parser__` narrows the listing."""
+        api_reuse = ReuseFactory(type="api")
+        ReuseFactory(type="application")
+
+        response = self.get(url_for("apiv2.reuses", type="api"))
+        assert200(response)
+        ids = {r["id"] for r in response.json["data"]}
+        assert ids == {str(api_reuse.id)}
