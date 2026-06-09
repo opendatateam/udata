@@ -131,6 +131,9 @@ class SearchableTopic(IndexDocument):
     nb_datasets = Integer()
     nb_reuses = Integer()
     nb_dataservices = Integer()
+    elements_titles = Text(analyzer=dgv_analyzer)
+    elements_descriptions = Text(analyzer=dgv_analyzer)
+    elements_tags = Keyword(multi=True)
 
 
 class SearchableDiscussion(IndexDocument):
@@ -483,7 +486,15 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=["id^5", "name^10", "description^4", "tags^3"],
+                        fields=[
+                            "id^8",
+                            "name^10",
+                            "description^6",
+                            "tags^5",
+                            "elements_titles^4",
+                            "elements_descriptions^3",
+                            "elements_tags^2",
+                        ],
                         fuzziness="AUTO:4,6",
                     )
                 ],

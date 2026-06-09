@@ -1,4 +1,5 @@
 import logging
+from urllib.parse import urlsplit
 
 from flask import current_app, request
 from werkzeug.datastructures import Headers
@@ -13,13 +14,47 @@ def add_vary(headers: Headers, header: str):
     headers.set("Vary", ", ".join(values))
 
 
+def get_allowed_origins() -> set[str]:
+    """Origins allowed to make *credentialed* cross-origin requests.
+
+    The trusted front-end (cdata) is derived from `CDATA_BASE_URL` so it works
+    out of the box, and operators can declare extra origins via
+    `CORS_ALLOWED_ORIGINS`.
+    """
+    origins = set(current_app.config.get("CORS_ALLOWED_ORIGINS") or [])
+
+    cdata_base_url = current_app.config.get("CDATA_BASE_URL")
+    if cdata_base_url:
+        parts = urlsplit(cdata_base_url)
+        if parts.scheme and parts.netloc:
+            origins.add(f"{parts.scheme}://{parts.netloc}")
+
+    return origins
+
+
+def set_allow_origin_headers(headers: Headers, origin: str) -> None:
+    if origin in get_allowed_origins():
+        # Trusted front-end: allow credentialed requests so the session cookie
+        # can be sent and read cross-origin.
+        headers.set("Access-Control-Allow-Origin", origin)
+        headers.set("Access-Control-Allow-Credentials", "true")
+    else:
+        # Any other origin only gets anonymous access. Reflecting an arbitrary
+        # origin together with `Allow-Credentials: true` is what would, in
+        # theory, let a malicious site read a logged-in user's private data or
+        # act on their behalf. In practice the session cookie is `SameSite=Lax`,
+        # so browsers don't send it on cross-site requests anyway; this stricter
+        # CORS policy is defense in depth so the protection doesn't rely on that
+        # single browser-enforced mechanism.
+        headers.set("Access-Control-Allow-Origin", "*")
+
+
 def add_actual_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get("Origin", None)
     add_vary(headers, "Origin")
 
     if origin:
-        headers.set("Access-Control-Allow-Origin", origin)
-        headers.set("Access-Control-Allow-Credentials", "true")
+        set_allow_origin_headers(headers, origin)
 
     return headers
 
@@ -67,8 +102,7 @@ def add_preflight_request_headers(headers: Headers) -> Headers:
     add_vary(headers, "Origin")
 
     if origin:
-        headers.set("Access-Control-Allow-Origin", origin)
-        headers.set("Access-Control-Allow-Credentials", "true")
+        set_allow_origin_headers(headers, origin)
 
         # The API allows all methods, so just copy the browser requested methods from the request headers.
         headers.set(

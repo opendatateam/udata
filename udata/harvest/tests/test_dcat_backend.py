@@ -205,6 +205,21 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_datasetseries(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        source = HarvestSourceFactory(
+            backend="dcat",
+            url=mock_dcat(rmock, "series.xml"),
+            organization=OrganizationFactory(),
+        )
+        actions.run(source)
+
+        datasets = Dataset.objects
+
+        assert len(datasets) == 1
+        assert datasets[0].title == "DCE – Bassin Artois-Picardie - Etat global"
+
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
 
@@ -1015,6 +1030,42 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         # No datasets should have been created either
         assert Dataset.objects.count() == 0
+
+    def test_preview_dataservice_serving_datasets(self, rmock):
+        """Preview a dataservice serving datasets that are created during the same run.
+
+        In dryrun the harvested datasets are never saved. They used to keep no pk, which
+        (1) made `dataservice.validate()` raise `ValidationError (... ['datasets'])` on
+        the `datasets` LazyReferenceField, and (2) collapsed every served dataset into a
+        single reference (they all compared equal through `pk=None`). Datasets now get a
+        client-side id during the preview, so both issues are gone.
+        """
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        url = mock_dcat(rmock, "bnodes.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        job = actions.preview(source)
+
+        assert job.status == "done"
+
+        dataservice_items = [item for item in job.items if item.dataservice is not None]
+        assert len(dataservice_items) == 1
+        dataservice_item = dataservice_items[0]
+        assert dataservice_item.status == "done", dataservice_item.errors
+        assert dataservice_item.dataservice.title == "Explore API v2"
+
+        # The dataservice serves dataset-2 and dataset-3: both stay attached as two
+        # distinct references (the dedup no longer collapses them through pk=None).
+        attached = dataservice_item.dataservice.datasets
+        assert len(attached) == 2
+        assert all(dataset.pk is not None for dataset in attached)
+        assert attached[0].pk != attached[1].pk
+
+        # A preview must not persist anything
+        assert Dataset.objects.count() == 0
+        assert Dataservice.objects.count() == 0
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
