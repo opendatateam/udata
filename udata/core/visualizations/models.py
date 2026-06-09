@@ -29,7 +29,7 @@ from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url
 
-from .constants import MAX_SIZE
+from .constants import IMAGE_MAX_SIZE
 
 visualization_permissions_fields = api.model(
     "VisualizationPermissions",
@@ -154,7 +154,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
         ImageField(
             fs=images,
             basename=default_image_basename,
-            max_size=MAX_SIZE,
+            max_size=IMAGE_MAX_SIZE,
         ),
         readonly=True,
         show_as_ref=True,

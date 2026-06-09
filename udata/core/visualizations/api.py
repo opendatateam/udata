@@ -98,6 +98,9 @@ class VisualizationImageAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def post(self, visualization):
         """Upload a new visualization image"""
+        if visualization.deleted_at:
+            api.abort(410, "Visualization has been deleted")
+
         visualization.permissions["edit"].test()
         parse_uploaded_image(visualization.image)
         visualization.save()
