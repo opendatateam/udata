@@ -30,7 +30,7 @@ class OwnedQuerySet(UDataQuerySet):
         if user.sysadmin:
             return self()
 
-        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owners = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
@@ -91,7 +91,6 @@ class Owned(object):
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
-        nested_fields=Organization.__ref_fields__,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,

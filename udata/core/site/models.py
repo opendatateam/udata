@@ -13,7 +13,8 @@ from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.models import Dataset
-from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, Bloc
+from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.organization.models import Organization

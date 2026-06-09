@@ -13,6 +13,8 @@ from udata.core.edito_blocs.models import (
     DatasetsListBloc,
 )
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Organization
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
@@ -94,13 +96,14 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert job.items[1].dataset == dataset_keep
         assert job.items[2].dataset is None
 
-    def test_purge_datasets_cleans_blocs_in_post_and_site(self):
+    def test_purge_datasets_cleans_blocs_in_post_site_and_organization(self):
         dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
         dataset_keep = Dataset.objects.create(title="keep me")
 
         bloc = DatasetsListBloc(title="Featured", datasets=[dataset_to_delete, dataset_keep])
         PostFactory(body_type="blocs", blocs=[bloc])
         SiteFactory(id="test-site", datasets_blocs=[bloc])
+        org = OrganizationFactory(blocs=[bloc])
 
         tasks.purge_datasets()
 
@@ -111,6 +114,10 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         site = Site.objects.get(id="test-site")
         assert len(site.datasets_blocs[0].datasets) == 1
         assert site.datasets_blocs[0].datasets[0].id == dataset_keep.id
+
+        org = Organization.objects.get(id=org.id)
+        assert len(org.blocs[0].datasets) == 1
+        assert org.blocs[0].datasets[0].id == dataset_keep.id
 
     def test_purge_datasets_cleans_dataset_in_nested_accordion_bloc(self):
         """Purging a dataset must remove it from `DatasetsListBloc`s nested inside an

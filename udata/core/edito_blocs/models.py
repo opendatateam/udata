@@ -6,15 +6,8 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
-from udata.mongo.uuid_fields import AutoUUIDField
-
-
-@generate_fields()
-class Bloc(EmbeddedDocument):
-    meta = {"allow_inheritance": True}
-
-    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:
@@ -139,13 +132,14 @@ SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
 
 def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post and Site.
+    """Remove references to a deleted object from all blocs in Post, Site and Organization.
 
     A reference can live both at the top level of a blocs field and nested inside an
     accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
     Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
     two levels are enough.
     """
+    from udata.core.organization.models import Organization
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
@@ -167,5 +161,6 @@ def purge_blocs_references(ref_field, obj_id):
         )
 
     purge(Post._get_collection(), "blocs")
+    purge(Organization._get_collection(), "blocs")
     for blocs_field in SITE_BLOCS_FIELDS:
         purge(Site._get_collection(), blocs_field)
