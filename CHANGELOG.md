@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.0.0 (2026-06-09)
+
+- **feat!: harvest API refactor ([#3759](https://github.com/opendatateam/udata/pull/3759))**
+- feat: prepare ElasticSearch 8 ([#3714](https://github.com/opendatateam/udata/pull/3714))
+- feat(search): index Topic.elements ([#3811](https://github.com/opendatateam/udata/pull/3811))
+- feat(spam): add web url in message report ([#3821](https://github.com/opendatateam/udata/pull/3821))
+
+
 ## 16.6.1 (2026-06-05)
 
 - chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))
