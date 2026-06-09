@@ -158,6 +158,14 @@ def _is_field_in_response_mask(read_fields, field_name) -> bool:
     return field_name in mask or "*" in mask
 
 
+# Heavy fields no bloc card ever displays. A dataset's `resources` list can hold dozens
+# of embedded sub-documents; loading the full document deserializes them all even though
+# the card only shows `organization`, `owner`, `quality`, etc. — and that deserialization,
+# not the queries, is what dominates the response time. We drop them from the load query.
+# Only fields that exist on a given model are excluded (reuses/dataservices have none).
+CARD_UNUSED_HEAVY_FIELDS = ("resources",)
+
+
 def prefetch_blocs_references(document_cls, obj, *bloc_fields):
     """Batch-load the datasets/reuses/dataservices referenced by an object's blocs.
 
@@ -171,6 +179,10 @@ def prefetch_blocs_references(document_cls, obj, *bloc_fields):
     reload each type as a single flat query with `select_related` (which batches the
     organization/owner lookups), and inject the resolved documents back into the blocs.
     Marshalling then issues no further query.
+
+    The load query also drops the heavy fields no card shows (a dataset's `resources`),
+    so we stop paying to deserialize data that isn't serialized — the dominant cost on
+    real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
     `document_cls` is the marshalled document class (Post, Site, …), `obj` its instance
     and `bloc_fields` the names of its bloc list attributes (e.g. `"blocs"`, or the
@@ -210,10 +222,11 @@ def prefetch_blocs_references(document_cls, obj, *bloc_fields):
     for _, _, model, ids in collected:
         ids_by_model.setdefault(model, set()).update(ids)
 
-    docs_by_model = {
-        model: {doc.id: doc for doc in model.objects(id__in=list(ids)).select_related()}
-        for model, ids in ids_by_model.items()
-    }
+    docs_by_model = {}
+    for model, ids in ids_by_model.items():
+        unused = [f for f in CARD_UNUSED_HEAVY_FIELDS if f in model._fields]
+        queryset = model.objects(id__in=list(ids)).exclude(*unused).select_related()
+        docs_by_model[model] = {doc.id: doc for doc in queryset}
 
     for bloc, attr, model, ids in collected:
         by_id = docs_by_model[model]

@@ -1,3 +1,5 @@
+from unittest import mock
+
 from flask import url_for
 from mongoengine.context_managers import query_counter
 
@@ -105,6 +107,45 @@ class PostsAPITest(APITestCase):
         org_ids = {str(o.id) for o in orgs}
         first_card = dataset_blocs[0]["datasets"][0]
         assert first_card["organization"]["id"] in org_ids
+
+    def test_post_api_blocs_projection_keeps_output_intact(self):
+        """Projecting out heavy unused fields must not change the serialized cards.
+
+        `prefetch_blocs_references` loads each card with only the fields its mask
+        serializes, dropping embedded-document lists the card never shows (a dataset's
+        `resources` can hold dozens of sub-documents — deserializing them dominates the
+        response time). The output must stay byte-for-byte identical to a full-document
+        load; this locks against projecting out a field a card actually needs.
+        """
+        org = OrganizationFactory()
+        datasets = []
+        for _ in range(5):
+            dataset = DatasetFactory(organization=org, nb_resources=8)
+            # In production `quality` is precomputed and stored; the card reads the cache
+            # and never recomputes from `resources`, which is why we can drop them.
+            dataset.quality_cached = dataset.compute_quality()
+            dataset.save()
+            datasets.append(dataset)
+        post = PostFactory(
+            body_type="blocs",
+            content=None,
+            blocs=[DatasetsListBloc(title="B", datasets=datasets)],
+            datasets=[],
+            reuses=[],
+        )
+        url = url_for("api.post", post=post)
+
+        projected = self.get(url).json
+
+        # Same request, but loading the full documents (no field projection).
+        with mock.patch("udata.core.edito_blocs.models.CARD_UNUSED_HEAVY_FIELDS", ()):
+            full = self.get(url).json
+
+        assert projected["blocs"] == full["blocs"]
+        # `quality` carries resource-derived criteria: it must still be correct from the
+        # cache even though `resources` was not loaded.
+        card = projected["blocs"][0]["datasets"][0]
+        assert card["quality"]["has_resources"] is True
 
     def test_post_list_does_not_dereference_blocs(self):
         """The list endpoint masks out blocs, so it must not dereference them.
