@@ -21,17 +21,24 @@ jobs:
         type: string
       mongo-version:
         type: string
+      elasticsearch-version:
+        type: string
     docker:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
-      - image: elasticsearch:7.17.28
+      - image: elasticsearch:<< parameters.elasticsearch-version >>
         environment:
-          node.name: es01
-          cluster.name: es-docker-cluster
-          cluster.initial_master_nodes: es01
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          action.destructive_requires_name: "false"
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-        command: ["bash", "-c", "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"]
+        command:
+          [
+            "bash",
+            "-c",
+            "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper",
+          ]
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
@@ -212,6 +219,7 @@ workflows:
             parameters:
               python-version: ["3.11", "3.13"]
               mongo-version: ["7.0.28"]
+              elasticsearch-version: ["7.17.28", "8.19.13"]
       - dist:
           requires:
             - python

@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD
+from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD, Namespace
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
@@ -21,6 +21,7 @@ from udata.core.dataset.models import (
     HarvestResourceMetadata,
     License,
     Resource,
+    SpatialCoverage,
 )
 from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
@@ -38,6 +39,7 @@ from udata.core.dataset.rdf import (
     resource_from_rdf,
     resource_to_rdf,
     rights_to_rdf,
+    spatial_from_rdf,
     spatial_resolution_from_rdf,
     temporal_from_rdf,
 )
@@ -53,7 +55,9 @@ from udata.rdf import (
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
+    LOCN,
     QUDT,
     SCHEMA,
     SDMXA,
@@ -64,8 +68,8 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
+    slugify_tag,
 )
-from udata.tags import slug as slugify_tag
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -93,6 +97,14 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
    </rdf:Description>
 </rdf:RDF>
 """
+
+
+def _to_geojson(coords):
+    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+
+
+def _to_wkt(coords):
+    return f"""Polygon(({", ".join([f"{x} {y}" for x, y in coords])}))"""
 
 
 class DatasetToRdfTest(PytestOnlyAPITestCase):
@@ -926,6 +938,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.checksum.value == sha1
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
+        assert resource.harvest.last_update - datetime.now(UTC) < timedelta(seconds=1)
         assert resource.format == "csv"
 
     def test_resource_future_modified_at(self):
@@ -1418,6 +1431,114 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert temporal_from_rdf(g.resource(node)) is None
         assert temporal_from_rdf(Literal("unparseable")) is None
+
+    @pytest.mark.parametrize(
+        "node_type, geom_type, datatype, serialize",
+        (
+            pytest.param(*params, id=id)
+            for id, *params in [
+                (
+                    "bbox-geojson",
+                    DCT.Location,
+                    DCAT.bbox,
+                    GEOSPARQL.geoJSONLiteral,
+                    _to_geojson,
+                ),
+                (  # replaced by GEOSPARQL.geoJSONLiteral
+                    "bbox-geojson-deprecated",
+                    DCT.Location,
+                    DCAT.bbox,
+                    "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
+                    _to_geojson,
+                ),
+                (
+                    "bbox-wkt",
+                    DCT.Location,
+                    DCAT.bbox,
+                    GEOSPARQL.wktLiteral,
+                    _to_wkt,
+                ),
+                (
+                    "geometry-geojson",
+                    DCT.Location,
+                    LOCN.geometry,
+                    GEOSPARQL.geoJSONLiteral,
+                    _to_geojson,
+                ),
+                (
+                    "geometry-wkt",
+                    DCT.Location,
+                    LOCN.geometry,
+                    GEOSPARQL.wktLiteral,
+                    _to_wkt,
+                ),
+                (  # old GeoNetwork dcat exposition
+                    "polygon-geometry",
+                    Namespace("http://www.opengis.net/rdf#").Polygon,
+                    LOCN.geometry,
+                    "http://www.opengis.net/rdf#wktLiteral",
+                    _to_wkt,
+                ),
+                (  # old GeoNetwork dcat exposition
+                    "polygon-aswkt",
+                    Namespace("http://www.opengis.net/rdf#").Polygon,
+                    GEOSPARQL.asWKT,
+                    "http://www.opengis.net/rdf#wktLiteral",
+                    _to_wkt,
+                ),
+            ]
+        ),
+    )
+    def test_parse_spatial_geometry(self, node_type, geom_type, datatype, serialize):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        spatial = BNode()
+        g.add((spatial, RDF.type, node_type))
+        g.add((spatial, geom_type, Literal(serialize(coords), datatype=datatype)))
+        g.add((dataset, DCT.spatial, spatial))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
+
+    def test_parse_spatial_geometry_redundant(self):
+        """
+        The same coordinates should only occur once in the result, even if they are represented
+        multiple times (in different formats) in the input.
+        """
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        for geom_type in [DCAT.bbox, LOCN.geometry]:
+            for geom_coords in [
+                Literal(_to_geojson(coords), datatype=GEOSPARQL.geoJSONLiteral),
+                Literal(_to_wkt(coords), datatype=GEOSPARQL.wktLiteral),
+            ]:
+                geom = BNode()
+                g.add((geom, RDF.type, DCT.Location))
+                g.add((geom, geom_type, geom_coords))
+                g.add((dataset, DCT.spatial, geom))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
 
     @pytest.mark.parametrize("uom, uom_str", [(QUDT.FT, "ft"), (QUDT.KiloM, "km"), (QUDT.M, "m")])
     def test_parse_spatial_resolution_as_distance(self, uom, uom_str):

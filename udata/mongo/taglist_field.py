@@ -2,6 +2,7 @@ from mongoengine.fields import ListField, StringField
 
 from udata import tags
 from udata.i18n import lazy_gettext as _
+from udata.tags import slug as slugify_tag
 
 
 class TagListField(ListField):
@@ -19,7 +20,7 @@ class TagListField(ListField):
             return []
 
     def clean(self, value):
-        return sorted({n for n in (tags.normalize(v) for v in value) if n})
+        return sorted({slugify_tag(v) for v in value})
 
     def to_python(self, value):
         return super(TagListField, self).to_python(self.clean(value))
@@ -28,8 +29,6 @@ class TagListField(ListField):
         return super(TagListField, self).to_mongo(self.clean(value))
 
     def validate(self, values):
-        if values is not None:
-            values[:] = self.clean(values)
         super(TagListField, self).validate(values)
 
         for tag in values:
