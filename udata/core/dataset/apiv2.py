@@ -1,4 +1,5 @@
 import logging
+import re
 
 import mongoengine
 from flask import abort, request, url_for
@@ -13,6 +14,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
+from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
@@ -31,7 +33,7 @@ from .api_fields import (
     user_ref_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset
+from .models import CommunityResource, Dataset, Resource
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -401,7 +403,7 @@ class DatasetExtrasAPI(API):
         return dataset.extras, 204
 
 
-@ns.route("/<dataset:dataset>/resources/", endpoint="resources")
+@ns.route("/<dataset_without_resources:dataset>/resources/", endpoint="resources")
 class ResourcesAPI(API):
     @apiv2.doc("list_resources")
     @apiv2.expect(resources_parser)
@@ -418,31 +420,47 @@ class ResourcesAPI(API):
         list_resources_url = url_for("apiv2.resources", dataset=dataset.id, _external=True)
         next_page = f"{list_resources_url}?page={page + 1}&page_size={page_size}"
         previous_page = f"{list_resources_url}?page={page - 1}&page_size={page_size}"
-        res = dataset.resources
 
+        # Filter the resources server-side so a dataset with many or heavy
+        # resources isn't fully loaded just to serve a single page (the route
+        # loads the dataset without its resources, see the converter).
+        conditions = []
         if args["type"]:
-            res = [elem for elem in res if elem["type"] == args["type"]]
+            conditions.append({"$eq": ["$$item.type", args["type"]]})
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
-
         if args["q"]:
-            res = [elem for elem in res if args["q"].lower() in elem["title"].lower()]
+            # re.escape to match the previous substring (not regex) behaviour
+            conditions.append(
+                {
+                    "$regexMatch": {
+                        "input": "$$item.title",
+                        "regex": re.escape(args["q"]),
+                        "options": "i",
+                    }
+                }
+            )
             next_page += f"&q={args['q']}"
             previous_page += f"&q={args['q']}"
 
-        if page > 1:
-            offset = page_size * (page - 1)
-        else:
-            offset = 0
-        paginated_result = res[offset : (page_size + offset if page_size is not None else None)]
+        paginated_result, total = paginate_embedded_list(
+            Dataset,
+            dataset.id,
+            "resources",
+            Resource,
+            page=page,
+            page_size=page_size,
+            condition={"$and": conditions} if conditions else None,
+        )
+        offset = page_size * (page - 1) if page > 1 else 0
 
         return {
             "data": paginated_result,
-            "next_page": next_page if page_size + offset < len(res) else None,
+            "next_page": next_page if page_size + offset < total else None,
             "page": page,
             "page_size": page_size,
             "previous_page": previous_page if page > 1 else None,
-            "total": len(res),
+            "total": total,
         }
 
 
