@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- feat(dataservices): compute the `reuses` metric so the dataservice reuses count is accurate [#XXXX](https://github.com/opendatateam/udata/pull/XXXX)
+
 ## 16.6.1 (2026-06-05)
 
 - chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))
