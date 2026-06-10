@@ -1849,6 +1849,10 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], 3)
+        self.assertEqual(data["mime"], "text/plain")
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "7e240de74fb1ed08fa08d38063f6a6a91462a815")
         response = self.put(url_for("api.resource", dataset=dataset, rid=data["id"]), data)
         self.assert200(response)
         dataset.reload()
@@ -1865,11 +1869,12 @@ class DatasetResourceAPITest(APITestCase):
         parts = 4
         url = url_for("api.upload_new_dataset_resource", dataset=dataset)
 
-        for i in range(parts):
+        # Distinct chunk contents so the final checksum proves the combination order
+        for i, chunk in enumerate([b"a", b"b", b"c", b"d"]):
             response = self.post(
                 url,
                 {
-                    "file": (BytesIO(b"a"), "blob"),
+                    "file": (BytesIO(chunk), "blob"),
                     "uuid": uuid,
                     "filename": "test.txt",
                     "partindex": i,
@@ -1902,6 +1907,53 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], parts)
+        self.assertEqual(data["mime"], "text/plain")
+        # The sha1 of b"abcd" proves the chunks were combined in order
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
+        self.assertEqual(list(storages.chunks.list_files()), [])
+
+    def test_create_with_file_chunk_bad_size(self):
+        """It should reject a chunk whose size does not match chunksize"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {
+                "file": (BytesIO(b"a"), "blob"),
+                "uuid": str(uuid4()),
+                "filename": "test.txt",
+                "partindex": 0,
+                "partbyteoffset": 0,
+                "totalfilesize": 4,
+                "totalparts": 4,
+                "chunksize": 10,  # Does not match the 1-byte chunk
+            },
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertFalse(response.json["success"])
+        self.assertEqual(list(storages.chunks.list_files()), [])
+
+    def test_create_with_file_missing_file(self):
+        """It should return an error when no file is provided"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"bad": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertFalse(response.json["success"])
+        self.assertIn("error", response.json)
 
     def test_reorder(self):
         # Register an extra field in order to test

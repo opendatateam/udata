@@ -6,7 +6,6 @@ from udata.core.access_type.constants import (
 )
 from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
-from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.mongo.errors import FieldValidationError
@@ -87,7 +86,7 @@ class BaseResourceForm(ModelForm):
         default="other",
         description=_("Resource type (documentation, API...)"),
     )
-    url = fields.UploadableURLField(_("URL"), [validators.DataRequired()], storage=resources)
+    url = fields.URLField(_("URL"), [validators.DataRequired()])
     format = fields.StringField(
         _("Format"),
         filters=[normalize_format],
