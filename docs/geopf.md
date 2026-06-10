@@ -52,7 +52,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 |---|---|
 | `fileIdentifier` | `dataset.id` |
 | `organisationName` (metadata contact + data contact) | `dataset.organization.name` or `dataset.owner.fullname` |
-| `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none |
+| `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none — see note below |
 | `pointOfContact` in `identificationInfo` | Org name + email (omitted if no org/owner) |
 | `dateStamp` | `dataset.last_modified` |
 | `title` | `dataset.title` |
@@ -66,6 +66,31 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 > **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI — this is the platform's own French label for dataset-level metadata, not an error.
 
+> **Note:** Contact points have no UI — they must be created via `POST /api/1/contacts/` and attached to the dataset via `PUT /api/1/datasets/{id}/`. This means a dataset going through the standard contribution funnel will have no contact point set at the time the gpkg resource is first uploaded, and the email fields will be absent from the metadata. Contact points must be added separately after the fact, then `udata geopf sync-dataset` run to refresh the metadata.
+
+## Reverse sync: services → resources
+
+Once a dataset has been pushed to Géoplateforme, the stored data are exposed as OGC services (WFS, WMS, WMTS, TMS, …). The reverse sync reads those offerings and mirrors them as resources in udata.
+
+### Workflow
+
+1. Collect stored data IDs from `geopf_stored_data_id` on the dataset's existing resources.
+2. For each stored data ID, query `GET /datastores/{id}/offerings?stored_data={id}`.
+3. For each offering: create a new resource if none with matching `geopf_offering_id` exists, or update the URL if it changed.
+4. Remove any resources whose `geopf_offering_id` no longer appears in the live offering set.
+
+### Resource extras set by reverse sync
+
+- `geopf_offering_id` — entrepôt offering ID (primary key for matching)
+- `geopf_stored_data_id` — stored data ID the offering belongs to
+- `geopf_service_type` — service type string (`WFS`, `WMS-VECTOR`, `VECTOR-TMS`, …)
+- `geopf_layer_name` — layer name as published on the platform
+- `geopf_last_synced_at` — ISO 8601 timestamp of last successful sync
+
+### Periodic job
+
+The job `geopf.sync-services` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf_metadata_id` in its extras (i.e., any dataset with at least one successful push). Errors on individual datasets are logged and skipped without aborting the run.
+
 ## CLI
 
 ```
@@ -73,6 +98,12 @@ udata geopf sync-dataset <dataset_id>
 ```
 
 Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.
+
+```
+udata geopf sync-services <dataset_id>
+```
+
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the reverse-sync logic.
 
 ## Configuration
 
@@ -87,8 +118,7 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 ## Limitations
 
 - Only `gpkg` resources are synchronised; other formats are silently skipped.
-- Updates to an existing resource are not yet handled — the task only fires on `on_resource_added`.
-- Resource deletion on the Géoplateforme side is not yet implemented.
+- Updates to an existing pushed resource are not yet handled — the push task only fires on `on_resource_added`.
 - SRS is hardcoded to `EPSG:4326` (WGS 84) for both upload creation and processing parameters; files in other projections will fail or produce incorrect results.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.

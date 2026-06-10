@@ -8,8 +8,8 @@ import requests
 from flask import current_app
 
 from udata.core import storages
-from udata.core.dataset.models import Dataset
-from udata.tasks import task
+from udata.core.dataset.models import Dataset, Resource
+from udata.tasks import job, task
 
 from .client import GeopfClient, GeopfError, md5_of_file
 from .metadata import dataset_to_iso19115
@@ -217,6 +217,109 @@ def sync_metadata(dataset, client):
         client.tag_entity("metadata", metadata_id, datasheet_name)
         _set_dataset_extras(dataset, {"geopf_metadata_id": metadata_id})
     return metadata_id
+
+
+@job("geopf.sync-services")
+def sync_geopf_services(self):
+    """Periodic job: sync GeoPortail services to udata resources for all pushed datasets."""
+    if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
+        "GEOPF_DATASTORE_ID"
+    ):
+        log.warning("geopf: GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured, skipping sync")
+        return
+
+    client = GeopfClient()
+    datasets = Dataset.objects(**{"extras__geopf_metadata_id__exists": True})
+    log.info("geopf: syncing services for %d datasets", datasets.count())
+    for dataset in datasets:
+        try:
+            n = sync_services_for_dataset(dataset, client)
+            log.info("geopf: synced %d offerings for dataset=%s", n, dataset.id)
+        except Exception:
+            log.exception("geopf: service sync failed for dataset=%s", dataset.id)
+
+
+def sync_services_for_dataset(dataset, client) -> int:
+    """Sync GeoPortail offerings to udata resources. Returns count of live offerings."""
+    stored_data_ids = {
+        r.extras["geopf_stored_data_id"]
+        for r in dataset.resources
+        if r.extras.get("geopf_stored_data_id")
+    }
+    if not stored_data_ids:
+        return 0
+
+    live_offering_ids = set()
+    for sd_id in stored_data_ids:
+        for offering in client.list_offerings(sd_id):
+            live_offering_ids.add(offering["_id"])
+            _upsert_offering_resource(dataset, offering, sd_id)
+
+    # Remove resources whose offering no longer exists on GeoPortail
+    for resource in list(dataset.resources):
+        oid = resource.extras.get("geopf_offering_id")
+        if oid and oid not in live_offering_ids:
+            log.info(
+                "geopf: removing resource=%s (offering=%s gone) dataset=%s",
+                resource.id,
+                oid,
+                dataset.id,
+            )
+            dataset.remove_resource(resource)
+
+    return len(live_offering_ids)
+
+
+def _upsert_offering_resource(dataset, offering, stored_data_id):
+    offering_id = offering["_id"]
+    service_type = offering.get("type", "")
+    layer_name = offering.get("layer_name", "")
+    url = _offering_url(offering)
+    if not url:
+        log.warning("geopf: offering=%s has no URL, skipping dataset=%s", offering_id, dataset.id)
+        return
+
+    title = f"Service {service_type} - {layer_name}" if layer_name else f"Service {service_type}"
+    now = datetime.now(UTC).isoformat()
+    existing = next(
+        (r for r in dataset.resources if r.extras.get("geopf_offering_id") == offering_id),
+        None,
+    )
+
+    if existing is None:
+        resource = Resource(
+            title=title,
+            url=url,
+            format=service_type.lower() if service_type else None,
+            filetype="remote",
+            type="api",
+            extras={
+                "geopf_offering_id": offering_id,
+                "geopf_stored_data_id": stored_data_id,
+                "geopf_service_type": service_type,
+                "geopf_layer_name": layer_name,
+                "geopf_last_synced_at": now,
+            },
+        )
+        dataset.add_resource(resource)
+        log.info(
+            "geopf: added resource offering=%s type=%s layer=%s dataset=%s",
+            offering_id,
+            service_type,
+            layer_name,
+            dataset.id,
+        )
+    else:
+        extras_update = {"geopf_last_synced_at": now}
+        if existing.url != url:
+            existing.url = url
+            dataset.update_resource(existing)
+        _set_extras(dataset, existing, extras_update)
+
+
+def _offering_url(offering: dict) -> str:
+    urls = offering.get("urls") or []
+    return urls[0].get("url", "") if urls else ""
 
 
 def _set_dataset_extras(dataset, extras: dict):

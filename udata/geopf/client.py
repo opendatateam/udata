@@ -124,6 +124,17 @@ class GeopfClient:
         )
         self._raise(resp)
 
+    # --- offerings ---
+
+    def list_offerings(self, stored_data_id: str) -> list:
+        """Return offerings for a stored_data, including urls and type."""
+        resp = self.session.get(
+            self._url("offerings"),
+            params={"stored_data": stored_data_id, "fields": "urls,type,layer_name,status,open"},
+        )
+        self._raise(resp)
+        return resp.json()
+
     # --- metadata ---
 
     def upload_metadata(self, xml_bytes):
