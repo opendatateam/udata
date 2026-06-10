@@ -25,7 +25,7 @@ Triggered automatically when a `gpkg` resource is added to a dataset (via the `o
 7. **Tag stored data** — attach `datasheet_name` tag to the resulting stored data.
 8. **Metadata** — generate ISO 19115 XML from the dataset and push it:
    - If `geopf_metadata_id` is already in dataset extras: update the existing metadata record.
-   - Otherwise: upload (with 409 upsert fallback), publish to CSW, tag, and store the ID in extras.
+   - Otherwise: upload (with 409 upsert fallback), tag, and store the ID in extras.
 
 On any failure the task attempts to delete the livraison to avoid orphaned uploads, then re-raises so the error is visible in Celery.
 
@@ -51,16 +51,29 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 | ISO 19115 field | Source |
 |---|---|
 | `fileIdentifier` | `dataset.id` |
-| `organisationName` | `dataset.organization.name` or `dataset.owner.fullname` |
+| `organisationName` (metadata contact + data contact) | `dataset.organization.name` or `dataset.owner.fullname` |
+| `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none |
+| `pointOfContact` in `identificationInfo` | Org name + email (omitted if no org/owner) |
 | `dateStamp` | `dataset.last_modified` |
 | `title` | `dataset.title` |
 | `date` (creation) | `dataset.created_at` |
 | `abstract` | `dataset.description`, falls back to `dataset.title` |
 | `keywords` | `dataset.tags` |
-| `otherConstraints` | `dataset.license.url` or `dataset.license.title` (omitted if no license) |
-| Bounding box | Computed from `dataset.spatial.geom` (MultiPolygon); defaults to France métropolitaine |
+| `topicCategory` | First `dataset.tags` entry matching a known ISO 19115 topic category keyword; omitted if no match |
+| `otherConstraints` | `dataset.license.url` or `dataset.license.title`; omitted if no license |
+| Bounding box | Computed from `dataset.spatial.geom` (raw MultiPolygon only); omitted if unavailable |
 | `language` | Hardcoded `fre` |
 | `hierarchyLevel` | Hardcoded `dataset` |
+
+> **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI — this is the platform's own French label for dataset-level metadata, not an error.
+
+## CLI
+
+```
+udata geopf sync-dataset <dataset_id>
+```
+
+Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.
 
 ## Configuration
 
@@ -78,3 +91,5 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 - Updates to an existing resource are not yet handled — the task only fires on `on_resource_added`.
 - Resource deletion on the Géoplateforme side is not yet implemented.
 - SRS is hardcoded to `EPSG:4326` (WGS 84) for both upload creation and processing parameters; files in other projections will fail or produce incorrect results.
+- Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
+- `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.

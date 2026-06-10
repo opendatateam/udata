@@ -50,7 +50,7 @@ def push_resource_to_geopf(dataset_id, resource_id):
 def _run_pipeline(dataset, resource, datastore_id):
     client = GeopfClient()
     datasheet_name = str(dataset.id)
-    stored_data_name = str(resource.id)
+    stored_data_name = f"_{resource.id}"
     filename = _resource_filename(resource)
     dataset_id = dataset.id
     resource_id = resource.id
@@ -137,16 +137,7 @@ def _run_pipeline(dataset, resource, datastore_id):
 
     client.tag_entity("stored_data", stored_data_id, datasheet_name)
 
-    xml = dataset_to_iso19115(dataset)
-    metadata_id = dataset.extras.get("geopf_metadata_id")
-    if metadata_id:
-        client.update_metadata(metadata_id, xml)
-        log.info("geopf: updated metadata=%s dataset=%s", metadata_id, dataset_id)
-    else:
-        metadata_id = client.upload_metadata(xml)
-        log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset_id)
-        client.tag_entity("metadata", metadata_id, datasheet_name)
-        _set_dataset_extras(dataset, {"geopf_metadata_id": metadata_id})
+    sync_metadata(dataset, client)
 
     fiche_url = (
         f"https://cartes.gouv.fr/tableau-de-bord/entrepots/{datastore_id}/donnees/{datasheet_name}"
@@ -210,6 +201,22 @@ class _download_to_tempfile:
                 os.unlink(self._tmp.name)
             except OSError:
                 pass
+
+
+def sync_metadata(dataset, client):
+    """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
+    datasheet_name = str(dataset.id)
+    xml = dataset_to_iso19115(dataset)
+    metadata_id = dataset.extras.get("geopf_metadata_id")
+    if metadata_id:
+        client.update_metadata(metadata_id, xml)
+        log.info("geopf: updated metadata=%s dataset=%s", metadata_id, dataset.id)
+    else:
+        metadata_id = client.upload_metadata(xml)
+        log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
+        client.tag_entity("metadata", metadata_id, datasheet_name)
+        _set_dataset_extras(dataset, {"geopf_metadata_id": metadata_id})
+    return metadata_id
 
 
 def _set_dataset_extras(dataset, extras: dict):
