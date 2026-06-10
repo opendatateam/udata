@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from flask import make_response, redirect, request, url_for
+from flask_restx.inputs import boolean
 from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
@@ -351,6 +352,15 @@ suggest_parser.add_argument(
     "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
 )
 
+org_suggest_parser = suggest_parser.copy()
+org_suggest_parser.add_argument(
+    "dataservices",
+    type=boolean,
+    location="args",
+    default=False,
+    help="If true, only suggest organizations that have at least one API",
+)
+
 
 @ns.route("/<org:org>/contacts/suggest/", endpoint="suggest_org_contact_points")
 class ContactPointSuggestAPI(API):
@@ -677,14 +687,16 @@ class FollowOrgAPI(FollowAPI):
 @ns.route("/suggest/", endpoint="suggest_organizations")
 class OrganizationSuggestAPI(API):
     @api.doc("suggest_organizations")
-    @api.expect(suggest_parser)
+    @api.expect(org_suggest_parser)
     @api.marshal_list_with(org_suggestion_fields)
     def get(self):
         """Organizations suggest endpoint using mongoDB contains"""
-        args = suggest_parser.parse_args()
+        args = org_suggest_parser.parse_args()
         orgs = Organization.objects(
             Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
         )
+        if args["dataservices"]:
+            orgs = orgs.filter(metrics__dataservices__gt=0)
         return [
             {
                 "id": org.id,
