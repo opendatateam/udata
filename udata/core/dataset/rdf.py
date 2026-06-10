@@ -662,7 +662,7 @@ def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
             if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
             and isinstance(value := obj.value(DQV.value), Literal)
         ]:
-            resolution = max(resolutions_as_scale)
+            resolution = min(resolutions_as_scale)
             # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with
             # a fairly limited set of "round" denominator values), which hopefully survive the
             # decimal-to-fraction conversion reasonably well.

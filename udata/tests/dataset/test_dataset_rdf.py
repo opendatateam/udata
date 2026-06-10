@@ -1728,7 +1728,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((qm2, DQV.value, Literal("0.00002", datatype=XSD.decimal)))
         g.add((dataset, DQV.hasQualityMeasurement, qm2))
 
-        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/25000"
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/50000"
 
     def test_parse_spatial_resolution_as_scale_missing_kind(self):
         g = Graph()
