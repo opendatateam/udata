@@ -1,5 +1,10 @@
 # Changelog
 
+## 17.0.1 (2026-06-10)
+
+- feat: improve backfill harvest migration ([#3826](https://github.com/opendatateam/udata/pull/3826))
+
+
 ## 17.0.0 (2026-06-09)
 
 - **feat!: harvest API refactor ([#3759](https://github.com/opendatateam/udata/pull/3759))**
