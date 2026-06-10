@@ -3,7 +3,7 @@ from xml.etree.ElementTree import fromstring
 import pytest
 
 from udata.core.contact_point.factories import ContactPointFactory
-from udata.core.dataset.factories import DatasetFactory, LicenseFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.geopf.metadata import dataset_to_iso19115
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -49,15 +49,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         dataset = DatasetFactory.build(spatial=None)
         root = _parse(dataset)
         assert root.find(".//gmd:extent", NS) is None
-
-    def test_license_url_in_constraints(self):
-        license = LicenseFactory.build(url="https://example.org/license")
-        dataset = DatasetFactory.build(license=license)
-        root = _parse(dataset)
-        constraints = _text(
-            root, ".//gmd:resourceConstraints//gmd:otherConstraints/gco:CharacterString"
-        )
-        assert constraints == "https://example.org/license"
 
     def test_keywords_from_tags(self):
         dataset = DatasetFactory.build(tags=["geo", "france"])

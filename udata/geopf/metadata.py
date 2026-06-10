@@ -88,7 +88,6 @@ TEMPLATE = """\
           codeListValue="fre">fre</gmd:LanguageCode>
       </gmd:language>
       {keywords_block}
-      {constraints_block}
       {topic_category_block}
       {extent_block}
     </gmd:MD_DataIdentification>
@@ -102,15 +101,6 @@ KEYWORDS_TEMPLATE = """\
           {keyword_elements}
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>"""
-
-CONSTRAINTS_TEMPLATE = """\
-      <gmd:resourceConstraints>
-        <gmd:MD_LegalConstraints>
-          <gmd:otherConstraints>
-            <gco:CharacterString>{license_text}</gco:CharacterString>
-          </gmd:otherConstraints>
-        </gmd:MD_LegalConstraints>
-      </gmd:resourceConstraints>"""
 
 CONTACT_INFO_TEMPLATE = """\
       <gmd:contactInfo>
@@ -183,15 +173,6 @@ def _org_name(dataset):
     return ""
 
 
-def _license_text(dataset):
-    if not dataset.license:
-        return ""
-    # Follow license_to_rdf() pattern from udata/core/dataset/rdf.py
-    if dataset.license.url:
-        return dataset.license.url
-    return dataset.license.title or ""
-
-
 def _contact_email(dataset):
     for cp in dataset.contact_points or []:
         if cp.email:
@@ -233,11 +214,6 @@ def dataset_to_iso19115(dataset) -> bytes:
         )
         keywords_block = KEYWORDS_TEMPLATE.format(keyword_elements=kw_elems)
 
-    constraints_block = ""
-    license_text = _license_text(dataset)
-    if license_text:
-        constraints_block = CONSTRAINTS_TEMPLATE.format(license_text=escape(license_text))
-
     topic = _topic_category(dataset)
     topic_category_block = TOPIC_CATEGORY_TEMPLATE.format(topic=topic) if topic else ""
 
@@ -258,7 +234,6 @@ def dataset_to_iso19115(dataset) -> bytes:
         abstract=escape(abstract),
         point_of_contact_block=point_of_contact_block,
         keywords_block=keywords_block,
-        constraints_block=constraints_block,
         topic_category_block=topic_category_block,
         extent_block=extent_block,
     )

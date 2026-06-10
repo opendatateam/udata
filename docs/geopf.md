@@ -60,7 +60,6 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 | `abstract` | `dataset.description`, falls back to `dataset.title` |
 | `keywords` | `dataset.tags` |
 | `topicCategory` | First `dataset.tags` entry matching a known ISO 19115 topic category keyword; omitted if no match |
-| `otherConstraints` | `dataset.license.url` or `dataset.license.title`; omitted if no license |
 | Bounding box | Computed from `dataset.spatial.geom` (raw MultiPolygon only); omitted if unavailable |
 | `language` | Hardcoded `fre` |
 | `hierarchyLevel` | Hardcoded `dataset` |
