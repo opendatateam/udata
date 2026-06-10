@@ -1849,6 +1849,10 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], 3)
+        self.assertEqual(data["mime"], "text/plain")
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "7e240de74fb1ed08fa08d38063f6a6a91462a815")
         response = self.put(url_for("api.resource", dataset=dataset, rid=data["id"]), data)
         self.assert200(response)
         dataset.reload()
@@ -1902,6 +1906,12 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], parts)
+        self.assertEqual(data["mime"], "text/plain")
+        # The sha1 of b"aaaa" proves the chunks were combined in order
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "70c881d4a26984ddce795f6f71817c9cf4480e79")
+        self.assertEqual(list(storages.chunks.list_files()), [])
 
     def test_create_with_file_chunk_bad_size(self):
         """It should reject a chunk whose size does not match chunksize"""
