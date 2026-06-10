@@ -58,7 +58,7 @@ class MeAPITest(APITestCase):
         self.assertTrue(response.json["success"])
 
         user.reload()
-        self.assertTrue(bool(user.avatar))
+        self.assertTrue(user.avatar)
         self.assertIn(user.avatar.filename, storages.avatars)
         self.assertIn(user.avatar.original, storages.avatars)
 

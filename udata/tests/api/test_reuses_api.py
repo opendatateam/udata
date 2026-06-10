@@ -57,7 +57,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert response.json["success"]
 
         reuse.reload()
-        assert bool(reuse.image)
+        assert reuse.image
         assert reuse.image.filename in storages.images
         assert reuse.image.original in storages.images
 

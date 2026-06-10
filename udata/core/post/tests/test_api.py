@@ -363,7 +363,7 @@ class PostsAPITest(APITestCase):
         assert response.json["success"]
 
         post.reload()
-        assert bool(post.image)
+        assert post.image
         assert post.image.filename in storages.images
         assert post.image.original in storages.images
 

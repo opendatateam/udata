@@ -123,7 +123,7 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert response.json["success"]
 
         org.reload()
-        assert bool(org.logo)
+        assert org.logo
         assert org.logo.filename in storages.avatars
         assert org.logo.original in storages.avatars
 

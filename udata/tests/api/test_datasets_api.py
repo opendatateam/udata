@@ -1869,11 +1869,12 @@ class DatasetResourceAPITest(APITestCase):
         parts = 4
         url = url_for("api.upload_new_dataset_resource", dataset=dataset)
 
-        for i in range(parts):
+        # Distinct chunk contents so the final checksum proves the combination order
+        for i, chunk in enumerate([b"a", b"b", b"c", b"d"]):
             response = self.post(
                 url,
                 {
-                    "file": (BytesIO(b"a"), "blob"),
+                    "file": (BytesIO(chunk), "blob"),
                     "uuid": uuid,
                     "filename": "test.txt",
                     "partindex": i,
@@ -1908,9 +1909,9 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(data["title"], "test.txt")
         self.assertEqual(data["filesize"], parts)
         self.assertEqual(data["mime"], "text/plain")
-        # The sha1 of b"aaaa" proves the chunks were combined in order
+        # The sha1 of b"abcd" proves the chunks were combined in order
         self.assertEqual(data["checksum"]["type"], "sha1")
-        self.assertEqual(data["checksum"]["value"], "70c881d4a26984ddce795f6f71817c9cf4480e79")
+        self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
         self.assertEqual(list(storages.chunks.list_files()), [])
 
     def test_create_with_file_chunk_bad_size(self):
