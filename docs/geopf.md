@@ -46,7 +46,7 @@ Dataset extras:
 
 ## ISO 19115 metadata
 
-One metadata document is generated per dataset (not per resource) and pushed as `ISOAP` to the entrepôt, then published to the CSW endpoint.
+One metadata document is generated per dataset (not per resource) and pushed as `ISOAP` to the entrepôt.
 
 | ISO 19115 field | Source |
 |---|---|

@@ -160,14 +160,6 @@ class GeopfClient:
         self._raise(resp)
         return metadata_id
 
-    def publish_metadata(self, file_identifier):
-        csw_endpoint = "ae062611-13eb-4a18-8d04-9b7604a031cc"
-        resp = self.session.post(
-            self._url("metadata/publication"),
-            json={"file_identifiers": [file_identifier], "endpoint": csw_endpoint},
-        )
-        self._raise(resp)
-
 
 _XML_NS = {
     "gmd": "http://www.isotc211.org/2005/gmd",

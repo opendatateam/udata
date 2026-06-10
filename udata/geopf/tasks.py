@@ -145,7 +145,6 @@ def _run_pipeline(dataset, resource, datastore_id):
     else:
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset_id)
-        client.publish_metadata(str(dataset.id))
         client.tag_entity("metadata", metadata_id, datasheet_name)
         _set_dataset_extras(dataset, {"geopf_metadata_id": metadata_id})
 
