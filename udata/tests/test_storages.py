@@ -1,10 +1,9 @@
 from datetime import UTC, datetime, timedelta
-from io import BytesIO
 from os.path import basename
 from uuid import uuid4
 
 import pytest
-from flask import json, url_for
+from flask import json
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
@@ -13,10 +12,7 @@ from udata.core.storages import utils
 from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.tests import PytestOnlyTestCase
-from udata.tests.api import PytestOnlyAPITestCase
 from udata.utils import faker
-
-from .helpers import assert200, assert400
 
 
 class StorageUtilsTest(PytestOnlyTestCase):
@@ -105,126 +101,6 @@ class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
         assert "xml" not in storages.CONFIGURABLE_AUTHORIZED_TYPES
         assert "exe" not in storages.CONFIGURABLE_AUTHORIZED_TYPES
         assert "bat" not in storages.CONFIGURABLE_AUTHORIZED_TYPES
-
-
-@pytest.mark.usefixtures("instance_path")
-class StorageUploadViewTest(PytestOnlyAPITestCase):
-    def test_standard_upload(self):
-        self.login()
-        response = self.post(
-            url_for("storage.upload", name="resources"),
-            {"file": (BytesIO(b"aaa"), "Test with  spaces.TXT")},
-            json=False,
-        )
-
-        assert200(response)
-        assert response.json["success"]
-        assert "url" in response.json
-        assert "size" in response.json
-        assert "sha1" in response.json
-        assert "filename" in response.json
-        filename = response.json["filename"]
-        assert filename.endswith("test-with-spaces.txt")
-        expected = storages.resources.url(filename, external=True)
-        assert response.json["url"] == expected
-        assert response.json["mime"] == "text/plain"
-
-    def test_chunked_upload(self):
-        self.login()
-        url = url_for("storage.upload", name="tmp")
-        uuid = str(uuid4())
-        parts = 4
-
-        for i in range(parts):
-            response = self.post(
-                url,
-                {
-                    "file": (BytesIO(b"a"), "blob"),
-                    "uuid": uuid,
-                    "filename": "Test with  spaces.TXT",
-                    "partindex": i,
-                    "partbyteoffset": 0,
-                    "totalfilesize": parts,
-                    "totalparts": parts,
-                    "chunksize": 1,
-                },
-                json=False,
-            )
-
-            assert200(response)
-            assert response.json["success"]
-            assert "filename" not in response.json
-            assert "url" not in response.json
-            assert "size" not in response.json
-            assert "sha1" not in response.json
-            assert "url" not in response.json
-
-        response = self.post(
-            url,
-            {
-                "uuid": uuid,
-                "filename": "Test with  spaces.TXT",
-                "totalfilesize": parts,
-                "totalparts": parts,
-            },
-            json=False,
-        )
-        assert "filename" in response.json
-        assert "url" in response.json
-        assert "size" in response.json
-        assert response.json["size"] == parts
-        assert "sha1" in response.json
-        expected_filename = "test-with-spaces.txt"
-        filename = response.json["filename"]
-        assert filename.endswith(expected_filename)
-        expected_url = storages.tmp.url(filename, external=True)
-        assert response.json["url"] == expected_url
-        assert response.json["mime"] == "text/plain"
-        assert storages.tmp.read(filename) == b"aaaa"
-        assert list(storages.chunks.list_files()) == []
-
-    def test_chunked_upload_bad_chunk(self):
-        self.login()
-        url = url_for("storage.upload", name="tmp")
-        uuid = str(uuid4())
-        parts = 4
-
-        response = self.post(
-            url,
-            {
-                "file": (BytesIO(b"a"), "blob"),
-                "uuid": uuid,
-                "filename": "test.txt",
-                "partindex": 0,
-                "partbyteoffset": 0,
-                "totalfilesize": parts,
-                "totalparts": parts,
-                "chunksize": 10,  # Does not match
-            },
-            json=False,
-        )
-
-        assert400(response)
-        assert not response.json["success"]
-        assert "filename" not in response.json
-        assert "url" not in response.json
-        assert "size" not in response.json
-        assert "sha1" not in response.json
-        assert "url" not in response.json
-
-        assert list(storages.chunks.list_files()) == []
-
-    def test_upload_resource_bad_request(self):
-        self.login()
-        response = self.post(
-            url_for("storage.upload", name="tmp"),
-            {"bad": (BytesIO(b"aaa"), "test.txt")},
-            json=False,
-        )
-
-        assert400(response)
-        assert not response.json["success"]
-        assert "error" in response.json
 
 
 @pytest.mark.usefixtures("instance_path")

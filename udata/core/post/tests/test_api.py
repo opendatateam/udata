@@ -1,5 +1,8 @@
+from io import BytesIO
+
 from flask import url_for
 
+from udata.core import storages
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.edito_blocs.models import (
@@ -14,7 +17,14 @@ from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
-from udata.tests.helpers import assert200, assert201, assert204
+from udata.tests.helpers import (
+    assert200,
+    assert201,
+    assert204,
+    assert400,
+    assert403,
+    create_test_image,
+)
 
 
 class PostsAPITest(APITestCase):
@@ -339,3 +349,42 @@ class PostsAPITest(APITestCase):
         content = response.data.decode("utf-8")
         assert news_post.name in content
         assert page_post.name not in content
+
+    def test_post_image_upload(self):
+        """An admin should upload a post image into the images storage"""
+        post = PostFactory()
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert200(response)
+        assert response.json["success"]
+
+        post.reload()
+        assert bool(post.image)
+        assert post.image.filename in storages.images
+        assert post.image.original in storages.images
+
+    def test_post_image_upload_requires_admin(self):
+        """It should forbid a non-admin from uploading a post image"""
+        post = PostFactory()
+        self.login(UserFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert403(response)
+
+    def test_post_image_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        post = PostFactory()
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)

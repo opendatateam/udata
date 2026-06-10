@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from io import BytesIO
 
 from flask import url_for
 
@@ -280,6 +281,34 @@ class UserAPITest(APITestCase):
         self.login()
         response = self.post(url_for("api.user_avatar", user=user))
         self.assert403(response)
+
+    def test_change_avatar_user_as_admin(self):
+        """An admin should upload an avatar for a given user"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(bool(user.avatar))
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_change_avatar_user_rejects_non_image(self):
+        """It should reject a non-image file"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
 
     def test_get_inactive_user_with_an_admin(self):
         """It should get a user"""
