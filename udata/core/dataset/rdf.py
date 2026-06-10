@@ -637,36 +637,43 @@ def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
     # - If several representations are present, we pick distance over scale (arbitrary).
     # - If cardinality > 1, we use the largest value we find. We don't go for the smallest to avoid
     #   giving a false sense of precision.
+    try:
+        if resolutions_in_meters := [
+            value.toPython()
+            for value in resource.objects(DCAT.spatialResolutionInMeters)
+            if isinstance(value, Literal)
+        ]:
+            resolution = max(resolutions_in_meters)
+            return f"{resolution} {DistanceUom.METER.symbol}"
 
-    if resolutions_in_meters := [
-        value.toPython()
-        for value in resource.objects(DCAT.spatialResolutionInMeters)
-        if isinstance(value, Literal)
-    ]:
-        resolution = max(resolutions_in_meters)
-        return f"{resolution} {DistanceUom.METER.symbol}"
+        if resolutions_as_distance := [
+            (value.toPython(), unit)
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
+            and (unit := QUDT_TO_UDATA.get(obj.value(SDMXA.unitMeasure).identifier))
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = max(resolutions_as_distance, key=lambda x: x[1].in_meters(x[0]))
+            return f"{resolution[0]} {resolution[1].symbol}"
 
-    if resolutions_as_distance := [
-        (value.toPython(), unit)
-        for obj in resource.objects(DQV.hasQualityMeasurement)
-        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
-        and (unit := QUDT_TO_UDATA.get(obj.value(SDMXA.unitMeasure).identifier))
-        and isinstance(value := obj.value(DQV.value), Literal)
-    ]:
-        resolution = max(resolutions_as_distance, key=lambda x: x[1].in_meters(x[0]))
-        return f"{resolution[0]} {resolution[1].symbol}"
-
-    if resolutions_as_scale := [
-        value.toPython()
-        for obj in resource.objects(DQV.hasQualityMeasurement)
-        if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
-        and isinstance(value := obj.value(DQV.value), Literal)
-    ]:
-        resolution = max(resolutions_as_scale)
-        # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with a
-        # fairly limited set of denominator values), which hopefully survive the decimal/fraction
-        # conversion reasonably well.
-        return str(Fraction(resolution))
+        if resolutions_as_scale := [
+            value.toPython()
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = max(resolutions_as_scale)
+            # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with
+            # a fairly limited set of "round" denominator values), which hopefully survive the
+            # decimal-to-fraction conversion reasonably well.
+            # max_denominator is picked to be larger than existing scales, but still small enough
+            # that we limit the risk of non-Decimal floats causing crazy fractions:
+            # Fraction(0.00004) would otherwise return 5902958103587057/147573952589676412928
+            # instead of 1/25000.
+            return str(Fraction(resolution).limit_denominator(max_denominator=100_000_000))
+    except Exception:
+        log.warning("Unable to parse spatial resolution", exc_info=True)
+        return
 
 
 def frequency_from_rdf(term) -> UpdateFrequency | None:

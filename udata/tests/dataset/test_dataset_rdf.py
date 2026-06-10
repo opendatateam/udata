@@ -1540,8 +1540,31 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
             geom={"type": "MultiPolygon", "coordinates": [[coords]]}
         )
 
+    @pytest.mark.parametrize(
+        "value, datatype",
+        [
+            ("50.0", None),
+            ("50.0", XSD.string),
+            ("50.0", XSD.decimal),
+            ("50.0", XSD.double),
+            ("50", XSD.integer),
+        ],
+    )
+    def test_parse_spatial_resolution_as_distance_datatype(self, value, datatype):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal(value, datatype=datatype)))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"{value} m"
+
     @pytest.mark.parametrize("uom, uom_str", [(QUDT.FT, "ft"), (QUDT.KiloM, "km"), (QUDT.M, "m")])
-    def test_parse_spatial_resolution_as_distance(self, uom, uom_str):
+    def test_parse_spatial_resolution_as_distance_uom(self, uom, uom_str):
         g = Graph()
         dataset = URIRef("http://example.org/dataset")
 
@@ -1574,13 +1597,59 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 km"
 
-    def test_parse_spatial_resolution_in_meters(self):
+    def test_parse_spatial_resolution_as_distance_missing_kind(self):
         g = Graph()
         dataset = URIRef("http://example.org/dataset")
 
-        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("50.0", datatype=XSD.decimal)))
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
 
-        assert spatial_resolution_from_rdf(g.resource(dataset)) == "50.0 m"
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_distance_missing_unit(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_distance_missing_value(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    @pytest.mark.parametrize(
+        "value, datatype",
+        [
+            ("50.0", None),
+            ("50.0", XSD.string),
+            ("50.0", XSD.decimal),
+            ("50.0", XSD.double),
+            ("50", XSD.integer),
+        ],
+    )
+    def test_parse_spatial_resolution_in_meters_datatype(self, value, datatype):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(value, datatype=datatype)))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"{value} m"
 
     def test_parse_spatial_resolution_in_meters_interval(self):
         g = Graph()
@@ -1591,17 +1660,57 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert spatial_resolution_from_rdf(g.resource(dataset)) == "51.0 m"
 
-    def test_parse_spatial_resolution_as_scale(self):
+    @pytest.mark.parametrize(
+        "value, datatype, expected",
+        [
+            ("0.00004", None, "1/25000"),
+            ("0.00004", XSD.string, "1/25000"),
+            ("0.00004", XSD.decimal, "1/25000"),
+            ("0.00004", XSD.double, "1/25000"),
+            ("1", XSD.integer, "1"),  # unlikely here, but test it anyway
+        ],
+    )
+    def test_parse_spatial_resolution_as_scale_datatype(self, value, datatype, expected):
         g = Graph()
         dataset = URIRef("http://example.org/dataset")
 
         qm = BNode()
         g.add((qm, RDF.type, DQV.QualityMeasurement))
         g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
-        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((qm, DQV.value, Literal(value, datatype=datatype)))
         g.add((dataset, DQV.hasQualityMeasurement, qm))
 
-        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/25000"
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == expected
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            ("0.001", "1/1000"),
+            ("0.0005", "1/2000"),
+            ("0.0002", "1/5000"),
+            ("0.0001", "1/10000"),
+            ("0.00004", "1/25000"),
+            ("0.00002", "1/50000"),
+            ("0.0000125", "1/80000"),
+            ("0.00001", "1/100000"),
+            ("0.000005", "1/200000"),
+            ("0.000004", "1/250000"),
+            ("0.000002", "1/500000"),
+            ("0.000001", "1/1000000"),
+            ("0.0000001", "1/10000000"),
+        ],
+    )
+    def test_parse_spatial_resolution_as_scale_common_scales(self, value, expected):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal(value, datatype=XSD.double)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == expected
 
     def test_parse_spatial_resolution_as_scale_interval(self):
         g = Graph()
@@ -1621,17 +1730,39 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/25000"
 
+    def test_parse_spatial_resolution_as_scale_missing_kind(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_scale_missing_value(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
     def test_parse_spatial_resolution_conflicting(self):
         g = Graph()
         dataset = URIRef("http://example.org/dataset")
 
         g.add((dataset, DCAT.spatialResolutionInMeters, Literal("1.0", datatype=XSD.decimal)))
 
-        measurement = BNode()
-        g.add((measurement, RDF.type, DQV.QualityMeasurement))
-        g.add((measurement, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
-        g.add((measurement, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
-        g.add((dataset, DQV.hasQualityMeasurement, measurement))
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
 
         # distance always win (arbitrary)
         assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 m"
