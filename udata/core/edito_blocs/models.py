@@ -1,4 +1,7 @@
+from flask import current_app, has_request_context, request
+from flask_restx.mask import Mask
 from mongoengine import EmbeddedDocument
+from mongoengine.base.datastructures import BaseList
 from mongoengine.errors import ValidationError
 from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
 
@@ -136,6 +139,120 @@ class AccordionListBloc(Bloc):
 
 
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
+
+
+def _is_field_in_response_mask(read_fields, field_name) -> bool:
+    """Tell whether a top-level field will be serialized given the request mask.
+
+    The effective mask is the `X-Fields` request header if present, else the model's
+    default mask. A field is kept when it is listed in the mask, or when the mask
+    contains the `*` wildcard. No mask means every field is serialized.
+    """
+    mask_str = getattr(read_fields, "__mask__", None)
+    if has_request_context():
+        header = current_app.config["RESTX_MASK_HEADER"]
+        mask_str = request.headers.get(header) or mask_str
+    if not mask_str:
+        return True
+    mask = Mask(mask_str)
+    return field_name in mask or "*" in mask
+
+
+# List fields (references or embedded documents) that no bloc card displays. Loading them
+# is pure waste: `select_related` would dereference a reuse's `datasets`/`dataservices`
+# lists (and a dataset's `contact_points`) one document per item, and a dataset's
+# `resources` list deserializes dozens of embedded sub-documents — all for data the card
+# never serializes. That work, not the queries, dominates the response time, so we drop
+# these from the load query. Each is excluded only on models that actually have it.
+#
+# Why hardcode this instead of deriving it from the card masks? The masks are *include*
+# lists ("show these fields"), but a Mongo projection here needs the opposite: which heavy
+# fields to *exclude* from the load. Inverting one isn't a free `.only(mask)` either — the
+# masks list display names (`quality`, `page`, `uri`…) that don't map 1:1 to stored fields
+# (`quality_cached`, computed properties…), so a load projection can't be read straight off
+# them. Computing the exclusions automatically means introspecting each model's field types
+# to find the heavy lists absent from the mask — more machinery than the handful of names
+# below are worth. The day the string masks are replaced by serialization rules integrated
+# into `api_fields`, the framework would know each card's real fields and could derive this
+# projection on its own; until then an explicit list is the simplest correct option.
+CARD_UNUSED_HEAVY_FIELDS = (
+    "resources",  # Dataset: embedded list of resources
+    "datasets",  # Reuse / Dataservice: referenced datasets
+    "dataservices",  # Reuse: referenced dataservices
+    "contact_points",  # Dataset / Dataservice: referenced contact points
+    "access_audiences",  # Dataset / Dataservice: embedded access audiences
+)
+
+
+def prefetch_blocs_references(document_cls, obj, *bloc_fields):
+    """Batch-load the datasets/reuses/dataservices referenced by an object's blocs.
+
+    Marshalling blocs serializes each referenced object as a card including its
+    `organization` (and `owner`). MongoEngine dereferences each reference — and each
+    reference's own organization/owner — one query at a time, with no cross-instance
+    cache. A page with dozens of cards therefore triggers hundreds of sequential
+    queries (one per organization), which dominates the response time.
+
+    We collect every reference across the whole (possibly accordion-nested) bloc tree,
+    reload each type as a single flat query with `select_related` (which batches the
+    organization/owner lookups), and inject the resolved documents back into the blocs.
+    Marshalling then issues no further query.
+
+    The load query also drops the heavy fields no card shows (a dataset's `resources`),
+    so we stop paying to deserialize data that isn't serialized — the dominant cost on
+    real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
+
+    `document_cls` is the marshalled document class (Post, Site, …), `obj` its instance
+    and `bloc_fields` the names of its bloc list attributes (e.g. `"blocs"`, or the
+    Site's three bloc fields). Bloc fields excluded by the response mask are skipped, so
+    masked-out blocs (e.g. on the default `/site/` response) add no latency.
+    """
+    included = [
+        name
+        for name in bloc_fields
+        if _is_field_in_response_mask(document_cls.__read_fields__, name)
+    ]
+    if not included:
+        return
+
+    # (bloc, attr, model, [referenced ids]) for every bloc holding references.
+    collected: list[tuple] = []
+
+    def walk(blocs):
+        for bloc in blocs:
+            for attr, mongo_field in type(bloc)._fields.items():
+                if isinstance(mongo_field, ListField) and isinstance(
+                    mongo_field.field, ReferenceField
+                ):
+                    # A `ListField(ReferenceField)`: read the raw references from `_data`
+                    # to avoid a per-bloc dereference (we batch them across all blocs).
+                    refs = bloc._data.get(attr) or []
+                    model = mongo_field.field.document_type
+                    collected.append((bloc, attr, model, [ref.id for ref in refs]))
+                elif isinstance(mongo_field, EmbeddedDocumentListField):
+                    # Recurse into nested blocs (e.g. accordion items -> content).
+                    walk(getattr(bloc, attr) or [])
+
+    for name in included:
+        walk(getattr(obj, name))
+
+    ids_by_model: dict = {}
+    for _, _, model, ids in collected:
+        ids_by_model.setdefault(model, set()).update(ids)
+
+    docs_by_model = {}
+    for model, ids in ids_by_model.items():
+        unused = [f for f in CARD_UNUSED_HEAVY_FIELDS if f in model._fields]
+        queryset = model.objects(id__in=list(ids)).exclude(*unused).select_related()
+        docs_by_model[model] = {doc.id: doc for doc in queryset}
+
+    for bloc, attr, model, ids in collected:
+        by_id = docs_by_model[model]
+        # Mark the list as already dereferenced so marshalling reads it as-is instead
+        # of dereferencing each reference (and its organization) again.
+        resolved = BaseList([by_id[ref_id] for ref_id in ids if ref_id in by_id], bloc, attr)
+        resolved._dereferenced = True
+        bloc._data[attr] = resolved
 
 
 def purge_blocs_references(ref_field, obj_id):

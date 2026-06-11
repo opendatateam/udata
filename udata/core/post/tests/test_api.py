@@ -1,4 +1,7 @@
+from unittest import mock
+
 from flask import url_for
+from mongoengine.context_managers import query_counter
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -9,6 +12,7 @@ from udata.core.edito_blocs.models import (
     DatasetsListBloc,
     ReusesListBloc,
 )
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
@@ -51,6 +55,124 @@ class PostsAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 1
         assert "blocs" not in response.json["data"][0]
+
+    def test_post_api_get_blocs_no_n_plus_1(self):
+        """Fetching a blocs page must not dereference references one by one.
+
+        Each card (dataset/reuse/dataservice) embeds its organization. Without
+        batching, every card triggers its own organization query, so the query
+        count scales with the number of cards (hundreds on real pages). The
+        `prefetch_blocs_references` helper must keep it bounded by a small constant.
+        """
+        orgs = OrganizationFactory.create_batch(4)
+
+        def datasets(n):
+            return [DatasetFactory(organization=orgs[i % len(orgs)]) for i in range(n)]
+
+        # 30 datasets spread across 4 top-level blocs + 2 blocs nested in an accordion.
+        top_level = [DatasetsListBloc(title=f"Top {i}", datasets=datasets(5)) for i in range(4)]
+        accordion = AccordionListBloc(
+            title="Accordion",
+            items=[
+                AccordionItemBloc(
+                    title=f"Item {i}",
+                    content=[DatasetsListBloc(title=f"Nested {i}", datasets=datasets(5))],
+                )
+                for i in range(2)
+            ],
+        )
+        reuses = [ReuseFactory(organization=orgs[i % len(orgs)]) for i in range(10)]
+        dataservices = [DataserviceFactory(organization=orgs[i % len(orgs)]) for i in range(4)]
+        blocs = top_level + [
+            accordion,
+            ReusesListBloc(title="Reuses", reuses=reuses),
+            DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+        ]
+        post = PostFactory(body_type="blocs", content=None, blocs=blocs, datasets=[], reuses=[])
+
+        url = url_for("api.post", post=post)
+        assert200(self.get(url))  # warm up one-time queries
+
+        with query_counter() as counter:
+            response = self.get(url)
+            num_queries = int(counter)
+        assert200(response)
+
+        # 30 + 10 + 4 = 44 cards sharing 4 orgs. The N+1 version issues 50+ queries;
+        # batched, it stays well under that and does not grow with the card count.
+        assert num_queries < 15, f"too many queries ({num_queries}): N+1 dereferencing"
+
+        # The references must still be fully resolved (organization included).
+        dataset_blocs = [b for b in response.json["blocs"] if b["class"] == "DatasetsListBloc"]
+        org_ids = {str(o.id) for o in orgs}
+        first_card = dataset_blocs[0]["datasets"][0]
+        assert first_card["organization"]["id"] in org_ids
+
+    def test_post_api_blocs_projection_keeps_output_intact(self):
+        """Projecting out heavy unused fields must not change the serialized cards.
+
+        `prefetch_blocs_references` loads each card with only the fields its mask
+        serializes, dropping embedded-document lists the card never shows (a dataset's
+        `resources` can hold dozens of sub-documents — deserializing them dominates the
+        response time). The output must stay byte-for-byte identical to a full-document
+        load; this locks against projecting out a field a card actually needs.
+        """
+        org = OrganizationFactory()
+        datasets = []
+        for _ in range(5):
+            dataset = DatasetFactory(organization=org, nb_resources=8)
+            # In production `quality` is precomputed and stored; the card reads the cache
+            # and never recomputes from `resources`, which is why we can drop them.
+            dataset.quality_cached = dataset.compute_quality()
+            dataset.save()
+            datasets.append(dataset)
+        post = PostFactory(
+            body_type="blocs",
+            content=None,
+            blocs=[DatasetsListBloc(title="B", datasets=datasets)],
+            datasets=[],
+            reuses=[],
+        )
+        url = url_for("api.post", post=post)
+
+        projected = self.get(url).json
+
+        # Same request, but loading the full documents (no field projection).
+        with mock.patch("udata.core.edito_blocs.models.CARD_UNUSED_HEAVY_FIELDS", ()):
+            full = self.get(url).json
+
+        assert projected["blocs"] == full["blocs"]
+        # `quality` carries resource-derived criteria: it must still be correct from the
+        # cache even though `resources` was not loaded.
+        card = projected["blocs"][0]["datasets"][0]
+        assert card["quality"]["has_resources"] is True
+
+    def test_post_list_does_not_dereference_blocs(self):
+        """The list endpoint masks out blocs, so it must not dereference them.
+
+        Blocs are excluded from `/posts` via the page mask. Dereferencing their
+        references (datasets, organizations…) here would add latency for data that
+        is never serialized.
+        """
+        org = OrganizationFactory()
+        bloc = DatasetsListBloc(
+            title="Heavy",
+            datasets=[DatasetFactory(organization=org) for _ in range(20)],
+        )
+        PostFactory(body_type="blocs", content=None, blocs=[bloc], datasets=[], reuses=[])
+
+        url = url_for("api.posts")
+        assert200(self.get(url))  # warm up one-time queries
+
+        with query_counter() as counter:
+            response = self.get(url)
+            num_queries = int(counter)
+        assert200(response)
+        assert "blocs" not in response.json["data"][0]
+
+        # If the masked-out blocs were dereferenced, the 20 datasets and their org
+        # would add queries. Listing must stay cheap regardless of bloc contents.
+        assert num_queries < 8, f"masked blocs were dereferenced ({num_queries} queries)"
 
     def test_search_post(self):
         """It should fetch a post list from the API"""
