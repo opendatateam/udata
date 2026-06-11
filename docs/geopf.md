@@ -42,8 +42,6 @@ Set on the original `.gpkg` resource by the push pipeline.
 | `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` at dispatch time, updated on completion or failure. |
 | `geopf:push:task-id` | Celery task UUID | ID of the Celery task that ran (or is running) this push. Query via `GET /api/1/tasks/<id>/` for status and traceback. |
 | `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the reverse sync to discover offerings. |
-| `geopf:push:datasheet-name` | string (= `dataset.id`) | Fiche grouping tag; all entrepôt entities for this dataset share this tag. |
-| `geopf:push:fiche-url` | URL | Direct link to the fiche on cartes.gouv.fr. |
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
 
@@ -52,6 +50,7 @@ Set on the original `.gpkg` resource by the push pipeline.
 | Key | Type | Description |
 |---|---|---|
 | `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
+| `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
 
 ## ISO 19115 metadata
 
@@ -95,9 +94,6 @@ Set on resources created (or updated) by the reverse sync. These resources are d
 | Key | Type | Description |
 |---|---|---|
 | `geopf:offering:id` | UUID string | Entrepôt offering ID. Primary key used to match existing resources on subsequent syncs. |
-| `geopf:offering:stored-data-id` | UUID string | Stored data ID this offering is published from. |
-| `geopf:offering:service-type` | string | Service type as returned by the API (`WFS`, `WMS-VECTOR`, `VECTOR-TMS`, …). |
-| `geopf:offering:layer-name` | string | Layer name as published on the platform. |
 | `geopf:offering:last-synced-at` | ISO 8601 | Timestamp of the last sync that observed this offering. |
 
 ### Periodic job

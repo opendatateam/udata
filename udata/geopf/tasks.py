@@ -161,12 +161,11 @@ def _run_pipeline(dataset, resource, datastore_id):
         resource,
         {
             "geopf:push:status": "done",
-            "geopf:push:datasheet-name": datasheet_name,
             "geopf:push:stored-data-id": stored_data_id,
             "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
-            "geopf:push:fiche-url": fiche_url,
         },
     )
+    _set_dataset_extras(dataset, {"geopf:push:fiche-url": fiche_url})
     log.info(
         "geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, fiche_url
     )
@@ -271,7 +270,7 @@ def sync_services_for_dataset(dataset, client) -> int:
     for sd_id in stored_data_ids:
         for offering in client.list_offerings(sd_id):
             live_offering_ids.add(offering["_id"])
-            _upsert_offering_resource(dataset, offering, sd_id)
+            _upsert_offering_resource(dataset, offering)
 
     # Remove resources whose offering no longer exists on GeoPortail
     for resource in list(dataset.resources):
@@ -288,7 +287,7 @@ def sync_services_for_dataset(dataset, client) -> int:
     return len(live_offering_ids)
 
 
-def _upsert_offering_resource(dataset, offering, stored_data_id):
+def _upsert_offering_resource(dataset, offering):
     offering_id = offering["_id"]
     service_type = offering.get("type", "")
     layer_name = offering.get("layer_name", "")
@@ -313,9 +312,6 @@ def _upsert_offering_resource(dataset, offering, stored_data_id):
             type="api",
             extras={
                 "geopf:offering:id": offering_id,
-                "geopf:offering:stored-data-id": stored_data_id,
-                "geopf:offering:service-type": service_type,
-                "geopf:offering:layer-name": layer_name,
                 "geopf:offering:last-synced-at": now,
             },
         )
