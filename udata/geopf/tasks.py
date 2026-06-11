@@ -17,8 +17,8 @@ from .metadata import dataset_to_iso19115
 log = logging.getLogger(__name__)
 
 
-@task(name="geopf.push_resource")
-def push_resource_to_geopf(dataset_id, resource_id):
+@task(name="geopf.push_resource", bind=True, ignore_result=False)
+def push_resource_to_geopf(self, dataset_id, resource_id):
     log.info("geopf: starting push dataset=%s resource=%s", dataset_id, resource_id)
     dataset = Dataset.objects.get(id=dataset_id)
     resource = next((r for r in dataset.resources if str(r.id) == resource_id), None)
@@ -37,6 +37,10 @@ def push_resource_to_geopf(dataset_id, resource_id):
             resource_id,
         )
         return
+
+    _set_extras(
+        dataset, resource, {"geopf:push:status": "pending", "geopf:push:task-id": self.request.id}
+    )
 
     try:
         _run_pipeline(dataset, resource, datastore_id)
@@ -232,7 +236,7 @@ def sync_metadata(dataset, client):
     return metadata_id
 
 
-@job("geopf.sync-services")
+@job("geopf.sync-services", ignore_result=False)
 def sync_geopf_services(self):
     """Periodic job: sync GeoPortail services to udata resources for all pushed datasets."""
     if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(

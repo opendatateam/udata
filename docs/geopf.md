@@ -39,8 +39,8 @@ Set on the original `.gpkg` resource by the push pipeline.
 
 | Key | Values / type | Description |
 |---|---|---|
-| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` at dispatch time, updated on completion or failure. |
-| `geopf:push:task-id` | Celery task UUID | ID of the Celery task that ran (or is running) this push. Query via `GET /api/1/tasks/<id>/` for status and traceback. |
+| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` when the task starts, updated on completion or failure. |
+| `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Set when the task starts. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
 | `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the reverse sync to discover offerings. |
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
