@@ -38,16 +38,16 @@ def push_resource_to_geopf(dataset_id, resource_id):
         )
         return
 
-    _set_extras(dataset, resource, {"geopf_status": "pending"})
-
     try:
         _run_pipeline(dataset, resource, datastore_id)
     except GeopfTimeoutError as e:
         log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
-        _set_extras(dataset, resource, {"geopf_status": "timeout", "geopf_error": str(e)})
+        _set_extras(dataset, resource, {"geopf_push_status": "timeout", "geopf_push_error": str(e)})
+        raise
     except Exception as e:
         log.exception("geopf: pipeline failed dataset=%s resource=%s", dataset_id, resource_id)
-        _set_extras(dataset, resource, {"geopf_status": "error", "geopf_error": str(e)})
+        _set_extras(dataset, resource, {"geopf_push_status": "error", "geopf_push_error": str(e)})
+        raise
 
 
 def _run_pipeline(dataset, resource, datastore_id):
@@ -160,11 +160,11 @@ def _run_pipeline(dataset, resource, datastore_id):
         dataset,
         resource,
         {
-            "geopf_status": "done",
-            "geopf_datasheet_name": datasheet_name,
-            "geopf_stored_data_id": stored_data_id,
-            "geopf_last_synced_at": datetime.now(UTC).isoformat(),
-            "geopf_fiche_url": fiche_url,
+            "geopf_push_status": "done",
+            "geopf_push_datasheet_name": datasheet_name,
+            "geopf_push_stored_data_id": stored_data_id,
+            "geopf_push_last_synced_at": datetime.now(UTC).isoformat(),
+            "geopf_push_fiche_url": fiche_url,
         },
     )
     log.info(
@@ -221,7 +221,7 @@ def sync_metadata(dataset, client):
     """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
     datasheet_name = str(dataset.id)
     xml = dataset_to_iso19115(dataset)
-    metadata_id = dataset.extras.get("geopf_metadata_id")
+    metadata_id = dataset.extras.get("geopf_push_metadata_id")
     if metadata_id:
         client.update_metadata(metadata_id, xml)
         log.info("geopf: updated metadata=%s dataset=%s", metadata_id, dataset.id)
@@ -229,7 +229,7 @@ def sync_metadata(dataset, client):
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
         client.tag_entity("metadata", metadata_id, datasheet_name)
-        _set_dataset_extras(dataset, {"geopf_metadata_id": metadata_id})
+        _set_dataset_extras(dataset, {"geopf_push_metadata_id": metadata_id})
     return metadata_id
 
 
@@ -243,22 +243,26 @@ def sync_geopf_services(self):
         return
 
     client = GeopfClient()
-    datasets = Dataset.objects(**{"extras__geopf_metadata_id__exists": True})
+    datasets = Dataset.objects(**{"extras__geopf_push_metadata_id__exists": True})
     log.info("geopf: syncing services for %d datasets", datasets.count())
+    failures = []
     for dataset in datasets:
         try:
             n = sync_services_for_dataset(dataset, client)
             log.info("geopf: synced %d offerings for dataset=%s", n, dataset.id)
-        except Exception:
+        except Exception as e:
             log.exception("geopf: service sync failed for dataset=%s", dataset.id)
+            failures.append(e)
+    if failures:
+        raise ExceptionGroup(f"geopf: sync failed for {len(failures)} dataset(s)", failures)
 
 
 def sync_services_for_dataset(dataset, client) -> int:
     """Sync GeoPortail offerings to udata resources. Returns count of live offerings."""
     stored_data_ids = {
-        r.extras["geopf_stored_data_id"]
+        r.extras["geopf_push_stored_data_id"]
         for r in dataset.resources
-        if r.extras.get("geopf_stored_data_id")
+        if r.extras.get("geopf_push_stored_data_id")
     }
     if not stored_data_ids:
         return 0
