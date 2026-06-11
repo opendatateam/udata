@@ -13,7 +13,7 @@ def _should_push(resource):
         resource is not None
         and resource.format
         and resource.format.lower() == "gpkg"
-        and not resource.extras.get("geopf_push_status")
+        and not resource.extras.get("geopf:push:status")
     )
 
 
@@ -23,7 +23,7 @@ def _queue(document, resource_id):
         log.info("geopf: queuing push dataset=%s resource=%s", document.id, resource_id)
         result = tasks.push_resource_to_geopf.delay(str(document.id), str(resource_id))
         _set_extras(
-            document, resource, {"geopf_push_status": "pending", "geopf_push_task_id": result.id}
+            document, resource, {"geopf:push:status": "pending", "geopf:push:task-id": result.id}
         )
 
 

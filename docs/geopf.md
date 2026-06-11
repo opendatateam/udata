@@ -24,7 +24,7 @@ Triggered automatically when a `gpkg` resource is added to a dataset (via the `o
 6. **Delete upload** — clean up the livraison once processing has consumed it.
 7. **Tag stored data** — attach `datasheet_name` tag to the resulting stored data.
 8. **Metadata** — generate ISO 19115 XML from the dataset and push it:
-   - If `geopf_metadata_id` is already in dataset extras: update the existing metadata record.
+   - If `geopf:push:metadata-id` is already in dataset extras: update the existing metadata record.
    - Otherwise: upload (with 409 upsert fallback), tag, and store the ID in extras.
 
 On any failure the task attempts to delete the livraison to avoid orphaned uploads, then re-raises so the error is visible in Celery.
@@ -33,16 +33,25 @@ On any failure the task attempts to delete the livraison to avoid orphaned uploa
 
 Progress is recorded in extras so it survives across Celery retries and is visible in the API.
 
-Resource extras:
-- `geopf_status` — `pending` | `done` | `error` | `timeout`
-- `geopf_stored_data_id` — entrepôt stored data ID
-- `geopf_datasheet_name` — fiche grouping tag (= `dataset.id`)
-- `geopf_fiche_url` — direct URL to the fiche on cartes.gouv.fr
-- `geopf_last_synced_at` — ISO 8601 timestamp of last successful push
-- `geopf_error` — error message (only on `error` status)
+### Push resource extras
 
-Dataset extras:
-- `geopf_metadata_id` — entrepôt metadata ID (avoids re-uploading metadata on subsequent resource syncs)
+Set on the original `.gpkg` resource by the push pipeline.
+
+| Key | Values / type | Description |
+|---|---|---|
+| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` at dispatch time, updated on completion or failure. |
+| `geopf:push:task-id` | Celery task UUID | ID of the Celery task that ran (or is running) this push. Query via `GET /api/1/tasks/<id>/` for status and traceback. |
+| `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the reverse sync to discover offerings. |
+| `geopf:push:datasheet-name` | string (= `dataset.id`) | Fiche grouping tag; all entrepôt entities for this dataset share this tag. |
+| `geopf:push:fiche-url` | URL | Direct link to the fiche on cartes.gouv.fr. |
+| `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
+| `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
+
+### Dataset extras
+
+| Key | Type | Description |
+|---|---|---|
+| `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
 
 ## ISO 19115 metadata
 
@@ -74,22 +83,26 @@ Once a dataset has been pushed to Géoplateforme, the stored data are exposed as
 
 ### Workflow
 
-1. Collect stored data IDs from `geopf_stored_data_id` on the dataset's existing resources.
+1. Collect stored data IDs from `geopf:push:stored-data-id` on the dataset's push resources.
 2. For each stored data ID, query `GET /datastores/{id}/offerings?stored_data={id}`.
-3. For each offering: create a new resource if none with matching `geopf_offering_id` exists, or update the URL if it changed.
-4. Remove any resources whose `geopf_offering_id` no longer appears in the live offering set.
+3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
+4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
 
-### Resource extras set by reverse sync
+### Offering resource extras
 
-- `geopf_offering_id` — entrepôt offering ID (primary key for matching)
-- `geopf_stored_data_id` — stored data ID the offering belongs to
-- `geopf_service_type` — service type string (`WFS`, `WMS-VECTOR`, `VECTOR-TMS`, …)
-- `geopf_layer_name` — layer name as published on the platform
-- `geopf_last_synced_at` — ISO 8601 timestamp of last successful sync
+Set on resources created (or updated) by the reverse sync. These resources are distinct from the original push resource.
+
+| Key | Type | Description |
+|---|---|---|
+| `geopf:offering:id` | UUID string | Entrepôt offering ID. Primary key used to match existing resources on subsequent syncs. |
+| `geopf:offering:stored-data-id` | UUID string | Stored data ID this offering is published from. |
+| `geopf:offering:service-type` | string | Service type as returned by the API (`WFS`, `WMS-VECTOR`, `VECTOR-TMS`, …). |
+| `geopf:offering:layer-name` | string | Layer name as published on the platform. |
+| `geopf:offering:last-synced-at` | ISO 8601 | Timestamp of the last sync that observed this offering. |
 
 ### Periodic job
 
-The job `geopf.sync-services` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf_metadata_id` in its extras (i.e., any dataset with at least one successful push). Errors on individual datasets are logged and skipped without aborting the run.
+The job `geopf.sync-services` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf:push:metadata-id` in its extras (i.e., any dataset with at least one successful push). Per-dataset errors are logged and collected; if any fail, the job raises an `ExceptionGroup` at the end so Celery records the run as failed.
 
 ## CLI
 
