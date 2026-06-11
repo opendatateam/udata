@@ -924,6 +924,34 @@ class DatasetAPITest(APITestCase):
         resource = dataset.resources[0]
         self.assertEqual(resource.extras, {"extra:id": "id"})
 
+    def test_dataset_api_update_does_not_override_hosted_resource_fields(self):
+        """A dataset PUT with stale resources must not override upload-computed fields
+
+        Regression test: publishers chaining file uploads with a dataset PUT
+        built from stale metadata used to overwrite the fresh checksum
+        computed at upload time (e.g. data.gouv.fr RNE dataset).
+        """
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        # to_dict() serializes embedded resources with the mongo `_id` key
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["title"] = "new title"
+        data["resources"][0]["url"] = faker.url()
+        data["resources"][0]["checksum"] = {"type": "sha1", "value": "0" * 40}
+        data["resources"][0]["filesize"] = resource.filesize + 1
+        data["resources"][0]["filetype"] = "remote"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        updated = dataset.resources[0]
+        self.assertEqual(updated.title, "new title")
+        self.assertEqual(updated.url, resource.url)
+        self.assertEqual(updated.checksum.value, resource.checksum.value)
+        self.assertEqual(updated.filesize, resource.filesize)
+        self.assertEqual(updated.filetype, "file")
+
     def test_dataset_api_update_without_resources(self):
         """It should update a dataset from the API without resources"""
         user = self.login()
@@ -2039,6 +2067,74 @@ class DatasetResourceAPITest(APITestCase):
         # Url should have been updated as it is a remote resource
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
+
+    def test_update_local_does_not_override_server_computed_fields(self):
+        """A stale client payload must not override upload-computed fields of a hosted file
+
+        Regression test: clients sending metadata fetched before a new file
+        upload used to overwrite the fresh checksum with a stale one, leaving
+        a checksum in database that does not match the hosted file.
+        """
+        resource = ResourceFactory()
+        original_checksum = resource.checksum.value
+        original_filesize = resource.filesize
+        original_url = resource.url
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": faker.url(),
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": original_filesize + 1,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        updated = self.dataset.resources[0]
+        self.assertEqual(updated.title, data["title"])
+        self.assertEqual(updated.checksum.value, original_checksum)
+        self.assertEqual(updated.filesize, original_filesize)
+        self.assertEqual(updated.url, original_url)
+
+    def test_update_local_cannot_remove_checksum(self):
+        """Sending a null checksum must not remove the checksum of a hosted file"""
+        resource = ResourceFactory()
+        original_checksum = resource.checksum.value
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": None,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertEqual(self.dataset.resources[0].checksum.value, original_checksum)
+
+    def test_update_remote_checksum(self):
+        """Checksum of a remote resource should remain editable by clients"""
+        resource = ResourceFactory(filetype="remote")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": 42,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        updated = self.dataset.resources[0]
+        self.assertEqual(updated.checksum.value, "0" * 40)
+        self.assertEqual(updated.filesize, 42)
 
     def test_cannot_update_resource_filetype(self):
         user = self.login()

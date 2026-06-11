@@ -737,11 +737,9 @@ class ResourceAPI(ResourceMixin, API):
         ):
             abort(400, "Cannot modify filetype after creation")
 
-        # ensure API client does not override url on self-hosted resources
-        if resource.filetype == "file":
-            form._fields.get("url").data = resource.url
-
         # populate_obj populates existing resource object with the content of the form.
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.now(UTC)
@@ -751,7 +749,11 @@ class ResourceAPI(ResourceMixin, API):
         # Will be fixed when we switch to the new API Fields.
         if "schema" in request.get_json() and form._fields.get("schema").data is None:
             resource.schema = None
-        if "checksum" in request.get_json() and form._fields.get("checksum").data is None:
+        if (
+            resource.filetype != "file"
+            and "checksum" in request.get_json()
+            and form._fields.get("checksum").data is None
+        ):
             resource.checksum = None
 
         dataset.update_resource(resource)

@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- fix(dataset): prevent clients from overriding server-computed fields (filetype, url, checksum, filesize) of file resources [#XXXX](https://github.com/opendatateam/udata/pull/XXXX)
+
 ## 17.0.1 (2026-06-10)
 
 - feat: improve backfill harvest migration ([#3826](https://github.com/opendatateam/udata/pull/3826))
