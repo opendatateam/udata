@@ -11,7 +11,7 @@ from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
 from udata.tasks import job, task
 
-from .client import GeopfClient, GeopfError, md5_of_file
+from .client import GeopfClient, GeopfError, GeopfTimeoutError, md5_of_file
 from .metadata import dataset_to_iso19115
 
 log = logging.getLogger(__name__)
@@ -42,6 +42,9 @@ def push_resource_to_geopf(dataset_id, resource_id):
 
     try:
         _run_pipeline(dataset, resource, datastore_id)
+    except GeopfTimeoutError as e:
+        log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
+        _set_extras(dataset, resource, {"geopf_status": "timeout", "geopf_error": str(e)})
     except Exception as e:
         log.exception("geopf: pipeline failed dataset=%s resource=%s", dataset_id, resource_id)
         _set_extras(dataset, resource, {"geopf_status": "error", "geopf_error": str(e)})
@@ -121,6 +124,17 @@ def _run_pipeline(dataset, resource, datastore_id):
             resource_id,
         )
 
+    except GeopfTimeoutError:
+        # Execution is still running on GeoPortail — deleting the upload would 409.
+        # Leave both in place; a future retry or manual cleanup can finish the job.
+        if upload_id:
+            log.warning(
+                "geopf: execution timed out, upload=%s left in place dataset=%s resource=%s",
+                upload_id,
+                dataset_id,
+                resource_id,
+            )
+        raise
     except Exception:
         if upload_id:
             log.warning(

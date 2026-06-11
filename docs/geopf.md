@@ -34,7 +34,7 @@ On any failure the task attempts to delete the livraison to avoid orphaned uploa
 Progress is recorded in extras so it survives across Celery retries and is visible in the API.
 
 Resource extras:
-- `geopf_status` — `pending` | `done` | `error`
+- `geopf_status` — `pending` | `done` | `error` | `timeout`
 - `geopf_stored_data_id` — entrepôt stored data ID
 - `geopf_datasheet_name` — fiche grouping tag (= `dataset.id`)
 - `geopf_fiche_url` — direct URL to the fiche on cartes.gouv.fr
@@ -66,7 +66,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 > **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI — this is the platform's own French label for dataset-level metadata, not an error.
 
-> **Note:** Contact points have no UI — they must be created via `POST /api/1/contacts/` and attached to the dataset via `PUT /api/1/datasets/{id}/`. This means a dataset going through the standard contribution funnel will have no contact point set at the time the gpkg resource is first uploaded, and the email fields will be absent from the metadata. Contact points must be added separately after the fact, then `udata geopf sync-dataset` run to refresh the metadata.
+> **Note:** Contact points have no UI — they must be created via `POST /api/1/contacts/` and attached to the dataset via `PUT /api/1/datasets/{id}/`. This means a dataset going through the standard contribution funnel will have no contact point set at the time the gpkg resource is first uploaded, and the email fields will be absent from the metadata. Contact points must be added separately after the fact, then `udata geopf push-metadata` run to refresh the metadata.
 
 ## Reverse sync: services → resources
 
@@ -94,7 +94,13 @@ The job `geopf.sync-services` runs automatically (schedule configured via Celery
 ## CLI
 
 ```
-udata geopf sync-dataset <dataset_id>
+udata geopf push-resource <dataset_id> <resource_id>
+```
+
+Runs the full upload pipeline synchronously for a single GPKG resource — same path as the Celery task. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
+
+```
+udata geopf push-metadata <dataset_id>
 ```
 
 Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.

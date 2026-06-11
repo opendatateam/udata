@@ -10,10 +10,16 @@ from flask import current_app
 log = logging.getLogger(__name__)
 
 POLL_INTERVAL = 10  # seconds between status checks
-POLL_TIMEOUT = 600  # 10 minutes max
+POLL_TIMEOUT = 1800  # default 30 minutes; override via GEOPF_POLL_TIMEOUT config
 
 
 class GeopfError(Exception):
+    pass
+
+
+class GeopfTimeoutError(GeopfError):
+    """Raised when a polled operation does not complete within the configured timeout."""
+
     pass
 
 
@@ -22,6 +28,7 @@ class GeopfClient:
         self.base = current_app.config["GEOPF_API_BASE"]
         self.datastore = current_app.config["GEOPF_DATASTORE_ID"]
         token = current_app.config["GEOPF_TOKEN"]
+        self.poll_timeout = current_app.config.get("GEOPF_POLL_TIMEOUT", POLL_TIMEOUT)
         self.session = requests.Session()
         self.session.headers["Authorization"] = f"Bearer {token}"
 
@@ -66,7 +73,7 @@ class GeopfClient:
 
     def poll_upload(self, upload_id):
         """Poll /checks until all checks complete. Returns 'CLOSED' or 'UNSTABLE'."""
-        deadline = time.time() + POLL_TIMEOUT
+        deadline = time.time() + self.poll_timeout
         while time.time() < deadline:
             resp = self.session.get(self._url(f"uploads/{upload_id}/checks"))
             self._raise(resp)
@@ -76,7 +83,7 @@ class GeopfClient:
             if not data.get("asked") and not data.get("in_progress"):
                 return "CLOSED"
             time.sleep(POLL_INTERVAL)
-        raise GeopfError(f"Upload {upload_id} checks did not complete within {POLL_TIMEOUT}s")
+        raise GeopfError(f"Upload {upload_id} checks did not complete within {self.poll_timeout}s")
 
     def delete_upload(self, upload_id):
         resp = self.session.delete(self._url(f"uploads/{upload_id}"))
@@ -101,7 +108,7 @@ class GeopfClient:
         return exec_id
 
     def poll_execution(self, exec_id):
-        deadline = time.time() + POLL_TIMEOUT
+        deadline = time.time() + self.poll_timeout
         while time.time() < deadline:
             resp = self.session.get(self._url(f"processings/executions/{exec_id}"))
             self._raise(resp)
@@ -112,7 +119,7 @@ class GeopfClient:
             if status in ("FAILURE", "ABORTED"):
                 return status, None
             time.sleep(POLL_INTERVAL)
-        raise GeopfError(f"Execution {exec_id} did not complete within {POLL_TIMEOUT}s")
+        raise GeopfTimeoutError(f"Execution {exec_id} did not complete within {self.poll_timeout}s")
 
     # --- tagging ---
 
