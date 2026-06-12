@@ -9,9 +9,10 @@ from flask import current_app
 
 from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
+from udata.core.storages.utils import md5
 from udata.tasks import job, task
 
-from .client import GeopfClient, GeopfError, GeopfTimeoutError, md5_of_file
+from .client import GeopfClient, GeopfError, GeopfTimeoutError
 from .metadata import dataset_to_iso19115
 
 log = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ def _run_pipeline(dataset, resource, datastore_id):
 
     try:
         with _open_resource_file(resource) as f:
-            md5 = md5_of_file(f)
+            file_md5 = md5(f, seek_zero=True)
 
             upload_id = client.create_upload(
                 name=stored_data_name,
@@ -81,7 +82,7 @@ def _run_pipeline(dataset, resource, datastore_id):
             )
 
             client.push_file(upload_id, f, filename)
-            client.push_md5(upload_id, filename, md5)
+            client.push_md5(upload_id, filename, file_md5)
             client.close_upload(upload_id)
 
         log.info(

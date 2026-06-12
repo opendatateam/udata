@@ -1,5 +1,10 @@
 from xml.sax.saxutils import escape
 
+XML_NS = {
+    "gmd": "http://www.isotc211.org/2005/gmd",
+    "gco": "http://www.isotc211.org/2005/gco",
+}
+
 # ISO 19115 MD_TopicCategoryCode → matching French/English tag keywords
 TOPIC_MAP = {
     "farming": ["agriculture", "agricole", "farming"],

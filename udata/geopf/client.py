@@ -1,4 +1,3 @@
-import hashlib
 import io
 import logging
 import time
@@ -6,6 +5,8 @@ from xml.etree.ElementTree import fromstring
 
 import requests
 from flask import current_app
+
+from udata.geopf.metadata import XML_NS
 
 log = logging.getLogger(__name__)
 
@@ -179,22 +180,8 @@ class GeopfClient:
         return metadata_id
 
 
-_XML_NS = {
-    "gmd": "http://www.isotc211.org/2005/gmd",
-    "gco": "http://www.isotc211.org/2005/gco",
-}
-
-
 def _extract_file_identifier(xml_bytes):
-    el = fromstring(xml_bytes).find("gmd:fileIdentifier/gco:CharacterString", _XML_NS)
+    el = fromstring(xml_bytes).find("gmd:fileIdentifier/gco:CharacterString", XML_NS)
     if el is None or not el.text:
         raise GeopfError("Could not extract file_identifier from metadata XML")
     return el.text
-
-
-def md5_of_file(fileobj):
-    h = hashlib.md5()
-    for chunk in iter(lambda: fileobj.read(65536), b""):
-        h.update(chunk)
-    fileobj.seek(0)
-    return h.hexdigest()

@@ -47,6 +47,14 @@ class StorageUtilsTest(PytestOnlyTestCase):
         expected = "81615449a98aaaad8dc179b3bec87f38"  # Output of md5sum
         assert utils.md5(self.file) == expected
 
+    def test_md5_seek_zero_rewinds(self):
+        utils.md5(self.file, seek_zero=True)
+        assert self.file.tell() == 0
+
+    def test_md5_no_seek_zero_leaves_position(self):
+        utils.md5(self.file)
+        assert self.file.tell() != 0
+
     def test_crc32(self):
         expected = "CA975130"  # Output of cksfv
         assert utils.crc32(self.file) == expected
