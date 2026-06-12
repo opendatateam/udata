@@ -342,8 +342,7 @@ def _offering_url(offering: dict) -> str:
 
 
 def _set_dataset_extras(dataset, extras: dict):
-    for k, v in extras.items():
-        dataset.extras[k] = v
+    dataset.extras.update(extras)
     Dataset.objects(id=dataset.id).update_one(
         **{f"set__extras__{k}": v for k, v in extras.items()},
     )
@@ -352,8 +351,7 @@ def _set_dataset_extras(dataset, extras: dict):
 def _set_extras(dataset, resource, extras: dict):
     """Update resource extras in-place and persist without reloading the full dataset."""
     resource = next((r for r in dataset.resources if str(r.id) == str(resource.id)), resource)
-    for k, v in extras.items():
-        resource.extras[k] = v
+    resource.extras.update(extras)
     Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
         **{f"set__resources__S__extras__{k}": v for k, v in extras.items()},
     )

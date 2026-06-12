@@ -19,12 +19,7 @@ def grp():
 @click.argument("resource_id")
 def push_resource(dataset_id, resource_id):
     """Push a GPKG resource to Géoplateforme (runs synchronously)."""
-    if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
-        "GEOPF_DATASTORE_ID"
-    ):
-        raise click.ClickException("GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured")
-
-    push_resource_to_geopf(dataset_id, resource_id)
+    push_resource_to_geopf(dataset_id, resource_id)  # type: ignore[call-arg] — Celery injects self for bind=True tasks
 
 
 @grp.command("push-metadata")
