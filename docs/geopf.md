@@ -31,7 +31,10 @@ On any failure the task attempts to delete the livraison to avoid orphaned uploa
 
 ## State tracking
 
-Progress is recorded in extras so it survives across Celery retries and is visible in the API.
+State is tracked at two levels that complement each other:
+
+- **Resource/dataset extras** — essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer: a quick `GET /api/1/datasets/{id}/` shows the current status of every push resource without touching Celery.
+- **Celery results** — the full execution record (return value, exception, traceback, timing) stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` value from the resource extras as the bridge between the two layers. Periodic `geopf.sync-services` job runs are also visible there via the jobs API (`GET /api/1/workers/jobs/`).
 
 ### Push resource extras
 
