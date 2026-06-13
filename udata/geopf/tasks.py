@@ -237,9 +237,9 @@ def sync_metadata(dataset, client):
     return metadata_id
 
 
-@job("geopf.sync-services", ignore_result=False)
-def sync_geopf_services(self):
-    """Periodic job: sync GeoPortail services to udata resources for all pushed datasets."""
+@job("geopf.sync-offerings", ignore_result=False)
+def sync_geopf_offerings(self):
+    """Periodic job: sync Géoplateforme offerings to udata resources for all pushed datasets."""
     if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
         "GEOPF_DATASTORE_ID"
     ):
@@ -248,21 +248,21 @@ def sync_geopf_services(self):
 
     client = GeopfClient()
     datasets = Dataset.objects(**{"extras__geopf:push:metadata-id__exists": True})
-    log.info("geopf: syncing services for %d datasets", datasets.count())
+    log.info("geopf: syncing offerings for %d datasets", datasets.count())
     failures = []
     for dataset in datasets:
         try:
-            n = sync_services_for_dataset(dataset, client)
+            n = sync_offerings_for_dataset(dataset, client)
             log.info("geopf: synced %d offerings for dataset=%s", n, dataset.id)
         except Exception as e:
-            log.exception("geopf: service sync failed for dataset=%s", dataset.id)
+            log.exception("geopf: offering sync failed for dataset=%s", dataset.id)
             failures.append(e)
     if failures:
         raise ExceptionGroup(f"geopf: sync failed for {len(failures)} dataset(s)", failures)
 
 
-def sync_services_for_dataset(dataset, client) -> int:
-    """Sync GeoPortail offerings to udata resources. Returns count of live offerings."""
+def sync_offerings_for_dataset(dataset, client) -> int:
+    """Sync Géoplateforme offerings to udata resources. Returns count of live offerings."""
     stored_data_ids = {
         r.extras["geopf:push:stored-data-id"]
         for r in dataset.resources

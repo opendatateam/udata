@@ -5,7 +5,7 @@ from udata.commands import cli
 from udata.core.dataset.models import Dataset
 
 from .client import GeopfClient, GeopfError
-from .tasks import push_resource_to_geopf, sync_metadata, sync_services_for_dataset
+from .tasks import push_resource_to_geopf, sync_metadata, sync_offerings_for_dataset
 
 
 @cli.group("geopf")
@@ -50,10 +50,10 @@ def push_metadata(dataset_id):
     click.echo(f"fiche={fiche_url}")
 
 
-@grp.command("sync-services")
+@grp.command("sync-offerings")
 @click.argument("dataset_id")
-def sync_services(dataset_id):
-    """Sync GeoPortail offerings to resources for a dataset."""
+def sync_offerings(dataset_id):
+    """Sync Géoplateforme offerings to resources for a dataset."""
     if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
         "GEOPF_DATASTORE_ID"
     ):
@@ -66,7 +66,7 @@ def sync_services(dataset_id):
 
     try:
         client = GeopfClient()
-        n = sync_services_for_dataset(dataset, client)
+        n = sync_offerings_for_dataset(dataset, client)
     except GeopfError as e:
         raise click.ClickException(str(e))
 

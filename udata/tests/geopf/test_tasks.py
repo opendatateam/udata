@@ -12,7 +12,7 @@ from udata.geopf.tasks import (
     _resource_filename,
     push_resource_to_geopf,
     sync_metadata,
-    sync_services_for_dataset,
+    sync_offerings_for_dataset,
 )
 from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyDBTestCase
@@ -93,12 +93,12 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         client.tag_entity.assert_not_called()
 
 
-class SyncServicesTest(PytestOnlyDBTestCase):
+class SyncOfferingsTest(PytestOnlyDBTestCase):
     def test_no_stored_data_skips_api_call(self):
         dataset = DatasetFactory()
         client = MagicMock()
 
-        count = sync_services_for_dataset(dataset, client)
+        count = sync_offerings_for_dataset(dataset, client)
 
         assert count == 0
         client.list_offerings.assert_not_called()
@@ -116,7 +116,7 @@ class SyncServicesTest(PytestOnlyDBTestCase):
             }
         ]
 
-        count = sync_services_for_dataset(dataset, client)
+        count = sync_offerings_for_dataset(dataset, client)
 
         assert count == 1
         dataset.reload()
@@ -130,13 +130,13 @@ class SyncServicesTest(PytestOnlyDBTestCase):
 
     def test_updates_url_for_changed_offering(self):
         gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
-        stale_service = ResourceFactory.build(
+        stale_offering = ResourceFactory.build(
             url="http://old.example.com/wfs",
             filetype="remote",
             type="api",
             extras={"geopf:offering:id": "offer-1"},
         )
-        dataset = DatasetFactory(resources=[gpkg, stale_service])
+        dataset = DatasetFactory(resources=[gpkg, stale_offering])
         client = MagicMock()
         client.list_offerings.return_value = [
             {
@@ -147,7 +147,7 @@ class SyncServicesTest(PytestOnlyDBTestCase):
             }
         ]
 
-        sync_services_for_dataset(dataset, client)
+        sync_offerings_for_dataset(dataset, client)
 
         dataset.reload()
         resource = next(
@@ -157,16 +157,16 @@ class SyncServicesTest(PytestOnlyDBTestCase):
 
     def test_removes_resource_for_deleted_offering(self):
         gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
-        gone_service = ResourceFactory.build(
+        gone_offering = ResourceFactory.build(
             filetype="remote",
             type="api",
             extras={"geopf:offering:id": "offer-gone"},
         )
-        dataset = DatasetFactory(resources=[gpkg, gone_service])
+        dataset = DatasetFactory(resources=[gpkg, gone_offering])
         client = MagicMock()
         client.list_offerings.return_value = []
 
-        count = sync_services_for_dataset(dataset, client)
+        count = sync_offerings_for_dataset(dataset, client)
 
         assert count == 0
         dataset.reload()

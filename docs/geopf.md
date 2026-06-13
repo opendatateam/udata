@@ -34,7 +34,7 @@ On any failure the task attempts to delete the livraison to avoid orphaned uploa
 State is tracked at two levels that complement each other:
 
 - **Resource/dataset extras** — essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer: a quick `GET /api/1/datasets/{id}/` shows the current status of every push resource without touching Celery.
-- **Celery results** — the full execution record (return value, exception, traceback, timing) stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` value from the resource extras as the bridge between the two layers. Periodic `geopf.sync-services` job runs are also visible there via the jobs API (`GET /api/1/workers/jobs/`).
+- **Celery results** — the full execution record (return value, exception, traceback, timing) stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` value from the resource extras as the bridge between the two layers. Periodic `geopf.sync-offerings` job runs are also visible there via the jobs API (`GET /api/1/workers/jobs/`).
 
 ### Push resource extras
 
@@ -79,9 +79,9 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 > **Note:** Contact points have no UI — they must be created via `POST /api/1/contacts/` and attached to the dataset via `PUT /api/1/datasets/{id}/`. This means a dataset going through the standard contribution funnel will have no contact point set at the time the gpkg resource is first uploaded, and the email fields will be absent from the metadata. Contact points must be added separately after the fact, then `udata geopf push-metadata` run to refresh the metadata.
 
-## Reverse sync: services → resources
+## Reverse sync: offerings → resources
 
-Once a dataset has been pushed to Géoplateforme, the stored data are exposed as OGC services (WFS, WMS, WMTS, TMS, …). The reverse sync reads those offerings and mirrors them as resources in udata.
+An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a dataset has been pushed, the reverse sync reads those offerings and mirrors them as resources in udata.
 
 ### Workflow
 
@@ -101,7 +101,7 @@ Set on resources created (or updated) by the reverse sync. These resources are d
 
 ### Periodic job
 
-The job `geopf.sync-services` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf:push:metadata-id` in its extras (i.e., any dataset with at least one successful push). Per-dataset errors are logged and collected; if any fail, the job raises an `ExceptionGroup` at the end so Celery records the run as failed.
+The job `geopf.sync-offerings` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf:push:metadata-id` in its extras (i.e., any dataset with at least one successful push). Per-dataset errors are logged and collected; if any fail, the job raises an `ExceptionGroup` at the end so Celery records the run as failed.
 
 ## CLI
 
@@ -118,7 +118,7 @@ udata geopf push-metadata <dataset_id>
 Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.
 
 ```
-udata geopf sync-services <dataset_id>
+udata geopf sync-offerings <dataset_id>
 ```
 
 Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the reverse-sync logic.
