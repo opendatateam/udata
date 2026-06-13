@@ -3,6 +3,7 @@ import os
 import tempfile
 from datetime import UTC, datetime
 from urllib.parse import urlparse
+from uuid import UUID
 
 import requests
 from flask import current_app
@@ -11,6 +12,7 @@ from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
 from udata.core.storages.utils import md5
 from udata.tasks import job, task
+from udata.utils import get_by
 
 from .client import GeopfClient, GeopfError, GeopfTimeoutError
 from .metadata import dataset_to_iso19115
@@ -22,7 +24,7 @@ log = logging.getLogger(__name__)
 def push_resource_to_geopf(self, dataset_id, resource_id):
     log.info("geopf: starting push dataset=%s resource=%s", dataset_id, resource_id)
     dataset = Dataset.objects.get(id=dataset_id)
-    resource = next((r for r in dataset.resources if str(r.id) == resource_id), None)
+    resource = get_by(dataset.resources, id=UUID(resource_id))
     if resource is None:
         log.error("geopf: resource not found dataset=%s resource=%s", dataset_id, resource_id)
         return
@@ -350,7 +352,7 @@ def _set_dataset_extras(dataset, extras: dict):
 
 def _set_extras(dataset, resource, extras: dict):
     """Update resource extras in-place and persist without reloading the full dataset."""
-    resource = next((r for r in dataset.resources if str(r.id) == str(resource.id)), resource)
+    resource = get_by(dataset.resources, id=resource.id)
     resource.extras.update(extras)
     Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
         **{f"set__resources__S__extras__{k}": v for k, v in extras.items()},
