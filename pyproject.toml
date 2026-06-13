@@ -113,6 +113,9 @@ maaf = "udata.harvest.backends.maaf:MaafBackend"
 ckan = "udata.harvest.backends.ckan.harvesters:CkanBackend"
 dkan = "udata.harvest.backends.ckan.harvesters:DkanBackend"
 
+[project.entry-points."udata.plugins"]
+geopf = "udata.geopf"
+
 [project.entry-points."udata.i18n"]
 udata = "udata.translations"
 
