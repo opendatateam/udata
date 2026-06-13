@@ -77,7 +77,6 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 > **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI — this is the platform's own French label for dataset-level metadata, not an error.
 
-> **Note:** Contact points have no UI — they must be created via `POST /api/1/contacts/` and attached to the dataset via `PUT /api/1/datasets/{id}/`. This means a dataset going through the standard contribution funnel will have no contact point set at the time the gpkg resource is first uploaded, and the email fields will be absent from the metadata. Contact points must be added separately after the fact, then `udata geopf push-metadata` run to refresh the metadata.
 
 ## Reverse sync: offerings → resources
 
@@ -140,3 +139,4 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 - SRS is hardcoded to `EPSG:4326` (WGS 84) for both upload creation and processing parameters; files in other projections will fail or produce incorrect results.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.
+- Contact points have no UI and must be set via API (`POST /api/1/contacts/`, then `PUT /api/1/datasets/{id}/`); datasets uploaded through the standard funnel will have no contact point and the metadata email fields will be absent. Run `udata geopf push-metadata` after adding one.
