@@ -11,7 +11,7 @@ from udata.geopf.metadata import XML_NS
 log = logging.getLogger(__name__)
 
 POLL_INTERVAL = 10  # seconds between status checks
-POLL_TIMEOUT = 60  # seconds, default 30 minutes; override via GEOPF_POLL_TIMEOUT config
+POLL_TIMEOUT = 1800  # seconds, default 30 minutes; override via GEOPF_POLL_TIMEOUT config
 
 
 class GeopfError(Exception):
