@@ -7,6 +7,7 @@ import requests
 from flask import current_app
 
 from udata.geopf.metadata import XML_NS
+from udata.geopf.srs import DEFAULT_SRS
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class GeopfClient:
 
     # --- livraison ---
 
-    def create_upload(self, name, description, srs="EPSG:4326"):
+    def create_upload(self, name, description, srs=DEFAULT_SRS):
         resp = self.session.post(
             self._url("uploads"),
             json={"name": name, "type": "VECTOR", "srs": srs, "description": description},
@@ -92,13 +93,13 @@ class GeopfClient:
 
     # --- processing ---
 
-    def launch_processing(self, upload_id, stored_data_name):
+    def launch_processing(self, upload_id, stored_data_name, srs=DEFAULT_SRS):
         processing_uuid = "0de8c60b-9938-4be9-aa36-9026b77c3c96"
         payload = {
             "processing": processing_uuid,
             "inputs": {"upload": [upload_id]},
             "output": {"stored_data": {"name": stored_data_name}},
-            "parameters": {"srs": "EPSG:4326"},
+            "parameters": {"srs": srs},
         }
         resp = self.session.post(self._url("processings/executions"), json=payload)
         self._raise(resp)

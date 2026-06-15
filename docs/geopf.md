@@ -136,7 +136,7 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 
 - Only `gpkg` resources are synchronised; other formats are silently skipped.
 - Updates to an existing pushed resource are not yet handled — the push task only fires on `on_resource_added`.
-- SRS is hardcoded to `EPSG:4326` (WGS 84) for both upload creation and processing parameters; files in other projections will fail or produce incorrect results.
+- SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.
 - Contact points have no UI and must be set via API (`POST /api/1/contacts/`, then `PUT /api/1/datasets/{id}/`); datasets uploaded through the standard funnel will have no contact point and the metadata email fields will be absent. Run `udata geopf push-metadata` after adding one.

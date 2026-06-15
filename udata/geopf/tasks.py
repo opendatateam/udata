@@ -16,6 +16,7 @@ from udata.utils import get_by
 
 from .client import GeopfClient, GeopfError, GeopfTimeoutError
 from .metadata import dataset_to_iso19115
+from .srs import DEFAULT_SRS, detect_srs
 
 log = logging.getLogger(__name__)
 
@@ -72,9 +73,13 @@ def _run_pipeline(dataset, resource, datastore_id):
         with _open_resource_file(resource) as f:
             file_md5 = md5(f, seek_zero=True)
 
+            srs = detect_srs(f, resource.format) or DEFAULT_SRS
+            log.debug("geopf: using srs=%s dataset=%s resource=%s", srs, dataset_id, resource_id)
+
             upload_id = client.create_upload(
                 name=stored_data_name,
                 description=dataset.title,
+                srs=srs,
             )
             log.info(
                 "geopf: created upload=%s dataset=%s resource=%s",
@@ -99,7 +104,7 @@ def _run_pipeline(dataset, resource, datastore_id):
 
         client.tag_entity("uploads", upload_id, datasheet_name)
 
-        exec_id = client.launch_processing(upload_id, stored_data_name)
+        exec_id = client.launch_processing(upload_id, stored_data_name, srs=srs)
         log.info(
             "geopf: launched processing execution=%s dataset=%s resource=%s",
             exec_id,
