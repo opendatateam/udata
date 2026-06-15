@@ -138,6 +138,21 @@ class ReuseListAPIV2Test(APITestCase):
         ids = {r["id"] for r in response.json["data"]}
         assert ids == {str(public_reuse.id), str(private_reuse.id)}
 
+    def test_reuse_list_private_isolation_between_users(self):
+        """A private reuse is only visible to its owner, never to another logged-in
+        user. Guards the `| owned_qs` branch of `visible_by_user`: a regression
+        broadening it would still pass `test_reuse_list_filter_private`."""
+        owner = UserFactory()
+        other_user = UserFactory()
+        public_reuse = ReuseFactory()
+        ReuseFactory(private=True, owner=owner)
+
+        self.login(other_user)
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        ids = {r["id"] for r in response.json["data"]}
+        assert ids == {str(public_reuse.id)}
+
     def test_reuse_list_excludes_deleted(self):
         """Deleted reuses are filtered out by the endpoint `deleted=None` clause;
         `deleted` is not `filterable`, so only this test guards that exclusion."""
