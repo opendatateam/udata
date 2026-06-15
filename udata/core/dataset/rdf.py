@@ -759,7 +759,6 @@ def access_rights_from_rdf(resource: RdfResource) -> list[str]:
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    # FIXME: support anchor-only elements
     return rdf_unique_values(resource, DCT.accessRights, unwrap=[RDFS.label, DCT.description])
 
 
@@ -769,7 +768,6 @@ def licenses_from_rdf(resource: RdfResource) -> list[str]:
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    # FIXME: support anchor-only elements
     return rdf_unique_values(resource, DCT.license, unwrap=[RDFS.label, DCT.description])
 
 
@@ -1023,8 +1021,6 @@ def dataset_from_rdf(
     if dataset_licenses:
         add_dcat_extra(dataset, "license", dataset_licenses)
     default_license = dataset.license or License.default()
-    # FIXME: resources_licenses_flat reproduces existing behavior, but differs from logic above,
-    # which is bump resource-level properties to dataset-level only if they're unanimous.
     resources_licenses_flat = uniquify(
         license for resource_licenses in resources_licenses for license in resource_licenses
     )
