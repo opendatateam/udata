@@ -71,6 +71,37 @@ class ReuseListAPIV2Test(APITestCase):
         assert200(response)
         assert response.json["data"][0]["datasets"]["total"] == 99
 
+    def test_reuse_list_datasets_link_filters_to_reuse(self):
+        """Following the `datasets.href` returns exactly the reuse datasets.
+        Asserting the id appears in the URL is not enough: a regression on the
+        filter param name would keep the id in the query string yet break the
+        link. This follows the link end-to-end to guard the wiring."""
+        reuse_datasets = DatasetFactory.create_batch(2)
+        VisibleReuseFactory(datasets=reuse_datasets)
+        other_dataset = DatasetFactory()  # not linked to the reuse
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        href = response.json["data"][0]["datasets"]["href"]
+
+        datasets_response = self.get(href)
+        assert200(datasets_response)
+        returned_ids = {d["id"] for d in datasets_response.json["data"]}
+        assert returned_ids == {str(d.id) for d in reuse_datasets}
+        assert str(other_dataset.id) not in returned_ids
+
+    def test_reuse_list_datasets_link_when_empty(self):
+        """A reuse without datasets still exposes a valid subsection link with a
+        `total` of 0 (the `metrics.get("datasets", 0)` default branch)."""
+        VisibleReuseFactory(datasets=[])
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        data = response.json["data"][0]
+        assert data["datasets"]["rel"] == "subsection"
+        assert data["datasets"]["total"] == 0
+        assert data["datasets"]["href"]
+
     def test_reuse_list_exposes_organization(self):
         """References other than `datasets` (e.g. organization) are still
         dereferenced and serialized."""
@@ -139,3 +170,25 @@ class ReuseListAPIV2Test(APITestCase):
         assert200(response)
         ids = {r["id"] for r in response.json["data"]}
         assert ids == {str(api_reuse.id)}
+
+    def test_reuse_list_filter_dataset(self):
+        """The `dataset` filter (key of the `datasets` field) narrows the listing
+        to the reuses linked to a given dataset — the core relation of this API."""
+        dataset = DatasetFactory()
+        linked_reuse = VisibleReuseFactory(datasets=[dataset])
+        VisibleReuseFactory(datasets=DatasetFactory.create_batch(1))
+
+        response = self.get(url_for("apiv2.reuses", dataset=str(dataset.id)))
+        assert200(response)
+        ids = {r["id"] for r in response.json["data"]}
+        assert ids == {str(linked_reuse.id)}
+
+    def test_reuse_list_exposes_owner(self):
+        """The `owner` reference is dereferenced and serialized under
+        `no_dereference()`, symmetrically to `organization`."""
+        user = UserFactory()
+        VisibleReuseFactory(owner=user, organization=None, datasets=DatasetFactory.create_batch(1))
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        assert response.json["data"][0]["owner"]["id"] == str(user.id)
