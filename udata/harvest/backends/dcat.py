@@ -507,15 +507,20 @@ class CswIso19139DcatBackend(BaseCswDcatBackend):
     name = "csw-iso-19139"
     display_name = "CSW-ISO-19139"
 
+    xslt_params = {
+        "CoupledResourceLookUp": "disabled",
+        "include-deprecated": "yes",  # required for dct:rights
+        "locale-preferred-lang": "fre",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
         xslt_text = self.get(xslt_url).text
         xslt_proc = self.saxon_proc.new_xslt30_processor()
         self.xslt_exec = xslt_proc.compile_stylesheet(stylesheet_text=xslt_text)
-        self.xslt_exec.set_parameter(
-            "CoupledResourceLookUp", self.saxon_proc.make_string_value("disabled")
-        )
+        for key, value in self.xslt_params.items():
+            self.xslt_exec.set_parameter(key, self.saxon_proc.make_string_value(value))
 
     @property
     @override
