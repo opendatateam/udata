@@ -2081,14 +2081,14 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     """
                     <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
                     """,
-                    {"https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"},
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
                 ),
                 (
                     "value",
                     """
                     <dct:license>License from value</dct:license>
                     """,
-                    {"License from value"},
+                    ["License from value"],
                 ),
                 (
                     "label",
@@ -2099,7 +2099,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        </rdf:Description>
                     </dct:license>
                     """,
-                    {"License from label"},
+                    ["License from label"],
                 ),
                 (
                     "uriref-precedence",
@@ -2108,9 +2108,9 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        No conditions apply to access and use.
                     </dct:license>
                     """,
-                    {
+                    [
                         "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
-                    },
+                    ],
                 ),
                 (
                     "resource",
@@ -2121,7 +2121,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        <rdfs:label>License from resource</rdfs:label>
                        <dct:description>A license specific to our organization</dct:description>
                     """,
-                    {"License from resource"},
+                    ["License from resource"],
                 ),
                 (
                     "multiple",
@@ -2133,7 +2133,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        </rdf:Description>
                     </dct:license>
                     """,
-                    {"License 1", "License 2"},
+                    ["License 1", "License 2"],
                 ),
             ]
         ],
@@ -2266,7 +2266,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from label"},
+                    ["Provenance from label"],
                 ),
                 # New DCAT* specs
                 (
@@ -2278,7 +2278,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from description"},
+                    ["Provenance from description"],
                 ),
                 (
                     "multiple",
@@ -2294,7 +2294,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Statement 1", "Statement 2"},
+                    ["Statement 1", "Statement 2"],
                 ),
                 # Supported theoretical(?) cases
                 (
@@ -2302,7 +2302,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     """
                     <dct:provenance>Provenance from value</dct:provenance>
                     """,
-                    {"Provenance from value"},
+                    ["Provenance from value"],
                 ),
                 (
                     "resource",
@@ -2312,7 +2312,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     <rdf:Description rdf:about="http://example.org/provenance">
                        <dct:description>Provenance from separate resource</dct:description>
                     """,
-                    {"Provenance from separate resource"},
+                    ["Provenance from separate resource"],
                 ),
             ]
         ],

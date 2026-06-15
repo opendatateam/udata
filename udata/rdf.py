@@ -4,7 +4,6 @@ This module centralize udata-wide RDF helpers and configuration
 
 import logging
 import re
-from collections.abc import Set
 from html.parser import HTMLParser
 from urllib.parse import quote
 
@@ -34,6 +33,7 @@ from udata.harvest.filters import normalize_tag
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
+from udata.utils import uniquify
 
 log = logging.getLogger(__name__)
 
@@ -252,9 +252,9 @@ def serialize_value(value, unwrap: list[URIRef] | None = None):
         return value.identifier.toPython()
 
 
-def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> Set[str]:
-    """Returns a set of serialized values for a predicate from a RdfResource"""
-    return frozenset(
+def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> list[str]:
+    """Returns a list of unique serialized values for a predicate from a RdfResource"""
+    return uniquify(
         value
         for info in resource.objects(predicate=predicate)
         if (value := serialize_value(info, unwrap=unwrap))
