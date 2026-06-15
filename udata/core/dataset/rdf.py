@@ -787,28 +787,22 @@ def provenances_from_rdf(resource: RdfResource) -> list[str]:
     return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
-def infer_access_conditions(
-    access_rights: Collection[str],
-) -> tuple[AccessType | None, InspireLimitationCategory | None]:
+def infer_inspire_access_limitation(strings: Collection[str]) -> InspireLimitationCategory | None:
     """
-    Infer the dataset access rights from a RDF dataset or a list of resources access rights.
-    If the dataset does not have access rights and all resources have the same set of access rights return it.
+    Infer INSPIRE access limitation from a list of free-text rights.
+    When multiple limitations are present, only the first one is returned.
     """
     if not current_app.config["INSPIRE_SUPPORT"]:
-        return None, None
+        return None
 
-    # Try to match access rights to known inspire access rights limitation categories
     country = current_app.config["DEFAULT_COUNTRY_CODE"]
-    categories = set(
-        InspireLimitationCategory.get_category_from_localized_label(access_right, country)
-        for access_right in access_rights
-    )
-    categories.discard(None)
-    if len(categories) != 1:
-        # FIXME: len() > 1 should also return RESTRICTED, or raise
-        return None, None
 
-    return AccessType.RESTRICTED, categories.pop()
+    for s in strings:
+        category = InspireLimitationCategory.get_category_from_localized_label(s, country)
+        if category:
+            return category
+
+    return None
 
 
 def add_dcat_extra(obj: DatasetOrResource, key: str, value: str | Collection) -> DatasetOrResource:
@@ -1015,10 +1009,10 @@ def dataset_from_rdf(
         dataset_access_rights = list(resources_access_rights.pop())
     if dataset_access_rights:
         add_dcat_extra(dataset, "accessRights", dataset_access_rights)
-    access_type, inspire_category = infer_access_conditions(dataset_access_rights + dataset_rights)
-    if access_type:
-        dataset.access_type = access_type
+
+    inspire_category = infer_inspire_access_limitation(dataset_access_rights + dataset_rights)
     if inspire_category:
+        dataset.access_type = AccessType.RESTRICTED
         dataset.access_type_reason_category = inspire_category
 
     # same heuristic as dataset.extra.rights above

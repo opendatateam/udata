@@ -33,7 +33,7 @@ from udata.core.dataset.rdf import (
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
-    infer_access_conditions,
+    infer_inspire_access_limitation,
     license_to_rdf,
     licenses_from_rdf,
     provenances_from_rdf,
@@ -2338,73 +2338,65 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
         assert rights == expected_rights
 
     @pytest.mark.parametrize(
-        "inspire_support, access_rights, expected_access_type, expected_inspire_category",
+        "inspire_support, input_strings, expected_category",
         [
             pytest.param(
                 inspire_support,
-                access_rights,
-                expected_access_type,
-                expected_inspire_category,
+                input_strings,
+                expected_category,
                 id=id,
             )
-            for id, inspire_support, access_rights, expected_access_type, expected_inspire_category in [
+            for id, inspire_support, input_strings, expected_category in [
                 (
                     "single_inspire_restriction",
                     True,
-                    {
+                    [
                         "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-                    },
-                    AccessType.RESTRICTED,
+                    ],
                     InspireLimitationCategory.INTERNATIONAL_RELATIONS,
                 ),
                 (
-                    # FIXME: should be restricted?
                     "multiple_inspire_restrictions",
                     True,
-                    {
+                    [
                         "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)",
                         "L124-5-II-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)",
-                    },
-                    None,
-                    None,
+                    ],
+                    InspireLimitationCategory.INTERNATIONAL_RELATIONS,
                 ),
                 (
                     "inspire_no_restriction",
                     True,
-                    {"Pas de restriction d'accès public selon INSPIRE"},
-                    None,
+                    ["Pas de restriction d'accès public selon INSPIRE"],
                     None,
                 ),
                 (
                     "unknown_rights",
                     True,
-                    {"Some unknown rights"},
-                    None,
+                    ["Some unknown rights"],
                     None,
                 ),
                 (
                     # don't detect a valid restriction when INSPIRE_SUPPORT is disabled
                     "inspire_off",
                     False,
-                    {
+                    [
                         "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-                    },
-                    None,
+                    ],
                     None,
                 ),
             ]
         ],
     )
-    def test_access_conditions(
-        self, app, inspire_support, access_rights, expected_access_type, expected_inspire_category
+    def test_inspire_access_limitation(
+        self, app, inspire_support, input_strings, expected_category
     ):
         app.config["INSPIRE_SUPPORT"] = inspire_support
         app.config["DEFAULT_COUNTRY_CODE"] = "fr"
 
-        access_type, inspire_category = infer_access_conditions(access_rights)
+        category = infer_inspire_access_limitation(input_strings)
 
-        assert access_type is expected_access_type
-        assert inspire_category is expected_inspire_category
+        assert category is expected_category
 
     @pytest.mark.parametrize(
         "xml, expected_provenances",
