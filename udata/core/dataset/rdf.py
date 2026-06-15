@@ -53,6 +53,7 @@ from udata.rdf import (
     sanitize_html,
     schema_from_rdf,
     set_harvested_date,
+    themes_data_from_rdf,
     themes_from_rdf,
     url_from_rdf,
     vocabulary_key,
@@ -893,6 +894,11 @@ def dataset_from_rdf(
         dataset.acronym = acronym
 
     dataset.tags = themes_from_rdf(d)
+
+    # Store raw theme information in extras for analysis
+    themes = themes_data_from_rdf(d)
+    if themes:
+        add_dcat_extra(dataset, "themes", themes)
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
