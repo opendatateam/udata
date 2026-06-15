@@ -2674,6 +2674,24 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(updated.checksum.value, original_checksum)
         self.assertEqual(updated.filesize, original_filesize)
 
+    def test_community_resource_update_does_not_override_filetype(self):
+        """A stale client payload must not change the filetype of a hosted file
+
+        Unlike ResourceAPI.put, the community resource PUT endpoint has no
+        explicit guard rejecting filetype changes: the protection relies solely
+        on BaseResourceForm.populate_obj.
+        """
+        user = self.login()
+        community_resource = CommunityResourceFactory(dataset=DatasetFactory(), owner=user)
+        data = {
+            "title": faker.sentence(),
+            "url": community_resource.url,
+            "filetype": "remote",
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.first().filetype, "file")
+
     def test_community_resource_file_update_old_file_deletion(self):
         """It should update a community resource's file and delete the old one"""
         dataset = DatasetFactory()
