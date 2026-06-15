@@ -998,12 +998,18 @@ def dataset_from_rdf(
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
+    # dataset.extra.rights is set from (in order, first match wins):
+    # 1. Dataset dct:rights metadata.
+    # 2. Distributions dct:rights metadata, but only if all distributions carry the same metadata.
+    #    This heuristic is needed to "reverse" the ISO-to-DCAT conversion from SEMIC, which moves
+    #    the dataset-level ISO metadata at the distribution level in DCAT.
     dataset_rights = rights_from_rdf(d)
     if not dataset_rights and len(resources_rights) == 1:
         dataset_rights = list(resources_rights.pop())
     if dataset_rights:
         add_dcat_extra(dataset, "rights", dataset_rights)
 
+    # same heuristic as dataset.extra.rights above
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights and len(resources_access_rights) == 1:
         dataset_access_rights = list(resources_access_rights.pop())
@@ -1015,11 +1021,18 @@ def dataset_from_rdf(
     if inspire_category:
         dataset.access_type_reason_category = inspire_category
 
+    # same heuristic as dataset.extra.rights above
     dataset_licenses = licenses_from_rdf(d)
     if not dataset_licenses and len(resources_licenses) == 1:
         dataset_licenses = list(resources_licenses.pop())
     if dataset_licenses:
         add_dcat_extra(dataset, "license", dataset_licenses)
+
+    # dataset.license is set from (in order, first match wins):
+    # 1. Dataset dct:license.
+    # 2. Dataset dct:rights (SEMIC outputs non-URI licenses as rights).
+    # 3. Distributions dct:license (contrary to dataset.extra.license, not all distributions
+    #    have to carry the same metadata).
     default_license = dataset.license or License.default()
     resources_licenses_flat = uniquify(
         license for resource_licenses in resources_licenses for license in resource_licenses
