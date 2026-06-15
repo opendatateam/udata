@@ -175,7 +175,11 @@ class DcatBackend(BaseBackend):
             page_number += 1
 
     def process_one_datasets_page(self, page_number: int, page: Graph):
-        for node in page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
+        # Manually deduplicate subjects to ensure a node is only processed once.
+        # Rdflib subjects() will return the same node multiple times if it matches different types,
+        # which can occur with ISO series converted by SEMIC (by default it sets rdf:type to both
+        # Dataset and DatasetSeries).
+        for node in set(page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
             remote_id = page.value(node, DCT.identifier)
             if self.is_dataset_external_to_this_page(page, node):
                 continue
