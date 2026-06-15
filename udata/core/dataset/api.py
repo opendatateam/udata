@@ -747,11 +747,12 @@ class ResourceAPI(ResourceMixin, API):
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
         # Will be fixed when we switch to the new API Fields.
-        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+        body = request.get_json()
+        if "schema" in body and form._fields.get("schema").data is None:
             resource.schema = None
         if (
             resource.filetype != "file"
-            and "checksum" in request.get_json()
+            and "checksum" in body
             and form._fields.get("checksum").data is None
         ):
             resource.checksum = None
@@ -823,8 +824,8 @@ class CommunityResourceAPI(API):
         """Update a given community resource"""
         community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
-        if community.filetype == "file":
-            form._fields.get("url").data = community.url
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()

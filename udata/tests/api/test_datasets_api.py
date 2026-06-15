@@ -2136,6 +2136,24 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.checksum.value, "0" * 40)
         self.assertEqual(updated.filesize, 42)
 
+    def test_update_remote_can_remove_checksum(self):
+        """Sending a null checksum should remove the checksum of a remote resource"""
+        resource = ResourceFactory(filetype="remote")
+        self.assertIsNotNone(resource.checksum)
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": None,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertIsNone(self.dataset.resources[0].checksum)
+
     def test_cannot_update_resource_filetype(self):
         user = self.login()
         resource = ResourceFactory(filetype="file")
@@ -2634,6 +2652,27 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 1)
         self.assertEqual(CommunityResource.objects.first().description, "new description")
         self.assertTrue(CommunityResource.objects.first().url.endswith("test.txt"))
+
+    def test_community_resource_update_does_not_override_server_computed_fields(self):
+        """A stale client payload must not override upload-computed fields of a hosted file"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(dataset=DatasetFactory(), owner=user)
+        original_url = community_resource.url
+        original_checksum = community_resource.checksum.value
+        original_filesize = community_resource.filesize
+        data = {
+            "title": faker.sentence(),
+            "url": faker.url(),
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": original_filesize + 1,
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.title, data["title"])
+        self.assertEqual(updated.url, original_url)
+        self.assertEqual(updated.checksum.value, original_checksum)
+        self.assertEqual(updated.filesize, original_filesize)
 
     def test_community_resource_file_update_old_file_deletion(self):
         """It should update a community resource's file and delete the old one"""
