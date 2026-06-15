@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -12,6 +13,7 @@ from udata.core.reports.constants import REASON_AUTO_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.notifications.tchap import send_message
 from udata.tests.api import APITestCase
 
 
@@ -171,7 +173,6 @@ class SpamTest(APITestCase):
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_dataset_spam_not_reflagged_after_dismiss(self):
-
         dataset = DatasetFactory(title="This is spam content")
         self.assertTrue(self.has_spam_report(dataset))
 
@@ -271,6 +272,55 @@ class SpamTest(APITestCase):
         dataset = DatasetFactory(title="This is spam content", organization=org)
         self.assertTrue(self.has_spam_report(dataset))
 
+    @pytest.mark.options(
+        SPAM_WORDS=["spam"],
+        TCHAP_HOMESERVER="https://matrix.example.org",
+        TCHAP_ROOM_ID="!room:example.org",
+        TCHAP_BOT_TOKEN="token",
+    )
+    def test_tchap_notification_is_queued_not_sent_during_request(self):
+        """The Tchap notification must be queued, never sent inside the request.
+
+        Sending it synchronously (the prod incident) made a misconfigured URL
+        crash the dataset save with a 400. It must run in a worker instead.
+        """
+        with patch("udata.notifications.tchap.send_message.delay") as delay:
+            dataset = DatasetFactory(title="This is spam content")
+
+        # The user action completed and the spam report was created...
+        self.assertTrue(self.has_spam_report(dataset))
+        # ...while the actual Tchap send was only enqueued, not executed here.
+        delay.assert_called_once()
+        (message,), _ = delay.call_args
+        self.assertTrue(message.startswith("⚠️ @all "))
+
+    @pytest.mark.options(
+        TCHAP_HOMESERVER="https://matrix.example.org",
+        TCHAP_ROOM_ID="!room:example.org",
+        TCHAP_BOT_TOKEN="token",
+    )
+    def test_tchap_send_message_builds_matrix_url(self):
+        with patch("udata.notifications.tchap.requests.post") as post:
+            send_message.run("hello")
+
+        post.assert_called_once()
+        url, _ = post.call_args
+        # Room id is URL-encoded in the path.
+        self.assertEqual(
+            url[0],
+            "https://matrix.example.org/_matrix/client/v3/rooms/"
+            "%21room%3Aexample.org/send/m.room.message",
+        )
+        self.assertEqual(post.call_args.kwargs["json"]["body"], "hello")
+        self.assertEqual(post.call_args.kwargs["headers"]["authorization"], "Bearer token")
+
+    @pytest.mark.options(TCHAP_HOMESERVER=None, TCHAP_ROOM_ID="!room:example.org")
+    def test_tchap_send_message_noop_without_config(self):
+        with patch("udata.notifications.tchap.requests.post") as post:
+            send_message.run("hello")
+
+        post.assert_not_called()
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_certified_org_reuse_not_flagged(self):
         org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])
@@ -289,3 +339,25 @@ class SpamTest(APITestCase):
             name="Spam Organization", badges=[OrganizationBadge(kind=CERTIFIED)]
         )
         self.assertFalse(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    @pytest.mark.options(CDATA_BASE_URL="https://example.com/")
+    def test_spam_message_contains_self_web_url(self):
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        assert report
+        assert dataset.self_web_url() in report.message
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_spam_message_does_not_fail_when_no_self_web_url(self):
+        """
+        subject does not have any web url because CDATA_BASE_URL isn't defined
+        """
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        assert report
+        assert "](" not in report.message

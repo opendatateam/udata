@@ -179,6 +179,9 @@ class Topic(EntityBase):
     nb_datasets: int = 0
     nb_reuses: int = 0
     nb_dataservices: int = 0
+    elements_titles: List[str] = None
+    elements_descriptions: List[str] = None
+    elements_tags: List[str] = None
 
     def __post_init__(self):
         if isinstance(self.created_at, str):

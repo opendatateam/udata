@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import UTC, date, datetime
 from itertools import chain
 
 from dateutil.parser import parse as parse_dt
@@ -33,6 +33,7 @@ from udata.rdf import (
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
     IANAFORMAT,
     OGC,
@@ -522,16 +523,19 @@ def spatial_from_rdf(graph):
 
             for object in term.objects():
                 if isinstance(object, Literal):
-                    if (
-                        object.datatype.__str__()
-                        == "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+                    if object.datatype in (
+                        GEOSPARQL.geoJSONLiteral,
+                        IANAFORMAT["application/vnd.geo+json"],  # older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
                         except ValueError as e:
                             log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
                             continue
-                    elif object.datatype.__str__() == "http://www.opengis.net/rdf#wktLiteral":
+                    elif object.datatype in (
+                        GEOSPARQL.wktLiteral,
+                        URIRef("http://www.opengis.net/rdf#wktLiteral"),  # old OGC prefix
+                    ):
                         try:
                             # .upper() si here because geomet doesn't support Polygon but only POLYGON
                             geojson = wkt.loads(object.toPython().strip().upper())
@@ -542,6 +546,7 @@ def spatial_from_rdf(graph):
                         continue
 
                     geojsons.append(geojson)
+
         except Exception as e:
             log.exception(
                 f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True
@@ -828,6 +833,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
+    resource.harvest.last_update = datetime.now(UTC)
 
     # :FutureHarvestModifiedAt
     resource.harvest.modified_at = safe_harvest_datetime(

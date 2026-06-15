@@ -139,6 +139,7 @@ class HarvestDatasetMetadata(EmbeddedDocument):
 class HarvestResourceMetadata(EmbeddedDocument):
     issued_at = DateTimeField()
     modified_at = DateTimeField()
+    last_update = DateTimeField()
     uri = StringField()
     dct_identifier = StringField()
 
