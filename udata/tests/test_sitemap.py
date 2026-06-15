@@ -21,6 +21,7 @@ def parse_xml(bytes):
 
 @pytest.mark.options(CDATA_BASE_URL="https://data.gouv.fr")
 @pytest.mark.options(SITEMAP_BASE_URL="https://data.gouv.fr")
+@pytest.mark.options(SITEMAP_S3_BUCKET="udata-sitemap")
 class SitemapGeneratorTest(PytestOnlyDBTestCase):
     def _generate(self, **config):
         uploaded = {}
@@ -31,14 +32,12 @@ class SitemapGeneratorTest(PytestOnlyDBTestCase):
         with patch("udata.core.sitemap.generator.store_bytes", side_effect=fake_store_bytes):
             from udata.core.sitemap.generator import generate_sitemaps
 
-            current_app.config.setdefault("SITEMAP_S3_BUCKET", "test-bucket")
-            current_app.config.update(config)
             result = generate_sitemaps()
 
         return result, uploaded
 
-    @pytest.mark.options(SITEMAP_S3_BUCKET=None)
     def test_skip_when_no_bucket(self):
+        current_app.config["SITEMAP_S3_BUCKET"] = None
         result, uploaded = self._generate()
         assert result is False
         assert len(uploaded) == 0
