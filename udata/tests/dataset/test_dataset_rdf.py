@@ -2077,35 +2077,60 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             )
             for id, xml_fragment, expected_licenses in [
                 (
-                    "uriref",
+                    "uri",
                     """
                     <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
                     """,
                     ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
                 ),
                 (
-                    "value",
+                    "uri_strict",
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    """,
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
+                ),
+                (
+                    "multiple",
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="http://creativecommons.org/licenses/by-sa/3.0/"/>
+                    </dct:license>
+                    """,
+                    [
+                        "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+                        "http://creativecommons.org/licenses/by-sa/3.0/",
+                    ],
+                ),
+                # degenerate cases
+                (
+                    "lenient_value",
                     """
                     <dct:license>License from value</dct:license>
                     """,
                     ["License from value"],
                 ),
                 (
-                    "label",
+                    "lenient_label",
                     """
                     <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License from label</rdfs:label>
-                       </rdf:Description>
+                      <rdf:Description>
+                        <rdfs:label>License from label</rdfs:label>
+                      </rdf:Description>
                     </dct:license>
                     """,
                     ["License from label"],
                 ),
                 (
-                    "uriref-precedence",
+                    "lenient_uri_wins",
                     """
                     <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
-                       No conditions apply to access and use.
+                      License from value
                     </dct:license>
                     """,
                     [
@@ -2113,7 +2138,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     ],
                 ),
                 (
-                    "resource",
+                    "lenient_label_wins",
                     """
                        <dct:license rdf:resource="http://example.org/custom-license"/>
                     </rdf:Description>
@@ -2123,29 +2148,16 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     """,
                     ["License from resource"],
                 ),
-                (
-                    "multiple",
-                    """
-                    <dct:license>License 1</dct:license>
-                    <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License 2</rdfs:label>
-                       </rdf:Description>
-                    </dct:license>
-                    """,
-                    ["License 1", "License 2"],
-                ),
             ]
         ],
     )
-    def test_licenses_from_rdf(self, xml: str, expected_licenses: set[str]):
+    def test_license_from_rdf(self, xml: str, expected_licenses: set[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
         licenses = licenses_from_rdf(dataset)
         assert licenses == expected_licenses
 
-    # TODO
     @pytest.mark.parametrize(
         "xml, expected_access_rights",
         [
@@ -2153,7 +2165,95 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                 XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_access_rights, id=id
             )
             for id, xml_fragment, expected_access_rights in [
-                # TODO
+                (
+                    "uri",
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                ),
+                (
+                    "uri_strict",
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement rdf:about="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                ),
+                (
+                    "text",
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights from statement</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from statement"],
+                ),
+                (
+                    "multiple",
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 1</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 2</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights 1", "Access rights 2"],
+                ),
+                # degenerate cases
+                (
+                    "lenient_value",
+                    """
+                    <dct:accessRights>Access rights from value</dct:accessRights>
+                    """,
+                    ["Access rights from value"],
+                ),
+                (
+                    "lenient_label",
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                ),
+                (
+                    "lenient_uri_wins",
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">
+                      Access rights from value
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                ),
+                (
+                    "lenient_label_wins",
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <dct:description>Access rights from description</dct:description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                ),
             ]
         ],
     )
@@ -2169,7 +2269,64 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
         [
             pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_rights, id=id)
             for id, xml_fragment, expected_rights in [
-                # TODO
+                (
+                    "text",
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights from statement</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights from statement"],
+                ),
+                (
+                    "multiple",
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 1</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 2</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights 1", "Rights 2"],
+                ),
+                # degenerate cases
+                (
+                    "lenient_value",
+                    """
+                    <dct:rights>Rights from value</dct:rights>
+                    """,
+                    ["Rights from value"],
+                ),
+                (
+                    "lenient_label",
+                    """
+                    <dct:rights>
+                       <rdf:Description>
+                          <rdfs:label>Rights from label</rdfs:label>
+                       </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                ),
+                (
+                    "lenient_label_wins",
+                    """
+                    <dct:rights>
+                      <rdf:Description>
+                        <dct:description>Rights from description</dct:description>
+                        <rdfs:label>Rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                ),
             ]
         ],
     )
