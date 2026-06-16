@@ -262,13 +262,23 @@ def check_files(delete, days, output, yes):
     header("Deleting orphan files")
     deleted = 0
     errors = 0
-    for fs_filename in orphans:
-        try:
-            storage.delete(fs_filename)
-            deleted += 1
-        except Exception as e:  # noqa  (never stop on a single failure)
-            log.error("Unable to delete %s: %s", fs_filename, e)
-            errors += 1
+
+    def delete_info(_item):
+        return f"{deleted:,} deleted, {errors:,} failed"
+
+    with click.progressbar(
+        orphans,
+        length=len(orphans),
+        label="Deleting",
+        item_show_func=delete_info,
+    ) as bar:
+        for fs_filename in bar:
+            try:
+                storage.delete(fs_filename)
+                deleted += 1
+            except Exception as e:  # noqa  (never stop on a single failure)
+                log.error("Unable to delete %s: %s", fs_filename, e)
+                errors += 1
     success(f"Deleted {deleted:,} files, {errors:,} failed")
 
 
