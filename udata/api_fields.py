@@ -182,6 +182,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         href = info.get("href", None)
         if href:
+            href_extra = info.get("href_extra", None)
+            # `href_total` lets a field provide the total from a stored counter
+            # instead of `len(o[key])`, which would load (and dereference) the
+            # whole list just to count it.
+            href_total = info.get("href_total", None)
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
@@ -189,7 +194,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         "rel": "subsection",
                         "href": href(o),
                         "type": "GET",
-                        "total": len(o[key]),
+                        "total": href_total(o) if href_total else len(o[key]),
+                        **(href_extra(o) if href_extra else {}),
                     },
                     description="Visit this API link to see the list.",
                     **kwargs,
@@ -233,10 +239,25 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 nested_info,
             )
 
+        # A `ListField(ReferenceField)` may hold dangling `DBRef`s pointing to
+        # deleted documents (e.g. a hard delete that bypassed `reverse_delete_rule`).
+        # MongoEngine leaves them as raw `DBRef`s on access, which crashes nested
+        # marshalling, so we filter them out at read time.
+        inner_is_reference = isinstance(
+            field.field,
+            mongo_fields.ReferenceField | mongo_fields.LazyReferenceField,
+        )
+
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
             # by the `href` code above.
             def constructor_read(**kwargs):
+                if inner_is_reference and "attribute" not in kwargs:
+                    kwargs["attribute"] = lambda obj, _key=key: [
+                        ref
+                        for ref in (getattr(obj, _key, None) or [])
+                        if not isinstance(ref, DBRef)
+                    ]
                 return restx_fields.List(field_read, **kwargs)
 
         # But we want to keep the `constructor_write` to allow changing the list.
@@ -250,19 +271,32 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
         if field.choices:
-            generic_fields = {}
-            for cls in field.choices:
-                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                generic_fields[cls.__name__] = convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having GenericReferenceField() we'll create fields for each
-                    # of the subclasses with ReferenceField(Organization)…
-                    mongoengine.fields.ReferenceField(cls),
-                    info,
-                )
+            # When the user supplies a single shared `nested_fields` model (e.g.
+            # `api.model_reference`), expose it as a `Nested` so X-Fields masks can
+            # traverse the reference (e.g. `element{id}`). Without this, the field
+            # is exposed as a `Raw`-based GenericField and any nested mask fails
+            # with "Mask is inconsistent with model".
+            shared_nested_fields = info.get("nested_fields")
+            if shared_nested_fields is not None:
 
-            def constructor_read(**kwargs):
-                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+                def constructor_read(**kwargs):
+                    return restx_fields.Nested(shared_nested_fields, **kwargs)
+            else:
+                generic_fields = {}
+                for cls in field.choices:
+                    cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                    generic_fields[cls.__name__] = convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having GenericReferenceField() we'll create fields for each
+                        # of the subclasses with ReferenceField(Organization)…
+                        mongoengine.fields.ReferenceField(cls),
+                        info,
+                    )
+
+                def constructor_read(**kwargs):
+                    return GenericField(
+                        {k: v[0].model for k, v in generic_fields.items()}, **kwargs
+                    )
 
             def constructor_write(**kwargs):
                 return restx_fields.Nested(lazy_reference, **kwargs)
@@ -330,6 +364,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
             )
 
+    elif isinstance(field, mongo_fields.MultiPolygonField):
+        constructor = restx_fields.Raw
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
@@ -671,6 +707,8 @@ class _FieldKwargs(TypedDict, total=False):
     size: int | None
     is_thumbnail: bool | None
     href: Callable | None
+    href_extra: Callable | None
+    href_total: Callable | None
     generic: bool | None
     generic_key: str | None
     convert_to: Callable | None
@@ -723,6 +761,8 @@ def field(
     size: int | None = None,
     is_thumbnail: bool | None = None,
     href: Callable | None = None,
+    href_extra: Callable | None = None,
+    href_total: Callable | None = None,
     generic: bool | None = None,
     generic_key: str | None = None,
     convert_to: Callable | None = None,
@@ -761,6 +801,11 @@ def field(
         size: Image size for thumbnails
         is_thumbnail: If True, this is a thumbnail field
         href: Function to generate API link
+        href_extra: Function returning extra keys to merge into the href object
+            (e.g. counters by status). Only applies when used together with `href`.
+        href_total: Function returning the list total, used instead of `len(value)`
+            so the (potentially huge / dereferencing) list isn't loaded just to be
+            counted. Only applies when used together with `href`.
         generic: If True, handle generic embedded documents
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX
@@ -839,18 +884,27 @@ def patch(obj: _T, request) -> _T:
                 model_attribute, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
             ):
                 value = wrap_primary_key(key, model_attribute, value)
-            elif isinstance(
+            elif value and isinstance(
                 model_attribute,
                 (
                     mongoengine.fields.GenericReferenceField,
                     mongoengine.fields.GenericLazyReferenceField,
                 ),
             ):
+                if not isinstance(value, dict) or "class" not in value or "id" not in value:
+                    raise FieldValidationError(
+                        message="Expected an object with `class` and `id` keys",
+                        field=key,
+                    )
+                try:
+                    document_type = db.resolve_model(value["class"])
+                except ValueError as e:
+                    raise FieldValidationError(message=str(e), field=key)
                 value = wrap_primary_key(
                     key,
                     model_attribute,
                     value["id"],
-                    document_type=db.resolve_model(value["class"]),
+                    document_type=document_type,
                 )
             elif value and isinstance(
                 model_attribute,
@@ -884,6 +938,40 @@ def patch(obj: _T, request) -> _T:
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
+
+            # Validate `choices` here because patch() never goes through
+            # MongoEngine's validate(): without this, an invalid choice would only
+            # be caught at save() time — and not at all on embedded documents that
+            # we patch but never save (e.g. ValidateSourceAPI builds a
+            # HarvestSourceValidation just to read its `state` and branch). The
+            # ideal would be to call obj.clean()/validate() after patching, but
+            # in udata clean() currently bundles pure validation with stateful
+            # side effects (activity tracking, spam detection, …) that must not
+            # run without an actual save. Same story for regex / max_length /
+            # min_value / max_value / custom `validation` callables: those are
+            # also silently skipped by patch() today and should be reinstated
+            # once clean() is split into a pure-validation half and a stateful
+            # half. Until then, this duplication of MongoEngine's `choices`
+            # logic is the minimal fix for the most common bug class (invalid
+            # enum values silently accepted).
+            # Restricted to StringField on purpose: GenericReferenceField &
+            # ReferenceField also accept `choices` but those constrain the
+            # allowed *document classes*, not the value itself, and are
+            # validated separately at save() time.
+            choices = getattr(model_attribute, "choices", None)
+            if (
+                value is not None
+                and choices
+                and isinstance(model_attribute, mongo_fields.StringField)
+            ):
+                valid_choices = [
+                    choice[0] if isinstance(choice, (list, tuple)) else choice for choice in choices
+                ]
+                if value not in valid_choices:
+                    raise FieldValidationError(
+                        field=key,
+                        message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
+                    )
 
             # Run checks if value is modified.
             # We run checks here (before setattr) to compare old vs new value.

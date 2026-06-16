@@ -15,6 +15,7 @@ from udata.harvest.filters import (
     force_list,
     is_url,
     normalize_string,
+    normalize_tag,
     taglist,
     to_date,
 )
@@ -167,7 +168,7 @@ class MaafBackend(BaseBackend):
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
         dataset.description = metadata["notes"]
         dataset.private = metadata["private"]
-        dataset.tags = sorted(set(metadata["tags"]))
+        dataset.tags = sorted({normalize_tag(t) for t in metadata["tags"] if normalize_tag(t)})
 
         if metadata.get("license_id"):
             dataset.license = License.objects.get(id=metadata["license_id"])
@@ -191,7 +192,7 @@ class MaafBackend(BaseBackend):
                 dataset.spatial.zones = [ZONES[metadata["territorial_coverage_code"]]]
 
         dataset.resources = []
-        cle = get_by(metadata["resources"], "format", "cle")
+        cle = get_by(metadata["resources"], format="cle")
         for row in metadata["resources"]:
             if row["format"] == "cle":
                 continue

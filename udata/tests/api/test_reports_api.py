@@ -129,6 +129,27 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
 
+    def test_reports_api_create_with_user_subject(self):
+        user = UserFactory()
+
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "subject": {
+                    "class": "User",
+                    "id": user.id,
+                },
+                "message": "Spam profile",
+                "reason": REASON_SPAM,
+            },
+        )
+        self.assert201(response)
+
+        report = Report.objects.first()
+        self.assertEqual(report.subject.pk, user.id)
+        self.assertEqual(report.reason, REASON_SPAM)
+        self.assertEqual(report.subject_label, user.slug)
+
     def test_reports_api_list_with_raw_dbref_subject(self):
         """Listing reports should not crash when the subject was stored as a raw DBRef
         (e.g. from the SpamInfo migration) after the fix migration has run."""

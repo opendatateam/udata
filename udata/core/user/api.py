@@ -472,6 +472,18 @@ class UserAPI(API):
         return "", 204
 
 
+@ns.route("/<user:user>/rotate_password/", endpoint="rotate_user_password")
+@api.response(404, "User not found")
+class UserRotatePasswordAPI(API):
+    @api.secure(admin_permission)
+    @api.doc("rotate_user_password")
+    @api.response(204, "Password rotation requested")
+    def post(self, user):
+        """Force a password rotation on the user's next login and reset their current sessions."""
+        user.request_password_rotation()
+        return "", 204
+
+
 # These imports are not at the top of the file to avoid circular imports
 from udata.models import ContactPoint  # noqa
 

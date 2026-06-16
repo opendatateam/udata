@@ -1,6 +1,10 @@
+from datetime import UTC, datetime
+
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.features.transfer.factories import TransferFactory
@@ -163,6 +167,46 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         discussion2.delete()
 
         # Verify all notifications are cleaned up
+        assert Notification.objects.count() == 0
+
+    def test_dataservice_notification_cleanup_on_dataservice_delete(self):
+        """Test that notifications are cleaned up when a dataservice is deleted."""
+        # Create owner, dataset, and dataservice
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(datasets=[dataset])
+
+        # Verify notification was created (via signal on dataservice creation)
+        assert Notification.objects.count() == 1
+        notification = Notification.objects.first()
+        assert notification.user == owner
+        assert notification.details.dataservice == dataservice
+
+        # Delete the dataservice
+        dataservice.deleted_at = datetime.now(UTC)
+        dataservice.save()
+
+        # Verify notification is cleaned up (via signal)
+        assert Notification.objects.count() == 0
+
+    def test_reuse_notification_cleanup_on_reuse_delete(self):
+        """Test that notifications are cleaned up when a reuse is deleted."""
+        # Create owner, dataset, and reuse
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(datasets=[dataset])
+
+        # Verify notification was created (via signal on reuse creation)
+        assert Notification.objects.count() == 1
+        notification = Notification.objects.first()
+        assert notification.user == owner
+        assert notification.details.reuse == reuse
+
+        # Delete the reuse
+        reuse.deleted = datetime.now(UTC)
+        reuse.save()
+
+        # Verify notification is cleaned up (via signal)
         assert Notification.objects.count() == 0
 
     def test_discussion_notification_survives_message_delete(self):

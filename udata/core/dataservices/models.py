@@ -33,6 +33,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spam.models import SpamMixin
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
@@ -187,6 +188,7 @@ def filter_by_reuse(base_query, filter_value):
 )
 class Dataservice(
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DataserviceBadgeMixin,
@@ -211,6 +213,12 @@ class Dataservice(
     on_delete = Signal()
 
     verbose_name = _("dataservice")
+
+    def fields_to_check_for_spam(self):
+        return {"title": self.title, "description": self.description}
+
+    def spam_is_whitelisted(self) -> bool:
+        return self.organization and self.organization.certified
 
     def __str__(self):
         return self.title or ""
@@ -389,3 +397,4 @@ class Dataservice(
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
+post_save.connect(SpamMixin.post_save, sender=Dataservice)

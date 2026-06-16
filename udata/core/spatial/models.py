@@ -5,6 +5,7 @@ from mongoengine.fields import IntField, ListField, MultiPolygonField, Reference
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
+from udata.api_fields import field, generate_fields
 from udata.app import cache
 from udata.core.metrics.models import WithMetrics
 from udata.i18n import _, get_locale, language
@@ -135,12 +136,13 @@ def get_spatial_admin_levels():
 admin_levels = LocalProxy(get_spatial_admin_levels)
 
 
+@generate_fields()
 class SpatialCoverage(EmbeddedDocument):
     """Represent a spatial coverage as a list of territories and/or a geometry."""
 
-    geom = MultiPolygonField()
-    zones = ListField(ReferenceField(GeoZone))
-    granularity = StringField(default="other")
+    geom = field(MultiPolygonField())
+    zones = field(ListField(ReferenceField(GeoZone)))
+    granularity = field(StringField(default="other"))
 
     @property
     def granularity_label(self):

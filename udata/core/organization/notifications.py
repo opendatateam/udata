@@ -155,7 +155,12 @@ def membership_request_notifications(user):
     notifications = []
 
     for org in orgs:
+        # Skip invitations: they are pending_requests too but the admin creates
+        # them and has nothing to handle. Email invitations also have user=None
+        # which would crash the field access below.
         for request in org.pending_requests:
+            if request.kind != "request":
+                continue
             notifications.append(
                 (
                     request.created,

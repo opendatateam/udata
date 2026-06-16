@@ -648,7 +648,7 @@ class UploadNewCommunityResources(UploadMixin, API):
 
 class ResourceMixin(object):
     def get_resource_or_404(self, dataset, id):
-        resource = get_by(dataset.resources, "id", id)
+        resource = get_by(dataset.resources, id=id)
         if not resource:
             api.abort(404, "Resource does not exist")
         return resource

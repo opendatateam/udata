@@ -102,9 +102,14 @@ class DataserviceConsumer(Dataservice):
 class TopicConsumer(Topic):
     @classmethod
     def load_from_dict(cls, data):
-        # Strip markdown from description if any
         if data.get("description"):
             data["description"] = mdstrip(data["description"])
+        elements = data.pop("elements", []) or []
+        data["elements_titles"] = [e["title"] for e in elements if e.get("title")]
+        data["elements_descriptions"] = [
+            mdstrip(e["description"]) for e in elements if e.get("description")
+        ]
+        data["elements_tags"] = [tag for e in elements for tag in (e.get("tags") or [])]
         return super().load_from_dict(data)
 
 

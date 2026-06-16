@@ -139,18 +139,33 @@ SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
 
 def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post and Site."""
+    """Remove references to a deleted object from all blocs in Post and Site.
+
+    A reference can live both at the top level of a blocs field and nested inside an
+    accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
+    Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
+    two levels are enough.
+    """
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
-    Post._get_collection().update_many(
-        {f"blocs.{ref_field}": obj_id},
-        {"$pull": {f"blocs.$[b].{ref_field}": obj_id}},
-        array_filters=[{f"b.{ref_field}": obj_id}],
-    )
-    for blocs_field in SITE_BLOCS_FIELDS:
-        Site._get_collection().update_many(
+    def purge(collection, blocs_field):
+        # Top-level blocs: <blocs_field>[].<ref_field>
+        collection.update_many(
             {f"{blocs_field}.{ref_field}": obj_id},
             {"$pull": {f"{blocs_field}.$[b].{ref_field}": obj_id}},
             array_filters=[{f"b.{ref_field}": obj_id}],
         )
+        # Blocs nested in an accordion: <blocs_field>[].items[].content[].<ref_field>
+        collection.update_many(
+            {f"{blocs_field}.items.content.{ref_field}": obj_id},
+            {"$pull": {f"{blocs_field}.$[b].items.$[].content.$[c].{ref_field}": obj_id}},
+            array_filters=[
+                {f"b.items.content.{ref_field}": obj_id},
+                {f"c.{ref_field}": obj_id},
+            ],
+        )
+
+    purge(Post._get_collection(), "blocs")
+    for blocs_field in SITE_BLOCS_FIELDS:
+        purge(Site._get_collection(), blocs_field)

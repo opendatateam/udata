@@ -5,7 +5,9 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import UTC, date, datetime
+from fractions import Fraction
+from itertools import chain
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -28,15 +30,20 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    DQV,
     EUFORMAT,
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
     IANAFORMAT,
+    OGC,
+    QUDT,
     RDFS,
     SCHEMA,
     SCV,
+    SDMXA,
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
@@ -52,10 +59,11 @@ from udata.rdf import (
     set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
+    vocabulary_key,
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode
 
-from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import OGC_SERVICE_FORMATS, DistanceUom, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -131,6 +139,12 @@ EUFREQ_ID_TO_UDATA = {
 
 # Merge order matters: we want FREQ to win over EUFREQ
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
+
+QUDT_TO_UDATA = {
+    QUDT.FT: DistanceUom.FOOT,
+    QUDT.KiloM: DistanceUom.KILOMETER,
+    QUDT.M: DistanceUom.METER,
+}
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -504,9 +518,9 @@ def temporal_from_rdf(period_of_time):
         log.warning("Unable to parse temporal coverage", exc_info=True)
 
 
-def spatial_from_rdf(graph):
+def spatial_from_rdf(resource: RdfResource) -> SpatialCoverage | None:
     geojsons = []
-    for term in graph.objects(DCT.spatial):
+    for term in resource.objects(DCT.spatial):
         try:
             # This may not be official in the norm but some ArcGis return
             # bbox as literal directly in DCT.spatial.
@@ -519,16 +533,19 @@ def spatial_from_rdf(graph):
 
             for object in term.objects():
                 if isinstance(object, Literal):
-                    if (
-                        object.datatype.__str__()
-                        == "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+                    if object.datatype in (
+                        GEOSPARQL.geoJSONLiteral,
+                        IANAFORMAT["application/vnd.geo+json"],  # older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
                         except ValueError as e:
                             log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
                             continue
-                    elif object.datatype.__str__() == "http://www.opengis.net/rdf#wktLiteral":
+                    elif object.datatype in (
+                        GEOSPARQL.wktLiteral,
+                        URIRef("http://www.opengis.net/rdf#wktLiteral"),  # old OGC prefix
+                    ):
                         try:
                             # .upper() si here because geomet doesn't support Polygon but only POLYGON
                             geojson = wkt.loads(object.toPython().strip().upper())
@@ -539,6 +556,7 @@ def spatial_from_rdf(graph):
                         continue
 
                     geojsons.append(geojson)
+
         except Exception as e:
             log.exception(
                 f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True
@@ -588,6 +606,76 @@ def spatial_from_rdf(graph):
         return None
 
 
+def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
+    # Spatial resolution refers to the level of detail of the dataset.
+    #
+    # ISO-19139 (INSPIRE) supports the following two representations:
+    # - Resolution distance [0..n]: `//gmd:MD_Resolution/gmd:distance`.
+    # - Equivalent scale [0..n]: `//gmd:MD_Resolution/gmd:equivalentScale`.
+    #
+    # GeoDCAT-AP supports the above two:
+    # - Distance [0..n]: `dcat:spatialResolutionInMeters`.
+    # - Scale [0..n]: `dqv:hasQualityMeasurement` with `dqv:isMeasurementOf` set to
+    #   `geodcatap:spatialResolutionAsScale`.
+    # plus:
+    # - Other distance units [0..n]: `dqv:isMeasurementOf` set to either:
+    #   - `geodcatap:spatialResolutionAsDistance` (configurable UOM, somewhat redundant with
+    #     `dcat:spatialResolutionInMeters`),
+    #   - `geodcatap:spatialResolutionAsAngularDistance` (angles not in ISO-19139),
+    #   - `geodcatap:spatialResolutionAsVerticalDistance` (?).
+    # - Free text [0..1]: `geodcatap:spatialResolutionAsText`.
+    #
+    # Why the 0..n cardinality?
+    # - INSPIRE TG only provide description for 0..2, with 2 being an interval of bounding values.
+    #   It is not clear if intervals only apply to distance, or to scales as well.
+    # - GeoDCAT-AP doesn't explain cardinality at all.
+    #
+    # We implement the following minimalist heuristic:
+    # - Only support INSPIRE representations (no practical examples for others so far).
+    # - Return an acceptable textual representation instead of a typed object (which would require
+    #   storing a type+value tuple).
+    # - If several representations are present, we pick distance over scale (arbitrary).
+    # - If cardinality > 1, we use the largest value we find. We don't go for the smallest to avoid
+    #   giving a false sense of precision.
+    try:
+        if resolutions_in_meters := [
+            value.toPython()
+            for value in resource.objects(DCAT.spatialResolutionInMeters)
+            if isinstance(value, Literal)
+        ]:
+            resolution = max(resolutions_in_meters)
+            return f"{resolution} {DistanceUom.METER.symbol}"
+
+        if resolutions_as_distance := [
+            (value.toPython(), unit)
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
+            and (unit := QUDT_TO_UDATA.get(obj.value(SDMXA.unitMeasure).identifier))
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = max(resolutions_as_distance, key=lambda x: x[1].in_meters(x[0]))
+            return f"{resolution[0]} {resolution[1].symbol}"
+
+        if resolutions_as_scale := [
+            value.toPython()
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = min(resolutions_as_scale)
+            # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with
+            # a fairly limited set of "round" denominator values), which hopefully survive the
+            # decimal-to-fraction conversion reasonably well.
+            # max_denominator is picked to be larger than existing scales, but still small enough
+            # that we limit the risk of non-Decimal floats causing crazy fractions:
+            # Fraction(0.00004) would otherwise return 5902958103587057/147573952589676412928
+            # instead of 1/25000.
+            return str(Fraction(resolution).limit_denominator(max_denominator=100_000_000))
+    except Exception:
+        log.warning("Unable to parse spatial resolution", exc_info=True)
+        return
+
+
 def frequency_from_rdf(term) -> UpdateFrequency | None:
     if isinstance(term, str):
         try:
@@ -608,41 +696,56 @@ def mime_from_rdf(resource):
     mime = rdf_value(resource, DCAT.mediaType, unwrap=[RDFS.label])
     if not mime:
         return
-    if IANAFORMAT in mime:
-        return "/".join(mime.split("/")[-2:])
+    if key := vocabulary_key(mime, IANAFORMAT):
+        return key
     if isinstance(mime, str):
         return mime
 
 
-def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format, unwrap=[RDFS.label])
-    if not format:
-        return
-    if EUFORMAT in format or IANAFORMAT in format:
-        _, _, format = namespace_manager.compute_qname(URIRef(format))
+def format_from_rdf(resource: RdfResource):
+    """
+    Return what udata considers to be the format.
+    - For services, return the service protocol if available, otherwise the distribution format.
+    - For other distribution types, return the distribution format.
+    """
+    # DCAT.accessService is 0..n, but since other 0..n distribution properties such as accessURL or
+    # downloadURL are treated as 0..1, we do the same here to stay consistent.
+    if service := resource.value(DCAT.accessService):
+        # Support both GEODCAT.serviceProtocol (GeoDCAT-AP 3+) and DCT.conformsTo (DCAT and older
+        # GeoDCAT-AP) mappings. Using chain() instead of objects(...|...) to enforce deterministic
+        # order.
+        for standard in chain(
+            service.objects(GEODCAT.serviceProtocol), service.objects(DCT.conformsTo)
+        ):
+            if key := vocabulary_key(standard.identifier, OGC):
+                return key.lower()
+
+    if format := rdf_value(resource, DCT.format, unwrap=[RDFS.label]):
+        if key := vocabulary_key(format, EUFORMAT):
+            return key.lower()
+        if key := vocabulary_key(format, IANAFORMAT):
+            return key.split("/")[-1].lower()
         return format.lower()
-    return format.lower()
 
 
-def title_from_rdf(rdf, url):
+def title_from_rdf(resource: RdfResource, url: str | None = None, format: str | None = None) -> str:
     """
     Try to extract a distribution title from a property.
     As it's not a mandatory property,
     it fallback on building a title from the URL
     then the format and in last ressort a generic resource name.
     """
-    title = rdf_value(rdf, DCT.title)
+    title = rdf_value(resource, DCT.title)
     if title:
         return title
     if url:
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
-        if fmt:
-            return i18n._("{format} resource").format(format=fmt.lower())
+        if format:
+            return i18n._("{format} resource").format(format=format.lower())
         else:
             return i18n._("Nameless resource")
 
@@ -741,19 +844,35 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        if format in OGC_SERVICE_FORMATS:
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
+            # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
+            # correct resource.
+            # GeoNetwork uses the layer name as title, so it should be stable enough that we can
+            # use it in our composite key. If the layer name changes, it's OK to treat it as a
+            # different resource.
+            # We however don't use the title for other types of resources, because it is more
+            # likely to be editorialized, and therefore change over time while still describing
+            # the same resource.
+            fields["title"] = title
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
+
     resource.filetype = "remote"
-    resource.title = title_from_rdf(distrib, url)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
-    resource.format = format_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
         resource.schema = schema
@@ -778,6 +897,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+
     if is_additionnal:
         resource.type = "other"
     elif distrib.value(DCAT.accessService):
@@ -793,6 +913,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
+    resource.harvest.last_update = datetime.now(UTC)
 
     # :FutureHarvestModifiedAt
     resource.harvest.modified_at = safe_harvest_datetime(
@@ -846,6 +967,10 @@ def dataset_from_rdf(
     spatial_coverage = spatial_from_rdf(d)
     if spatial_coverage:
         dataset.spatial = spatial_coverage
+
+    spatial_resolution = spatial_resolution_from_rdf(d)
+    if spatial_resolution:
+        add_dcat_extra(dataset, "spatial_resolution", spatial_resolution)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

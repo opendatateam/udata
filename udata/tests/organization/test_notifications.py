@@ -36,6 +36,27 @@ class OrganizationNotificationsTest(PytestOnlyDBTestCase):
         assert details["user"]["fullname"] == applicant.fullname
         assert details["user"]["avatar"] == str(applicant.avatar)
 
+    def test_pending_membership_requests_ignores_invitations(self):
+        # Pending invitations (especially email ones with user=None) should
+        # not appear in admin notifications: the admin created them, and
+        # accessing request.user.id would crash on email invitations.
+        admin = UserFactory()
+        applicant = UserFactory()
+        actual_request = MembershipRequest(user=applicant, comment="test", kind="request")
+        email_invitation = MembershipRequest(
+            user=None, email="invited@example.org", kind="invitation"
+        )
+        OrganizationFactory(
+            members=[Member(user=admin, role="admin")],
+            requests=[actual_request, email_invitation],
+        )
+
+        notifications = membership_request_notifications(admin)
+        assert len(notifications) == 1
+        _dt, details = notifications[0]
+        assert details["id"] == actual_request.id
+        assert details["user"]["id"] == applicant.id
+
 
 class MembershipRequestNotificationTest(DBTestCase):
     def test_notification_created_for_admins_only(self):

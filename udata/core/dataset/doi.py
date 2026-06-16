@@ -1,5 +1,5 @@
-from flask import current_app
 import requests
+from flask import current_app
 from requests.auth import HTTPBasicAuth
 
 from udata.models import Dataset
