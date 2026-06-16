@@ -34,12 +34,21 @@ from .models import (
 __all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
 
 # Fields computed by the server at upload time for resources hosted on our
-# file storage. They must not be overridden by API clients: a client sending
-# stale metadata (e.g. fetched before a new file upload) would otherwise
-# overwrite the values describing the currently hosted file.
+# file storage (see `handle_upload`). They must not be overridden by API
+# clients: a client sending stale metadata (e.g. fetched before a new file
+# upload) would otherwise overwrite the values describing the currently hosted
+# file. None of these fields are editable from the admin front for a hosted
+# file: they are only sent for `remote` resources.
 # Same reasoning as the `url` protection from
 # https://github.com/opendatateam/udata/issues/2544
-HOSTED_RESOURCE_PROTECTED_FIELDS = ("filetype", "url", "checksum", "filesize")
+HOSTED_RESOURCE_PROTECTED_FIELDS = (
+    "filetype",
+    "url",
+    "checksum",
+    "filesize",
+    "mime",
+    "format",
+)
 
 
 class ChecksumForm(ModelForm):
