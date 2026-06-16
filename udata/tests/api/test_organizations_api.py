@@ -271,7 +271,10 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert "blocs" not in response.json
 
     def test_blocs_returned_with_x_fields(self):
-        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello", title="Welcome")])
+        org = OrganizationFactory(
+            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
+        )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
@@ -281,6 +284,72 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert response.json["blocs"][0]["class"] == "MarkdownBloc"
         assert response.json["blocs"][0]["title"] == "Welcome"
         assert response.json["blocs"][0]["content"] == "Hello"
+
+    def test_draft_blocs_hidden_from_public(self):
+        """Without a publication date, blocs are a draft and never shown to the public."""
+        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello", title="Welcome")])
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        assert response.json["blocs"] == []
+
+    def test_scheduled_blocs_hidden_from_public(self):
+        """A future publication date keeps the blocs hidden from the public until reached."""
+        org = OrganizationFactory(
+            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            blocs_published_at=datetime(2100, 1, 1, tzinfo=UTC),
+        )
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        assert response.json["blocs"] == []
+
+    def test_draft_blocs_visible_to_admin(self):
+        """Editors always see the blocs so they can prepare and schedule the edito."""
+        user = self.login()
+        org = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+        )
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        assert len(response.json["blocs"]) == 1
+        assert response.json["blocs"][0]["title"] == "Welcome"
+
+    def test_draft_blocs_hidden_from_editor(self):
+        """Only organization administrators see draft blocs: an editor (who cannot edit
+        the organization) is treated like the public and must not see them."""
+        user = self.login()
+        org = OrganizationFactory(
+            members=[Member(user=user, role="editor")],
+            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+        )
+        response = self.get(
+            url_for("api.organization", org=org),
+            headers={"X-Fields": "{*}"},
+        )
+        assert200(response)
+        assert response.json["blocs"] == []
+
+    def test_admin_can_set_blocs_published_at(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data = org.to_dict()
+        data["blocs"] = [{"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"}]
+        data["blocs_published_at"] = "2020-01-01T00:00:00+00:00"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.blocs_published_at is not None
+        assert org.blocs_are_published is True
 
     def test_admin_can_update_blocs(self):
         user = self.login()
@@ -340,7 +409,8 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                         )
                     ],
                 )
-            ]
+            ],
+            blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self.get(
             url_for("api.organization", org=org),
