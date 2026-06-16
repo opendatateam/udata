@@ -28,7 +28,7 @@ def update_dataservices_metrics(document, **kwargs):
 
 
 @Owned.on_owner_change.connect
-def update_org_metrics(document, previous):
+def update_org_metrics(document, previous, **kwargs):
     if not isinstance(previous, Organization):
         return
     if isinstance(document, Dataset):
