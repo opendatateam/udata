@@ -183,34 +183,56 @@ def check_files(delete, days, output, yes):
     referenced = collect_referenced_filenames()
     success(f"{len(referenced)} files referenced in database")
 
-    # 2. Single cross-referencing pass over the storage. A first cheap pass only
-    #    counts files (directory metadata, no content read) so the progress bar
-    #    can show a percentage and an ETA.
+    # 2. Count files first (cheap directory metadata pass, no content read) so
+    #    the scan progress bar below can show a percentage and an ETA.
     header("Counting files on storage")
     total = sum(1 for _ in storage.list_files())
     echo(white(f"{total:,} files to scan"))
 
+    # 3. Cross-reference the storage against the database. This is pure set
+    #    logic (no filesystem stat), so it stays backend-agnostic: a file on
+    #    storage referenced by nothing is an orphan candidate; a reference still
+    #    left over once the whole walk is done points to a missing file.
+    header("Scanning storage")
+    orphan_candidates = []
+
+    def scan_info(_item):
+        return f"{len(orphan_candidates):,} orphan candidates"
+
+    with click.progressbar(
+        storage.list_files(),
+        length=total,
+        label="Scanning",
+        item_show_func=scan_info,
+    ) as bar:
+        for fs_filename in bar:
+            if fs_filename in referenced:
+                referenced.discard(fs_filename)
+            else:
+                orphan_candidates.append(fs_filename)
+
+    broken_references = referenced
+
+    # 4. Stat only the orphan candidates (a small subset) to apply the --days
+    #    protection and measure reclaimable space. This is the only step that
+    #    needs direct filesystem access, hence the local-backend requirement
+    #    checked above.
     cutoff = datetime.now() - timedelta(days=days)
     orphans = []
     orphans_size = 0
     skipped_recent = 0
 
-    def progress_info(_item):
+    def check_info(_item):
         return f"{len(orphans):,} orphans, {human_size(orphans_size)}"
 
-    header("Scanning storage")
+    header("Checking orphan candidates")
     with click.progressbar(
-        storage.list_files(),
-        length=total,
-        label="Scanning",
-        item_show_func=progress_info,
+        orphan_candidates,
+        length=len(orphan_candidates),
+        label="Checking",
+        item_show_func=check_info,
     ) as bar:
         for fs_filename in bar:
-            if fs_filename in referenced:
-                # Mark as seen; whatever stays in `referenced` is a broken reference.
-                referenced.discard(fs_filename)
-                continue
-
             try:
                 stat = os.stat(storage.path(fs_filename))
             except FileNotFoundError:
@@ -223,9 +245,7 @@ def check_files(delete, days, output, yes):
                 orphans.append(fs_filename)
                 orphans_size += stat.st_size
 
-    broken_references = referenced
-
-    # 3. Report.
+    # 5. Report.
     header("Result")
     echo(white(f"Files scanned on storage: {total:,}"))
     echo(white(f"Orphan files: {len(orphans):,} ({human_size(orphans_size)} reclaimable)"))
