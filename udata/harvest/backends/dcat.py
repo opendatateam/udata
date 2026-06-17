@@ -301,6 +301,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
     <csw:GetRecords xmlns:apiso="http://www.opengis.net/cat/csw/apiso/1.0"
                     xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
+                    xmlns:gmd="http://www.isotc211.org/2005/gmd"
                     service="CSW" version="2.0.2" outputFormat="application/xml"
                     resultType="results" startPosition="{start}" maxRecords="25"
                     outputSchema="{output_schema}">
@@ -310,19 +311,19 @@ class BaseCswDcatBackend(DcatBackend, ABC):
           <ogc:Filter>
             <ogc:Or>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
                 <ogc:Literal>dataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
                 <ogc:Literal>nonGeographicDataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
                 <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
                 <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
             </ogc:Or>
@@ -330,7 +331,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
-            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
+            <ogc:PropertyName>apiso:Identifier</ogc:PropertyName>
             <ogc:SortOrder>ASC</ogc:SortOrder>
           </ogc:SortProperty>
         </ogc:SortBy>
