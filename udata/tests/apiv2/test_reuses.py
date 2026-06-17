@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
@@ -33,6 +34,19 @@ class ReuseSearchAPIV2Test(APITestCase):
         assert data["datasets"]["rel"] == "subsection"
         assert data["datasets"]["total"] == 99
         assert str(reuse.id) in data["datasets"]["href"]
+
+    def test_reuse_search_exposes_dataservices_link(self):
+        """`dataservices` is exposed as a subsection link, like `datasets`. Its
+        `total` is counted with `len()` (dataservices have no stored counter)."""
+        reuse = VisibleReuseFactory(dataservices=DataserviceFactory.create_batch(2))
+
+        response = self.get(url_for("apiv2.reuse_search"))
+        assert200(response)
+        data = response.json["data"][0]
+        assert data["dataservices"]["rel"] == "subsection"
+        assert data["dataservices"]["type"] == "GET"
+        assert data["dataservices"]["total"] == 2
+        assert str(reuse.id) in data["dataservices"]["href"]
 
     def test_search_returns_400_when_pagination_exceeds_es_max_result_window(self):
         response = self.get("/api/2/reuses/search/?page=8925&page_size=20")
@@ -101,6 +115,48 @@ class ReuseListAPIV2Test(APITestCase):
         assert data["datasets"]["rel"] == "subsection"
         assert data["datasets"]["total"] == 0
         assert data["datasets"]["href"]
+
+    def test_reuse_list_dataservices_link(self):
+        """`dataservices` is exposed as a subsection link, like `datasets`."""
+        reuse = VisibleReuseFactory(dataservices=DataserviceFactory.create_batch(3))
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        data = response.json["data"][0]
+        assert data["dataservices"]["rel"] == "subsection"
+        assert data["dataservices"]["type"] == "GET"
+        assert data["dataservices"]["total"] == 3
+        assert str(reuse.id) in data["dataservices"]["href"]
+
+    def test_reuse_list_dataservices_link_filters_to_reuse(self):
+        """Following the `dataservices.href` returns exactly the reuse
+        dataservices. Like the datasets test, this follows the link end-to-end to
+        guard the filter wiring, not just the presence of the id in the URL."""
+        reuse_dataservices = DataserviceFactory.create_batch(2)
+        VisibleReuseFactory(dataservices=reuse_dataservices)
+        other_dataservice = DataserviceFactory()  # not linked to the reuse
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        href = response.json["data"][0]["dataservices"]["href"]
+
+        dataservices_response = self.get(href)
+        assert200(dataservices_response)
+        returned_ids = {d["id"] for d in dataservices_response.json["data"]}
+        assert returned_ids == {str(d.id) for d in reuse_dataservices}
+        assert str(other_dataservice.id) not in returned_ids
+
+    def test_reuse_list_dataservices_link_when_empty(self):
+        """A reuse without dataservices still exposes a valid subsection link with
+        a `total` of 0."""
+        VisibleReuseFactory(dataservices=[])
+
+        response = self.get(url_for("apiv2.reuses"))
+        assert200(response)
+        data = response.json["data"][0]
+        assert data["dataservices"]["rel"] == "subsection"
+        assert data["dataservices"]["total"] == 0
+        assert data["dataservices"]["href"]
 
     def test_reuse_list_exposes_organization(self):
         """References other than `datasets` (e.g. organization) are still

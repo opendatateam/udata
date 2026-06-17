@@ -40,6 +40,27 @@ reuse_fields = apiv2.clone(
             },
             description="Link to the reuse datasets",
         ),
+        "dataservices": fields.Raw(
+            attribute=lambda o: {
+                "rel": "subsection",
+                "href": url_for(
+                    "api.dataservices",
+                    reuse=o.id,
+                    page=1,
+                    page_size=DEFAULT_PAGE_SIZE,
+                    _external=True,
+                ),
+                "type": "GET",
+                # Same href pattern as `datasets` for coherence. Unlike datasets,
+                # dataservices have no stored counter, so the total is computed
+                # with `len()`: in the listing it is free thanks to
+                # `no_dereference()`, and dataservices are lightweight (no
+                # embedded resources), so dereferencing the few linked ones in
+                # the search path is cheap.
+                "total": len(o.dataservices),
+            },
+            description="Link to the reuse dataservices",
+        ),
     },
 )
 
