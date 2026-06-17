@@ -1058,6 +1058,28 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert Follow.objects.following(user).count() == 0
         assert Follow.objects.followers(user).count() == 0
 
+    def test_suggest_organizations_without_count_for_has_null_count(self):
+        """Without count_for the endpoint stays the plain Mongo suggest."""
+        OrganizationFactory(name="plain-org")
+        response = self.get(url_for("api.suggest_organizations", q="plain", size=5))
+        assert200(response)
+        assert response.json[0]["name"] == "plain-org"
+        assert response.json[0]["matching_count"] is None
+
+    def test_suggest_organizations_count_for_without_search_service(self):
+        """With count_for but no search service, suggestions are returned without crashing."""
+        OrganizationFactory(name="degraded-org")
+        response = self.get(
+            url_for("api.suggest_organizations", q="degraded", size=5, count_for="dataset")
+        )
+        assert200(response)
+        assert response.json[0]["name"] == "degraded-org"
+
+    def test_suggest_organizations_invalid_count_for(self):
+        """count_for only accepts known model kinds."""
+        response = self.get(url_for("api.suggest_organizations", q="x", size=5, count_for="banana"))
+        assert response.status_code == 400
+
     def test_suggest_organizations_api(self):
         """It should suggest organizations"""
         for i in range(3):

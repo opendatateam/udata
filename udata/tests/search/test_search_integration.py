@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from flask import url_for
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
@@ -658,3 +659,60 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "DS tagged" in titles
         assert "DS other" not in titles
+
+    def test_suggest_organizations_with_dataset_count(self):
+        """count_for=dataset annotates each suggestion and pushes empty orgs to the end."""
+        org_two = OrganizationFactory(name="Count Alpha")
+        org_one = OrganizationFactory(name="Count Beta")
+        OrganizationFactory(name="Count Empty")
+        DatasetFactory(organization=org_two)
+        DatasetFactory(organization=org_two)
+        DatasetFactory(organization=org_one)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Count", size=10, count_for="dataset")
+        )
+        self.assert200(response)
+        counts = {org["name"]: org["matching_count"] for org in response.json}
+        assert counts == {"Count Alpha": 2, "Count Beta": 1, "Count Empty": 0}
+        # The empty organization is demoted to the end, the others keep their ranking.
+        assert response.json[-1]["name"] == "Count Empty"
+
+    def test_suggest_organizations_count_scoped_by_filter(self):
+        """The count respects the count_filter.* search context."""
+        org = OrganizationFactory(name="Scoped Org")
+        DatasetFactory(organization=org, tags=["transport"])
+        DatasetFactory(organization=org, tags=["sante"])
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Scoped",
+                size=10,
+                count_for="dataset",
+                **{"count_filter.tag": "transport"},
+            )
+        )
+        self.assert200(response)
+        assert response.json[0]["name"] == "Scoped Org"
+        assert response.json[0]["matching_count"] == 1
+
+    def test_suggest_organizations_dataservice_count(self):
+        """count_for=dataservice replaces the old "orgs with at least one API" flag."""
+        org_api = OrganizationFactory(name="Api Provider")
+        OrganizationFactory(name="Api Nothing")
+        DataserviceFactory(organization=org_api)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Api", size=10, count_for="dataservice")
+        )
+        self.assert200(response)
+        counts = {org["name"]: org["matching_count"] for org in response.json}
+        assert counts == {"Api Provider": 1, "Api Nothing": 0}
+        assert response.json[-1]["name"] == "Api Nothing"

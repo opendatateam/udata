@@ -99,5 +99,13 @@ org_suggestion_fields = api.model(
             size=BIGGEST_LOGO_SIZE, description="The organization logo URL", readonly=True
         ),
         "page": fields.String(description="The organization web page URL", readonly=True),
+        "matching_count": fields.Integer(
+            description=(
+                "Number of objects (set by the `count_for` param) owned by this "
+                "organization and matching the `count_filter.*` search. Null unless "
+                "`count_for` was requested."
+            ),
+            readonly=True,
+        ),
     },
 )

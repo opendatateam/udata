@@ -268,6 +268,52 @@ def configure_indices(prefix):
             cls._index._name = cls.Index.name
 
 
+def organization_count_facet(search, get_filters_except, include_terms):
+    """Count-only mode for the organization facet (used by the organization suggest).
+
+    Instead of running a full search (hits + every facet), we run an aggregation-only
+    request (`size: 0`, no fetch phase) building *only* the organization `terms`
+    aggregation, restricted to `include_terms` (the exact "<id>|<name>" keys of the
+    candidate organizations). Counts stay faithful to a real search because we reuse
+    the relevance query and `get_filters_except("organization_id_with_name")` already
+    built by the caller — the organization filter itself is excluded so selecting an
+    organization doesn't zero out the others.
+
+    Alternative considered and rejected (kept here on purpose): doing everything in ES
+    with no Mongo round-trip — a single `terms` aggregation ordered by
+    `max(orga_followers)` with an `include` regex on the name. We don't because
+    `orga_followers` isn't indexed on dataservices (would need a reindex), ordering a
+    terms aggregation by a sub-metric is shard-approximate, and matching the name would
+    become a case/accent-sensitive regex. Letting Mongo own the name match + follower
+    sort (exact, uniform across models, and needed anyway for the logo/slug/page
+    payload) and using ES only for the exact counts is simpler and correct.
+    """
+    org_filters = get_filters_except("organization_id_with_name")
+    if org_filters:
+        parent = search.aggs.bucket(
+            "organization_id_with_name_filtered", "filter", filter=query.Bool(must=org_filters)
+        )
+    else:
+        parent = search.aggs
+    parent.bucket(
+        "organization_id_with_name",
+        "terms",
+        field="organization_with_id",
+        include=include_terms,
+        size=len(include_terms),
+    )
+    response = search[:0].execute()
+
+    buckets = []
+    aggregations = getattr(response, "aggregations", None)
+    if aggregations is not None:
+        container = getattr(aggregations, "organization_id_with_name_filtered", aggregations)
+        org_agg = getattr(container, "organization_id_with_name", None)
+        if org_agg is not None:
+            buckets = [{"name": b.key, "count": b.doc_count} for b in org_agg.buckets]
+    return 0, [], {"organization_id_with_name": buckets}
+
+
 class ElasticClient:
     def __init__(self, url: str, prefix: str):
         self.es = connections.create_connection(hosts=[url])
@@ -647,6 +693,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        count_organizations: Optional[List[str]] = None,
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableDataset.search()
 
@@ -821,6 +868,9 @@ class ElasticClient:
                 if key != exclude_key and filter_dict[key] is not None:
                     filters_list.append(filter_dict[key])
             return filters_list
+
+        if count_organizations is not None:
+            return organization_count_facet(search, get_filters_except, count_organizations)
 
         format_filters = get_filters_except("format_family")
         if format_filters:
@@ -1053,6 +1103,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        count_organizations: Optional[List[str]] = None,
     ) -> Tuple[int, List[dict], dict]:
         search = SearchableReuse.search()
 
@@ -1213,6 +1264,9 @@ class ElasticClient:
                     flt.append(filter_dict[k])
             return flt
 
+        if count_organizations is not None:
+            return organization_count_facet(search, get_filters_except, count_organizations)
+
         facet_fields = {
             "producer_type": ("producer_type", "producer_type"),
             "organization_id_with_name": ("organization_with_id", "organization_id_with_name"),
@@ -1343,6 +1397,7 @@ class ElasticClient:
         page_size: int,
         filters: dict,
         sort: Optional[str] = None,
+        count_organizations: Optional[List[str]] = None,
     ):
         search = SearchableDataservice.search()
 
@@ -1497,6 +1552,9 @@ class ElasticClient:
                 if k != exclude_key and filter_dict[k] is not None:
                     filters_list.append(filter_dict[k])
             return filters_list
+
+        if count_organizations is not None:
+            return organization_count_facet(search, get_filters_except, count_organizations)
 
         facet_fields = {
             "access_type": ("access_type", "access_type"),

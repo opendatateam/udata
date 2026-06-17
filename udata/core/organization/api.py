@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
-from flask import make_response, redirect, request, url_for
+from flask import current_app, make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
+from werkzeug.datastructures import MultiDict
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
@@ -32,6 +34,7 @@ from udata.core.storages.api import (
 from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.search import adapter_for, get_elastic_client
 
 from .api_fields import (
     invite_fields,
@@ -674,27 +677,116 @@ class FollowOrgAPI(FollowAPI):
     model = Organization
 
 
+# Models whose search index can back an organization suggest count (count_for=...).
+COUNT_FOR_MODELS = {"dataset": Dataset, "reuse": Reuse, "dataservice": Dataservice}
+# Prefix namespacing the context-search filters from the suggest's own params: the
+# suggest `q` is an organization name, while `count_filter.q` is the dataset/reuse/...
+# full-text query the count is scoped to (e.g. count_filter.tag=transport).
+COUNT_FILTER_PREFIX = "count_filter."
+# Upper bound on the number of organizations we send to ES in a single count request.
+# The candidate set comes from a name `icontains`, which is barely selective for short
+# queries (on data.gouv.fr "a" matches ~5000 of ~6300 orgs, "le" ~1500), so we always
+# keep only the top organizations by followers. The count ranking is therefore exact
+# whenever the name match already fits under this cap (typically queries of 3+ chars,
+# e.g. "data" matches ~90 orgs) and a best-effort top-by-followers otherwise.
+COUNT_CANDIDATE_POOL = 100
+
+
+def org_suggestion(org):
+    return {
+        "id": org.id,
+        "name": org.name,
+        "acronym": org.acronym,
+        "slug": org.slug,
+        "image_url": org.logo,
+        "page": org.self_web_url(),
+    }
+
+
+org_suggest_parser = suggest_parser.copy()
+org_suggest_parser.add_argument(
+    "count_for",
+    type=str,
+    choices=list(COUNT_FOR_MODELS),
+    location="args",
+    help=(
+        "Annotate each suggestion with the number of matching objects of this kind "
+        "(dataset, reuse or dataservice), scoped to the search passed via "
+        f"`{COUNT_FILTER_PREFIX}*` params (e.g. {COUNT_FILTER_PREFIX}tag=transport). "
+        "Empty organizations are pushed to the end, the follower ranking is kept."
+    ),
+)
+
+
+def organization_match_counts(count_for, organizations):
+    """Return {organization_id: matching_count} for the given candidate organizations.
+
+    Counts come from the search index of ``count_for`` (datasets/reuses/dataservices) —
+    the only place a search-scoped per-organization count exists — via an exact ES
+    `include` of the candidates. Returns an empty mapping when search is disabled.
+    """
+    if not organizations or not current_app.config["ELASTICSEARCH_URL"]:
+        return {}
+
+    adapter = adapter_for(COUNT_FOR_MODELS[count_for])
+
+    # Parse the count_filter.* params through the target model's own request parser so
+    # filters are validated/typed exactly like a real search on that model.
+    stripped = MultiDict()
+    for key in request.args:
+        if key.startswith(COUNT_FILTER_PREFIX):
+            for value in request.args.getlist(key):
+                stripped.add(key[len(COUNT_FILTER_PREFIX) :], value)
+    parser = adapter.as_request_parser(paginate=False, store_missing=False)
+    params = dict(parser.parse_args(req=SimpleNamespace(args=stripped)))
+
+    params.setdefault("q", "")
+    params["page"] = 1
+    # Ignored: count-only mode forces ES `size: 0`, so no hits are ever fetched.
+    params["page_size"] = 1
+    # The exact indexed `organization_with_id` terms ("<id>|<name>") to count.
+    params["count_organizations"] = [f"{org.id}|{org.name}" for org in organizations]
+
+    service = adapter.service_class(get_elastic_client())
+    _, _, _, facets = service.search(params)
+
+    # Bucket keys are "<id>|<name>"; key counts by id to stay robust to a stale name.
+    return {
+        bucket["name"].split("|", 1)[0]: bucket["count"]
+        for bucket in facets.get("organization_id_with_name", [])
+        if bucket["name"] != "all"
+    }
+
+
 @ns.route("/suggest/", endpoint="suggest_organizations")
 class OrganizationSuggestAPI(API):
     @api.doc("suggest_organizations")
-    @api.expect(suggest_parser)
+    @api.expect(org_suggest_parser)
     @api.marshal_list_with(org_suggestion_fields)
     def get(self):
         """Organizations suggest endpoint using mongoDB contains"""
-        args = suggest_parser.parse_args()
+        args = org_suggest_parser.parse_args()
         orgs = Organization.objects(
             Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
-        )
+        ).order_by(SUGGEST_SORTING)
+
+        if not args["count_for"]:
+            return [org_suggestion(org) for org in orgs.limit(args["size"])]
+
+        # Count the top organizations by followers matching the name. We cap the pool
+        # because a name `icontains` is barely selective on short queries (see
+        # COUNT_CANDIDATE_POOL); the counted set stays exact for queries narrow enough
+        # to fit under the cap.
+        candidates = list(orgs.limit(COUNT_CANDIDATE_POOL))
+        counts = organization_match_counts(args["count_for"], candidates)
+
+        # Keep the follower order (stable sort), only pushing empty organizations to the
+        # end. We never sort by count: a huge low-quality organization must not outrank a
+        # well-followed one.
+        candidates.sort(key=lambda org: counts.get(str(org.id), 0) == 0)
         return [
-            {
-                "id": org.id,
-                "name": org.name,
-                "acronym": org.acronym,
-                "slug": org.slug,
-                "image_url": org.logo,
-                "page": org.self_web_url(),
-            }
-            for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
+            {**org_suggestion(org), "matching_count": counts.get(str(org.id), 0)}
+            for org in candidates[: args["size"]]
         ]
 
 
