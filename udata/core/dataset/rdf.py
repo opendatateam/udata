@@ -52,6 +52,7 @@ from udata.rdf import (
     contact_points_from_rdf,
     contact_points_to_rdf,
     default_lang_value,
+    localname,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -805,14 +806,31 @@ def infer_inspire_access_limitation(strings: Collection[str]) -> InspireLimitati
     return None
 
 
-def add_dcat_extra(obj: DatasetOrResource, key: str, value: str | Collection) -> DatasetOrResource:
+def set_dcat_extra(obj: DatasetOrResource, property: URIRef | str, value: str | Collection):
+    key = localname(property) if isinstance(property, URIRef) else property
     if not isinstance(value, str):
         value = list(value)
     obj.extras["dcat"] = {
         **obj.extras.get("dcat", {}),
         key: value,
     }
-    return obj
+
+
+def get_dcat_extra(obj: DatasetOrResource, property: URIRef | str):
+    key = localname(property) if isinstance(property, URIRef) else property
+    if dcat := obj.extras.get("dcat"):
+        return dcat.get(key)
+
+
+def get_unanimous_dcat_extra(resources: list[Resource], property: URIRef | str):
+    if not resources:
+        return None
+    key = localname(property) if isinstance(property, URIRef) else property
+    value = get_dcat_extra(resources[0], key)
+    for resource in resources[1:]:
+        if value != get_dcat_extra(resource, key):
+            return None
+    return value
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> Resource | None:
@@ -871,15 +889,15 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> R
 
     access_rights = access_rights_from_rdf(distrib)
     if access_rights:
-        add_dcat_extra(resource, "accessRights", access_rights)
+        set_dcat_extra(resource, DCT.accessRights, access_rights)
 
     licenses = licenses_from_rdf(distrib)
     if licenses:
-        add_dcat_extra(resource, "license", licenses)
+        set_dcat_extra(resource, DCT.license, licenses)
 
     rights = rights_from_rdf(distrib)
     if rights:
-        add_dcat_extra(resource, "rights", rights)
+        set_dcat_extra(resource, DCT.rights, rights)
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -962,7 +980,7 @@ def dataset_from_rdf(
 
     spatial_resolution = spatial_resolution_from_rdf(d)
     if spatial_resolution:
-        add_dcat_extra(dataset, "spatial_resolution", spatial_resolution)
+        set_dcat_extra(dataset, "spatial_resolution", spatial_resolution)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -976,63 +994,58 @@ def dataset_from_rdf(
 
     provenances = provenances_from_rdf(d)
     if provenances:
-        add_dcat_extra(dataset, "provenance", provenances)
+        set_dcat_extra(dataset, "provenance", provenances)
 
-    # set-of-tuples will have length 1 when all distributions have the same metadata
-    resources_rights: set[tuple[str, ...]] = set()
-    resources_access_rights: set[tuple[str, ...]] = set()
-    resources_licenses: set[tuple[str, ...]] = set()
+    # list of harvested distributions, possibly only a subset of dataset.resources
+    distributions = []
 
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
-        resource_from_rdf(distrib, dataset)
-        resources_rights.add(tuple(rights_from_rdf(distrib)))
-        resources_access_rights.add(tuple(access_rights_from_rdf(distrib)))
-        resources_licenses.add(tuple(licenses_from_rdf(distrib)))
+        resource = resource_from_rdf(distrib, dataset)
+        if resource:
+            distributions.append(resource)
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    # dataset.extra.rights is set from (in order, first match wins):
+    # dataset.extra.dcat.rights is set from (in order, first match wins):
     # 1. Dataset dct:rights metadata.
     # 2. Distributions dct:rights metadata, but only if all distributions carry the same metadata.
     #    This heuristic is needed to "reverse" the ISO-to-DCAT conversion from SEMIC, which moves
     #    the dataset-level ISO metadata at the distribution level in DCAT.
-    dataset_rights = rights_from_rdf(d)
-    if not dataset_rights and len(resources_rights) == 1:
-        dataset_rights = list(resources_rights.pop())
-    if dataset_rights:
-        add_dcat_extra(dataset, "rights", dataset_rights)
+    rights = rights_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.rights) or []
+    if rights:
+        set_dcat_extra(dataset, DCT.rights, rights)
 
-    # same heuristic as dataset.extra.rights above
-    dataset_access_rights = access_rights_from_rdf(d)
-    if not dataset_access_rights and len(resources_access_rights) == 1:
-        dataset_access_rights = list(resources_access_rights.pop())
-    if dataset_access_rights:
-        add_dcat_extra(dataset, "accessRights", dataset_access_rights)
+    # same heuristic as dataset.extra.dcat.rights above
+    access_rights = (
+        access_rights_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.accessRights) or []
+    )
+    if access_rights:
+        set_dcat_extra(dataset, DCT.accessRights, access_rights)
 
-    inspire_category = infer_inspire_access_limitation(dataset_access_rights + dataset_rights)
+    inspire_category = infer_inspire_access_limitation(access_rights + rights)
     if inspire_category:
         dataset.access_type = AccessType.RESTRICTED
         dataset.access_type_reason_category = inspire_category
 
-    # same heuristic as dataset.extra.rights above
-    dataset_licenses = licenses_from_rdf(d)
-    if not dataset_licenses and len(resources_licenses) == 1:
-        dataset_licenses = list(resources_licenses.pop())
-    if dataset_licenses:
-        add_dcat_extra(dataset, "license", dataset_licenses)
+    # same heuristic as dataset.extra.dcat.rights above
+    licenses = licenses_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.license) or []
+    if licenses:
+        set_dcat_extra(dataset, DCT.license, licenses)
 
     # dataset.license is set from (in order, first match wins):
     # 1. Dataset dct:license.
     # 2. Dataset dct:rights (SEMIC outputs non-URI licenses as rights).
-    # 3. Distributions dct:license (contrary to dataset.extra.license, not all distributions
+    # 3. Distributions dct:license (contrary to dataset.extra.dcat.license, not all distributions
     #    have to carry the same metadata).
     default_license = dataset.license or License.default()
-    resources_licenses_flat = uniquify(
-        license for resource_licenses in resources_licenses for license in resource_licenses
+    resources_licenses = uniquify(
+        license
+        for distrib in distributions
+        for license in (get_dcat_extra(distrib, DCT.license) or [])
     )
     dataset.license = License.guess(
-        *(dataset_licenses + dataset_rights + resources_licenses_flat), default=default_license
+        *(licenses + rights + resources_licenses), default=default_license
     )
 
     identifier = rdf_value(d, DCT.identifier)

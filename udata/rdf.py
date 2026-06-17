@@ -20,6 +20,7 @@ from rdflib.namespace import (
     XSD,
     Namespace,
     NamespaceManager,
+    split_uri,
 )
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
@@ -161,6 +162,10 @@ AGENT_ROLE_TO_RDF_PREDICATE = {
 CONTACT_POINT_ENTITY_TO_ROLE = {
     predicate: role for role, predicate in AGENT_ROLE_TO_RDF_PREDICATE.items()
 }
+
+
+def localname(uriref: URIRef) -> str:
+    return split_uri(uriref)[1]
 
 
 def guess_format(string):
