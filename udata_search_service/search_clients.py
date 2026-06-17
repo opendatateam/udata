@@ -268,16 +268,20 @@ def configure_indices(prefix):
             cls._index._name = cls.Index.name
 
 
-def organization_count_facet(search, get_filters_except, include_terms):
-    """Count-only mode for the organization facet (used by the organization suggest).
+def organization_counts(search, get_filters_except, organization_ids):
+    """Count, per organization id, the documents matching the current search.
 
-    Instead of running a full search (hits + every facet), we run an aggregation-only
-    request (`size: 0`, no fetch phase) building *only* the organization `terms`
-    aggregation, restricted to `include_terms` (the exact "<id>|<name>" keys of the
-    candidate organizations). Counts stay faithful to a real search because we reuse
-    the relevance query and `get_filters_except("organization_id_with_name")` already
-    built by the caller — the organization filter itself is excluded so selecting an
-    organization doesn't zero out the others.
+    Used by the organization suggest: given a set of candidate organization ids, return
+    a ``{organization_id: count}`` mapping scoped to the same query/filters as a real
+    search. The caller only deals in ids — the "<id>|<name>" composite indexed field is
+    a search-internal detail, so here we aggregate on the plain ``organization`` id field.
+
+    Instead of a full search (hits + every facet), this is an aggregation-only request
+    (`size: 0`, no fetch phase) building *only* the organization `terms` aggregation,
+    restricted to ``organization_ids`` via `include`. Counts stay faithful because we
+    reuse the relevance query and `get_filters_except("organization_id_with_name")`
+    already built by the caller — the organization filter itself is excluded so selecting
+    an organization doesn't zero out the others.
 
     Alternative considered and rejected (kept here on purpose): doing everything in ES
     with no Mongo round-trip — a single `terms` aggregation ordered by
@@ -291,27 +295,27 @@ def organization_count_facet(search, get_filters_except, include_terms):
     org_filters = get_filters_except("organization_id_with_name")
     if org_filters:
         parent = search.aggs.bucket(
-            "organization_id_with_name_filtered", "filter", filter=query.Bool(must=org_filters)
+            "organizations_filtered", "filter", filter=query.Bool(must=org_filters)
         )
     else:
         parent = search.aggs
     parent.bucket(
-        "organization_id_with_name",
+        "organizations",
         "terms",
-        field="organization_with_id",
-        include=include_terms,
-        size=len(include_terms),
+        field="organization",
+        include=organization_ids,
+        size=len(organization_ids),
     )
     response = search[:0].execute()
 
-    buckets = []
+    counts = {}
     aggregations = getattr(response, "aggregations", None)
     if aggregations is not None:
-        container = getattr(aggregations, "organization_id_with_name_filtered", aggregations)
-        org_agg = getattr(container, "organization_id_with_name", None)
+        container = getattr(aggregations, "organizations_filtered", aggregations)
+        org_agg = getattr(container, "organizations", None)
         if org_agg is not None:
-            buckets = [{"name": b.key, "count": b.doc_count} for b in org_agg.buckets]
-    return 0, [], {"organization_id_with_name": buckets}
+            counts = {bucket.key: bucket.doc_count for bucket in org_agg.buckets}
+    return 0, [], {"organization_counts": counts}
 
 
 class ElasticClient:
@@ -870,7 +874,7 @@ class ElasticClient:
             return filters_list
 
         if count_organizations is not None:
-            return organization_count_facet(search, get_filters_except, count_organizations)
+            return organization_counts(search, get_filters_except, count_organizations)
 
         format_filters = get_filters_except("format_family")
         if format_filters:
@@ -1265,7 +1269,7 @@ class ElasticClient:
             return flt
 
         if count_organizations is not None:
-            return organization_count_facet(search, get_filters_except, count_organizations)
+            return organization_counts(search, get_filters_except, count_organizations)
 
         facet_fields = {
             "producer_type": ("producer_type", "producer_type"),
@@ -1554,7 +1558,7 @@ class ElasticClient:
             return filters_list
 
         if count_organizations is not None:
-            return organization_count_facet(search, get_filters_except, count_organizations)
+            return organization_counts(search, get_filters_except, count_organizations)
 
         facet_fields = {
             "access_type": ("access_type", "access_type"),

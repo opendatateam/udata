@@ -27,8 +27,8 @@ def base_filters(**extra):
 
 def test_count_organizations_forwarded_when_set():
     client = FakeElasticClient()
-    DatasetService(client).search(base_filters(count_organizations=["abc|Org"]))
-    assert client.last_call["kwargs"]["count_organizations"] == ["abc|Org"]
+    DatasetService(client).search(base_filters(count_organizations=["org-id-1", "org-id-2"]))
+    assert client.last_call["kwargs"]["count_organizations"] == ["org-id-1", "org-id-2"]
     # It must not leak into the filters sent to ES as a regular filter.
     assert "count_organizations" not in client.last_call["filters"]
 

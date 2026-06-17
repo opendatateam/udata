@@ -744,18 +744,13 @@ def organization_match_counts(count_for, organizations):
     params["page"] = 1
     # Ignored: count-only mode forces ES `size: 0`, so no hits are ever fetched.
     params["page_size"] = 1
-    # The exact indexed `organization_with_id` terms ("<id>|<name>") to count.
-    params["count_organizations"] = [f"{org.id}|{org.name}" for org in organizations]
+    # The search layer owns how organizations are indexed; we only pass ids and get back
+    # a {organization_id: count} mapping.
+    params["count_organizations"] = [str(org.id) for org in organizations]
 
     service = adapter.service_class(get_elastic_client())
     _, _, _, facets = service.search(params)
-
-    # Bucket keys are "<id>|<name>"; key counts by id to stay robust to a stale name.
-    return {
-        bucket["name"].split("|", 1)[0]: bucket["count"]
-        for bucket in facets.get("organization_id_with_name", [])
-        if bucket["name"] != "all"
-    }
+    return facets.get("organization_counts", {})
 
 
 @ns.route("/suggest/", endpoint="suggest_organizations")
