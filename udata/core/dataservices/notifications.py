@@ -33,7 +33,7 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
 
 
 @Dataservice.on_create.connect
-def on_dataservice_created(dataservice):
+def on_dataservice_created(dataservice, **kwargs):
     """Create notifications when a dataservice is created"""
     from udata.features.notifications.models import Notification
 

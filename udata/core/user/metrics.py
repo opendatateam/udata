@@ -30,12 +30,12 @@ def update_dataservices_metrics(document, **kwargs):
 
 @on_follow.connect
 @on_unfollow.connect
-def update_user_following_metric(follow):
+def update_user_following_metric(follow, **kwargs):
     follow.follower.count_following()
 
 
 @Owned.on_owner_change.connect
-def update_owner_metrics(document, previous):
+def update_owner_metrics(document, previous, **kwargs):
     if not isinstance(previous, User):
         return
     if isinstance(document, Dataset):
