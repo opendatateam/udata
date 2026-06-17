@@ -463,14 +463,37 @@ class Dataservice(
 
         return result
 
-    @staticmethod
-    def normalize_score(score):
-        QUALITY_MAX_SCORE = 10
-        return score / QUALITY_MAX_SCORE
-
     def compute_quality_score(self, quality):
-        score = sum(1 for value in quality.values() if value is True)
-        return self.normalize_score(score)
+        if quality.get("has_machine_documentation"):
+            weights = {
+                "has_machine_documentation": 3,
+                "has_description": 2,
+                "rate_limiting_documented": 2,
+                "has_base_api_url": 1,
+                "has_technical_documentation": 1,
+                "access_conditions_clear": 1,
+                "license": 1,
+                "availability_documented": 1,
+                "has_contact_point": 1,
+                "has_business_documentation": 1,
+            }
+        else:
+            # has_machine_documentation absent: when swagger is missing it contributes nothing,
+            # so base_api_url and technical_documentation take higher weight as fallbacks
+            weights = {
+                "has_description": 2,
+                "rate_limiting_documented": 2,
+                "has_base_api_url": 2,
+                "has_technical_documentation": 2,
+                "access_conditions_clear": 1,
+                "license": 1,
+                "availability_documented": 1,
+                "has_contact_point": 1,
+                "has_business_documentation": 1,
+            }
+        total = sum(weights.values())
+        score = sum(weights[k] for k, v in quality.items() if v is True and k in weights)
+        return score / total
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)

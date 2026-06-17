@@ -85,21 +85,21 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
 
 
 class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
-    def test_score_is_count_of_true_criteria_over_ten(self):
+    def test_weighted_score_with_swagger_present(self):
         ds = DataserviceFactory.build()
         quality = {
-            "has_description": True,
-            "has_machine_documentation": True,
+            "has_description": True,  # weight 2
+            "has_machine_documentation": True,  # weight 3 → swagger-present weights, total=14
             "has_technical_documentation": False,
-            "license": True,
+            "license": True,  # weight 1
             "has_contact_point": False,
-            "has_base_api_url": True,
+            "has_base_api_url": True,  # weight 1
             "availability_documented": False,
             "rate_limiting_documented": False,
             "has_business_documentation": False,
-            "access_conditions_clear": True,
+            "access_conditions_clear": True,  # weight 1
         }
-        assert ds.compute_quality_score(quality) == 0.5
+        assert ds.compute_quality_score(quality) == 8 / 14
 
     def test_all_false_scores_zero(self):
         ds = DataserviceFactory.build()
@@ -138,6 +138,41 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             ]
         }
         assert ds.compute_quality_score(quality) == 1.0
+
+    def test_machine_documentation_outweighs_description(self):
+        ds = DataserviceFactory.build()
+        all_false = {
+            "has_machine_documentation": False,
+            "has_description": False,
+            "has_base_api_url": False,
+            "has_technical_documentation": False,
+            "rate_limiting_documented": False,
+            "access_conditions_clear": False,
+            "license": False,
+            "availability_documented": False,
+            "has_contact_point": False,
+            "has_business_documentation": False,
+        }
+        only_swagger = {**all_false, "has_machine_documentation": True}
+        only_description = {**all_false, "has_description": True}
+
+        assert ds.compute_quality_score(only_swagger) > ds.compute_quality_score(only_description)
+
+    def test_fully_configured_without_swagger_scores_one(self):
+        ds = DataserviceFactory.build()
+        no_swagger_all_others_true = {
+            "has_machine_documentation": False,
+            "has_description": True,
+            "has_base_api_url": True,
+            "has_technical_documentation": True,
+            "rate_limiting_documented": True,
+            "access_conditions_clear": True,
+            "license": True,
+            "availability_documented": True,
+            "has_contact_point": True,
+            "has_business_documentation": True,
+        }
+        assert ds.compute_quality_score(no_swagger_all_others_true) == 1.0
 
 
 class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
