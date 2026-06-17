@@ -256,8 +256,8 @@ def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -
     """Returns a list of unique serialized values for a predicate from a RdfResource"""
     return uniquify(
         value
-        for info in resource.objects(predicate=predicate)
-        if (value := serialize_value(info, unwrap=unwrap))
+        for obj in resource.objects(predicate=predicate)
+        if (value := serialize_value(obj, unwrap=unwrap))
     )
 
 
