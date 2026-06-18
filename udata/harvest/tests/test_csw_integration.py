@@ -44,6 +44,11 @@ GEONETWORK_URL = os.environ.get(
     "CSW_GEONETWORK_URL", "http://localhost:8080/geonetwork/srv/eng/csw"
 )
 GEONETWORK_BASE = os.environ.get("CSW_GEONETWORK_BASE", "http://localhost:8080/geonetwork")
+# Harvest as admin (credentials in the URL) so GeoNetwork returns the freshly
+# inserted record, which is not published to the anonymous group by default.
+GEONETWORK_AUTH_URL = os.environ.get(
+    "CSW_GEONETWORK_AUTH_URL", "http://admin:admin@localhost:8080/geonetwork/srv/eng/csw"
+)
 
 RECORD = Path(__file__).parent / "csw_dcat" / "records" / "combles.xml"
 # Title produced by harvesting `records/combles.xml` (same record and mapping
@@ -125,7 +130,7 @@ class CswIntegrationTest(PytestOnlyDBTestCase):
         """Full pipeline: push a record into GeoNetwork, harvest it back out."""
         load_geonetwork_record()
 
-        job = self.harvest(GEONETWORK_URL)
+        job = self.harvest(GEONETWORK_AUTH_URL)
 
         query_errors = [error.message for error in job.errors if QUERY_REJECTED in error.message]
         assert not query_errors, query_errors
