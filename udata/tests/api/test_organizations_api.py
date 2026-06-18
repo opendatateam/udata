@@ -1106,6 +1106,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert [org["name"] for org in response.json] == ["topic-member"]
 
+    def test_suggest_organizations_topic_standalone_without_count_for(self):
+        """`topic` works on its own: a plain name suggest scoped to the topic's orgs."""
+        in_topic = OrganizationFactory(name="universe-member")
+        out_topic = OrganizationFactory(name="universe-outsider")
+        dataset_in = DatasetFactory(organization=in_topic)
+        DatasetFactory(organization=out_topic)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="universe", size=10, topic=str(topic.id))
+        )
+        assert200(response)
+        assert [org["name"] for org in response.json] == ["universe-member"]
+        assert response.json[0]["matching_count"] is None
+
     def test_suggest_organizations_facet_ids_must_match_query(self):
         """Facet ids only contribute organizations that also match the name query."""
         OrganizationFactory(name="alpha-corp")

@@ -714,7 +714,10 @@ org_suggest_parser.add_argument(
     "topic",
     type=str,
     location="args",
-    help="Restrict suggestions to organizations owning a `count_for` object in this topic.",
+    help=(
+        "Restrict suggestions to organizations owning an object in this topic (an object "
+        "of `count_for`'s kind when set, any kind otherwise). Usable without `count_for`."
+    ),
 )
 org_suggest_parser.add_argument(
     "count_facet_ids",
@@ -728,15 +731,21 @@ org_suggest_parser.add_argument(
 )
 
 
-def topic_organization_ids(count_for, topic):
-    """Ids of organizations owning a `count_for` object listed in this topic (the universe).
+def topic_organization_ids(topic, count_for=None):
+    """Ids of organizations owning an element of this topic (its universe).
 
-    `distinct` on the `organization` reference returns Organization documents, so we map
-    them to their ids for an `id__in` filter.
+    With ``count_for`` the universe is restricted to that element type; otherwise every
+    element type is considered. `distinct` on the `organization` reference returns
+    Organization documents, hence the mapping to their ids for an `id__in` filter.
     """
-    model = COUNT_FOR_MODELS[count_for]
-    element_ids = topic.get_nested_elements_ids(model.__name__)
-    return [org.id for org in model.objects(id__in=element_ids).distinct("organization") if org]
+    models = [COUNT_FOR_MODELS[count_for]] if count_for else list(COUNT_FOR_MODELS.values())
+    org_ids = set()
+    for model in models:
+        element_ids = topic.get_nested_elements_ids(model.__name__)
+        org_ids.update(
+            org.id for org in model.objects(id__in=element_ids).distinct("organization") if org
+        )
+    return list(org_ids)
 
 
 def organization_match_counts(count_for, organizations):
@@ -782,33 +791,30 @@ class OrganizationSuggestAPI(API):
     def get(self):
         """Organizations suggest endpoint using mongoDB contains"""
         args = org_suggest_parser.parse_args()
-        name_match = Organization.objects(
+        orgs = Organization.objects(
             Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
         )
+        # `topic` restricts to the organizations of that universe. Usable on its own (a
+        # plain name suggest scoped to a topic) or together with `count_for`.
+        if args["topic"]:
+            topic = Topic.objects.get_or_404(pk=args["topic"])
+            orgs = orgs.filter(id__in=topic_organization_ids(topic, args["count_for"]))
 
         if not args["count_for"]:
             return [
-                org_suggestion(org)
-                for org in name_match.order_by(SUGGEST_SORTING).limit(args["size"])
+                org_suggestion(org) for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
             ]
 
-        # A — most followed organizations matching the name, restricted to the topic
-        # universe when given (only orgs owning a `count_for` object in the topic).
-        universe = name_match
-        if args["topic"]:
-            topic = Topic.objects.get_or_404(pk=args["topic"])
-            universe = universe.filter(id__in=topic_organization_ids(args["count_for"], topic))
-        candidates = list(universe.order_by(SUGGEST_SORTING).limit(args["size"]))
+        # A — most followed organizations of the (optionally topic-restricted) universe.
+        candidates = list(orgs.order_by(SUGGEST_SORTING).limit(args["size"]))
 
         # B — organizations from the front's current facet (those that actually have
-        # results), always kept as candidates so the most relevant ones show up even when
-        # they are not the most followed. Same universe + name constraints as A.
+        # results), kept as candidates so the most relevant ones show up even when they are
+        # not the most followed. Same universe + name constraints as A.
         if args["count_facet_ids"]:
             seen = {org.id for org in candidates}
             candidates += [
-                org
-                for org in universe.filter(id__in=args["count_facet_ids"])
-                if org.id not in seen
+                org for org in orgs.filter(id__in=args["count_facet_ids"]) if org.id not in seen
             ]
 
         counts = organization_match_counts(args["count_for"], candidates)
