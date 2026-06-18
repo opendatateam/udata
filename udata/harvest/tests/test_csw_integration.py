@@ -54,13 +54,14 @@ QUERY_REJECTED = "Failed to query CSW"
 def load_geonetwork_record():
     """Push the ISO-19139 test record into GeoNetwork and publish it.
 
-    GeoNetwork requires an XSRF token (set as a cookie on a first authenticated
-    call) to be echoed back as a header on the insert request.
+    GeoNetwork's REST API is XSRF-protected: a first authenticated call to
+    `/srv/eng/info?type=me` sets the `XSRF-TOKEN` cookie, whose value must be
+    echoed back as the `X-XSRF-TOKEN` header on the (multipart) insert request.
     """
     session = requests.Session()
     session.auth = ("admin", "admin")
 
-    session.get(f"{GEONETWORK_BASE}/srv/api/me", timeout=30)
+    session.get(f"{GEONETWORK_BASE}/srv/eng/info?type=me", timeout=30)
     token = session.cookies.get("XSRF-TOKEN")
 
     response = session.put(
@@ -69,16 +70,13 @@ def load_geonetwork_record():
             "metadataType": "METADATA",
             "uuidProcessing": "OVERWRITE",
             "group": "2",
+            "category": "",
             "rejectIfInvalid": "false",
             "publishToAll": "true",
         },
-        headers={
-            "X-XSRF-TOKEN": token,
-            "Content-Type": "application/xml",
-            "Accept": "application/json",
-        },
-        data=RECORD.read_bytes(),
-        timeout=30,
+        headers={"X-XSRF-TOKEN": token, "Accept": "application/json"},
+        files={"file": ("combles.xml", RECORD.read_bytes(), "application/xml")},
+        timeout=60,
     )
     response.raise_for_status()
 
@@ -107,12 +105,21 @@ class CswIntegrationTest(PytestOnlyDBTestCase):
         query_errors = [error.message for error in job.errors if QUERY_REJECTED in error.message]
         assert not query_errors, query_errors
 
-    def test_geonetwork_harvests_record(self):
-        """GeoNetwork must accept the request and yield the published record.
+    def test_geonetwork_accepts_request(self):
+        """GeoNetwork must parse our GetRecords request.
 
-        On the current (capitalized) code this fails: GeoNetwork rejects the
-        request with a "Failed to query CSW" error — the GeoIDE bug, reproduced.
+        This reproduces the bug without depending on record loading: a parse
+        error happens before any data lookup. On the current (capitalized) code
+        GeoNetwork rejects the request and the job fails with "Failed to query
+        CSW" — the GeoIDE bug, reproduced.
         """
+        job = self.harvest(GEONETWORK_URL)
+
+        query_errors = [error.message for error in job.errors if QUERY_REJECTED in error.message]
+        assert not query_errors, query_errors
+
+    def test_geonetwork_harvests_record(self):
+        """Full pipeline: push a record into GeoNetwork, harvest it back out."""
         load_geonetwork_record()
 
         job = self.harvest(GEONETWORK_URL)
