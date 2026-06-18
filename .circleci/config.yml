@@ -108,6 +108,74 @@ jobs:
           path: reports/
           destination: reports
 
+  # Experimental: spin up real CSW servers (PyCSW + GeoNetwork 3.x) as service
+  # containers and send them our actual GetRecords request, to measure how long
+  # booting them takes in CI and which `apiso:` property casing each accepts.
+  # GeoNetwork (Java + H2 + Lucene) is the slow one — its "Wait for GeoNetwork"
+  # step duration is the timing signal we care about.
+  csw-integration:
+    resource_class: large
+    docker:
+      - image: ghcr.io/astral-sh/uv:python3.11-trixie
+      - image: mongo:7.0.28
+      - image: redis:alpine
+      - image: geopython/pycsw:2.6.1
+      - image: geonetwork:3.12.12
+    environment:
+      BASH_ENV: /root/.bashrc
+      UDATA_TEST_CSW_INTEGRATION: "1"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - py3.11-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+            - py3.11-cache-v1-{{ arch }}-
+      - run:
+          name: Install Python dependencies
+          command: |
+            uv sync --frozen
+      - run:
+          name: Install curl
+          command: |
+            apt-get update && apt-get install -y curl
+      - run:
+          name: Wait for PyCSW
+          command: |
+            start=$(date +%s)
+            for i in $(seq 1 60); do
+              if curl -sf "http://localhost:8000/?service=CSW&version=2.0.2&request=GetCapabilities" >/dev/null; then
+                echo "PyCSW ready after $(($(date +%s) - start))s"
+                exit 0
+              fi
+              echo "Waiting for PyCSW... ($i/60)"
+              sleep 2
+            done
+            echo "PyCSW failed to start"
+            exit 1
+      - run:
+          name: Wait for GeoNetwork
+          command: |
+            start=$(date +%s)
+            for i in $(seq 1 120); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080/geonetwork/srv/eng/csw?service=CSW&request=GetCapabilities")
+              if [ "$code" = "200" ]; then
+                echo "GeoNetwork ready after $(($(date +%s) - start))s"
+                exit 0
+              fi
+              echo "Waiting for GeoNetwork... ($i/120) - HTTP $code"
+              sleep 5
+            done
+            echo "GeoNetwork failed to start"
+            exit 1
+      - run:
+          name: Run CSW integration tests
+          command: |
+            mkdir -p reports/python
+            uv run pytest udata/harvest/tests/test_csw_integration.py -v \
+              --junitxml=reports/python/csw-integration.xml
+      - store_test_results:
+          path: reports/python
+
   dist:
     docker:
       - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
@@ -220,6 +288,7 @@ workflows:
               python-version: ["3.11", "3.13"]
               mongo-version: ["7.0.28"]
               elasticsearch-version: ["7.17.28", "8.19.13"]
+      - csw-integration
       - dist:
           requires:
             - python
