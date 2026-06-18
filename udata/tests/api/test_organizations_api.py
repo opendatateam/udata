@@ -13,6 +13,7 @@ from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.i18n import _
@@ -1079,6 +1080,49 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         """count_for only accepts known model kinds."""
         response = self.get(url_for("api.suggest_organizations", q="x", size=5, count_for="banana"))
         assert response.status_code == 400
+
+    def test_suggest_organizations_restricted_by_topic_selection(self):
+        """`topic` limits candidates to organizations owning a dataset in the topic.
+
+        This restriction is pure MongoDB (via TopicElement), so it is exercised without a
+        running search service — only the candidate set is asserted, not the counts.
+        """
+        in_topic = OrganizationFactory(name="topic-member")
+        out_topic = OrganizationFactory(name="topic-outsider")
+        dataset_in = DatasetFactory(organization=in_topic)
+        DatasetFactory(organization=out_topic)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="topic",
+                size=10,
+                count_for="dataset",
+                topic=str(topic.id),
+            )
+        )
+        assert200(response)
+        assert [org["name"] for org in response.json] == ["topic-member"]
+
+    def test_suggest_organizations_facet_ids_must_match_query(self):
+        """Facet ids only contribute organizations that also match the name query."""
+        OrganizationFactory(name="alpha-corp")
+        beta = OrganizationFactory(name="beta-corp")
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="alpha",
+                size=10,
+                count_for="dataset",
+                count_facet_ids=str(beta.id),
+            )
+        )
+        assert200(response)
+        names = [org["name"] for org in response.json]
+        assert "alpha-corp" in names
+        assert "beta-corp" not in names
 
     def test_suggest_organizations_api(self):
         """It should suggest organizations"""

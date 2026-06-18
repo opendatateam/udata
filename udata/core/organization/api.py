@@ -31,6 +31,7 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.topic.models import Topic
 from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -679,17 +680,10 @@ class FollowOrgAPI(FollowAPI):
 
 # Models whose search index can back an organization suggest count (count_for=...).
 COUNT_FOR_MODELS = {"dataset": Dataset, "reuse": Reuse, "dataservice": Dataservice}
-# Prefix namespacing the context-search filters from the suggest's own params: the
-# suggest `q` is an organization name, while `count_filter.q` is the dataset/reuse/...
-# full-text query the count is scoped to (e.g. count_filter.tag=transport).
+# Prefix namespacing the count-context filters from the suggest's own params: the suggest
+# `q` is an organization name, while `count_filter.q` is the dataset/reuse/... full-text
+# query the count is scoped to (e.g. count_filter.tag=transport).
 COUNT_FILTER_PREFIX = "count_filter."
-# Upper bound on the number of organizations we send to ES in a single count request.
-# The candidate set comes from a name `icontains`, which is barely selective for short
-# queries (on data.gouv.fr "a" matches ~5000 of ~6300 orgs, "le" ~1500), so we always
-# keep only the top organizations by followers. The count ranking is therefore exact
-# whenever the name match already fits under this cap (typically queries of 3+ chars,
-# e.g. "data" matches ~90 orgs) and a best-effort top-by-followers otherwise.
-COUNT_CANDIDATE_POOL = 100
 
 
 def org_suggestion(org):
@@ -711,11 +705,38 @@ org_suggest_parser.add_argument(
     location="args",
     help=(
         "Annotate each suggestion with the number of matching objects of this kind "
-        "(dataset, reuse or dataservice), scoped to the search passed via "
+        "(dataset, reuse or dataservice), counted in the search index and scoped by the "
         f"`{COUNT_FILTER_PREFIX}*` params (e.g. {COUNT_FILTER_PREFIX}tag=transport). "
         "Empty organizations are pushed to the end, the follower ranking is kept."
     ),
 )
+org_suggest_parser.add_argument(
+    "topic",
+    type=str,
+    location="args",
+    help="Restrict suggestions to organizations owning a `count_for` object in this topic.",
+)
+org_suggest_parser.add_argument(
+    "count_facet_ids",
+    action="split",
+    location="args",
+    help=(
+        "Organization ids of the current search facet. They are always kept as candidates "
+        "so the organizations that actually have results show up even when they are not "
+        "the most followed."
+    ),
+)
+
+
+def topic_organization_ids(count_for, topic):
+    """Ids of organizations owning a `count_for` object listed in this topic (the universe).
+
+    `distinct` on the `organization` reference returns Organization documents, so we map
+    them to their ids for an `id__in` filter.
+    """
+    model = COUNT_FOR_MODELS[count_for]
+    element_ids = topic.get_nested_elements_ids(model.__name__)
+    return [org.id for org in model.objects(id__in=element_ids).distinct("organization") if org]
 
 
 def organization_match_counts(count_for, organizations):
@@ -761,24 +782,44 @@ class OrganizationSuggestAPI(API):
     def get(self):
         """Organizations suggest endpoint using mongoDB contains"""
         args = org_suggest_parser.parse_args()
-        orgs = Organization.objects(
+        name_match = Organization.objects(
             Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
-        ).order_by(SUGGEST_SORTING)
+        )
 
         if not args["count_for"]:
-            return [org_suggestion(org) for org in orgs.limit(args["size"])]
+            return [
+                org_suggestion(org)
+                for org in name_match.order_by(SUGGEST_SORTING).limit(args["size"])
+            ]
 
-        # Count the top organizations by followers matching the name. We cap the pool
-        # because a name `icontains` is barely selective on short queries (see
-        # COUNT_CANDIDATE_POOL); the counted set stays exact for queries narrow enough
-        # to fit under the cap.
-        candidates = list(orgs.limit(COUNT_CANDIDATE_POOL))
+        # A — most followed organizations matching the name, restricted to the topic
+        # universe when given (only orgs owning a `count_for` object in the topic).
+        universe = name_match
+        if args["topic"]:
+            topic = Topic.objects.get_or_404(pk=args["topic"])
+            universe = universe.filter(id__in=topic_organization_ids(args["count_for"], topic))
+        candidates = list(universe.order_by(SUGGEST_SORTING).limit(args["size"]))
+
+        # B — organizations from the front's current facet (those that actually have
+        # results), always kept as candidates so the most relevant ones show up even when
+        # they are not the most followed.
+        if args["count_facet_ids"]:
+            seen = {org.id for org in candidates}
+            candidates += [
+                org
+                for org in name_match.filter(id__in=args["count_facet_ids"])
+                if org.id not in seen
+            ]
+
         counts = organization_match_counts(args["count_for"], candidates)
-
-        # Keep the follower order (stable sort), only pushing empty organizations to the
-        # end. We never sort by count: a huge low-quality organization must not outrank a
-        # well-followed one.
-        candidates.sort(key=lambda org: counts.get(str(org.id), 0) == 0)
+        # Organizations with results first (by followers), empty ones pushed to the end. We
+        # never sort by count: a huge low-quality org must not outrank a well-followed one.
+        candidates.sort(
+            key=lambda org: (
+                counts.get(str(org.id), 0) == 0,
+                -(org.metrics or {}).get("followers", 0),
+            )
+        )
         return [
             {**org_suggestion(org), "matching_count": counts.get(str(org.id), 0)}
             for org in candidates[: args["size"]]
