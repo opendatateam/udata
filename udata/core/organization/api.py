@@ -802,12 +802,12 @@ class OrganizationSuggestAPI(API):
 
         # B — organizations from the front's current facet (those that actually have
         # results), always kept as candidates so the most relevant ones show up even when
-        # they are not the most followed.
+        # they are not the most followed. Same universe + name constraints as A.
         if args["count_facet_ids"]:
             seen = {org.id for org in candidates}
             candidates += [
                 org
-                for org in name_match.filter(id__in=args["count_facet_ids"])
+                for org in universe.filter(id__in=args["count_facet_ids"])
                 if org.id not in seen
             ]
 
