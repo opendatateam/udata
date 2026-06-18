@@ -8,15 +8,17 @@ a request that is valid XML but rejected by a real catalog.
 
 Context: PR #3837 capitalized the `apiso:` property names (`apiso:type` ->
 `apiso:Type`, `apiso:identifier` -> `apiso:Identifier`) to satisfy a PyCSW
-instance. These tests reproduce, end to end, what each server family does with
-the *current* code: PyCSW is expected to accept the request, while GeoNetwork
-is expected to reject the capitalized request (the GeoIDE failure mode), which
-makes the harvest fail with a "Failed to query CSW" error.
+instance, which was reported to break GeoIDE harvests. These tests show that
+both servers we can containerize accept the capitalized request: PyCSW (it was
+tuned for it) and upstream GeoNetwork (which is lenient about Filter/SortBy
+field names, see note [4] in dcat.py). The GeoIDE rejection is specific to
+GeoSource, an old GeoNetwork fork that is not containerizable — so it cannot be
+reproduced here.
 
-The GeoNetwork record is pushed over its REST API at the start of the test (no
-records need to be loaded into PyCSW: a request parse error happens before any
-data lookup). Skipped unless `UDATA_TEST_CSW_INTEGRATION=1` and both servers
-are reachable, so they only run in the dedicated CI job.
+The GeoNetwork record is pushed over CSW-T at the start of the test; PyCSW
+serves its built-in conformance data, so it needs no loading. Skipped unless
+`UDATA_TEST_CSW_INTEGRATION=1` and both servers are reachable, so they only run
+in the dedicated CI job.
 """
 
 import os
@@ -52,34 +54,35 @@ QUERY_REJECTED = "Failed to query CSW"
 
 
 def load_geonetwork_record():
-    """Push the ISO-19139 test record into GeoNetwork and publish it.
+    """Push the ISO-19139 test record into GeoNetwork via CSW-T and publish it.
 
-    GeoNetwork's REST API is XSRF-protected: a first authenticated call to
-    `/srv/eng/info?type=me` sets the `XSRF-TOKEN` cookie, whose value must be
-    echoed back as the `X-XSRF-TOKEN` header on the (multipart) insert request.
+    We use the OGC CSW transaction endpoint (`/srv/eng/csw-publication`) rather
+    than the REST API: it goes through the same CSW servlet as the (working)
+    harvest endpoint and is not XSRF-protected, only basic-auth.
     """
-    session = requests.Session()
-    session.auth = ("admin", "admin")
+    record = RECORD.read_text(encoding="utf-8")
+    # Drop the XML declaration so the record can be embedded in the transaction.
+    if record.lstrip().startswith("<?xml"):
+        record = record.split("?>", 1)[1]
 
-    # A POST to this endpoint authenticates and sets the XSRF-TOKEN cookie.
-    session.post(f"{GEONETWORK_BASE}/srv/eng/info?type=me", timeout=30)
-    token = session.cookies.get("XSRF-TOKEN")
-    assert token, f"no XSRF-TOKEN cookie returned, got: {session.cookies.get_dict()}"
+    transaction = (
+        '<csw:Transaction xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"'
+        ' service="CSW" version="2.0.2"><csw:Insert>'
+        f"{record}"
+        "</csw:Insert></csw:Transaction>"
+    )
 
-    # Spring accepts the token as the X-XSRF-TOKEN header or the _csrf parameter.
-    response = session.put(
-        f"{GEONETWORK_BASE}/srv/api/records",
-        params={
-            "metadataType": "METADATA",
-            "uuidProcessing": "OVERWRITE",
-            "publishToAll": "true",
-            "_csrf": token,
-        },
-        headers={"X-XSRF-TOKEN": token, "Accept": "application/json"},
-        files={"file": ("combles.xml", RECORD.read_bytes(), "application/xml")},
+    response = requests.post(
+        f"{GEONETWORK_BASE}/srv/eng/csw-publication",
+        data=transaction.encode("utf-8"),
+        headers={"Content-Type": "application/xml"},
+        auth=("admin", "admin"),
         timeout=60,
     )
-    assert response.ok, f"GeoNetwork insert failed {response.status_code}: {response.text[:1000]}"
+    assert response.ok, (
+        f"GeoNetwork CSW-T insert failed {response.status_code}: {response.text[:1000]}"
+    )
+    assert "ExceptionReport" not in response.text, response.text[:1000]
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
@@ -107,12 +110,11 @@ class CswIntegrationTest(PytestOnlyDBTestCase):
         assert not query_errors, query_errors
 
     def test_geonetwork_accepts_request(self):
-        """GeoNetwork must parse our GetRecords request.
+        """Upstream GeoNetwork must parse our GetRecords request.
 
-        This reproduces the bug without depending on record loading: a parse
-        error happens before any data lookup. On the current (capitalized) code
-        GeoNetwork rejects the request and the job fails with "Failed to query
-        CSW" — the GeoIDE bug, reproduced.
+        Independent of record loading: a parse error would happen before any
+        data lookup. Upstream GeoNetwork is lenient and accepts the capitalized
+        request — unlike GeoSource/GeoIDE, which is not containerizable here.
         """
         job = self.harvest(GEONETWORK_URL)
 
