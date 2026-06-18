@@ -12,6 +12,7 @@ from mongoengine.fields import (
     StringField,
     UUIDField,
 )
+from mongoengine.signals import post_delete
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -205,3 +206,18 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     on_update = Signal()
 
     verbose_name = _("chart")
+
+    @classmethod
+    def clean_image_on_delete(cls, sender, document, **kwargs):
+        """Clean up image files when a Chart is deleted"""
+        from udata.core.storages import images
+
+        if sender == Chart and document.image.filename is not None:
+            storage = images
+            storage.delete(document.image.filename)
+            storage.delete(document.image.original)
+            for key, value in document.image.thumbnails.items():
+                storage.delete(value)
+
+
+post_delete.connect(Chart.clean_image_on_delete, sender=Chart)
