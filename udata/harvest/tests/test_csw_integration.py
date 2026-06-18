@@ -61,24 +61,25 @@ def load_geonetwork_record():
     session = requests.Session()
     session.auth = ("admin", "admin")
 
-    session.get(f"{GEONETWORK_BASE}/srv/eng/info?type=me", timeout=30)
+    # A POST to this endpoint authenticates and sets the XSRF-TOKEN cookie.
+    session.post(f"{GEONETWORK_BASE}/srv/eng/info?type=me", timeout=30)
     token = session.cookies.get("XSRF-TOKEN")
+    assert token, f"no XSRF-TOKEN cookie returned, got: {session.cookies.get_dict()}"
 
+    # Spring accepts the token as the X-XSRF-TOKEN header or the _csrf parameter.
     response = session.put(
         f"{GEONETWORK_BASE}/srv/api/records",
         params={
             "metadataType": "METADATA",
             "uuidProcessing": "OVERWRITE",
-            "group": "2",
-            "category": "",
-            "rejectIfInvalid": "false",
             "publishToAll": "true",
+            "_csrf": token,
         },
         headers={"X-XSRF-TOKEN": token, "Accept": "application/json"},
         files={"file": ("combles.xml", RECORD.read_bytes(), "application/xml")},
         timeout=60,
     )
-    response.raise_for_status()
+    assert response.ok, f"GeoNetwork insert failed {response.status_code}: {response.text[:1000]}"
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
