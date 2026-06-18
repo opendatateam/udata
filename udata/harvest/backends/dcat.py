@@ -311,19 +311,19 @@ class BaseCswDcatBackend(DcatBackend, ABC):
           <ogc:Filter>
             <ogc:Or>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>dataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>nonGeographicDataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:Type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
             </ogc:Or>
@@ -331,7 +331,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
-            <ogc:PropertyName>apiso:Identifier</ogc:PropertyName>
+            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
             <ogc:SortOrder>ASC</ogc:SortOrder>
           </ogc:SortProperty>
         </ogc:SortBy>
