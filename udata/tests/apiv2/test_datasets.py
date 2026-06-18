@@ -366,6 +366,34 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["next_page"] is None
         assert data["previous_page"] is None
 
+    def test_get_with_query_string_special_chars(self):
+        """The query string is matched as a literal substring, not as a regex"""
+        resources = [
+            ResourceFactory(title="Total (2024)"),
+            ResourceFactory(title="Total 2024"),
+        ]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for("apiv2.resources", dataset=dataset.id, q="(2024)"))
+        self.assert200(response)
+        data = response.json
+        # A naive regex would treat "(2024)" as a group and match both titles
+        assert data["total"] == 1
+        assert data["data"][0]["title"] == "Total (2024)"
+
+    def test_get_with_type_and_query_string(self):
+        """The type and query string filters combine (AND)"""
+        resources = [
+            ResourceFactory(type="main", title="alpha report"),
+            ResourceFactory(type="main", title="beta report"),
+            ResourceFactory(type="documentation", title="alpha doc"),
+        ]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for("apiv2.resources", dataset=dataset.id, type="main", q="alpha"))
+        self.assert200(response)
+        data = response.json
+        assert data["total"] == 1
+        assert data["data"][0]["title"] == "alpha report"
+
 
 class DatasetExtrasAPITest(APITestCase):
     def setUp(self):
