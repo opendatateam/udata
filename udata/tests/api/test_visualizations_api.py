@@ -289,7 +289,7 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
             json=False,
         )
         assert response.status_code == 200
-        assert "image" in response.json
+        assert response.json["image"] is not None
 
     def test_upload_image_permission_denied(self):
         """It should deny upload for non-owner"""
