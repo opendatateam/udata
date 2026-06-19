@@ -33,6 +33,8 @@ from udata.core.dataset.rdf import (
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
+    get_dcat_extra,
+    get_unanimous_dcat_extra,
     inspire_category_from_rights,
     license_to_rdf,
     licenses_from_rdf,
@@ -41,6 +43,7 @@ from udata.core.dataset.rdf import (
     resource_to_rdf,
     rights_from_rdf,
     rights_to_rdf,
+    set_dcat_extra,
     spatial_from_rdf,
     spatial_resolution_from_rdf,
     temporal_from_rdf,
@@ -2551,3 +2554,88 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
         resource = graph.resource(distribution)
         format = format_from_rdf(resource)
         assert format == expected_format
+
+
+class DcatHelpersTest:
+    def test_set_dcat_extra(self):
+        dataset = Dataset()
+
+        # assign
+        set_dcat_extra(dataset, "foo", "aa")
+        assert dataset.extras["dcat"]["foo"] == "aa"
+
+        # override
+        set_dcat_extra(dataset, "foo", "bb")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+
+        # extend
+        set_dcat_extra(dataset, "bar", "cc")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+        assert dataset.extras["dcat"]["bar"] == "cc"
+
+        # list type
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert dataset.extras["dcat"]["foo"] == ["aa", "bb"]
+        set_dcat_extra(dataset, "foo", ["aa"])
+        assert dataset.extras["dcat"]["foo"] == ["aa"]  # != "aa"
+
+        # set type
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = dataset.extras["dcat"]["foo"]
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # uriref
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert dataset.extras["dcat"]["accessRights"] == "xx"
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert dataset.extras["dcat"]["foo"] == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert dataset.extras["dcat"]["foo"] == []
+
+    def test_get_dcat_extra(self):
+        dataset = Dataset()
+
+        # missing
+        assert get_dcat_extra(dataset, "missing") is None
+
+        # str
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert get_dcat_extra(dataset, DCT.accessRights) == "xx"
+        assert get_dcat_extra(dataset, "accessRights") == "xx"
+
+        # list
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert get_dcat_extra(dataset, "foo") == ["aa", "bb"]
+
+        # set
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = get_dcat_extra(dataset, "foo")
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert get_dcat_extra(dataset, "foo") == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert get_dcat_extra(dataset, "foo") == []
+
+    def test_get_unanimous_dcat_extra(self):
+        r1 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r2 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r3 = Resource(extras={"dcat": {"accessRights": "bb"}})
+        r4 = Resource(extras={"dcat": {}})
+        r5 = Resource()
+
+        assert get_unanimous_dcat_extra([r1, r2], "accessRights") == "aa"
+        assert get_unanimous_dcat_extra([r1, r2], DCT.accessRights) == "aa"
+
+        assert get_unanimous_dcat_extra([r1, r3], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r4], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r5], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r4, r5], DCT.accessRights) is None
+
+        assert get_unanimous_dcat_extra([], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r2], "foo") is None
