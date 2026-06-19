@@ -1379,28 +1379,13 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
-    @pytest.mark.parametrize(
-        "remote_url_prefix",
-        [
-            None,
-            # trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
-            # no trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
-        ],
-    )
-    def test_geo2france(self, rmock, remote_url_prefix: str):
+    def test_geo2france(self, rmock):
         mock_xslt(rmock)
         url = mock_csw_pagination(
             rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{page}.xml"
         )
         org = OrganizationFactory()
-        source = HarvestSourceFactory(
-            backend="csw-iso-19139",
-            url=url,
-            organization=org,
-            config={"extra_configs": [{"key": "remote_url_prefix", "value": remote_url_prefix}]},
-        )
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
 
         actions.run(source)
 
@@ -1459,6 +1444,25 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         # License is not properly mapped in XSLT conversion
         assert dataset.license is None
 
+        # dataset rights inherited from the iso resources converted to dcat distributions (when all resources agree)
+        rights = dataset.extras["dcat"]["rights"]
+        assert len(rights) == 6
+        assert (
+            "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
+            in rights
+        )
+
+        # SEMIC puts non-URI license/accessRights in rights
+        assert dataset.extras["dcat"].get("license") is None
+        assert dataset.extras["dcat"].get("accessRights") is None
+
+        # rights interpreted as a known INSPIRE restriction
+        assert dataset.access_type == AccessType.RESTRICTED
+        assert (
+            dataset.access_type_reason_category
+            == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
+        )
+
         # Distributions don't get properly mapped to distribution with this XSLT if missing CI_OnLineFunctionCode.
         # A CI_OnLineFunctionCode was added explicitely on one of the Online Resources.
         # (See mapping at: https://semiceu.github.io/GeoDCAT-AP/releases/2.0.0/#resource-locator---on-line-resource)
@@ -1471,40 +1475,8 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         )
         assert resource.type == "main"
         assert resource.format == "mapinfo tab"
-
-        # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
-        if remote_url_prefix:
-            assert (
-                dataset.harvest.remote_url
-                == "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
-            )
-        else:
-            # this is the first dct:landingPage found in the node
-            # if it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior
-            assert (
-                dataset.harvest.remote_url
-                == "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
-            )
-
-        # dataset rights inherited from the iso resources converted to dcat distributions
-        rights = dataset.extras["dcat"]["rights"]
-        assert len(rights) == 6
-        assert (
-            "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
-            in rights
-        )
-
-        # also present at the resource level
+        # rights also present at the resource level
         assert resource.extras["dcat"]["rights"] == rights
-        # also interpreted as a known INSPIRE restriction
-        assert dataset.access_type == AccessType.RESTRICTED
-        assert (
-            dataset.access_type_reason_category
-            == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
-        )
-
-        assert dataset.extras["dcat"].get("license") is None
-        assert dataset.extras["dcat"].get("accessRights") is None
 
     def test_geoide(self, rmock):
         # this is the string used in geo-ide for now
@@ -1527,24 +1499,30 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         dataset = Dataset.objects.first()
 
         assert dataset.title == "Plan local d'urbanisme de la commune de Combles"
-        assert len(dataset.resources) == 6
+
         assert dataset.license == lov1
 
         # dataset rights inherited from the iso resources converted to dcat distributions
         rights = dataset.extras["dcat"]["rights"]
         assert len(rights) == 6
-        # FIXME: should be fixed upstream, but do we want to be more clever to extract license/accessRights?
+
+        # SEMIC puts non-URI license/accessRights in rights
         assert "Pas de restriction d'accès public selon INSPIRE" in rights
         assert "Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence." in rights
-        # also present at the resource level
-        for resource in dataset.resources:
-            assert resource.extras["dcat"]["rights"] == rights
 
         assert dataset.extras["dcat"].get("license") is None
         assert dataset.extras["dcat"].get("accessRights") is None
 
+        assert dataset.access_type == AccessType.OPEN
+        assert dataset.access_type_reason_category is None
+
         # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
         assert "inspire" in dataset.tags
+
+        assert len(dataset.resources) == 6
+        # rights also present at the resource level
+        for resource in dataset.resources:
+            assert resource.extras["dcat"]["rights"] == rights
 
     def test_geoplateforme(self, rmock):
         mock_xslt(rmock)
@@ -1562,3 +1540,61 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         assert dataset.title == "RPG"
         assert len(dataset.resources) == 70  # 24 WFS + 23 WMS + 23 WMTS
+
+    def test_url_prefix(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <gmd:fileIdentifier>
+                <gco:CharacterString>id-1</gco:CharacterString>
+              </gmd:fileIdentifier>
+              <gmd:hierarchyLevel>
+                <gmd:MD_ScopeCode codeListValue="dataset" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_ScopeCode">dataset</gmd:MD_ScopeCode>
+              </gmd:hierarchyLevel>
+              <gmd:identificationInfo>
+                <gmd:MD_DataIdentification>
+                  <gmd:citation>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                         <gco:CharacterString>Dataset 1</gco:CharacterString>
+                       </gmd:title>
+                       <gmd:identifier>
+                        <gmd:MD_Identifier>
+                          <gmd:code>
+                            <gco:CharacterString>dataset-1</gco:CharacterString>
+                          </gmd:code>
+                        </gmd:MD_Identifier>
+                      </gmd:identifier>
+                    </gmd:CI_Citation>
+                  </gmd:citation>
+                </gmd:MD_DataIdentification>
+              </gmd:identificationInfo>
+            </gmd:MD_Metadata>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+        mock_xslt(rmock)
+        rmock.get("http://data.example.com/datasets/dataset-1", status_code=200)
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+
+        source = HarvestSourceFactory(
+            backend="csw-iso-19139",
+            config={
+                "extra_configs": [
+                    {"key": "remote_url_prefix", "value": "http://catalog.example.com"}
+                ]
+            },
+        )
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects[0]
+        assert dataset.harvest.remote_url == "http://catalog.example.com/id-1"
