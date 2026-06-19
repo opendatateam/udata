@@ -788,9 +788,9 @@ def provenances_from_rdf(resource: RdfResource) -> list[str]:
     return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
-def infer_inspire_access_limitation(strings: Collection[str]) -> InspireLimitationCategory | None:
+def inspire_category_from_rights(rights: Collection[str]) -> InspireLimitationCategory | None:
     """
-    Infer INSPIRE access limitation from a list of free-text rights.
+    Identify INSPIRE access limitation category from a list of rights.
     When multiple limitations are present, only the first one is returned.
     """
     if not current_app.config["INSPIRE_SUPPORT"]:
@@ -798,8 +798,8 @@ def infer_inspire_access_limitation(strings: Collection[str]) -> InspireLimitati
 
     country = current_app.config["DEFAULT_COUNTRY_CODE"]
 
-    for s in strings:
-        category = InspireLimitationCategory.get_category_from_localized_label(s, country)
+    for right in rights:
+        category = InspireLimitationCategory.lookup(right, country)
         if category:
             return category
 
@@ -1023,7 +1023,7 @@ def dataset_from_rdf(
     if access_rights:
         set_dcat_extra(dataset, DCT.accessRights, access_rights)
 
-    inspire_category = infer_inspire_access_limitation(access_rights + rights)
+    inspire_category = inspire_category_from_rights(access_rights + rights)
     if inspire_category:
         dataset.access_type = AccessType.RESTRICTED
         dataset.access_type_reason_category = inspire_category

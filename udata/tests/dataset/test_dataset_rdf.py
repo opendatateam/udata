@@ -33,7 +33,7 @@ from udata.core.dataset.rdf import (
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
-    infer_inspire_access_limitation,
+    inspire_category_from_rights,
     license_to_rdf,
     licenses_from_rdf,
     provenances_from_rdf,
@@ -2351,7 +2351,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
                     "single_inspire_restriction",
                     True,
                     [
-                        "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b"
                     ],
                     InspireLimitationCategory.INTERNATIONAL_RELATIONS,
                 ),
@@ -2388,13 +2388,11 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             ]
         ],
     )
-    def test_inspire_access_limitation(
-        self, app, inspire_support, input_strings, expected_category
-    ):
+    def test_inspire_category(self, app, inspire_support, input_strings, expected_category):
         app.config["INSPIRE_SUPPORT"] = inspire_support
         app.config["DEFAULT_COUNTRY_CODE"] = "fr"
 
-        category = infer_inspire_access_limitation(input_strings)
+        category = inspire_category_from_rights(input_strings)
 
         assert category is expected_category
 

@@ -594,7 +594,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         # test dct:license support
         dataset = Dataset.objects.get(harvest__dct_identifier="3")
-        assert dataset.license.id == "lov2"
+        assert dataset.license is None
+        assert dataset.access_type is AccessType.RESTRICTED
+        assert (
+            dataset.access_type_reason_category == InspireLimitationCategory.INTELLECTUAL_PROPERTY
+        )
         assert dataset.harvest.remote_url == "http://data.test.org/datasets/3"
         assert dataset.harvest.remote_id == "3"
         assert dataset.harvest.issued_at.date() == date(2016, 12, 14)
