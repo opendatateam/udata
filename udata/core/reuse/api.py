@@ -6,6 +6,7 @@ from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, request
 from flask_login import current_user
 
+import udata.core.reuse.versioning  # noqa: F401 — register version transforms
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save

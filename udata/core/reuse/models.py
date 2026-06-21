@@ -86,7 +86,6 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     nested_filters={"organization_badge": "organization.badges"},
-    page_mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(
     Datetimed,
@@ -146,6 +145,7 @@ class Reuse(
         filterable={
             "key": "dataset",
         },
+        href=lambda reuse: url_for("api.datasets", reuse=reuse.id, _external=True),
     )
     dataservices = field(
         ListField(
