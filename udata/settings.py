@@ -352,8 +352,9 @@ class Defaults(object):
 
     # Hosts whose CSW server only accepts the spec-compliant lowercase apiso
     # common queryables (apiso:type) and rejects the capitalized form (apiso:Type)
-    # that pycsw requires. See `udata/harvest/backends/dcat.py`.
-    HARVEST_CSW_LOWERCASE_APISO_HOSTS = ["ogc.geo-ide.developpement-durable.gouv.fr"]
+    # that pycsw requires. Set per deployment, e.g.
+    # ["ogc.geo-ide.developpement-durable.gouv.fr"]. See harvest/backends/dcat.py.
+    HARVEST_CSW_LOWERCASE_APISO_HOSTS = []
 
     # If set, harvest emit activities associated with this user as actor
     # It should be a dedicated service account

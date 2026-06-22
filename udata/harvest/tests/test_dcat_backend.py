@@ -1080,13 +1080,18 @@ class CswApisoQueryableCasingTest(PytestOnlyDBTestCase):
         source = HarvestSourceFactory(backend="csw-dcat", url=url)
         return get_backend("csw-dcat")(source).build_csw_request(start=1)
 
-    def test_default_uses_capitalized_queryables(self):
-        request = self.build_request("https://meta.atmosud.org/csw")
+    def test_capitalized_queryables_by_default(self):
+        # No hosts configured by default: every server gets the capitalized form.
+        request = self.build_request("https://ogc.geo-ide.developpement-durable.gouv.fr/csw")
         assert "apiso:Type" in request
         assert "apiso:Identifier" in request
         assert "apiso:type" not in request
 
-    def test_geoide_uses_lowercase_queryables(self):
+    def test_listed_host_uses_lowercase_queryables(self):
+        self.app.config["HARVEST_CSW_LOWERCASE_APISO_HOSTS"] = [
+            "ogc.geo-ide.developpement-durable.gouv.fr"
+        ]
+
         request = self.build_request(
             "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset"
         )
@@ -1094,11 +1099,10 @@ class CswApisoQueryableCasingTest(PytestOnlyDBTestCase):
         assert "apiso:identifier" in request
         assert "apiso:Type" not in request
 
-    def test_lowercase_hosts_is_configurable(self):
-        self.app.config["HARVEST_CSW_LOWERCASE_APISO_HOSTS"] = ["example.org"]
-        request = self.build_request("https://example.org/csw")
-        assert "apiso:type" in request
-        assert "apiso:Type" not in request
+        # A host that is not configured keeps the capitalized form.
+        other = self.build_request("https://meta.atmosud.org/csw")
+        assert "apiso:Type" in other
+        assert "apiso:type" not in other
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
