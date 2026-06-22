@@ -350,6 +350,11 @@ class Defaults(object):
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/refs/heads/geodcat-ap-2.0.0/iso-19139-to-dcat-ap.xsl"
 
+    # Hosts whose CSW server only accepts the spec-compliant lowercase apiso
+    # common queryables (apiso:type) and rejects the capitalized form (apiso:Type)
+    # that pycsw requires. See `udata/harvest/backends/dcat.py`.
+    HARVEST_CSW_LOWERCASE_APISO_HOSTS = ["ogc.geo-ide.developpement-durable.gouv.fr"]
+
     # If set, harvest emit activities associated with this user as actor
     # It should be a dedicated service account
     HARVEST_ACTIVITY_USER_ID = None

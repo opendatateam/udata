@@ -3,6 +3,7 @@ import traceback
 from abc import ABC, abstractmethod
 from datetime import date
 from typing import ClassVar, Generator
+from urllib.parse import urlparse
 
 from flask import current_app
 from rdflib import Graph
@@ -311,19 +312,19 @@ class BaseCswDcatBackend(DcatBackend, ABC):
           <ogc:Filter>
             <ogc:Or>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>{type_property}</ogc:PropertyName>
                 <ogc:Literal>dataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>{type_property}</ogc:PropertyName>
                 <ogc:Literal>nonGeographicDataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>{type_property}</ogc:PropertyName>
                 <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:PropertyName>{type_property}</ogc:PropertyName>
                 <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
             </ogc:Or>
@@ -331,7 +332,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
-            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
+            <ogc:PropertyName>{identifier_property}</ogc:PropertyName>
             <ogc:SortOrder>ASC</ogc:SortOrder>
           </ogc:SortProperty>
         </ogc:SortBy>
@@ -376,18 +377,40 @@ class BaseCswDcatBackend(DcatBackend, ABC):
     def get_format(self) -> str:
         return "xml"
 
+    def build_csw_request(self, start: int) -> str:
+        """
+        Build the CSW GetRecords request for the given start position.
+
+        Per OGC 07-045r2 §7.2.4 the common queryables (type, identifier) are
+        lowercase; GeoIDE follows this, but pycsw only accepts the capitalized
+        form (https://github.com/geopython/pycsw/issues/1235). We default to the
+        capitalized form pycsw needs and send lowercase only to the hosts listed
+        in `HARVEST_CSW_LOWERCASE_APISO_HOSTS`.
+        """
+        lowercase_hosts = current_app.config["HARVEST_CSW_LOWERCASE_APISO_HOSTS"]
+        if urlparse(self.source.url).hostname in lowercase_hosts:
+            type_property, identifier_property = "apiso:type", "apiso:identifier"
+        else:
+            type_property, identifier_property = "apiso:Type", "apiso:Identifier"
+
+        return self.CSW_REQUEST.format(
+            output_schema=self.output_schema,
+            start=start,
+            type_property=type_property,
+            identifier_property=identifier_property,
+        )
+
     @override
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Yield all RDF pages as `Graph` from the source.
         """
-        output_schema = self.output_schema
         page_number = 0
         start = 1
 
         while True:
             log.debug(f"Requesting CSW from start={start}")
-            data = self.CSW_REQUEST.format(output_schema=output_schema, start=start)
+            data = self.build_csw_request(start)
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
 

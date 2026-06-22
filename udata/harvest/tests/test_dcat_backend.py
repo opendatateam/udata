@@ -1069,6 +1069,39 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
+class CswApisoQueryableCasingTest(PytestOnlyDBTestCase):
+    """The apiso queryable casing depends on the target server (see dcat.py).
+
+    pycsw only accepts the capitalized common queryables (apiso:Type), while
+    GeoIDE only accepts the spec-compliant lowercase form (apiso:type).
+    """
+
+    def build_request(self, url):
+        source = HarvestSourceFactory(backend="csw-dcat", url=url)
+        return get_backend("csw-dcat")(source).build_csw_request(start=1)
+
+    def test_default_uses_capitalized_queryables(self):
+        request = self.build_request("https://meta.atmosud.org/csw")
+        assert "apiso:Type" in request
+        assert "apiso:Identifier" in request
+        assert "apiso:type" not in request
+
+    def test_geoide_uses_lowercase_queryables(self):
+        request = self.build_request(
+            "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset"
+        )
+        assert "apiso:type" in request
+        assert "apiso:identifier" in request
+        assert "apiso:Type" not in request
+
+    def test_lowercase_hosts_is_configurable(self):
+        self.app.config["HARVEST_CSW_LOWERCASE_APISO_HOSTS"] = ["example.org"]
+        request = self.build_request("https://example.org/csw")
+        assert "apiso:type" in request
+        assert "apiso:Type" not in request
+
+
+@pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "schema_name, schema_uri",
