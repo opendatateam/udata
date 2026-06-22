@@ -43,7 +43,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
-from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -54,17 +54,6 @@ from udata.tests.helpers import assert200, assert404, create_geozones_fixtures
 from udata.utils import faker, unique_string
 
 from . import APITestCase, PytestOnlyAPITestCase
-
-SAMPLE_GEOM = {
-    "type": "MultiPolygon",
-    "coordinates": [
-        [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],  # noqa
-        [
-            [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],  # noqa
-            [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]],
-        ],
-    ],
-}
 
 
 def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
