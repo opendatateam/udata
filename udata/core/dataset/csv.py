@@ -12,6 +12,11 @@ def serialize_spatial_zones(dataset):
         return ",".join(z.name for z in dataset.spatial.zones)
 
 
+def serialize_spatial_geom(dataset):
+    if dataset.spatial and dataset.spatial.geom:
+        return json.dumps(dataset.spatial.geom, default=str)
+
+
 @csv.adapter(Dataset)
 class DatasetCsvAdapter(csv.Adapter):
     fields = (
@@ -33,6 +38,7 @@ class DatasetCsvAdapter(csv.Adapter):
         "temporal_coverage.end",
         "spatial.granularity",
         ("spatial.zones", serialize_spatial_zones),
+        ("spatial.geom", serialize_spatial_geom),
         ("featured", lambda o: o.featured or False),
         "created_at",
         "last_modified",

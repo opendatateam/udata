@@ -1,9 +1,12 @@
+import json
 from datetime import datetime, timedelta
 
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
+from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
 from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.helpers import create_geozones_fixtures
 
 
 class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
@@ -74,6 +77,12 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
                 ResourceFactory(),
             ]
         )
+        paca, _, _ = create_geozones_fixtures()
+        country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
+        spatial_zones_dataset = DatasetFactory(
+            spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id)
+        )
+        spatial_geom_dataset = DatasetFactory(spatial={"geom": SAMPLE_GEOM})
         adapter = DatasetCsvAdapter(Dataset.objects.all())
 
         # Build a dict (Dataset ID to dict of header name to value) from the CSV values and headers to simplify testing below.
@@ -94,3 +103,10 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         assert resources_dataset_values["resources_count"] == 3
         assert resources_dataset_values["main_resources_count"] == 1
         assert set(resources_dataset_values["resources_formats"].split(",")) == set(["csv", "json"])
+
+        spatial_zones_dataset_values = csv[str(spatial_zones_dataset.id)]
+        assert spatial_zones_dataset_values["spatial.zones"] == "Provence Alpes Côtes dAzur"
+        assert spatial_zones_dataset_values["spatial.granularity"] == "country"
+
+        spatial_geom_dataset_values = csv[str(spatial_geom_dataset.id)]
+        assert json.loads(spatial_geom_dataset_values["spatial.geom"])["type"] == "MultiPolygon"
