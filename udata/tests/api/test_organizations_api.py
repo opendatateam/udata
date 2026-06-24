@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
-from io import StringIO
+from io import BytesIO, StringIO
 
 import pytest
 from flask import url_for
 
 import udata.core.organization.constants as org_constants
-from udata.core import csv
+from udata.core import csv, storages
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataservices.factories import DataserviceFactory
@@ -30,6 +30,7 @@ from udata.tests.helpers import (
     assert_not_emit,
     assert_starts_with,
     assert_status,
+    create_test_image,
 )
 from udata.utils import faker
 
@@ -108,6 +109,45 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert member["user"]["first_name"] == "Normal"
         assert member["user"]["last_name"] == "User"
         assert "id" in member["user"]
+
+    def test_organization_logo_upload(self):
+        """A member with edit permission should upload a logo"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert200(response)
+        assert response.json["success"]
+
+        org.reload()
+        assert org.logo
+        assert org.logo.filename in storages.avatars
+        assert org.logo.original in storages.avatars
+
+    def test_organization_logo_upload_forbidden_for_non_member(self):
+        """It should forbid a non-member from uploading a logo"""
+        self.login()
+        org = OrganizationFactory()
+        response = self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert403(response)
+
+    def test_organization_logo_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)
 
     def test_organization_api_get_with_membership_request_without_created_by(self):
         """Old membership requests may have created_by=None, the API should not 500"""
