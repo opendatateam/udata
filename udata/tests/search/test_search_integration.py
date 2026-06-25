@@ -1,5 +1,3 @@
-import time
-
 import pytest
 
 from udata.core.access_type.constants import AccessType
@@ -31,6 +29,17 @@ class SearchIntegrationTest(APITestCase):
         es_client.init_indices()
         yield
 
+    def refresh_index(self):
+        """Force an ES refresh so freshly indexed documents become searchable.
+
+        Tasks run eagerly in tests, so indexing is synchronous: the only thing
+        missing is the refresh. Forcing it is deterministic, unlike relying on
+        ES' ~1s auto-refresh interval (which made these tests flaky).
+        """
+        from udata.search import get_elastic_client
+
+        get_elastic_client().es.indices.refresh(index="udata-test-*")
+
     def test_dataset_fuzzy_search(self):
         """
         Test that Elasticsearch fuzzy search works.
@@ -41,7 +50,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Données spectaculaires sur les transports")
 
         # Small delay to let ES index the document
-        time.sleep(1)
+        self.refresh_index()
 
         # Search with a typo - only ES fuzzy search can handle this
         response = self.get("/api/2/datasets/search/?q=spectakulaire")
@@ -58,7 +67,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Dataset tabular", resources=[csv_resource])
         DatasetFactory(title="Dataset machine readable", resources=[json_resource])
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?format_family=tabular")
         self.assert200(response)
@@ -76,7 +85,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Dataset public service", organization=org)
         DatasetFactory(title="Dataset user", owner=user, organization=None)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?producer_type=public-service")
         self.assert200(response)
@@ -85,11 +94,44 @@ class SearchIntegrationTest(APITestCase):
         assert "Dataset public service" in titles
         assert "Dataset user" not in titles
 
+    def test_dataset_facets_counts(self):
+        """Test that facets return correct counts, including the 'all' total."""
+        license_cc = LicenseFactory(id="cc-by")
+        license_odbl = LicenseFactory(id="odc-odbl")
+        DatasetFactory(title="DS1", license=license_cc, tags=["transport"])
+        DatasetFactory(title="DS2", license=license_cc, tags=["sante"])
+        DatasetFactory(title="DS3", license=license_odbl, tags=["transport"])
+
+        self.refresh_index()
+
+        # Without filter: all 3 datasets, facets show totals
+        response = self.get("/api/2/datasets/search/")
+        self.assert200(response)
+        assert response.json["total"] == 3
+        facets = response.json["facets"]
+        license_facet = facets["license"]
+        license_all = next(f for f in license_facet if f["name"] == "all")
+        assert license_all["count"] == 3
+        license_cc_bucket = next(f for f in license_facet if f["name"] == "cc-by")
+        assert license_cc_bucket["count"] == 2
+        license_odbl_bucket = next(f for f in license_facet if f["name"] == "odc-odbl")
+        assert license_odbl_bucket["count"] == 1
+
+        # With a tag filter: facet "all" for license should still be 2
+        # (docs matching tag=transport, regardless of license)
+        response = self.get("/api/2/datasets/search/?tag=transport")
+        self.assert200(response)
+        assert response.json["total"] == 2
+        facets = response.json["facets"]
+        license_facet = facets["license"]
+        license_all = next(f for f in license_facet if f["name"] == "all")
+        assert license_all["count"] == 2
+
     def test_reuse_search(self):
         """Test reuse search endpoint."""
         VisibleReuseFactory(title="Réutilisation de données ouvertes")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/reuses/search/?q=ouvertes")
         self.assert200(response)
@@ -106,7 +148,7 @@ class SearchIntegrationTest(APITestCase):
         VisibleReuseFactory(title="Reuse public service", organization=org)
         VisibleReuseFactory(title="Reuse by user", owner=user, organization=None)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/reuses/search/?producer_type=public-service")
         self.assert200(response)
@@ -126,7 +168,7 @@ class SearchIntegrationTest(APITestCase):
         """Test dataservice search endpoint."""
         dataservice = DataserviceFactory(title="API des transports en commun")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/dataservices/search/?q=transports")
         self.assert200(response)
@@ -139,7 +181,7 @@ class SearchIntegrationTest(APITestCase):
         # to trigger unindex and avoid polluting ES for subsequent tests.
         # There's no HTTP endpoint to trigger clean-es remotely on the search service.
         dataservice.delete()
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/dataservices/search/?q=transports")
         self.assert200(response)
@@ -149,7 +191,7 @@ class SearchIntegrationTest(APITestCase):
         """Test organization search endpoint."""
         OrganizationFactory(name="Direction du numérique")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/organizations/search/?q=numérique")
         self.assert200(response)
@@ -161,7 +203,7 @@ class SearchIntegrationTest(APITestCase):
         """Test topic search endpoint."""
         TopicFactory(name="Transports et mobilité", private=False)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=mobilité")
         self.assert200(response)
@@ -173,7 +215,7 @@ class SearchIntegrationTest(APITestCase):
         TopicFactory(name="aaa topic", private=False)
         TopicFactory(name="zzz topic", private=False)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?sort=name")
         self.assert200(response)
@@ -194,7 +236,7 @@ class SearchIntegrationTest(APITestCase):
         TopicFactory(name="old topic", private=False, created_at=datetime(2020, 1, 1))
         TopicFactory(name="new topic", private=False, created_at=datetime(2024, 1, 1))
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?sort=created")
         self.assert200(response)
@@ -216,7 +258,7 @@ class SearchIntegrationTest(APITestCase):
         time_mod.sleep(1.5)
         TopicFactory(name="new topic", private=False)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?sort=last_modified")
         self.assert200(response)
@@ -239,7 +281,7 @@ class SearchIntegrationTest(APITestCase):
         )
         TopicFactory(name="other topic", description="other description")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=climate")
         self.assert200(response)
@@ -255,7 +297,7 @@ class SearchIntegrationTest(APITestCase):
         )
         TopicFactory(name="other topic", description="other description")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=biodiversity")
         self.assert200(response)
@@ -269,7 +311,7 @@ class SearchIntegrationTest(APITestCase):
         TopicElementFactory(topic=topic, title="some title", tags=["renewable-energy"])
         TopicFactory(name="other topic", description="other description")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=renewable-energy")
         self.assert200(response)
@@ -285,14 +327,14 @@ class SearchIntegrationTest(APITestCase):
         )
         TopicFactory(name="other topic", description="other description")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=climate")
         self.assert200(response)
         assert response.json["total"] == 1
 
         elem.delete()
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=climate")
         self.assert200(response)
@@ -310,7 +352,7 @@ class SearchIntegrationTest(APITestCase):
         )
         TopicFactory(name="other topic", description="other description")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=climate")
         self.assert200(response)
@@ -319,7 +361,7 @@ class SearchIntegrationTest(APITestCase):
         elem.title = "ocean biodiversity data"
         elem.tags = ["marine"]
         elem.save()
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/topics/search/?q=climate")
         self.assert200(response)
@@ -335,7 +377,7 @@ class SearchIntegrationTest(APITestCase):
         user = UserFactory()
         DiscussionFactory(title="Question sur les données", subject=dataset, user=user)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/discussions/search/?q=données")
         self.assert200(response)
@@ -347,7 +389,7 @@ class SearchIntegrationTest(APITestCase):
         """Test post search endpoint."""
         PostFactory(name="Actualités open data", headline="Les dernières nouvelles")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/posts/search/?q=actualités")
         self.assert200(response)
@@ -361,7 +403,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Dataset transport only", tags=["transport"])
         DatasetFactory(title="Dataset environnement only", tags=["environnement"])
 
-        time.sleep(1)
+        self.refresh_index()
 
         # Filter by both tags - should only return dataset with both
         response = self.get("/api/2/datasets/search/?tag=transport&tag=environnement")
@@ -379,7 +421,7 @@ class SearchIntegrationTest(APITestCase):
         org_company.add_badge(COMPANY)
         org_company.save()
 
-        time.sleep(2)
+        self.refresh_index()
 
         response = self.get("/api/2/organizations/search/?producer_type=public-service")
         self.assert200(response)
@@ -394,7 +436,7 @@ class SearchIntegrationTest(APITestCase):
         org.add_badge(org_constants.PUBLIC_SERVICE)
         org.save()
 
-        time.sleep(2)
+        self.refresh_index()
 
         response = self.get("/api/2/organizations/search/?badge=public-service")
         self.assert200(response)
@@ -412,7 +454,7 @@ class SearchIntegrationTest(APITestCase):
         org = OrganizationFactory()
         reuse = VisibleReuseFactory(organization=org)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/reuses/search/?organization={org.id}")
         self.assert200(response)
@@ -429,7 +471,7 @@ class SearchIntegrationTest(APITestCase):
         """
         org = OrganizationFactory(name="Organisation Unique Test")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/organizations/search/?q=unique")
         self.assert200(response)
@@ -445,7 +487,7 @@ class SearchIntegrationTest(APITestCase):
         open_dataservice = DataserviceFactory(access_type=AccessType.OPEN)
         open_with_account_dataservice = DataserviceFactory(access_type=AccessType.OPEN_WITH_ACCOUNT)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/dataservices/search/")
         self.assert200(response)
@@ -469,7 +511,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Ancien", created_at_internal=datetime(2020, 1, 1))
         DatasetFactory(title="Récent", created_at_internal=datetime(2024, 1, 1))
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?sort=-created")
         self.assert200(response)
@@ -483,7 +525,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="CC-BY", license=license_cc)
         DatasetFactory(title="ODbL", license=license_odbl)
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?license=cc-by")
         self.assert200(response)
@@ -497,7 +539,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Dataset org", organization=org)
         DatasetFactory(title="Dataset autre")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/datasets/search/?organization={org.id}")
         self.assert200(response)
@@ -511,7 +553,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Dataset user", owner=user, organization=None)
         DatasetFactory(title="Dataset autre")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/datasets/search/?owner={user.id}")
         self.assert200(response)
@@ -527,7 +569,7 @@ class SearchIntegrationTest(APITestCase):
         DatasetFactory(title="Avec schéma", resources=[resource_with_schema])
         DatasetFactory(title="Sans schéma")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?schema=etalab/schema-irve")
         self.assert200(response)
@@ -543,7 +585,7 @@ class SearchIntegrationTest(APITestCase):
 
         DatasetFactory(title="Dataset sans badge")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/datasets/search/?badge={HVD}")
         self.assert200(response)
@@ -555,7 +597,7 @@ class SearchIntegrationTest(APITestCase):
         for i in range(4):
             DatasetFactory(title=f"Dataset {i}")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/datasets/search/?page_size=2&page=1")
         self.assert200(response)
@@ -576,7 +618,7 @@ class SearchIntegrationTest(APITestCase):
         VisibleReuseFactory(title="API reuse", type="api")
         VisibleReuseFactory(title="App reuse", type="application")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/reuses/search/?type=api")
         self.assert200(response)
@@ -590,7 +632,7 @@ class SearchIntegrationTest(APITestCase):
         VisibleReuseFactory(title="Reuse user", owner=user, organization=None)
         VisibleReuseFactory(title="Reuse autre")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/reuses/search/?owner={user.id}")
         self.assert200(response)
@@ -604,7 +646,7 @@ class SearchIntegrationTest(APITestCase):
         DataserviceFactory(title="DS org", organization=org)
         DataserviceFactory(title="DS autre")
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get(f"/api/2/dataservices/search/?organization={org.id}")
         self.assert200(response)
@@ -617,7 +659,7 @@ class SearchIntegrationTest(APITestCase):
         DataserviceFactory(title="DS tagged", tags=["transport"])
         DataserviceFactory(title="DS other", tags=["sante"])
 
-        time.sleep(1)
+        self.refresh_index()
 
         response = self.get("/api/2/dataservices/search/?tag=transport")
         self.assert200(response)

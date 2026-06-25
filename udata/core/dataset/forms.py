@@ -1,3 +1,5 @@
+import copy
+
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
     AccessAudienceType,
@@ -6,7 +8,6 @@ from udata.core.access_type.constants import (
 )
 from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
-from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.mongo.errors import FieldValidationError
@@ -30,6 +31,23 @@ from .models import (
 )
 
 __all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
+
+# Fields computed by the server at upload time for resources hosted on our
+# file storage (see `handle_upload`). They must not be overridden by API
+# clients: a client sending stale metadata (e.g. fetched before a new file
+# upload) would otherwise overwrite the values describing the currently hosted
+# file. None of these fields are editable from the admin front for a hosted
+# file: they are only sent for `remote` resources.
+# Same reasoning as the `url` protection from
+# https://github.com/opendatateam/udata/issues/2544
+HOSTED_RESOURCE_PROTECTED_FIELDS = (
+    "filetype",
+    "url",
+    "checksum",
+    "filesize",
+    "mime",
+    "format",
+)
 
 
 class ChecksumForm(ModelForm):
@@ -87,7 +105,7 @@ class BaseResourceForm(ModelForm):
         default="other",
         description=_("Resource type (documentation, API...)"),
     )
-    url = fields.UploadableURLField(_("URL"), [validators.DataRequired()], storage=resources)
+    url = fields.URLField(_("URL"), [validators.DataRequired()])
     format = fields.StringField(
         _("Format"),
         filters=[normalize_format],
@@ -102,6 +120,20 @@ class BaseResourceForm(ModelForm):
     )
     extras = fields.ExtrasField()
     schema = fields.FormField(SchemaForm)
+
+    def populate_obj(self, obj):
+        # Only protect existing hosted files: a brand new resource has no url
+        # yet and must be populated normally. `checksum` is deep-copied because
+        # populate_obj mutates the existing embedded document in place.
+        protect = obj.filetype == "file" and obj.url
+        protected_values = (
+            {name: copy.deepcopy(getattr(obj, name)) for name in HOSTED_RESOURCE_PROTECTED_FIELDS}
+            if protect
+            else {}
+        )
+        super().populate_obj(obj)
+        for name, value in protected_values.items():
+            setattr(obj, name, value)
 
 
 class ResourceForm(BaseResourceForm):

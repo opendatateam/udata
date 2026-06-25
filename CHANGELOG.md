@@ -1,5 +1,36 @@
 # Changelog
 
+## 17.0.2 (2026-06-23)
+
+- chore(CI): use recommended UV_PUBLISH_TOKEN ([#3840](https://github.com/opendatateam/udata/pull/3840))
+- chore(deps): lock file maintenance ([#3820](https://github.com/opendatateam/udata/pull/3820))
+- chore(deps): lock file maintenance ([#3829](https://github.com/opendatateam/udata/pull/3829))
+- chore(harvest): improve CSW request XML compliance ([#3837](https://github.com/opendatateam/udata/pull/3837))
+- chore(harvest): partially revert csw xml update ([#3843](https://github.com/opendatateam/udata/pull/3843))
+- feat: add API v2 for reuses listing ([#3800](https://github.com/opendatateam/udata/pull/3800))
+- feat: add file to charts ([#3809](https://github.com/opendatateam/udata/pull/3809))
+- feat(harvest): harvest spatial resolution ([#3773](https://github.com/opendatateam/udata/pull/3773))
+- fix(perfs): filter datasets by reuse or dataservice ([#3822](https://github.com/opendatateam/udata/pull/3822))
+- fix(perfs): paginate ressources MongoDB side instead of Python ([#3823](https://github.com/opendatateam/udata/pull/3823))
+- fix: protect hosted resource checksum ([#3834](https://github.com/opendatateam/udata/pull/3834))
+- perf: optimize harvest clean command ([#3836](https://github.com/opendatateam/udata/pull/3836))
+- refactor: add missing signal kwargs ([#3835](https://github.com/opendatateam/udata/pull/3835))
+- test: improve ElasticSearch tests stability ([#3841](https://github.com/opendatateam/udata/pull/3841))
+
+
+## 17.0.1 (2026-06-10)
+
+- feat: improve backfill harvest migration ([#3826](https://github.com/opendatateam/udata/pull/3826))
+
+
+## 17.0.0 (2026-06-09)
+
+- **feat!: harvest API refactor ([#3759](https://github.com/opendatateam/udata/pull/3759))**
+- feat: prepare ElasticSearch 8 ([#3714](https://github.com/opendatateam/udata/pull/3714))
+- feat(search): index Topic.elements ([#3811](https://github.com/opendatateam/udata/pull/3811))
+- feat(spam): add web url in message report ([#3821](https://github.com/opendatateam/udata/pull/3821))
+
+
 ## 16.6.1 (2026-06-05)
 
 - chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))

@@ -235,20 +235,30 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["dataservice"]):
                 api.abort(400, "Dataservice arg must be an identifier")
             try:
-                dataservice = Dataservice.objects.get(id=args["dataservice"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources).
+                dataservice = (
+                    Dataservice.objects(id=args["dataservice"])
+                    .only("datasets")
+                    .no_dereference()
+                    .get()
+                )
             except Dataservice.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in dataservice.datasets])
         if args.get("reuse"):
             if not ObjectId.is_valid(args["reuse"]):
                 api.abort(400, "Reuse arg must be an identifier")
             try:
-                reuse = Reuse.objects.get(id=args["reuse"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources,
+                # which can be megabytes for a dataset with thousands of resources).
+                reuse = Reuse.objects(id=args["reuse"]).only("datasets").no_dereference().get()
             except Reuse.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in reuse.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in reuse.datasets])
         if args.get("archived") is not None:
             if current_user.is_anonymous:
                 abort(401)
@@ -737,11 +747,9 @@ class ResourceAPI(ResourceMixin, API):
         ):
             abort(400, "Cannot modify filetype after creation")
 
-        # ensure API client does not override url on self-hosted resources
-        if resource.filetype == "file":
-            form._fields.get("url").data = resource.url
-
         # populate_obj populates existing resource object with the content of the form.
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.now(UTC)
@@ -749,9 +757,14 @@ class ResourceAPI(ResourceMixin, API):
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
         # Will be fixed when we switch to the new API Fields.
-        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+        body = request.get_json()
+        if "schema" in body and form._fields.get("schema").data is None:
             resource.schema = None
-        if "checksum" in request.get_json() and form._fields.get("checksum").data is None:
+        if (
+            resource.filetype != "file"
+            and "checksum" in body
+            and form._fields.get("checksum").data is None
+        ):
             resource.checksum = None
 
         dataset.update_resource(resource)
@@ -821,8 +834,8 @@ class CommunityResourceAPI(API):
         """Update a given community resource"""
         community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
-        if community.filetype == "file":
-            form._fields.get("url").data = community.url
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
