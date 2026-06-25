@@ -41,7 +41,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -592,12 +592,7 @@ def generate_fields(**kwargs) -> Callable:
         parser: RequestParser = api.parser()
 
         if paginable:
-            parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(parser)
 
         if sortables:
             choices: list[str] = [sortable["key"] for sortable in sortables] + [
