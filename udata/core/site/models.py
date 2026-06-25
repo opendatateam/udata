@@ -102,9 +102,9 @@ class Site(WithMetrics, Document):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects.visible().count()
-        self.metrics["datasets_visits_by_months"] = get_metrics_for_model(
-            "site", None, ["visit_dataset"]
-        )[0]
+        visits = get_metrics_for_model("site", None, ["visit_dataset"])
+        if visits is not None:
+            self.metrics["datasets_visits_by_months"] = visits[0]
         self.save()
 
     def count_resources(self):
@@ -116,9 +116,9 @@ class Site(WithMetrics, Document):
             ),
             {},
         ).get("count", 0)
-        self.metrics["resources_downloads_by_months"] = get_metrics_for_model(
-            "site", None, ["download_resource"]
-        )[0]
+        downloads = get_metrics_for_model("site", None, ["download_resource"])
+        if downloads is not None:
+            self.metrics["resources_downloads_by_months"] = downloads[0]
         self.save()
 
     def count_reuses(self):
