@@ -62,3 +62,14 @@ def cleanup_reuse_notifications(reuse, **kwargs):
         Notification.objects(details__reuse=reuse).delete()
     except Exception as e:
         log.error(f"Error cleaning up notifications for deleted reuse {reuse.id}: {e}")
+
+
+@Dataset.on_delete.connect
+def cleanup_reuse_dataset_notifications(dataset, **kwargs):
+    """Clean up reuse notifications when a referenced dataset is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        Notification.objects(details__dataset=dataset).delete()
+    except Exception as e:
+        log.error(f"Error cleaning up reuse notifications for deleted dataset {dataset.id}: {e}")

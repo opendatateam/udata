@@ -60,3 +60,16 @@ def cleanup_dataservice_notifications(dataservice, **kwargs):
         Notification.objects(details__dataservice=dataservice).delete()
     except Exception as e:
         log.error(f"Error cleaning up notifications for deleted dataservice {dataservice.id}: {e}")
+
+
+@Dataset.on_delete.connect
+def cleanup_dataservice_dataset_notifications(dataset, **kwargs):
+    """Clean up dataservice notifications when a referenced dataset is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        Notification.objects(details__dataset=dataset).delete()
+    except Exception as e:
+        log.error(
+            f"Error cleaning up dataservice notifications for deleted dataset {dataset.id}: {e}"
+        )
