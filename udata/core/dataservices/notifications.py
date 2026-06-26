@@ -63,8 +63,8 @@ def cleanup_dataservice_notifications(dataservice, **kwargs):
 
 
 @Dataset.on_delete.connect
-def cleanup_dataservice_dataset_notifications(dataset, **kwargs):
-    """Clean up dataservice notifications when a referenced dataset is deleted"""
+def cleanup_dataservice_and_reuse_dataset_notifications(dataset, **kwargs):
+    """Clean up dataservice and reuse notifications when a referenced dataset is deleted"""
     from udata.features.notifications.models import Notification
 
     try:
