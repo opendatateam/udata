@@ -107,14 +107,18 @@ class SiteActivityAPI(API):
         safe_items = []
         for item in qs.queryset.items:
             try:
+                item.actor
+                if item.organization:
+                    item.organization
                 item.related_to
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
-            else:
-                if isinstance(item.related_to, Owned):
-                    if not OwnableReadPermission(item.related_to).can():
-                        continue
-                safe_items.append(item)
+                continue
+
+            if isinstance(item.related_to, Owned):
+                if not OwnableReadPermission(item.related_to).can():
+                    continue
+            safe_items.append(item)
         qs.queryset.items = safe_items
 
         return qs
