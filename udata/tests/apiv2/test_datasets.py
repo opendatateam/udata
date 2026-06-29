@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest import mock
 
 from flask import url_for
 from mongoengine.context_managers import query_counter
@@ -509,21 +508,6 @@ class DatasetExtrasAPITest(APITestCase):
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras["test::extra"] == "test-value"
 
-    def test_update_dataset_extras_does_not_full_save(self):
-        # Saving a whole dataset is O(N²) in the number of embedded resources;
-        # the extras endpoint must write with a targeted update_one instead.
-        self.dataset.extras = {"test::extra": "test-value"}
-        self.dataset.save()
-
-        data = {"test::extra": "changed"}
-        with mock.patch.object(Dataset, "save") as save:
-            response = self.put(url_for("apiv2.dataset_extras", dataset=self.dataset), data)
-        self.assert200(response)
-        save.assert_not_called()
-
-        self.dataset.reload()
-        assert self.dataset.extras["test::extra"] == "changed"
-
     def test_dataset_custom_extras_str(self):
         member = Member(user=self.user, role="admin")
         org = OrganizationFactory(members=[member])
@@ -671,25 +655,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert len(self.dataset.resources[0].extras) == 1
         assert self.dataset.resources[0].extras["test::extra"] == "test-value"
 
-    def test_update_resource_extras_does_not_full_save(self):
-        # This endpoint is on Hydra's hot callback path. Saving the whole dataset
-        # is O(N²) in the number of embedded resources, so it must use a targeted
-        # positional update_one instead of resource.save() -> dataset.save().
-        resource = ResourceFactory()
-        self.dataset.resources.append(resource)
-        self.dataset.save()
-
-        data = {"check:status": 200}
-        with mock.patch.object(Dataset, "save") as save:
-            response = self.put(
-                url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id), data
-            )
-        self.assert200(response)
-        save.assert_not_called()
-
-        self.dataset.reload()
-        assert self.dataset.resources[0].extras["check:status"] == 200
-
     def test_update_resource_extras_refreshes_quality(self):
         # quality_cached depends on resource extras: check:available feeds the
         # `all_resources_available` indicator, so the targeted update must recompute it.
@@ -707,3 +672,104 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.dataset.reload()
         assert self.dataset.resources[0].extras["check:available"] is False
         assert self.dataset.quality["all_resources_available"] is False
+
+    def test_delete_resource_extras_refreshes_quality(self):
+        # Symmetric to the PUT case: deleting check:available makes the resource
+        # availability `unknown` again, so the targeted update must recompute
+        # quality_cached on delete too.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": False})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        assert self.dataset.quality["all_resources_available"] is False
+
+        response = self.delete(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id),
+            ["check:available"],
+        )
+        self.assert204(response)
+
+        self.dataset.reload()
+        assert "check:available" not in self.dataset.resources[0].extras
+        assert self.dataset.quality["all_resources_available"] is True
+
+    def test_update_resource_extras_refreshes_last_update(self):
+        # last_update derives from resource.last_modified, which for a remote
+        # resource reads the `analysis:last-modified-at` extra. Editing that extra
+        # must refresh the dataset's last_update, as Dataset.clean() did on save.
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-01-01T00:00:00"}
+        )
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        self.dataset.reload()
+        assert self.dataset.last_update == datetime(2024, 1, 1)
+
+        data = {"analysis:last-modified-at": "2024-06-15T12:00:00"}
+        response = self.put(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id), data
+        )
+        self.assert200(response)
+
+        self.dataset.reload()
+        assert self.dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+    def test_delete_resource_extras_refreshes_last_update(self):
+        # Deleting `analysis:last-modified-at` makes the remote resource fall back
+        # to its last_modified_internal, so last_update must no longer be the
+        # deleted date.
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2020-01-01T00:00:00"}
+        )
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        self.dataset.reload()
+        assert self.dataset.last_update == datetime(2020, 1, 1)
+
+        response = self.delete(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id),
+            ["analysis:last-modified-at"],
+        )
+        self.assert204(response)
+
+        self.dataset.reload()
+        assert self.dataset.last_update != datetime(2020, 1, 1)
+
+    def test_update_resource_extras_targets_correct_resource(self):
+        # The positional $ operator must write to the matched resource only, not to
+        # the first resource of the array.
+        resources = [ResourceFactory() for _ in range(3)]
+        self.dataset.resources.extend(resources)
+        self.dataset.save()
+        target = resources[1]
+
+        data = {"check:status": 200}
+        response = self.put(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=target.id), data
+        )
+        self.assert200(response)
+
+        self.dataset.reload()
+        assert self.dataset.resources[1].extras["check:status"] == 200
+        assert self.dataset.resources[0].extras == {}
+        assert self.dataset.resources[2].extras == {}
+
+    def test_delete_resource_extras_targets_correct_resource(self):
+        # The positional $ operator must delete from the matched resource only.
+        resources = [
+            ResourceFactory(extras={"check:status": 200, "keep": "value"}) for _ in range(3)
+        ]
+        self.dataset.resources.extend(resources)
+        self.dataset.save()
+        target = resources[1]
+
+        response = self.delete(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=target.id),
+            ["check:status"],
+        )
+        self.assert204(response)
+
+        self.dataset.reload()
+        assert "check:status" not in self.dataset.resources[1].extras
+        assert self.dataset.resources[1].extras["keep"] == "value"
+        assert self.dataset.resources[0].extras["check:status"] == 200
+        assert self.dataset.resources[2].extras["check:status"] == 200

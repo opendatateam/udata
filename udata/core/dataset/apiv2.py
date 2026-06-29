@@ -581,10 +581,16 @@ class ResourceExtrasAPI(ResourceMixin, API):
         # number of embedded resources, and this endpoint is on Hydra's hot callback
         # path (run for every resource, on datasets with 15k+ resources): the targeted
         # write avoids re-shipping the whole multi-MB document on each call.
-        # quality_cached is recomputed here because it depends on resource extras
-        # (check:available feeds `all_resources_available`).
+        # last_update and quality_cached are recomputed here because they both depend
+        # on resource extras: a remote resource's last_modified can come from its
+        # `analysis:last-modified-at` extra, and check:available feeds
+        # `all_resources_available`. last_update is set first so the recomputed
+        # quality_cached (whose next_update_for_update_fulfilled_in_time derives from
+        # last_update) stays consistent, exactly as Dataset.clean() would do on save.
+        dataset.last_update = dataset.compute_last_update()
         Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
             set__resources__S__extras=resource.extras,
+            set__last_update=dataset.last_update,
             set__quality_cached=dataset.compute_quality(),
         )
         return resource.extras
@@ -606,9 +612,12 @@ class ResourceExtrasAPI(ResourceMixin, API):
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
         # Targeted positional update instead of resource.save() -> dataset.save()
-        # (which rewrites the whole document, O(N) in resources). See the put() above.
+        # (which rewrites the whole document, O(N) in resources). See the put() above
+        # for why last_update and quality_cached are recomputed from the resource extras.
+        dataset.last_update = dataset.compute_last_update()
         Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
             set__resources__S__extras=resource.extras,
+            set__last_update=dataset.last_update,
             set__quality_cached=dataset.compute_quality(),
         )
         return resource.extras, 204
