@@ -44,7 +44,6 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
 from udata.uris import cdata_url
-from udata.utils import to_naive_datetime
 
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
@@ -212,7 +211,7 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields(read_mask_exclude=["blocs"])
+@generate_fields(read_mask_exclude=["presentation_blocs"])
 class Organization(
     Auditable,
     SpamMixin,
@@ -258,20 +257,20 @@ class Organization(
     zone = field(StringField(), readonly=True)
     extras = field(OrganizationExtrasField(), auditable=False)
 
-    blocs = field(
+    presentation_blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
-        # Read through `public_blocs` so the API hides unpublished blocs from the public.
-        # Writes still target the real `blocs` attribute (patch() addresses fields by key).
-        attribute="public_blocs",
+        # Read through `public_presentation_blocs` so the API hides unpublished blocs from
+        # the public. Writes still target the real `presentation_blocs` attribute (patch()
+        # addresses fields by key).
+        attribute="public_presentation_blocs",
     )
-    blocs_published_at = field(
+    presentation_blocs_published_at = field(
         DateTimeField(),
         description=(
-            "Publication date of the organization blocs. The blocs are publicly visible "
-            "once this date is set and reached. Leave empty to keep them hidden (draft), "
-            "or set a future date to schedule their publication. Organization "
-            "administrators always see the blocs regardless of this date."
+            "Publication date of the organization presentation blocs. Set it to make the "
+            "blocs publicly visible; leave it empty to keep them hidden (draft). "
+            "Organization administrators always see the blocs regardless of this date."
         ),
     )
 
@@ -299,27 +298,15 @@ class Organization(
         return self.name or ""
 
     @property
-    def blocs_are_published(self) -> bool:
-        """Whether the organization blocs are visible to the public.
+    def public_presentation_blocs(self):
+        """Presentation blocs as exposed through the API.
 
-        Blocs without a publication date are a draft and never shown publicly. A future
-        date schedules them, making them visible automatically once reached.
+        Hidden from the public until they are published (`presentation_blocs_published_at` is
+        set); organization administrators always see them so they can prepare the edito
+        before it goes live.
         """
-        if self.blocs_published_at is None:
-            return False
-        # MongoEngine stores naive datetimes, so normalize before comparing.
-        return to_naive_datetime(self.blocs_published_at) <= datetime.now(UTC).replace(tzinfo=None)
-
-    @property
-    def public_blocs(self):
-        """Blocs as exposed through the API.
-
-        Hidden from the public until their publication date is reached; organization
-        administrators always see them so they can prepare and schedule the edito before
-        it goes live.
-        """
-        if self.blocs_are_published or self.permissions["edit"].can():
-            return self.blocs
+        if self.presentation_blocs_published_at is not None or self.permissions["edit"].can():
+            return self.presentation_blocs
         return []
 
     @property

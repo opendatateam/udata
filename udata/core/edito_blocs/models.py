@@ -161,6 +161,6 @@ def purge_blocs_references(ref_field, obj_id):
         )
 
     purge(Post._get_collection(), "blocs")
-    purge(Organization._get_collection(), "blocs")
+    purge(Organization._get_collection(), "presentation_blocs")
     for blocs_field in SITE_BLOCS_FIELDS:
         purge(Site._get_collection(), blocs_field)

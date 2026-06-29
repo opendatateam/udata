@@ -103,7 +103,7 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         bloc = DatasetsListBloc(title="Featured", datasets=[dataset_to_delete, dataset_keep])
         PostFactory(body_type="blocs", blocs=[bloc])
         SiteFactory(id="test-site", datasets_blocs=[bloc])
-        org = OrganizationFactory(blocs=[bloc])
+        org = OrganizationFactory(presentation_blocs=[bloc])
 
         tasks.purge_datasets()
 
@@ -116,8 +116,8 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert site.datasets_blocs[0].datasets[0].id == dataset_keep.id
 
         org = Organization.objects.get(id=org.id)
-        assert len(org.blocs[0].datasets) == 1
-        assert org.blocs[0].datasets[0].id == dataset_keep.id
+        assert len(org.presentation_blocs[0].datasets) == 1
+        assert org.presentation_blocs[0].datasets[0].id == dataset_keep.id
 
     def test_purge_datasets_cleans_dataset_in_nested_accordion_bloc(self):
         """Purging a dataset must remove it from `DatasetsListBloc`s nested inside an

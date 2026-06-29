@@ -305,63 +305,52 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
     def test_blocs_hidden_by_default(self):
         """Blocs are an opt-in field — they should not appear in the default response."""
-        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello")])
+        org = OrganizationFactory(presentation_blocs=[MarkdownBloc(content="Hello")])
         response = self.get(url_for("api.organization", org=org))
         assert200(response)
-        assert "blocs" not in response.json
+        assert "presentation_blocs" not in response.json
 
     def test_blocs_returned_with_x_fields(self):
         org = OrganizationFactory(
-            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
-            blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        assert len(response.json["blocs"]) == 1
-        assert response.json["blocs"][0]["class"] == "MarkdownBloc"
-        assert response.json["blocs"][0]["title"] == "Welcome"
-        assert response.json["blocs"][0]["content"] == "Hello"
+        assert len(response.json["presentation_blocs"]) == 1
+        assert response.json["presentation_blocs"][0]["class"] == "MarkdownBloc"
+        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
+        assert response.json["presentation_blocs"][0]["content"] == "Hello"
 
     def test_draft_blocs_hidden_from_public(self):
         """Without a publication date, blocs are a draft and never shown to the public."""
-        org = OrganizationFactory(blocs=[MarkdownBloc(content="Hello", title="Welcome")])
-        response = self.get(
-            url_for("api.organization", org=org),
-            headers={"X-Fields": "{*}"},
-        )
-        assert200(response)
-        assert response.json["blocs"] == []
-
-    def test_scheduled_blocs_hidden_from_public(self):
-        """A future publication date keeps the blocs hidden from the public until reached."""
         org = OrganizationFactory(
-            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
-            blocs_published_at=datetime(2100, 1, 1, tzinfo=UTC),
+            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")]
         )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        assert response.json["blocs"] == []
+        assert response.json["presentation_blocs"] == []
 
     def test_draft_blocs_visible_to_admin(self):
-        """Editors always see the blocs so they can prepare and schedule the edito."""
+        """Admins always see the blocs so they can prepare the edito before publishing."""
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="admin")],
-            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
         )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        assert len(response.json["blocs"]) == 1
-        assert response.json["blocs"][0]["title"] == "Welcome"
+        assert len(response.json["presentation_blocs"]) == 1
+        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
 
     def test_draft_blocs_hidden_from_editor(self):
         """Only organization administrators see draft blocs: an editor (who cannot edit
@@ -369,33 +358,34 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="editor")],
-            blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
         )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        assert response.json["blocs"] == []
+        assert response.json["presentation_blocs"] == []
 
-    def test_admin_can_set_blocs_published_at(self):
+    def test_admin_can_publish_blocs(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
-        data["blocs"] = [{"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"}]
-        data["blocs_published_at"] = "2020-01-01T00:00:00+00:00"
+        data["presentation_blocs"] = [
+            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"}
+        ]
+        data["presentation_blocs_published_at"] = "2020-01-01T00:00:00+00:00"
         response = self.put(url_for("api.organization", org=org), data)
         assert200(response)
 
         org.reload()
-        assert org.blocs_published_at is not None
-        assert org.blocs_are_published is True
+        assert org.presentation_blocs_published_at is not None
 
     def test_admin_can_update_blocs(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
-        data["blocs"] = [
+        data["presentation_blocs"] = [
             {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"},
             {
                 "class": "LinksListBloc",
@@ -407,31 +397,31 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert200(response)
 
         org.reload()
-        assert len(org.blocs) == 2
-        assert org.blocs[0].__class__.__name__ == "MarkdownBloc"
-        assert org.blocs[0].title == "Edito"
-        assert org.blocs[1].__class__.__name__ == "LinksListBloc"
-        assert org.blocs[1].links[0].title == "Doc"
+        assert len(org.presentation_blocs) == 2
+        assert org.presentation_blocs[0].__class__.__name__ == "MarkdownBloc"
+        assert org.presentation_blocs[0].title == "Edito"
+        assert org.presentation_blocs[1].__class__.__name__ == "LinksListBloc"
+        assert org.presentation_blocs[1].links[0].title == "Doc"
 
     def test_editor_cannot_update_blocs(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="editor")])
         data = org.to_dict()
-        data["blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
-        assert org.blocs == []
+        assert org.presentation_blocs == []
 
     def test_non_member_cannot_update_blocs(self):
         self.login()
         org = OrganizationFactory()
         data = org.to_dict()
-        data["blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
-        assert org.blocs == []
+        assert org.presentation_blocs == []
 
     def test_accordion_blocs_serialized_recursively(self):
         """A generic bloc nested inside an accordion item must serialize with its concrete
@@ -439,7 +429,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         (`Organization.blocs` -> `AccordionItemBloc.content`), which is the path most
         affected by resolving the allowed subclasses at marshalling time."""
         org = OrganizationFactory(
-            blocs=[
+            presentation_blocs=[
                 AccordionListBloc(
                     title="FAQ",
                     items=[
@@ -450,14 +440,14 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                     ],
                 )
             ],
-            blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        accordion = response.json["blocs"][0]
+        accordion = response.json["presentation_blocs"][0]
         assert accordion["class"] == "AccordionListBloc"
         assert accordion["title"] == "FAQ"
         item = accordion["items"][0]
@@ -473,7 +463,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
-        data["blocs"] = [
+        data["presentation_blocs"] = [
             {
                 "class": "AccordionListBloc",
                 "title": "FAQ",
@@ -485,7 +475,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
         org.reload()
-        assert org.blocs == []
+        assert org.presentation_blocs == []
 
 
 class MembershipAPITest(PytestOnlyAPITestCase):
