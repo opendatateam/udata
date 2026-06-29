@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime, timedelta, timezone
+from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -109,6 +110,34 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert len(dataset.resources) == 1
         assert dataset.resources[0].id == resource.id
         assert dataset.resources[0].description == "New description"
+
+    def test_update_resource_does_not_reload(self):
+        # update_resource must not reload(): reloading re-deserializes every embedded
+        # resource (O(N), prohibitive on large datasets). The in-memory document is
+        # kept consistent instead.
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        resource.description = "New description"
+
+        with mock.patch.object(Dataset, "reload") as reload:
+            dataset.update_resource(resource)
+        reload.assert_not_called()
+
+    def test_update_resource_refreshes_quality_without_reload(self):
+        # quality_cached depends on resource extras (check:available feeds
+        # all_resources_available). After update_resource — and without any reload —
+        # the in-memory document AND the persisted document must reflect the change.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": True})
+        dataset = DatasetFactory(resources=[resource])
+        assert dataset.quality["all_resources_available"] is True
+
+        resource.extras["check:available"] = False
+        dataset.update_resource(resource)
+
+        # in-memory, no reload
+        assert dataset.quality["all_resources_available"] is False
+        # persisted
+        assert Dataset.objects(id=dataset.id).first().quality["all_resources_available"] is False
 
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()
