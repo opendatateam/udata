@@ -1,5 +1,4 @@
 from datetime import UTC, date, datetime, timedelta, timezone
-from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -111,18 +110,6 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert dataset.resources[0].id == resource.id
         assert dataset.resources[0].description == "New description"
 
-    def test_update_resource_does_not_reload(self):
-        # update_resource must not reload(): reloading re-deserializes every embedded
-        # resource (O(N), prohibitive on large datasets). The in-memory document is
-        # kept consistent instead.
-        resource = ResourceFactory()
-        dataset = DatasetFactory(resources=[resource])
-        resource.description = "New description"
-
-        with mock.patch.object(Dataset, "reload") as reload:
-            dataset.update_resource(resource)
-        reload.assert_not_called()
-
     def test_update_resource_refreshes_quality_without_reload(self):
         # quality_cached depends on resource extras (check:available feeds
         # all_resources_available). After update_resource — and without any reload —
@@ -138,6 +125,66 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert dataset.quality["all_resources_available"] is False
         # persisted
         assert Dataset.objects(id=dataset.id).first().quality["all_resources_available"] is False
+
+    def test_add_resource_keeps_in_memory_and_persisted_consistent(self):
+        # add_resource performs a divergent double write: it pushes resource.to_mongo()
+        # to the DB but inserts the live resource object in memory. Since no reload()
+        # re-syncs them anymore, both representations must agree.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": False})
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+
+        dataset.add_resource(resource)
+
+        persisted = Dataset.objects(id=dataset.id).first()
+        assert [r.id for r in dataset.resources] == [r.id for r in persisted.resources]
+        assert dataset.resources[0].id == resource.id
+        assert persisted.resources[0].id == resource.id
+        # quality is recomputed identically in memory and in the DB
+        assert (
+            dataset.quality["all_resources_available"]
+            == persisted.quality["all_resources_available"]
+            is False
+        )
+
+    def test_remove_resource_refreshes_in_memory_and_persisted(self):
+        # remove_resource updates the in-memory document (resources list + quality_cached)
+        # to match what it persists, without a reload(). check:available feeds
+        # all_resources_available: dropping the unavailable resource flips it to True.
+        available = ResourceFactory(filetype="remote", extras={"check:available": True})
+        unavailable = ResourceFactory(filetype="remote", extras={"check:available": False})
+        dataset = DatasetFactory(resources=[available, unavailable])
+        assert dataset.quality["all_resources_available"] is False
+
+        with assert_emit(Dataset.on_resource_removed):
+            dataset.remove_resource(unavailable)
+
+        # in-memory, no reload
+        assert [r.id for r in dataset.resources] == [available.id]
+        assert dataset.quality["all_resources_available"] is True
+        # persisted
+        persisted = Dataset.objects(id=dataset.id).first()
+        assert [r.id for r in persisted.resources] == [available.id]
+        assert persisted.quality["all_resources_available"] is True
+
+    @pytest.mark.parametrize("operation", ["add", "update", "remove"])
+    def test_resource_method_refreshes_last_modified_in_memory(self, operation):
+        # add/update/remove_resource set last_modified_internal in memory. Previously a
+        # reload() re-read it from the DB; now it must be fresh without any reload.
+        existing = ResourceFactory()
+        dataset = DatasetFactory(resources=[existing])
+        # Arrange a clearly stale timestamp so any refresh is unambiguous.
+        old = datetime(2000, 1, 1)
+        dataset.last_modified_internal = old
+
+        if operation == "add":
+            dataset.add_resource(ResourceFactory())
+        elif operation == "update":
+            existing.description = "Updated"
+            dataset.update_resource(existing)
+        else:
+            dataset.remove_resource(existing)
+
+        assert dataset.last_modified > old
 
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()
