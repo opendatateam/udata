@@ -48,6 +48,13 @@ class DatasetAPIV2Test(APITestCase):
         assert data["data"][1]["community_resources"]["total"] == 0
         assert data["data"][0]["community_resources"]["total"] == 0
 
+    def test_list_invalid_pagination_params_return_400(self):
+        """The shared positive page/page_size validation also guards list endpoints."""
+        DatasetFactory()
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.datasets", **params))
+            self.assert400(response)
+
     def test_filter_by_reuse(self):
         DatasetFactory(title="Dataset without reuse")
 
@@ -434,6 +441,18 @@ class DatasetResourceAPIV2Test(APITestCase):
         data = response.json
         assert data["total"] == 1
         assert data["data"][0]["title"] == "alpha report"
+
+    def test_invalid_pagination_params_return_400(self):
+        """Out-of-range page/page_size must be rejected with a 400.
+
+        A non-positive ``page_size`` used to reach the ``$slice`` aggregation as a
+        negative length and crash with a 500 (OperationFailure: "Third argument to
+        $slice must be positive").
+        """
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(3)])
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.resources", dataset=dataset.id, **params))
+            self.assert400(response)
 
 
 class DatasetExtrasAPITest(APITestCase):

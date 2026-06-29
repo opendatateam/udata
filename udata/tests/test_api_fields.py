@@ -15,6 +15,7 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
+from werkzeug.exceptions import BadRequest
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -417,15 +418,21 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             assert results.page_size == 5
             assert results.page == 3
 
-    def test_negative_page_size_returns_404(self, app) -> None:
-        """Negative page_size should return a 404 error."""
-        from werkzeug.exceptions import NotFound
+    def test_invalid_pagination_returns_400(self, app) -> None:
+        """A non-positive page/page_size is rejected at parse time with a 400.
 
+        It used to slip through to ``Pagination`` and surface as a 404.
+        """
         FakeFactory()
 
-        with app.test_request_context("/foobar", query_string={"page": 1, "page_size": -5}):
-            with pytest.raises(NotFound):
-                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+        for query in (
+            {"page": 1, "page_size": -5},
+            {"page": 1, "page_size": 0},
+            {"page": 0, "page_size": 5},
+        ):
+            with app.test_request_context("/foobar", query_string=query):
+                with pytest.raises(BadRequest):
+                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
 
 
 class PatchChoicesValidationTest(PytestOnlyDBTestCase):
