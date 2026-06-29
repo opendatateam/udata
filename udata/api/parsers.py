@@ -1,4 +1,4 @@
-from udata.api import api
+from udata.api import add_pagination_arguments, api
 
 
 class ModelApiParser:
@@ -16,12 +16,7 @@ class ModelApiParser:
         help_msg = "The field (and direction) on which sorting apply"
         self.parser.add_argument("sort", type=str, location="args", choices=choices, help=help_msg)
         if paginate:
-            self.parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            self.parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(self.parser)
 
     def parse(self):
         args = self.parser.parse_args()

@@ -11,7 +11,7 @@ CACHE_KEY = "sitemap-page-{0}"
 
 
 @sitemap_page_needed.connect
-def create_page(app, page, urlset):
+def create_page(app, page, urlset, **kwargs):
     key = CACHE_KEY.format(page)
     cache.set(key, sitemap.render_page(urlset=urlset))
 

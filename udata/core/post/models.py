@@ -12,7 +12,7 @@ from mongoengine.fields import (
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.edito_blocs.models import Bloc
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields

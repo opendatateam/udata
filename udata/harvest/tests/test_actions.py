@@ -249,6 +249,25 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         for dataset in datasets:
             assert dataset.deleted is not None
 
+    def test_clean_source_updates_organization_metrics(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory()
+        for _ in range(5):
+            DatasetFactory(
+                organization=org,
+                harvest=HarvestDatasetMetadata(source_id=str(source.id)),
+            )
+        org.count_datasets()
+        org.reload()
+        assert org.metrics["datasets"] == 5
+
+        actions.clean_source(source)
+
+        # Metrics are recomputed once at the end of the cleanup rather than on
+        # each dataset deletion, but the final count must still be accurate.
+        org.reload()
+        assert org.metrics["datasets"] == 0
+
     def test_get_job_by_id(self):
         job = HarvestJobFactory()
         assert actions.get_job(str(job.id)) == job

@@ -4,7 +4,7 @@ from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine import Q
 
-from udata.api import api
+from udata.api import add_pagination_arguments, api
 from udata.api.parsers import ModelApiParser
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
@@ -13,16 +13,7 @@ from udata.core.topic.models import TopicElement
 class TopicElementsParser(ModelApiParser):
     def __init__(self):
         super().__init__()
-        self.parser.add_argument(
-            "page", type=int, default=1, location="args", help="The page to fetch"
-        )
-        self.parser.add_argument(
-            "page_size",
-            type=int,
-            default=DEFAULT_PAGE_SIZE,
-            location="args",
-            help="The page size to fetch",
-        )
+        add_pagination_arguments(self.parser, page_size=DEFAULT_PAGE_SIZE)
         self.parser.add_argument(
             "class",
             type=str,

@@ -4,7 +4,7 @@ from flask import current_app, request
 from flask_security import current_user
 
 from udata import tracking
-from udata.api import API, api, fields
+from udata.api import API, add_pagination_arguments, api, fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import Follow
 from udata.utils import id_or_404
@@ -25,10 +25,7 @@ follow_fields = api.model(
 follow_page_fields = api.model("FollowPage", fields.pager(follow_fields))
 
 parser = api.parser()
-parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-parser.add_argument(
-    "page_size", type=int, default=20, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(parser)
 parser.add_argument(
     "user",
     type=str,

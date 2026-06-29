@@ -2,8 +2,6 @@ from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import User
 
-from .constants import AVATAR_SIZES
-
 __all__ = ("UserProfileForm", "UserProfileAdminForm")
 
 
@@ -19,7 +17,6 @@ class UserProfileForm(ModelForm):
         [validators.DataRequired(), validators.NoURLs(_("URLs not allowed in this field"))],
     )
     email = fields.StringField(_("Email"), [validators.DataRequired(), validators.Email()])
-    avatar = fields.ImageField(_("Avatar"), sizes=AVATAR_SIZES)
     website = fields.URLField(_("Website"))
     about = fields.MarkdownField(_("About"))
 

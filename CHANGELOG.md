@@ -1,5 +1,33 @@
 # Changelog
 
+## 17.0.3 (2026-06-29)
+
+- feat: add parsing_table for tabular detection ([#3845](https://github.com/opendatateam/udata/pull/3845))
+- feat(catalog): add spatial geom in dataset catalog  ([#3842](https://github.com/opendatateam/udata/pull/3842))
+- feat: org edito blocs ([#3780](https://github.com/opendatateam/udata/pull/3780))
+- feat: remove tmp file upload ([#3828](https://github.com/opendatateam/udata/pull/3828))
+- fix: paginations with negative page and page_size ([#3847](https://github.com/opendatateam/udata/pull/3847))
+- fix: wiping metrics on metric-api failures ([#3846](https://github.com/opendatateam/udata/pull/3846))
+
+
+## 17.0.2 (2026-06-23)
+
+- chore(CI): use recommended UV_PUBLISH_TOKEN ([#3840](https://github.com/opendatateam/udata/pull/3840))
+- chore(deps): lock file maintenance ([#3820](https://github.com/opendatateam/udata/pull/3820))
+- chore(deps): lock file maintenance ([#3829](https://github.com/opendatateam/udata/pull/3829))
+- chore(harvest): improve CSW request XML compliance ([#3837](https://github.com/opendatateam/udata/pull/3837))
+- chore(harvest): partially revert csw xml update ([#3843](https://github.com/opendatateam/udata/pull/3843))
+- feat: add API v2 for reuses listing ([#3800](https://github.com/opendatateam/udata/pull/3800))
+- feat: add file to charts ([#3809](https://github.com/opendatateam/udata/pull/3809))
+- feat(harvest): harvest spatial resolution ([#3773](https://github.com/opendatateam/udata/pull/3773))
+- fix(perfs): filter datasets by reuse or dataservice ([#3822](https://github.com/opendatateam/udata/pull/3822))
+- fix(perfs): paginate ressources MongoDB side instead of Python ([#3823](https://github.com/opendatateam/udata/pull/3823))
+- fix: protect hosted resource checksum ([#3834](https://github.com/opendatateam/udata/pull/3834))
+- perf: optimize harvest clean command ([#3836](https://github.com/opendatateam/udata/pull/3836))
+- refactor: add missing signal kwargs ([#3835](https://github.com/opendatateam/udata/pull/3835))
+- test: improve ElasticSearch tests stability ([#3841](https://github.com/opendatateam/udata/pull/3841))
+
+
 ## 17.0.1 (2026-06-10)
 
 - feat: improve backfill harvest migration ([#3826](https://github.com/opendatateam/udata/pull/3826))

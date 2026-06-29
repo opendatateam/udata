@@ -7,6 +7,8 @@ from udata.models import Dataset, Organization, Reuse
 @Dataset.on_update.connect
 @Dataset.on_delete.connect
 def update_datasets_metrics(document, **kwargs):
+    if "metrics" in kwargs.get("ignores", []):
+        return
     if document.organization:
         document.organization.count_datasets()
 
@@ -28,7 +30,7 @@ def update_dataservices_metrics(document, **kwargs):
 
 
 @Owned.on_owner_change.connect
-def update_org_metrics(document, previous):
+def update_org_metrics(document, previous, **kwargs):
     if not isinstance(previous, Organization):
         return
     if isinstance(document, Dataset):
