@@ -381,7 +381,12 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        dataset.save(signal_kwargs={"ignores": ["post_save"]})
+        # Validate only the custom: extras (normally done by Dataset.clean()) and
+        # write with a targeted update_one. A full dataset.save() re-serializes and
+        # rewrites the whole document, i.e. O(N) in the number of embedded resources.
+        # Dataset extras do not feed quality_cached, so it does not need recomputing here.
+        dataset.validate_custom_extras()
+        Dataset.objects(id=dataset.id).update_one(set__extras=dataset.extras)
         return dataset.extras
 
     @apiv2.secure
@@ -399,7 +404,10 @@ class DatasetExtrasAPI(API):
                 del dataset.extras[key]
             except KeyError:
                 pass
-        dataset.save(signal_kwargs={"ignores": ["post_save"]})
+        # Targeted update_one instead of a full dataset.save() (which rewrites the
+        # whole document, O(N) in the number of embedded resources). Deleting extras
+        # keys cannot make remaining custom: extras invalid, so no revalidation.
+        Dataset.objects(id=dataset.id).update_one(set__extras=dataset.extras)
         return dataset.extras, 204
 
 
@@ -568,7 +576,17 @@ class ResourceExtrasAPI(ResourceMixin, API):
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        # Targeted positional update instead of resource.save() -> dataset.save().
+        # A full save re-serializes and rewrites the whole document, O(N) in the
+        # number of embedded resources, and this endpoint is on Hydra's hot callback
+        # path (run for every resource, on datasets with 15k+ resources): the targeted
+        # write avoids re-shipping the whole multi-MB document on each call.
+        # quality_cached is recomputed here because it depends on resource extras
+        # (check:available feeds `all_resources_available`).
+        Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
+            set__resources__S__extras=resource.extras,
+            set__quality_cached=dataset.compute_quality(),
+        )
         return resource.extras
 
     @apiv2.secure
@@ -587,5 +605,10 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        # Targeted positional update instead of resource.save() -> dataset.save()
+        # (which rewrites the whole document, O(N) in resources). See the put() above.
+        Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
+            set__resources__S__extras=resource.extras,
+            set__quality_cached=dataset.compute_quality(),
+        )
         return resource.extras, 204

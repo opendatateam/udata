@@ -744,6 +744,16 @@ class Dataset(
         if self.access_type and self.access_type != AccessType.OPEN:
             self.license = None
 
+        self.validate_custom_extras()
+
+    def validate_custom_extras(self):
+        """Validate `custom:` extras against the organization's declared custom metadata.
+
+        Extracted from clean() so the extras API endpoints can run just this check
+        before a targeted update_one, instead of a full document save: saving the
+        dataset re-serializes and rewrites the whole document, i.e. O(N) in the
+        number of embedded resources, which is costly on large datasets.
+        """
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
                 continue

@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest import mock
 
 from flask import url_for
 from mongoengine.context_managers import query_counter
@@ -508,6 +509,21 @@ class DatasetExtrasAPITest(APITestCase):
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras["test::extra"] == "test-value"
 
+    def test_update_dataset_extras_does_not_full_save(self):
+        # Saving a whole dataset is O(N²) in the number of embedded resources;
+        # the extras endpoint must write with a targeted update_one instead.
+        self.dataset.extras = {"test::extra": "test-value"}
+        self.dataset.save()
+
+        data = {"test::extra": "changed"}
+        with mock.patch.object(Dataset, "save") as save:
+            response = self.put(url_for("apiv2.dataset_extras", dataset=self.dataset), data)
+        self.assert200(response)
+        save.assert_not_called()
+
+        self.dataset.reload()
+        assert self.dataset.extras["test::extra"] == "changed"
+
     def test_dataset_custom_extras_str(self):
         member = Member(user=self.user, role="admin")
         org = OrganizationFactory(members=[member])
@@ -654,3 +670,40 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.dataset.reload()
         assert len(self.dataset.resources[0].extras) == 1
         assert self.dataset.resources[0].extras["test::extra"] == "test-value"
+
+    def test_update_resource_extras_does_not_full_save(self):
+        # This endpoint is on Hydra's hot callback path. Saving the whole dataset
+        # is O(N²) in the number of embedded resources, so it must use a targeted
+        # positional update_one instead of resource.save() -> dataset.save().
+        resource = ResourceFactory()
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        data = {"check:status": 200}
+        with mock.patch.object(Dataset, "save") as save:
+            response = self.put(
+                url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id), data
+            )
+        self.assert200(response)
+        save.assert_not_called()
+
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras["check:status"] == 200
+
+    def test_update_resource_extras_refreshes_quality(self):
+        # quality_cached depends on resource extras: check:available feeds the
+        # `all_resources_available` indicator, so the targeted update must recompute it.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": True})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        assert self.dataset.quality["all_resources_available"] is True
+
+        data = {"check:available": False}
+        response = self.put(
+            url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id), data
+        )
+        self.assert200(response)
+
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras["check:available"] is False
+        assert self.dataset.quality["all_resources_available"] is False
