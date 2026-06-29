@@ -35,6 +35,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.followers.signals import on_follow, on_unfollow
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema
@@ -95,6 +96,33 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
         with pytest.raises(ValidationError):
             dataset.add_resource(resource)
+
+    def test_clean_validates_custom_extras(self):
+        # custom: extras validation lives in validate_custom_extras(), called by
+        # clean(). The extras API endpoints now call validate_custom_extras()
+        # directly, bypassing clean()/save(), so this is the only test guarding the
+        # clean() -> validate_custom_extras() wiring for full-save paths (v1 API,
+        # harvesting...): dropping the call from clean() must break a test.
+        org = OrganizationFactory()
+        org.extras = {"custom": [{"title": "color", "description": "banner color", "type": "str"}]}
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        # Undeclared custom metadata is rejected on a full save.
+        dataset.extras = {"custom:size": "large"}
+        with pytest.raises(MongoEngineValidationError):
+            dataset.save()
+
+        # Declared metadata but wrong type is rejected too.
+        dataset.extras = {"custom:color": 123}
+        with pytest.raises(MongoEngineValidationError):
+            dataset.save()
+
+        # Declared metadata with the right type goes through.
+        dataset.extras = {"custom:color": "blue"}
+        dataset.save()
+        dataset.reload()
+        assert dataset.extras["custom:color"] == "blue"
 
     def test_update_resource(self):
         user = UserFactory()

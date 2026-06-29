@@ -1047,6 +1047,30 @@ class Dataset(
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
+    def update_resource_extras(self, resource):
+        """Persist a single resource's extras with a targeted positional update.
+
+        `resource` must be the in-memory instance held in `self.resources` (its
+        extras are already mutated by the caller). This is on Hydra's hot callback
+        path (run for every resource, on datasets with 15k+ resources): a full
+        resource.save() -> dataset.save() re-serializes and rewrites the whole
+        document, O(N) in embedded resources, whereas this re-ships only the
+        changed extras subdocument.
+
+        last_update and quality_cached are recomputed because they both depend on
+        resource extras: a remote resource's last_modified can come from its
+        `analysis:last-modified-at` extra, and check:available feeds
+        `all_resources_available`. last_update is set first so the recomputed
+        quality_cached (whose next_update_for_update_fulfilled_in_time derives from
+        last_update) stays consistent, exactly as Dataset.clean() would do on save.
+        """
+        self.last_update = self.compute_last_update()
+        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+            set__resources__S__extras=resource.extras,
+            set__last_update=self.last_update,
+            set__quality_cached=self.compute_quality(),
+        )
+
     def remove_resource(self, resource):
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources = [r for r in self.resources if r.id != resource.id]
