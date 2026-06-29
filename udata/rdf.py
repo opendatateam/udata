@@ -358,14 +358,14 @@ def themes_data_from_rdf(rdf) -> list[dict]:
     """
     Extract structured theme information from DCAT.theme for analysis/storage.
 
-    Returns a list of dicts with label, uri, scheme, and scheme_uri for each theme.
+    Returns a list of dicts with label, uri, scheme_label, and scheme_uri for each theme.
     Blank node URIs are normalized to None.
     """
     themes = []
     for theme in rdf.objects(DCAT.theme):
         label, uri, scheme_label, scheme_uri = _extract_theme_info(theme)
         themes.append(
-            {"label": label, "uri": uri, "scheme": scheme_label, "scheme_uri": scheme_uri}
+            {"label": label, "uri": uri, "scheme_label": scheme_label, "scheme_uri": scheme_uri}
         )
     return themes
 

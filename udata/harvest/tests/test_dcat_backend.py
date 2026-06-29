@@ -124,8 +124,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         dataset = datasets["1"]
         assert dataset.tags == ["tag-1", "tag-2", "tag-3", "tag-4", "theme-1", "theme-2"]
         assert dataset.extras["dcat"]["themes"] == [
-            {"label": "Theme 1", "uri": None, "scheme": None, "scheme_uri": None},
-            {"label": "Theme 2", "uri": None, "scheme": None, "scheme_uri": None},
+            {"label": "Theme 1", "uri": None, "scheme_label": None, "scheme_uri": None},
+            {"label": "Theme 2", "uri": None, "scheme_label": None, "scheme_uri": None},
         ]
         assert len(dataset.resources) == 2
 
@@ -486,11 +486,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
         assert datasets["1"].extras["dcat"]["themes"] == [
-            {"label": "Theme 1", "uri": None, "scheme": None, "scheme_uri": None},
+            {"label": "Theme 1", "uri": None, "scheme_label": None, "scheme_uri": None},
             {
                 "label": "Répartition des espèces",
                 "uri": None,
-                "scheme": "GEMET - INSPIRE themes, version 1.0",
+                "scheme_label": "GEMET - INSPIRE themes, version 1.0",
                 "scheme_uri": None,
             },
         ]
@@ -499,7 +499,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             {
                 "label": "Hydrographie",
                 "uri": "http://bnode.namespace.voc/theme/hy",
-                "scheme": None,
+                "scheme_label": None,
                 "scheme_uri": "http://inspire.ec.europa.eu/theme",
             },
         ]
