@@ -136,7 +136,7 @@ class SitemapGeneratorTest(PytestOnlyDBTestCase):
         assert url_elem.find(f"{{{SITEMAP_NS}}}loc").text == dataset.self_web_url()
         assert url_elem.find(f"{{{SITEMAP_NS}}}lastmod").text
 
-    @pytest.mark.options(SITEMAP_S3_PREFIX="custom")
+    @pytest.mark.options(SITEMAP_S3_FILENAME_PREFIX="custom")
     def test_custom_prefix(self):
         DatasetFactory()
 

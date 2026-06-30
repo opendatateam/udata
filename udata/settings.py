@@ -189,7 +189,7 @@ class Defaults(object):
 
     # Sitemap settings
     SITEMAP_S3_BUCKET: str | None = None
-    SITEMAP_S3_PREFIX: str = "sitemaps"
+    SITEMAP_S3_FILENAME_PREFIX: str = "sitemaps"
     SITEMAP_URLS_PER_FILE: int = 50000
     SITEMAP_BASE_URL: str | None = None
 

@@ -45,6 +45,14 @@ def check_title_or_element_required(value, obj, data, **_kwargs):
 check_title_or_element_required.run_even_if_missing = True
 
 
+class TopicQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(private__ne=True)
+
+    def hidden(self):
+        return self(private=True)
+
+
 @generate_fields()
 class TopicElement(Auditable, Document):
     title = field(StringField(required=False))
@@ -102,7 +110,7 @@ class TopicElement(Auditable, Document):
 
 
 @generate_fields()
-class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
+class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
     verbose_name = _("collection")
 
     name = field(StringField(required=True), show_as_ref=True)
@@ -139,7 +147,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
         + Owned.meta["indexes"],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
-        "queryset_class": OwnedQuerySet,
+        "queryset_class": TopicQuerySet,
     }
 
     after_save = Signal()
