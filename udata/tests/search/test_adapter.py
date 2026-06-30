@@ -88,8 +88,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "tag", clean_string)
         assertHasArgument(parser, "other", clean_string)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
     def test_as_request_parser_bool_filter(self):
         parser = FakeSearchWithBool.as_request_parser()
@@ -100,8 +100,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "q", str)
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "boolean", inputs.boolean)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
     def test_as_request_parser_temporal_coverage_facet(self):
         parser = FakeSearchWithCoverage.as_request_parser()
@@ -113,8 +113,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "q", str)
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "coverage", filter.validate_parameter)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
 
 class ConfigureIndicesTest:

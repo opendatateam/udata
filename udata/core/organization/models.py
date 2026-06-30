@@ -10,6 +10,7 @@ from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
     ListField,
@@ -25,6 +26,7 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -209,7 +211,7 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=["presentation_blocs"])
 class Organization(
     Auditable,
     SpamMixin,
@@ -255,6 +257,23 @@ class Organization(
     zone = field(StringField(), readonly=True)
     extras = field(OrganizationExtrasField(), auditable=False)
 
+    presentation_blocs = field(
+        EmbeddedDocumentListField(Bloc),
+        generic=True,
+        # Read through `public_presentation_blocs` so the API hides unpublished blocs from
+        # the public. Writes still target the real `presentation_blocs` attribute (patch()
+        # addresses fields by key).
+        attribute="public_presentation_blocs",
+    )
+    presentation_blocs_published_at = field(
+        DateTimeField(),
+        description=(
+            "Publication date of the organization presentation blocs. Set it to make the "
+            "blocs publicly visible; leave it empty to keep them hidden (draft). "
+            "Organization administrators always see the blocs regardless of this date."
+        ),
+    )
+
     deleted = field(DateTimeField(), readonly=True)
 
     meta = {
@@ -277,6 +296,18 @@ class Organization(
 
     def __str__(self):
         return self.name or ""
+
+    @property
+    def public_presentation_blocs(self):
+        """Presentation blocs as exposed through the API.
+
+        Hidden from the public until they are published (`presentation_blocs_published_at` is
+        set); organization administrators always see them so they can prepare the edito
+        before it goes live.
+        """
+        if self.presentation_blocs_published_at is not None or self.permissions["edit"].can():
+            return self.presentation_blocs
+        return []
 
     @property
     @field(nested_fields=org_permissions_fields, show_as_ref=True)

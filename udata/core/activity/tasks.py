@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 @new_activity.connect
-def delay_activity(cls, related_to, actor, organization=None, changes=None, extras=None):
+def delay_activity(cls, related_to, actor, organization=None, changes=None, extras=None, **kwargs):
     emit_activity.delay(
         cls.__name__,
         str(actor.id),

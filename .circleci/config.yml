@@ -147,7 +147,7 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
-            uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            uv publish dist/*.whl  # use UV_PUBLISH_TOKEN
 
   trigger-gitlab-pipeline:
     docker:

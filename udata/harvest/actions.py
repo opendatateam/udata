@@ -137,9 +137,14 @@ def delete_source(source: HarvestSource):
 def clean_source(source: HarvestSource):
     """Deletes all datasets linked to a harvest source"""
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    organizations = set()
     for dataset in datasets:
+        if dataset.organization:
+            organizations.add(dataset.organization)
         dataset.deleted = datetime.now(UTC)
-        dataset.save()
+        dataset.save(signal_kwargs={"ignores": ["metrics"]})
+    for org in organizations:
+        org.count_datasets()
     return len(datasets)
 
 
