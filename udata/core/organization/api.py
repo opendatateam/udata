@@ -1,7 +1,6 @@
 from datetime import UTC, datetime
 
 from flask import make_response, redirect, request, url_for
-from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
@@ -29,6 +28,7 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.suggest import mongo_suggest
 from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -358,14 +358,14 @@ class ContactPointSuggestAPI(API):
     @api.expect(suggest_parser)
     @api.marshal_list_with(ContactPoint.__read_fields__)
     def get(self, org):
-        """Contact points suggest endpoint using mongoDB contains"""
+        """Contact points autocomplete, ranked by match quality."""
         args = suggest_parser.parse_args()
-        contact_points = ContactPoint.objects(
-            Q(name__icontains=args["q"])
-            | Q(email__icontains=args["q"])
-            | Q(contact_form__icontains=args["q"])
-        ).owned_by(org)
-        return list(contact_points.limit(args["size"]))
+        return mongo_suggest(
+            ContactPoint.objects.owned_by(org),
+            args["q"],
+            match_fields=["name", "email", "contact_form"],
+            size=args["size"],
+        )
 
 
 requests_parser = api.parser()
@@ -680,10 +680,16 @@ class OrganizationSuggestAPI(API):
     @api.expect(suggest_parser)
     @api.marshal_list_with(org_suggestion_fields)
     def get(self):
-        """Organizations suggest endpoint using mongoDB contains"""
+        """Organizations autocomplete: accent-insensitive, ranked by match quality then followers."""
         args = suggest_parser.parse_args()
-        orgs = Organization.objects(
-            Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
+        orgs = mongo_suggest(
+            Organization.objects(deleted=None),
+            args["q"],
+            match_fields=["name", "acronym"],
+            slug_field="slug",
+            order_by=SUGGEST_SORTING,
+            size=args["size"],
+            blend_popularity=True,
         )
         return [
             {
@@ -694,7 +700,7 @@ class OrganizationSuggestAPI(API):
                 "image_url": org.logo,
                 "page": org.self_web_url(),
             }
-            for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
+            for org in orgs
         ]
 
 

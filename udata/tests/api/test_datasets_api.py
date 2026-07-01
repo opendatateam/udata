@@ -2563,6 +2563,41 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
+    def test_suggest_datasets_accent_insensitive(self):
+        """Typing without accents should still match accented titles (via the slug)."""
+        DatasetFactory(title="Élections municipales", visible=True)
+
+        response = self.get(url_for("api.suggest_datasets", q="elections", size=5))
+        self.assert200(response)
+
+        titles = [suggestion["title"] for suggestion in response.json]
+        self.assertIn("Élections municipales", titles)
+
+    def test_suggest_datasets_ranked_by_match_quality(self):
+        """An exact match ranks above a buried substring, even with far fewer followers."""
+        buried = DatasetFactory(
+            title="Metadata catalogue", visible=True, metrics={"followers": 100}
+        )
+        exact = DatasetFactory(title="Data", visible=True, metrics={"followers": 0})
+
+        response = self.get(url_for("api.suggest_datasets", q="data", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertEqual(ids[0], str(exact.id))
+        self.assertLess(ids.index(str(exact.id)), ids.index(str(buried.id)))
+
+    def test_suggest_datasets_blend_popularity_over_prefix(self):
+        """A much-followed whole-word match outranks a barely-followed prefix match."""
+        DatasetFactory(title="Paris tourisme", visible=True, metrics={"followers": 1})
+        word = DatasetFactory(title="Open data Paris", visible=True, metrics={"followers": 500})
+
+        response = self.get(url_for("api.suggest_datasets", q="paris", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertEqual(ids[0], str(word.id))
+
 
 class DatasetReferencesAPITest(APITestCase):
     def test_dataset_licenses_list(self):

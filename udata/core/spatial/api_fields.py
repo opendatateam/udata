@@ -98,6 +98,9 @@ zone_suggestion_fields = api.model(
         "name": fields.String(description="The territory name", required=True),
         "code": fields.String(description="The territory main code", required=True),
         "level": fields.String(description="The territory administrative level", required=True),
+        "level_name": fields.String(
+            description="The human-readable administrative level (e.g. 'Commune', 'Département')"
+        ),
         "uri": fields.String(description="The zone uri", required=True),
     },
 )
