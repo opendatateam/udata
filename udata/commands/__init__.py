@@ -175,7 +175,6 @@ MODULES_WITH_COMMANDS = [
     "core.dataset",
     "core.jobs",
     "core.metrics",
-    "core.organization",
     "core.spatial",
     "core.user",
     "harvest",

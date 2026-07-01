@@ -1,11 +1,12 @@
 from udata.core import storages
 from udata.core.badges.tasks import notify_new_badge
 from udata.features.notifications.models import Notification
-from udata.models import Activity, ContactPoint, Dataset, Follow, Transfer
+from udata.models import Activity, ContactPoint, Dataset, Follow, GeoZone, Transfer
 from udata.search import reindex
 from udata.tasks import get_logger, job, task
 
 from . import mails
+from .api_entreprise import fetch_company_info, parse_zone_match
 from .assignment import Assignment
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
@@ -261,3 +262,61 @@ def notify_badge_local_authority(org_id):
             log.error(
                 f"Failed to create new badge notification for kind {LOCAL_AUTHORITY} and user {member.user}: {e}"
             )
+
+
+@task
+def lookup_organization_zone(org_id):
+    """Resolve and persist `Organization.zone` + `extras.code_insee` from the SIRET.
+
+    Sets the zone when the API positively identifies a local-authority entity
+    (commune, département, région or EPCI). Clears it when the SIRET is removed
+    or the entity stops being a local authority. Preserves derived data on
+    inconclusive lookups (transient outage, malformed payload, GeoZone missing
+    from the local referential) so a temporary failure never wipes a correct
+    enrichment.
+    """
+    org = Organization.objects(pk=org_id).first()
+    if org is None:
+        return
+
+    target_geoid = None
+    target_code_insee = None
+    if org.business_number_id:
+        info = fetch_company_info(org.business_number_id)
+        if info is None:
+            return  # inconclusive — preserve existing enrichment
+        candidate, code_insee, decisive = parse_zone_match(info)
+        if not decisive:
+            return  # malformed payload — preserve
+        if candidate:
+            resolved = GeoZone.objects.resolve(candidate, id_only=True)
+            if not resolved:
+                log.warning("GeoZone %s not found for organization %s", candidate, org_id)
+                return  # missing referential — preserve
+            target_geoid = resolved
+            target_code_insee = code_insee
+        # else: positively non-collectivité — fall through with None/None to clear.
+
+    if org.zone == target_geoid and org.extras.get("code_insee") == target_code_insee:
+        return
+    org.zone = target_geoid
+    if target_code_insee is None:
+        org.extras.pop("code_insee", None)
+    else:
+        org.extras["code_insee"] = target_code_insee
+    # Ignore post_save to avoid re-triggering the on_update signal that scheduled us.
+    org.save(signal_kwargs={"ignores": ["post_save"]})
+
+
+@Organization.on_create.connect
+def _lookup_zone_on_org_create(organization, **kwargs):
+    if organization.business_number_id:
+        lookup_organization_zone.delay(str(organization.id))
+
+
+@Organization.on_update.connect
+def _lookup_zone_on_siret_update(organization, **kwargs):
+    if "business_number_id" not in kwargs.get("changed_fields", []):
+        return
+    # Schedule even when the SIRET was removed so a previously-set zone is cleared.
+    lookup_organization_zone.delay(str(organization.id))
