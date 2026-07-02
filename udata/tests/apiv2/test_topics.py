@@ -7,7 +7,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
@@ -22,7 +22,6 @@ from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
-from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.helpers import create_geozones_fixtures
 
 

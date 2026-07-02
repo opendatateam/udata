@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask_restx.inputs import boolean
 from flask_security import current_user
 
-from udata.api import API, api, fields
+from udata.api import API, add_pagination_arguments, api, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
@@ -152,10 +152,7 @@ parser.add_argument(
     "org", type=str, location="args", help="Filter discussions for a given organization"
 )
 parser.add_argument("user", type=str, location="args", help="Filter discussions created by a user")
-parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-parser.add_argument(
-    "page_size", type=int, default=20, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(parser)
 
 
 discussion_delete_parser = add_send_legal_notice_argument(api.parser())
