@@ -1,5 +1,15 @@
 # Changelog
 
+## 17.0.3 (2026-06-29)
+
+- feat: add parsing_table for tabular detection ([#3845](https://github.com/opendatateam/udata/pull/3845))
+- feat(catalog): add spatial geom in dataset catalog  ([#3842](https://github.com/opendatateam/udata/pull/3842))
+- feat: org edito blocs ([#3780](https://github.com/opendatateam/udata/pull/3780))
+- feat: remove tmp file upload ([#3828](https://github.com/opendatateam/udata/pull/3828))
+- fix: paginations with negative page and page_size ([#3847](https://github.com/opendatateam/udata/pull/3847))
+- fix: wiping metrics on metric-api failures ([#3846](https://github.com/opendatateam/udata/pull/3846))
+
+
 ## 17.0.2 (2026-06-23)
 
 - chore(CI): use recommended UV_PUBLISH_TOKEN ([#3840](https://github.com/opendatateam/udata/pull/3840))

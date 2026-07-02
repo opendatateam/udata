@@ -12284,6 +12284,7 @@
             "analysis:mime-type": "text/plain",
             "analysis:parsing:finished_at": "2024-07-18T10:36:46.389802+00:00",
             "analysis:parsing:started_at": "2024-07-18T10:36:45.549380+00:00",
+            "analysis:parsing:parsing_table": "70f4c60b4f9828beb7922b1fe0dae8da",
             "check:available": true,
             "check:count-availability": 142,
             "check:date": "2024-01-17T01:40:06.428775+00:00",

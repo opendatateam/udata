@@ -25,11 +25,11 @@ import mongoengine
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
-from flask_restx.inputs import boolean
+from flask_restx.inputs import boolean, positive
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
-from udata.api import API, api, errors
+from udata.api import API, add_pagination_arguments, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.core import storages
@@ -290,12 +290,7 @@ community_parser = api.parser()
 community_parser.add_argument(
     "sort", type=str, default="-created_at_internal", location="args", help="The sorting attribute"
 )
-community_parser.add_argument(
-    "page", type=int, default=1, location="args", help="The page to fetch"
-)
-community_parser.add_argument(
-    "page_size", type=int, default=20, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(community_parser)
 community_parser.add_argument(
     "organization",
     type=str,
@@ -314,7 +309,7 @@ common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 # Build catalog_parser from DatasetApiParser parser with a default page_size of 100
 catalog_parser = DatasetApiParser().parser
 catalog_parser.replace_argument(
-    "page_size", type=int, location="args", default=100, help="The page size"
+    "page_size", type=positive, location="args", default=100, help="The page size"
 )
 
 
@@ -795,7 +790,9 @@ class CommunityResourcesAPI(API):
             community_resources = community_resources(dataset=args["dataset"])
         if args["organization"]:
             community_resources = community_resources(organization=args["organization"])
-        return community_resources.order_by(args["sort"]).paginate(args["page"], args["page_size"])
+        return community_resources.order_by(args["sort"], "id").paginate(
+            args["page"], args["page_size"]
+        )
 
     @api.secure
     @api.doc("create_community_resource", responses={400: "Validation error"})
