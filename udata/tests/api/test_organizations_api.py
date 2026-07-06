@@ -206,6 +206,67 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert Organization.objects.count() == 1
         assert Organization.objects.first().description == "new description"
 
+    def test_organization_api_update_preserves_logo(self):
+        """Updating an org via PUT must not touch its logo when the client
+        echoes the logo URL back in the payload.
+
+        Regression: the logo ImageField was writable, so patch() rebuilt it
+        from the raw URL, corrupting the filename and dropping thumbnails and
+        original. Logo changes go through the dedicated upload endpoint only.
+        """
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        # Give the org a real logo with generated thumbnails and original.
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+        original = org.logo.original
+        thumbnails = dict(org.logo.thumbnails)
+        assert filename
+
+        # The client fetches the org (logo marshalled as a full URL) and PUTs
+        # the whole payload back to change only the description.
+        data = self.get(url_for("api.organization", org=org)).json
+        assert data["logo"], "The logo URL should be part of the GET payload"
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
+        assert org.logo.original == original
+        assert dict(org.logo.thumbnails) == thumbnails
+
+    def test_organization_api_update_empty_logo_preserves_logo(self):
+        """Sending an empty/absent logo in the PUT payload must not wipe the
+        stored logo (same regression, wipe path instead of corruption)."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+
+        data = org.to_dict()
+        data["logo"] = ""
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
+
     def test_organization_api_update_business_number_id(self):
         """It should update an organization from the API by adding a business number id"""
         user = self.login()
