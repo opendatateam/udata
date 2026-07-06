@@ -242,6 +242,10 @@ class Organization(
             max_size=LOGO_MAX_SIZE,
             thumbnails=LOGO_SIZES,
         ),
+        # Read-only: the logo is managed through the dedicated upload endpoint
+        # (POST /organizations/<id>/logo/). Left writable, patch() would set it
+        # from the raw URL echoed back by clients, wiping thumbnails/original.
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_LOGO_SIZE,
