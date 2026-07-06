@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.0.4 (2026-07-06)
+
+- chore(deps): lock file maintenance ([#3850](https://github.com/opendatateam/udata/pull/3850))
+- feat: accept webp as image format ([#3855](https://github.com/opendatateam/udata/pull/3855))
+- fix: removing logo on description update ([#3859](https://github.com/opendatateam/udata/pull/3859))
+
+
 ## 17.0.3 (2026-06-29)
 
 - feat: add parsing_table for tabular detection ([#3845](https://github.com/opendatateam/udata/pull/3845))
