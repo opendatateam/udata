@@ -395,7 +395,15 @@ def contact_points_from_rdf(rdf, prop, role, dataset, dryrun=False):
         elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
             name = contact_point_name(
                 rdf_value(contact_point, VCARD.fn),
-                rdf_value(contact_point, VCARD["organization-name"]),
+                rdf_value(contact_point, VCARD["organization-name"])
+                or rdf_value(  # deprecated vcard:org spec
+                    contact_point,
+                    VCARD.org,
+                    unwrap=[
+                        VCARD["organization-name"],
+                        VCARD["organisation-name"],  # GeoNetwork incorrectly uses UK spelling
+                    ],
+                ),
             )
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)

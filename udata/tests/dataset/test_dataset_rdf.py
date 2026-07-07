@@ -700,6 +700,34 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.contact_points[0].name == "foo (bar)"
         assert dataset.contact_points[0].email == "foo@example.com"
 
+    def test_contact_point_organization_member_vcard_deprecated(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        org = BNode()  # deprecated vcard:org spec
+        g.add((org, VCARD["organization-name"], Literal("bar")))
+        g.add((contact, VCARD.org, org))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="bar")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo (bar)"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
     def test_contact_point_organization_member_foaf_both_mails(self):
         g = Graph()
         node = URIRef("https://test.org/dataset")

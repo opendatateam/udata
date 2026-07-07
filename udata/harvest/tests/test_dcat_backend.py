@@ -1084,6 +1084,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             backend="csw-dcat",
             url=url,
             config={"features": {"geodcatap": geodcatap}},
+            organization=OrganizationFactory(),
         )
 
         backend = get_backend(source.backend)(source)
@@ -1108,6 +1109,13 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.description.startswith(
             "Part des ménages présents depuis 5 ans ou plus dans leur logement actuel"
         )
+
+        contact = dataset.contact_points[0]
+        assert contact.email == "contact@geo2france.fr"
+        if geodcatap:
+            assert contact.name == "Géo2France (Géo2France)"
+        else:
+            assert contact.name == "Géo2France"
 
         keywords = {
             "logement",
