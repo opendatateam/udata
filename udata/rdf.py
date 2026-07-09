@@ -392,39 +392,47 @@ def contact_points_from_rdf(rdf, prop, role, dataset, dryrun=False):
             name = contact_point.toPython()
             email = None
             contact_form = None
-        elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
-            name = contact_point_name(
-                rdf_value(contact_point, VCARD.fn),
-                rdf_value(contact_point, VCARD["organization-name"])
-                or rdf_value(  # deprecated vcard:org spec
-                    contact_point,
-                    VCARD.org,
-                    unwrap=[
-                        VCARD["organization-name"],
-                        VCARD["organisation-name"],  # GeoNetwork incorrectly uses UK spelling
-                    ],
-                ),
-            )
-            email = (
-                rdf_value(contact_point, VCARD.hasEmail)
-                or rdf_value(contact_point, VCARD.email)
-                or None
-            )
-            email = email.replace("mailto:", "").strip() if email else None
-            contact_form = rdf_value(contact_point, VCARD.hasUrl)
+        elif val := contact_point.value(RDF.type):
+            rdf_type = val.identifier
+            if rdf_type in VCARD:
+                name = contact_point_name(
+                    rdf_value(contact_point, VCARD.fn),
+                    rdf_value(contact_point, VCARD["organization-name"])
+                    or rdf_value(  # deprecated vcard:org spec
+                        contact_point,
+                        VCARD.org,
+                        unwrap=[
+                            VCARD["organization-name"],
+                            VCARD["organisation-name"],  # GeoNetwork incorrectly uses UK spelling
+                        ],
+                    ),
+                )
+                email = (
+                    rdf_value(contact_point, VCARD.hasEmail)
+                    or rdf_value(contact_point, VCARD.email)
+                    or None
+                )
+                email = email.replace("mailto:", "").strip() if email else None
+                contact_form = rdf_value(contact_point, VCARD.hasUrl)
+            elif rdf_type in FOAF:
+                contact_point_org = contact_point.value(ORG.memberOf)
+                name = contact_point_name(
+                    rdf_value(contact_point, FOAF.name) or rdf_value(contact_point, SKOS.prefLabel),
+                    rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
+                )
+                email = (
+                    rdf_value(contact_point, FOAF.mbox)
+                    or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
+                    or None
+                )
+                email = email.replace("mailto:", "").strip() if email else None
+                contact_form = None
+            else:
+                log.warning(f"Unsupported contact point with rdf:type={rdf_type}")
+                continue
         else:
-            contact_point_org = contact_point.value(ORG.memberOf)
-            name = contact_point_name(
-                rdf_value(contact_point, FOAF.name) or rdf_value(contact_point, SKOS.prefLabel),
-                rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
-            )
-            email = (
-                rdf_value(contact_point, FOAF.mbox)
-                or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
-                or None
-            )
-            email = email.replace("mailto:", "").strip() if email else None
-            contact_form = None
+            log.warning(f"Unsupported contact point with role={role}")
+            continue
 
         # Tested at validation time, because it depends on the role
         # if not email and not contact_form:

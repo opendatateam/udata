@@ -1148,6 +1148,25 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             assert resource.type == "main"
             assert resource.format == "ogc:wms"
 
+        # Another dataset with several types of contacts
+        contacts = {
+            (c.name, c.email, c.contact_form, c.role)
+            for c in datasets["0ae299e7-10d6-4290-944e-c6c62e2aeabf"].contact_points
+        }
+        if geodcatap:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "custodian"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+            }
+        else:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "publisher"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+                ("Odema", "odema@cerdd.org", None, "publisher"),
+            }
+
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(
             rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
