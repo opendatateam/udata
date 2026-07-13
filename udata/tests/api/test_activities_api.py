@@ -1,7 +1,6 @@
 from datetime import UTC, datetime
 
 from flask import url_for
-from mongoengine.connection import get_db
 from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
@@ -14,6 +13,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.core.user.models import User
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert400
 
@@ -181,7 +181,7 @@ class ActivityAPITest(APITestCase):
         FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset)
 
         # Simulate a manual/document purge that leaves the activity with a DBRef.
-        get_db().dataset.delete_one({"_id": dataset.id})
+        Dataset._get_collection().delete_one({"_id": dataset.id})
 
         response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
@@ -193,7 +193,7 @@ class ActivityAPITest(APITestCase):
         FakeDatasetActivity.objects.create(actor=actor, related_to=DatasetFactory())
 
         # Simulate a manual hard-delete of the user leaving a dangling DBRef in the activity.
-        get_db().user.delete_one({"_id": actor.id})
+        User._get_collection().delete_one({"_id": actor.id})
 
         response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
