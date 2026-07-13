@@ -108,8 +108,7 @@ class SiteActivityAPI(API):
         for item in qs.queryset.items:
             try:
                 item.actor
-                if item.organization:
-                    item.organization
+                item.organization
                 item.related_to
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
