@@ -71,5 +71,5 @@ def cleanup_dataservice_and_reuse_dataset_notifications(dataset, **kwargs):
         Notification.objects(details__dataset=dataset).delete()
     except Exception as e:
         log.error(
-            f"Error cleaning up dataservice notifications for deleted dataset {dataset.id}: {e}"
+            f"Error cleaning up dataservice and reuse notifications for deleted dataset {dataset.id}: {e}"
         )
