@@ -19,7 +19,7 @@ from udata.core.topic.factories import (
     TopicWithElementsFactory,
 )
 from udata.core.topic.models import Topic, TopicElement
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
 from udata.tests.helpers import create_geozones_fixtures
@@ -582,6 +582,62 @@ class TopicAPITest(APITestCase):
 
         self.assertIn("uri", data)
         self.assertTrue(data["uri"].startswith("http"))
+
+    def test_featured_is_readonly_on_create(self):
+        """It should ignore featured when creating a topic (readonly)"""
+        self.login()
+        data = TopicWithElementsFactory.as_payload()
+        data["featured"] = True
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        topic = Topic.objects.first()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_is_readonly_on_update(self):
+        """It should ignore featured when updating a topic (readonly)"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner, featured=False)
+        data = {"featured": True}
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_admin_post_requires_admin(self):
+        """It should require admin to feature a topic"""
+        self.login()
+        topic = TopicFactory()
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+
+    def test_featured_admin_post_as_admin(self):
+        """It should allow admin to feature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is True
+        assert response.json["featured"] is True
+
+    def test_featured_admin_delete_requires_admin(self):
+        """It should require admin to unfeature a topic"""
+        self.login()
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+
+    def test_featured_admin_delete_as_admin(self):
+        """It should allow admin to unfeature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
 
 
 class TopicElementsAPITest(APITestCase):
