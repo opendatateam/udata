@@ -49,7 +49,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_datasets_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["dataset"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_datasets_csv"))
         self.assert404(response)
 
@@ -158,7 +160,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_resources_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["resource"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_datasets_resources_csv"))
         self.assert404(response)
 
@@ -240,7 +244,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_organizations_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["organization"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_organizations_csv"))
         self.assert404(response)
 
@@ -285,7 +291,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_reuses_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["reuse"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_reuses_csv"))
         self.assert404(response)
 
@@ -370,7 +378,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_dataservices_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["dataservice"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_dataservices_csv"))
         self.assert404(response)
 
@@ -461,7 +471,9 @@ class SiteCsvExportsTest(APITestCase):
 
     @pytest.mark.usefixtures("instance_path")
     def test_harvest_csv_w_export_csv_feature(self):
-        # no export generated, 404
+        self.app.config["EXPORT_CSV_MODELS"] = ["harvest"]
+
+        # no export generated yet, 404
         response = self.get(url_for("api.site_harvests_csv"))
         self.assert404(response)
 
