@@ -13,7 +13,7 @@ from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
 from mongoengine.errors import ValidationError
-from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, Node, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
@@ -928,8 +928,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
 def dataset_from_rdf(
     graph: Graph,
-    dataset=None,
-    node=None,
+    dataset: Dataset | None = None,
+    node: Node | None = None,
     remote_url_prefix: str | None = None,
     dryrun: bool = False,
 ):
@@ -940,6 +940,8 @@ def dataset_from_rdf(
 
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
+        if node is None:
+            raise  # FIXME
 
     d = graph.resource(node)
 

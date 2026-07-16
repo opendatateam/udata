@@ -2,15 +2,17 @@ import logging
 import traceback
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import ClassVar, Generator
+from typing import ClassVar, Generator, Never
 
 from flask import current_app
-from rdflib import Graph
+from rdflib import Graph, Node
 from rdflib.namespace import RDF
 from saxonche import PySaxonProcessor, PyXdmNode
 from typing_extensions import override
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.rdf import dataservice_from_rdf
+from udata.core.dataset.models import Dataset
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import gettext as _
@@ -74,7 +76,8 @@ class DcatBackend(BaseBackend):
         super().__init__(*args, **kwargs)
         self.organizations_to_update = set()
 
-    def inner_harvest(self):
+    @override
+    def inner_harvest(self) -> Never:
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
@@ -84,15 +87,16 @@ class DcatBackend(BaseBackend):
             self.process_one_datasets_page(page_number, page)
             pages.append((page_number, page))
 
-        for org in self.organizations_to_update:
-            org.compute_aggregate_metrics = True
-            org.count_datasets()
-
         # We do a second pass to have all datasets in memory and attach datasets
         # to dataservices. It could be better to be one pass of graph walking and
         # then one pass of attaching datasets to dataservices.
         for page_number, page in pages:
             self.process_one_dataservices_page(page_number, page)
+
+        for org in self.organizations_to_update:
+            org.compute_aggregate_metrics = True
+            org.count_datasets()
+            org.count_dataservices()
 
         if not self.dryrun and self.has_reached_max_items():
             # We have reached the max_items limit. Warn the user that all the datasets may not be present.
@@ -174,13 +178,26 @@ class DcatBackend(BaseBackend):
 
             page_number += 1
 
-    def process_one_datasets_page(self, page_number: int, page: Graph):
+    def process_one_datasets_page(self, page_number: int, page: Graph) -> Never:
         for node in page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
-            remote_id = page.value(node, DCT.identifier)
             if self.is_dataset_external_to_this_page(page, node):
                 continue
 
+            remote_id = page.value(node, DCT.identifier)
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
+
+            if self.has_reached_max_items():
+                return
+
+    def process_one_dataservices_page(self, page_number: int, page: Graph) -> Never:
+        access_services = {o for _, _, o in page.triples((None, DCAT.accessService, None))}
+
+        for node in page.subjects(RDF.type, DCAT.DataService):
+            if node in access_services:
+                continue
+
+            remote_id = page.value(node, DCT.identifier)
+            self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
 
             if self.has_reached_max_items():
                 return
@@ -213,44 +230,48 @@ class DcatBackend(BaseBackend):
             predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
         )
 
-    def process_one_dataservices_page(self, page_number: int, page: Graph):
-        access_services = {o for _, _, o in page.triples((None, DCAT.accessService, None))}
-        for node in page.subjects(RDF.type, DCAT.DataService):
-            if node in access_services:
-                continue
-            remote_id = page.value(node, DCT.identifier)
-            self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
-
-            if self.has_reached_max_items():
-                return
-
-    def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
-        item.kwargs["page_number"] = page_number
-
-        dataset = self.get_dataset(item.remote_id)
+    # FIXME: signature
+    def inner_process_item(
+        self,
+        cls: type[Dataset] | type[Dataservice],
+        harvest_item: HarvestItem,
+        page_number: int,
+        page: Graph,
+        node: Node,
+    ):
+        harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
-        dataset = dataset_from_rdf(
-            page, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
-        )
-        if dataset.organization:
-            dataset.organization.compute_aggregate_metrics = False
-            self.organizations_to_update.add(dataset.organization)
-        return dataset
 
-    def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
-        item.kwargs["page_number"] = page_number
+        item = self.get_item(cls, harvest_item.remote_id)
+        if cls is Dataset:
+            item = dataset_from_rdf(
+                page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
+            )
+        else:
+            item = dataservice_from_rdf(
+                page,
+                item,
+                node,
+                [itm.dataset for itm in self.job.items],
+                remote_url_prefix=remote_url_prefix,
+                dryrun=self.dryrun,
+            )
 
-        dataservice = self.get_dataservice(item.remote_id)
-        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
-        return dataservice_from_rdf(
-            page,
-            dataservice,
-            node,
-            [item.dataset for item in self.job.items],
-            remote_url_prefix=remote_url_prefix,
-            dryrun=self.dryrun,
-        )
+        if item.organization:
+            item.organization.compute_aggregate_metrics = False
+            self.organizations_to_update.add(item.organization)
 
+        return item
+
+    @override
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+        return self.inner_process_item(Dataset, harvest_item, **kwargs)
+
+    @override
+    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
+        return self.inner_process_item(Dataservice, harvest_item, **kwargs)
+
+    # TODO: other type than Dataset?
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
             if str(graph.value(node, DCT.identifier)) == item.remote_id:

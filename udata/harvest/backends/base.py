@@ -12,8 +12,8 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
-from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import Dataset, User
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
+from udata.core.user.models import User
 from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
@@ -176,10 +176,10 @@ class BaseBackend(object):
     def inner_harvest(self) -> Never:
         raise NotImplementedError
 
-    def inner_process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
         raise NotImplementedError
 
-    def inner_process_dataservice(self, harvest_item: HarvestItem) -> Dataservice:
+    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
         raise NotImplementedError
 
     def harvest(self) -> HarvestJob:
