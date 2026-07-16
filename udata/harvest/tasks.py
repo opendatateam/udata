@@ -20,18 +20,19 @@ def harvest(self, ident):
     backend.harvest()
 
 
-@task(ignore_result=False, route="low.harvest")
-def harvest_job_item(job_id, item_id):
-    log.info('Harvesting item %s for job "%s"', item_id, job_id)
+# FIXME: process_item broken by https://github.com/opendatateam/udata/pull/3030
+# @task(ignore_result=False, route="low.harvest")
+# def harvest_job_item(job_id, item_id):
+#     log.info('Harvesting item %s for job "%s"', item_id, job_id)
 
-    job = HarvestJob.objects.get(pk=job_id)
-    Backend = backends.get_backend(job.source.backend)
-    backend = Backend(job)
+#     job = HarvestJob.objects.get(pk=job_id)
+#     Backend = backends.get_backend(job.source.backend)
+#     backend = Backend(job)
 
-    item = next(i for i in job.items if i.remote_id == item_id)
+#     item = next(i for i in job.items if i.remote_id == item_id)
 
-    backend.process_item(item)
-    return item_id
+#     backend.process_item(item)
+#     return item_id
 
 
 @task(ignore_result=False, route="low.harvest")

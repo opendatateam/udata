@@ -418,7 +418,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     # might lose some information needed to understand the problem.
                     xml = result.to_string("utf-8")
                     log.error(f"Error parsing source record: {e}\nSource XML: {xml}")
-                    self.add_item(
+                    self.add_harvest_item(
                         HarvestItem(
                             status="failed",
                             errors=[
