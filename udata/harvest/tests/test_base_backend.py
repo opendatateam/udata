@@ -1,8 +1,10 @@
 from datetime import UTC, datetime, timedelta
+from typing import Never
 from urllib.parse import urlparse
 
 import pytest
 import requests
+from typing_extensions import override
 from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -10,11 +12,10 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.models import HarvestItem
-from udata.models import Dataset
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
@@ -55,7 +56,8 @@ class FakeBackend(BaseBackend):
         HarvestExtraConfig("Test Str", "test_str", str),
     )
 
-    def inner_harvest(self):
+    @override
+    def inner_harvest(self) -> Never:
         for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_dataset(remote_id)
             if self.has_reached_max_items():
@@ -66,7 +68,8 @@ class FakeBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
+    @override
+    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
         dataset = self.get_dataset(item.remote_id)
 
         for key, value in DatasetFactory.as_dict(visible=True).items():
@@ -81,7 +84,8 @@ class FakeBackend(BaseBackend):
         )
         return dataset
 
-    def inner_process_dataservice(self, item: HarvestItem):
+    @override
+    def inner_process_dataservice(self, item: HarvestItem, **kwargs) -> Dataservice:
         dataservice = self.get_dataservice(item.remote_id)
 
         for key, value in DataserviceFactory.as_dict().items():

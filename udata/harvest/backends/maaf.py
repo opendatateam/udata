@@ -2,12 +2,16 @@ import logging
 import os
 import re
 from collections import OrderedDict
+from typing import Never
 from urllib.parse import urljoin
 
 from lxml import etree, html
+from typing_extensions import override
 from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.models import Dataset
 from udata.harvest.backends import BaseBackend
 from udata.harvest.filters import (
     boolean,
@@ -135,7 +139,8 @@ class MaafBackend(BaseBackend):
     display_name = "MAAF"
     verify_ssl = False
 
-    def inner_harvest(self):
+    @override
+    def inner_harvest(self) -> Never:
         """Parse the index pages HTML to find link to dataset descriptors"""
         directories = [self.source.url]
         while directories:
@@ -155,7 +160,8 @@ class MaafBackend(BaseBackend):
                 else:
                     log.debug("Skip %s", href)
 
-    def inner_process_dataset(self, item: HarvestItem):
+    @override
+    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
         response = self.get(item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
@@ -222,6 +228,10 @@ class MaafBackend(BaseBackend):
             dataset.extras[extra["key"]] = extra["value"]
 
         return dataset
+
+    @override
+    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
+        pass
 
     def parse_xml(self, xml):
         root = etree.fromstring(xml)

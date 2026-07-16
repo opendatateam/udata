@@ -1,5 +1,6 @@
 import logging
 import traceback
+from abc import ABC, abstractmethod
 from datetime import UTC, date, datetime, timedelta
 from typing import Never
 from uuid import UUID
@@ -81,7 +82,7 @@ class HarvestFeature(object):
         }
 
 
-class BaseBackend(object):
+class BaseBackend(ABC):
     """
     Base class that wrap children methods to add error management and debug logs.
     Also provides a few helpers needed on all or some backends.
@@ -173,12 +174,15 @@ class BaseBackend(object):
         if extra_config:
             return extra_config["value"]
 
+    @abstractmethod
     def inner_harvest(self) -> Never:
         raise NotImplementedError
 
+    @abstractmethod
     def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
         raise NotImplementedError
 
+    @abstractmethod
     def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
         raise NotImplementedError
 

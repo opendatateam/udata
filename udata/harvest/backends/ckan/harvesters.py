@@ -1,15 +1,18 @@
 import json
 import logging
 from datetime import UTC, datetime
+from typing import Never
 from urllib.parse import urljoin
 from uuid import UUID
 
 from dateutil.parser import ParserError
 from mongoengine import Q
+from typing_extensions import override
 
 from udata import uris
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
@@ -95,7 +98,8 @@ class CkanBackend(BaseBackend):
         response = self.get(url)
         return response.json()
 
-    def inner_harvest(self):
+    @override
+    def inner_harvest(self) -> Never:
         """List all datasets for a given ..."""
         fix = False  # Fix should be True for CKAN < '1.8'
 
@@ -125,7 +129,8 @@ class CkanBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
+    @override
+    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
         response = self.get_action("package_show", id=item.remote_id)
 
         result = response["result"]
@@ -283,6 +288,10 @@ class CkanBackend(BaseBackend):
             resource.harvest.last_update = datetime.now(UTC)
 
         return dataset
+
+    @override
+    def inner_process_dataservice(self, item: HarvestItem, **kwargs) -> Dataservice:
+        pass
 
 
 class DkanBackend(CkanBackend):

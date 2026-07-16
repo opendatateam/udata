@@ -1,8 +1,13 @@
+from typing import Never
+
 import factory
 import pytest
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
+from typing_extensions import override
 
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
 from udata.factories import ModelFactory
 
 from .. import backends
@@ -57,20 +62,27 @@ class FactoryBackend(backends.BaseBackend):
         backends.HarvestExtraConfig("Test Str", "test_str", str),
     )
 
-    def inner_harvest(self):
+    @override
+    def inner_harvest(self) -> Never:
         mock_initialize.send(self)
         for i in range(self.config.get("count", DEFAULT_COUNT)):
             self.process_dataset(str(i))
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
+    @override
+    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
         mock_process.send(self, item=item.remote_id)
 
         dataset = self.get_dataset(item.remote_id)
         dataset.title = f"dataset-{item.remote_id}"
 
         return dataset
+
+    @override
+    def inner_process_dataservice(self, item: HarvestItem, **kwargs) -> Dataservice:
+        # FIXME: doesn't return Dataservice...
+        pass
 
 
 class MockBackendsMixin(object):
