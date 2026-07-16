@@ -14,7 +14,7 @@ from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import Dataset, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
-from udata.harvest.backends.base import BaseBackend, HarvestFilter
+from udata.harvest.backends.base import BaseBackend, Harvestable, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
@@ -128,10 +128,11 @@ class CkanBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    # FIXME: signature
     @override
-    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset:
-        if cls is not Dataset:
+    def inner_process(
+        self, item_class: type[Harvestable], item: HarvestItem, **kwargs
+    ) -> Harvestable:
+        if item_class is not Dataset:
             return
 
         response = self.get_action("package_show", id=item.remote_id)

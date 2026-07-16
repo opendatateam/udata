@@ -11,7 +11,7 @@ from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import Dataset
-from udata.harvest.backends import BaseBackend
+from udata.harvest.backends import BaseBackend, Harvestable
 from udata.harvest.filters import (
     boolean,
     email,
@@ -159,10 +159,11 @@ class MaafBackend(BaseBackend):
                 else:
                     log.debug("Skip %s", href)
 
-    # FIXME: signature
     @override
-    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset:
-        if cls is not Dataset:
+    def inner_process(
+        self, item_class: type[Harvestable], item: HarvestItem, **kwargs
+    ) -> Harvestable:
+        if item_class is not Dataset:
             return
 
         response = self.get(item.remote_id)

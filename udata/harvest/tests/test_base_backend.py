@@ -21,6 +21,7 @@ from udata.utils import faker
 
 from ..backends import (
     BaseBackend,
+    Harvestable,
     HarvestExtraConfig,
     HarvestFeature,
     HarvestFilter,
@@ -67,22 +68,23 @@ class FakeBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    # FIXME: signature
     @override
-    def inner_process(self, cls, harvest_item: HarvestItem, **kwargs) -> Dataset | Dataservice:
-        item = self.get_item(cls, harvest_item.remote_id)
-        if cls is Dataset:
+    def inner_process(
+        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
+    ) -> Harvestable:
+        item = self.get_item(item_class, harvest_item.remote_id)
+        if item_class is Dataset:
             items = DatasetFactory.as_dict(visible=True).items()
         else:
             items = DataserviceFactory.as_dict().items()
+
         for key, value in items:
             if getattr(item, key) is None:
                 setattr(item, key, value)
         if self.source.config.get("last_modified"):
             item.last_modified_internal = self.source.config["last_modified"]
-        item.harvest.remote_url = (
-            f"http://www.example.com/records/{cls.__name__.lower()}-url-{len(self.job.items)}"
-        )
+        item.harvest.remote_url = f"http://www.example.com/records/{item_class.__name__.lower()}-url-{len(self.job.items)}"
+
         return item
 
 

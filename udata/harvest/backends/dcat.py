@@ -30,7 +30,7 @@ from udata.rdf import (
 from udata.storage.s3 import store_as_json
 from udata.utils import safe_unicode
 
-from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
+from .base import BaseBackend, Harvestable, HarvestExtraConfig, HarvestFeature
 
 log = logging.getLogger(__name__)
 
@@ -230,20 +230,19 @@ class DcatBackend(BaseBackend):
             predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
         )
 
-    # FIXME: signature
     def inner_process(
         self,
-        cls: type[Dataset] | type[Dataservice],
+        item_class: type[Harvestable],
         harvest_item: HarvestItem,
         page_number: int,
         page: Graph,
         node: Node,
-    ):
+    ) -> Harvestable:
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(cls, harvest_item.remote_id)
-        if cls is Dataset:
+        item = self.get_item(item_class, harvest_item.remote_id)
+        if item_class is Dataset:
             item = dataset_from_rdf(
                 page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
             )

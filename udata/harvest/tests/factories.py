@@ -9,7 +9,7 @@ from typing_extensions import override
 from udata.core.dataset.models import Dataset
 from udata.factories import ModelFactory
 
-from .. import backends
+from ..backends import BaseBackend, Harvestable, HarvestExtraConfig, HarvestFeature, HarvestFilter
 from ..models import HarvestItem, HarvestJob, HarvestSource
 
 
@@ -46,19 +46,19 @@ mock_process = ns.signal("backend:process")
 DEFAULT_COUNT = 3
 
 
-class FactoryBackend(backends.BaseBackend):
+class FactoryBackend(BaseBackend):
     name = "factory"
     filters = (
-        backends.HarvestFilter("Test", "test", int, "An integer"),
-        backends.HarvestFilter("Tag", "tag", str),
+        HarvestFilter("Test", "test", int, "An integer"),
+        HarvestFilter("Tag", "tag", str),
     )
     features = (
-        backends.HarvestFeature("test", "Test"),
-        backends.HarvestFeature("toggled", "Toggled", "A togglable", True),
+        HarvestFeature("test", "Test"),
+        HarvestFeature("toggled", "Toggled", "A togglable", True),
     )
     extra_configs = (
-        backends.HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
-        backends.HarvestExtraConfig("Test Str", "test_str", str),
+        HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
+        HarvestExtraConfig("Test Str", "test_str", str),
     )
 
     @override
@@ -69,13 +69,14 @@ class FactoryBackend(backends.BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    # FIXME: signature
     @override
-    def inner_process(self, cls, harvest_item: HarvestItem, **kwargs) -> Dataset:
+    def inner_process(
+        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
+    ) -> Harvestable:
         mock_process.send(self, item=harvest_item.remote_id)
 
-        item = self.get_item(cls, harvest_item.remote_id)
-        item.title = f"{cls.__name__.lower()}-{harvest_item.remote_id}"
+        item = self.get_item(item_class, harvest_item.remote_id)
+        item.title = f"{item_class.__name__.lower()}-{harvest_item.remote_id}"
 
         return item
 
