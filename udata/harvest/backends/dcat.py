@@ -184,7 +184,7 @@ class DcatBackend(BaseBackend):
                 continue
 
             remote_id = page.value(node, DCT.identifier)
-            self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
+            self.process_item(Dataset, remote_id, page_number=page_number, page=page, node=node)
 
             if self.has_reached_max_items():
                 return
@@ -197,7 +197,7 @@ class DcatBackend(BaseBackend):
                 continue
 
             remote_id = page.value(node, DCT.identifier)
-            self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
+            self.process_item(Dataservice, remote_id, page_number=page_number, page=page, node=node)
 
             if self.has_reached_max_items():
                 return
@@ -231,7 +231,7 @@ class DcatBackend(BaseBackend):
         )
 
     # FIXME: signature
-    def inner_process_item(
+    def inner_process(
         self,
         cls: type[Dataset] | type[Dataservice],
         harvest_item: HarvestItem,
@@ -262,14 +262,6 @@ class DcatBackend(BaseBackend):
             self.organizations_to_update.add(item.organization)
 
         return item
-
-    @override
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
-        return self.inner_process_item(Dataset, harvest_item, **kwargs)
-
-    @override
-    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
-        return self.inner_process_item(Dataservice, harvest_item, **kwargs)
 
     # TODO: other type than Dataset?
     def get_node_from_item(self, graph, item):

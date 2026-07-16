@@ -10,7 +10,6 @@ from mongoengine import Q
 from typing_extensions import override
 
 from udata import uris
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import Dataset, HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
@@ -125,12 +124,16 @@ class CkanBackend(BaseBackend):
 
         for name in names:
             # We use `name` as `remote_id` for now, we'll be replace at the beginning of the process
-            self.process_dataset(name)
+            self.process_item(Dataset, name)
             if self.has_reached_max_items():
                 return
 
+    # FIXME: signature
     @override
-    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
+    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset:
+        if cls is not Dataset:
+            return
+
         response = self.get_action("package_show", id=item.remote_id)
 
         result = response["result"]
@@ -288,10 +291,6 @@ class CkanBackend(BaseBackend):
             resource.harvest.last_update = datetime.now(UTC)
 
         return dataset
-
-    @override
-    def inner_process_dataservice(self, item: HarvestItem, **kwargs) -> Dataservice:
-        pass
 
 
 class DkanBackend(CkanBackend):

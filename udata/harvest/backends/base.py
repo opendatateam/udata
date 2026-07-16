@@ -178,12 +178,9 @@ class BaseBackend(ABC):
     def inner_harvest(self) -> Never:
         raise NotImplementedError
 
+    # FIXME: signature
     @abstractmethod
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
-        raise NotImplementedError
-
-    @abstractmethod
-    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
+    def inner_process(self, cls, harvest_item: HarvestItem, **kwargs):
         raise NotImplementedError
 
     def harvest(self) -> HarvestJob:
@@ -266,15 +263,12 @@ class BaseBackend(ABC):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            if cls is Dataset:
-                item = self.inner_process_dataset(harvest_item, **kwargs)
-            else:
-                item = self.inner_process_dataservice(harvest_item, **kwargs)
+            item = self.inner_process(cls, harvest_item, **kwargs)
             if item.harvest:
                 harvest_item.remote_url = item.harvest.remote_url
 
             # FIXME: comment still true?
-            # Use `harvest_item.remote_id` from this point, because `inner_process_*` could have modified it.
+            # Use `harvest_item.remote_id` from this point, because `inner_process()` could have modified it.
 
             self.ensure_unique_remote_id(harvest_item)
 
@@ -335,14 +329,8 @@ class BaseBackend(ABC):
             ]
             self.save_job()
 
-    def process_dataset(self, remote_id: str, **kwargs) -> Never:
-        self.process_item(Dataset, remote_id, **kwargs)
-
-    def process_dataservice(self, remote_id: str, **kwargs) -> Never:
-        self.process_item(Dataservice, remote_id, **kwargs)
-
     def has_reached_max_items(self) -> bool:
-        """Should be called after process_dataset to know if we reach the max items"""
+        """Should be called after process_item to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
     def ensure_unique_remote_id(self, harvest_item: HarvestItem) -> Never:

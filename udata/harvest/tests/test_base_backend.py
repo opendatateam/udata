@@ -59,46 +59,46 @@ class FakeBackend(BaseBackend):
     @override
     def inner_harvest(self) -> Never:
         for remote_id in self.source.config.get("dataset_remote_ids", []):
-            self.process_dataset(remote_id)
+            self.process_item(Dataset, remote_id)
             if self.has_reached_max_items():
                 return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
-            self.process_dataservice(remote_id)
+            self.process_item(Dataservice, remote_id)
             if self.has_reached_max_items():
                 return
 
+    # FIXME: signature
     @override
-    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
-        dataset = self.get_dataset(item.remote_id)
+    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset | Dataservice:
+        if cls is Dataset:
+            dataset = self.get_dataset(item.remote_id)
 
-        for key, value in DatasetFactory.as_dict(visible=True).items():
-            if getattr(dataset, key) is None:
-                setattr(dataset, key, value)
-        if self.source.config.get("last_modified"):
-            dataset.last_modified_internal = self.source.config["last_modified"]
-        if not dataset.harvest:
-            dataset.harvest = HarvestDatasetMetadata()
-        dataset.harvest.remote_url = (
-            f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
-        )
-        return dataset
+            for key, value in DatasetFactory.as_dict(visible=True).items():
+                if getattr(dataset, key) is None:
+                    setattr(dataset, key, value)
+            if self.source.config.get("last_modified"):
+                dataset.last_modified_internal = self.source.config["last_modified"]
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.remote_url = (
+                f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
+            )
+            return dataset
+        else:
+            dataservice = self.get_dataservice(item.remote_id)
 
-    @override
-    def inner_process_dataservice(self, item: HarvestItem, **kwargs) -> Dataservice:
-        dataservice = self.get_dataservice(item.remote_id)
-
-        for key, value in DataserviceFactory.as_dict().items():
-            if getattr(dataservice, key) is None:
-                setattr(dataservice, key, value)
-        if self.source.config.get("last_modified"):
-            dataservice.last_modified_internal = self.source.config["last_modified"]
-        if not dataservice.harvest:
-            dataservice.harvest = HarvestDataserviceMetadata()
-        dataservice.harvest.remote_url = (
-            f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
-        )
-        return dataservice
+            for key, value in DataserviceFactory.as_dict().items():
+                if getattr(dataservice, key) is None:
+                    setattr(dataservice, key, value)
+            if self.source.config.get("last_modified"):
+                dataservice.last_modified_internal = self.source.config["last_modified"]
+            if not dataservice.harvest:
+                dataservice.harvest = HarvestDataserviceMetadata()
+            dataservice.harvest.remote_url = (
+                f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
+            )
+            return dataservice
 
 
 class HarvestFilterTest:

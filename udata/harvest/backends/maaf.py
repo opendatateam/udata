@@ -9,7 +9,6 @@ from lxml import etree, html
 from typing_extensions import override
 from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import Dataset
 from udata.harvest.backends import BaseBackend
@@ -154,14 +153,18 @@ class MaafBackend(BaseBackend):
                 elif href.lower().endswith(".xml"):
                     # We use the URL as `remote_id` for now, we'll be replace at
                     # the beginning of the process
-                    self.process_dataset(urljoin(directory, href))
+                    self.process_item(Dataset, urljoin(directory, href))
                     if self.has_reached_max_items():
                         return
                 else:
                     log.debug("Skip %s", href)
 
+    # FIXME: signature
     @override
-    def inner_process_dataset(self, item: HarvestItem, **kwargs) -> Dataset:
+    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset:
+        if cls is not Dataset:
+            return
+
         response = self.get(item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
@@ -228,10 +231,6 @@ class MaafBackend(BaseBackend):
             dataset.extras[extra["key"]] = extra["value"]
 
         return dataset
-
-    @override
-    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
-        pass
 
     def parse_xml(self, xml):
         root = etree.fromstring(xml)
