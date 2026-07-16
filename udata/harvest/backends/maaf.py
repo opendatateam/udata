@@ -171,7 +171,7 @@ class MaafBackend(BaseBackend):
 
         # Replace the `remote_id` from the URL to `id`.
         item.remote_id = metadata["id"]
-        dataset = self.get_dataset(item.remote_id)
+        dataset = self.get_item(Dataset, item.remote_id)
 
         dataset.title = metadata["title"]
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)

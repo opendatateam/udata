@@ -272,15 +272,10 @@ class BaseBackend(ABC):
 
             self.ensure_unique_remote_id(harvest_item)
 
+            item.harvest = self.update_item_harvest_info(cls, item.harvest, harvest_item.remote_id)
             if cls is Dataset:
-                item.harvest = self.update_dataset_harvest_info(
-                    item.harvest, harvest_item.remote_id
-                )
                 item.archived = None
             else:
-                item.harvest = self.update_dataservice_harvest_info(
-                    item.harvest, harvest_item.remote_id
-                )
                 item.archived_at = None
 
             # TODO: Apply editable mappings
@@ -346,12 +341,6 @@ class BaseBackend(ABC):
         metadata: HarvestDatasetMetadata | HarvestDataserviceMetadata | None,
         remote_id: str,
     ):
-        if not metadata:
-            if cls is Dataset:
-                metadata = HarvestDatasetMetadata()
-            else:
-                metadata = HarvestDataserviceMetadata()
-
         metadata.backend = self.display_name
         metadata.source_id = str(self.source.id)
         if cls is Dataservice:
@@ -368,16 +357,6 @@ class BaseBackend(ABC):
         # created_at, modified_at, remote_url, uri, dct_identifier are set in `dataset_from_rdf`
 
         return metadata
-
-    def update_dataset_harvest_info(
-        self, metadata: HarvestDatasetMetadata | None, remote_id: str
-    ) -> HarvestDatasetMetadata:
-        return self.update_item_harvest_info(Dataset, metadata, remote_id)
-
-    def update_dataservice_harvest_info(
-        self, metadata: HarvestDataserviceMetadata | None, remote_id: str
-    ) -> HarvestDataserviceMetadata:
-        return self.update_item_harvest_info(Dataservice, metadata, remote_id)
 
     def add_harvest_item(self, harvest_item: HarvestItem) -> HarvestItem:
         self.job.items.append(harvest_item)
@@ -458,20 +437,20 @@ class BaseBackend(ABC):
 
         if item:
             self.ensure_unique_ownership(item)
-            return item
-
-        if self.source.organization:
-            return cls(organization=self.source.organization)
+        elif self.source.organization:
+            item = cls(organization=self.source.organization)
         elif self.source.owner:
-            return cls(owner=self.source.owner)
+            item = cls(owner=self.source.owner)
+        else:
+            item = cls()
 
-        return cls()
+        if not item.harvest:
+            if cls is Dataset:
+                item.harvest = HarvestDatasetMetadata()
+            else:
+                item.harvest = HarvestDataserviceMetadata()
 
-    def get_dataset(self, remote_id: str) -> Dataset:
-        return self.get_item(Dataset, remote_id)
-
-    def get_dataservice(self, remote_id: str) -> Dataservice:
-        return self.get_item(Dataservice, remote_id)
+        return item
 
     def ensure_unique_ownership(self, item: Dataset | Dataservice) -> Never:
         """Raise if item already belongs to some other owner.

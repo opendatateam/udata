@@ -71,16 +71,13 @@ class FactoryBackend(backends.BaseBackend):
 
     # FIXME: signature
     @override
-    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset:
-        if cls is not Dataset:
-            return
+    def inner_process(self, cls, harvest_item: HarvestItem, **kwargs) -> Dataset:
+        mock_process.send(self, item=harvest_item.remote_id)
 
-        mock_process.send(self, item=item.remote_id)
+        item = self.get_item(cls, harvest_item.remote_id)
+        item.title = f"{cls.__name__.lower()}-{harvest_item.remote_id}"
 
-        dataset = self.get_dataset(item.remote_id)
-        dataset.title = f"dataset-{item.remote_id}"
-
-        return dataset
+        return item
 
 
 class MockBackendsMixin(object):

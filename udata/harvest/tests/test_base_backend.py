@@ -9,10 +9,9 @@ from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.models import HarvestItem
@@ -70,35 +69,21 @@ class FakeBackend(BaseBackend):
 
     # FIXME: signature
     @override
-    def inner_process(self, cls, item: HarvestItem, **kwargs) -> Dataset | Dataservice:
+    def inner_process(self, cls, harvest_item: HarvestItem, **kwargs) -> Dataset | Dataservice:
+        item = self.get_item(cls, harvest_item.remote_id)
         if cls is Dataset:
-            dataset = self.get_dataset(item.remote_id)
-
-            for key, value in DatasetFactory.as_dict(visible=True).items():
-                if getattr(dataset, key) is None:
-                    setattr(dataset, key, value)
-            if self.source.config.get("last_modified"):
-                dataset.last_modified_internal = self.source.config["last_modified"]
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
-            dataset.harvest.remote_url = (
-                f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
-            )
-            return dataset
+            items = DatasetFactory.as_dict(visible=True).items()
         else:
-            dataservice = self.get_dataservice(item.remote_id)
-
-            for key, value in DataserviceFactory.as_dict().items():
-                if getattr(dataservice, key) is None:
-                    setattr(dataservice, key, value)
-            if self.source.config.get("last_modified"):
-                dataservice.last_modified_internal = self.source.config["last_modified"]
-            if not dataservice.harvest:
-                dataservice.harvest = HarvestDataserviceMetadata()
-            dataservice.harvest.remote_url = (
-                f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
-            )
-            return dataservice
+            items = DataserviceFactory.as_dict().items()
+        for key, value in items:
+            if getattr(item, key) is None:
+                setattr(item, key, value)
+        if self.source.config.get("last_modified"):
+            item.last_modified_internal = self.source.config["last_modified"]
+        item.harvest.remote_url = (
+            f"http://www.example.com/records/{cls.__name__.lower()}-url-{len(self.job.items)}"
+        )
+        return item
 
 
 class HarvestFilterTest:

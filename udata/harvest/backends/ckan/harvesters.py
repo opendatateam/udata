@@ -11,7 +11,7 @@ from typing_extensions import override
 
 from udata import uris
 from udata.core.dataset.constants import UpdateFrequency
-from udata.core.dataset.models import Dataset, HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import Dataset, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
@@ -152,10 +152,7 @@ class CkanBackend(BaseBackend):
         if not len(data.get("resources", [])):
             raise HarvestSkipException(f"Dataset {data['name']} has no record")
 
-        dataset = self.get_dataset(item.remote_id)
-
-        if not dataset.harvest:
-            dataset.harvest = HarvestDatasetMetadata()
+        dataset = self.get_item(Dataset, item.remote_id)
 
         # Core attributes
         if not dataset.slug:
