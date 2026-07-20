@@ -98,6 +98,7 @@ class DcatBackend(BaseBackend):
             org.count_datasets()
             org.count_dataservices()
 
+        # TODO: move in base to benefit other harvesters
         if not self.dryrun and self.has_reached_max_items():
             # We have reached the max_items limit. Warn the user that all the datasets may not be present.
             error = HarvestError(
@@ -249,7 +250,7 @@ class DcatBackend(BaseBackend):
             page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
-        # TODO: this should go in base to benefit other harvesters
+        # TODO: move in base to benefit other harvesters
         if item.organization:
             item.organization.compute_aggregate_metrics = False
             self.organizations_to_update.add(item.organization)

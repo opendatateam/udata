@@ -289,8 +289,8 @@ class BaseBackend(ABC):
 
             if self.dryrun:
                 item.validate()
-                # A preview never saves, so the dataset would keep no pk and could not
-                # be referenced by a dataservice harvested in the same run. Give it the
+                # A preview never saves, so the item would keep no pk and could not
+                # be referenced by another item harvested in the same run. Give it the
                 # client-side id that save() would have generated so cross-references
                 # between previewed objects stay valid and distinct.
                 if item.pk is None:
@@ -298,10 +298,10 @@ class BaseBackend(ABC):
             else:
                 item.save()
 
-            # FIXME: why use a different field for different type?
+            # FIXME: consolidate to a single field?
             if isinstance(item, Dataset):
                 harvest_item.dataset = item
-            else:
+            elif isinstance(item, Dataservice):
                 harvest_item.dataservice = item
 
             harvest_item.status = "done"
@@ -345,7 +345,7 @@ class BaseBackend(ABC):
         metadata.backend = self.display_name or "unknown"
         metadata.source_id = str(self.source.id)
         if hasattr(metadata, "source_url"):
-            # FIXME: consolidate source_url to all HarvestMetadata (or remove)
+            # FIXME: consolidate `source_url` to all HarvestMetadata (or remove)?
             metadata.source_url = str(self.source.url)
         metadata.remote_id = remote_id
         metadata.domain = self.source.domain

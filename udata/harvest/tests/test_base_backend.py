@@ -86,7 +86,7 @@ class FakeBackend(BaseBackend):
         if self.source.config.get("last_modified"):
             item.last_modified_internal = self.source.config["last_modified"]
         clazz = type(item).__name__.lower()
-        position = {len(self.job.items)}
+        position = len(self.job.items)
         item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
 
 
