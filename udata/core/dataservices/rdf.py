@@ -39,7 +39,7 @@ def dataservice_from_rdf(
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.DataService)
         if node is None:
-            raise  # FIXME
+            raise RuntimeError("graph contains no service")
 
     d = graph.resource(node)
 

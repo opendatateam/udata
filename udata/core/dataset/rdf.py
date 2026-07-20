@@ -941,7 +941,7 @@ def dataset_from_rdf(
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
         if node is None:
-            raise  # FIXME
+            raise RuntimeError("graph contains no dataset")
 
     d = graph.resource(node)
 
