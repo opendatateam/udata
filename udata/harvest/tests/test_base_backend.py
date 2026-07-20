@@ -21,7 +21,6 @@ from udata.utils import faker
 
 from ..backends import (
     BaseBackend,
-    Harvestable,
     HarvestExtraConfig,
     HarvestFeature,
     HarvestFilter,
@@ -69,23 +68,28 @@ class FakeBackend(BaseBackend):
                 return
 
     @override
-    def inner_process(
-        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable | None:
-        item = self.get_item(item_class, harvest_item.remote_id)
-        if item_class is Dataset:
-            items = DatasetFactory.as_dict(visible=True).items()
-        else:
-            items = DataserviceFactory.as_dict().items()
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+        item = self.get_item(Dataset, harvest_item.remote_id)
+        fields = DatasetFactory.as_dict(visible=True).items()
+        self._init_item(item, fields)
+        return item
 
-        for key, value in items:
+    @override
+    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
+        item = self.get_item(Dataservice, harvest_item.remote_id)
+        fields = DataserviceFactory.as_dict().items()
+        self._init_item(item, fields)
+        return item
+
+    def _init_item(self, item, fields):
+        for key, value in fields:
             if getattr(item, key) is None:
                 setattr(item, key, value)
         if self.source.config.get("last_modified"):
             item.last_modified_internal = self.source.config["last_modified"]
-        item.harvest.remote_url = f"http://www.example.com/records/{item_class.__name__.lower()}-url-{len(self.job.items)}"
-
-        return item
+        clazz = type(item).__name__.lower()
+        position = {len(self.job.items)}
+        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
 
 
 class HarvestFilterTest:

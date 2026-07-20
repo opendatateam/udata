@@ -184,10 +184,10 @@ class BaseBackend(ABC):
     def inner_harvest(self) -> Never:
         raise NotImplementedError
 
-    @abstractmethod
-    def inner_process(
-        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable | None:
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+        raise NotImplementedError
+
+    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
         raise NotImplementedError
 
     def harvest(self) -> HarvestJob:
@@ -267,10 +267,13 @@ class BaseBackend(ABC):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            item = self.inner_process(item_class, harvest_item, **kwargs)
-            if not item:
-                # FIXME
-                return
+            if item_class is Dataset:
+                item = self.inner_process_dataset(harvest_item, **kwargs)
+            elif item_class is Dataservice:
+                item = self.inner_process_dataservice(harvest_item, **kwargs)
+            else:
+                print(f"{item_class=}")
+                raise  # FIXME
 
             if item.harvest:
                 harvest_item.remote_url = item.harvest.remote_url

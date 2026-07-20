@@ -30,7 +30,7 @@ from udata.rdf import (
 from udata.storage.s3 import store_as_json
 from udata.utils import safe_unicode
 
-from .base import BaseBackend, Harvestable, HarvestExtraConfig, HarvestFeature
+from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
 log = logging.getLogger(__name__)
 
@@ -231,31 +231,47 @@ class DcatBackend(BaseBackend):
         )
 
     # FIXME: kwargs
-    def inner_process(
+    def inner_process_dataset(
         self,
-        item_class: type[Harvestable],
         harvest_item: HarvestItem,
         page_number: int,
         page: Graph,
         node: Node,
-    ) -> Harvestable | None:
+    ) -> Dataset:
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(item_class, harvest_item.remote_id)
-        if item_class is Dataset:
-            item = dataset_from_rdf(
-                page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
-            )
-        elif item_class is Dataservice:
-            item = dataservice_from_rdf(
-                page,
-                item,
-                node,
-                [itm.dataset for itm in self.job.items],
-                remote_url_prefix=remote_url_prefix,
-                dryrun=self.dryrun,
-            )
+        item = self.get_item(Dataset, harvest_item.remote_id)
+        item = dataset_from_rdf(
+            page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
+        )
+
+        # FIXME: this should go in base to benefit other harvesters
+        if item.organization:
+            item.organization.compute_aggregate_metrics = False
+            self.organizations_to_update.add(item.organization)
+
+        return item
+
+    def inner_process_dataservice(
+        self,
+        harvest_item: HarvestItem,
+        page_number: int,
+        page: Graph,
+        node: Node,
+    ) -> Dataservice:
+        harvest_item.kwargs["page_number"] = page_number
+        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
+
+        item = self.get_item(Dataservice, harvest_item.remote_id)
+        item = dataservice_from_rdf(
+            page,
+            item,
+            node,
+            [itm.dataset for itm in self.job.items],
+            remote_url_prefix=remote_url_prefix,
+            dryrun=self.dryrun,
+        )
 
         if item.organization:
             item.organization.compute_aggregate_metrics = False

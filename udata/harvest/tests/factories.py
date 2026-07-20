@@ -9,7 +9,7 @@ from typing_extensions import override
 from udata.core.dataset.models import Dataset
 from udata.factories import ModelFactory
 
-from ..backends import BaseBackend, Harvestable, HarvestExtraConfig, HarvestFeature, HarvestFilter
+from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
 from ..models import HarvestItem, HarvestJob, HarvestSource
 
 
@@ -70,14 +70,10 @@ class FactoryBackend(BaseBackend):
                 return
 
     @override
-    def inner_process(
-        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable | None:
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
         mock_process.send(self, item=harvest_item.remote_id)
-
-        item = self.get_item(item_class, harvest_item.remote_id)
-        item.title = f"{item_class.__name__.lower()}-{harvest_item.remote_id}"
-
+        item = self.get_item(Dataset, harvest_item.remote_id)
+        item.title = f"dataset-{harvest_item.remote_id}"
         return item
 
 

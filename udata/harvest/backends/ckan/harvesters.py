@@ -14,7 +14,7 @@ from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import Dataset, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
-from udata.harvest.backends.base import BaseBackend, Harvestable, HarvestFilter
+from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
@@ -129,13 +129,8 @@ class CkanBackend(BaseBackend):
                 return
 
     @override
-    def inner_process(
-        self, item_class: type[Harvestable], item: HarvestItem, **kwargs
-    ) -> Harvestable | None:
-        if item_class is not Dataset:
-            return
-
-        response = self.get_action("package_show", id=item.remote_id)
+    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+        response = self.get_action("package_show", id=harvest_item.remote_id)
 
         result = response["result"]
         # DKAN returns a list where CKAN returns an object
@@ -145,7 +140,7 @@ class CkanBackend(BaseBackend):
 
         # Replace the `remote_id` from `name` to `id`.
         if result.get("id"):
-            item.remote_id = result["id"]
+            harvest_item.remote_id = result["id"]
 
         data = self.validate(result, self.schema)
 
@@ -153,7 +148,7 @@ class CkanBackend(BaseBackend):
         if not len(data.get("resources", [])):
             raise HarvestSkipException(f"Dataset {data['name']} has no record")
 
-        dataset = self.get_item(Dataset, item.remote_id)
+        dataset = self.get_item(Dataset, harvest_item.remote_id)
 
         # Core attributes
         if not dataset.slug:
