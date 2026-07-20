@@ -1163,6 +1163,10 @@ class Dataset(
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
+    def set_harvested(self):
+        if not self.harvest:
+            self.harvest = HarvestDatasetMetadata()
+
 
 pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)

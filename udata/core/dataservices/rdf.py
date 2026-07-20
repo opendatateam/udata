@@ -3,7 +3,6 @@ from rdflib import RDF, BNode, Graph, Literal, Node, URIRef
 
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
@@ -83,9 +82,7 @@ def dataservice_from_rdf(
     if license is not None:
         dataservice.license = License.guess(license)
 
-    if not dataservice.harvest:
-        dataservice.harvest = HarvestDataserviceMetadata()
-
+    dataservice.set_harvested()
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     dataservice.harvest.remote_url = remote_url_from_rdf(
         d, graph, remote_url_prefix=remote_url_prefix

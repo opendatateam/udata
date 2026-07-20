@@ -249,7 +249,7 @@ class DcatBackend(BaseBackend):
             page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
-        # FIXME: this should go in base to benefit other harvesters
+        # TODO: this should go in base to benefit other harvesters
         if item.organization:
             item.organization.compute_aggregate_metrics = False
             self.organizations_to_update.add(item.organization)

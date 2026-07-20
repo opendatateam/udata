@@ -20,7 +20,7 @@ from rdflib.resource import Resource as RdfResource
 from udata import i18n, uris
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
 from udata.mongo.datetime_fields import DateRange
@@ -1033,8 +1033,7 @@ def dataset_from_rdf(
     issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
-    if not dataset.harvest:
-        dataset.harvest = HarvestDatasetMetadata()
+    dataset.set_harvested()
     dataset.harvest.dct_identifier = identifier
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url

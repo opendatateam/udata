@@ -278,9 +278,7 @@ class BaseBackend(ABC):
             # modified it.
 
             # Update `remote_url` right away so it's available even if later code raises
-            if item.harvest:
-                # FIXME: if item.harvest==None then update_harvest_metadata below would fail
-                harvest_item.remote_url = item.harvest.remote_url
+            harvest_item.remote_url = item.harvest.remote_url
 
             self.ensure_unique_remote_id(harvest_item)
 
@@ -445,12 +443,7 @@ class BaseBackend(ABC):
         else:
             item = item_class()
 
-        if not item.harvest:
-            # FIXME: auto-init?
-            if item_class is Dataset:
-                item.harvest = HarvestDatasetMetadata()
-            else:
-                item.harvest = HarvestDataserviceMetadata()
+        item.set_harvested()
 
         return item
 
