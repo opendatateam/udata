@@ -24,7 +24,6 @@ from udata.rdf import (
 )
 
 
-# TODO: unit tests like for dataset_from_rdf
 def dataservice_from_rdf(
     graph: Graph,
     dataservice: Dataservice,
