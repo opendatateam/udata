@@ -184,7 +184,9 @@ class DcatBackend(BaseBackend):
                 continue
 
             remote_id = page.value(node, DCT.identifier)
-            self.process_item(Dataset, remote_id, page_number=page_number, page=page, node=node)
+            self.process_item(
+                remote_id, self.process_dataset, page_number=page_number, page=page, node=node
+            )
 
             if self.has_reached_max_items():
                 return
@@ -197,7 +199,9 @@ class DcatBackend(BaseBackend):
                 continue
 
             remote_id = page.value(node, DCT.identifier)
-            self.process_item(Dataservice, remote_id, page_number=page_number, page=page, node=node)
+            self.process_item(
+                remote_id, self.process_dataservice, page_number=page_number, page=page, node=node
+            )
 
             if self.has_reached_max_items():
                 return
@@ -230,8 +234,7 @@ class DcatBackend(BaseBackend):
             predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
         )
 
-    # FIXME: kwargs
-    def inner_process_dataset(
+    def process_dataset(
         self,
         harvest_item: HarvestItem,
         page_number: int,
@@ -241,7 +244,7 @@ class DcatBackend(BaseBackend):
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(Dataset, harvest_item.remote_id)
+        item = self.get_item(harvest_item.remote_id, Dataset)
         item = dataset_from_rdf(
             page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
@@ -253,7 +256,7 @@ class DcatBackend(BaseBackend):
 
         return item
 
-    def inner_process_dataservice(
+    def process_dataservice(
         self,
         harvest_item: HarvestItem,
         page_number: int,
@@ -263,7 +266,7 @@ class DcatBackend(BaseBackend):
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(Dataservice, harvest_item.remote_id)
+        item = self.get_item(harvest_item.remote_id, Dataservice)
         item = dataservice_from_rdf(
             page,
             item,

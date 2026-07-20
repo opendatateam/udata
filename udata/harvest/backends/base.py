@@ -1,8 +1,9 @@
 import logging
 import traceback
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
-from typing import Never, TypeVar, Union
+from typing import Concatenate, Never, ParamSpec, TypeVar, Union
 from uuid import UUID
 
 import requests
@@ -86,6 +87,8 @@ Harvestable = TypeVar("Harvestable", bound=Union[Dataset, Dataservice])
 HarvestMetadata = TypeVar(
     "HarvestMetadata", bound=Union[HarvestDatasetMetadata, HarvestDataserviceMetadata]
 )
+
+ItemProcessorParams = ParamSpec("ItemProcessorParams")
 
 
 class BaseBackend(ABC):
@@ -184,12 +187,6 @@ class BaseBackend(ABC):
     def inner_harvest(self) -> Never:
         raise NotImplementedError
 
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
-        raise NotImplementedError
-
-    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
-        raise NotImplementedError
-
     def harvest(self) -> HarvestJob:
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
@@ -252,8 +249,15 @@ class BaseBackend(ABC):
 
         return self.job
 
-    def process_item(self, item_class: type[Harvestable], remote_id: str, **kwargs) -> Never:
-        log.debug(f"Processing {item_class.__name__.lower()} {remote_id}…")
+    def process_item(
+        self,
+        remote_id: str,
+        item_processor: Callable[Concatenate[HarvestItem, ItemProcessorParams], Harvestable],
+        *args: ItemProcessorParams.args,
+        **kwargs: ItemProcessorParams.kwargs,
+    ) -> Never:
+        # FIXME: use typing.get_type_hints()["return"] or inspect.signature().return_annotation to get item type?
+        log.debug(f"Processing item {remote_id}…")
 
         # TODO: add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
         harvest_item = self.add_harvest_item(
@@ -267,25 +271,20 @@ class BaseBackend(ABC):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            if item_class is Dataset:
-                item = self.inner_process_dataset(harvest_item, **kwargs)
-            elif item_class is Dataservice:
-                item = self.inner_process_dataservice(harvest_item, **kwargs)
-            else:
-                print(f"{item_class=}")
-                raise  # FIXME
+            item = item_processor(harvest_item, *args, **kwargs)
 
+            # IMPORTANT:
+            # Use `harvest_item.remote_id` from this point, because `item_processor()` could have
+            # modified it.
+
+            # Update `remote_url` right away so it's available even if later code raises
             if item.harvest:
+                # FIXME: if item.harvest==None then update_harvest_metadata below would fail
                 harvest_item.remote_url = item.harvest.remote_url
-
-            # FIXME: comment still true?
-            # Use `harvest_item.remote_id` from this point, because `inner_process()` could have modified it.
 
             self.ensure_unique_remote_id(harvest_item)
 
-            item.harvest = self.update_item_harvest_info(
-                item_class, item.harvest, harvest_item.remote_id
-            )
+            item.harvest = self.update_harvest_metadata(item.harvest, harvest_item.remote_id)
             item.archived_at = None
 
             # TODO: Apply editable mappings
@@ -296,14 +295,14 @@ class BaseBackend(ABC):
                 # be referenced by a dataservice harvested in the same run. Give it the
                 # client-side id that save() would have generated so cross-references
                 # between previewed objects stay valid and distinct.
-                if item_class is Dataset and item.pk is None:
+                if isinstance(item, Dataset) and item.pk is None:
                     # FIXME: needed for dataservice?
                     item.id = ObjectId()
             else:
                 item.save()
 
             # FIXME: why use a different field for different type?
-            if item_class is Dataset:
+            if isinstance(item, Dataset):
                 harvest_item.dataset = item
             else:
                 harvest_item.dataservice = item
@@ -345,15 +344,11 @@ class BaseBackend(ABC):
 
         self.remote_ids.add(harvest_item.remote_id)
 
-    def update_item_harvest_info(
-        self,
-        item_class: type[Harvestable],
-        metadata: HarvestMetadata,
-        remote_id: str,
-    ) -> HarvestMetadata:
+    def update_harvest_metadata(self, metadata: HarvestMetadata, remote_id: str) -> HarvestMetadata:
         metadata.backend = self.display_name or "unknown"
         metadata.source_id = str(self.source.id)
-        if item_class is Dataservice:
+        if hasattr(metadata, "source_url"):
+            # FIXME: consolidate source_url to all HarvestMetadata (or remove)
             metadata.source_url = str(self.source.url)
         metadata.remote_id = remote_id
         metadata.domain = self.source.domain
@@ -423,7 +418,7 @@ class BaseBackend(ABC):
                 )
             )
 
-    def get_item(self, item_class: type[Harvestable], remote_id: str) -> Harvestable:
+    def get_item(self, remote_id: str, item_class: type[Harvestable]) -> Harvestable:
         """Get or create a `item_class` given its remote ID (and its source)
         We first try to match `source_id` to be source domain independent
         """
@@ -451,6 +446,7 @@ class BaseBackend(ABC):
             item = item_class()
 
         if not item.harvest:
+            # FIXME: auto-init?
             if item_class is Dataset:
                 item.harvest = HarvestDatasetMetadata()
             else:

@@ -58,25 +58,23 @@ class FakeBackend(BaseBackend):
     @override
     def inner_harvest(self) -> Never:
         for remote_id in self.source.config.get("dataset_remote_ids", []):
-            self.process_item(Dataset, remote_id)
+            self.process_item(remote_id, self.process_dataset)
             if self.has_reached_max_items():
                 return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
-            self.process_item(Dataservice, remote_id)
+            self.process_item(remote_id, self.process_dataservice)
             if self.has_reached_max_items():
                 return
 
-    @override
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
-        item = self.get_item(Dataset, harvest_item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        item = self.get_item(harvest_item.remote_id, Dataset)
         fields = DatasetFactory.as_dict(visible=True).items()
         self._init_item(item, fields)
         return item
 
-    @override
-    def inner_process_dataservice(self, harvest_item: HarvestItem, **kwargs) -> Dataservice:
-        item = self.get_item(Dataservice, harvest_item.remote_id)
+    def process_dataservice(self, harvest_item: HarvestItem) -> Dataservice:
+        item = self.get_item(harvest_item.remote_id, Dataservice)
         fields = DataserviceFactory.as_dict().items()
         self._init_item(item, fields)
         return item

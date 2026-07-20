@@ -153,21 +153,20 @@ class MaafBackend(BaseBackend):
                 elif href.lower().endswith(".xml"):
                     # We use the URL as `remote_id` for now, we'll be replace at
                     # the beginning of the process
-                    self.process_item(Dataset, urljoin(directory, href))
+                    self.process_item(urljoin(directory, href), self.process_dataset)
                     if self.has_reached_max_items():
                         return
                 else:
                     log.debug("Skip %s", href)
 
-    @override
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
         response = self.get(harvest_item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
 
         # Replace the `remote_id` from the URL to `id`.
         harvest_item.remote_id = metadata["id"]
-        dataset = self.get_item(Dataset, harvest_item.remote_id)
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         dataset.title = metadata["title"]
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)

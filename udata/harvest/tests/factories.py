@@ -65,14 +65,13 @@ class FactoryBackend(BaseBackend):
     def inner_harvest(self) -> Never:
         mock_initialize.send(self)
         for i in range(self.config.get("count", DEFAULT_COUNT)):
-            self.process_item(Dataset, str(i))
+            self.process_item(str(i), self.process_dataset)
             if self.has_reached_max_items():
                 return
 
-    @override
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
         mock_process.send(self, item=harvest_item.remote_id)
-        item = self.get_item(Dataset, harvest_item.remote_id)
+        item = self.get_item(harvest_item.remote_id, Dataset)
         item.title = f"dataset-{harvest_item.remote_id}"
         return item
 

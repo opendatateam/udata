@@ -124,12 +124,11 @@ class CkanBackend(BaseBackend):
 
         for name in names:
             # We use `name` as `remote_id` for now, we'll be replace at the beginning of the process
-            self.process_item(Dataset, name)
+            self.process_item(name, self.process_dataset)
             if self.has_reached_max_items():
                 return
 
-    @override
-    def inner_process_dataset(self, harvest_item: HarvestItem, **kwargs) -> Dataset:
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
         response = self.get_action("package_show", id=harvest_item.remote_id)
 
         result = response["result"]
@@ -148,7 +147,7 @@ class CkanBackend(BaseBackend):
         if not len(data.get("resources", [])):
             raise HarvestSkipException(f"Dataset {data['name']} has no record")
 
-        dataset = self.get_item(Dataset, harvest_item.remote_id)
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         # Core attributes
         if not dataset.slug:
