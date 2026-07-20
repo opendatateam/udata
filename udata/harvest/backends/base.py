@@ -293,8 +293,7 @@ class BaseBackend(ABC):
                 # be referenced by a dataservice harvested in the same run. Give it the
                 # client-side id that save() would have generated so cross-references
                 # between previewed objects stay valid and distinct.
-                if isinstance(item, Dataset) and item.pk is None:
-                    # FIXME: needed for dataservice?
+                if item.pk is None:
                     item.id = ObjectId()
             else:
                 item.save()
