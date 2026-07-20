@@ -282,7 +282,6 @@ class DcatBackend(BaseBackend):
 
         return item
 
-    # TODO: other type than Dataset?
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
             if str(graph.value(node, DCT.identifier)) == item.remote_id:
