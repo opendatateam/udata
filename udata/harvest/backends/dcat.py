@@ -230,6 +230,7 @@ class DcatBackend(BaseBackend):
             predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
         )
 
+    # FIXME: kwargs
     def inner_process(
         self,
         item_class: type[Harvestable],
@@ -237,7 +238,7 @@ class DcatBackend(BaseBackend):
         page_number: int,
         page: Graph,
         node: Node,
-    ) -> Harvestable:
+    ) -> Harvestable | None:
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
@@ -246,7 +247,7 @@ class DcatBackend(BaseBackend):
             item = dataset_from_rdf(
                 page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
             )
-        else:
+        elif item_class is Dataservice:
             item = dataservice_from_rdf(
                 page,
                 item,

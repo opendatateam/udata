@@ -71,7 +71,7 @@ class FakeBackend(BaseBackend):
     @override
     def inner_process(
         self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable:
+    ) -> Harvestable | None:
         item = self.get_item(item_class, harvest_item.remote_id)
         if item_class is Dataset:
             items = DatasetFactory.as_dict(visible=True).items()

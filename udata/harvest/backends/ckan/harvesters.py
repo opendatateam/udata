@@ -131,7 +131,7 @@ class CkanBackend(BaseBackend):
     @override
     def inner_process(
         self, item_class: type[Harvestable], item: HarvestItem, **kwargs
-    ) -> Harvestable:
+    ) -> Harvestable | None:
         if item_class is not Dataset:
             return
 

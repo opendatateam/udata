@@ -72,7 +72,7 @@ class FactoryBackend(BaseBackend):
     @override
     def inner_process(
         self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable:
+    ) -> Harvestable | None:
         mock_process.send(self, item=harvest_item.remote_id)
 
         item = self.get_item(item_class, harvest_item.remote_id)

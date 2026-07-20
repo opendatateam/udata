@@ -2,7 +2,7 @@ import logging
 import traceback
 from abc import ABC, abstractmethod
 from datetime import UTC, date, datetime, timedelta
-from typing import Never, TypeVar
+from typing import Never, TypeVar, Union
 from uuid import UUID
 
 import requests
@@ -82,7 +82,10 @@ class HarvestFeature(object):
         }
 
 
-Harvestable = TypeVar("Harvestable")
+Harvestable = TypeVar("Harvestable", bound=Union[Dataset, Dataservice])
+HarvestMetadata = TypeVar(
+    "HarvestMetadata", bound=Union[HarvestDatasetMetadata, HarvestDataserviceMetadata]
+)
 
 
 class BaseBackend(ABC):
@@ -184,7 +187,7 @@ class BaseBackend(ABC):
     @abstractmethod
     def inner_process(
         self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
-    ) -> Harvestable:
+    ) -> Harvestable | None:
         raise NotImplementedError
 
     def harvest(self) -> HarvestJob:
@@ -265,6 +268,10 @@ class BaseBackend(ABC):
                 raise HarvestSkipException("missing identifier")
 
             item = self.inner_process(item_class, harvest_item, **kwargs)
+            if not item:
+                # FIXME
+                return
+
             if item.harvest:
                 harvest_item.remote_url = item.harvest.remote_url
 
@@ -276,10 +283,7 @@ class BaseBackend(ABC):
             item.harvest = self.update_item_harvest_info(
                 item_class, item.harvest, harvest_item.remote_id
             )
-            if item_class is Dataset:
-                item.archived = None
-            else:
-                item.archived_at = None
+            item.archived_at = None
 
             # TODO: Apply editable mappings
 
@@ -338,14 +342,13 @@ class BaseBackend(ABC):
 
         self.remote_ids.add(harvest_item.remote_id)
 
-    # FIXME: more generic signature? (or do we need the return?)
     def update_item_harvest_info(
         self,
         item_class: type[Harvestable],
-        metadata: HarvestDatasetMetadata | HarvestDataserviceMetadata | None,
+        metadata: HarvestMetadata,
         remote_id: str,
-    ) -> HarvestDatasetMetadata | HarvestDataserviceMetadata:
-        metadata.backend = self.display_name
+    ) -> HarvestMetadata:
+        metadata.backend = self.display_name or "unknown"
         metadata.source_id = str(self.source.id)
         if item_class is Dataservice:
             metadata.source_url = str(self.source.url)
@@ -353,12 +356,9 @@ class BaseBackend(ABC):
         metadata.domain = self.source.domain
         metadata.last_update = datetime.now(UTC)
         metadata.archived_at = None
-        if item_class is Dataset:
-            metadata.archived = None
-        else:
-            metadata.archived_reason = None
+        metadata.archived_reason = None
 
-        # created_at, modified_at, remote_url, uri, dct_identifier are set in `dataset_from_rdf`
+        # created_at, modified_at, remote_url, uri, dct_identifier are set in `*_from_rdf`
 
         return metadata
 
@@ -455,7 +455,7 @@ class BaseBackend(ABC):
 
         return item
 
-    def ensure_unique_ownership(self, item: Dataset | Dataservice) -> Never:
+    def ensure_unique_ownership(self, item: Harvestable) -> Never:
         """Raise if item already belongs to some other owner.
 
         Ressources (datasets, services, ...) must have universally unique

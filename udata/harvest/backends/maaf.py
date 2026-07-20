@@ -161,18 +161,18 @@ class MaafBackend(BaseBackend):
 
     @override
     def inner_process(
-        self, item_class: type[Harvestable], item: HarvestItem, **kwargs
-    ) -> Harvestable:
+        self, item_class: type[Harvestable], harvest_item: HarvestItem, **kwargs
+    ) -> Harvestable | None:
         if item_class is not Dataset:
             return
 
-        response = self.get(item.remote_id)
+        response = self.get(harvest_item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
 
         # Replace the `remote_id` from the URL to `id`.
-        item.remote_id = metadata["id"]
-        dataset = self.get_item(Dataset, item.remote_id)
+        harvest_item.remote_id = metadata["id"]
+        dataset = self.get_item(Dataset, harvest_item.remote_id)
 
         dataset.title = metadata["title"]
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
