@@ -1,7 +1,6 @@
 import json
 import logging
 from datetime import UTC, datetime
-from typing import Never
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -98,7 +97,7 @@ class CkanBackend(BaseBackend):
         return response.json()
 
     @override
-    def inner_harvest(self) -> Never:
+    def inner_harvest(self):
         """List all datasets for a given ..."""
         fix = False  # Fix should be True for CKAN < '1.8'
 

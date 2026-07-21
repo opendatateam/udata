@@ -1,5 +1,4 @@
 from datetime import UTC, datetime, timedelta
-from typing import Never
 from urllib.parse import urlparse
 
 import pytest
@@ -56,7 +55,7 @@ class FakeBackend(BaseBackend):
     )
 
     @override
-    def inner_harvest(self) -> Never:
+    def inner_harvest(self):
         for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_item(remote_id, self.process_dataset)
             if self.has_reached_max_items():

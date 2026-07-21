@@ -3,7 +3,7 @@ import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
-from typing import Concatenate, Never, ParamSpec, TypeVar, Union
+from typing import Concatenate, ParamSpec, TypeVar, Union
 from uuid import UUID
 
 import requests
@@ -184,8 +184,8 @@ class BaseBackend(ABC):
             return extra_config["value"]
 
     @abstractmethod
-    def inner_harvest(self) -> Never:
-        raise NotImplementedError
+    def inner_harvest(self) -> None:
+        raise NotImplementedError()
 
     def harvest(self) -> HarvestJob:
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
@@ -255,7 +255,7 @@ class BaseBackend(ABC):
         item_processor: Callable[Concatenate[HarvestItem, ItemProcessorParams], Harvestable],
         *args: ItemProcessorParams.args,
         **kwargs: ItemProcessorParams.kwargs,
-    ) -> Never:
+    ):
         # FIXME: use typing.get_type_hints()["return"] or inspect.signature().return_annotation to get item type?
         log.debug(f"Processing item {remote_id}…")
 
@@ -335,7 +335,7 @@ class BaseBackend(ABC):
         """Should be called after process_item to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
-    def ensure_unique_remote_id(self, harvest_item: HarvestItem) -> Never:
+    def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:
             raise HarvestValidationError(f"Identifier '{harvest_item.remote_id}' already exists")
 
@@ -362,17 +362,17 @@ class BaseBackend(ABC):
         self.save_job()
         return harvest_item
 
-    def save_job(self) -> Never:
+    def save_job(self):
         if not self.dryrun:
             self.job.save()
 
-    def end_job(self) -> Never:
+    def end_job(self):
         self.job.ended = datetime.now(UTC)
         if not self.dryrun:
             self.job.save()
         after_harvest_job.send(self)
 
-    def autoarchive(self) -> Never:
+    def autoarchive(self):
         """
         Archive items that exist on the local instance but not on remote platform
         after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
@@ -446,7 +446,7 @@ class BaseBackend(ABC):
 
         return item
 
-    def ensure_unique_ownership(self, item: Harvestable) -> Never:
+    def ensure_unique_ownership(self, item: Harvestable):
         """Raise if item already belongs to some other owner.
 
         Ressources (datasets, services, ...) must have universally unique

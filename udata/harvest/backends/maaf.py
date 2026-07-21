@@ -2,7 +2,6 @@ import logging
 import os
 import re
 from collections import OrderedDict
-from typing import Never
 from urllib.parse import urljoin
 
 from lxml import etree, html
@@ -139,7 +138,7 @@ class MaafBackend(BaseBackend):
     verify_ssl = False
 
     @override
-    def inner_harvest(self) -> Never:
+    def inner_harvest(self):
         """Parse the index pages HTML to find link to dataset descriptors"""
         directories = [self.source.url]
         while directories:

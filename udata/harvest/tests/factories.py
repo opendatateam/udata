@@ -1,5 +1,3 @@
-from typing import Never
-
 import factory
 import pytest
 from factory.fuzzy import FuzzyChoice
@@ -62,7 +60,7 @@ class FactoryBackend(BaseBackend):
     )
 
     @override
-    def inner_harvest(self) -> Never:
+    def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get("count", DEFAULT_COUNT)):
             self.process_item(str(i), self.process_dataset)

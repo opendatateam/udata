@@ -2,7 +2,7 @@ import logging
 import traceback
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import ClassVar, Generator, Never
+from typing import ClassVar, Generator
 
 from flask import current_app
 from rdflib import Graph, Node
@@ -77,7 +77,7 @@ class DcatBackend(BaseBackend):
         self.organizations_to_update = set()
 
     @override
-    def inner_harvest(self) -> Never:
+    def inner_harvest(self):
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
@@ -179,7 +179,7 @@ class DcatBackend(BaseBackend):
 
             page_number += 1
 
-    def process_one_datasets_page(self, page_number: int, page: Graph) -> Never:
+    def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
             if self.is_dataset_external_to_this_page(page, node):
                 continue
@@ -192,7 +192,7 @@ class DcatBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    def process_one_dataservices_page(self, page_number: int, page: Graph) -> Never:
+    def process_one_dataservices_page(self, page_number: int, page: Graph):
         access_services = {o for _, _, o in page.triples((None, DCAT.accessService, None))}
 
         for node in page.subjects(RDF.type, DCAT.DataService):
