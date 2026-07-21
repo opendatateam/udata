@@ -137,10 +137,14 @@ class HarvestMetadata(EmbeddedDocument):
     )
 
     created_at = field(
-        DateTimeField(), description="Date of the creation as provided by the harvested catalog"
+        DateTimeField(), description="Date of creation as provided by the harvested catalog"
     )
     issued_at = field(
-        DateTimeField(), description="Release date as provided by the harvested catalog"
+        DateTimeField(), description="Date of release as provided by the harvested catalog"
+    )
+    modified_at = field(
+        DateTimeField(),
+        description="Date of last modification as provided by the harvested catalog",
     )
     last_update = field(DateTimeField(), description="Date of the last harvesting")
     archived_at = field(DateTimeField())

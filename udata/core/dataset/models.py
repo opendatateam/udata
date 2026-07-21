@@ -120,18 +120,23 @@ def get_json_ld_extra(key, value):
 @generate_fields()
 class HarvestDatasetMetadata(EmbeddedDocument):
     backend = StringField()
+    domain = StringField()
+
+    source_id = StringField()
+
+    remote_id = StringField()
+    remote_url = URLField()
+
+    uri = StringField()
+
     created_at = DateTimeField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
-    source_id = StringField()
-    remote_id = StringField()
-    domain = StringField()
     last_update = DateTimeField()
-    remote_url = URLField()
-    uri = StringField()
-    dct_identifier = StringField()
     archived_at = DateTimeField()
     archived = StringField()
+
+    dct_identifier = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
