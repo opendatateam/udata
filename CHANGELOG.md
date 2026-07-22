@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.0.5 (2026-07-22)
+
+- feat(dataservices): compute reuses metric ([#3816](https://github.com/opendatateam/udata/pull/3816))
+- feat(harvest,catalog): sync dataset/dataservice harvest info ([#3864](https://github.com/opendatateam/udata/pull/3864))
+- fix(dataservices): parse swagger and scope to bouquet fiche for search ([#3783](https://github.com/opendatateam/udata/pull/3783))
+
+
 ## 17.0.4 (2026-07-06)
 
 - chore(deps): lock file maintenance ([#3850](https://github.com/opendatateam/udata/pull/3850))
