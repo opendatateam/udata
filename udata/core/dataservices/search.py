@@ -11,6 +11,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic, TopicElement
+from udata.http import ssrf_session
 from udata.models import Dataservice, Organization
 from udata.search import (
     BoolFilter,
@@ -115,7 +116,9 @@ class DataserviceSearch(ModelSearchAdapter):
         try:
             timeout = 10
             headers = {"User-Agent": "udata-search-service/1.0"}
-            response = requests.get(
+            # machine_documentation_url is user-supplied: fetch it through the
+            # SSRF-guarded session, which validates the resolved IP at connect time.
+            response = ssrf_session().get(
                 url, timeout=timeout, stream=True, headers=headers, allow_redirects=False
             )
             response.raise_for_status()
