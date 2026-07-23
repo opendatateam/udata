@@ -226,6 +226,24 @@ class FakeWithHrefFallback(Document):
     meta = {"collection": "fake_with_href_fallback_api_fields"}
 
 
+@generate_fields()
+class FakeWithFilteredList(Document):
+    """Exercises `attribute` on a list of embedded documents: the list is read through a
+    property that filters it, like `Organization.requests` / `visible_requests`."""
+
+    embeddeds = field(
+        ListField(EmbeddedDocumentField(FakeEmbedded)),
+        readonly=True,
+        attribute="visible_embeddeds",
+    )
+
+    meta = {"collection": "fake_with_filtered_list_api_fields"}
+
+    @property
+    def visible_embeddeds(self) -> list[FakeEmbedded]:
+        return [embedded for embedded in self.embeddeds if embedded.status == "active"]
+
+
 class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
@@ -478,3 +496,21 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class ListAttributeFieldTest(PytestOnlyDBTestCase):
+    def test_list_attribute_is_resolved_on_the_document(self, app) -> None:
+        """`attribute` on a list points to a property of the document, and the items are
+        still serialized in full: it must not be propagated to the inner field, or each
+        item would look that attribute up on itself and marshal to null."""
+        obj = FakeWithFilteredList(
+            embeddeds=[
+                FakeEmbedded(title="shown", description="a description", status="active"),
+                FakeEmbedded(title="filtered out", description="a description", status="inactive"),
+            ]
+        )
+        with app.test_request_context("/"):
+            embeddeds = marshal(obj, FakeWithFilteredList.__read_fields__)["embeddeds"]
+        assert len(embeddeds) == 1
+        assert embeddeds[0]["title"] == "shown"
+        assert embeddeds[0]["description"] == "a description"
