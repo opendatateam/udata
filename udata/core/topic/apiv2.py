@@ -270,7 +270,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = TopicElement.objects.get_or_404(pk=element_id)
+        element = TopicElement.objects.get_or_404(pk=element_id, topic=topic)
         element.delete()
 
         return None, 204
@@ -287,7 +287,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = TopicElement.objects.get_or_404(pk=element_id)
+        element = TopicElement.objects.get_or_404(pk=element_id, topic=topic)
         patch_and_save(element, request)
 
         return element
