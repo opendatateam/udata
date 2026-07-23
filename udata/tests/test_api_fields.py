@@ -229,7 +229,7 @@ class FakeWithHrefFallback(Document):
 @generate_fields()
 class FakeWithFilteredList(Document):
     """Exercises `attribute` on a list of embedded documents: the list is read through a
-    property that filters it, like `Organization.requests` / `visible_requests`."""
+    property of the document that filters it."""
 
     embeddeds = field(
         ListField(EmbeddedDocumentField(FakeEmbedded)),

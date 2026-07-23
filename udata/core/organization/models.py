@@ -24,7 +24,6 @@ from werkzeug.utils import cached_property
 from udata.api import api
 from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
-from udata.auth import current_user
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.edito_blocs.base import Bloc
@@ -256,14 +255,11 @@ class Organization(
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
-    requests = field(
-        ListField(EmbeddedDocumentField(MembershipRequest)),
-        readonly=True,
-        # Read through `visible_requests` so membership requests and invitations stay
-        # private, like the dedicated `/membership/` endpoint: they carry the identity
-        # of the applicants and free-text comments about them.
-        attribute="visible_requests",
-    )
+    # Deliberately not wrapped with `field()`: membership requests and invitations carry
+    # the identity of the applicants and free-text comments about them, so they are never
+    # part of the organization API payload. They are served by the dedicated, permission
+    # checked `/organizations/<org>/membership/` endpoint.
+    requests = ListField(EmbeddedDocumentField(MembershipRequest))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)
@@ -320,19 +316,6 @@ class Organization(
         if self.presentation_blocs_published_at is not None or self.permissions["edit"].can():
             return self.presentation_blocs
         return []
-
-    @property
-    def visible_requests(self):
-        """Membership requests as exposed through the API.
-
-        Restricted to the members allowed to handle them, as in the `/membership/`
-        endpoint. Applicants still see their own request so they can track its status.
-        """
-        if self.permissions["members"].can():
-            return self.requests
-        if not current_user.is_authenticated:
-            return []
-        return self.requests_of(current_user.id)
 
     @property
     @field(nested_fields=org_permissions_fields, show_as_ref=True)
@@ -448,14 +431,6 @@ class Organization(
             ):
                 return request
         return None
-
-    def requests_of(self, user_id) -> list[MembershipRequest]:
-        """Membership requests and invitations attached to a given user.
-
-        Accepts an id in any form, so callers can pass a raw query string parameter as
-        well as a Mongo id. Email invitations have no user attached, hence the guard.
-        """
-        return [r for r in self.requests if r.user is not None and str(r.user.id) == str(user_id)]
 
     @field(description="Link to the API endpoint for this organization", show_as_ref=True)
     def uri(self, *args, **kwargs):
