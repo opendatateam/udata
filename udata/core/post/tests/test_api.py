@@ -274,18 +274,40 @@ class PostsAPITest(APITestCase):
     def test_post_search_api_excludes_drafts(self):
         """The v2 search endpoint should never expose unpublished posts"""
         published = PostFactory.create_batch(3)
-        draft = PostFactory(published=None)
+        PostFactory(published=None)
+        expected = {str(post.id) for post in published}
 
         response = self.get(url_for("apiv2.post_search"))
         assert200(response)
         assert response.json["total"] == 3
-        assert {p["id"] for p in response.json["data"]} == {str(post.id) for post in published}
+        assert {p["id"] for p in response.json["data"]} == expected
 
+        # Unlike the v1 list endpoint, the v2 search has no `with_drafts` bypass:
+        # drafts are not indexed at all, so sysadmins do not see them either.
         self.login(AdminFactory())
 
         response = self.get(url_for("apiv2.post_search"))
         assert200(response)
-        assert str(draft.id) not in [p["id"] for p in response.json["data"]]
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == expected
+
+    def test_post_search_api_filters_on_query_and_tags(self):
+        """The Mongo fallback of the v2 search should actually apply `q` and `tag`"""
+        named = PostFactory(name="Foobar", tags=["transport"])
+        both_tags = PostFactory(name="Something else", tags=["transport", "sante"])
+        PostFactory(name="Something else", tags=["sante"])
+
+        response = self.get(url_for("apiv2.post_search", q="Foobar"))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(named.id)]
+
+        response = self.get(url_for("apiv2.post_search", tag="transport"))
+        assert200(response)
+        assert {p["id"] for p in response.json["data"]} == {str(named.id), str(both_tags.id)}
+
+        response = self.get(url_for("apiv2.post_search", tag=["transport", "sante"]))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both_tags.id)]
 
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""
