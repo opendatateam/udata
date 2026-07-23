@@ -332,7 +332,7 @@ class Organization(
             return self.requests
         if not current_user.is_authenticated:
             return []
-        return [r for r in self.requests if r.user is not None and r.user.id == current_user.id]
+        return self.requests_of(current_user.id)
 
     @property
     @field(nested_fields=org_permissions_fields, show_as_ref=True)
@@ -448,6 +448,14 @@ class Organization(
             ):
                 return request
         return None
+
+    def requests_of(self, user_id) -> list[MembershipRequest]:
+        """Membership requests and invitations attached to a given user.
+
+        Accepts an id in any form, so callers can pass a raw query string parameter as
+        well as a Mongo id. Email invitations have no user attached, hence the guard.
+        """
+        return [r for r in self.requests if r.user is not None and str(r.user.id) == str(user_id)]
 
     @field(description="Link to the API endpoint for this organization", show_as_ref=True)
     def uri(self, *args, **kwargs):
