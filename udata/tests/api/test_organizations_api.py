@@ -166,6 +166,89 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
+    def test_organization_api_get_hides_requests_from_anonymous(self):
+        """Membership requests must not leak to anonymous users"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert response.json["requests"] == []
+
+    def test_organization_api_get_hides_requests_from_unrelated_user(self):
+        """Membership requests must not leak to a logged in user without any right on the org"""
+        self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert response.json["requests"] == []
+
+    def test_organization_api_get_hides_requests_from_simple_editor(self):
+        """Only members allowed to manage memberships can see the requests"""
+        user = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="editor")], requests=[membership_request]
+        )
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert response.json["requests"] == []
+
+    def test_organization_api_get_shows_requests_to_org_admin(self):
+        """An organization admin still sees the membership requests"""
+        user = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[membership_request]
+        )
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert len(response.json["requests"]) == 1
+        assert response.json["requests"][0]["comment"] == "secret comment"
+
+    def test_organization_api_get_shows_own_request_to_applicant(self):
+        """An applicant still sees their own membership request"""
+        applicant = self.login()
+        other_applicant = UserFactory()
+        own_request = MembershipRequest(user=applicant, comment="my own comment")
+        other_request = MembershipRequest(user=other_applicant, comment="someone else comment")
+        organization = OrganizationFactory(requests=[other_request, own_request])
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert len(response.json["requests"]) == 1
+        assert response.json["requests"][0]["comment"] == "my own comment"
+
+    def test_organization_api_get_hides_requests_when_explicitly_masked(self):
+        """Asking for the field through X-Fields must not bypass the check"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
+
+        response = self.get(
+            url_for("api.organization", org=organization), headers={"X-Fields": "requests"}
+        )
+        assert200(response)
+        assert response.json["requests"] == []
+
+    def test_organization_api_list_hides_requests_from_anonymous(self):
+        """Membership requests must not leak through the organization list either"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        OrganizationFactory(requests=[membership_request])
+
+        response = self.get(url_for("api.organizations"), headers={"X-Fields": "data{requests}"})
+        assert200(response)
+        assert response.json["data"][0]["requests"] == []
+
     def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
         organization = OrganizationFactory(deleted=datetime.now(UTC))
