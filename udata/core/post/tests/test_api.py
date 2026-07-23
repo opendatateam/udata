@@ -23,6 +23,7 @@ from udata.tests.helpers import (
     assert204,
     assert400,
     assert403,
+    assert404,
     create_test_image,
 )
 
@@ -91,6 +92,20 @@ class PostsAPITest(APITestCase):
         owner = response.json["owner"]
         assert isinstance(owner, dict)
         assert owner["id"] == str(admin.id)
+
+    def test_post_api_get_draft(self):
+        """An unpublished post should only be readable by a sysadmin"""
+        draft = PostFactory(published=None)
+
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(UserFactory())
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(AdminFactory())
+        response = self.get(url_for("api.post", post=draft))
+        assert200(response)
+        assert response.json["id"] == str(draft.id)
 
     def test_post_api_get_with_dangling_dataset_reference(self):
         """Getting a post should not crash when one of its datasets was hard-deleted,
@@ -255,6 +270,22 @@ class PostsAPITest(APITestCase):
         response = self.get(url_for("api.posts", with_drafts=True))
         assert200(response)
         assert len(response.json["data"]) == 3
+
+    def test_post_search_api_excludes_drafts(self):
+        """The v2 search endpoint should never expose unpublished posts"""
+        published = PostFactory.create_batch(3)
+        draft = PostFactory(published=None)
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == {str(post.id) for post in published}
+
+        self.login(AdminFactory())
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert str(draft.id) not in [p["id"] for p in response.json["data"]]
 
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""

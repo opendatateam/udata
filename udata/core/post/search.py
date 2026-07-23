@@ -22,12 +22,14 @@ class PostSearch(ModelSearchAdapter):
     }
 
     @classmethod
-    def is_indexable(cls, post):
-        return True
+    def is_indexable(cls, post: Post) -> bool:
+        # Unpublished posts are drafts: they must never reach the search index,
+        # which is public and unauthenticated.
+        return post.published is not None
 
     @classmethod
     def mongo_search(cls, args):
-        posts = Post.objects()
+        posts = Post.objects().published()
         sort = cls.parse_sort(args["sort"]) or "-created_at"
         return posts.order_by(sort).paginate(args["page"], args["page_size"])
 

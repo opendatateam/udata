@@ -101,6 +101,8 @@ class PostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def get(self, post):
         """Get a given post"""
+        if post.published is None and not AdminPermission().can():
+            api.abort(404)
         return post
 
     @api.doc("update_post")
@@ -129,7 +131,8 @@ class PublishPostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def post(self, post):
         """Publish an existing post"""
-        post.modify(published=datetime.now(UTC))
+        post.published = datetime.now(UTC)
+        post.save()
         return post
 
     @api.secure(admin_permission)
@@ -137,7 +140,8 @@ class PublishPostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def delete(self, post):
         """Unpublish an existing post"""
-        post.modify(published=None)
+        post.published = None
+        post.save()
         return post
 
 
