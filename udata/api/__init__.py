@@ -323,8 +323,8 @@ def handle_validation_error(error: mongoengine.errors.ValidationError):
 @apiv2.errorhandler(PermissionDenied)
 @apiv2.marshal_with(default_error_v2, code=403)
 def handle_permission_denied_v2(error):
-    message = "You do not have the permission to modify that object."
-    return {"message": message}, 403
+    """Error occuring when the user does not have the required permissions"""
+    return handle_permission_denied(error)
 
 
 @apiv2.errorhandler(mongoengine.errors.ValidationError)

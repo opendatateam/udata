@@ -605,12 +605,23 @@ class TopicAPITest(APITestCase):
         assert topic.featured is False
         assert response.json["featured"] is False
 
+    def test_featured_admin_post_requires_authentication(self):
+        """It should require authentication to feature a topic"""
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is False
+
     def test_featured_admin_post_requires_admin(self):
         """It should require admin to feature a topic"""
         self.login()
-        topic = TopicFactory()
+        topic = TopicFactory(featured=False)
         response = self.post(url_for("apiv2.topic_featured", topic=topic))
         self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is False
 
     def test_featured_admin_post_as_admin(self):
         """It should allow admin to feature a topic"""
@@ -622,12 +633,23 @@ class TopicAPITest(APITestCase):
         assert topic.featured is True
         assert response.json["featured"] is True
 
+    def test_featured_admin_delete_requires_authentication(self):
+        """It should require authentication to unfeature a topic"""
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is True
+
     def test_featured_admin_delete_requires_admin(self):
         """It should require admin to unfeature a topic"""
         self.login()
         topic = TopicFactory(featured=True)
         response = self.delete(url_for("apiv2.topic_featured", topic=topic))
         self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is True
 
     def test_featured_admin_delete_as_admin(self):
         """It should allow admin to unfeature a topic"""
