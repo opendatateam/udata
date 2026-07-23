@@ -960,6 +960,20 @@ class TopicElementsAPITest(APITestCase):
             "A topic element must have a title or an element."
         )
 
+    def test_add_element_ignores_arbitrary_topic_in_payload(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"title": "should stay in the URL topic", "topic": str(other_topic.id)}],
+        )
+        assert response.status_code == 201
+
+        assert TopicElement.objects(topic=topic).count() == 1
+        assert TopicElement.objects(topic=other_topic).count() == 0
+
     def test_add_datasets_perm(self):
         user = UserFactory()
         topic = TopicFactory(owner=user)
@@ -1081,6 +1095,20 @@ class TopicElementAPITest(APITestCase):
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 403
 
+    def test_delete_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicWithElementsFactory(owner=UserFactory())
+        other_element = other_topic.elements[0]
+
+        response = self.delete(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id)
+        )
+        assert response.status_code == 404
+
+        other_topic.reload()
+        assert other_element.id in (elt.id for elt in other_topic.elements)
+
     def test_update_element(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
@@ -1132,3 +1160,34 @@ class TopicElementAPITest(APITestCase):
         assert element.tags == ["baz"]
         assert element.extras == {"foo": "bar"}
         assert element.element is None
+
+    def test_update_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+        other_element = TopicElementFactory(topic=other_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id),
+            {"title": "modified title"},
+        )
+        assert response.status_code == 404
+
+        other_element.reload()
+        assert other_element.title == "original title"
+
+    def test_update_element_cannot_move_to_own_topic(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=owner)
+        own_element = TopicElementFactory(topic=own_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=own_element.id),
+            {"title": "modified title", "topic": str(other_topic.id)},
+        )
+        assert response.status_code == 200
+
+        own_element.reload()
+        assert own_element.title == "modified title"
+        assert own_element.topic.id == own_topic.id
