@@ -1,5 +1,16 @@
 # Changelog
 
+## 17.0.6 (2026-07-24)
+
+- chore(docker): disable elasticsearch disk threshold ([#3861](https://github.com/opendatateam/udata/pull/3861))
+- chore(jobs): require admin permission for celery jobs api routes ([#3869](https://github.com/opendatateam/udata/pull/3869))
+- ci: redirect inv stdin to /dev/null to bypass invoke v3 tty crash ([#3866](https://github.com/opendatateam/udata/pull/3866))
+- feat(topic): featured property is read only and has dedicated admin permission routes ([#3870](https://github.com/opendatateam/udata/pull/3870))
+- fix: stop leaking membership requests through the public organization API ([#3875](https://github.com/opendatateam/udata/pull/3875))
+- fix(topics): check element is part of Topic ([#3874](https://github.com/opendatateam/udata/pull/3874))
+- test: explicit CSV export config ([#3871](https://github.com/opendatateam/udata/pull/3871))
+
+
 ## 17.0.5 (2026-07-22)
 
 - feat(dataservices): compute reuses metric ([#3816](https://github.com/opendatateam/udata/pull/3816))
