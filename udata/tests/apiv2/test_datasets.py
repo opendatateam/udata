@@ -1,9 +1,12 @@
 from datetime import datetime
 
 from flask import url_for
+from mongoengine.context_managers import query_counter
 from mongoengine.fields import DateTimeField
 
 import udata.core.organization.constants as org_constants
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -13,6 +16,7 @@ from udata.core.dataset.factories import (
 from udata.core.dataset.models import ResourceMixin
 from udata.core.organization.factories import Member, OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
 from udata.models import Dataset
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_not_emit
@@ -45,6 +49,13 @@ class DatasetAPIV2Test(APITestCase):
         assert data["data"][1]["community_resources"]["total"] == 0
         assert data["data"][0]["community_resources"]["total"] == 0
 
+    def test_list_invalid_pagination_params_return_400(self):
+        """The shared positive page/page_size validation also guards list endpoints."""
+        DatasetFactory()
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.datasets", **params))
+            self.assert400(response)
+
     def test_filter_by_reuse(self):
         DatasetFactory(title="Dataset without reuse")
 
@@ -59,6 +70,44 @@ class DatasetAPIV2Test(APITestCase):
         data = response.json
         assert len(data["data"]) == 1
         assert data["data"][0]["title"] == dataset_with_reuse.title
+
+    def test_filter_by_dataservice(self):
+        DatasetFactory(title="Dataset without dataservice")
+
+        dataset_with_dataservice = DatasetFactory(title="Dataset with dataservice")
+        archived_dataset_with_dataservice = DatasetFactory(
+            title="Dataset with dataservice", archived=datetime(2022, 2, 22)
+        )
+        dataservice = DataserviceFactory(
+            datasets=[dataset_with_dataservice.id, archived_dataset_with_dataservice.id]
+        )
+
+        response = self.get(url_for("apiv2.datasets", dataservice=dataservice.id))
+        self.assert200(response)
+        data = response.json
+        assert len(data["data"]) == 1
+        assert data["data"][0]["title"] == dataset_with_dataservice.title
+
+    def test_filter_by_reuse_does_not_dereference_datasets(self):
+        # Regression: filtering datasets by reuse used to dereference the whole
+        # reuse.datasets list, loading every referenced Dataset with its embedded
+        # resources (megabytes for a dataset with thousands of resources) just to
+        # read their ids. Building the filter must hit the database exactly once
+        # (fetch the reuse's references), never dereferencing the datasets.
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(20)])
+        reuse = ReuseFactory(datasets=[dataset.id])
+
+        with query_counter() as counter:
+            DatasetApiParser.parse_filters(Dataset.objects, {"reuse": str(reuse.id)})
+            assert counter == 1
+
+    def test_filter_by_dataservice_does_not_dereference_datasets(self):
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(20)])
+        dataservice = DataserviceFactory(datasets=[dataset.id])
+
+        with query_counter() as counter:
+            DatasetApiParser.parse_filters(Dataset.objects, {"dataservice": str(dataservice.id)})
+            assert counter == 1
 
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]
@@ -366,6 +415,46 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["next_page"] is None
         assert data["previous_page"] is None
 
+    def test_get_with_query_string_special_chars(self):
+        """The query string is matched as a literal substring, not as a regex"""
+        resources = [
+            ResourceFactory(title="Total (2024)"),
+            ResourceFactory(title="Total 2024"),
+        ]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for("apiv2.resources", dataset=dataset.id, q="(2024)"))
+        self.assert200(response)
+        data = response.json
+        # A naive regex would treat "(2024)" as a group and match both titles
+        assert data["total"] == 1
+        assert data["data"][0]["title"] == "Total (2024)"
+
+    def test_get_with_type_and_query_string(self):
+        """The type and query string filters combine (AND)"""
+        resources = [
+            ResourceFactory(type="main", title="alpha report"),
+            ResourceFactory(type="main", title="beta report"),
+            ResourceFactory(type="documentation", title="alpha doc"),
+        ]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for("apiv2.resources", dataset=dataset.id, type="main", q="alpha"))
+        self.assert200(response)
+        data = response.json
+        assert data["total"] == 1
+        assert data["data"][0]["title"] == "alpha report"
+
+    def test_invalid_pagination_params_return_400(self):
+        """Out-of-range page/page_size must be rejected with a 400.
+
+        A non-positive ``page_size`` used to reach the ``$slice`` aggregation as a
+        negative length and crash with a 500 (OperationFailure: "Third argument to
+        $slice must be positive").
+        """
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(3)])
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.resources", dataset=dataset.id, **params))
+            self.assert400(response)
+
 
 class DatasetExtrasAPITest(APITestCase):
     def setUp(self):
@@ -384,6 +473,35 @@ class DatasetExtrasAPITest(APITestCase):
         data = response.json
         assert data["test::extra"] == "test-value"
         assert data["check::date"] == "2024-04-14T08:42:00"
+
+    def test_update_dataset_extras_without_permission(self):
+        """It should return a 403 when the user cannot edit the dataset"""
+        someone_else_dataset = DatasetFactory(owner=UserFactory())
+
+        response = self.put(
+            url_for("apiv2.dataset_extras", dataset=someone_else_dataset),
+            {"test::extra": "test-value"},
+        )
+
+        self.assert403(response)
+        assert "message" in response.json
+        someone_else_dataset.reload()
+        assert "test::extra" not in someone_else_dataset.extras
+
+    def test_delete_dataset_extras_without_permission(self):
+        """It should return a 403 when the user cannot delete the dataset extras"""
+        someone_else_dataset = DatasetFactory(owner=UserFactory())
+        someone_else_dataset.extras = {"test::extra": "test-value"}
+        someone_else_dataset.save()
+
+        response = self.delete(
+            url_for("apiv2.dataset_extras", dataset=someone_else_dataset), ["test::extra"]
+        )
+
+        self.assert403(response)
+        assert "message" in response.json
+        someone_else_dataset.reload()
+        assert someone_else_dataset.extras["test::extra"] == "test-value"
 
     def test_update_dataset_extras(self):
         self.dataset.extras = {

@@ -7,6 +7,7 @@ from flask_security import current_user
 from udata import search
 from udata.api import API, api, apiv2, fields
 from udata.api_fields import lazy_reference, patch, patch_and_save
+from udata.auth import admin_permission
 from udata.core.discussions.models import Discussion
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import Topic, TopicElement
@@ -270,7 +271,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = TopicElement.objects.get_or_404(pk=element_id)
+        element = TopicElement.objects.get_or_404(pk=element_id, topic=topic)
         element.delete()
 
         return None, 204
@@ -287,7 +288,29 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = TopicElement.objects.get_or_404(pk=element_id)
+        element = TopicElement.objects.get_or_404(pk=element_id, topic=topic)
         patch_and_save(element, request)
 
         return element
+
+
+@ns.route("/<topic:topic>/featured/", endpoint="topic_featured", doc=common_doc)
+@apiv2.response(404, "Topic not found")
+class TopicFeaturedAPI(API):
+    @apiv2.secure(admin_permission)
+    @apiv2.doc("feature_topic")
+    @apiv2.marshal_with(topic_fields)
+    def post(self, topic):
+        """Mark the topic as featured"""
+        topic.featured = True
+        topic.save()
+        return topic
+
+    @apiv2.secure(admin_permission)
+    @apiv2.doc("unfeature_topic")
+    @apiv2.marshal_with(topic_fields)
+    def delete(self, topic):
+        """Unmark the topic as featured"""
+        topic.featured = False
+        topic.save()
+        return topic

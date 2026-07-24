@@ -173,7 +173,6 @@ class SpamTest(APITestCase):
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_dataset_spam_not_reflagged_after_dismiss(self):
-
         dataset = DatasetFactory(title="This is spam content")
         self.assertTrue(self.has_spam_report(dataset))
 
@@ -340,3 +339,25 @@ class SpamTest(APITestCase):
             name="Spam Organization", badges=[OrganizationBadge(kind=CERTIFIED)]
         )
         self.assertFalse(self.has_spam_report(org))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    @pytest.mark.options(CDATA_BASE_URL="https://example.com/")
+    def test_spam_message_contains_self_web_url(self):
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        assert report
+        assert dataset.self_web_url() in report.message
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_spam_message_does_not_fail_when_no_self_web_url(self):
+        """
+        subject does not have any web url because CDATA_BASE_URL isn't defined
+        """
+        org = OrganizationFactory()
+        dataset = DatasetFactory(title="This is spam content", organization=org)
+
+        report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
+        assert report
+        assert "](" not in report.message

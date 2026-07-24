@@ -12,6 +12,11 @@ def serialize_spatial_zones(dataset):
         return ",".join(z.name for z in dataset.spatial.zones)
 
 
+def serialize_spatial_geom(dataset):
+    if dataset.spatial and dataset.spatial.geom:
+        return json.dumps(dataset.spatial.geom, default=str)
+
+
 @csv.adapter(Dataset)
 class DatasetCsvAdapter(csv.Adapter):
     fields = (
@@ -33,6 +38,7 @@ class DatasetCsvAdapter(csv.Adapter):
         "temporal_coverage.end",
         "spatial.granularity",
         ("spatial.zones", serialize_spatial_zones),
+        ("spatial.geom", serialize_spatial_geom),
         ("featured", lambda o: o.featured or False),
         "created_at",
         "last_modified",
@@ -44,9 +50,13 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
-        ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
-        ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.remote_id", lambda r: r.harvest and r.harvest.remote_id),
         ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
+        ("harvest.uri", lambda r: r.harvest and r.harvest.uri),
+        ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
+        ("harvest.issued_at", lambda r: r.harvest and r.harvest.issued_at),
+        ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.dct_identifier", lambda r: r.harvest and r.harvest.dct_identifier),
         ("quality_score", lambda o: format(o.quality["score"], ".2f")),
         # schema? what is the schema of a dataset?
     )

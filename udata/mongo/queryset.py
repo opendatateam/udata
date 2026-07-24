@@ -110,3 +110,36 @@ class UDataQuerySet(BaseQuerySet):
             else:
                 self.error("expect a list of string, ObjectId or DBRef")
         return self(__raw__=query)
+
+
+def paginate_embedded_list(
+    document_cls, document_id, field, embedded_cls, *, page, page_size, condition=None
+):
+    """Filter and slice an embedded-document ``ListField`` server-side via an
+    aggregation, so a document with a huge list isn't fully loaded just to serve
+    a single page.
+
+    ``condition`` is an optional aggregation boolean expression over the
+    ``$$item`` variable (e.g. ``{"$eq": ["$$item.type", "main"]}``). Returns a
+    ``(items, total)`` tuple where ``items`` are rebuilt ``embedded_cls``
+    instances and ``total`` is the count after filtering.
+    """
+    source = f"${field}"
+    filtered = (
+        {"$filter": {"input": source, "as": "item", "cond": condition}} if condition else source
+    )
+    offset = page_size * (page - 1) if page > 1 else 0
+    pipeline = [
+        {"$match": {"_id": document_id}},
+        {"$project": {"items": filtered}},
+        {
+            "$project": {
+                "total": {"$size": "$items"},
+                "data": {"$slice": ["$items", offset, page_size]},
+            }
+        },
+    ]
+    result = next(document_cls.objects.aggregate(*pipeline), None)
+    if not result:
+        return [], 0
+    return [embedded_cls._from_son(item) for item in result["data"]], result["total"]

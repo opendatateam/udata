@@ -41,7 +41,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -95,7 +95,18 @@ class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
-        self.fields_by_type = fields_by_type
+        # `fields_by_type` may be a callable resolved lazily on first use (and then
+        # memoized). This lets generic embedded lists discover their subclasses at
+        # marshalling time rather than at class-decoration time, when the subclass
+        # registry can still be incomplete because of import ordering / cycles
+        # (e.g. `Organization.blocs`, decorated before the `Bloc` subclasses are loaded).
+        self._fields_by_type = fields_by_type
+
+    @property
+    def fields_by_type(self):
+        if callable(self._fields_by_type):
+            self._fields_by_type = self._fields_by_type()
+        return self._fields_by_type
 
     def format(self, value):
         # Value is one of the generic object
@@ -182,6 +193,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         href = info.get("href", None)
         if href:
+            href_extra = info.get("href_extra", None)
+            # `href_total` lets a field provide the total from a stored counter
+            # instead of `len(o[key])`, which would load (and dereference) the
+            # whole list just to count it.
+            href_total = info.get("href_total", None)
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
@@ -189,7 +205,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         "rel": "subsection",
                         "href": href(o),
                         "type": "GET",
-                        "total": len(o[key]),
+                        "total": href_total(o) if href_total else len(o[key]),
+                        **(href_extra(o) if href_extra else {}),
                     },
                     description="Visit this API link to see the list.",
                     **kwargs,
@@ -202,30 +219,40 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+        # `attribute` says where to read the list on the parent document. Propagating it
+        # to the inner field would make every item look that same attribute up on itself
+        # (and serialize as null), so it stays on the list.
+        nested_info = {
+            **{k: v for k, v in info.items() if k != "attribute"},
+            **inner_info,
+            **info.get("inner_field_info", {}),
+        }
 
         generic = info.get("generic", False)
 
-        allowed_classes = (
-            classes_by_parents[field.field.document_type_obj]
-            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
-            and field.field.document_type_obj in classes_by_parents
-            else set()
-        )
-        if generic and allowed_classes:
-            generic_fields = {
-                cls.__name__: convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
-                    mongoengine.fields.EmbeddedDocumentField(cls),
-                    nested_info,
-                )
-                for cls in allowed_classes
-            }
+        if generic and isinstance(field.field, mongoengine.fields.EmbeddedDocumentField):
+            # Resolve the allowed subclasses lazily (at marshalling time) rather than now.
+            # `classes_by_parents` is populated as each subclass module is imported, and an
+            # import cycle can decorate the parent before its subclasses are registered
+            # (e.g. `Organization.blocs`). Deferring the lookup to the first marshalling —
+            # which happens from the API layer, after every model is loaded — guarantees the
+            # registry is complete, instead of falling back to the bare `{id}` parent model.
+            parent = field.field.document_type_obj
 
-            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
-            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+            def generic_fields():
+                return {
+                    cls.__name__: convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        mongoengine.fields.EmbeddedDocumentField(cls),
+                        nested_info,
+                    )
+                    for cls in classes_by_parents.get(parent, set())
+                }
+
+            field_read = GenericField(lambda: {k: v[0].model for k, v in generic_fields().items()})
+            field_write = GenericField(lambda: {k: v[1].model for k, v in generic_fields().items()})
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -586,12 +613,7 @@ def generate_fields(**kwargs) -> Callable:
         parser: RequestParser = api.parser()
 
         if paginable:
-            parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(parser)
 
         if sortables:
             choices: list[str] = [sortable["key"] for sortable in sortables] + [
@@ -701,6 +723,8 @@ class _FieldKwargs(TypedDict, total=False):
     size: int | None
     is_thumbnail: bool | None
     href: Callable | None
+    href_extra: Callable | None
+    href_total: Callable | None
     generic: bool | None
     generic_key: str | None
     convert_to: Callable | None
@@ -753,6 +777,8 @@ def field(
     size: int | None = None,
     is_thumbnail: bool | None = None,
     href: Callable | None = None,
+    href_extra: Callable | None = None,
+    href_total: Callable | None = None,
     generic: bool | None = None,
     generic_key: str | None = None,
     convert_to: Callable | None = None,
@@ -791,6 +817,11 @@ def field(
         size: Image size for thumbnails
         is_thumbnail: If True, this is a thumbnail field
         href: Function to generate API link
+        href_extra: Function returning extra keys to merge into the href object
+            (e.g. counters by status). Only applies when used together with `href`.
+        href_total: Function returning the list total, used instead of `len(value)`
+            so the (potentially huge / dereferencing) list isn't loaded just to be
+            counted. Only applies when used together with `href`.
         generic: If True, handle generic embedded documents
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX
@@ -923,6 +954,40 @@ def patch(obj: _T, request) -> _T:
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
+
+            # Validate `choices` here because patch() never goes through
+            # MongoEngine's validate(): without this, an invalid choice would only
+            # be caught at save() time — and not at all on embedded documents that
+            # we patch but never save (e.g. ValidateSourceAPI builds a
+            # HarvestSourceValidation just to read its `state` and branch). The
+            # ideal would be to call obj.clean()/validate() after patching, but
+            # in udata clean() currently bundles pure validation with stateful
+            # side effects (activity tracking, spam detection, …) that must not
+            # run without an actual save. Same story for regex / max_length /
+            # min_value / max_value / custom `validation` callables: those are
+            # also silently skipped by patch() today and should be reinstated
+            # once clean() is split into a pure-validation half and a stateful
+            # half. Until then, this duplication of MongoEngine's `choices`
+            # logic is the minimal fix for the most common bug class (invalid
+            # enum values silently accepted).
+            # Restricted to StringField on purpose: GenericReferenceField &
+            # ReferenceField also accept `choices` but those constrain the
+            # allowed *document classes*, not the value itself, and are
+            # validated separately at save() time.
+            choices = getattr(model_attribute, "choices", None)
+            if (
+                value is not None
+                and choices
+                and isinstance(model_attribute, mongo_fields.StringField)
+            ):
+                valid_choices = [
+                    choice[0] if isinstance(choice, (list, tuple)) else choice for choice in choices
+                ]
+                if value not in valid_choices:
+                    raise FieldValidationError(
+                        field=key,
+                        message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
+                    )
 
             # Run checks if value is modified.
             # We run checks here (before setattr) to compare old vs new value.
