@@ -1,7 +1,6 @@
 import logging
 import traceback
 from datetime import UTC, date, datetime, timedelta
-from functools import cached_property
 from uuid import UUID
 
 import requests
@@ -10,12 +9,12 @@ from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
+from udata import http
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.http import ssrf_session
 from udata.models import Dataset, User
-from udata.utils import raise_if_redirect, safe_unicode
+from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import (
@@ -124,38 +123,23 @@ class BaseBackend(object):
     def config(self):
         return self.source.config
 
-    @cached_property
-    def session(self):
-        # Harvest source URLs are user-supplied: fetch them through the
-        # SSRF-guarded session, which validates the resolved IP at connect time.
-        return ssrf_session()
-
     def head(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
-        response = self.session.head(url, headers=headers, **kwargs)
-        if not kwargs["allow_redirects"]:
-            raise_if_redirect(response)
-        return response
+        return http.head(url, headers=headers, **kwargs)
 
     def get(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
-        response = self.session.get(url, headers=headers, **kwargs)
-        if not kwargs["allow_redirects"]:
-            raise_if_redirect(response)
-        return response
+        return http.get(url, headers=headers, **kwargs)
 
     def post(self, url, data, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
-        response = self.session.post(url, data=data, headers=headers, **kwargs)
-        if not kwargs["allow_redirects"]:
-            raise_if_redirect(response)
-        return response
+        return http.post(url, data=data, headers=headers, **kwargs)
 
     def get_headers(self):
         return {

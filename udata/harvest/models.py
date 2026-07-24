@@ -14,6 +14,7 @@ from mongoengine.fields import (
     ListField,
     ReferenceField,
     StringField,
+    URLField,
 )
 from werkzeug.utils import cached_property
 
@@ -184,7 +185,7 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         description="The source permalink string",
     )
     description = field(StringField(), markdown=True, description="The source description")
-    url = field(StringField(required=True), description="The source base URL")
+    url = field(URLField(required=True), description="The source base URL")
     backend = field(
         StringField(required=True),
         description="The source backend",
