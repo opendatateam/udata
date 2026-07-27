@@ -1,4 +1,5 @@
 import pytest
+from flask import url_for
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
@@ -9,7 +10,11 @@ from udata.core.organization.constants import COMPANY, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
-from udata.core.topic.factories import TopicElementFactory, TopicFactory
+from udata.core.topic.factories import (
+    TopicElementDatasetFactory,
+    TopicElementFactory,
+    TopicFactory,
+)
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
@@ -667,3 +672,182 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "DS tagged" in titles
         assert "DS other" not in titles
+
+    def test_suggest_organizations_with_dataset_count(self):
+        """count_for=dataset annotates each suggestion and pushes empty orgs to the end."""
+        org_two = OrganizationFactory(name="Count Alpha")
+        org_one = OrganizationFactory(name="Count Beta")
+        OrganizationFactory(name="Count Empty")
+        DatasetFactory(organization=org_two)
+        DatasetFactory(organization=org_two)
+        DatasetFactory(organization=org_one)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Count", size=10, count_for="dataset")
+        )
+        self.assert200(response)
+        counts = {org["name"]: org["matching_count"] for org in response.json}
+        assert counts == {"Count Alpha": 2, "Count Beta": 1, "Count Empty": 0}
+        # The empty organization is demoted to the end, the others keep their ranking.
+        assert response.json[-1]["name"] == "Count Empty"
+
+    def test_suggest_organizations_count_scoped_by_filter(self):
+        """The count respects the count_filter.* search context."""
+        org = OrganizationFactory(name="Scoped Org")
+        DatasetFactory(organization=org, tags=["transport"])
+        DatasetFactory(organization=org, tags=["sante"])
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Scoped",
+                size=10,
+                count_for="dataset",
+                **{"count_filter.tag": "transport"},
+            )
+        )
+        self.assert200(response)
+        assert response.json[0]["name"] == "Scoped Org"
+        assert response.json[0]["matching_count"] == 1
+
+    def test_suggest_organizations_dataservice_count(self):
+        """count_for=dataservice replaces the old "orgs with at least one API" flag."""
+        org_api = OrganizationFactory(name="Api Provider")
+        OrganizationFactory(name="Api Nothing")
+        DataserviceFactory(organization=org_api)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Api", size=10, count_for="dataservice")
+        )
+        self.assert200(response)
+        counts = {org["name"]: org["matching_count"] for org in response.json}
+        assert counts == {"Api Provider": 1, "Api Nothing": 0}
+        assert response.json[-1]["name"] == "Api Nothing"
+
+    def test_suggest_organizations_restricted_by_topic(self):
+        """`topic` restricts candidates to orgs owning a dataset in the topic."""
+        in_topic = OrganizationFactory(name="Topic Member")
+        out_topic = OrganizationFactory(name="Topic Outsider")
+        dataset_in = DatasetFactory(organization=in_topic)
+        DatasetFactory(organization=out_topic)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Topic",
+                size=10,
+                count_for="dataset",
+                topic=str(topic.id),
+            )
+        )
+        self.assert200(response)
+        names = [org["name"] for org in response.json]
+        assert names == ["Topic Member"]
+        assert response.json[0]["matching_count"] == 1
+
+    def test_suggest_organizations_facet_ids_surface_relevant_orgs(self):
+        """count_facet_ids brings in result-having orgs beyond the follower-limited top."""
+        org_top = OrganizationFactory(name="Facet One", metrics={"followers": 3})
+        OrganizationFactory(name="Facet Two", metrics={"followers": 2})  # no dataset
+        org_low = OrganizationFactory(name="Facet Three", metrics={"followers": 1})
+        DatasetFactory(organization=org_top)
+        DatasetFactory(organization=org_low)
+
+        time.sleep(1)
+
+        # size=2 → A (top followers) = One, Two ; Three is only reachable via the facet ids.
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Facet",
+                size=2,
+                count_for="dataset",
+                count_facet_ids=str(org_low.id),
+            )
+        )
+        self.assert200(response)
+        # "Two" (0 result) is demoted out, "Three" surfaces thanks to the facet ids.
+        assert [org["name"] for org in response.json] == ["Facet One", "Facet Three"]
+        assert [org["matching_count"] for org in response.json] == [1, 1]
+
+    def test_suggest_organizations_reuse_count(self):
+        """count_for=reuse counts reuses per organization."""
+        org = OrganizationFactory(name="Reuse Org")
+        VisibleReuseFactory(organization=org)
+        VisibleReuseFactory(organization=org)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Reuse", size=10, count_for="reuse")
+        )
+        self.assert200(response)
+        assert response.json[0]["name"] == "Reuse Org"
+        assert response.json[0]["matching_count"] == 2
+
+    def test_suggest_organizations_ranked_by_followers_not_count(self):
+        """Among orgs with results, ranking is by followers — never by number of matches."""
+        popular = OrganizationFactory(name="Rank Popular", metrics={"followers": 100})
+        prolific = OrganizationFactory(name="Rank Prolific", metrics={"followers": 1})
+        DatasetFactory(organization=popular)
+        DatasetFactory.create_batch(3, organization=prolific)
+
+        time.sleep(1)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="Rank", size=10, count_for="dataset")
+        )
+        self.assert200(response)
+        # Prolific has more datasets, but Popular has far more followers → Popular first.
+        assert [org["name"] for org in response.json] == ["Rank Popular", "Rank Prolific"]
+        assert {org["name"]: org["matching_count"] for org in response.json} == {
+            "Rank Popular": 1,
+            "Rank Prolific": 3,
+        }
+
+    def test_suggest_organizations_topic_restriction_and_count_are_independent(self):
+        """`topic` restricts candidates; the count scope is driven separately by count_filter."""
+        org = OrganizationFactory(name="Deco Org")
+        dataset_in = DatasetFactory(organization=org)
+        DatasetFactory(organization=org)  # second dataset, not in the topic
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        time.sleep(1)
+
+        # Restricted to the topic universe, no count scope → counts all org datasets (2).
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Deco",
+                size=10,
+                count_for="dataset",
+                topic=str(topic.id),
+            )
+        )
+        self.assert200(response)
+        assert response.json[0]["matching_count"] == 2
+
+        # Same candidates, but the count is scoped to the topic via count_filter → 1.
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="Deco",
+                size=10,
+                count_for="dataset",
+                topic=str(topic.id),
+                **{"count_filter.topic": str(topic.id)},
+            )
+        )
+        self.assert200(response)
+        assert response.json[0]["matching_count"] == 1

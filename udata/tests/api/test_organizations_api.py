@@ -14,6 +14,7 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.edito_blocs.models import AccordionItemBloc, AccordionListBloc, MarkdownBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.i18n import _
@@ -1364,6 +1365,87 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert Follow.objects.following(to_follow).count() == 0
         assert Follow.objects.following(user).count() == 0
         assert Follow.objects.followers(user).count() == 0
+
+    def test_suggest_organizations_without_count_for_has_null_count(self):
+        """Without count_for the endpoint stays the plain Mongo suggest."""
+        OrganizationFactory(name="plain-org")
+        response = self.get(url_for("api.suggest_organizations", q="plain", size=5))
+        assert200(response)
+        assert response.json[0]["name"] == "plain-org"
+        assert response.json[0]["matching_count"] is None
+
+    def test_suggest_organizations_count_for_without_search_service(self):
+        """With count_for but no search service, suggestions are returned without crashing."""
+        OrganizationFactory(name="degraded-org")
+        response = self.get(
+            url_for("api.suggest_organizations", q="degraded", size=5, count_for="dataset")
+        )
+        assert200(response)
+        assert response.json[0]["name"] == "degraded-org"
+
+    def test_suggest_organizations_invalid_count_for(self):
+        """count_for only accepts known model kinds."""
+        response = self.get(url_for("api.suggest_organizations", q="x", size=5, count_for="banana"))
+        assert response.status_code == 400
+
+    def test_suggest_organizations_restricted_by_topic_selection(self):
+        """`topic` limits candidates to organizations owning a dataset in the topic.
+
+        This restriction is pure MongoDB (via TopicElement), so it is exercised without a
+        running search service — only the candidate set is asserted, not the counts.
+        """
+        in_topic = OrganizationFactory(name="topic-member")
+        out_topic = OrganizationFactory(name="topic-outsider")
+        dataset_in = DatasetFactory(organization=in_topic)
+        DatasetFactory(organization=out_topic)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="topic",
+                size=10,
+                count_for="dataset",
+                topic=str(topic.id),
+            )
+        )
+        assert200(response)
+        assert [org["name"] for org in response.json] == ["topic-member"]
+
+    def test_suggest_organizations_topic_standalone_without_count_for(self):
+        """`topic` works on its own: a plain name suggest scoped to the topic's orgs."""
+        in_topic = OrganizationFactory(name="universe-member")
+        out_topic = OrganizationFactory(name="universe-outsider")
+        dataset_in = DatasetFactory(organization=in_topic)
+        DatasetFactory(organization=out_topic)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset_in)
+
+        response = self.get(
+            url_for("api.suggest_organizations", q="universe", size=10, topic=str(topic.id))
+        )
+        assert200(response)
+        assert [org["name"] for org in response.json] == ["universe-member"]
+        assert response.json[0]["matching_count"] is None
+
+    def test_suggest_organizations_facet_ids_must_match_query(self):
+        """Facet ids only contribute organizations that also match the name query."""
+        OrganizationFactory(name="alpha-corp")
+        beta = OrganizationFactory(name="beta-corp")
+        response = self.get(
+            url_for(
+                "api.suggest_organizations",
+                q="alpha",
+                size=10,
+                count_for="dataset",
+                count_facet_ids=str(beta.id),
+            )
+        )
+        assert200(response)
+        names = [org["name"] for org in response.json]
+        assert "alpha-corp" in names
+        assert "beta-corp" not in names
 
     def test_suggest_organizations_api(self):
         """It should suggest organizations"""

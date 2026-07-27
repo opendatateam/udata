@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
-from flask import make_response, redirect, request, url_for
+from flask import current_app, make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
+from werkzeug.datastructures import MultiDict
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
@@ -29,9 +31,11 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.topic.models import Topic
 from udata.mongo import db
 from udata.mongo.errors import FieldValidationError
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.search import adapter_for, get_elastic_client
 
 from .api_fields import (
     invite_fields,
@@ -668,27 +672,157 @@ class FollowOrgAPI(FollowAPI):
     model = Organization
 
 
+# Models whose search index can back an organization suggest count (count_for=...).
+COUNT_FOR_MODELS = {"dataset": Dataset, "reuse": Reuse, "dataservice": Dataservice}
+# Prefix namespacing the count-context filters from the suggest's own params: the suggest
+# `q` is an organization name, while `count_filter.q` is the dataset/reuse/... full-text
+# query the count is scoped to (e.g. count_filter.tag=transport).
+COUNT_FILTER_PREFIX = "count_filter."
+
+
+def org_suggestion(org):
+    return {
+        "id": org.id,
+        "name": org.name,
+        "acronym": org.acronym,
+        "slug": org.slug,
+        "image_url": org.logo,
+        "page": org.self_web_url(),
+    }
+
+
+org_suggest_parser = suggest_parser.copy()
+org_suggest_parser.add_argument(
+    "count_for",
+    type=str,
+    choices=list(COUNT_FOR_MODELS),
+    location="args",
+    help=(
+        "Annotate each suggestion with the number of matching objects of this kind "
+        "(dataset, reuse or dataservice), counted in the search index and scoped by the "
+        f"`{COUNT_FILTER_PREFIX}*` params (e.g. {COUNT_FILTER_PREFIX}tag=transport). "
+        "Empty organizations are pushed to the end, the follower ranking is kept."
+    ),
+)
+org_suggest_parser.add_argument(
+    "topic",
+    type=str,
+    location="args",
+    help=(
+        "Restrict suggestions to organizations owning an object in this topic (an object "
+        "of `count_for`'s kind when set, any kind otherwise). Usable without `count_for`."
+    ),
+)
+org_suggest_parser.add_argument(
+    "count_facet_ids",
+    action="split",
+    location="args",
+    help=(
+        "Organization ids of the current search facet. They are always kept as candidates "
+        "so the organizations that actually have results show up even when they are not "
+        "the most followed."
+    ),
+)
+
+
+def topic_organization_ids(topic, count_for=None):
+    """Ids of organizations owning an element of this topic (its universe).
+
+    With ``count_for`` the universe is restricted to that element type; otherwise every
+    element type is considered. `distinct` on the `organization` reference returns
+    Organization documents, hence the mapping to their ids for an `id__in` filter.
+    """
+    models = [COUNT_FOR_MODELS[count_for]] if count_for else list(COUNT_FOR_MODELS.values())
+    org_ids = set()
+    for model in models:
+        element_ids = topic.get_nested_elements_ids(model.__name__)
+        org_ids.update(
+            org.id for org in model.objects(id__in=element_ids).distinct("organization") if org
+        )
+    return list(org_ids)
+
+
+def organization_match_counts(count_for, organizations):
+    """Return {organization_id: matching_count} for the given candidate organizations.
+
+    Counts come from the search index of ``count_for`` (datasets/reuses/dataservices) —
+    the only place a search-scoped per-organization count exists — via an exact ES
+    `include` of the candidates. Returns an empty mapping when search is disabled.
+    """
+    if not organizations or not current_app.config["ELASTICSEARCH_URL"]:
+        return {}
+
+    adapter = adapter_for(COUNT_FOR_MODELS[count_for])
+
+    # Parse the count_filter.* params through the target model's own request parser so
+    # filters are validated/typed exactly like a real search on that model.
+    stripped = MultiDict()
+    for key in request.args:
+        if key.startswith(COUNT_FILTER_PREFIX):
+            for value in request.args.getlist(key):
+                stripped.add(key[len(COUNT_FILTER_PREFIX) :], value)
+    parser = adapter.as_request_parser(paginate=False, store_missing=False)
+    params = dict(parser.parse_args(req=SimpleNamespace(args=stripped)))
+
+    params.setdefault("q", "")
+    params["page"] = 1
+    # Ignored: count-only mode forces ES `size: 0`, so no hits are ever fetched.
+    params["page_size"] = 1
+    # The search layer owns how organizations are indexed; we only pass ids and get back
+    # a {organization_id: count} mapping.
+    params["count_organizations"] = [str(org.id) for org in organizations]
+
+    service = adapter.service_class(get_elastic_client())
+    _, _, _, facets = service.search(params)
+    return facets.get("organization_counts", {})
+
+
 @ns.route("/suggest/", endpoint="suggest_organizations")
 class OrganizationSuggestAPI(API):
     @api.doc("suggest_organizations")
-    @api.expect(suggest_parser)
+    @api.expect(org_suggest_parser)
     @api.marshal_list_with(org_suggestion_fields)
     def get(self):
         """Organizations suggest endpoint using mongoDB contains"""
-        args = suggest_parser.parse_args()
+        args = org_suggest_parser.parse_args()
         orgs = Organization.objects(
             Q(name__icontains=args["q"]) | Q(acronym__icontains=args["q"]), deleted=None
         )
+        # `topic` restricts to the organizations of that universe. Usable on its own (a
+        # plain name suggest scoped to a topic) or together with `count_for`.
+        if args["topic"]:
+            topic = Topic.objects.get_or_404(pk=args["topic"])
+            orgs = orgs.filter(id__in=topic_organization_ids(topic, args["count_for"]))
+
+        if not args["count_for"]:
+            return [
+                org_suggestion(org) for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
+            ]
+
+        # A — most followed organizations of the (optionally topic-restricted) universe.
+        candidates = list(orgs.order_by(SUGGEST_SORTING).limit(args["size"]))
+
+        # B — organizations from the front's current facet (those that actually have
+        # results), kept as candidates so the most relevant ones show up even when they are
+        # not the most followed. Same universe + name constraints as A.
+        if args["count_facet_ids"]:
+            seen = {org.id for org in candidates}
+            candidates += [
+                org for org in orgs.filter(id__in=args["count_facet_ids"]) if org.id not in seen
+            ]
+
+        counts = organization_match_counts(args["count_for"], candidates)
+        # Organizations with results first (by followers), empty ones pushed to the end. We
+        # never sort by count: a huge low-quality org must not outrank a well-followed one.
+        candidates.sort(
+            key=lambda org: (
+                counts.get(str(org.id), 0) == 0,
+                -(org.metrics or {}).get("followers", 0),
+            )
+        )
         return [
-            {
-                "id": org.id,
-                "name": org.name,
-                "acronym": org.acronym,
-                "slug": org.slug,
-                "image_url": org.logo,
-                "page": org.self_web_url(),
-            }
-            for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
+            {**org_suggestion(org), "matching_count": counts.get(str(org.id), 0)}
+            for org in candidates[: args["size"]]
         ]
 
 
