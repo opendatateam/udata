@@ -88,7 +88,9 @@ def dataservice_from_rdf(
     )
     dataservice.harvest.created_at = rdf_value(d, DCT.created)
     dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
-    dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
+    dataservice.harvest.modified_at = rdf_value(d, DCT.modified)
+
+    dataservice.metadata_modified_at = dataservice.harvest.modified_at
 
     dataservice.tags = themes_from_rdf(d)
 

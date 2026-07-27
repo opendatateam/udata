@@ -249,6 +249,7 @@ def collect_stats(response):
 
 
 default_error = api.model("Error", {"message": fields.String})
+default_error_v2 = apiv2.inherit("Error", default_error)
 
 
 @api.errorhandler(PermissionDenied)
@@ -317,6 +318,13 @@ def handle_validation_error(error: mongoengine.errors.ValidationError):
         },
         400,
     )
+
+
+@apiv2.errorhandler(PermissionDenied)
+@apiv2.marshal_with(default_error_v2, code=403)
+def handle_permission_denied_v2(error):
+    """Error occuring when the user does not have the required permissions"""
+    return handle_permission_denied(error)
 
 
 @apiv2.errorhandler(mongoengine.errors.ValidationError)
