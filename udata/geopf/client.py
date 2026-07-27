@@ -25,16 +25,33 @@ class GeopfTimeoutError(GeopfError):
     pass
 
 
+class GeopfReauthRequired(GeopfError):
+    """Raised when there is no valid (or refreshable) geopf token for the acting user."""
+
+    pass
+
+
 class GeopfClient:
-    def __init__(self):
+    def __init__(self, token: str | None = None, datastore_id: str | None = None):
+        """A geopf entrepôt API client.
+
+        `token` is the acting identity's bearer access token — the push
+        flow uses a per-user OAuth token, the reverse sync uses the static
+        `GEOPF_TOKEN` service-account token. `datastore_id` scopes
+        datastore-bound calls (uploads, processing, tagging, metadata,
+        offerings); it isn't needed for instance-level calls like
+        `list_datastores`.
+        """
         self.base = current_app.config["GEOPF_API_BASE"]
-        self.datastore = current_app.config["GEOPF_DATASTORE_ID"]
-        token = current_app.config["GEOPF_TOKEN"]
+        self.datastore = datastore_id
         self.poll_timeout = current_app.config.get("GEOPF_POLL_TIMEOUT", POLL_TIMEOUT)
         self.session = requests.Session()
-        self.session.headers["Authorization"] = f"Bearer {token}"
+        if token:
+            self.session.headers["Authorization"] = f"Bearer {token}"
 
     def _url(self, path):
+        if not self.datastore:
+            raise GeopfError("GeopfClient: no datastore_id configured for this call")
         return f"{self.base}/datastores/{self.datastore}/{path}"
 
     def _raise(self, resp):
@@ -132,6 +149,18 @@ class GeopfClient:
             json={"datasheet_name": datasheet_name},
         )
         self._raise(resp)
+
+    # --- datastores ---
+
+    def list_datastores(self) -> list:
+        """Return the datastores (entrepôts) accessible to the current user's token.
+
+        Instance-level call, not scoped to `self.datastore`.
+        # FIXME: confirm the exact route against geopf's API docs once available.
+        """
+        resp = self.session.get(f"{self.base}/datastores")
+        self._raise(resp)
+        return resp.json()
 
     # --- offerings ---
 

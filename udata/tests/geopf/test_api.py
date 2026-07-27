@@ -1,0 +1,216 @@
+from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
+from flask import redirect, url_for
+
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.user.factories import UserFactory
+from udata.geopf.api import DATASET_SESSION_KEY
+from udata.geopf.models import GeopfToken
+from udata.tests.api import APITestCase
+from udata.tests.geopf import TEST_GEOPF_CONF
+
+CDATA_BASE_URL = "https://cdata.example.com"
+
+
+@TEST_GEOPF_CONF
+class GeopfLoginApiTest(APITestCase):
+    def test_requires_login(self):
+        response = self.get(url_for("api.geopf_login"))
+        self.assert401(response)
+
+    def test_redirects_to_provider_and_stores_dataset_id(self):
+        self.login()
+        dataset = DatasetFactory()
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_redirect.return_value = redirect("https://sso.geopf.fr/auth")
+            response = self.get(url_for("api.geopf_login", dataset_id=str(dataset.id)))
+
+        self.assertEqual(response.status_code, 302)
+        mock_oauth.geopf.authorize_redirect.assert_called_once()
+        with self.client.session_transaction() as sess:
+            assert sess[DATASET_SESSION_KEY] == str(dataset.id)
+
+    def test_stores_none_when_no_dataset_id_given(self):
+        self.login()
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_redirect.return_value = redirect("https://sso.geopf.fr/auth")
+            self.get(url_for("api.geopf_login"))
+
+        with self.client.session_transaction() as sess:
+            assert sess[DATASET_SESSION_KEY] is None
+
+
+@pytest.mark.options(CDATA_BASE_URL=CDATA_BASE_URL)
+@TEST_GEOPF_CONF
+class GeopfAuthApiTest(APITestCase):
+    def test_stores_token_and_redirects_to_dataset_page(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        with self.client.session_transaction() as sess:
+            sess[DATASET_SESSION_KEY] = str(dataset.id)
+
+        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_access_token.return_value = token
+            response = self.get(url_for("api.geopf_auth"))
+
+        self.assertEqual(response.status_code, 302)
+        assert response.location.startswith(f"{CDATA_BASE_URL}/datasets/{dataset.slug}")
+        stored = GeopfToken.objects.get(user=user.id)
+        assert stored.access_token == "at"
+        assert stored.refresh_token == "rt"
+
+    def test_redirects_home_when_no_dataset_id_stored(self):
+        self.login()
+        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_access_token.return_value = token
+            response = self.get(url_for("api.geopf_auth"))
+
+        self.assertEqual(response.status_code, 302)
+        assert response.location.startswith(CDATA_BASE_URL)
+
+    def test_redirects_home_when_dataset_id_unknown(self):
+        self.login()
+        with self.client.session_transaction() as sess:
+            sess[DATASET_SESSION_KEY] = "000000000000000000000000"
+
+        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_access_token.return_value = token
+            response = self.get(url_for("api.geopf_auth"))
+
+        self.assertEqual(response.status_code, 302)
+        assert "/datasets/" not in response.location
+
+    def test_redirects_home_when_dataset_id_malformed(self):
+        """A malformed id (not a valid ObjectId) must fall back safely, not error out."""
+        self.login()
+        with self.client.session_transaction() as sess:
+            sess[DATASET_SESSION_KEY] = "not-an-id"
+
+        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        with patch("udata.geopf.api.oauth") as mock_oauth:
+            mock_oauth.geopf.authorize_access_token.return_value = token
+            response = self.get(url_for("api.geopf_auth"))
+
+        self.assertEqual(response.status_code, 302)
+        assert "/datasets/" not in response.location
+
+
+@TEST_GEOPF_CONF
+class GeopfStatusApiTest(APITestCase):
+    def test_not_connected(self):
+        self.login()
+        response = self.get(url_for("api.geopf_status"))
+        self.assert200(response)
+        assert response.json == {"connected": False, "expires_at": None}
+
+    def test_connected(self):
+        user = self.login()
+        expires_at = datetime.now(UTC) + timedelta(hours=1)
+        GeopfToken(user=user, access_token="a", refresh_token="r", expires_at=expires_at).save()
+
+        response = self.get(url_for("api.geopf_status"))
+        self.assert200(response)
+        assert response.json["connected"] is True
+
+
+@TEST_GEOPF_CONF
+class GeopfTokenApiTest(APITestCase):
+    def test_disconnect_removes_stored_token(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        response = self.delete(url_for("api.geopf_token"))
+        self.assert204(response)
+        assert GeopfToken.objects(user=user.id).first() is None
+
+
+@TEST_GEOPF_CONF
+class GeopfDatastoresApiTest(APITestCase):
+    def test_not_connected_returns_409(self):
+        self.login()
+        response = self.get(url_for("api.geopf_datastores"))
+        self.assertStatus(response, 409)
+
+    def test_connected_lists_datastores(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with patch("udata.geopf.api.GeopfClient") as mock_client_cls:
+            mock_client_cls.return_value.list_datastores.return_value = [{"_id": "ds-1"}]
+            response = self.get(url_for("api.geopf_datastores"))
+
+        self.assert200(response)
+        assert response.json == [{"_id": "ds-1"}]
+
+
+@TEST_GEOPF_CONF
+class GeopfPushApiTest(APITestCase):
+    def test_requires_edit_permission(self):
+        owner = UserFactory()
+        self.login()  # a different user, no rights on the dataset
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=owner, resources=[resource])
+
+        response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+        self.assert403(response)
+
+    def test_resource_not_found(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        response = self.post(
+            url_for("api.geopf_push", dataset=dataset, rid="00000000-0000-0000-0000-000000000000")
+        )
+        self.assert404(response)
+
+    def test_rejects_non_gpkg_resource(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+        self.assert400(response)
+
+    def test_not_connected_returns_409(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+        self.assertStatus(response, 409)
+
+    def test_connected_enqueues_push_task(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        mock_task = MagicMock(id="task-123")
+        with patch(
+            "udata.geopf.api.push_resource_to_geopf.delay", return_value=mock_task
+        ) as mock_delay:
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
+        assert response.json == {"task_id": "task-123"}
+        mock_delay.assert_called_once_with(str(dataset.id), str(resource.id), str(user.id), None)

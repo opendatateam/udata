@@ -3,8 +3,10 @@ from flask import current_app
 
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
+from udata.core.user.models import User
 
-from .client import GeopfClient, GeopfError
+from .auth import resolve_access_token
+from .client import GeopfClient, GeopfError, GeopfReauthRequired
 from .tasks import push_resource_to_geopf, sync_metadata, sync_offerings_for_dataset
 
 
@@ -14,22 +16,68 @@ def grp():
     pass
 
 
+def _require_datastore_id(datastore_id):
+    datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
+    if not datastore_id:
+        raise click.ClickException("Provide --datastore-id or configure GEOPF_DATASTORE_ID")
+    return datastore_id
+
+
+def _resolve_token_option(user_id, token):
+    """Resolve --user-id/--token CLI options to a usable access token."""
+    if bool(user_id) == bool(token):
+        raise click.ClickException("Provide exactly one of --user-id or --token")
+    if token:
+        return token
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        raise click.ClickException(f"User {user_id} not found")
+    try:
+        return resolve_access_token(user=user)
+    except GeopfReauthRequired as e:
+        raise click.ClickException(str(e))
+
+
+user_id_option = click.option(
+    "--user-id", help="Push using this user's stored geopf token (refreshed as needed)"
+)
+token_option = click.option(
+    "--token", help="Push using this raw access token, bypassing any stored token"
+)
+datastore_id_option = click.option(
+    "--datastore-id", help="Datastore to push into (defaults to GEOPF_DATASTORE_ID)"
+)
+
+
 @grp.command("push-resource")
 @click.argument("dataset_id")
 @click.argument("resource_id")
-def push_resource(dataset_id, resource_id):
+@user_id_option
+@token_option
+@datastore_id_option
+def push_resource(dataset_id, resource_id, user_id, token, datastore_id):
     """Push a GPKG resource to Géoplateforme (runs synchronously)."""
-    push_resource_to_geopf(dataset_id, resource_id)  # type: ignore[call-arg] — Celery injects self for bind=True tasks
+    if bool(user_id) == bool(token):
+        raise click.ClickException("Provide exactly one of --user-id or --token")
+    if user_id and not User.objects(id=user_id).first():
+        raise click.ClickException(f"User {user_id} not found")
+
+    datastore_id = _require_datastore_id(datastore_id)
+    push_resource_to_geopf(  # type: ignore[call-arg] — Celery injects self for bind=True tasks
+        dataset_id, resource_id, user_id, datastore_id, token
+    )
 
 
 @grp.command("push-metadata")
 @click.argument("dataset_id")
-def push_metadata(dataset_id):
+@user_id_option
+@token_option
+@datastore_id_option
+def push_metadata(dataset_id, user_id, token, datastore_id):
     """Sync metadata for a dataset to Géoplateforme."""
-    if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
-        "GEOPF_DATASTORE_ID"
-    ):
-        raise click.ClickException("GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured")
+    access_token = _resolve_token_option(user_id, token)
+    datastore_id = _require_datastore_id(datastore_id)
 
     try:
         dataset = Dataset.objects.get(id=dataset_id)
@@ -37,12 +85,11 @@ def push_metadata(dataset_id):
         raise click.ClickException(f"Dataset {dataset_id} not found")
 
     try:
-        client = GeopfClient()
+        client = GeopfClient(token=access_token, datastore_id=datastore_id)
         metadata_id = sync_metadata(dataset, client)
     except GeopfError as e:
         raise click.ClickException(str(e))
 
-    datastore_id = current_app.config["GEOPF_DATASTORE_ID"]
     fiche_url = (
         f"https://cartes.gouv.fr/tableau-de-bord/entrepots/{datastore_id}/donnees/{dataset_id}"
     )
@@ -54,10 +101,9 @@ def push_metadata(dataset_id):
 @click.argument("dataset_id")
 def sync_offerings(dataset_id):
     """Sync Géoplateforme offerings to resources for a dataset."""
-    if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
-        "GEOPF_DATASTORE_ID"
-    ):
-        raise click.ClickException("GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured")
+    token = current_app.config.get("GEOPF_TOKEN")
+    if not token:
+        raise click.ClickException("GEOPF_TOKEN not configured")
 
     try:
         dataset = Dataset.objects.get(id=dataset_id)
@@ -65,8 +111,7 @@ def sync_offerings(dataset_id):
         raise click.ClickException(f"Dataset {dataset_id} not found")
 
     try:
-        client = GeopfClient()
-        n = sync_offerings_for_dataset(dataset, client)
+        n = sync_offerings_for_dataset(dataset, token)
     except GeopfError as e:
         raise click.ClickException(str(e))
 

@@ -681,8 +681,21 @@ class Defaults(object):
     # Géoplateforme (geopf) integration
     ###########################################################################
     GEOPF_API_BASE = "https://data.geopf.fr/api"
-    GEOPF_TOKEN = None  # Bearer token for entrepôt API (required to enable push)
-    GEOPF_DATASTORE_ID = None  # Target datastore UUID (required to enable push)
+    # FIXME: temporary default datastore, until cdata has a datastore picker and every
+    # push carries an explicit datastore_id chosen by the user among their own entrepôts.
+    GEOPF_DATASTORE_ID = None
+    # Shared service-account bearer token for the periodic reverse sync (geopf.sync-offerings),
+    # which has no per-user identity to authenticate as. Not used by the push flow — that's
+    # per-user OAuth (GEOPF_OAUTH_* below).
+    GEOPF_TOKEN = None
+    # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
+    # udata acts as a confidential client authenticating on behalf of the data.gouv.fr user.
+    GEOPF_OAUTH_CLIENT_ID = None
+    GEOPF_OAUTH_CLIENT_SECRET = None
+    GEOPF_OAUTH_OPENID_CONF_URL = None  # .../realms/geoplateforme/.well-known/openid-configuration
+    GEOPF_OAUTH_SCOPE = "openid"  # confirmed working against sso.geopf.fr; "default" 400s there
+    # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest.
+    GEOPF_TOKEN_ENCRYPTION_KEY = None
 
     # Format families for search filtering
     ###########################################################################

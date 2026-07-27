@@ -388,6 +388,7 @@ def init_app(app):
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
     import udata.core.avatars.api  # noqa
+    import udata.geopf.api  # noqa
     import udata.harvest.api  # noqa
 
     # api.init_app(app)

@@ -11,10 +11,12 @@ from flask import current_app
 from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
 from udata.core.storages.utils import md5
+from udata.core.user.models import User
 from udata.tasks import job, task
 from udata.utils import get_by
 
-from .client import GeopfClient, GeopfError, GeopfTimeoutError
+from .auth import resolve_access_token
+from .client import GeopfClient, GeopfError, GeopfReauthRequired, GeopfTimeoutError
 from .metadata import dataset_to_iso19115
 from .srs import DEFAULT_SRS, detect_srs
 
@@ -22,8 +24,18 @@ log = logging.getLogger(__name__)
 
 
 @task(name="geopf.push_resource", bind=True, ignore_result=False)
-def push_resource_to_geopf(self, dataset_id, resource_id):
-    log.info("geopf: starting push dataset=%s resource=%s", dataset_id, resource_id)
+def push_resource_to_geopf(
+    self, dataset_id, resource_id, user_id=None, datastore_id=None, access_token=None
+):
+    """Push a gpkg resource to Géoplateforme as the acting user.
+
+    Pass `user_id` for the normal path (their stored `GeopfToken` is looked
+    up and refreshed as needed). `access_token` is an ops/CLI-only escape
+    hatch that bypasses stored-token resolution entirely with a raw token.
+    """
+    log.info(
+        "geopf: starting push dataset=%s resource=%s user=%s", dataset_id, resource_id, user_id
+    )
     dataset = Dataset.objects.get(id=dataset_id)
     resource = get_by(dataset.resources, id=UUID(resource_id))
     if resource is None:
@@ -33,21 +45,42 @@ def push_resource_to_geopf(self, dataset_id, resource_id):
     if not resource.format or resource.format.lower() != "gpkg":
         return
 
-    datastore_id = current_app.config.get("GEOPF_DATASTORE_ID")
-    if not datastore_id or not current_app.config.get("GEOPF_TOKEN"):
+    # FIXME: temporary default datastore, until cdata has a datastore picker
+    # and every push carries an explicit datastore_id chosen by the user.
+    datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
+    if not datastore_id:
         log.warning(
-            "geopf: GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured, skipping push dataset=%s resource=%s",
+            "geopf: no datastore_id provided and GEOPF_DATASTORE_ID not configured, "
+            "skipping push dataset=%s resource=%s",
             dataset_id,
             resource_id,
         )
         return
 
+    if not access_token:
+        user = User.objects.get(id=user_id)
+        try:
+            access_token = resolve_access_token(user=user)
+        except GeopfReauthRequired as e:
+            log.error(
+                "geopf: no usable geopf token for user=%s dataset=%s resource=%s: %s",
+                user_id,
+                dataset_id,
+                resource_id,
+                e,
+            )
+            _set_extras(
+                dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)}
+            )
+            raise
+
     _set_extras(
         dataset, resource, {"geopf:push:status": "pending", "geopf:push:task-id": self.request.id}
     )
 
+    client = GeopfClient(token=access_token, datastore_id=datastore_id)
     try:
-        _run_pipeline(dataset, resource, datastore_id)
+        _run_pipeline(dataset, resource, datastore_id, client)
     except GeopfTimeoutError as e:
         log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
         _set_extras(dataset, resource, {"geopf:push:status": "timeout", "geopf:push:error": str(e)})
@@ -58,8 +91,7 @@ def push_resource_to_geopf(self, dataset_id, resource_id):
         raise
 
 
-def _run_pipeline(dataset, resource, datastore_id):
-    client = GeopfClient()
+def _run_pipeline(dataset, resource, datastore_id, client):
     datasheet_name = str(dataset.id)
     stored_data_name = f"_{resource.id}"
     filename = _resource_filename(resource)
@@ -174,6 +206,7 @@ def _run_pipeline(dataset, resource, datastore_id):
         {
             "geopf:push:status": "done",
             "geopf:push:stored-data-id": stored_data_id,
+            "geopf:push:datastore-id": datastore_id,
             "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
         },
     )
@@ -247,19 +280,17 @@ def sync_metadata(dataset, client):
 @job("geopf.sync-offerings", ignore_result=False)
 def sync_geopf_offerings(self):
     """Periodic job: sync Géoplateforme offerings to udata resources for all pushed datasets."""
-    if not current_app.config.get("GEOPF_TOKEN") or not current_app.config.get(
-        "GEOPF_DATASTORE_ID"
-    ):
-        log.warning("geopf: GEOPF_TOKEN or GEOPF_DATASTORE_ID not configured, skipping sync")
+    token = current_app.config.get("GEOPF_TOKEN")
+    if not token:
+        log.warning("geopf: GEOPF_TOKEN not configured, skipping sync")
         return
 
-    client = GeopfClient()
     datasets = Dataset.objects(**{"extras__geopf:push:metadata-id__exists": True})
     log.info("geopf: syncing offerings for %d datasets", datasets.count())
     failures = []
     for dataset in datasets:
         try:
-            n = sync_offerings_for_dataset(dataset, client)
+            n = sync_offerings_for_dataset(dataset, token)
             log.info("geopf: synced %d offerings for dataset=%s", n, dataset.id)
         except Exception as e:
             log.exception("geopf: offering sync failed for dataset=%s", dataset.id)
@@ -268,18 +299,29 @@ def sync_geopf_offerings(self):
         raise ExceptionGroup(f"geopf: sync failed for {len(failures)} dataset(s)", failures)
 
 
-def sync_offerings_for_dataset(dataset, client) -> int:
-    """Sync Géoplateforme offerings to udata resources. Returns count of live offerings."""
-    stored_data_ids = {
-        r.extras["geopf:push:stored-data-id"]
+def sync_offerings_for_dataset(dataset, token) -> int:
+    """Sync Géoplateforme offerings to udata resources. Returns count of live offerings.
+
+    Groups resources by `(geopf:push:datastore-id, geopf:push:stored-data-id)` —
+    same datastore-selection logic as the push flow, falling back to
+    `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore
+    tracking existed — but authenticated with the static `GEOPF_TOKEN`
+    service-account token rather than a per-user one (see "Authentication" /
+    the reverse sync section in docs/geopf.md for why).
+    """
+    default_datastore_id = current_app.config.get("GEOPF_DATASTORE_ID")
+    pairs = {
+        (r.extras.get("geopf:push:datastore-id") or default_datastore_id, sd_id)
         for r in dataset.resources
-        if r.extras.get("geopf:push:stored-data-id")
+        if (sd_id := r.extras.get("geopf:push:stored-data-id"))
     }
-    if not stored_data_ids:
+    pairs = {(datastore_id, sd_id) for datastore_id, sd_id in pairs if datastore_id}
+    if not pairs:
         return 0
 
     live_offering_ids = set()
-    for sd_id in stored_data_ids:
+    for datastore_id, sd_id in pairs:
+        client = GeopfClient(token=token, datastore_id=datastore_id)
         for offering in client.list_offerings(sd_id):
             live_offering_ids.add(offering["_id"])
             _upsert_offering_resource(dataset, offering)
