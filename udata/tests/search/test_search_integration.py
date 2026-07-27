@@ -400,11 +400,11 @@ class SearchIntegrationTest(APITestCase):
 
     def test_post_search_follows_publication_state(self):
         """A post should be searchable only while it is published."""
-        post = PostFactory(name="Brouillon confidentiel", published=None)
+        post = PostFactory(name="Draft not yet published", published=None)
 
         self.refresh_index()
 
-        response = self.get("/api/2/posts/search/?q=confidentiel")
+        response = self.get("/api/2/posts/search/?q=draft")
         self.assert200(response)
         assert response.json["total"] == 0
 
@@ -413,7 +413,7 @@ class SearchIntegrationTest(APITestCase):
 
         self.refresh_index()
 
-        response = self.get("/api/2/posts/search/?q=confidentiel")
+        response = self.get("/api/2/posts/search/?q=draft")
         self.assert200(response)
         assert [p["id"] for p in response.json["data"]] == [str(post.id)]
 
@@ -421,7 +421,7 @@ class SearchIntegrationTest(APITestCase):
 
         self.refresh_index()
 
-        response = self.get("/api/2/posts/search/?q=confidentiel")
+        response = self.get("/api/2/posts/search/?q=draft")
         self.assert200(response)
         assert response.json["total"] == 0
 
