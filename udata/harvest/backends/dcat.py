@@ -245,17 +245,17 @@ class DcatBackend(BaseBackend):
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(harvest_item.remote_id, Dataset)
-        item = dataset_from_rdf(
-            page, item, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
+        dataset = dataset_from_rdf(
+            page, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
         # TODO: move in base to benefit other harvesters
-        if item.organization:
-            item.organization.compute_aggregate_metrics = False
-            self.organizations_to_update.add(item.organization)
+        if dataset.organization:
+            dataset.organization.compute_aggregate_metrics = False
+            self.organizations_to_update.add(dataset.organization)
 
-        return item
+        return dataset
 
     def process_dataservice(
         self,
@@ -267,21 +267,21 @@ class DcatBackend(BaseBackend):
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
 
-        item = self.get_item(harvest_item.remote_id, Dataservice)
-        item = dataservice_from_rdf(
+        dataservice = self.get_item(harvest_item.remote_id, Dataservice)
+        dataservice = dataservice_from_rdf(
             page,
-            item,
+            dataservice,
             node,
             [itm.dataset for itm in self.job.items],
             remote_url_prefix=remote_url_prefix,
             dryrun=self.dryrun,
         )
 
-        if item.organization:
-            item.organization.compute_aggregate_metrics = False
-            self.organizations_to_update.add(item.organization)
+        if dataservice.organization:
+            dataservice.organization.compute_aggregate_metrics = False
+            self.organizations_to_update.add(dataservice.organization)
 
-        return item
+        return dataservice
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
