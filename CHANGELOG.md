@@ -1,5 +1,15 @@
 # Changelog
 
+## 17.0.7 (2026-07-27)
+
+- chore: add default access type to dataset & dataservices ([#3879](https://github.com/opendatateam/udata/pull/3879))
+- feat(catalog): add resource harvest.last_update ([#3880](https://github.com/opendatateam/udata/pull/3880))
+- fix: activity derefences ([#3868](https://github.com/opendatateam/udata/pull/3868))
+- fix: lazily translate DCAT harvester labels so they are not frozen at import time ([#3881](https://github.com/opendatateam/udata/pull/3881))
+- fix: never expose unpublished posts through the search and detail endpoints ([#3876](https://github.com/opendatateam/udata/pull/3876))
+- fix: notifications dereferences ([#3867](https://github.com/opendatateam/udata/pull/3867))
+
+
 ## 17.0.6 (2026-07-24)
 
 - chore(docker): disable elasticsearch disk threshold ([#3861](https://github.com/opendatateam/udata/pull/3861))
