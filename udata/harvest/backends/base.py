@@ -3,7 +3,7 @@ import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
-from typing import Concatenate, ParamSpec, TypeVar, Union
+from typing import Concatenate, ParamSpec, TypeVar
 from uuid import UUID
 
 import requests
@@ -83,9 +83,12 @@ class HarvestFeature(object):
         }
 
 
-Harvestable = TypeVar("Harvestable", bound=Union[Dataset, Dataservice])
+Harvestable = Dataset | Dataservice
+H = TypeVar("H", bound=Harvestable)
+
+# FIXME: should instead be a superclass
 HarvestMetadata = TypeVar(
-    "HarvestMetadata", bound=Union[HarvestDatasetMetadata, HarvestDataserviceMetadata]
+    "HarvestMetadata", bound=HarvestDatasetMetadata | HarvestDataserviceMetadata
 )
 
 ItemProcessorParams = ParamSpec("ItemProcessorParams")
@@ -415,7 +418,7 @@ class BaseBackend(ABC):
                 )
             )
 
-    def get_item(self, remote_id: str, item_class: type[Harvestable]) -> Harvestable:
+    def get_item(self, remote_id: str, item_class: type[H]) -> H:
         """Get or create a `item_class` given its remote ID (and its source)
         We first try to match `source_id` to be source domain independent
         """
