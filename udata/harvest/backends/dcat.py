@@ -74,6 +74,7 @@ class DcatBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.graphs = list[tuple[Graph, int]]()
         self.organizations_to_update = set()
 
     @override
@@ -81,17 +82,15 @@ class DcatBackend(BaseBackend):
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
-        pages = []
-
-        for page_number, page in self.walk_graph(self.source.url, fmt):
-            self.process_one_datasets_page(page_number, page)
-            pages.append((page_number, page))
+        for graph, page_number in self.walk_graph(self.source.url, fmt):
+            self.process_one_datasets_page(graph, page_number)
+            self.graphs.append((graph, page_number))
 
         # We do a second pass to have all datasets in memory and attach datasets
         # to dataservices. It could be better to be one pass of graph walking and
         # then one pass of attaching datasets to dataservices.
-        for page_number, page in pages:
-            self.process_one_dataservices_page(page_number, page)
+        for graph, page_number in self.graphs:
+            self.process_one_dataservices_page(graph, page_number)
 
         for org in self.organizations_to_update:
             org.compute_aggregate_metrics = True
@@ -106,33 +105,7 @@ class DcatBackend(BaseBackend):
             )
             self.job.errors.append(error)
 
-        # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
-        max_harvest_graph_size_in_mongo = current_app.config.get(
-            "HARVEST_MAX_CATALOG_SIZE_IN_MONGO"
-        )
-        if max_harvest_graph_size_in_mongo is None:
-            max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
-
-        bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")
-
-        serialized_graphs = [p.serialize(format=fmt, indent=None) for _, p in pages]
-
-        if (
-            bucket is not None
-            and sum([len(g.encode("utf-8")) for g in serialized_graphs])
-            >= max_harvest_graph_size_in_mongo
-        ):
-            prefix = current_app.config.get("HARVEST_GRAPHS_S3_FILENAME_PREFIX") or ""
-
-            # TODO: we could store each page in independant files to allow downloading only the require page in
-            # subsequent jobs. (less data to download in each job)
-            filename = f"{prefix}harvest_{self.job.id}_{date.today()}.json"
-
-            store_as_json(bucket, filename, serialized_graphs)
-
-            self.job.data["filename"] = filename
-        else:
-            self.job.data["graphs"] = serialized_graphs
+        self.store_graphs(fmt)
 
     def get_format(self) -> str:
         fmt = guess_format(self.source.url)
@@ -151,63 +124,63 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
         """
         Yield all RDF pages as `Graph` from the source
         """
         page_number = 0
         while url:
-            subgraph = Graph(namespace_manager=namespace_manager)
+            graph = Graph(namespace_manager=namespace_manager)
             response = self.get(url)
             response.raise_for_status()
             data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
                 data = data.replace(old_uri, new_uri)
-            subgraph.parse(data=data, format=fmt)
+            graph.parse(data=data, format=fmt)
 
             url = None
             for cls, prop in KNOWN_PAGINATION:
-                if (None, RDF.type, cls) in subgraph:
-                    pagination = subgraph.value(predicate=RDF.type, object=cls)
-                    pagination = subgraph.resource(pagination)
+                if (None, RDF.type, cls) in graph:
+                    pagination = graph.value(predicate=RDF.type, object=cls)
+                    pagination = graph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
 
-            yield page_number, subgraph
+            yield graph, page_number
             if self.has_reached_max_items():
                 return
 
             page_number += 1
 
-    def process_one_datasets_page(self, page_number: int, page: Graph):
-        for node in page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
-            if self.is_dataset_external_to_this_page(page, node):
+    def process_one_datasets_page(self, graph: Graph, page_number: int):
+        for node in graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
+            if self.is_dataset_external_to_this_graph(node, graph):
                 continue
 
-            remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
+            remote_id = str(v) if (v := graph.value(node, DCT.identifier)) else None
             self.process_item(
-                remote_id, self.process_dataset, node=node, page=page, page_number=page_number
+                remote_id, self.process_dataset, node=node, graph=graph, page_number=page_number
             )
 
             if self.has_reached_max_items():
                 return
 
-    def process_one_dataservices_page(self, page_number: int, page: Graph):
-        access_services = {o for _, _, o in page.triples((None, DCAT.accessService, None))}
+    def process_one_dataservices_page(self, graph: Graph, page_number: int):
+        access_services = {o for _, _, o in graph.triples((None, DCAT.accessService, None))}
 
-        for node in page.subjects(RDF.type, DCAT.DataService):
+        for node in graph.subjects(RDF.type, DCAT.DataService):
             if node in access_services:
                 continue
 
-            remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
+            remote_id = str(v) if (v := graph.value(node, DCT.identifier)) else None
             self.process_item(
-                remote_id, self.process_dataservice, node=node, page=page, page_number=page_number
+                remote_id, self.process_dataservice, node=node, graph=graph, page_number=page_number
             )
 
             if self.has_reached_max_items():
                 return
 
-    def is_dataset_external_to_this_page(self, page: Graph, node) -> bool:
+    def is_dataset_external_to_this_graph(self, node: Node, graph: Graph) -> bool:
         # In dataservice nodes we have `servesDataset` or `hasPart` that can contains nodes
         # with type=dataset. We don't want to process them because these nodes are empty (they
         # only contains a link to the dataset definition).
@@ -225,12 +198,12 @@ class DcatBackend(BaseBackend):
 
         # This is not dangerous because we check for missing title in `dataset_from_rdf` later so we would have skipped
         # this dataset anyway.
-        resource = page.resource(node)
+        resource = graph.resource(node)
         title = rdf_value(resource, DCT.title)
         if title:
             return False
 
-        predicates = [link_type for (_other_node, link_type) in page.subject_predicates(node)]
+        predicates = [link_type for (_, link_type) in graph.subject_predicates(node)]
         return len(predicates) == 1 and (
             predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
         )
@@ -239,7 +212,7 @@ class DcatBackend(BaseBackend):
         self,
         harvest_item: HarvestItem,
         node: Node,
-        page: Graph,
+        graph: Graph,
         page_number: int,
     ) -> Dataset:
         harvest_item.kwargs["page_number"] = page_number
@@ -247,7 +220,7 @@ class DcatBackend(BaseBackend):
 
         dataset = self.get_item(harvest_item.remote_id, Dataset)
         dataset = dataset_from_rdf(
-            page, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
+            graph, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
         # TODO: move in base to benefit other harvesters
@@ -261,7 +234,7 @@ class DcatBackend(BaseBackend):
         self,
         harvest_item: HarvestItem,
         node: Node,
-        page: Graph,
+        graph: Graph,
         page_number: int,
     ) -> Dataservice:
         harvest_item.kwargs["page_number"] = page_number
@@ -269,7 +242,7 @@ class DcatBackend(BaseBackend):
 
         dataservice = self.get_item(harvest_item.remote_id, Dataservice)
         dataservice = dataservice_from_rdf(
-            page,
+            graph,
             dataservice,
             node,
             [itm.dataset for itm in self.job.items],
@@ -282,6 +255,36 @@ class DcatBackend(BaseBackend):
             self.organizations_to_update.add(dataservice.organization)
 
         return dataservice
+
+    def store_graphs(self, fmt: str):
+        # The official MongoDB document size in 16MB. The default value here is 15MB to account
+        # for other fields in the document (and for difference between * 1024 vs * 1000).
+        max_harvest_graph_size_in_mongo = current_app.config.get(
+            "HARVEST_MAX_CATALOG_SIZE_IN_MONGO"
+        )
+        if max_harvest_graph_size_in_mongo is None:
+            max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
+
+        bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")
+
+        serialized_graphs = [g.serialize(format=fmt, indent=None) for g, _ in self.graphs]
+
+        if (
+            bucket is not None
+            and sum([len(g.encode("utf-8")) for g in serialized_graphs])
+            >= max_harvest_graph_size_in_mongo
+        ):
+            prefix = current_app.config.get("HARVEST_GRAPHS_S3_FILENAME_PREFIX") or ""
+
+            # TODO: we could store each page in independant files to allow downloading only the require page in
+            # subsequent jobs. (less data to download in each job)
+            filename = f"{prefix}harvest_{self.job.id}_{date.today()}.json"
+
+            store_as_json(bucket, filename, serialized_graphs)
+
+            self.job.data["filename"] = filename
+        else:
+            self.job.data["graphs"] = serialized_graphs
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
@@ -409,7 +412,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         return "xml"
 
     @override
-    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
         """
         Yield all RDF pages as `Graph` from the source.
         """
@@ -441,10 +444,10 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 if result.node_kind_str != "element":
                     # Saxonche returns all children, including comments and other non-element nodes
                     continue
-                subgraph = Graph(namespace_manager=namespace_manager)
+                graph = Graph(namespace_manager=namespace_manager)
                 try:
                     doc = self.as_dcat(result).to_string("utf-8")
-                    subgraph.parse(data=doc, format=fmt)
+                    graph.parse(data=doc, format=fmt)
                 except Exception as e:
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
@@ -463,12 +466,12 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     )
                     continue
 
-                if not subgraph.subjects(
+                if not graph.subjects(
                     RDF.type, [DCAT.Dataset, DCAT.DatasetSeries, DCAT.DataService]
                 ):
                     raise ValueError("Failed to fetch CSW content")
 
-                yield page_number, subgraph
+                yield graph, page_number
 
                 if self.has_reached_max_items():
                     return

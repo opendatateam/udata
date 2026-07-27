@@ -66,14 +66,15 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     graphs = backend.walk_graph(url, format)
 
     # serialize/unserialize graph like in the job mechanism
-    graph = Graph(namespace_manager=namespace_manager)
-    for page_number, subgraph in graphs:
-        serialized = subgraph.serialize(format=format, indent=None)
-        _subgraph = Graph(namespace_manager=namespace_manager)
-        graph += _subgraph.parse(data=serialized, format=format)
+    full_graph = Graph(namespace_manager=namespace_manager)
+    for graph, page_number in graphs:
+        serialized = graph.serialize(format=format, indent=None)
+        full_graph += Graph(namespace_manager=namespace_manager).parse(
+            data=serialized, format=format
+        )
 
-        for node in subgraph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
-            identifier = subgraph.value(node, DCT.identifier)
+        for node in graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
+            identifier = graph.value(node, DCT.identifier)
             kwargs = {"nid": str(node), "page": page_number}
             kwargs["type"] = "uriref" if isinstance(node, URIRef) else "blank"
             item = HarvestItem(remote_id=str(identifier), kwargs=kwargs)
@@ -83,9 +84,9 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
         if not rid or rid in item.remote_id:
             echo(magenta("Processing item {}".format(item.remote_id)))
             echo("Item kwargs: {}".format(yellow(item.kwargs)))
-            node = backend.get_node_from_item(graph, item)
+            node = backend.get_node_from_item(full_graph, item)
             dataset = MockDatasetFactory()
-            dataset = dataset_from_rdf(graph, dataset, node=node, dryrun=True)
+            dataset = dataset_from_rdf(full_graph, dataset, node=node, dryrun=True)
             echo("")
             echo(green("Dataset found!"))
             echo("Title: {}".format(yellow(dataset)))
