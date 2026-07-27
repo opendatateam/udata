@@ -251,7 +251,7 @@ class BaseBackend(ABC):
 
     def process_item(
         self,
-        remote_id: str,
+        remote_id: str | None,
         item_processor: Callable[Concatenate[HarvestItem, ItemProcessorParams], Harvestable],
         *args: ItemProcessorParams.args,
         **kwargs: ItemProcessorParams.kwargs,

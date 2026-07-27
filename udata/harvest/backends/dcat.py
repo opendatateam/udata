@@ -184,7 +184,7 @@ class DcatBackend(BaseBackend):
             if self.is_dataset_external_to_this_page(page, node):
                 continue
 
-            remote_id = page.value(node, DCT.identifier)
+            remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
             self.process_item(
                 remote_id, self.process_dataset, page_number=page_number, page=page, node=node
             )
@@ -199,7 +199,7 @@ class DcatBackend(BaseBackend):
             if node in access_services:
                 continue
 
-            remote_id = page.value(node, DCT.identifier)
+            remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
             self.process_item(
                 remote_id, self.process_dataservice, page_number=page_number, page=page, node=node
             )
