@@ -101,6 +101,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ("downloads", lambda o: int(o.metrics.get("views", 0))),
         ("harvest.issued_at", lambda o: o.harvest and o.harvest.issued_at),
         ("harvest.modified_at", lambda o: o.harvest and o.harvest.modified_at),
+        ("harvest.last_update", lambda o: o.harvest and o.harvest.last_update),
         ("schema_name", "schema.name"),
         ("schema_version", "schema.version"),
         ("preview_url", lambda o: o.preview_url or None),
