@@ -186,7 +186,7 @@ class DcatBackend(BaseBackend):
 
             remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
             self.process_item(
-                remote_id, self.process_dataset, page_number=page_number, page=page, node=node
+                remote_id, self.process_dataset, node=node, page=page, page_number=page_number
             )
 
             if self.has_reached_max_items():
@@ -201,7 +201,7 @@ class DcatBackend(BaseBackend):
 
             remote_id = str(v) if (v := page.value(node, DCT.identifier)) else None
             self.process_item(
-                remote_id, self.process_dataservice, page_number=page_number, page=page, node=node
+                remote_id, self.process_dataservice, node=node, page=page, page_number=page_number
             )
 
             if self.has_reached_max_items():
@@ -238,9 +238,9 @@ class DcatBackend(BaseBackend):
     def process_dataset(
         self,
         harvest_item: HarvestItem,
-        page_number: int,
-        page: Graph,
         node: Node,
+        page: Graph,
+        page_number: int,
     ) -> Dataset:
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
@@ -260,9 +260,9 @@ class DcatBackend(BaseBackend):
     def process_dataservice(
         self,
         harvest_item: HarvestItem,
-        page_number: int,
-        page: Graph,
         node: Node,
+        page: Graph,
+        page_number: int,
     ) -> Dataservice:
         harvest_item.kwargs["page_number"] = page_number
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
