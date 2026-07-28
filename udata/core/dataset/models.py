@@ -1000,6 +1000,31 @@ class Dataset(
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def _atomic_resources_update(self, match_resource=None, **kwargs):
+        """Apply an atomic update to a dataset whose in-memory resources just changed.
+
+        Refreshes what Dataset.clean() would recompute on a full save: last_update
+        first, because compute_quality() reads next_update, which derives from it.
+        `match_resource` scopes the query to a single resource, so that callers can
+        target it with the positional `$` operator.
+
+        The search reindexing is asked for explicitly: an atomic update emits no
+        post_save, which is what used to reindex the dataset through save(). Only
+        that receiver is called back — re-emitting post_save would also run spam
+        detection and ownership handling, which a resource change does not concern.
+        """
+        query = Dataset.objects(id=self.id)
+        if match_resource is not None:
+            query = query.filter(resources__id=match_resource.id)
+
+        self.last_update = self.compute_last_update()
+        query.update_one(
+            set__last_update=self.last_update,
+            set__quality_cached=self.compute_quality(),
+            **kwargs,
+        )
+        reindex_model_on_save(Dataset, self)
+
     def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
@@ -1013,8 +1038,7 @@ class Dataset(
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources.insert(0, resource)
 
-        self.update(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
             set__last_modified_internal=datetime.now(UTC),
         )
@@ -1029,8 +1053,8 @@ class Dataset(
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
 
-        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
+            match_resource=resource,
             set__resources__S=resource,
             set__last_modified_internal=datetime.now(UTC),
         )
@@ -1048,37 +1072,26 @@ class Dataset(
         document, O(N) in embedded resources, whereas this re-ships only the
         changed extras subdocument.
 
-        last_update and quality_cached are recomputed because they both depend on
-        resource extras: a remote resource's last_modified can come from its
-        `analysis:last-modified-at` extra, and check:available feeds
-        `all_resources_available`. last_update is set first so the recomputed
-        quality_cached (whose next_update_for_update_fulfilled_in_time derives from
-        last_update) stays consistent, exactly as Dataset.clean() would do on save.
+        Unlike update_resource, it neither reloads the dataset nor emits
+        on_resource_updated: the caller of this path is Hydra itself, and a reload
+        is another O(N) read on the very datasets this exists to speed up.
         """
-        # update_one runs no document validation, so the types registered on the
-        # extras field (check:available, check:status, check:date) would accept
+        # An atomic update runs no document validation, so the types registered on
+        # the extras field (check:available, check:status, check:date) would accept
         # anything. Only the extras are validated: validating the whole resource
         # would reject unrelated invalid legacy fields and lock Hydra out of the
         # very resources it has to keep checking.
         Resource.extras.validate(resource.extras)
-        self.last_update = self.compute_last_update()
-        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+        self._atomic_resources_update(
+            match_resource=resource,
             set__resources__S__extras=resource.extras,
-            set__last_update=self.last_update,
-            set__quality_cached=self.compute_quality(),
         )
-        # update_one emits no post_save, which is what used to trigger the search
-        # reindexing through dataset.save(). Only that receiver is called back here:
-        # re-emitting post_save would also run spam detection and ownership handling
-        # on every Hydra check, for a change that concerns neither.
-        reindex_model_on_save(Dataset, self)
 
     def remove_resource(self, resource):
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources = [r for r in self.resources if r.id != resource.id]
 
-        self.update(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
             pull__resources__id=resource.id,
             set__last_modified_internal=datetime.now(UTC),
         )

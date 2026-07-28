@@ -151,6 +151,69 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
         job_reindex.assert_called_once()
 
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_resource_changes_reindex_dataset(self, mocker):
+        # Same reason as above for the three other atomic resource writes.
+        job_reindex = mocker.patch.object(reindex, "delay")
+        dataset = DatasetFactory()
+        resource = ResourceFactory()
+        job_reindex.reset_mock()
+
+        dataset.add_resource(resource)
+        assert job_reindex.call_count == 1
+
+        resource.description = "New description"
+        dataset.update_resource(resource)
+        assert job_reindex.call_count == 2
+
+        dataset.remove_resource(resource)
+        assert job_reindex.call_count == 3
+
+    def test_add_resource_refreshes_last_update(self):
+        # last_update is the most recent resource date, so adding a resource that
+        # is more recent than the dataset itself must move it.
+        dataset = DatasetFactory()
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2026-06-15T12:00:00"}
+        )
+
+        dataset.add_resource(resource)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2026, 6, 15, 12, 0, 0)
+
+    def test_update_resource_refreshes_last_update(self):
+        # A remote resource reads its last_modified from analysis:last-modified-at,
+        # so editing it through update_resource must move the dataset last_update.
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-01-01T00:00:00"}
+        )
+        dataset = DatasetFactory(resources=[resource])
+        assert dataset.last_update == datetime(2024, 1, 1)
+
+        resource.extras["analysis:last-modified-at"] = "2024-06-15T12:00:00"
+        dataset.update_resource(resource)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+    def test_remove_resource_refreshes_last_update(self):
+        # Removing the most recent resource must bring last_update back down to
+        # the remaining one, not leave the deleted resource's date behind.
+        old = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-01-01T00:00:00"}
+        )
+        recent = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-06-15T12:00:00"}
+        )
+        dataset = DatasetFactory(resources=[old, recent])
+        assert dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+        dataset.remove_resource(recent)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2024, 1, 1)
+
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()
         resource = ResourceFactory()
