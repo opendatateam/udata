@@ -5,52 +5,55 @@ import pytest
 
 from udata.ssrf import (
     BlockedAddressError,
+    BlockedCategory,
     SSRFPolicy,
     SSRFProtectedSession,
     blocked_reason,
 )
 
-# (address, reason substring or None if allowed under the DEFAULT policy)
+# (address, category that forbids it, or None if allowed under the DEFAULT policy)
 DEFAULT_CASES = [
     # Loopback, in every representation that routes to 127.0.0.1 / ::1
-    ("127.0.0.1", "loopback"),
-    ("127.0.1.1", "loopback"),
-    ("::1", "loopback"),
-    ("::ffff:7f00:1", "loopback"),  # IPv4-mapped 127.0.0.1
-    ("::ffff:127.0.0.1", "loopback"),
-    ("2002:7f00:1::", "loopback"),  # 6to4-encoded 127.0.0.1
-    ("64:ff9b::7f00:1", "loopback"),  # NAT64 well-known prefix, 127.0.0.1
-    ("64:ff9b::127.0.0.1", "loopback"),
+    ("127.0.0.1", BlockedCategory.LOOPBACK),
+    ("127.0.1.1", BlockedCategory.LOOPBACK),
+    ("::1", BlockedCategory.LOOPBACK),
+    ("::ffff:7f00:1", BlockedCategory.LOOPBACK),  # IPv4-mapped 127.0.0.1
+    ("::ffff:127.0.0.1", BlockedCategory.LOOPBACK),
+    ("2002:7f00:1::", BlockedCategory.LOOPBACK),  # 6to4-encoded 127.0.0.1
+    ("64:ff9b::7f00:1", BlockedCategory.LOOPBACK),  # NAT64 well-known prefix, 127.0.0.1
+    ("64:ff9b::127.0.0.1", BlockedCategory.LOOPBACK),
     # Link-local, incl. the cloud metadata endpoint
-    ("169.254.169.254", "link-local"),
-    ("::ffff:a9fe:a9fe", "link-local"),  # mapped 169.254.169.254
-    ("2002:a9fe:a9fe::", "link-local"),  # 6to4-encoded 169.254.169.254
-    ("64:ff9b::a9fe:a9fe", "link-local"),  # NAT64-encoded 169.254.169.254
-    ("fe80::1", "link-local"),
+    ("169.254.169.254", BlockedCategory.LINK_LOCAL),
+    ("::ffff:a9fe:a9fe", BlockedCategory.LINK_LOCAL),  # mapped 169.254.169.254
+    ("2002:a9fe:a9fe::", BlockedCategory.LINK_LOCAL),  # 6to4-encoded 169.254.169.254
+    ("64:ff9b::a9fe:a9fe", BlockedCategory.LINK_LOCAL),  # NAT64-encoded 169.254.169.254
+    ("fe80::1", BlockedCategory.LINK_LOCAL),
     # Private (RFC1918 / ULA)
-    ("10.0.0.1", "private"),
-    ("192.168.1.1", "private"),
-    ("172.16.0.1", "private"),
-    ("::ffff:0a00:0001", "private"),  # mapped 10.0.0.1
-    ("64:ff9b::a00:1", "private"),  # NAT64-encoded 10.0.0.1
-    ("fc00::1", "private"),
+    ("10.0.0.1", BlockedCategory.PRIVATE),
+    ("192.168.1.1", BlockedCategory.PRIVATE),
+    ("172.16.0.1", BlockedCategory.PRIVATE),
+    ("::ffff:0a00:0001", BlockedCategory.PRIVATE),  # mapped 10.0.0.1
+    ("64:ff9b::a00:1", BlockedCategory.PRIVATE),  # NAT64-encoded 10.0.0.1
+    ("fc00::1", BlockedCategory.PRIVATE),
     # Site-local (RFC 3879): deprecated but still routed on some networks, and
     # the stdlib reports it neither private nor reserved.
-    ("fec0::1", "private"),
-    ("feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "private"),
+    ("fec0::1", BlockedCategory.PRIVATE),
+    ("feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", BlockedCategory.PRIVATE),
     # CGNAT (RFC 6598): ``ipaddress`` reports it neither private nor reserved,
     # only not globally routable.
-    ("100.64.0.1", "private"),
-    ("100.127.255.254", "private"),
-    ("::ffff:6440:1", "private"),  # mapped 100.64.0.1
-    # Reserved / IPv4-compatible IPv6
-    ("::7f00:1", "reserved"),
-    ("::127.0.0.1", "reserved"),
+    ("100.64.0.1", BlockedCategory.PRIVATE),
+    ("100.127.255.254", BlockedCategory.PRIVATE),
+    ("::ffff:6440:1", BlockedCategory.PRIVATE),  # mapped 100.64.0.1
+    # Reserved: IETF future use (240.0.0.0/4) and IPv4-compatible IPv6
+    ("240.0.0.1", BlockedCategory.RESERVED),
+    ("255.255.255.255", BlockedCategory.RESERVED),
+    ("::7f00:1", BlockedCategory.RESERVED),
+    ("::127.0.0.1", BlockedCategory.RESERVED),
     # Multicast / unspecified are always blocked
-    ("224.0.0.1", "multicast"),
-    ("ff00::1", "multicast"),
-    ("0.0.0.0", "unspecified"),
-    ("::", "unspecified"),
+    ("224.0.0.1", BlockedCategory.MULTICAST),
+    ("ff00::1", BlockedCategory.MULTICAST),
+    ("0.0.0.0", BlockedCategory.UNSPECIFIED),
+    ("::", BlockedCategory.UNSPECIFIED),
     # Public addresses are allowed
     ("142.42.1.1", None),
     ("8.8.8.8", None),
@@ -62,15 +65,9 @@ DEFAULT_CASES = [
 ]
 
 
-@pytest.mark.parametrize("address,reason", DEFAULT_CASES)
-def test_blocked_reason_default_policy(address, reason):
-    result = blocked_reason(address, SSRFPolicy())
-    if reason is None:
-        assert result is None, f"{address} should be allowed, got {result!r}"
-    else:
-        assert result is not None and reason in result, (
-            f"{address} should be blocked as {reason}, got {result!r}"
-        )
+@pytest.mark.parametrize("address,expected", DEFAULT_CASES)
+def test_blocked_reason_default_policy(address, expected):
+    assert blocked_reason(address, SSRFPolicy()) is expected
 
 
 def test_allow_loopback_permits_loopback_only():
@@ -96,6 +93,7 @@ def test_allow_private_does_not_permit_loopback():
 
 def test_allow_reserved_permits_reserved_only():
     policy = SSRFPolicy(allow_reserved=True)
+    assert blocked_reason("240.0.0.1", policy) is None  # IETF future use
     # IPv4-compatible IPv6 is deprecated and no longer routed to the embedded
     # IPv4 address, so it is classified reserved rather than loopback: opening
     # up reserved does not open up 127.0.0.1.
@@ -103,6 +101,14 @@ def test_allow_reserved_permits_reserved_only():
     assert blocked_reason("::127.0.0.1", policy) is None
     assert blocked_reason("127.0.0.1", policy) is not None
     assert blocked_reason("10.0.0.1", policy) is not None
+
+
+def test_allow_private_does_not_permit_reserved():
+    # 240.0.0.0/4 reports both ``is_private`` and ``is_reserved``: the two flags
+    # must stay independently controllable despite the overlap.
+    policy = SSRFPolicy(allow_private=True)
+    assert blocked_reason("10.0.0.1", policy) is None
+    assert blocked_reason("240.0.0.1", policy) is BlockedCategory.RESERVED
 
 
 def test_session_blocks_loopback_before_connecting():
@@ -116,6 +122,15 @@ def test_session_blocks_ipv4_mapped_loopback():
     session = SSRFProtectedSession()
     with pytest.raises(BlockedAddressError, match="loopback"):
         session.get("http://[::ffff:7f00:1]:9/", timeout=2)
+
+
+def test_session_blocks_an_https_target():
+    # The https pool hands out a different connection class than the http one
+    # (GuardedHTTPSConnection): without this, only the plain-HTTP wiring is ever
+    # built, while every real harvest source is https.
+    session = SSRFProtectedSession()
+    with pytest.raises(BlockedAddressError, match="loopback"):
+        session.get("https://127.0.0.1:9/", timeout=2)
 
 
 def test_session_blocks_hostname_resolving_to_loopback():
@@ -152,6 +167,11 @@ def test_session_refuses_explicit_proxy():
 
 class _Handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        if self.path == "/redirect-to-metadata":
+            self.send_response(302)
+            self.send_header("Location", "http://169.254.169.254/latest/meta-data/")
+            self.end_headers()
+            return
         body = b"hello from allowed host"
         self.send_response(200)
         self.send_header("Content-Type", "text/plain")
@@ -180,3 +200,13 @@ def test_session_allows_permitted_target_end_to_end(local_server):
     response = session.get(f"http://{host}:{port}/", timeout=5)
     assert response.status_code == 200
     assert response.text == "hello from allowed host"
+
+
+def test_session_blocks_a_redirect_to_a_forbidden_target(local_server):
+    # A validated URL can 302 to an internal target. Every hop opens a new
+    # guarded connection, so the block lands on the redirect target — here the
+    # cloud metadata endpoint — rather than on the allowed first hop.
+    host, port = local_server
+    session = SSRFProtectedSession(SSRFPolicy(allow_loopback=True))
+    with pytest.raises(BlockedAddressError, match="link-local"):
+        session.get(f"http://{host}:{port}/redirect-to-metadata", timeout=5)

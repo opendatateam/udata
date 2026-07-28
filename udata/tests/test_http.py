@@ -28,11 +28,6 @@ class SSRFSessionFactoryTest(PytestOnlyTestCase):
         with pytest.raises(BlockedAddressError, match="loopback"):
             ssrf_session().get("http://127.0.0.1:9/", timeout=2)
 
-    @pytest.mark.options(URLS_ALLOW_LOCAL=False, URLS_ALLOW_PRIVATE=False)
-    def test_session_blocks_ipv4_mapped_loopback(self):
-        with pytest.raises(BlockedAddressError, match="loopback"):
-            ssrf_session().get("http://[::ffff:7f00:1]:9/", timeout=2)
-
     @pytest.mark.options(URLS_ALLOW_LOCAL=True)
     def test_session_allows_loopback_when_settings_permit(self):
         # With URLS_ALLOW_LOCAL, loopback is no longer blocked: the connection is

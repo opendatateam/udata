@@ -36,7 +36,7 @@ import socket
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from urllib.parse import urlsplit
 
 import requests
@@ -44,8 +44,15 @@ from urllib3.connection import HTTPConnection, HTTPSConnection
 from urllib3.connectionpool import HTTPConnectionPool
 from urllib3.exceptions import ConnectTimeoutError, NameResolutionError, NewConnectionError
 from urllib3.poolmanager import PoolManager
-from urllib3.util.connection import _TYPE_SOCKET_OPTIONS
-from urllib3.util.timeout import _DEFAULT_TIMEOUT, _TYPE_TIMEOUT
+from urllib3.util import Timeout
+
+if TYPE_CHECKING:
+    # Private urllib3 aliases, kept out of the runtime imports: a rename in a
+    # 2.x release would otherwise turn into an ImportError at startup, since
+    # udata.uris imports this module. They are only ever annotations, and
+    # ``from __future__ import annotations`` means they are never evaluated.
+    from urllib3.util.connection import _TYPE_SOCKET_OPTIONS
+    from urllib3.util.timeout import _TYPE_TIMEOUT
 
 __all__ = [
     "SSRFPolicy",
@@ -152,6 +159,11 @@ def blocked_reason(address: str, policy: SSRFPolicy) -> BlockedCategory | None:
         return None if policy.allow_loopback else BlockedCategory.LOOPBACK
     if ip.is_link_local:
         return None if policy.allow_link_local else BlockedCategory.LINK_LOCAL
+    # Reserved belongs to the narrow group too: the stdlib lists IPv4's
+    # 240.0.0.0/4 as private *and* reserved, so testing it after the private
+    # branch would make ``allow_reserved`` a no-op for every IPv4 address.
+    if ip.is_reserved:
+        return None if policy.allow_reserved else BlockedCategory.RESERVED
     # ``is_private`` alone would let CGNAT (100.64.0.0/10) through: the stdlib
     # reports it False there while ``is_global`` is False too. For IPv4 that
     # makes ``not is_global`` a catch-all for whatever IANA reserves next. It
@@ -161,8 +173,6 @@ def blocked_reason(address: str, policy: SSRFPolicy) -> BlockedCategory | None:
     # be named explicitly.
     if ip.is_private or not ip.is_global or (ip.version == 6 and ip.is_site_local):
         return None if policy.allow_private else BlockedCategory.PRIVATE
-    if ip.is_reserved:
-        return None if policy.allow_reserved else BlockedCategory.RESERVED
 
     return None
 
@@ -196,9 +206,9 @@ def _guarded_create_connection(
             sock = socket.socket(af, socktype, proto)
             for opt in socket_options or ():
                 sock.setsockopt(*opt)
-            # ``_DEFAULT_TIMEOUT`` means "leave the socket's default"; None means
-            # blocking mode — both mirror urllib3's own create_connection.
-            if timeout is not _DEFAULT_TIMEOUT:
+            # ``Timeout.DEFAULT_TIMEOUT`` means "leave the socket's default";
+            # None means blocking mode — both mirror urllib3's create_connection.
+            if timeout is not Timeout.DEFAULT_TIMEOUT:
                 sock.settimeout(timeout)
             if source_address:
                 sock.bind(source_address)
