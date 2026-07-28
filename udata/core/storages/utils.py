@@ -27,12 +27,9 @@ def sha1(file):
     return hash(file, hashlib.sha1())
 
 
-def md5(file, seek_zero=False):
+def md5(file):
     """Perform a MD5 digest on a file"""
-    result = hash(file, hashlib.md5())
-    if seek_zero:
-        file.seek(0)
-    return result
+    return hash(file, hashlib.md5())
 
 
 def crc32(file):

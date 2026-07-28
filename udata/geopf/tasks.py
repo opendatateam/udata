@@ -135,7 +135,8 @@ def _run_pipeline(dataset, resource, datastore_id, client):
 
     try:
         with _open_resource_file(resource) as f:
-            file_md5 = md5(f, seek_zero=True)
+            file_md5 = md5(f)
+            f.seek(0)
 
             srs = detect_srs(f, resource.format) or DEFAULT_SRS
             log.debug("geopf: using srs=%s dataset=%s resource=%s", srs, dataset_id, resource_id)
