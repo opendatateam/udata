@@ -773,3 +773,19 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.resources[1].extras["keep"] == "value"
         assert self.dataset.resources[0].extras["check:status"] == 200
         assert self.dataset.resources[2].extras["check:status"] == 200
+
+    def test_update_resource_extras_rejects_wrongly_typed_extras(self):
+        # check:available is registered as a BooleanField and check:status as an
+        # IntField on the extras field: a targeted update must enforce them just
+        # like a full save did, otherwise Hydra can persist a string that
+        # check_availability() then reports as available.
+        resource = ResourceFactory(extras={"check:available": True})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
+
+        self.assert400(self.put(url, {"check:available": "yes"}))
+        self.assert400(self.put(url, {"check:status": "not-an-int"}))
+
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras == {"check:available": True}

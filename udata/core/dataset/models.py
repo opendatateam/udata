@@ -58,6 +58,7 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
+from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -1054,12 +1055,23 @@ class Dataset(
         quality_cached (whose next_update_for_update_fulfilled_in_time derives from
         last_update) stays consistent, exactly as Dataset.clean() would do on save.
         """
+        # update_one runs no document validation, so the types registered on the
+        # extras field (check:available, check:status, check:date) would accept
+        # anything. Only the extras are validated: validating the whole resource
+        # would reject unrelated invalid legacy fields and lock Hydra out of the
+        # very resources it has to keep checking.
+        Resource.extras.validate(resource.extras)
         self.last_update = self.compute_last_update()
         Dataset.objects(id=self.id, resources__id=resource.id).update_one(
             set__resources__S__extras=resource.extras,
             set__last_update=self.last_update,
             set__quality_cached=self.compute_quality(),
         )
+        # update_one emits no post_save, which is what used to trigger the search
+        # reindexing through dataset.save(). Only that receiver is called back here:
+        # re-emitting post_save would also run spam detection and ownership handling
+        # on every Hydra check, for a change that concerns neither.
+        reindex_model_on_save(Dataset, self)
 
     def remove_resource(self, resource):
         # only useful for compute_quality(), we will reload to have a clean object

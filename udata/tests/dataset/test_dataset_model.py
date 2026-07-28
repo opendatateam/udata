@@ -39,6 +39,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema
+from udata.search import reindex
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
@@ -134,6 +135,21 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert len(dataset.resources) == 1
         assert dataset.resources[0].id == resource.id
         assert dataset.resources[0].description == "New description"
+
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_update_resource_extras_reindexes_dataset(self, mocker):
+        # The targeted update emits no post_save, so the search reindexing a full
+        # save used to trigger has to be asked for explicitly: without it the
+        # dataset keeps a stale last_update in the search index.
+        job_reindex = mocker.patch.object(reindex, "delay")
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        job_reindex.reset_mock()
+
+        resource.extras["check:available"] = True
+        dataset.update_resource_extras(resource)
+
+        job_reindex.assert_called_once()
 
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()
