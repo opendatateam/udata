@@ -10,7 +10,7 @@ from udata.utils import get_by
 from .auth import oauth, resolve_access_token, store_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
 from .models import GeopfToken
-from .tasks import push_resource_to_geopf, sync_offerings_to_geopf
+from .tasks import pull_offerings_from_geopf, push_resource_to_geopf
 
 ns = api.namespace("geopf", "Géoplateforme related operations")
 
@@ -127,12 +127,12 @@ class GeopfPushAPI(API):
         return {"task_id": task.id}, 202
 
 
-@ns.route("/sync-offerings/<dataset:dataset>/", endpoint="geopf_sync_offerings")
-class GeopfSyncOfferingsAPI(API):
+@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings")
+class GeopfPullOfferingsAPI(API):
     @api.secure
-    @api.doc("geopf_sync_offerings")
+    @api.doc("geopf_pull_offerings")
     def post(self, dataset):
-        """Sync Géoplateforme offerings to resources for this dataset, as the current user."""
+        """Pull Géoplateforme offerings into resources for this dataset, as the current user."""
         dataset.permissions["edit_resources"].test()
 
         user = current_user._get_current_object()
@@ -141,5 +141,5 @@ class GeopfSyncOfferingsAPI(API):
         except GeopfReauthRequired:
             api.abort(409, "Not connected to Géoplateforme")
 
-        task = sync_offerings_to_geopf.delay(str(dataset.id), str(user.id))
+        task = pull_offerings_from_geopf.delay(str(dataset.id), str(user.id))
         return {"task_id": task.id}, 202

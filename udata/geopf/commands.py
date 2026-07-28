@@ -7,7 +7,7 @@ from udata.core.user.models import User
 
 from .auth import resolve_access_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
-from .tasks import push_resource_to_geopf, sync_metadata, sync_offerings_to_geopf
+from .tasks import pull_offerings_from_geopf, push_resource_to_geopf, sync_metadata
 
 
 @cli.group("geopf")
@@ -40,10 +40,10 @@ def _resolve_token_option(user_id, token):
 
 
 user_id_option = click.option(
-    "--user-id", help="Push using this user's stored geopf token (refreshed as needed)"
+    "--user-id", help="Act as this user, using their stored geopf token (refreshed as needed)"
 )
 token_option = click.option(
-    "--token", help="Push using this raw access token, bypassing any stored token"
+    "--token", help="Act with this raw access token, bypassing any stored token"
 )
 datastore_id_option = click.option(
     "--datastore-id", help="Datastore to push into (defaults to GEOPF_DATASTORE_ID)"
@@ -97,18 +97,18 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
     click.echo(f"fiche={fiche_url}")
 
 
-@grp.command("sync-offerings")
+@grp.command("pull-offerings")
 @click.argument("dataset_id")
 @user_id_option
 @token_option
-def sync_offerings(dataset_id, user_id, token):
-    """Sync Géoplateforme offerings to resources for a dataset (runs synchronously)."""
+def pull_offerings(dataset_id, user_id, token):
+    """Pull Géoplateforme offerings into resources for a dataset (runs synchronously)."""
     if bool(user_id) == bool(token):
         raise click.ClickException("Provide exactly one of --user-id or --token")
     if user_id and not User.objects(id=user_id).first():
         raise click.ClickException(f"User {user_id} not found")
 
-    n = sync_offerings_to_geopf(  # type: ignore[call-arg] — Celery injects self for bind=True tasks
+    n = pull_offerings_from_geopf(  # type: ignore[call-arg] — Celery injects self for bind=True tasks
         dataset_id, user_id, token
     )
-    click.echo(f"synced={n} offerings for dataset {dataset_id}")
+    click.echo(f"pulled={n} offerings for dataset {dataset_id}")

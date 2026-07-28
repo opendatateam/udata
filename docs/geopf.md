@@ -113,7 +113,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a resource has been pushed, a user can create a service for it through the cartes.gouv.fr dashboard; the pull flow reads those offerings back and mirrors them as resources in udata.
 
-Triggered explicitly via `POST /api/1/geopf/sync-offerings/<dataset_id>/`, as the current user: `202` + Celery task id, or `409` if not connected. Runs as a Celery task, same pattern as push.
+Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as the current user: `202` + Celery task id, or `409` if not connected. Runs as a Celery task, same pattern as push.
 
 ### Workflow
 
@@ -161,10 +161,10 @@ Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a fu
 ### Pull
 
 ```
-udata geopf sync-offerings <dataset_id> (--user-id <id> | --token <token>)
+udata geopf pull-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the pull logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate pull or verifying the pull logic.
 
 ## Configuration
 

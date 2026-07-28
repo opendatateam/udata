@@ -295,9 +295,9 @@ def sync_metadata(dataset, client):
     return metadata_id
 
 
-@task(name="geopf.sync_offerings", bind=True, ignore_result=False)
-def sync_offerings_to_geopf(self, dataset_id, user_id=None, access_token=None):
-    """Sync Géoplateforme offerings to resources for a dataset, as the acting user.
+@task(name="geopf.pull_offerings", bind=True, ignore_result=False)
+def pull_offerings_from_geopf(self, dataset_id, user_id=None, access_token=None):
+    """Pull Géoplateforme offerings into resources for a dataset, as the acting user.
 
     Pass `user_id` for the normal path (their stored `GeopfToken` is looked
     up and refreshed as needed). `access_token` is an ops/CLI-only escape
@@ -321,9 +321,9 @@ def sync_offerings_to_geopf(self, dataset_id, user_id=None, access_token=None):
     )
 
     try:
-        n = sync_offerings_for_dataset(dataset, access_token)
+        n = pull_offerings_for_dataset(dataset, access_token)
     except Exception as e:
-        log.exception("geopf: offering sync failed for dataset=%s", dataset_id)
+        log.exception("geopf: offering pull failed for dataset=%s", dataset_id)
         _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
         raise
 
@@ -334,8 +334,8 @@ def sync_offerings_to_geopf(self, dataset_id, user_id=None, access_token=None):
     return n
 
 
-def sync_offerings_for_dataset(dataset, token) -> int:
-    """Sync Géoplateforme offerings to udata resources. Returns count of live offerings.
+def pull_offerings_for_dataset(dataset, token) -> int:
+    """Pull Géoplateforme offerings into udata resources. Returns count of live offerings.
 
     `token` is a geopf access token for the acting user. A dataset lives in
     exactly one entrepôt (`geopf:push:datastore-id`, dataset extra, falling

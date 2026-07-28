@@ -7,10 +7,10 @@ from udata.geopf.client import GeopfError, GeopfTimeoutError
 from udata.geopf.tasks import (
     _offering_url,
     _resource_filename,
+    pull_offerings_for_dataset,
+    pull_offerings_from_geopf,
     push_resource_to_geopf,
     sync_metadata,
-    sync_offerings_for_dataset,
-    sync_offerings_to_geopf,
 )
 from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyDBTestCase
@@ -70,12 +70,12 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
 
 
 @TEST_GEOPF_CONF
-class SyncOfferingsTest(PytestOnlyDBTestCase):
+class PullOfferingsTest(PytestOnlyDBTestCase):
     def test_no_stored_data_skips_api_call(self):
         dataset = DatasetFactory()
 
         with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
-            count = sync_offerings_for_dataset(dataset, TEST_TOKEN)
+            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
         assert count == 0
         mock_client_cls.assert_not_called()
@@ -94,7 +94,7 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         ]
 
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
-            count = sync_offerings_for_dataset(dataset, TEST_TOKEN)
+            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
         mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id="ds-1")
         assert count == 1
@@ -115,7 +115,7 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         mock_client.list_offerings.return_value = []
 
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
-            sync_offerings_for_dataset(dataset, TEST_TOKEN)
+            pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
         mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
 
@@ -141,7 +141,7 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         ]
 
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
-            sync_offerings_for_dataset(dataset, TEST_TOKEN)
+            pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
         dataset.reload()
         resource = next(
@@ -163,7 +163,7 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         mock_client.list_offerings.return_value = []
 
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
-            count = sync_offerings_for_dataset(dataset, TEST_TOKEN)
+            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
         assert count == 0
         dataset.reload()
@@ -294,12 +294,12 @@ class PushResourceTaskSkipTest(PytestOnlyDBTestCase):
 
 
 @TEST_GEOPF_CONF
-class SyncOfferingsTaskTest(PytestOnlyDBTestCase):
+class PullOfferingsTaskTest(PytestOnlyDBTestCase):
     def test_sets_pending_then_done_on_success(self):
         dataset = DatasetFactory()
 
-        with patch("udata.geopf.tasks.sync_offerings_for_dataset", return_value=3):
-            sync_offerings_to_geopf.apply(
+        with patch("udata.geopf.tasks.pull_offerings_for_dataset", return_value=3):
+            pull_offerings_from_geopf.apply(
                 args=[str(dataset.id)], kwargs={"access_token": "test-token"}, throw=True
             )
 
@@ -310,9 +310,9 @@ class SyncOfferingsTaskTest(PytestOnlyDBTestCase):
     def test_sets_error_status_on_failure(self):
         dataset = DatasetFactory()
 
-        with patch("udata.geopf.tasks.sync_offerings_for_dataset", side_effect=GeopfError("boom")):
+        with patch("udata.geopf.tasks.pull_offerings_for_dataset", side_effect=GeopfError("boom")):
             with pytest.raises(GeopfError):
-                sync_offerings_to_geopf.apply(
+                pull_offerings_from_geopf.apply(
                     args=[str(dataset.id)],
                     kwargs={"access_token": "test-token"},
                     throw=True,
