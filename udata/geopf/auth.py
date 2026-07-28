@@ -51,15 +51,16 @@ def _refresh(geopf_token: GeopfToken) -> GeopfToken:
     return store_token(geopf_token.user, token)
 
 
-def resolve_access_token(user=None, raw_token: str | None = None) -> str:
+def resolve_access_token(user=None, raw_token: str | None = None, min_validity: int = 0) -> str:
     """Return a usable geopf access token for calling the geopf API.
 
     Pass `raw_token` to bypass storage entirely (ops/debugging, e.g. the CLI's
     `--token` option). Otherwise `user` is required: looks up their stored
-    `GeopfToken`, refreshing it first if expired. Raises `GeopfReauthRequired`
-    when there is no token or refresh fails, so the caller (API endpoint, task,
-    CLI) can surface a "connect to Géoplateforme" prompt instead of a generic
-    error.
+    `GeopfToken`, refreshing it first if expired, or if it expires within
+    `min_validity` seconds (pass the expected duration of the work ahead so
+    the token outlives it). Raises `GeopfReauthRequired` when there is no
+    token or refresh fails, so the caller (API endpoint, task, CLI) can
+    surface a "connect to Géoplateforme" prompt instead of a generic error.
     """
     if raw_token:
         return raw_token
@@ -69,6 +70,6 @@ def resolve_access_token(user=None, raw_token: str | None = None) -> str:
     geopf_token = GeopfToken.objects(user=user).first()
     if geopf_token is None:
         raise GeopfReauthRequired(f"geopf: no stored token for user={user.id}")
-    if geopf_token.is_expired():
+    if geopf_token.is_expired(within_seconds=min_validity):
         geopf_token = _refresh(geopf_token)
     return geopf_token.access_token

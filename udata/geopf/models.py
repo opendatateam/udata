@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from udata.models import db
 from udata.mongo.encrypted_field import EncryptedStringField
@@ -20,8 +20,9 @@ class GeopfToken(db.Document):
 
     meta = {"collection": "geopf_token"}
 
-    def is_expired(self) -> bool:
+    def is_expired(self, within_seconds: int = 0) -> bool:
+        """Whether the token is expired, or will be within `within_seconds`."""
         expires_at = self.expires_at
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=UTC)
-        return expires_at <= datetime.now(UTC)
+        return expires_at <= datetime.now(UTC) + timedelta(seconds=within_seconds)

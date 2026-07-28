@@ -31,7 +31,7 @@ udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not 
 | Disconnect | `DELETE /api/1/geopf/token/` | JSON |
 | List available entrepôts | `GET /api/1/geopf/datastores/` | JSON |
 
-Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired (refresh token has same lifetime as auth token currently).
+Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired. Both access and refresh tokens currently live 12h on sso.geopf.fr; the push task additionally refreshes proactively when the token wouldn't outlive the pipeline's worst-case duration (two poll timeouts), so long polls can't outrun it.
 
 The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown.
 
