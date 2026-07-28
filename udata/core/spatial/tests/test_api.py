@@ -58,7 +58,11 @@ class SpatialApiTest(APITestCase):
     def test_suggest_zones_on_name(self):
         """It should suggest zones based on its name"""
         for i in range(4):
-            GeoZoneFactory(name="name-test-{0}".format(i) if i % 2 else faker.word())
+            GeoZoneFactory(
+                name="name-test-{0}".format(i) if i % 2 else faker.word(),
+                level="fr:commune",
+                code=str(i),
+            )
 
         response = self.get(url_for("api.suggest_zones", q="name-test", size=5))
         self.assert200(response)
@@ -71,37 +75,27 @@ class SpatialApiTest(APITestCase):
             self.assertIn("code", suggestion)
             self.assertIn("uri", suggestion)
             self.assertIn("level", suggestion)
+            self.assertIn("level_name", suggestion)
             self.assertIn("name-test", suggestion["name"])
 
     def test_suggest_zones_on_id(self):
         """It should suggest zones based on its id"""
-        zone = GeoZoneFactory()
+        zone = GeoZoneFactory(level="fr:commune")
         for _ in range(2):
-            GeoZoneFactory()
+            GeoZoneFactory(level="fr:commune")
 
         response = self.get(url_for("api.suggest_zones", q=zone.id))
         self.assert200(response)
 
         self.assertEqual(response.json[0]["id"], zone["id"])
 
-    def test_suggest_zones_sorted(self):
-        """It should suggest zones based on its name"""
-        country_level = GeoLevelFactory(id="country", name="country", admin_level=10)
-        region_level = GeoLevelFactory(id="region", name="region", admin_level=20)
-        country_zone = GeoZoneFactory(name="name-test-country", level=country_level.id)
-        region_zone = GeoZoneFactory(name="name-test-region", level=region_level.id)
-
-        response = self.get(url_for("api.suggest_zones", q="name-test", size=5))
-        self.assert200(response)
-
-        self.assertEqual(len(response.json), 2)
-        self.assertEqual((response.json[0]["id"]), country_zone.id)
-        self.assertEqual((response.json[1]["id"]), region_zone.id)
-
     def test_suggest_zones_on_code(self):
         """It should suggest zones based on its code"""
         for i in range(4):
-            GeoZoneFactory(code="code-test-{0}".format(i) if i % 2 else faker.word())
+            GeoZoneFactory(
+                code="code-test-{0}".format(i) if i % 2 else faker.word(),
+                level="fr:commune",
+            )
 
         response = self.get(url_for("api.suggest_zones", q="code-test", size=5))
         self.assert200(response)
@@ -109,45 +103,79 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(len(response.json), 2)
 
         for suggestion in response.json:
-            self.assertIn("id", suggestion)
-            self.assertIn("name", suggestion)
-            self.assertIn("code", suggestion)
-            self.assertIn("level", suggestion)
-            self.assertIn("uri", suggestion)
             self.assertIn("code-test", suggestion["code"])
 
     def test_suggest_zones_no_match(self):
         """It should not provide zones suggestions if no match"""
         for i in range(3):
-            GeoZoneFactory(name=5 * "{0}".format(i), code=3 * "{0}".format(i))
+            GeoZoneFactory(name=5 * "{0}".format(i), code=3 * "{0}".format(i), level="fr:commune")
 
         response = self.get(url_for("api.suggest_zones", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
-
-    def test_suggest_zones_unicode(self):
-        """It should suggest zones based on its name"""
-        for i in range(4):
-            GeoZoneFactory(name="name-testé-{0}".format(i) if i % 2 else faker.word())
-
-        response = self.get(url_for("api.suggest_zones", q="name-testé", size=5))
-        self.assert200(response)
-
-        self.assertEqual(len(response.json), 2)
-
-        for suggestion in response.json:
-            self.assertIn("id", suggestion)
-            self.assertIn("name", suggestion)
-            self.assertIn("code", suggestion)
-            self.assertIn("level", suggestion)
-            self.assertIn("uri", suggestion)
-            self.assertIn("name-testé", suggestion["name"])
 
     def test_suggest_zones_empty(self):
         """It should not provide zones suggestion if no data is present"""
         response = self.get(url_for("api.suggest_zones", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+    def test_suggest_zones_accent_insensitive(self):
+        """Typing without accents still matches accented names (via the slug)."""
+        GeoZoneFactory(name="Orléans", slug="orleans", level="fr:commune")
+
+        response = self.get(url_for("api.suggest_zones", q="orleans", size=5))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 1)
+        self.assertEqual(response.json[0]["name"], "Orléans")
+
+    def test_suggest_zones_match_quality(self):
+        """Exact/prefix/word matches rank above a buried substring ("Val Parisis")."""
+        commune = GeoZoneFactory(name="Paris", level="fr:commune")
+        word = GeoZoneFactory(name="Le Grand Paris", level="fr:epci")
+        substring = GeoZoneFactory(name="Val Parisis", level="fr:epci")
+
+        response = self.get(url_for("api.suggest_zones", q="Paris", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertEqual(ids, [commune.id, word.id, substring.id])
+
+    def test_suggest_zones_ranked_by_level(self):
+        """Equal-quality matches are ordered by level relevance, not admin_level."""
+        country = GeoZoneFactory(name="Testville", level="country")
+        region = GeoZoneFactory(name="Testville", level="fr:region")
+        commune = GeoZoneFactory(name="Testville", level="fr:commune")
+
+        response = self.get(url_for("api.suggest_zones", q="Testville", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertEqual(ids, [commune.id, region.id, country.id])
+
+    def test_suggest_zones_excludes_detail_levels(self):
+        """Detail levels such as arrondissements are never suggested."""
+        commune = GeoZoneFactory(name="Paris", level="fr:commune")
+        GeoZoneFactory(name="Paris", level="fr:arrondissement")
+
+        response = self.get(url_for("api.suggest_zones", q="Paris", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertEqual(ids, [commune.id])
+
+    def test_suggest_zones_default_on_empty_query(self):
+        """An empty query returns default broad zones, never communes."""
+        region = GeoZoneFactory(name="Bretagne", level="fr:region")
+        GeoZoneFactory(name="Rennes", level="fr:commune")
+
+        response = self.get(url_for("api.suggest_zones", q="", size=5))
+        self.assert200(response)
+
+        ids = [suggestion["id"] for suggestion in response.json]
+        self.assertIn(region.id, ids)
+        self.assertTrue(all(s["level"] in ("fr:region", "fr:departement") for s in response.json))
 
     def test_spatial_levels(self):
         levels = [GeoLevelFactory() for _ in range(3)]

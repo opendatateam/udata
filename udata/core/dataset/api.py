@@ -27,7 +27,6 @@ from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
 from flask_restx.inputs import boolean, positive
 from flask_security import current_user
-from mongoengine.queryset.visitor import Q
 
 from udata.api import API, add_pagination_arguments, api, errors
 from udata.api.parsers import ModelApiParser
@@ -44,6 +43,7 @@ from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_no
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
+from udata.core.suggest import mongo_suggest
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
@@ -877,11 +877,16 @@ class DatasetSuggestAPI(API):
     @api.expect(suggest_parser)
     @api.marshal_with(dataset_suggestion_fields)
     def get(self):
-        """Datasets suggest endpoint using mongoDB contains"""
+        """Datasets autocomplete: accent-insensitive, ranked by match quality then followers."""
         args = suggest_parser.parse_args()
-        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
-        datasets = datasets_query.filter(
-            Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"])
+        datasets = mongo_suggest(
+            Dataset.objects(archived=None, deleted=None, private=False),
+            args["q"],
+            match_fields=["title", "acronym"],
+            slug_field="slug",
+            order_by=SUGGEST_SORTING,
+            size=args["size"],
+            blend_popularity=True,
         )
         return [
             {
@@ -898,7 +903,7 @@ class DatasetSuggestAPI(API):
                 ),
                 "page": dataset.self_web_url(),
             }
-            for dataset in datasets.order_by(SUGGEST_SORTING).limit(args["size"])
+            for dataset in datasets
         ]
 
 

@@ -23,6 +23,7 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.suggest import mongo_suggest
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.models import Dataset
@@ -347,10 +348,16 @@ class ReusesSuggestAPI(API):
     @api.expect(suggest_parser)
     @api.marshal_list_with(reuse_suggestion_fields)
     def get(self):
-        """Reuses suggest endpoint using mongoDB contains"""
+        """Reuses autocomplete: accent-insensitive, ranked by match quality then followers."""
         args = suggest_parser.parse_args()
-        reuses = Reuse.objects(
-            archived=None, deleted=None, private__ne=True, title__icontains=args["q"]
+        reuses = mongo_suggest(
+            Reuse.objects(archived=None, deleted=None, private__ne=True),
+            args["q"],
+            match_fields=["title"],
+            slug_field="slug",
+            order_by=SUGGEST_SORTING,
+            size=args["size"],
+            blend_popularity=True,
         )
         return [
             {
@@ -360,7 +367,7 @@ class ReusesSuggestAPI(API):
                 "image_url": reuse.image,
                 "page": reuse.self_web_url(),
             }
-            for reuse in reuses.order_by(SUGGEST_SORTING).limit(args["size"])
+            for reuse in reuses
         ]
 
 
