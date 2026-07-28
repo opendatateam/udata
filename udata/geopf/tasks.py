@@ -191,7 +191,7 @@ def _run_pipeline(dataset, resource, datastore_id, client):
         )
 
     except GeopfTimeoutError:
-        # Execution is still running on GeoPortail; deleting the upload would 409.
+        # Checks or processing still running on GeoPortail; deleting the upload would 409.
         # Leave both in place; a future retry or manual cleanup can finish the job.
         if upload_id:
             log.warning(

@@ -84,8 +84,8 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
         assert status == "UNSTABLE"
 
     @pytest.mark.options(GEOPF_POLL_TIMEOUT=-1)
-    def test_poll_upload_raises_on_timeout(self, rmock):
-        with pytest.raises(GeopfError):
+    def test_poll_upload_raises_timeout_error(self, rmock):
+        with pytest.raises(GeopfTimeoutError):
             GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).poll_upload("u1")
 
 

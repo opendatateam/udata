@@ -102,7 +102,9 @@ class GeopfClient:
             if not data.get("asked") and not data.get("in_progress"):
                 return "CLOSED"
             time.sleep(POLL_INTERVAL)
-        raise GeopfError(f"Upload {upload_id} checks did not complete within {self.poll_timeout}s")
+        raise GeopfTimeoutError(
+            f"Upload {upload_id} checks did not complete within {self.poll_timeout}s"
+        )
 
     def delete_upload(self, upload_id):
         resp = self.session.delete(self._url(f"uploads/{upload_id}"))
