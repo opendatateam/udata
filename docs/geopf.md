@@ -2,6 +2,11 @@
 
 udata can synchronise GeoPackage (`.gpkg`) resources to the IGN [Géoplateforme](https://geoplateforme.fr/) entrepôt, making them available as vector tiles on [cartes.gouv.fr](https://cartes.gouv.fr), on demand from the frontend (cdata) and on behalf of the user who triggers it.
 
+Two independent flows, each triggered explicitly by a user, each running as its own Celery task:
+
+- **Push**: data.gouv.fr → Géoplateforme. Uploads a `.gpkg` resource and its metadata.
+- **Pull**: Géoplateforme → data.gouv.fr (the "reverse sync"). Reads back the OGC services (offerings) a user configured on cartes.gouv.fr for a pushed dataset, and mirrors them as resources.
+
 ## Data model mapping
 
 | data.gouv.fr | Géoplateforme |
@@ -12,9 +17,11 @@ udata can synchronise GeoPackage (`.gpkg`) resources to the IGN [Géoplateforme]
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
 
+**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. This assumes all of a dataset's resources land in the same datastore; not enforced in code, only true today because cdata has no datastore picker yet (see Limitations).
+
 ## Authentication
 
-udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not as a shared service identity — géoplateforme grants access according to that user's own rights on the platform. This is a per-user OAuth 2.0 `authorization_code` link (udata is a confidential OIDC client of geopf's Keycloak, `sso.geopf.fr`, realm `geoplateforme`), driven by the frontend (cdata):
+udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not as a shared service identity: géoplateforme grants access according to that user's own rights on the platform. This is a per-user OAuth 2.0 `authorization_code` link (udata is a confidential OIDC client of geopf's Keycloak, `sso.geopf.fr`, realm `geoplateforme`), driven by the frontend (cdata). There is no anonymous route into the entrepôt API and no service-account credential; this applies equally to push and pull, neither has an unauthenticated path.
 
 | Step | Call | Kind |
 |---|---|---|
@@ -23,40 +30,44 @@ udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not 
 | OAuth callback | `GET /api/1/geopf/auth` | browser navigation; exchanges the code, persists the token, redirects back to the dataset's cdata page |
 | Disconnect | `DELETE /api/1/geopf/token/` | JSON |
 | List available entrepôts | `GET /api/1/geopf/datastores/` | JSON |
-| Trigger a push | `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` | JSON, 202 + Celery task id, or 409 if not connected |
-| Trigger the reverse sync | `POST /api/1/geopf/sync-offerings/<dataset_id>/` | JSON, 202 + Celery task id, or 409 if not connected |
 
-Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired (the refresh logic exists but geopf does not support refresh flow for now). If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect.
+Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired (refresh token has same lifetime as auth token currently).
 
-The login endpoint takes a `dataset_id`, not a redirect path to avoid open redirect concerns. The callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown.
+The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown.
 
-There is no anonymous route into the entrepôt API and no service-account credential — every call, including the reverse sync, runs as whichever user is currently authenticated and connected.
+If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect. This is the same for both push and pull.
 
-## Push workflow
+## State tracking
 
-Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for `gpkg` resources). Runs as a Celery task.
+Both push and pull follow the same two-level pattern:
 
-1. **Download** — fetch the file from storage (local) or remote URL into a temp file; compute MD5.
-2. **Upload (livraison)** — create an upload, push the file and its MD5 checksum, close the upload.
-3. **Wait for checks** — poll `/uploads/{id}/checks` until `asked` and `in_progress` are empty; fail if any check fails.
-4. **Tag upload** — attach `datasheet_name` tag so the upload is associated with the fiche.
-5. **Processing** — launch the vector integration processing job; poll until `SUCCESS`.
-6. **Delete upload** — clean up the livraison once processing has consumed it.
-7. **Tag stored data** — attach `datasheet_name` tag to the resulting stored data.
-8. **Metadata** — generate ISO 19115 XML from the dataset and push it:
+- **Extras**: essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
+- **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/`, using the task-id extra as the bridge between the two layers.
+
+Each flow's specific extras keys are listed in its own section below.
+
+## Push: data.gouv.fr → Géoplateforme
+
+Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for `gpkg` resources): `202` + Celery task id, or `409` if not connected. Runs as a Celery task.
+
+### Workflow
+
+1. **Download**: fetch the file from storage (local) or remote URL into a temp file; compute MD5.
+2. **Upload (livraison)**: create an upload, push the file and its MD5 checksum, close the upload.
+3. **Wait for checks**: poll `/uploads/{id}/checks` until `asked` and `in_progress` are empty; fail if any check fails.
+4. **Tag upload**: attach `datasheet_name` tag so the upload is associated with the fiche.
+5. **Processing**: launch the vector integration processing job; poll until `SUCCESS`.
+6. **Delete upload**: clean up the livraison once processing has consumed it.
+7. **Tag stored data**: attach `datasheet_name` tag to the resulting stored data.
+8. **Metadata**: generate ISO 19115 XML from the dataset and push it:
    - If `geopf:push:metadata-id` is already in dataset extras: update the existing metadata record.
    - Otherwise: upload (with 409 upsert fallback), tag, and store the ID in extras.
 
 On any failure the task attempts to delete the livraison to avoid orphaned uploads, then re-raises so the error is visible in Celery.
 
-## Push state tracking
+### State tracking
 
-State is tracked at two levels that complement each other:
-
-- **Resource/dataset extras** — essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
-- **Celery results** — the full execution record (return value, exception, traceback, timing) of each task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` / `geopf:pull:task-id` extras as the bridge between the two layers.
-
-### Push resource extras
+#### Push resource extras
 
 Set on the original `.gpkg` resource by the push pipeline.
 
@@ -64,23 +75,19 @@ Set on the original `.gpkg` resource by the push pipeline.
 |---|---|---|
 | `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` when the task starts, updated on completion or failure. |
 | `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Set when the task starts. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
-| `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the reverse sync to discover offerings. |
+| `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
 | `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this resource was pushed into. |
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
 
-### Push dataset extras
+#### Push dataset extras
 
 | Key | Type | Description |
 |---|---|---|
 | `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
 | `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
-| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the reverse sync. Set to `pending` when the task starts, updated on completion or failure. |
-| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the reverse sync. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
-| `geopf:pull:last-synced-at` | ISO 8601 | Timestamp of the last successful reverse sync. |
-| `geopf:pull:error` | string | Error message from the last failed reverse sync. Only present on `error` status. |
 
-## ISO 19115 metadata
+### ISO 19115 metadata
 
 One metadata document is generated per dataset (not per resource) and pushed as `ISOAP` to the entrepôt.
 
@@ -88,7 +95,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 |---|---|
 | `fileIdentifier` | `dataset.id` |
 | `organisationName` (metadata contact + data contact) | `dataset.organization.name` or `dataset.owner.fullname` |
-| `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none — see note below |
+| `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none, see note below |
 | `pointOfContact` in `identificationInfo` | Org name + email (omitted if no org/owner) |
 | `dateStamp` | `dataset.last_modified` |
 | `title` | `dataset.title` |
@@ -100,25 +107,35 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 | `language` | Hardcoded `fre` |
 | `hierarchyLevel` | Hardcoded `dataset` |
 
-> **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI — this is the platform's own French label for dataset-level metadata, not an error.
+> **Note:** cartes.gouv.fr displays `hierarchyLevel=dataset` as "Lot" in its UI. This is the platform's own French label for dataset-level metadata, not an error.
 
+## Pull: Géoplateforme → data.gouv.fr (reverse sync)
 
-## Reverse sync: offerings → resources
+An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a resource has been pushed, a user can create a service for it through the cartes.gouv.fr dashboard; the pull flow reads those offerings back and mirrors them as resources in udata.
 
-An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a resource has been pushed, a user can create a service for it through the cartes.gouv.fr dashboard; the reverse sync reads those offerings back and mirrors them as resources in udata.
-
-Triggered explicitly via `POST /api/1/geopf/sync-offerings/<dataset_id>/`, as the current user — runs as a Celery task, same pattern as the push flow (202 + task id, state tracked on the dataset extras below).
+Triggered explicitly via `POST /api/1/geopf/sync-offerings/<dataset_id>/`, as the current user: `202` + Celery task id, or `409` if not connected. Runs as a Celery task, same pattern as push.
 
 ### Workflow
 
-1. Collect `(geopf:push:datastore-id, geopf:push:stored-data-id)` pairs from the dataset's push resources — same per-resource datastore-selection logic as the push flow, falling back to `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore tracking existed.
+1. Collect `(geopf:push:datastore-id, geopf:push:stored-data-id)` pairs from the dataset's push resources, using the same per-resource datastore-selection logic as push and falling back to `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore tracking existed.
 2. For each pair, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
 3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
 4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
 
-### Offering resource extras
+### State tracking
 
-Set on resources created (or updated) by the reverse sync. These resources are distinct from the original push resource.
+#### Pull dataset extras
+
+| Key | Values / type | Description |
+|---|---|---|
+| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` when the task starts, updated on completion or failure. |
+| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the pull. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `geopf:pull:last-synced-at` | ISO 8601 | Timestamp of the last successful pull. |
+| `geopf:pull:error` | string | Error message from the last failed pull. Only present on `error` status. |
+
+#### Offering resource extras
+
+Set on resources created (or updated) by the pull flow. These resources are distinct from the original push resource.
 
 | Key | Type | Description |
 |---|---|---|
@@ -127,11 +144,13 @@ Set on resources created (or updated) by the reverse sync. These resources are d
 
 ## CLI
 
+### Push
+
 ```
 udata geopf push-resource <dataset_id> <resource_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
 ```
 
-Runs the full upload pipeline synchronously for a single GPKG resource — same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` defaults to `GEOPF_DATASTORE_ID` if omitted. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
+Runs the full upload pipeline synchronously for a single GPKG resource, same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` defaults to `GEOPF_DATASTORE_ID` if omitted. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
 
 ```
 udata geopf push-metadata <dataset_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
@@ -139,11 +158,13 @@ udata geopf push-metadata <dataset_id> (--user-id <id> | --token <token>) [--dat
 
 Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Same `--user-id`/`--token`/`--datastore-id` options as `push-resource`. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.
 
+### Pull
+
 ```
 udata geopf sync-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against each resource's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the reverse-sync logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against each resource's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the pull logic.
 
 ## Configuration
 
@@ -163,13 +184,13 @@ GEOPF_OAUTH_SCOPE = "openid"  # default
 GEOPF_TOKEN_ENCRYPTION_KEY = "<fernet key>"
 ```
 
-The plugin is registered as a udata entry point (`udata.plugins`) and activated by adding `geopf` to the `PLUGINS` list. Note that the API endpoints (`udata/geopf/api.py`) are always registered as a core namespace, regardless of plugin activation — only the OAuth client registration and the config-gated behavior are conditional.
+The plugin is registered as a udata entry point (`udata.plugins`) and activated by adding `geopf` to the `PLUGINS` list. Note that the API endpoints (`udata/geopf/api.py`) are always registered as a core namespace, regardless of plugin activation; only the OAuth client registration and the config-gated behavior are conditional.
 
 ## Limitations
 
 - Only `gpkg` resources are synchronised; other formats are silently skipped.
-- Updates to an existing pushed resource are not yet handled — a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
-- There's no datastore picker in cdata yet — every push falls back to the single `GEOPF_DATASTORE_ID`, even though a user may have access to several entrepôts. `GET /api/1/geopf/datastores/` already lists what's available; wiring a picker in cdata is follow-up work.
+- Updates to an existing pushed resource are not yet handled: a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
+- There's no datastore picker in cdata yet: every push falls back to the single `GEOPF_DATASTORE_ID`, even though a user may have access to several entrepôts. `GET /api/1/geopf/datastores/` already lists what's available; wiring a picker in cdata is follow-up work.
 - SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.
