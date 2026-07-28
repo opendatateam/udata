@@ -148,14 +148,14 @@ def test_session_rejects_disallowed_scheme():
         session.get("http://142.42.1.1/", timeout=2)
 
 
-def test_session_ignores_environment_proxy(monkeypatch):
+def test_session_refuses_an_environment_proxy(monkeypatch):
     # requests serves proxied requests from a plain urllib3 ProxyManager, which
-    # knows nothing about the guarded pools. An ambient proxy variable must not
-    # be able to turn the guard off.
+    # knows nothing about the guarded pools. A proxy picked up from the
+    # environment must fail like an explicit one, not silently turn the guard off.
     monkeypatch.setenv("HTTP_PROXY", "http://198.51.100.1:3128")
     monkeypatch.setenv("HTTPS_PROXY", "http://198.51.100.1:3128")
     session = SSRFProtectedSession()
-    with pytest.raises(BlockedAddressError, match="loopback"):
+    with pytest.raises(BlockedAddressError, match="proxied"):
         session.get("http://127.0.0.1:9/", timeout=2)
 
 

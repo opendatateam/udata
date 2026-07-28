@@ -328,11 +328,6 @@ class SSRFProtectedSession(requests.Session):
 
     def __init__(self, policy: SSRFPolicy | None = None):
         super().__init__()
-        # An ambient HTTP_PROXY/HTTPS_PROXY in the environment would route every
-        # request through an unguarded ProxyManager (see ``proxy_manager_for``).
-        # Ignore the environment so the guard cannot be switched off by a
-        # variable nobody declared.
-        self.trust_env = False
         self.policy = policy or SSRFPolicy()
         adapter = GuardedHTTPAdapter(policy=self.policy)
         self.mount("http://", adapter)
