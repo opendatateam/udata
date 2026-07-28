@@ -190,7 +190,7 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 
 - Only `gpkg` resources are synchronised; other formats are silently skipped.
 - Updates to an existing pushed resource are not yet handled: a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
-- There's no datastore picker in cdata yet: every dataset's first push falls back to the single `GEOPF_DATASTORE_ID`, even though a user may have access to several entrepôts. `GET /api/1/geopf/datastores/` already lists what's available; wiring a picker in cdata is follow-up work.
+- `GEOPF_DATASTORE_ID` is currently a single test default used when a push doesn't pass an explicit `datastore_id`; that fallback should go away once every push reliably supplies one.
 - SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.

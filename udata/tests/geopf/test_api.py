@@ -215,6 +215,31 @@ class GeopfPushApiTest(APITestCase):
         assert response.json == {"task_id": "task-123"}
         mock_delay.assert_called_once_with(str(dataset.id), str(resource.id), str(user.id), None)
 
+    def test_passes_through_requested_datastore_id(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        mock_task = MagicMock(id="task-123")
+        with patch(
+            "udata.geopf.api.push_resource_to_geopf.delay", return_value=mock_task
+        ) as mock_delay:
+            response = self.post(
+                url_for("api.geopf_push", dataset=dataset, rid=resource.id),
+                data={"datastore_id": "ds-chosen"},
+            )
+
+        self.assertStatus(response, 202)
+        mock_delay.assert_called_once_with(
+            str(dataset.id), str(resource.id), str(user.id), "ds-chosen"
+        )
+
 
 @TEST_GEOPF_CONF
 class GeopfSyncOfferingsApiTest(APITestCase):
