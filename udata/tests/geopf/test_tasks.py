@@ -5,6 +5,7 @@ import pytest
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.geopf.client import GeopfError, GeopfTimeoutError
 from udata.geopf.tasks import (
+    _download_to_tempfile,
     _offering_url,
     _resource_filename,
     pull_offerings_for_dataset,
@@ -41,6 +42,20 @@ class ResourceFilenameTest(PytestOnlyTestCase):
     def test_url_no_path_falls_back_to_resource_id(self):
         r = ResourceFactory.build(fs_filename=None, url="https://example.com")
         assert _resource_filename(r).endswith(".gpkg")
+
+
+class DownloadToTempfileTest(PytestOnlyTestCase):
+    def test_downloads_within_size_limit(self, rmock):
+        rmock.get("https://example.com/data.gpkg", content=b"x" * 1024)
+        with _download_to_tempfile("https://example.com/data.gpkg") as f:
+            assert f.read() == b"x" * 1024
+
+    @pytest.mark.options(GEOPF_MAX_REMOTE_FILE_SIZE=1024)
+    def test_raises_when_size_limit_exceeded(self, rmock):
+        rmock.get("https://example.com/data.gpkg", content=b"x" * 2048)
+        with pytest.raises(GeopfError, match="GEOPF_MAX_REMOTE_FILE_SIZE"):
+            with _download_to_tempfile("https://example.com/data.gpkg"):
+                pass
 
 
 class SyncMetadataTest(PytestOnlyDBTestCase):

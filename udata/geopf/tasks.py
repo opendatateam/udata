@@ -250,18 +250,32 @@ def _open_resource_file(resource):
 
 
 class _download_to_tempfile:
-    """Download a remote URL to a temp file, yield it, clean up on exit."""
+    """Download a remote URL to a temp file, yield it, clean up on exit.
+
+    FIXME: `self.url` is user-controlled (remote resource URL), so this fetch
+    is an SSRF vector from the worker (internal hosts, link-local metadata
+    endpoints). Switch to the SSRF-hardened http client once it lands
+    (see PRs #3877/#3878).
+    """
 
     def __init__(self, url):
         self.url = url
         self._tmp = None
 
     def __enter__(self):
+        max_size = current_app.config["GEOPF_MAX_REMOTE_FILE_SIZE"]
         self._tmp = tempfile.NamedTemporaryFile(suffix=".gpkg", delete=False)
         try:
             with requests.get(self.url, stream=True, timeout=60) as resp:
                 resp.raise_for_status()
+                size = 0
                 for chunk in resp.iter_content(65536):
+                    size += len(chunk)
+                    if size > max_size:
+                        raise GeopfError(
+                            f"Remote file at {self.url} exceeds "
+                            f"GEOPF_MAX_REMOTE_FILE_SIZE ({max_size} bytes)"
+                        )
                     self._tmp.write(chunk)
             self._tmp.seek(0)
             return self._tmp
