@@ -381,12 +381,14 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        # Validate only the custom: extras (normally done by Dataset.clean()) and
-        # write with a targeted update_one. A full dataset.save() re-serializes and
-        # rewrites the whole document, i.e. O(N) in the number of embedded resources.
-        # Dataset extras do not feed quality_cached, so it does not need recomputing here.
-        dataset.validate_custom_extras()
-        Dataset.objects(id=dataset.id).update_one(set__extras=dataset.extras)
+        # Deliberately a full save here, unlike the resource extras endpoints below,
+        # which go through the targeted Dataset.update_resource_extras(). A save is
+        # O(N) in the number of embedded resources (~3.4s on a 10k-resources dataset),
+        # but this endpoint sees 2 real calls per 50 days in production against 2.7M
+        # for the resource one: the cost is never paid in practice, and save() keeps
+        # the full extras validation and the search reindexing without us restating
+        # them by hand.
+        dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
     @apiv2.secure
@@ -404,10 +406,7 @@ class DatasetExtrasAPI(API):
                 del dataset.extras[key]
             except KeyError:
                 pass
-        # Targeted update_one instead of a full dataset.save() (which rewrites the
-        # whole document, O(N) in the number of embedded resources). Deleting extras
-        # keys cannot make remaining custom: extras invalid, so no revalidation.
-        Dataset.objects(id=dataset.id).update_one(set__extras=dataset.extras)
+        dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras, 204
 
 

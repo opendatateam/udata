@@ -98,11 +98,8 @@ class DatasetModelTest(PytestOnlyDBTestCase):
             dataset.add_resource(resource)
 
     def test_clean_validates_custom_extras(self):
-        # custom: extras validation lives in validate_custom_extras(), called by
-        # clean(). The extras API endpoints now call validate_custom_extras()
-        # directly, bypassing clean()/save(), so this is the only test guarding the
-        # clean() -> validate_custom_extras() wiring for full-save paths (v1 API,
-        # harvesting...): dropping the call from clean() must break a test.
+        # The other custom: extras tests go through the v2 extras endpoint; this one
+        # covers the plain save() path used by the v1 API and harvesting.
         org = OrganizationFactory()
         org.extras = {"custom": [{"title": "color", "description": "banner color", "type": "str"}]}
         org.save()
