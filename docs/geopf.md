@@ -1,10 +1,10 @@
 # Géoplateforme integration
 
-udata can synchronise GeoPackage (`.gpkg`) resources to the IGN [Géoplateforme](https://geoplateforme.fr/) entrepôt, making them available as vector tiles on [cartes.gouv.fr](https://cartes.gouv.fr), on demand from the frontend (cdata) and on behalf of the user who triggers it.
+udata can synchronise resources (`gpkg` by default, see `GEOPF_PUSHABLE_FORMATS`) to the IGN [Géoplateforme](https://geoplateforme.fr/) entrepôt, making them available as vector tiles on [cartes.gouv.fr](https://cartes.gouv.fr), on demand from the frontend (cdata) and on behalf of the user who triggers it.
 
 Two independent flows, each triggered explicitly by a user, each running as its own Celery task:
 
-- **Push**: data.gouv.fr → Géoplateforme. Uploads a `.gpkg` resource and its metadata.
+- **Push**: data.gouv.fr → Géoplateforme. Uploads a resource and its metadata.
 - **Pull**: Géoplateforme → data.gouv.fr (the "reverse sync"). Reads back the OGC services (offerings) a user configured on cartes.gouv.fr for a pushed dataset, and mirrors them as resources.
 
 ## Data model mapping
@@ -12,7 +12,7 @@ Two independent flows, each triggered explicitly by a user, each running as its 
 | data.gouv.fr | Géoplateforme |
 |---|---|
 | Dataset | Fiche de données (`datasheet_name = dataset.id`) |
-| Resource (gpkg) | Stored data (`stored_data` name = `resource.id`) |
+| Resource | Stored data (`stored_data` name = `resource.id`) |
 | Dataset metadata | ISO 19115 metadata (one per fiche) |
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
@@ -69,7 +69,7 @@ On any failure the task attempts to delete the livraison to avoid orphaned uploa
 
 #### Push resource extras
 
-Set on the original `.gpkg` resource by the push pipeline.
+Set on the original pushed resource by the push pipeline.
 
 | Key | Values / type | Description |
 |---|---|---|
