@@ -12,7 +12,7 @@ from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
 from udata.core.storages.utils import md5
 from udata.core.user.models import User
-from udata.tasks import job, task
+from udata.tasks import task
 from udata.utils import get_by
 
 from .auth import resolve_access_token
@@ -277,37 +277,53 @@ def sync_metadata(dataset, client):
     return metadata_id
 
 
-@job("geopf.sync-offerings", ignore_result=False)
-def sync_geopf_offerings(self):
-    """Periodic job: sync Géoplateforme offerings to udata resources for all pushed datasets."""
-    token = current_app.config.get("GEOPF_TOKEN")
-    if not token:
-        log.warning("geopf: GEOPF_TOKEN not configured, skipping sync")
-        return
+@task(name="geopf.sync_offerings", bind=True, ignore_result=False)
+def sync_offerings_to_geopf(self, dataset_id, user_id=None, access_token=None):
+    """Sync Géoplateforme offerings to resources for a dataset, as the acting user.
 
-    datasets = Dataset.objects(**{"extras__geopf:push:metadata-id__exists": True})
-    log.info("geopf: syncing offerings for %d datasets", datasets.count())
-    failures = []
-    for dataset in datasets:
+    Pass `user_id` for the normal path (their stored `GeopfToken` is looked
+    up and refreshed as needed). `access_token` is an ops/CLI-only escape
+    hatch that bypasses stored-token resolution entirely with a raw token.
+    """
+    dataset = Dataset.objects.get(id=dataset_id)
+
+    if not access_token:
+        user = User.objects.get(id=user_id)
         try:
-            n = sync_offerings_for_dataset(dataset, token)
-            log.info("geopf: synced %d offerings for dataset=%s", n, dataset.id)
-        except Exception as e:
-            log.exception("geopf: offering sync failed for dataset=%s", dataset.id)
-            failures.append(e)
-    if failures:
-        raise ExceptionGroup(f"geopf: sync failed for {len(failures)} dataset(s)", failures)
+            access_token = resolve_access_token(user=user)
+        except GeopfReauthRequired as e:
+            log.error(
+                "geopf: no usable geopf token for user=%s dataset=%s: %s", user_id, dataset_id, e
+            )
+            _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+            raise
+
+    _set_dataset_extras(
+        dataset, {"geopf:pull:status": "pending", "geopf:pull:task-id": self.request.id}
+    )
+
+    try:
+        n = sync_offerings_for_dataset(dataset, access_token)
+    except Exception as e:
+        log.exception("geopf: offering sync failed for dataset=%s", dataset_id)
+        _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+        raise
+
+    _set_dataset_extras(
+        dataset,
+        {"geopf:pull:status": "done", "geopf:pull:last-synced-at": datetime.now(UTC).isoformat()},
+    )
+    return n
 
 
 def sync_offerings_for_dataset(dataset, token) -> int:
     """Sync Géoplateforme offerings to udata resources. Returns count of live offerings.
 
-    Groups resources by `(geopf:push:datastore-id, geopf:push:stored-data-id)` —
-    same datastore-selection logic as the push flow, falling back to
+    `token` is a geopf access token for the acting user. Groups resources by
+    `(geopf:push:datastore-id, geopf:push:stored-data-id)` — same
+    datastore-selection logic as the push flow, falling back to
     `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore
-    tracking existed — but authenticated with the static `GEOPF_TOKEN`
-    service-account token rather than a per-user one (see "Authentication" /
-    the reverse sync section in docs/geopf.md for why).
+    tracking existed.
     """
     default_datastore_id = current_app.config.get("GEOPF_DATASTORE_ID")
     pairs = {

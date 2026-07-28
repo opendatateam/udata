@@ -684,10 +684,6 @@ class Defaults(object):
     # FIXME: temporary default datastore, until cdata has a datastore picker and every
     # push carries an explicit datastore_id chosen by the user among their own entrepôts.
     GEOPF_DATASTORE_ID = None
-    # Shared service-account bearer token for the periodic reverse sync (geopf.sync-offerings),
-    # which has no per-user identity to authenticate as. Not used by the push flow — that's
-    # per-user OAuth (GEOPF_OAUTH_* below).
-    GEOPF_TOKEN = None
     # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
     # udata acts as a confidential client authenticating on behalf of the data.gouv.fr user.
     GEOPF_OAUTH_CLIENT_ID = None

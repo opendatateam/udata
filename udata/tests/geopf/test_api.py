@@ -214,3 +214,41 @@ class GeopfPushApiTest(APITestCase):
         self.assertStatus(response, 202)
         assert response.json == {"task_id": "task-123"}
         mock_delay.assert_called_once_with(str(dataset.id), str(resource.id), str(user.id), None)
+
+
+@TEST_GEOPF_CONF
+class GeopfSyncOfferingsApiTest(APITestCase):
+    def test_requires_edit_permission(self):
+        owner = UserFactory()
+        self.login()  # a different user, no rights on the dataset
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.post(url_for("api.geopf_sync_offerings", dataset=dataset))
+        self.assert403(response)
+
+    def test_not_connected_returns_409(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        response = self.post(url_for("api.geopf_sync_offerings", dataset=dataset))
+        self.assertStatus(response, 409)
+
+    def test_connected_enqueues_sync_task(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        mock_task = MagicMock(id="task-456")
+        with patch(
+            "udata.geopf.api.sync_offerings_to_geopf.delay", return_value=mock_task
+        ) as mock_delay:
+            response = self.post(url_for("api.geopf_sync_offerings", dataset=dataset))
+
+        self.assertStatus(response, 202)
+        assert response.json == {"task_id": "task-456"}
+        mock_delay.assert_called_once_with(str(dataset.id), str(user.id))

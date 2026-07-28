@@ -7,7 +7,7 @@ from udata.core.user.models import User
 
 from .auth import resolve_access_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
-from .tasks import push_resource_to_geopf, sync_metadata, sync_offerings_for_dataset
+from .tasks import push_resource_to_geopf, sync_metadata, sync_offerings_to_geopf
 
 
 @cli.group("geopf")
@@ -99,20 +99,16 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
 
 @grp.command("sync-offerings")
 @click.argument("dataset_id")
-def sync_offerings(dataset_id):
-    """Sync Géoplateforme offerings to resources for a dataset."""
-    token = current_app.config.get("GEOPF_TOKEN")
-    if not token:
-        raise click.ClickException("GEOPF_TOKEN not configured")
+@user_id_option
+@token_option
+def sync_offerings(dataset_id, user_id, token):
+    """Sync Géoplateforme offerings to resources for a dataset (runs synchronously)."""
+    if bool(user_id) == bool(token):
+        raise click.ClickException("Provide exactly one of --user-id or --token")
+    if user_id and not User.objects(id=user_id).first():
+        raise click.ClickException(f"User {user_id} not found")
 
-    try:
-        dataset = Dataset.objects.get(id=dataset_id)
-    except Dataset.DoesNotExist:
-        raise click.ClickException(f"Dataset {dataset_id} not found")
-
-    try:
-        n = sync_offerings_for_dataset(dataset, token)
-    except GeopfError as e:
-        raise click.ClickException(str(e))
-
+    n = sync_offerings_to_geopf(  # type: ignore[call-arg] — Celery injects self for bind=True tasks
+        dataset_id, user_id, token
+    )
     click.echo(f"synced={n} offerings for dataset {dataset_id}")

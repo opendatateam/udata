@@ -10,6 +10,7 @@ from udata.geopf.tasks import (
     push_resource_to_geopf,
     sync_metadata,
     sync_offerings_for_dataset,
+    sync_offerings_to_geopf,
 )
 from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyDBTestCase
@@ -250,3 +251,33 @@ class PushResourceTaskSkipTest(PytestOnlyDBTestCase):
             push_resource_to_geopf.apply(args=[str(dataset.id), resource_id])
 
         mock_pipeline.assert_not_called()
+
+
+@TEST_GEOPF_CONF
+class SyncOfferingsTaskTest(PytestOnlyDBTestCase):
+    def test_sets_pending_then_done_on_success(self):
+        dataset = DatasetFactory()
+
+        with patch("udata.geopf.tasks.sync_offerings_for_dataset", return_value=3):
+            sync_offerings_to_geopf.apply(
+                args=[str(dataset.id)], kwargs={"access_token": "test-token"}, throw=True
+            )
+
+        dataset.reload()
+        assert dataset.extras.get("geopf:pull:status") == "done"
+        assert "geopf:pull:last-synced-at" in dataset.extras
+
+    def test_sets_error_status_on_failure(self):
+        dataset = DatasetFactory()
+
+        with patch("udata.geopf.tasks.sync_offerings_for_dataset", side_effect=GeopfError("boom")):
+            with pytest.raises(GeopfError):
+                sync_offerings_to_geopf.apply(
+                    args=[str(dataset.id)],
+                    kwargs={"access_token": "test-token"},
+                    throw=True,
+                )
+
+        dataset.reload()
+        assert dataset.extras.get("geopf:pull:status") == "error"
+        assert "boom" in dataset.extras.get("geopf:pull:error", "")

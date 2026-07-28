@@ -35,12 +35,12 @@ class GeopfClient:
     def __init__(self, token: str | None = None, datastore_id: str | None = None):
         """A geopf entrepôt API client.
 
-        `token` is the acting identity's bearer access token — the push
-        flow uses a per-user OAuth token, the reverse sync uses the static
-        `GEOPF_TOKEN` service-account token. `datastore_id` scopes
-        datastore-bound calls (uploads, processing, tagging, metadata,
-        offerings); it isn't needed for instance-level calls like
-        `list_datastores`.
+        `token` is the acting user's bearer access token — every call here
+        (push, reverse sync alike) runs as whichever user is currently
+        authenticated, there is no anonymous or service-account credential.
+        `datastore_id` scopes datastore-bound calls (uploads, processing,
+        tagging, metadata, offerings); it isn't needed for instance-level
+        calls like `list_datastores`.
         """
         self.base = current_app.config["GEOPF_API_BASE"]
         self.datastore = datastore_id

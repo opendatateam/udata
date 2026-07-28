@@ -24,14 +24,15 @@ udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not 
 | Disconnect | `DELETE /api/1/geopf/token/` | JSON |
 | List available entrepôts | `GET /api/1/geopf/datastores/` | JSON |
 | Trigger a push | `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` | JSON, 202 + Celery task id, or 409 if not connected |
+| Trigger the reverse sync | `POST /api/1/geopf/sync-offerings/<dataset_id>/` | JSON, 202 + Celery task id, or 409 if not connected |
 
-Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet — see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired. If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect.
+Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired (the refresh logic exists but geopf does not support refresh flow for now). If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect.
 
-The login endpoint takes a `dataset_id`, not a redirect path — the callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown. This means the client can never influence the actual redirect target, so there is no open-redirect surface to defend.
+The login endpoint takes a `dataset_id`, not a redirect path to avoid open redirect concerns. The callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown.
 
-The periodic reverse sync (below) is a background job with no per-user identity to authenticate as, so it keeps using a separate, static `GEOPF_TOKEN` service-account bearer token — the push flow above is the only part that moved to per-user OAuth.
+There is no anonymous route into the entrepôt API and no service-account credential — every call, including the reverse sync, runs as whichever user is currently authenticated and connected.
 
-## Workflow
+## Push workflow
 
 Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for `gpkg` resources). Runs as a Celery task.
 
@@ -48,12 +49,12 @@ Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resou
 
 On any failure the task attempts to delete the livraison to avoid orphaned uploads, then re-raises so the error is visible in Celery.
 
-## State tracking
+## Push state tracking
 
 State is tracked at two levels that complement each other:
 
-- **Resource/dataset extras** — essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer: a quick `GET /api/1/datasets/{id}/` shows the current status of every push resource without touching Celery.
-- **Celery results** — the full execution record (return value, exception, traceback, timing) stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` value from the resource extras as the bridge between the two layers. Periodic `geopf.sync-offerings` job runs are also visible there via the jobs API (`GET /api/1/workers/jobs/`).
+- **Resource/dataset extras** — essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
+- **Celery results** — the full execution record (return value, exception, traceback, timing) of each task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` using the `geopf:push:task-id` / `geopf:pull:task-id` extras as the bridge between the two layers.
 
 ### Push resource extras
 
@@ -68,12 +69,16 @@ Set on the original `.gpkg` resource by the push pipeline.
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
 
-### Dataset extras
+### Push dataset extras
 
 | Key | Type | Description |
 |---|---|---|
 | `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
 | `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
+| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the reverse sync. Set to `pending` when the task starts, updated on completion or failure. |
+| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the reverse sync. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `geopf:pull:last-synced-at` | ISO 8601 | Timestamp of the last successful reverse sync. |
+| `geopf:pull:error` | string | Error message from the last failed reverse sync. Only present on `error` status. |
 
 ## ISO 19115 metadata
 
@@ -100,7 +105,9 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 ## Reverse sync: offerings → resources
 
-An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a dataset has been pushed, the reverse sync reads those offerings and mirrors them as resources in udata.
+An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a resource has been pushed, a user can create a service for it through the cartes.gouv.fr dashboard; the reverse sync reads those offerings back and mirrors them as resources in udata.
+
+Triggered explicitly via `POST /api/1/geopf/sync-offerings/<dataset_id>/`, as the current user — runs as a Celery task, same pattern as the push flow (202 + task id, state tracked on the dataset extras below).
 
 ### Workflow
 
@@ -108,8 +115,6 @@ An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WM
 2. For each pair, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
 3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
 4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
-
-Authenticated with the static `GEOPF_TOKEN` service-account token (see "Authentication" above) — unlike the push flow, this isn't per-user: a periodic background job has no acting user to authenticate as, and authenticating it as whichever user last pushed a resource turned out not to work reliably (their OAuth refresh token doesn't survive long inactivity; see `udata/geopf/tasks.py:sync_geopf_offerings` history for what was tried and ruled out).
 
 ### Offering resource extras
 
@@ -119,10 +124,6 @@ Set on resources created (or updated) by the reverse sync. These resources are d
 |---|---|---|
 | `geopf:offering:id` | UUID string | Entrepôt offering ID. Primary key used to match existing resources on subsequent syncs. |
 | `geopf:offering:last-synced-at` | ISO 8601 | Timestamp of the last sync that observed this offering. |
-
-### Periodic job
-
-The job `geopf.sync-offerings` runs automatically (schedule configured via Celery Beat). It processes every dataset that has `geopf:push:metadata-id` in its extras (i.e., any dataset with at least one successful push). Per-dataset errors are logged and collected; if any fail, the job raises an `ExceptionGroup` at the end so Celery records the run as failed.
 
 ## CLI
 
@@ -139,10 +140,10 @@ udata geopf push-metadata <dataset_id> (--user-id <id> | --token <token>) [--dat
 Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a full resource upload. Same `--user-id`/`--token`/`--datastore-id` options as `push-resource`. Useful for iterating on metadata content or fixing a metadata record after a failed pipeline run. Prints the metadata ID and fiche URL on success.
 
 ```
-udata geopf sync-offerings <dataset_id>
+udata geopf sync-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, using the static `GEOPF_TOKEN` (no `--user-id`/`--token` options — this path isn't per-user), against each resource's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the reverse-sync logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against each resource's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the reverse-sync logic.
 
 ## Configuration
 
@@ -152,15 +153,11 @@ GEOPF_API_BASE = "https://data.geopf.fr/api"  # default
 # every push carries an explicit datastore_id chosen by the user.
 GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
 
-# Static service-account bearer token, used only by the periodic reverse sync
-# (geopf.sync-offerings) — the push flow uses per-user OAuth instead (below).
-GEOPF_TOKEN = "<your Bearer token>"
-
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"
 GEOPF_OAUTH_OPENID_CONF_URL = "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"
-GEOPF_OAUTH_SCOPE = "default"  # default
+GEOPF_OAUTH_SCOPE = "openid"  # default
 
 # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest
 GEOPF_TOKEN_ENCRYPTION_KEY = "<fernet key>"
