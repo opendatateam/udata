@@ -229,9 +229,7 @@ def _run_pipeline(dataset, resource, datastore_id, client):
 
     sync_metadata(dataset, client)
 
-    fiche_url = (
-        f"https://cartes.gouv.fr/tableau-de-bord/entrepots/{datastore_id}/donnees/{datasheet_name}"
-    )
+    url = fiche_url(datastore_id, datasheet_name)
     _set_extras(
         dataset,
         resource,
@@ -241,10 +239,14 @@ def _run_pipeline(dataset, resource, datastore_id, client):
             "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
         },
     )
-    _set_dataset_extras(dataset, {"geopf:push:fiche-url": fiche_url})
-    log.info(
-        "geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, fiche_url
-    )
+    _set_dataset_extras(dataset, {"geopf:push:fiche-url": url})
+    log.info("geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, url)
+
+
+def fiche_url(datastore_id, datasheet_name):
+    """URL of the datasheet's fiche on the cartes.gouv.fr dashboard."""
+    base = current_app.config["GEOPF_DASHBOARD_BASE"]
+    return f"{base}/tableau-de-bord/entrepots/{datastore_id}/donnees/{datasheet_name}"
 
 
 def _resource_filename(resource):

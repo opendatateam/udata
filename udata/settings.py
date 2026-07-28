@@ -681,6 +681,8 @@ class Defaults(object):
     # Géoplateforme (geopf) integration
     ###########################################################################
     GEOPF_API_BASE = "https://data.geopf.fr/api"
+    # Base URL of the cartes.gouv.fr dashboard, used to build fiche URLs.
+    GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"
     # FIXME: temporary default datastore, until cdata has a datastore picker and every
     # push carries an explicit datastore_id chosen by the user among their own entrepôts.
     GEOPF_DATASTORE_ID = None

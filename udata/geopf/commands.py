@@ -7,7 +7,7 @@ from udata.core.user.models import User
 
 from .auth import resolve_access_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
-from .tasks import pull_offerings_from_geopf, push_resource_to_geopf, sync_metadata
+from .tasks import fiche_url, pull_offerings_from_geopf, push_resource_to_geopf, sync_metadata
 
 
 @cli.group("geopf")
@@ -90,11 +90,8 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
     except GeopfError as e:
         raise click.ClickException(str(e))
 
-    fiche_url = (
-        f"https://cartes.gouv.fr/tableau-de-bord/entrepots/{datastore_id}/donnees/{dataset_id}"
-    )
     click.echo(f"metadata={metadata_id}")
-    click.echo(f"fiche={fiche_url}")
+    click.echo(f"fiche={fiche_url(datastore_id, dataset_id)}")
 
 
 @grp.command("pull-offerings")

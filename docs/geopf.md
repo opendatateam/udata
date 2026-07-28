@@ -170,6 +170,7 @@ Pulls live offerings from Géoplateforme and syncs them as resources for the giv
 
 ```python
 GEOPF_API_BASE = "https://data.geopf.fr/api"  # default
+GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"  # default, used to build fiche URLs
 # FIXME: temporary default datastore, until cdata has a datastore picker and
 # every dataset's first push carries an explicit datastore_id chosen by the user.
 GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
