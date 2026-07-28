@@ -34,20 +34,23 @@ from __future__ import annotations
 import ipaddress
 import socket
 from dataclasses import dataclass, field
+from functools import partial
 from typing import Callable
+from urllib.parse import urlsplit
 
 import requests
 from urllib3.connection import HTTPConnection, HTTPSConnection
-from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
-from urllib3.exceptions import NewConnectionError
+from urllib3.connectionpool import HTTPConnectionPool
+from urllib3.exceptions import ConnectTimeoutError, NameResolutionError, NewConnectionError
 from urllib3.poolmanager import PoolManager
+from urllib3.util.connection import _TYPE_SOCKET_OPTIONS
 from urllib3.util.retry import Retry
-from urllib3.util.timeout import _DEFAULT_TIMEOUT
+from urllib3.util.timeout import _DEFAULT_TIMEOUT, _TYPE_TIMEOUT
 
 __all__ = [
     "SSRFPolicy",
     "BlockedAddressError",
-    "is_ip_blocked",
+    "blocked_reason",
     "GuardedHTTPAdapter",
     "SSRFProtectedSession",
 ]
@@ -108,7 +111,7 @@ def _unwrap_embedded_ipv4(ip: _IPAddress) -> _IPAddress:
     return ip
 
 
-def is_ip_blocked(address: str, policy: SSRFPolicy) -> str | None:
+def blocked_reason(address: str, policy: SSRFPolicy) -> str | None:
     """
     Classify a raw IP string against ``policy``.
 
@@ -130,7 +133,11 @@ def is_ip_blocked(address: str, policy: SSRFPolicy) -> str | None:
         return None if policy.allow_loopback else "loopback address"
     if ip.is_link_local:
         return None if policy.allow_link_local else "link-local address"
-    if ip.is_private:
+    # ``is_private`` alone would let CGNAT (100.64.0.0/10) through: the stdlib
+    # reports it False there while ``is_global`` is False too. Treating anything
+    # not globally routable as private keeps the category exhaustive whatever
+    # IANA adds next.
+    if ip.is_private or not ip.is_global:
         return None if policy.allow_private else "private address"
     if ip.is_reserved:
         return None if policy.allow_reserved else "reserved address"
@@ -141,9 +148,9 @@ def is_ip_blocked(address: str, policy: SSRFPolicy) -> str | None:
 def _guarded_create_connection(
     address: tuple[str, int],
     validate: Callable[[str], None],
-    timeout,
-    source_address,
-    socket_options,
+    timeout: _TYPE_TIMEOUT,
+    source_address: tuple[str, int] | None,
+    socket_options: _TYPE_SOCKET_OPTIONS | None,
 ) -> socket.socket:
     """
     ``urllib3.util.connection.create_connection`` with an IP check.
@@ -188,14 +195,12 @@ def _guarded_create_connection(
 class _GuardedConnectionMixin:
     """Shared ``_new_conn`` that validates the resolved IP before connecting."""
 
-    # Bound per-policy by ``GuardedPoolManager`` via a generated subclass. We use
-    # a class attribute rather than a constructor kwarg because urllib3 threads
-    # connection kwargs through its pool-key namedtuple, which rejects unknown
-    # fields.
-    policy: SSRFPolicy = SSRFPolicy()
+    def __init__(self, *args, policy: SSRFPolicy, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.policy = policy
 
     def _validate_ip(self, ip: str) -> None:
-        reason = is_ip_blocked(ip, self.policy)
+        reason = blocked_reason(ip, self.policy)
         if reason is not None:
             raise BlockedAddressError(f"{self.host} resolves to a blocked {reason} ({ip})")
         if self.policy.allowed_ports is not None and self.port not in self.policy.allowed_ports:
@@ -204,6 +209,8 @@ class _GuardedConnectionMixin:
     def _new_conn(self) -> socket.socket:
         if self.policy.hostname_allowlist and self.policy.hostname_allowlist(self.host):
             return super()._new_conn()
+        # Same exception mapping as urllib3's own ``_new_conn``: requests relies
+        # on it to tell a connect timeout from a refused connection.
         try:
             return _guarded_create_connection(
                 (self._dns_host, self.port),
@@ -212,6 +219,13 @@ class _GuardedConnectionMixin:
                 self.source_address,
                 self.socket_options,
             )
+        except socket.gaierror as e:
+            raise NameResolutionError(self.host, self, e) from e
+        except socket.timeout as e:
+            raise ConnectTimeoutError(
+                self,
+                f"Connection to {self.host} timed out. (connect timeout={self.timeout})",
+            ) from e
         except OSError as e:
             raise NewConnectionError(self, f"Failed to establish a new connection: {e}") from e
 
@@ -228,19 +242,26 @@ class GuardedHTTPSConnection(_GuardedConnectionMixin, HTTPSConnection):
 
 
 class GuardedPoolManager(PoolManager):
+    """A ``PoolManager`` whose pools hand out policy-bound guarded connections."""
+
     def __init__(self, policy: SSRFPolicy, **kwargs):
-        # Generate per-policy connection subclasses carrying the policy as a
-        # class attribute, and pools that use them. This keeps the policy out of
-        # urllib3's connection kwargs (see ``_GuardedConnectionMixin.policy``).
-        http_conn = type("PolicyHTTPConnection", (GuardedHTTPConnection,), {"policy": policy})
-        https_conn = type("PolicyHTTPSConnection", (GuardedHTTPSConnection,), {"policy": policy})
         super().__init__(**kwargs)
-        # Must be set after super().__init__, which resets pool_classes_by_scheme
-        # to urllib3's module-level default.
-        self.pool_classes_by_scheme = {
-            "http": type("PolicyHTTPPool", (HTTPConnectionPool,), {"ConnectionCls": http_conn}),
-            "https": type("PolicyHTTPSPool", (HTTPSConnectionPool,), {"ConnectionCls": https_conn}),
-        }
+        self.policy = policy
+
+    def _new_pool(
+        self,
+        scheme: str,
+        host: str,
+        port: int,
+        request_context: dict | None = None,
+    ) -> HTTPConnectionPool:
+        pool = super()._new_pool(scheme, host, port, request_context)
+        connection_cls = GuardedHTTPSConnection if scheme == "https" else GuardedHTTPConnection
+        # urllib3 threads connection kwargs through its pool-key namedtuple,
+        # which rejects unknown fields — hence binding the policy here rather
+        # than passing it as a connection kwarg.
+        pool.ConnectionCls = partial(connection_cls, policy=self.policy)
+        return pool
 
 
 class GuardedHTTPAdapter(requests.adapters.HTTPAdapter):
@@ -259,6 +280,15 @@ class GuardedHTTPAdapter(requests.adapters.HTTPAdapter):
             **pool_kwargs,
         )
 
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        # requests serves proxied requests from a plain urllib3 ProxyManager,
+        # which knows nothing about the guarded pools: going through a proxy
+        # would silently disable every check in this module. Fail closed — a
+        # proxy able to reach internal hosts is exactly the SSRF target.
+        raise BlockedAddressError(
+            f"refusing to reach {proxy}: the SSRF guard does not cover proxied connections"
+        )
+
 
 class SSRFProtectedSession(requests.Session):
     """
@@ -270,13 +300,18 @@ class SSRFProtectedSession(requests.Session):
 
     def __init__(self, policy: SSRFPolicy | None = None, max_retries: int | Retry = 0):
         super().__init__()
+        # An ambient HTTP_PROXY/HTTPS_PROXY in the environment would route every
+        # request through an unguarded ProxyManager (see ``proxy_manager_for``).
+        # Ignore the environment so the guard cannot be switched off by a
+        # variable nobody declared.
+        self.trust_env = False
         self.policy = policy or SSRFPolicy()
         adapter = GuardedHTTPAdapter(policy=self.policy, max_retries=max_retries)
         self.mount("http://", adapter)
         self.mount("https://", adapter)
 
     def send(self, request, **kwargs):
-        scheme = request.url.split("://", 1)[0].lower()
+        scheme = urlsplit(request.url).scheme
         if scheme not in self.policy.allowed_schemes:
             raise BlockedAddressError(f"scheme {scheme!r} is not allowed")
         return super().send(request, **kwargs)

@@ -1,7 +1,6 @@
 import logging
 import traceback
 from datetime import UTC, date, datetime, timedelta
-from functools import cached_property
 from uuid import UUID
 
 import requests
@@ -119,16 +118,13 @@ class BaseBackend(object):
             self.job = None
         self.dryrun = dryrun
         self.max_items = max_items or current_app.config["HARVEST_MAX_ITEMS"]
+        # Harvest source URLs are user-supplied: fetch them through the
+        # SSRF-guarded session.
+        self.session = ssrf_session()
 
     @property
     def config(self):
         return self.source.config
-
-    @cached_property
-    def session(self):
-        # Harvest source URLs are user-supplied: fetch them through the
-        # SSRF-guarded session, which validates the resolved IP at connect time.
-        return ssrf_session()
 
     def head(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())

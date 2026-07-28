@@ -22,8 +22,10 @@ from udata.ssrf import SSRFPolicy, SSRFProtectedSession
 def ssrf_policy() -> SSRFPolicy:
     """Build an :class:`SSRFPolicy` from the current app's ``URLS_ALLOW_*`` config."""
     config = current_app.config
-    # udata groups link-local and IETF-reserved ranges under "private" (see
-    # udata.uris.validate), so a single URLS_ALLOW_PRIVATE toggle drives them all.
+    # udata.uris.validate groups link-local under "private", so URLS_ALLOW_PRIVATE
+    # drives it here too. It has no notion of IETF-reserved ranges: mapping them
+    # to that same toggle is a decision of this module, so that a deployment
+    # opening up internal targets does not have to enumerate every category.
     allow_private = config["URLS_ALLOW_PRIVATE"]
     return SSRFPolicy(
         allow_loopback=config["URLS_ALLOW_LOCAL"],
