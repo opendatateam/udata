@@ -81,11 +81,8 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_not_called()
 
     def test_adds_resource_for_new_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            extras={"geopf:push:stored-data-id": "sd-1", "geopf:push:datastore-id": "ds-1"},
-        )
-        dataset = DatasetFactory(resources=[gpkg])
+        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
+        dataset = DatasetFactory(resources=[gpkg], extras={"geopf:push:datastore-id": "ds-1"})
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = [
             {
@@ -111,9 +108,8 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         assert offering_resource.format == "wfs"
 
     def test_falls_back_to_configured_datastore_id(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"}
-        )  # no geopf:push:datastore-id — resource pushed before per-resource tracking
+        # no geopf:push:datastore-id — dataset pushed before dataset-level tracking existed
+        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
         dataset = DatasetFactory(resources=[gpkg])
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = []
@@ -124,17 +120,16 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
 
     def test_updates_url_for_changed_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            extras={"geopf:push:stored-data-id": "sd-1", "geopf:push:datastore-id": "ds-1"},
-        )
+        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
         stale_offering = ResourceFactory.build(
             url="http://old.example.com/wfs",
             filetype="remote",
             type="api",
             extras={"geopf:offering:id": "offer-1"},
         )
-        dataset = DatasetFactory(resources=[gpkg, stale_offering])
+        dataset = DatasetFactory(
+            resources=[gpkg, stale_offering], extras={"geopf:push:datastore-id": "ds-1"}
+        )
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = [
             {
@@ -155,16 +150,15 @@ class SyncOfferingsTest(PytestOnlyDBTestCase):
         assert resource.url == "http://new.example.com/wfs"
 
     def test_removes_resource_for_deleted_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            extras={"geopf:push:stored-data-id": "sd-1", "geopf:push:datastore-id": "ds-1"},
-        )
+        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
         gone_offering = ResourceFactory.build(
             filetype="remote",
             type="api",
             extras={"geopf:offering:id": "offer-gone"},
         )
-        dataset = DatasetFactory(resources=[gpkg, gone_offering])
+        dataset = DatasetFactory(
+            resources=[gpkg, gone_offering], extras={"geopf:push:datastore-id": "ds-1"}
+        )
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = []
 
@@ -236,6 +230,39 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
             push_resource_to_geopf.apply(args=[str(dataset.id), resource_id])
 
         mock_pipeline.assert_not_called()
+
+    def test_first_push_persists_datastore_id_on_dataset(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+
+        with patch("udata.geopf.tasks._run_pipeline"):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": "ds-1"},
+            )
+
+        dataset.reload()
+        assert dataset.extras.get("geopf:push:datastore-id") == "ds-1"
+
+    def test_subsequent_push_reuses_dataset_datastore_id(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(
+            resources=[resource], extras={"geopf:push:datastore-id": "ds-established"}
+        )
+        resource_id = str(dataset.resources[0].id)
+
+        with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
+            with patch("udata.geopf.tasks._run_pipeline"):
+                push_resource_to_geopf.apply(
+                    args=[str(dataset.id), resource_id],
+                    # a different datastore_id is explicitly passed, but must be ignored
+                    kwargs={"access_token": "test-token", "datastore_id": "ds-other"},
+                )
+
+        mock_client_cls.assert_called_once_with(token="test-token", datastore_id="ds-established")
+        dataset.reload()
+        assert dataset.extras.get("geopf:push:datastore-id") == "ds-established"
 
 
 @pytest.mark.options(GEOPF_DATASTORE_ID=None)

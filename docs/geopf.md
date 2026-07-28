@@ -17,7 +17,7 @@ Two independent flows, each triggered explicitly by a user, each running as its 
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
 
-**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. This assumes all of a dataset's resources land in the same datastore; not enforced in code, only true today because cdata has no datastore picker yet (see Limitations).
+**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. A dataset also lives in exactly one entrepôt: the datastore is resolved (explicit choice, or `GEOPF_DATASTORE_ID` fallback) on a dataset's first push and stored as `geopf:push:datastore-id` (dataset extra), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
 
 ## Authentication
 
@@ -76,7 +76,6 @@ Set on the original `.gpkg` resource by the push pipeline.
 | `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` when the task starts, updated on completion or failure. |
 | `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Set when the task starts. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
 | `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
-| `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this resource was pushed into. |
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
 
@@ -84,6 +83,7 @@ Set on the original `.gpkg` resource by the push pipeline.
 
 | Key | Type | Description |
 |---|---|---|
+| `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first push, reused as-is by every later push. |
 | `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
 | `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
 
@@ -117,8 +117,8 @@ Triggered explicitly via `POST /api/1/geopf/sync-offerings/<dataset_id>/`, as th
 
 ### Workflow
 
-1. Collect `(geopf:push:datastore-id, geopf:push:stored-data-id)` pairs from the dataset's push resources, using the same per-resource datastore-selection logic as push and falling back to `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore tracking existed.
-2. For each pair, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
+1. Resolve the dataset's datastore (`geopf:push:datastore-id`, falling back to `GEOPF_DATASTORE_ID` for datasets pushed before that tracking existed), and collect `geopf:push:stored-data-id` from each of its push resources.
+2. For each stored data id, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
 3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
 4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
 
@@ -164,14 +164,14 @@ Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a fu
 udata geopf sync-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against each resource's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the pull logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate sync or verifying the pull logic.
 
 ## Configuration
 
 ```python
 GEOPF_API_BASE = "https://data.geopf.fr/api"  # default
 # FIXME: temporary default datastore, until cdata has a datastore picker and
-# every push carries an explicit datastore_id chosen by the user.
+# every dataset's first push carries an explicit datastore_id chosen by the user.
 GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
 
 # OAuth2/OIDC client registration against geopf's Keycloak
@@ -190,7 +190,7 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 
 - Only `gpkg` resources are synchronised; other formats are silently skipped.
 - Updates to an existing pushed resource are not yet handled: a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
-- There's no datastore picker in cdata yet: every push falls back to the single `GEOPF_DATASTORE_ID`, even though a user may have access to several entrepôts. `GET /api/1/geopf/datastores/` already lists what's available; wiring a picker in cdata is follow-up work.
+- There's no datastore picker in cdata yet: every dataset's first push falls back to the single `GEOPF_DATASTORE_ID`, even though a user may have access to several entrepôts. `GET /api/1/geopf/datastores/` already lists what's available; wiring a picker in cdata is follow-up work.
 - SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.

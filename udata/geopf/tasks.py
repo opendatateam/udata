@@ -45,9 +45,24 @@ def push_resource_to_geopf(
     if not resource.format or resource.format.lower() != "gpkg":
         return
 
-    # FIXME: temporary default datastore, until cdata has a datastore picker
-    # and every push carries an explicit datastore_id chosen by the user.
-    datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
+    # A dataset lives in exactly one entrepôt on geopf (the fiche dashboard URL
+    # itself is scoped to one datastore), so once a dataset has pushed before,
+    # every subsequent push reuses that datastore rather than re-resolving one.
+    existing_datastore_id = dataset.extras.get("geopf:push:datastore-id")
+    if existing_datastore_id:
+        if datastore_id and datastore_id != existing_datastore_id:
+            log.warning(
+                "geopf: dataset=%s is already pushed to datastore=%s, ignoring "
+                "requested datastore=%s",
+                dataset_id,
+                existing_datastore_id,
+                datastore_id,
+            )
+        datastore_id = existing_datastore_id
+    else:
+        # FIXME: temporary default datastore, until cdata has a datastore picker
+        # for a dataset's first push.
+        datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
     if not datastore_id:
         log.warning(
             "geopf: no datastore_id provided and GEOPF_DATASTORE_ID not configured, "
@@ -56,6 +71,7 @@ def push_resource_to_geopf(
             resource_id,
         )
         return
+    _set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
 
     if not access_token:
         user = User.objects.get(id=user_id)
@@ -206,7 +222,6 @@ def _run_pipeline(dataset, resource, datastore_id, client):
         {
             "geopf:push:status": "done",
             "geopf:push:stored-data-id": stored_data_id,
-            "geopf:push:datastore-id": datastore_id,
             "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
         },
     )
@@ -319,25 +334,26 @@ def sync_offerings_to_geopf(self, dataset_id, user_id=None, access_token=None):
 def sync_offerings_for_dataset(dataset, token) -> int:
     """Sync Géoplateforme offerings to udata resources. Returns count of live offerings.
 
-    `token` is a geopf access token for the acting user. Groups resources by
-    `(geopf:push:datastore-id, geopf:push:stored-data-id)` — same
-    datastore-selection logic as the push flow, falling back to
-    `GEOPF_DATASTORE_ID` for resources pushed before per-resource datastore
-    tracking existed.
+    `token` is a geopf access token for the acting user. A dataset lives in
+    exactly one entrepôt (`geopf:push:datastore-id`, dataset extra, falling
+    back to `GEOPF_DATASTORE_ID` for datasets pushed before that tracking
+    existed); every one of its push resources' `geopf:push:stored-data-id` is
+    looked up within that same datastore.
     """
-    default_datastore_id = current_app.config.get("GEOPF_DATASTORE_ID")
-    pairs = {
-        (r.extras.get("geopf:push:datastore-id") or default_datastore_id, sd_id)
+    datastore_id = dataset.extras.get("geopf:push:datastore-id") or current_app.config.get(
+        "GEOPF_DATASTORE_ID"
+    )
+    stored_data_ids = {
+        r.extras["geopf:push:stored-data-id"]
         for r in dataset.resources
-        if (sd_id := r.extras.get("geopf:push:stored-data-id"))
+        if r.extras.get("geopf:push:stored-data-id")
     }
-    pairs = {(datastore_id, sd_id) for datastore_id, sd_id in pairs if datastore_id}
-    if not pairs:
+    if not datastore_id or not stored_data_ids:
         return 0
 
+    client = GeopfClient(token=token, datastore_id=datastore_id)
     live_offering_ids = set()
-    for datastore_id, sd_id in pairs:
-        client = GeopfClient(token=token, datastore_id=datastore_id)
+    for sd_id in stored_data_ids:
         for offering in client.list_offerings(sd_id):
             live_offering_ids.add(offering["_id"])
             _upsert_offering_resource(dataset, offering)
