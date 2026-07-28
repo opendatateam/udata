@@ -53,6 +53,6 @@ def ssrf_policy() -> SSRFPolicy:
     )
 
 
-def ssrf_session(**kwargs) -> SSRFProtectedSession:
+def ssrf_session() -> SSRFProtectedSession:
     """Return a :class:`SSRFProtectedSession` configured from the app settings."""
-    return SSRFProtectedSession(ssrf_policy(), **kwargs)
+    return SSRFProtectedSession(ssrf_policy())

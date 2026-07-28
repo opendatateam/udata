@@ -135,12 +135,6 @@ def test_session_refuses_explicit_proxy():
         session.get("http://142.42.1.1/", timeout=2, proxies={"http": "http://198.51.100.1:3128"})
 
 
-def test_session_enforces_allowed_ports():
-    session = SSRFProtectedSession(SSRFPolicy(allow_loopback=True, allowed_ports=frozenset({443})))
-    with pytest.raises(BlockedAddressError, match="port"):
-        session.get("http://127.0.0.1:9/", timeout=2)
-
-
 class _Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         body = b"hello from allowed host"

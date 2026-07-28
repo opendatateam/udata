@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import ipaddress
 import socket
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
 from typing import Callable
@@ -45,7 +45,6 @@ from urllib3.connectionpool import HTTPConnectionPool
 from urllib3.exceptions import ConnectTimeoutError, NameResolutionError, NewConnectionError
 from urllib3.poolmanager import PoolManager
 from urllib3.util.connection import _TYPE_SOCKET_OPTIONS
-from urllib3.util.retry import Retry
 from urllib3.util.timeout import _DEFAULT_TIMEOUT, _TYPE_TIMEOUT
 
 __all__ = [
@@ -53,7 +52,6 @@ __all__ = [
     "BlockedAddressError",
     "BlockedCategory",
     "blocked_reason",
-    "GuardedHTTPAdapter",
     "SSRFProtectedSession",
 ]
 
@@ -103,11 +101,6 @@ class SSRFPolicy:
     allow_link_local: bool = False  # 169.254.0.0/16, fe80::/10 (cloud metadata!)
     allow_reserved: bool = False  # IETF-reserved / IPv4-compatible IPv6, etc.
     allowed_schemes: frozenset[str] = frozenset({"http", "https"})
-    # ``None`` means "any port". Otherwise only these ports are reachable.
-    allowed_ports: frozenset[int] | None = None
-    # Optional escape hatch for deployments doing split-horizon DNS: a hostname
-    # for which this returns True bypasses the IP checks entirely. Use sparingly.
-    hostname_allowlist: Callable[[str], bool] | None = field(default=None, compare=False)
 
 
 def _unwrap_embedded_ipv4(ip: _IPAddress) -> _IPAddress:
@@ -220,12 +213,8 @@ class _GuardedConnectionMixin:
         reason = blocked_reason(ip, self.policy)
         if reason is not None:
             raise BlockedAddressError(f"{self.host} resolves to a blocked {reason.value} ({ip})")
-        if self.policy.allowed_ports is not None and self.port not in self.policy.allowed_ports:
-            raise BlockedAddressError(f"port {self.port} is not allowed")
 
     def _new_conn(self) -> socket.socket:
-        if self.policy.hostname_allowlist and self.policy.hostname_allowlist(self.host):
-            return super()._new_conn()
         # Same exception mapping as urllib3's own ``_new_conn``: requests relies
         # on it to tell a connect timeout from a refused connection.
         try:
@@ -284,8 +273,8 @@ class GuardedPoolManager(PoolManager):
 class GuardedHTTPAdapter(requests.adapters.HTTPAdapter):
     """A ``requests`` adapter whose connections validate their target IP."""
 
-    def __init__(self, policy: SSRFPolicy | None = None, **kwargs):
-        self.policy = policy or SSRFPolicy()
+    def __init__(self, policy: SSRFPolicy, **kwargs):
+        self.policy = policy
         super().__init__(**kwargs)
 
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
@@ -315,7 +304,7 @@ class SSRFProtectedSession(requests.Session):
     an internal redirect target is blocked at connect time like any other.
     """
 
-    def __init__(self, policy: SSRFPolicy | None = None, max_retries: int | Retry = 0):
+    def __init__(self, policy: SSRFPolicy | None = None):
         super().__init__()
         # An ambient HTTP_PROXY/HTTPS_PROXY in the environment would route every
         # request through an unguarded ProxyManager (see ``proxy_manager_for``).
@@ -323,7 +312,7 @@ class SSRFProtectedSession(requests.Session):
         # variable nobody declared.
         self.trust_env = False
         self.policy = policy or SSRFPolicy()
-        adapter = GuardedHTTPAdapter(policy=self.policy, max_retries=max_retries)
+        adapter = GuardedHTTPAdapter(policy=self.policy)
         self.mount("http://", adapter)
         self.mount("https://", adapter)
 
