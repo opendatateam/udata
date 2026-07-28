@@ -35,7 +35,7 @@ class GeopfClient:
     def __init__(self, token: str | None = None, datastore_id: str | None = None):
         """A geopf entrepôt API client.
 
-        `token` is the acting user's bearer access token — every call here
+        `token` is the acting user's bearer access token: every call here
         (push, reverse sync alike) runs as whichever user is currently
         authenticated, there is no anonymous or service-account credential.
         `datastore_id` scopes datastore-bound calls (uploads, processing,

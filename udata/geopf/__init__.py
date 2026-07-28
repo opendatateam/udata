@@ -1,8 +1,8 @@
 import logging
 
 from . import (
-    models,  # noqa: F401 — registers the GeopfToken document
-    tasks,  # noqa: F401 — registers Celery tasks
+    models,  # noqa: F401 (registers the GeopfToken document)
+    tasks,  # noqa: F401 (registers Celery tasks)
 )
 
 log = logging.getLogger(__name__)

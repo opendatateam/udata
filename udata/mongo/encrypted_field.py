@@ -16,7 +16,7 @@ class EncryptedStringField(StringField):
     encrypt/decrypt rather than at field construction, so this can be
     declared in a Document class body (import time, no app context yet).
     Values are encrypted in ``to_mongo`` (on save) and decrypted in
-    ``to_python`` (on load from MongoDB) — like other transform fields
+    ``to_python`` (on load from MongoDB); like other transform fields
     (e.g. ``udata.mongo.datetime_fields.DateField``), in-memory access
     before a save/reload round-trip sees the plaintext as assigned.
 

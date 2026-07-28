@@ -74,7 +74,6 @@ def push_resource_to_geopf(
             resource_id,
         )
         return
-    _set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
 
     if not access_token:
         user = User.objects.get(id=user_id)
@@ -108,6 +107,10 @@ def push_resource_to_geopf(
         log.exception("geopf: pipeline failed dataset=%s resource=%s", dataset_id, resource_id)
         _set_extras(dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)})
         raise
+
+    # Pin only after success, so a failed first push can't lock the dataset
+    # onto a bad datastore.
+    _set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
 
 
 def _run_pipeline(dataset, resource, datastore_id, client):
@@ -165,7 +168,7 @@ def _run_pipeline(dataset, resource, datastore_id, client):
 
         exec_status, stored_data_id = client.poll_execution(exec_id)
 
-        # Delete upload after processing — API returns 409 if attempted while processing runs
+        # Delete upload after processing; API returns 409 if attempted while processing runs
         try:
             client.delete_upload(upload_id)
         except GeopfError as e:
@@ -188,7 +191,7 @@ def _run_pipeline(dataset, resource, datastore_id, client):
         )
 
     except GeopfTimeoutError:
-        # Execution is still running on GeoPortail — deleting the upload would 409.
+        # Execution is still running on GeoPortail; deleting the upload would 409.
         # Leave both in place; a future retry or manual cleanup can finish the job.
         if upload_id:
             log.warning(

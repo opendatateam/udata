@@ -123,7 +123,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert offering_resource.format == "wfs"
 
     def test_falls_back_to_configured_datastore_id(self):
-        # no geopf:push:datastore-id — dataset pushed before dataset-level tracking existed
+        # no geopf:push:datastore-id: dataset pushed before dataset-level tracking existed
         gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
         dataset = DatasetFactory(resources=[gpkg])
         mock_client = MagicMock()
@@ -272,6 +272,22 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         assert dataset.extras.get("geopf:push:datastore-id") == "ds-1"
+
+    def test_failed_push_does_not_persist_datastore_id(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+
+        with patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfError("boom")):
+            with pytest.raises(GeopfError):
+                push_resource_to_geopf.apply(
+                    args=[str(dataset.id), resource_id],
+                    kwargs={"access_token": "test-token", "datastore_id": "ds-bad"},
+                    throw=True,
+                )
+
+        dataset.reload()
+        assert "geopf:push:datastore-id" not in dataset.extras
 
     def test_subsequent_push_reuses_dataset_datastore_id(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")

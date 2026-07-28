@@ -20,7 +20,7 @@ DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 def _redirect_target(dataset_id):
     """Resolve a dataset id to its cdata page, falling back to the homepage.
 
-    We only ever accept an *id* from the client here, never a path or URL —
+    We only ever accept an *id* from the client here, never a path or URL:
     it's resolved to a URL entirely server-side via `Dataset.self_web_url()`,
     so there is no open-redirect surface.
     """

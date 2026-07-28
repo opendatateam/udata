@@ -17,7 +17,7 @@ Two independent flows, each triggered explicitly by a user, each running as its 
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
 
-**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. A dataset also lives in exactly one entrepôt: the datastore is resolved (explicit choice, or `GEOPF_DATASTORE_ID` fallback) on a dataset's first push and stored as `geopf:push:datastore-id` (dataset extra), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
+**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. A dataset also lives in exactly one entrepôt: the datastore is resolved (explicit choice, or `GEOPF_DATASTORE_ID` fallback) on a dataset's first push and stored as `geopf:push:datastore-id` (dataset extra) once that push succeeds (a failed push doesn't pin anything), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
 
 ## Authentication
 
@@ -83,7 +83,7 @@ Set on the original pushed resource by the push pipeline.
 
 | Key | Type | Description |
 |---|---|---|
-| `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first push, reused as-is by every later push. |
+| `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first *successful* push, reused as-is by every later push. |
 | `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
 | `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
 
