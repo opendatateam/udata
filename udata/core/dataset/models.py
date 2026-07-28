@@ -1014,42 +1014,53 @@ class Dataset(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources.insert(0, resource)
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         self.update(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Keep the in-memory document consistent with what we persist below, so we
+        # don't need a self.reload() afterwards. reload() would re-read and
+        # re-deserialize every embedded resource (O(N), ~1.3s on a 15k-resource
+        # dataset) for nothing: nothing downstream consumes a fully-reloaded object
+        # (the endpoint returns `resource`, and the on_resource_updated handlers only
+        # read document.resources / document.organization, all up to date here).
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         Dataset.objects(id=self.id, resources__id=resource.id).update_one(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             set__resources__S=resource,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources = [r for r in self.resources if r.id != resource.id]
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         self.update(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             pull__resources__id=resource.id,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
         # Deletes resource's file from file storage
@@ -1061,7 +1072,6 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
