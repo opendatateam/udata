@@ -250,7 +250,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         # BlockedAddressError is neither a RequestException nor an OSError (so
         # that urllib3 cannot swallow it): make sure it still lands as a job
         # failure instead of escaping the harvest task.
-        source = HarvestSourceFactory(url="http://10.0.0.1/catalog")
+        source = HarvestSourceFactory()
+        # Assigned without saving: URLField keeps a private address out of the
+        # stored value, so the case left to exercise is the one it cannot catch
+        # — a source whose URL only reaches a forbidden address at fetch time.
+        source.url = "http://10.0.0.1/catalog"
 
         job = FetchingBackend(source).harvest()
 
