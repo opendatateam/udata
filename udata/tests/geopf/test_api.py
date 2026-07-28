@@ -9,7 +9,7 @@ from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
 from udata.geopf.models import GeopfToken
 from udata.tests.api import APITestCase
-from udata.tests.geopf import TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_API_BASE, TEST_ENCRYPTION_KEY, TEST_GEOPF_CONF
 
 CDATA_BASE_URL = "https://cdata.example.com"
 
@@ -256,6 +256,47 @@ class GeopfPushApiTest(APITestCase):
         mock_delay.assert_called_once_with(
             str(dataset.id), str(resource.id), str(user.id), "ds-chosen"
         )
+
+
+# Class-level options win over method-level ones for conflicting keys
+# (pytest-flask applies markers closest-first).
+@pytest.mark.options(
+    GEOPF_API_BASE=TEST_API_BASE,
+    GEOPF_TOKEN_ENCRYPTION_KEY=TEST_ENCRYPTION_KEY,
+    GEOPF_DATASTORE_ID=None,
+)
+class GeopfPushApiNoDatastoreTest(APITestCase):
+    def _connect(self, user):
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+    def test_no_resolvable_datastore_returns_400(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        self._connect(user)
+
+        response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+        self.assert400(response)
+
+    def test_pinned_datastore_satisfies_check(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(
+            owner=user,
+            resources=[resource],
+            extras={"geopf:push:datastore-id": "ds-pinned"},
+        )
+        self._connect(user)
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
 
 
 @TEST_GEOPF_CONF

@@ -101,9 +101,10 @@ def push_resource_to_geopf(
             )
             raise
 
-    _set_extras(
-        dataset, resource, {"geopf:push:status": "pending", "geopf:push:task-id": self.request.id}
-    )
+    pending = {"geopf:push:status": "pending"}
+    if self.request.id:  # None on synchronous CLI runs
+        pending["geopf:push:task-id"] = self.request.id
+    _set_extras(dataset, resource, pending)
 
     client = GeopfClient(token=access_token, datastore_id=datastore_id)
     try:
@@ -342,9 +343,10 @@ def pull_offerings_from_geopf(self, dataset_id, user_id=None, access_token=None)
             _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
             raise
 
-    _set_dataset_extras(
-        dataset, {"geopf:pull:status": "pending", "geopf:pull:task-id": self.request.id}
-    )
+    pending = {"geopf:pull:status": "pending"}
+    if self.request.id:  # None on synchronous CLI runs
+        pending["geopf:pull:task-id"] = self.request.id
+    _set_dataset_extras(dataset, pending)
 
     try:
         n = pull_offerings_for_dataset(dataset, access_token)
