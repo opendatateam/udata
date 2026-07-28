@@ -34,6 +34,7 @@ from __future__ import annotations
 import ipaddress
 import socket
 from dataclasses import dataclass, field
+from enum import StrEnum
 from functools import partial
 from typing import Callable
 from urllib.parse import urlsplit
@@ -50,10 +51,27 @@ from urllib3.util.timeout import _DEFAULT_TIMEOUT, _TYPE_TIMEOUT
 __all__ = [
     "SSRFPolicy",
     "BlockedAddressError",
+    "BlockedCategory",
     "blocked_reason",
     "GuardedHTTPAdapter",
     "SSRFProtectedSession",
 ]
+
+
+class BlockedCategory(StrEnum):
+    """
+    Why an address is refused.
+
+    Callers that phrase their own message (udata's URL validation does) branch on
+    the member; the value doubles as a default human-readable reason.
+    """
+
+    MULTICAST = "multicast address"
+    UNSPECIFIED = "unspecified address"
+    LOOPBACK = "loopback address"
+    LINK_LOCAL = "link-local address"
+    PRIVATE = "private address"
+    RESERVED = "reserved address"
 
 
 class BlockedAddressError(Exception):
@@ -111,36 +129,35 @@ def _unwrap_embedded_ipv4(ip: _IPAddress) -> _IPAddress:
     return ip
 
 
-def blocked_reason(address: str, policy: SSRFPolicy) -> str | None:
+def blocked_reason(address: str, policy: SSRFPolicy) -> BlockedCategory | None:
     """
     Classify a raw IP string against ``policy``.
 
-    :return: a short reason string when the address is blocked, ``None`` when it
-        is allowed.
+    :return: the category that forbids the address, ``None`` when it is allowed.
     """
     ip = _unwrap_embedded_ipv4(ipaddress.ip_address(address))
 
     # These are never legitimate targets, regardless of policy.
     if ip.is_multicast:
-        return "multicast address"
+        return BlockedCategory.MULTICAST
     if ip.is_unspecified:
-        return "unspecified address"
+        return BlockedCategory.UNSPECIFIED
 
     # Specific categories are checked before the broad ``is_private`` because a
     # loopback/link-local address also reports ``is_private == True``; checking
     # the narrow category first lets each be allowed independently.
     if ip.is_loopback:
-        return None if policy.allow_loopback else "loopback address"
+        return None if policy.allow_loopback else BlockedCategory.LOOPBACK
     if ip.is_link_local:
-        return None if policy.allow_link_local else "link-local address"
+        return None if policy.allow_link_local else BlockedCategory.LINK_LOCAL
     # ``is_private`` alone would let CGNAT (100.64.0.0/10) through: the stdlib
     # reports it False there while ``is_global`` is False too. Treating anything
     # not globally routable as private keeps the category exhaustive whatever
     # IANA adds next.
     if ip.is_private or not ip.is_global:
-        return None if policy.allow_private else "private address"
+        return None if policy.allow_private else BlockedCategory.PRIVATE
     if ip.is_reserved:
-        return None if policy.allow_reserved else "reserved address"
+        return None if policy.allow_reserved else BlockedCategory.RESERVED
 
     return None
 
@@ -202,7 +219,7 @@ class _GuardedConnectionMixin:
     def _validate_ip(self, ip: str) -> None:
         reason = blocked_reason(ip, self.policy)
         if reason is not None:
-            raise BlockedAddressError(f"{self.host} resolves to a blocked {reason} ({ip})")
+            raise BlockedAddressError(f"{self.host} resolves to a blocked {reason.value} ({ip})")
         if self.policy.allowed_ports is not None and self.port not in self.policy.allowed_ports:
             raise BlockedAddressError(f"port {self.port} is not allowed")
 
