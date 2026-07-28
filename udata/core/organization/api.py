@@ -395,19 +395,13 @@ class MembershipRequestAPI(API):
                     403,
                     "You can only access your own membership requests or the one of your organizations.",
                 )
-            if args["status"]:
-                return [
-                    r
-                    for r in org.requests
-                    if (
-                        r.status == args["status"]
-                        and r.user is not None
-                        and str(r.user.id) == args["user"]
-                    )
-                ]
-            return [
+            # Email invitations have no user attached, hence the `is not None` guard.
+            requests = [
                 r for r in org.requests if r.user is not None and str(r.user.id) == args["user"]
             ]
+            if args["status"]:
+                return [r for r in requests if r.status == args["status"]]
+            return requests
         org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
