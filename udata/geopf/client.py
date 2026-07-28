@@ -113,9 +113,8 @@ class GeopfClient:
     # --- processing ---
 
     def launch_processing(self, upload_id, stored_data_name, srs=DEFAULT_SRS):
-        processing_uuid = "0de8c60b-9938-4be9-aa36-9026b77c3c96"
         payload = {
-            "processing": processing_uuid,
+            "processing": current_app.config["GEOPF_VECTOR_PROCESSING_ID"],
             "inputs": {"upload": [upload_id]},
             "output": {"stored_data": {"name": stored_data_name}},
             "parameters": {"srs": srs},

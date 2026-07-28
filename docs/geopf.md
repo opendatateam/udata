@@ -180,6 +180,13 @@ GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
 # without matching support in udata/geopf/srs.py would fail at upload time.
 GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})  # default
 
+# Maximum size (bytes) of a remote resource file downloaded for a push
+GEOPF_MAX_REMOTE_FILE_SIZE = 1_000_000_000  # default, 1 GB
+
+# "Intégration de données vectorielles" processing on the entrepôt
+# (may differ on other geopf instances)
+GEOPF_VECTOR_PROCESSING_ID = "0de8c60b-9938-4be9-aa36-9026b77c3c96"  # default
+
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"

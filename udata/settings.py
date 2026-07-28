@@ -692,6 +692,10 @@ class Defaults(object):
     GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
     # Maximum size (bytes) of a remote resource file downloaded for a push.
     GEOPF_MAX_REMOTE_FILE_SIZE = 1_000_000_000  # 1 GB
+    # "Intégration de données vectorielles" processing on the geopf entrepôt.
+    # FIXME: magic value observed in production; confirm where it comes from,
+    # whether it is stable, and whether it differs on other geopf instances.
+    GEOPF_VECTOR_PROCESSING_ID = "0de8c60b-9938-4be9-aa36-9026b77c3c96"
     # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
     # udata acts as a confidential client authenticating on behalf of the data.gouv.fr user.
     GEOPF_OAUTH_CLIENT_ID = None
