@@ -19,17 +19,25 @@ DEFAULT_CASES = [
     ("::ffff:7f00:1", "loopback"),  # IPv4-mapped 127.0.0.1
     ("::ffff:127.0.0.1", "loopback"),
     ("2002:7f00:1::", "loopback"),  # 6to4-encoded 127.0.0.1
+    ("64:ff9b::7f00:1", "loopback"),  # NAT64 well-known prefix, 127.0.0.1
+    ("64:ff9b::127.0.0.1", "loopback"),
     # Link-local, incl. the cloud metadata endpoint
     ("169.254.169.254", "link-local"),
     ("::ffff:a9fe:a9fe", "link-local"),  # mapped 169.254.169.254
     ("2002:a9fe:a9fe::", "link-local"),  # 6to4-encoded 169.254.169.254
+    ("64:ff9b::a9fe:a9fe", "link-local"),  # NAT64-encoded 169.254.169.254
     ("fe80::1", "link-local"),
     # Private (RFC1918 / ULA)
     ("10.0.0.1", "private"),
     ("192.168.1.1", "private"),
     ("172.16.0.1", "private"),
     ("::ffff:0a00:0001", "private"),  # mapped 10.0.0.1
+    ("64:ff9b::a00:1", "private"),  # NAT64-encoded 10.0.0.1
     ("fc00::1", "private"),
+    # Site-local (RFC 3879): deprecated but still routed on some networks, and
+    # the stdlib reports it neither private nor reserved.
+    ("fec0::1", "private"),
+    ("feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", "private"),
     # CGNAT (RFC 6598): ``ipaddress`` reports it neither private nor reserved,
     # only not globally routable.
     ("100.64.0.1", "private"),
@@ -47,6 +55,10 @@ DEFAULT_CASES = [
     ("142.42.1.1", None),
     ("8.8.8.8", None),
     ("2a00:1450:4007:80e::2004", None),
+    # A DNS64 resolver hands out the NAT64 form of every IPv4-only host: the
+    # public ones must stay reachable, or nothing resolves on such a network.
+    ("64:ff9b::8.8.8.8", None),
+    ("64:ff9b::808:808", None),
 ]
 
 
@@ -66,6 +78,7 @@ def test_allow_loopback_permits_loopback_only():
     assert blocked_reason("127.0.0.1", policy) is None
     assert blocked_reason("::ffff:7f00:1", policy) is None  # mapped form too
     assert blocked_reason("2002:7f00:1::", policy) is None  # 6to4 form too
+    assert blocked_reason("64:ff9b::7f00:1", policy) is None  # NAT64 form too
     # But a private (non-loopback) address is still blocked.
     assert blocked_reason("10.0.0.1", policy) is not None
 
@@ -74,8 +87,10 @@ def test_allow_private_does_not_permit_loopback():
     policy = SSRFPolicy(allow_private=True)
     assert blocked_reason("10.0.0.1", policy) is None
     assert blocked_reason("100.64.0.1", policy) is None  # CGNAT counts as private
+    assert blocked_reason("fec0::1", policy) is None  # site-local counts as private
     assert blocked_reason("169.254.169.254", policy) is not None  # link-local stays blocked
     assert blocked_reason("127.0.0.1", policy) is not None  # loopback stays blocked
+    assert blocked_reason("64:ff9b::7f00:1", policy) is not None  # NAT64 loopback stays blocked
     assert blocked_reason("::7f00:1", policy) is not None  # reserved stays blocked
 
 

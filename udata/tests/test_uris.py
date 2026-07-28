@@ -106,11 +106,13 @@ LOCAL = LOCAL_HOSTS + LOCAL_IPS
 SMUGGLED_LOCAL_IPS = [
     "http://[::ffff:7f00:1]",  # IPv4-mapped 127.0.0.1
     "http://[2002:7f00:1::]",  # 6to4-encoded 127.0.0.1
+    "http://[64:ff9b::7f00:1]",  # NAT64-encoded 127.0.0.1
 ]
 
 SMUGGLED_PRIVATE_IPS = [
     "http://[::ffff:a9fe:a9fe]",  # IPv4-mapped 169.254.169.254, the cloud metadata endpoint
     "http://[2002:a9fe:a9fe::]",  # 6to4-encoded 169.254.169.254
+    "http://[64:ff9b::a9fe:a9fe]",  # NAT64-encoded 169.254.169.254
 ]
 
 # Not globally routable, yet neither RFC1918 nor loopback.
@@ -118,6 +120,7 @@ NOT_GLOBALLY_ROUTABLE_IPS = [
     "http://100.64.0.1",  # CGNAT (RFC 6598)
     "http://192.0.2.1",  # TEST-NET-1
     "http://198.51.100.1",  # TEST-NET-2
+    "http://[fec0::1]",  # site-local (RFC 3879)
 ]
 
 HOSTS_RESOLVING_TO_LOOPBACK = [

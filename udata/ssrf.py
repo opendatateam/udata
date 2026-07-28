@@ -85,6 +85,12 @@ class BlockedAddressError(Exception):
 
 _IPAddress = ipaddress.IPv4Address | ipaddress.IPv6Address
 
+# RFC 6052 well-known prefix: a DNS64 resolver answers every IPv4-only name with
+# ``64:ff9b::<the IPv4>``, and the NAT64 gateway routes it to that IPv4. The
+# stdlib has no accessor for it (only the RFC 8215 local-use ``64:ff9b:1::/48``
+# is listed as private), so the prefix is spelled out here.
+_NAT64_WELL_KNOWN_PREFIX = ipaddress.IPv6Network("64:ff9b::/96")
+
 
 @dataclass(frozen=True)
 class SSRFPolicy:
@@ -107,10 +113,11 @@ def _unwrap_embedded_ipv4(ip: _IPAddress) -> _IPAddress:
     """
     Return the embedded IPv4 address for IPv6 forms that route to one.
 
-    ``::ffff:7f00:1`` and ``2002:7f00:1::`` both reach ``127.0.0.1`` but their
-    IPv6 object reports ``is_loopback == False``. We classify the embedded IPv4
-    so those forms cannot be used to smuggle a loopback/private target past the
-    per-category checks.
+    ``::ffff:7f00:1``, ``2002:7f00:1::`` and ``64:ff9b::7f00:1`` all reach
+    ``127.0.0.1`` but their IPv6 object reports ``is_loopback == False``. We
+    classify the embedded IPv4 so those forms cannot be used to smuggle a
+    loopback/private target past the per-category checks — and, symmetrically,
+    so a NAT64 address standing for a public IPv4 stays reachable.
     """
     if ip.version == 6:
         mapped = ip.ipv4_mapped
@@ -119,6 +126,8 @@ def _unwrap_embedded_ipv4(ip: _IPAddress) -> _IPAddress:
         sixtofour = ip.sixtofour
         if sixtofour is not None:
             return sixtofour
+        if ip in _NAT64_WELL_KNOWN_PREFIX:
+            return ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF)
     return ip
 
 
@@ -144,10 +153,13 @@ def blocked_reason(address: str, policy: SSRFPolicy) -> BlockedCategory | None:
     if ip.is_link_local:
         return None if policy.allow_link_local else BlockedCategory.LINK_LOCAL
     # ``is_private`` alone would let CGNAT (100.64.0.0/10) through: the stdlib
-    # reports it False there while ``is_global`` is False too. Treating anything
-    # not globally routable as private keeps the category exhaustive whatever
-    # IANA adds next.
-    if ip.is_private or not ip.is_global:
+    # reports it False there while ``is_global`` is False too. For IPv4 that
+    # makes ``not is_global`` a catch-all for whatever IANA reserves next. It
+    # buys nothing for IPv6, where the stdlib derives ``is_global`` from
+    # ``is_private`` — so site-local (fec0::/10, deprecated by RFC 3879 but
+    # still routed here and there, and in none of the stdlib's blocks) has to
+    # be named explicitly.
+    if ip.is_private or not ip.is_global or (ip.version == 6 and ip.is_site_local):
         return None if policy.allow_private else BlockedCategory.PRIVATE
     if ip.is_reserved:
         return None if policy.allow_reserved else BlockedCategory.RESERVED
