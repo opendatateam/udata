@@ -48,7 +48,7 @@ Each flow's specific extras keys are listed in its own section below.
 
 ## Push: data.gouv.fr → Géoplateforme
 
-Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for `gpkg` resources): `202` + Celery task id, or `409` if not connected. Runs as a Celery task.
+Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for resources whose format is in `GEOPF_PUSHABLE_FORMATS`): `202` + Celery task id, or `409` if not connected. Runs as a Celery task.
 
 ### Workflow
 
@@ -150,7 +150,7 @@ Set on resources created (or updated) by the pull flow. These resources are dist
 udata geopf push-resource <dataset_id> <resource_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
 ```
 
-Runs the full upload pipeline synchronously for a single GPKG resource, same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` defaults to `GEOPF_DATASTORE_ID` if omitted. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
+Runs the full upload pipeline synchronously for a single resource, same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` defaults to `GEOPF_DATASTORE_ID` if omitted. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
 
 ```
 udata geopf push-metadata <dataset_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
@@ -174,6 +174,11 @@ GEOPF_API_BASE = "https://data.geopf.fr/api"  # default
 # every dataset's first push carries an explicit datastore_id chosen by the user.
 GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
 
+# Resource formats eligible for push. Only gpkg is actually processed today
+# (SRS detection is gpkg-specific, see Limitations), so adding a format here
+# without matching support in udata/geopf/srs.py would fail at upload time.
+GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})  # default
+
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"
@@ -188,7 +193,7 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 
 ## Limitations
 
-- Only `gpkg` resources are synchronised; other formats are silently skipped.
+- Only formats listed in `GEOPF_PUSHABLE_FORMATS` are synchronised (`gpkg` by default); other formats are silently skipped. SRS detection (`udata/geopf/srs.py`) only supports `gpkg` today, so adding a format to the setting alone isn't enough to actually push it.
 - Updates to an existing pushed resource are not yet handled: a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
 - `GEOPF_DATASTORE_ID` is currently a single test default used when a push doesn't pass an explicit `datastore_id`; that fallback should go away once every push reliably supplies one.
 - SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.

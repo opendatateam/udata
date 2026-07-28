@@ -186,6 +186,23 @@ class GeopfPushApiTest(APITestCase):
         response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
         self.assert400(response)
 
+    @pytest.mark.options(GEOPF_PUSHABLE_FORMATS=frozenset({"gpkg", "csv"}))
+    def test_allows_format_permitted_by_config(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
+
     def test_not_connected_returns_409(self):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")

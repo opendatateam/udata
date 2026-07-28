@@ -1,5 +1,5 @@
 import mongoengine
-from flask import redirect, request, session, url_for
+from flask import current_app, redirect, request, session, url_for
 
 from udata.api import API, api
 from udata.auth import current_user
@@ -101,14 +101,18 @@ class GeopfPushAPI(API):
     @api.secure
     @api.doc("geopf_push")
     def post(self, dataset, rid):
-        """Push a gpkg resource to Géoplateforme, as the current user."""
+        """Push a resource to Géoplateforme, as the current user."""
         dataset.permissions["edit_resources"].test()
 
         resource = get_by(dataset.resources, id=rid)
         if resource is None:
             api.abort(404, "Resource not found")
-        if not resource.format or resource.format.lower() != "gpkg":
-            api.abort(400, "Only gpkg resources can be pushed to Géoplateforme")
+        pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
+        if not resource.format or resource.format.lower() not in pushable_formats:
+            api.abort(
+                400,
+                f"Only {', '.join(sorted(pushable_formats))} resources can be pushed to Géoplateforme",
+            )
 
         user = current_user._get_current_object()
         try:

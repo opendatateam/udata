@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 def push_resource_to_geopf(
     self, dataset_id, resource_id, user_id=None, datastore_id=None, access_token=None
 ):
-    """Push a gpkg resource to Géoplateforme as the acting user.
+    """Push a resource (format in `GEOPF_PUSHABLE_FORMATS`) to Géoplateforme as the acting user.
 
     Pass `user_id` for the normal path (their stored `GeopfToken` is looked
     up and refreshed as needed). `access_token` is an ops/CLI-only escape
@@ -42,7 +42,10 @@ def push_resource_to_geopf(
         log.error("geopf: resource not found dataset=%s resource=%s", dataset_id, resource_id)
         return
 
-    if not resource.format or resource.format.lower() != "gpkg":
+    if (
+        not resource.format
+        or resource.format.lower() not in current_app.config["GEOPF_PUSHABLE_FORMATS"]
+    ):
         return
 
     # A dataset lives in exactly one entrepôt on geopf (the fiche dashboard URL

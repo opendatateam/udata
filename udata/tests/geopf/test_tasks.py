@@ -231,6 +231,19 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         mock_pipeline.assert_not_called()
 
+    @pytest.mark.options(GEOPF_PUSHABLE_FORMATS=frozenset({"gpkg", "csv"}))
+    def test_pushes_format_allowed_by_config(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+
+        with patch("udata.geopf.tasks._run_pipeline") as mock_pipeline:
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id], kwargs={"access_token": "test-token"}
+            )
+
+        mock_pipeline.assert_called_once()
+
     def test_first_push_persists_datastore_id_on_dataset(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(resources=[resource])

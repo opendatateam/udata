@@ -684,6 +684,10 @@ class Defaults(object):
     # FIXME: temporary default datastore, until cdata has a datastore picker and every
     # push carries an explicit datastore_id chosen by the user among their own entrepôts.
     GEOPF_DATASTORE_ID = None
+    # Resource formats eligible for push. Only gpkg is actually processed today
+    # (see udata/geopf/srs.py), so adding a format here without SRS-detection
+    # support for it would just fail at upload time.
+    GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
     # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
     # udata acts as a confidential client authenticating on behalf of the data.gouv.fr user.
     GEOPF_OAUTH_CLIENT_ID = None
