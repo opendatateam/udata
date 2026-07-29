@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.search import DataserviceApiParser
+from udata.core.dataservices.search import parse_dataservice_filters
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
@@ -78,7 +78,7 @@ class SiteRdfCatalogFormat(API):
         params = catalog_parser.parse_args()
         datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
         datasets = datasets.paginate(params["page"], params["page_size"])
-        dataservices = DataserviceApiParser.parse_filters(Dataservice.objects.visible(), params)
+        dataservices = parse_dataservice_filters(Dataservice.objects.visible(), params)
         dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
 
         catalog = build_catalog(

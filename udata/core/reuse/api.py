@@ -7,7 +7,6 @@ from flask import make_response, request
 from flask_login import current_user
 
 from udata.api import API, api, errors
-from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.badges import api as badges_api
@@ -39,74 +38,43 @@ DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
 
 
-class ReuseApiParser(ModelApiParser):
-    sorts = {
-        "title": "title",
-        "created": "created_at",
-        "last_modified": "last_modified",
-        "datasets": "metrics.datasets",
-        "followers": "metrics.followers",
-        "views": "metrics.views",
-    }
-
-    def __init__(self):
-        super().__init__()
-        self.parser.add_argument("dataset", type=str, location="args")
-        self.parser.add_argument("tag", type=str, location="args")
-        self.parser.add_argument("organization", type=str, location="args")
-        # Uses __badges__ (not available_badges) so that users can still filter
-        # by any existing badge, even hidden ones.
-        self.parser.add_argument(
-            "organization_badge",
-            type=str,
-            choices=list(Organization.__badges__),
-            location="args",
-        )
-        self.parser.add_argument("owner", type=str, location="args")
-        self.parser.add_argument("type", type=str, location="args")
-        self.parser.add_argument("topic", type=str, location="args")
-        self.parser.add_argument("featured", type=bool, location="args")
-
-    @staticmethod
-    def parse_filters(reuses, args):
-        if args.get("q"):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            reuses = reuses.search_text(phrase_query)
-        if args.get("dataset"):
-            if not ObjectId.is_valid(args["dataset"]):
-                api.abort(400, "Dataset arg must be an identifier")
-            reuses = reuses.filter(datasets=args["dataset"])
-        if args.get("featured"):
-            reuses = reuses.filter(featured=args["featured"])
-        if args.get("topic"):
-            reuses = reuses.filter(topic=args["topic"])
-        if args.get("type"):
-            reuses = reuses.filter(type=args["type"])
-        if args.get("tag"):
-            reuses = reuses.filter(tags__all=args["tag"])
-        if args.get("organization"):
-            if not ObjectId.is_valid(args["organization"]):
-                api.abort(400, "Organization arg must be an identifier")
-            reuses = reuses.filter(organization=args["organization"])
-        if args.get("organization_badge"):
-            orgs = Organization.objects.with_badge(args["organization_badge"])
-            reuses = reuses.filter(organization__in=orgs)
-        if args.get("owner"):
-            if not ObjectId.is_valid(args["owner"]):
-                api.abort(400, "Owner arg must be an identifier")
-            reuses = reuses.filter(owner=args["owner"])
-        return reuses
+def parse_reuse_filters(reuses, args):
+    if args.get("q"):
+        # Following code splits the 'q' argument by spaces to surround
+        # every word in it with quotes before rebuild it.
+        # This allows the search_text method to tokenise with an AND
+        # between tokens whereas an OR is used without it.
+        phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+        reuses = reuses.search_text(phrase_query)
+    if args.get("dataset"):
+        if not ObjectId.is_valid(args["dataset"]):
+            api.abort(400, "Dataset arg must be an identifier")
+        reuses = reuses.filter(datasets=args["dataset"])
+    if args.get("featured"):
+        reuses = reuses.filter(featured=args["featured"])
+    if args.get("topic"):
+        reuses = reuses.filter(topic=args["topic"])
+    if args.get("type"):
+        reuses = reuses.filter(type=args["type"])
+    if args.get("tag"):
+        reuses = reuses.filter(tags__all=args["tag"])
+    if args.get("organization"):
+        if not ObjectId.is_valid(args["organization"]):
+            api.abort(400, "Organization arg must be an identifier")
+        reuses = reuses.filter(organization=args["organization"])
+    if args.get("organization_badge"):
+        orgs = Organization.objects.with_badge(args["organization_badge"])
+        reuses = reuses.filter(organization__in=orgs)
+    if args.get("owner"):
+        if not ObjectId.is_valid(args["owner"]):
+            api.abort(400, "Owner arg must be an identifier")
+        reuses = reuses.filter(owner=args["owner"])
+    return reuses
 
 
 ns = api.namespace("reuses", "Reuse related operations")
 
 common_doc = {"params": {"reuse": "The reuse ID or slug"}}
-
-reuse_parser = ReuseApiParser()
 
 
 @ns.route("/", endpoint="reuses")
