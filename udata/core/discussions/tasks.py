@@ -2,13 +2,11 @@ from datetime import UTC, datetime
 
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
 from udata.features.notifications.models import Notification
-from udata.tasks import connect, get_logger
+from udata.tasks import connect
 
 from . import mails
 from .models import Discussion
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
-
-log = get_logger(__name__)
 
 
 @connect(on_new_discussion, by_id=True)
