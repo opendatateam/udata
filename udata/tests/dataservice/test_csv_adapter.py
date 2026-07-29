@@ -13,6 +13,7 @@ class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
         date_created = datetime(2022, 12, 31)
         date_issued = date_created + timedelta(days=1)
         date_modified = date_created + timedelta(days=2)
+        date_updated = date_created + timedelta(days=3)
         dataservice = DataserviceFactory(
             created_at=date_created,
             metadata_modified_at=date_modified,
@@ -33,6 +34,7 @@ class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
                 "created_at": date_created,
                 "issued_at": date_issued,
                 "modified_at": date_modified,
+                "last_update": date_updated,
             },
         )
         [DataserviceFactory() for _ in range(10)]
@@ -65,3 +67,4 @@ class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
         assert harvest_dataservice_values["harvest.created_at"] == date_created.isoformat()
         assert harvest_dataservice_values["harvest.issued_at"] == date_issued.isoformat()
         assert harvest_dataservice_values["harvest.modified_at"] == date_modified.isoformat()
+        assert harvest_dataservice_values["harvest.last_update"] == date_updated.isoformat()
