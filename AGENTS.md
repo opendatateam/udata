@@ -75,7 +75,7 @@ udata is a customizable and skinnable social platform dedicated to (open) data. 
 
 ```bash
 # Install dependencies with uv (recommended)
-uv sync
+uv sync --frozen
 
 # Install with pip (alternative)
 pip install --group dev -e .
