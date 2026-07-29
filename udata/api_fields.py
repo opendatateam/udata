@@ -633,16 +633,15 @@ def generate_fields(**kwargs) -> Callable:
             parser.add_argument("q", type=str, location="args")
 
         for filterable in filterables:
-            extra_kwargs = {}
-            if filterable.get("is_list"):
-                extra_kwargs["action"] = "append"
             parser.add_argument(
                 # Use the custom label from `nested_filters` if there's one.
                 filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
-                **extra_kwargs,
+                # A list field accepts the parameter several times, and
+                # `apply_sort_filters` then requires all the values (`__all`).
+                action="append" if filterable.get("is_list") else "store",
             )
 
         cls.__index_parser__ = parser
