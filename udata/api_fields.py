@@ -639,6 +639,9 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                # A list field accepts the parameter several times, and
+                # `apply_sort_filters` then requires all the values (`__all`).
+                action="append" if filterable.get("is_list") else "store",
             )
 
         cls.__index_parser__ = parser
@@ -683,9 +686,12 @@ def generate_fields(**kwargs) -> Callable:
                     if query:
                         base_query = filterable["query"](base_query, filter)
                     else:
+                        column = filterable["column"]
+                        if filterable.get("is_list"):
+                            column = f"{column}__all"
                         base_query = base_query.filter(
                             **{
-                                filterable["column"]: filter,
+                                column: filter,
                             }
                         )
 
@@ -1130,6 +1136,23 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # "key" is the param key in the URL
     if "key" not in filterable:
         filterable["key"] = column
+
+    # For simple list fields (e.g. tags), allow multiple filter values via
+    # action="append" and use __all to match documents containing all values.
+    # Excluded: EmbeddedDocumentListField (filtered on a sub-field like
+    # badges__kind, where __all semantics don't apply).
+    # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
+    # Dataservice.contact_points) — these are filtered by a single ObjectId
+    # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
+    # Supporting it would also require updating the ObjectId validation above.
+    if (
+        isinstance(field, mongo_fields.ListField)
+        and not isinstance(field, mongo_fields.EmbeddedDocumentListField)
+        and not isinstance(
+            field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
+        )
+    ):
+        filterable["is_list"] = True
 
     # If we do a filter on a embed document, get the class info
     # of this document to see if there is a default filter value

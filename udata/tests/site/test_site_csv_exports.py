@@ -100,6 +100,24 @@ class SiteCsvExportsTest(APITestCase):
         self.assertNotIn(str(hidden_dataset.id), ids)
 
     @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_datasets_csv_with_multiple_tags_filter(self):
+        both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
+        only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
+
+        response = self.get(url_for("api.site_datasets_csv", tag=["tag-a", "tag-b"]))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
     def test_datasets_csv_with_badge_filter(self):
         dataset_with_badge = DatasetFactory(resources=[ResourceFactory()])
         dataset_with_badge.add_badge(SPD)
@@ -210,6 +228,24 @@ class SiteCsvExportsTest(APITestCase):
         for dataset in filtered_datasets:
             for resource in dataset.resources:
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_resources_csv_with_multiple_tags_filter(self):
+        both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
+        only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
+
+        response = self.get(url_for("api.site_datasets_resources_csv", tag=["tag-a", "tag-b"]))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
 
     @pytest.mark.options(EXPORT_CSV_MODELS=[])
     def test_organizations_csv(self):
@@ -339,6 +375,83 @@ class SiteCsvExportsTest(APITestCase):
         self.assertNotIn(str(hidden_reuse.id), ids)
 
     @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_dataset_filter(self):
+        dataset = DatasetFactory()
+        matching_reuse = ReuseFactory(datasets=[dataset])
+        other_reuse = ReuseFactory(datasets=[DatasetFactory()])
+
+        response = self.get(url_for("api.site_reuses_csv", dataset=dataset.id))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(matching_reuse.id), ids)
+        self.assertNotIn(str(other_reuse.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_multiple_tags_filter(self):
+        both_tags = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a", "tag-b"])
+        both_tags_and_more = ReuseFactory(
+            datasets=[DatasetFactory()], tags=["tag-a", "tag-b", "tag-c"]
+        )
+        only_a = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a"])
+
+        response = self.get(url_for("api.site_reuses_csv", tag=["tag-a", "tag-b"]))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 2)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertIn(str(both_tags_and_more.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_featured_filter(self):
+        featured = ReuseFactory(datasets=[DatasetFactory()], featured=True)
+        not_featured = ReuseFactory(datasets=[DatasetFactory()], featured=False)
+
+        response = self.get(url_for("api.site_reuses_csv", featured=True))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(featured.id), ids)
+
+        response = self.get(url_for("api.site_reuses_csv", featured=False))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(not_featured.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_invalid_filter_value(self):
+        ReuseFactory(datasets=[DatasetFactory()])
+
+        self.assert400(self.get(url_for("api.site_reuses_csv", type="not-a-reuse-type")))
+        self.assert400(self.get(url_for("api.site_reuses_csv", sort="not-a-sort")))
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
     def test_dataservices_csv(self):
         dataservices = [DataserviceFactory(datasets=[DatasetFactory()]) for _ in range(5)]
         archived_dataservices = [
@@ -420,6 +533,28 @@ class SiteCsvExportsTest(APITestCase):
             self.assertIn(str(dataservice.id), ids)
         for dataservice in dataservices:
             self.assertNotIn(str(dataservice.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_dataservices_csv_with_multiple_tags_filter(self):
+        both_tags = DataserviceFactory(datasets=[DatasetFactory()], tags=["tag-a", "tag-b"])
+        both_tags_and_more = DataserviceFactory(
+            datasets=[DatasetFactory()], tags=["tag-a", "tag-b", "tag-c"]
+        )
+        only_a = DataserviceFactory(datasets=[DatasetFactory()], tags=["tag-a"])
+
+        response = self.get(url_for("api.site_dataservices_csv", tag=["tag-a", "tag-b"]))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 2)
+        self.assertIn(str(both_tags.id), ids)
+        self.assertIn(str(both_tags_and_more.id), ids)
+        self.assertNotIn(str(only_a.id), ids)
 
     @pytest.mark.options(EXPORT_CSV_MODELS=[])
     def test_harvest_csv(self):
