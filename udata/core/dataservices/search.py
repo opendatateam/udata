@@ -32,6 +32,10 @@ __all__ = ("DataserviceSearch",)
 DEFAULT_SORTING = "-created_at"
 
 
+# Duplicates by hand the filters declared with `filterable=` on the Dataservice
+# model: both lists must be kept in sync, or a filter silently works on one path
+# only. Meant to disappear once `mongo_search` and the RDF catalogs use
+# `Dataservice.apply_sort_filters()`, which derives its filters from the model.
 def parse_dataservice_filters(dataservices, args):
     if args.get("q"):
         # Following code splits the 'q' argument by spaces to surround

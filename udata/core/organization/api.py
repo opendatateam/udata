@@ -80,6 +80,11 @@ def resolve_assignment_subjects(raw_assignments, org):
     return subjects
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. Organization declares none today, so
+# nothing is duplicated yet, but any filter added on both sides would have to be
+# kept in sync. Meant to disappear once the callers use
+# `Organization.apply_sort_filters()`.
 class OrgApiParser(ModelApiParser):
     sorts = {
         "name": "name",

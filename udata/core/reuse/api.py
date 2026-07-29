@@ -38,6 +38,10 @@ DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
 
 
+# Duplicates by hand the filters declared with `filterable=` on the Reuse model:
+# both lists must be kept in sync, or a filter silently works on one path only.
+# Meant to disappear once `mongo_search` uses `Reuse.apply_sort_filters()`, which
+# derives its filters from the model itself.
 def parse_reuse_filters(reuses, args):
     if args.get("q"):
         # Following code splits the 'q' argument by spaces to surround
