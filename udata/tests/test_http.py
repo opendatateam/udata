@@ -4,6 +4,10 @@ from udata.http import ssrf_policy, ssrf_session
 from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase
 
+# An ambient proxy would serve these requests from an unguarded pool manager,
+# so the outcome asserted below would depend on the machine's environment.
+pytestmark = pytest.mark.usefixtures("no_ambient_proxy")
+
 
 class SSRFSessionFactoryTest(PytestOnlyTestCase):
     @pytest.mark.options(URLS_ALLOW_LOCAL=False, URLS_ALLOW_PRIVATE=False)

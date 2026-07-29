@@ -23,6 +23,20 @@ def rmock():
 
 
 @pytest.fixture
+def no_ambient_proxy(monkeypatch):
+    """Drop the proxy settings exported by the machine.
+
+    requests resolves ``*_proxy``/``no_proxy`` from the environment on every
+    request, so whether a test exercises the HTTP stack or a proxy is otherwise
+    decided by the developer's shell or the CI image — which does export
+    ``no_proxy``.
+    """
+    for name in ("http_proxy", "https_proxy", "all_proxy", "no_proxy"):
+        monkeypatch.delenv(name, raising=False)
+        monkeypatch.delenv(name.upper(), raising=False)
+
+
+@pytest.fixture
 def instance_path(app, tmpdir):
     """Use temporary application instance_path"""
     from udata.core import storages

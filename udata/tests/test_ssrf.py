@@ -1,3 +1,4 @@
+import socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 
@@ -10,6 +11,11 @@ from udata.ssrf import (
     SSRFProtectedSession,
     blocked_reason,
 )
+
+# Every request here crosses requests' proxy resolution, and a proxied request
+# never reaches the guard: neutralise the environment so these tests assert the
+# code's behaviour rather than the machine's proxy settings.
+pytestmark = pytest.mark.usefixtures("no_ambient_proxy")
 
 # (address, category that forbids it, or None if allowed under the DEFAULT policy)
 DEFAULT_CASES = [
@@ -200,6 +206,46 @@ def test_session_allows_permitted_target_end_to_end(local_server):
     response = session.get(f"http://{host}:{port}/", timeout=5)
     assert response.status_code == 200
     assert response.text == "hello from allowed host"
+
+
+def resolving_to(addresses):
+    """A ``socket.getaddrinfo`` stub answering with the given IPs, in order."""
+
+    def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (ip, port))
+            for ip in addresses
+        ]
+
+    return getaddrinfo
+
+
+@pytest.mark.parametrize("blocked_first", [True, False])
+def test_session_connects_to_the_allowed_address_of_a_multi_homed_host(
+    local_server, monkeypatch, blocked_first
+):
+    # A hostname resolving to both an internal and an allowed address must stay
+    # reachable through the allowed one — a blocked candidate rules out itself,
+    # not the whole host — whatever order the resolver hands them out in.
+    host, port = local_server
+    addresses = ["10.0.0.1", host] if blocked_first else [host, "10.0.0.1"]
+    monkeypatch.setattr(socket, "getaddrinfo", resolving_to(addresses))
+
+    session = SSRFProtectedSession(SSRFPolicy(allow_loopback=True))
+    response = session.get(f"http://multi-homed.test:{port}/", timeout=5)
+
+    assert response.status_code == 200
+    assert response.text == "hello from allowed host"
+
+
+def test_session_blocks_a_host_whose_addresses_are_all_forbidden(monkeypatch):
+    # The counterpart: skipping blocked candidates must not end up letting a
+    # fully internal host through silently.
+    monkeypatch.setattr(socket, "getaddrinfo", resolving_to(["10.0.0.1", "192.168.1.1"]))
+
+    session = SSRFProtectedSession()
+    with pytest.raises(BlockedAddressError, match="private"):
+        session.get("http://internal-only.test:9/", timeout=2)
 
 
 def test_session_blocks_a_redirect_to_a_forbidden_target(local_server):

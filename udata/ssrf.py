@@ -45,6 +45,7 @@ from urllib3.connectionpool import HTTPConnectionPool
 from urllib3.exceptions import ConnectTimeoutError, NameResolutionError, NewConnectionError
 from urllib3.poolmanager import PoolManager
 from urllib3.util import Timeout
+from urllib3.util.connection import allowed_gai_family
 
 if TYPE_CHECKING:
     # Private urllib3 aliases, kept out of the runtime imports: a rename in a
@@ -190,17 +191,29 @@ def _guarded_create_connection(
     Mirrors urllib3's connector but calls ``validate(ip)`` on each resolved
     candidate right before ``connect()``. Resolution and connection share the
     same ``getaddrinfo`` result, so there is no rebinding window.
+
+    A blocked candidate only rules itself out, exactly like a candidate that
+    fails to connect: a host publishing both a public and an internal address
+    stays reachable through the public one. The block is only raised when no
+    candidate could be connected to at all.
     """
     host, port = address
     if host.startswith("["):
         host = host.strip("[]")
 
     err = None
+    blocked = None
+    # Same address family as urllib3 would ask for, so the guard never widens
+    # nor narrows the set of candidates: AF_INET when the host cannot bind IPv6.
     for af, socktype, proto, _canonname, sa in socket.getaddrinfo(
-        host, port, socket.AF_UNSPEC, socket.SOCK_STREAM
+        host, port, allowed_gai_family(), socket.SOCK_STREAM
     ):
         # sa[0] is the exact IP the socket would connect to.
-        validate(sa[0])
+        try:
+            validate(sa[0])
+        except BlockedAddressError as e:
+            blocked = e
+            continue
         sock = None
         try:
             sock = socket.socket(af, socktype, proto)
@@ -219,8 +232,13 @@ def _guarded_create_connection(
             if sock is not None:
                 sock.close()
 
+    # A connection error describes what happened to the addresses we were
+    # allowed to use, so it wins over the block: reporting the block instead
+    # would read as "your source is forbidden" when it is merely unreachable.
     if err is not None:
         raise err
+    if blocked is not None:
+        raise blocked
     raise OSError("getaddrinfo returns an empty list")
 
 
