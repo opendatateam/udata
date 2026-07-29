@@ -3,13 +3,13 @@ from flask import abort, request
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
 )
-from udata.models import Dataset, Organization, Reuse, User, db
+from udata.models import Dataset, Reuse, User, db
 from udata.utils import id_or_404
 
 from .actions import accept_transfer, refuse_transfer, request_transfer
@@ -46,7 +46,7 @@ transfer_response_fields = api.model(
 
 person_mapping = {
     User: user_ref_fields,
-    Organization: org_ref_fields,
+    Organization: Organization.__ref_fields__,
 }
 
 subject_mapping = {

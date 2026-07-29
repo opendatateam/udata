@@ -58,6 +58,8 @@ class SpamMixin(object):
         return False
 
     def spam_report_message(self, breadcrumb):
+        if url := getattr(self, "self_web_url", lambda: None)():
+            return f"Spam potentiel sur [{type(self).__name__}]({url})"
         return f"Spam potentiel sur {type(self).__name__}"
 
     @classmethod
@@ -96,8 +98,9 @@ class SpamMixin(object):
                 continue
 
             # Only check fields that have changed (or all fields if document is new)
+            root_field = field_name.split(".")[0]
             field_changed = is_created or any(
-                field_name.startswith(cf) or cf.startswith(field_name.split(".")[0])
+                field_name.startswith(cf) or cf == root_field or cf.startswith(root_field + ".")
                 for cf in changed_fields
             )
             if not field_changed:

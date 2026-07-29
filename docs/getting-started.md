@@ -98,9 +98,18 @@ A sample content of `udata.cfg` for local development is shown below.
 ```shell
 from udata.settings import Defaults
 
+# generate secrets with `python -c "import secrets; print(secrets.token_urlsafe(64))"`
+SECRET_KEY='generated-secret'
+API_TOKEN_SECRET='another-generated-secret'
+ELASTICSEARCH_URL='http://localhost:9200'
+
+HARVESTER_BACKENDS = ['dcat']
+HARVEST_MAX_ITEMS = 100
+
 DEBUG = True
 SEND_MAIL = False
 SERVER_NAME ='dev.local:7000'
+CDATA_BASE_URL = 'http://localhost:3000'
 CACHE_TYPE = 'flask_caching.backends.null'
 
 URLS_ALLOW_PRIVATE = True

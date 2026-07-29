@@ -1,6 +1,6 @@
-from flask import url_for
+from flask import g, url_for
 
-from udata.core.pages.factories import PageFactory
+from udata.core.edito_blocs.models import DatasetsListBloc, HeroBloc
 from udata.core.site.models import Site
 from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
@@ -14,30 +14,47 @@ class SiteAPITest(APITestCase):
         site = Site.objects.get(id=self.app.config["SITE_ID"])
 
         self.assertEqual(site.title, response.json["title"])
-        self.assertIsNotNone(response.json["version"])
 
-    def test_set_site(self):
+    def test_get_site_hides_blocs_by_default(self):
         response = self.get(url_for("api.site"))
         self.assert200(response)
+        assert "datasets_blocs" not in response.json
+        assert "reuses_blocs" not in response.json
+        assert "dataservices_blocs" not in response.json
 
+    def test_get_site_with_x_fields_shows_blocs(self):
+        # Trigger site creation via the API
+        self.get(url_for("api.site"))
         site = Site.objects.get(id=self.app.config["SITE_ID"])
-        ids = [p.id for p in PageFactory.create_batch(3)]
-        self.login(AdminFactory())
+        site.datasets_blocs = [HeroBloc(title="Test hero")]
+        site.save()
 
+        # Invalidate the cached site in flask.g so it's reloaded from DB
+        g.site = None
+
+        response = self.get(url_for("api.site"), headers={"X-Fields": "{*}"})
+        self.assert200(response)
+        assert "datasets_blocs" in response.json
+        assert len(response.json["datasets_blocs"]) == 1
+        assert response.json["datasets_blocs"][0]["class"] == "HeroBloc"
+
+    def test_set_site_blocs(self):
+        self.login(AdminFactory())
         response = self.patch(
             url_for("api.site"),
             {
-                "datasets_page": ids[0],
-                "reuses_page": ids[1],
-                "dataservices_page": ids[2],
+                "datasets_blocs": [
+                    {
+                        "class": "DatasetsListBloc",
+                        "title": "Featured",
+                        "datasets": [],
+                    }
+                ],
             },
         )
-
         self.assert200(response)
-        self.assertEqual(response.json["title"], site.title)
 
         site = Site.objects.get(id=self.app.config["SITE_ID"])
-
-        self.assertEqual(site.datasets_page.id, ids[0])
-        self.assertEqual(site.reuses_page.id, ids[1])
-        self.assertEqual(site.dataservices_page.id, ids[2])
+        assert len(site.datasets_blocs) == 1
+        assert isinstance(site.datasets_blocs[0], DatasetsListBloc)
+        assert site.datasets_blocs[0].title == "Featured"

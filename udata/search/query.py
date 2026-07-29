@@ -3,12 +3,14 @@ import json
 import logging
 import urllib.parse
 
-from elasticsearch.exceptions import BadRequestError
-from flask import current_app, request
+from elasticsearch.exceptions import RequestError
+from flask import abort, current_app, request
 
 from udata.search.result import SearchResult
 
 DEFAULT_PAGE_SIZE = 20
+# Elasticsearch default max_result_window is 10000
+ES_MAX_RESULT_WINDOW = 10000
 log = logging.getLogger(__name__)
 
 
@@ -17,8 +19,17 @@ class SearchQuery:
     model = None
 
     def __init__(self, params):
-        self.page = int(params.pop("page", 1))
-        self.page_size = int(params.pop("page_size", DEFAULT_PAGE_SIZE))
+        self.page = max(1, int(params.pop("page", 1)))
+        self.page_size = max(1, int(params.pop("page_size", DEFAULT_PAGE_SIZE)))
+        offset = (self.page - 1) * self.page_size + self.page_size
+        if offset > ES_MAX_RESULT_WINDOW:
+            max_page = ES_MAX_RESULT_WINDOW // self.page_size
+            abort(
+                400,
+                f"Result window is too large: page {self.page} with page_size {self.page_size} "
+                f"exceeds the maximum of {ES_MAX_RESULT_WINDOW} results. "
+                f"Maximum page for this page_size is {max_page}.",
+            )
         self._query = params.pop("q", "")
         self.sort = params.pop("sort", None)
         self._filters = {}
@@ -41,11 +52,11 @@ class SearchQuery:
             service = self.adapter.service_class(get_elastic_client())
             try:
                 results, total, total_pages, facets = service.search(self.to_search_params())
-            except BadRequestError as e:
+            except RequestError as e:
                 log.error(
-                    "Elasticsearch BadRequestError for %s: %s",
+                    "Elasticsearch RequestError for %s: %s",
                     self.adapter.__name__,
-                    json.dumps(e.body, indent=2, default=str),
+                    json.dumps(e.info, indent=2, default=str),
                 )
                 raise
             result_dicts = [{"id": r.id} for r in results]

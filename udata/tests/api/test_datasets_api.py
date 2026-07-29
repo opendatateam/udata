@@ -43,7 +43,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
-from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -54,17 +54,6 @@ from udata.tests.helpers import assert200, assert404, create_geozones_fixtures
 from udata.utils import faker, unique_string
 
 from . import APITestCase, PytestOnlyAPITestCase
-
-SAMPLE_GEOM = {
-    "type": "MultiPolygon",
-    "coordinates": [
-        [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],  # noqa
-        [
-            [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],  # noqa
-            [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]],
-        ],
-    ],
-}
 
 
 def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
@@ -195,6 +184,8 @@ class DatasetAPITest(APITestCase):
 
         temporal_coverage = DateRange(start="2022-05-03", end="2022-05-04")
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+        _ = DatasetFactory(access_type=AccessType.OPEN)
+        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
 
         owner_dataset = DatasetFactory(owner=owner)
         org_dataset = DatasetFactory(organization=org)
@@ -218,8 +209,6 @@ class DatasetAPITest(APITestCase):
                 )
             ]
         )
-
-        restricted_dataset = DatasetFactory(access_type=AccessType.RESTRICTED)
 
         total_datasets = Dataset.objects().count()
 
@@ -283,6 +272,12 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(temporal_coverage_dataset.id))
+
+        # filter on access_type
+        response = self.get(url_for("api.datasets", access_type=AccessType.RESTRICTED))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(restricted_dataset.id))
 
         # filter on owner
         response = self.get(url_for("api.datasets", owner=owner.id))
@@ -714,6 +709,37 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), 3)
 
+    def test_dataset_api_create_populates_hosted_resource_fields(self):
+        """A new hosted resource must be populated normally, not protected
+
+        The protection of server-computed fields only applies to existing
+        hosted files: a brand new resource has no url yet, so its submitted
+        url/checksum/filesize/mime/format must be persisted as-is.
+        """
+        data = DatasetFactory.as_dict()
+        data["resources"] = [
+            {
+                "title": faker.sentence(),
+                "type": "main",
+                "filetype": "file",
+                "url": faker.url(),
+                "checksum": {"type": "sha1", "value": "0" * 40},
+                "filesize": 1234,
+                "mime": "text/csv",
+                "format": "csv",
+            }
+        ]
+        with self.api_user():
+            response = self.post(url_for("api.datasets"), data)
+        self.assert201(response)
+
+        resource = Dataset.objects.first().resources[0]
+        self.assertEqual(resource.url, data["resources"][0]["url"])
+        self.assertEqual(resource.checksum.value, "0" * 40)
+        self.assertEqual(resource.filesize, 1234)
+        self.assertEqual(resource.mime, "text/csv")
+        self.assertEqual(resource.format, "csv")
+
     def test_dataset_api_create_with_resources_dict(self):
         """Create a dataset w/ resources in a dict instead of list,
         should fail
@@ -917,6 +943,38 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         resource = dataset.resources[0]
         self.assertEqual(resource.extras, {"extra:id": "id"})
+
+    def test_dataset_api_update_does_not_override_hosted_resource_fields(self):
+        """A dataset PUT with stale resources must not override upload-computed fields
+
+        Regression test: publishers chaining file uploads with a dataset PUT
+        built from stale metadata used to overwrite the fresh checksum
+        computed at upload time (e.g. data.gouv.fr RNE dataset).
+        """
+        user = self.login()
+        resource = ResourceFactory(mime="text/csv", format="csv")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        # to_dict() serializes embedded resources with the mongo `_id` key
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["title"] = "new title"
+        data["resources"][0]["url"] = faker.url()
+        data["resources"][0]["checksum"] = {"type": "sha1", "value": "0" * 40}
+        data["resources"][0]["filesize"] = resource.filesize + 1
+        data["resources"][0]["filetype"] = "remote"
+        data["resources"][0]["mime"] = "application/pdf"
+        data["resources"][0]["format"] = "pdf"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        updated = dataset.resources[0]
+        self.assertEqual(updated.title, "new title")
+        self.assertEqual(updated.url, resource.url)
+        self.assertEqual(updated.checksum.value, resource.checksum.value)
+        self.assertEqual(updated.filesize, resource.filesize)
+        self.assertEqual(updated.filetype, "file")
+        self.assertEqual(updated.mime, "text/csv")
+        self.assertEqual(updated.format, "csv")
 
     def test_dataset_api_update_without_resources(self):
         """It should update a dataset from the API without resources"""
@@ -1843,6 +1901,10 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], 3)
+        self.assertEqual(data["mime"], "text/plain")
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "7e240de74fb1ed08fa08d38063f6a6a91462a815")
         response = self.put(url_for("api.resource", dataset=dataset, rid=data["id"]), data)
         self.assert200(response)
         dataset.reload()
@@ -1859,11 +1921,12 @@ class DatasetResourceAPITest(APITestCase):
         parts = 4
         url = url_for("api.upload_new_dataset_resource", dataset=dataset)
 
-        for i in range(parts):
+        # Distinct chunk contents so the final checksum proves the combination order
+        for i, chunk in enumerate([b"a", b"b", b"c", b"d"]):
             response = self.post(
                 url,
                 {
-                    "file": (BytesIO(b"a"), "blob"),
+                    "file": (BytesIO(chunk), "blob"),
                     "uuid": uuid,
                     "filename": "test.txt",
                     "partindex": i,
@@ -1896,6 +1959,53 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data["title"], "test.txt")
+        self.assertEqual(data["filesize"], parts)
+        self.assertEqual(data["mime"], "text/plain")
+        # The sha1 of b"abcd" proves the chunks were combined in order
+        self.assertEqual(data["checksum"]["type"], "sha1")
+        self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
+        self.assertEqual(list(storages.chunks.list_files()), [])
+
+    def test_create_with_file_chunk_bad_size(self):
+        """It should reject a chunk whose size does not match chunksize"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {
+                "file": (BytesIO(b"a"), "blob"),
+                "uuid": str(uuid4()),
+                "filename": "test.txt",
+                "partindex": 0,
+                "partbyteoffset": 0,
+                "totalfilesize": 4,
+                "totalparts": 4,
+                "chunksize": 10,  # Does not match the 1-byte chunk
+            },
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertFalse(response.json["success"])
+        self.assertEqual(list(storages.chunks.list_files()), [])
+
+    def test_create_with_file_missing_file(self):
+        """It should return an error when no file is provided"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"bad": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertFalse(response.json["success"])
+        self.assertIn("error", response.json)
 
     def test_reorder(self):
         # Register an extra field in order to test
@@ -2033,6 +2143,102 @@ class DatasetResourceAPITest(APITestCase):
         # Url should have been updated as it is a remote resource
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
+
+    def test_update_local_does_not_override_server_computed_fields(self):
+        """A stale client payload must not override upload-computed fields of a hosted file
+
+        Regression test: clients sending metadata fetched before a new file
+        upload used to overwrite the fresh checksum with a stale one, leaving
+        a checksum in database that does not match the hosted file.
+        """
+        resource = ResourceFactory(mime="text/csv", format="csv")
+        original_checksum = resource.checksum.value
+        original_filesize = resource.filesize
+        original_url = resource.url
+        original_mime = resource.mime
+        original_format = resource.format
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": faker.url(),
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": original_filesize + 1,
+            "mime": "application/pdf",
+            "format": "pdf",
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        updated = self.dataset.resources[0]
+        self.assertEqual(updated.title, data["title"])
+        self.assertEqual(updated.checksum.value, original_checksum)
+        self.assertEqual(updated.filesize, original_filesize)
+        self.assertEqual(updated.url, original_url)
+        self.assertEqual(updated.mime, original_mime)
+        self.assertEqual(updated.format, original_format)
+
+    def test_update_local_cannot_remove_checksum(self):
+        """Sending a null checksum must not remove the checksum of a hosted file"""
+        resource = ResourceFactory()
+        original_checksum = resource.checksum.value
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": None,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertEqual(self.dataset.resources[0].checksum.value, original_checksum)
+
+    def test_update_remote_checksum(self):
+        """Server-computed fields of a remote resource should remain editable by clients"""
+        resource = ResourceFactory(filetype="remote", mime="text/csv", format="csv")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": 42,
+            "mime": "application/pdf",
+            "format": "pdf",
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        updated = self.dataset.resources[0]
+        self.assertEqual(updated.checksum.value, "0" * 40)
+        self.assertEqual(updated.filesize, 42)
+        self.assertEqual(updated.mime, "application/pdf")
+        self.assertEqual(updated.format, "pdf")
+
+    def test_update_remote_can_remove_checksum(self):
+        """Sending a null checksum should remove the checksum of a remote resource"""
+        resource = ResourceFactory(filetype="remote")
+        self.assertIsNotNone(resource.checksum)
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        data = {
+            "title": faker.sentence(),
+            "url": resource.url,
+            "checksum": None,
+        }
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)), data
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertIsNone(self.dataset.resources[0].checksum)
 
     def test_cannot_update_resource_filetype(self):
         user = self.login()
@@ -2532,6 +2738,53 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 1)
         self.assertEqual(CommunityResource.objects.first().description, "new description")
         self.assertTrue(CommunityResource.objects.first().url.endswith("test.txt"))
+
+    def test_community_resource_update_does_not_override_server_computed_fields(self):
+        """A stale client payload must not override upload-computed fields of a hosted file"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, mime="text/csv", format="csv"
+        )
+        original_url = community_resource.url
+        original_checksum = community_resource.checksum.value
+        original_filesize = community_resource.filesize
+        original_mime = community_resource.mime
+        original_format = community_resource.format
+        data = {
+            "title": faker.sentence(),
+            "url": faker.url(),
+            "checksum": {"type": "sha1", "value": "0" * 40},
+            "filesize": original_filesize + 1,
+            "mime": "application/pdf",
+            "format": "pdf",
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.title, data["title"])
+        self.assertEqual(updated.url, original_url)
+        self.assertEqual(updated.checksum.value, original_checksum)
+        self.assertEqual(updated.filesize, original_filesize)
+        self.assertEqual(updated.mime, original_mime)
+        self.assertEqual(updated.format, original_format)
+
+    def test_community_resource_update_does_not_override_filetype(self):
+        """A stale client payload must not change the filetype of a hosted file
+
+        Unlike ResourceAPI.put, the community resource PUT endpoint has no
+        explicit guard rejecting filetype changes: the protection relies solely
+        on BaseResourceForm.populate_obj.
+        """
+        user = self.login()
+        community_resource = CommunityResourceFactory(dataset=DatasetFactory(), owner=user)
+        data = {
+            "title": faker.sentence(),
+            "url": community_resource.url,
+            "filetype": "remote",
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.first().filetype, "file")
 
     def test_community_resource_file_update_old_file_deletion(self):
         """It should update a community resource's file and delete the old one"""

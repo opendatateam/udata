@@ -8,6 +8,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.site.models import Site
 from udata.models import Dataset, Organization, Reuse
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -49,6 +50,29 @@ class GetStockMetricsTest(PytestOnlyDBTestCase):
             assert len(res[i]) == 13  # The current month as well as last year's are included
             assert list(res[i].values())[-1] == len(key) * 2403 + 1
             assert list(res[i].values())[-2] == len(key) * 2403
+
+    def test_failed_metrics_api_does_not_override_stored_site_metrics(self, app, rmock):
+        """A transient metrics API failure must not wipe previously stored metrics."""
+        previous_visits = {"2026-05": 42, "2026-06": 51}
+        previous_downloads = {"2026-05": 10, "2026-06": 12}
+        site = Site(
+            id=app.config["SITE_ID"],
+            title="Test site",
+            metrics={
+                "datasets_visits_by_months": previous_visits,
+                "resources_downloads_by_months": previous_downloads,
+            },
+        )
+        site.save()
+
+        rmock.get(f"{app.config['METRICS_API']}/site/data/", status_code=500)
+
+        site.count_datasets()
+        site.count_resources()
+
+        site.reload()
+        assert site.metrics["datasets_visits_by_months"] == previous_visits
+        assert site.metrics["resources_downloads_by_months"] == previous_downloads
 
     @pytest.mark.parametrize(
         "model,factory,date_label",

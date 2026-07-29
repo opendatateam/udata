@@ -45,6 +45,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
@@ -119,18 +120,23 @@ def get_json_ld_extra(key, value):
 @generate_fields()
 class HarvestDatasetMetadata(EmbeddedDocument):
     backend = StringField()
+    domain = StringField()
+
+    source_id = StringField()
+
+    remote_id = StringField()
+    remote_url = URLField()
+
+    uri = StringField()
+
     created_at = DateTimeField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
-    source_id = StringField()
-    remote_id = StringField()
-    domain = StringField()
     last_update = DateTimeField()
-    remote_url = URLField()
-    uri = StringField()
-    dct_identifier = StringField()
     archived_at = DateTimeField()
     archived = StringField()
+
+    dct_identifier = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
@@ -138,6 +144,7 @@ class HarvestDatasetMetadata(EmbeddedDocument):
 class HarvestResourceMetadata(EmbeddedDocument):
     issued_at = DateTimeField()
     modified_at = DateTimeField()
+    last_update = DateTimeField()
     uri = StringField()
     dct_identifier = StringField()
 
@@ -565,6 +572,7 @@ class DatasetBadgeMixin(BadgeMixin):
 @generate_fields()
 class Dataset(
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DatasetBadgeMixin,
@@ -691,6 +699,12 @@ class Dataset(
     verbose_name = _("dataset")
 
     missing_resources = False
+
+    def fields_to_check_for_spam(self):
+        return {"title": self.title, "description": self.description}
+
+    def spam_is_whitelisted(self) -> bool:
+        return self.organization and self.organization.certified
 
     @cached_property
     def resources_len(self):
@@ -1000,42 +1014,53 @@ class Dataset(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources.insert(0, resource)
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         self.update(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Keep the in-memory document consistent with what we persist below, so we
+        # don't need a self.reload() afterwards. reload() would re-read and
+        # re-deserialize every embedded resource (O(N), ~1.3s on a 15k-resource
+        # dataset) for nothing: nothing downstream consumes a fully-reloaded object
+        # (the endpoint returns `resource`, and the on_resource_updated handlers only
+        # read document.resources / document.organization, all up to date here).
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         Dataset.objects(id=self.id, resources__id=resource.id).update_one(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             set__resources__S=resource,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources = [r for r in self.resources if r.id != resource.id]
+        self.quality_cached = self.compute_quality()
+        self.last_modified_internal = datetime.now(UTC)
 
         self.update(
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             pull__resources__id=resource.id,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
         # Deletes resource's file from file storage
@@ -1047,7 +1072,6 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
@@ -1142,6 +1166,7 @@ class Dataset(
 pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
+post_save.connect(SpamMixin.post_save, sender=Dataset)
 
 
 class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySet]):
@@ -1243,6 +1268,6 @@ def get_resource(id):
     """Fetch a resource given its UUID"""
     dataset = Dataset.objects(resources__id=id).first()
     if dataset:
-        return get_by(dataset.resources, "id", id)
+        return get_by(dataset.resources, id=id)
     else:
         return CommunityResource.objects(id=id).first()

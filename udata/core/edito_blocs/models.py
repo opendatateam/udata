@@ -2,31 +2,12 @@ from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
 
-from udata.api import api, fields
+from udata.api import api
 from udata.api_fields import field, generate_fields
-from udata.core.activity.models import Auditable
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.owned import Owned
+from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
-from udata.mongo.datetime_fields import Datetimed
-from udata.mongo.document import UDataDocument as Document
-from udata.mongo.uuid_fields import AutoUUIDField
-
-page_permissions_fields = api.model(
-    "PagePermissions",
-    {
-        "delete": fields.Permission(),
-        "edit": fields.Permission(),
-    },
-)
-
-
-@generate_fields()
-class Bloc(EmbeddedDocument):
-    meta = {"allow_inheritance": True}
-
-    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:
@@ -34,15 +15,25 @@ class BlocWithTitleMixin:
     subtitle = field(StringField())
 
 
-@generate_fields(
-    mask="*,datasets{id,title,uri,page,private,archived,organization,owner,last_update,quality,metrics,description}"
+DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,organization,owner,last_update,quality,metrics,badges,tags}"
+dataset_card_fields = api.model("Dataset (card)", dict(dataset_fields), mask=DATASET_CARD_MASK)
+
+REUSE_CARD_MASK = "{id,title,slug,description,type,url,image,image_thumbnail,page,uri,organization,owner,metrics,badges,tags,topic,private,created_at,last_modified}"
+reuse_card_fields = api.model("Reuse (card)", dict(Reuse.__read_fields__), mask=REUSE_CARD_MASK)
+
+DATASERVICE_CARD_MASK = "{id,title,acronym,slug,description,base_api_url,format,self_api_url,self_web_url,organization,owner,metrics,badges,tags,private,created_at,metadata_modified_at}"
+dataservice_card_fields = api.model(
+    "Dataservice (card)", dict(Dataservice.__read_fields__), mask=DATASERVICE_CARD_MASK
 )
+
+
+@generate_fields()
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
         ListField(
             field(
                 ReferenceField("Dataset"),
-                nested_fields=dataset_fields,
+                nested_fields=dataset_card_fields,
             )
         )
     )
@@ -54,7 +45,7 @@ class ReusesListBloc(BlocWithTitleMixin, Bloc):
         ListField(
             field(
                 ReferenceField("Reuse"),
-                nested_fields=Reuse.__read_fields__,
+                nested_fields=reuse_card_fields,
             )
         )
     )
@@ -66,7 +57,7 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
         ListField(
             field(
                 ReferenceField("Dataservice"),
-                nested_fields=Dataservice.__read_fields__,
+                nested_fields=dataservice_card_fields,
             )
         )
     )
@@ -137,21 +128,39 @@ class AccordionListBloc(Bloc):
     items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 
-@generate_fields()
-class Page(Auditable, Owned, Datetimed, Document):
-    blocs = field(
-        EmbeddedDocumentListField(Bloc),
-        generic=True,
-    )
+SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
-    @property
-    @field(
-        nested_fields=page_permissions_fields,
-    )
-    def permissions(self):
-        from .permissions import PageEditPermission
 
-        return {
-            "delete": PageEditPermission(self),
-            "edit": PageEditPermission(self),
-        }
+def purge_blocs_references(ref_field, obj_id):
+    """Remove references to a deleted object from all blocs in Post, Site and Organization.
+
+    A reference can live both at the top level of a blocs field and nested inside an
+    accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
+    Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
+    two levels are enough.
+    """
+    from udata.core.organization.models import Organization
+    from udata.core.post.models import Post
+    from udata.core.site.models import Site
+
+    def purge(collection, blocs_field):
+        # Top-level blocs: <blocs_field>[].<ref_field>
+        collection.update_many(
+            {f"{blocs_field}.{ref_field}": obj_id},
+            {"$pull": {f"{blocs_field}.$[b].{ref_field}": obj_id}},
+            array_filters=[{f"b.{ref_field}": obj_id}],
+        )
+        # Blocs nested in an accordion: <blocs_field>[].items[].content[].<ref_field>
+        collection.update_many(
+            {f"{blocs_field}.items.content.{ref_field}": obj_id},
+            {"$pull": {f"{blocs_field}.$[b].items.$[].content.$[c].{ref_field}": obj_id}},
+            array_filters=[
+                {f"b.items.content.{ref_field}": obj_id},
+                {f"c.{ref_field}": obj_id},
+            ],
+        )
+
+    purge(Post._get_collection(), "blocs")
+    purge(Organization._get_collection(), "presentation_blocs")
+    for blocs_field in SITE_BLOCS_FIELDS:
+        purge(Site._get_collection(), blocs_field)

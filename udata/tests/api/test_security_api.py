@@ -5,6 +5,7 @@ from flask import url_for
 from flask_security.recoverable import generate_reset_password_token
 
 from udata.commands.fixtures import UserFactory
+from udata.core.user.factories import AdminFactory
 from udata.i18n import lazy_gettext as _
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import capture_mails
@@ -136,7 +137,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
             url_for("security.login"), {"email": user.email, "password": "password123"}
         )
         self.assertStatus(response, 200)
-        assert "tf_required" not in response.json["response"]
+        assert response.json["response"]["tf_required"] is False
         assert "tf_state" not in response.json["response"]
 
         # Should be None by default (2FA not set up)
@@ -187,3 +188,53 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
             },
         )
         self.assertStatus(response, 200)
+
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED=False, SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True
+    )
+    def test_sysadmin_requires_2fa_even_when_globally_disabled(self):
+        today = datetime.now(UTC)
+        admin = AdminFactory(password="password123", confirmed_at=today)
+
+        # Sysadmin should require 2FA even when globally disabled
+        response = self.post(
+            url_for("security.login"), {"email": admin.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is True
+        assert response.json["response"]["tf_state"] == "setup_from_login"
+
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED=False, SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True
+    )
+    def test_regular_user_no_2fa_when_globally_disabled(self):
+        today = datetime.now(UTC)
+        user = UserFactory(password="password123", confirmed_at=today)
+
+        # Regular user should not require 2FA when globally disabled
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is False
+        assert "tf_state" not in response.json["response"]
+
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED=False, SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=False
+    )
+    def test_user_with_existing_2fa_needs_validation(self):
+        today = datetime.now(UTC)
+        user = UserFactory(
+            password="password123",
+            confirmed_at=today,
+            tf_primary_method="authenticator",
+            tf_totp_secret="test_secret",
+        )
+
+        # Should require 2FA token validation
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        assert response.json["response"]["tf_required"] is True
+        assert response.json["response"]["tf_state"] == "ready"
+        assert response.json["response"]["tf_primary_method"] == "authenticator"

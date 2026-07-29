@@ -7,7 +7,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
@@ -19,10 +19,9 @@ from udata.core.topic.factories import (
     TopicWithElementsFactory,
 )
 from udata.core.topic.models import Topic, TopicElement
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
-from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.helpers import create_geozones_fixtures
 
 
@@ -356,6 +355,69 @@ class TopicsListAPITest(APITestCase):
         self.assertEqual(topic.spatial.geom, SAMPLE_GEOM)
         self.assertEqual(topic.spatial.granularity, granularity)
 
+    def test_topic_api_create_with_invalid_element_leaves_partial_state(self):
+        """Locks current behavior: the topic is saved first, then elements are
+        iterated and saved one by one. A validation error mid-loop leaves the
+        topic (and any already-saved elements) in the database and returns a
+        400 to the client. This pre-existed the api_fields migration (the old
+        TopicForm.save had the same order, it just silently dropped invalid
+        elements instead of raising). If we ever decide to make topic creation
+        atomic, this test will fail and remind us to revisit.
+        """
+        self.login()
+        dataset = DatasetFactory()
+        data = {
+            "name": "partial topic",
+            "description": "desc",
+            "tags": ["tag"],
+            "elements": [
+                {"title": "valid", "element": {"class": "Dataset", "id": str(dataset.id)}},
+                # Wrong class for the given id -> raises "Unknown reference"
+                {"element": {"class": "Reuse", "id": str(dataset.id)}},
+            ],
+        }
+        response = self.post(url_for("apiv2.topics_list"), data)
+        assert response.status_code == 400
+
+        topic = Topic.objects(name="partial topic").first()
+        assert topic is not None
+        assert len(topic.elements) == 1
+
+    def test_topic_api_create_with_malformed_element_returns_400(self):
+        """Regression test: a malformed element payload (unknown `class` or
+        missing `class` key) on topic creation must return 400, not 500.
+        `patch()` raises a raw `ValueError` (unknown class from
+        `db.resolve_model()`) or `KeyError` (missing `class` key from
+        `value["class"]`) inside the elements loop, and neither is caught
+        by the current POST handler.
+        """
+        self.login()
+        dataset = DatasetFactory()
+        base = {"name": "topic", "description": "desc", "tags": ["tag"]}
+
+        # Unknown class -> ValueError from db.resolve_model().
+        response = self.post(
+            url_for("apiv2.topics_list"),
+            {**base, "elements": [{"element": {"class": "NotAModel", "id": "abc"}}]},
+        )
+        assert response.status_code == 400
+
+        # Missing `class` key -> KeyError from value["class"].
+        response = self.post(
+            url_for("apiv2.topics_list"),
+            {**base, "elements": [{"element": {"id": str(dataset.id)}}]},
+        )
+        assert response.status_code == 400
+
+    def test_topic_api_create_with_non_object_body_returns_400(self):
+        """Regression test: a non-object JSON body must return 400, not 500.
+        `request.json.copy()` + `data.pop("elements", None)` raises a raw
+        `TypeError` on a list body (and `AttributeError` on null/string/int).
+        """
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), [{"not": "a topic"}])
+        assert response.status_code == 400
+
 
 class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
@@ -422,6 +484,45 @@ class TopicAPITest(APITestCase):
         self.assertEqual(topic.description, "Updated description")
         self.assertEqual(topic.tags, ["updated-tag"])
 
+    def test_topic_api_update_with_invalid_element_deletes_existing_elements(self):
+        """Locks current behavior: PUT deletes the topic's existing elements
+        before iterating and validating the new ones. A validation error mid-
+        loop leaves the topic updated, its old elements gone, and returns a
+        400 to the client. This pre-existed the api_fields migration (the old
+        TopicForm.save had the same order, it just silently dropped invalid
+        elements instead of raising). If we ever decide to validate the full
+        element list before touching existing data, this test will fail and
+        remind us to revisit.
+        """
+        user = self.login()
+        topic = TopicWithElementsFactory(owner=user)
+        dataset = DatasetFactory()
+        self.assertGreater(len(topic.elements), 0)
+
+        data = {
+            "name": "updated name",
+            "description": topic.description,
+            "tags": topic.tags,
+            # Wrong class for the given id -> raises "Unknown reference"
+            "elements": [{"element": {"class": "Reuse", "id": str(dataset.id)}}],
+        }
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        assert response.status_code == 400
+
+        topic.reload()
+        assert topic.name == "updated name"
+        assert len(topic.elements) == 0
+
+    def test_topic_api_update_with_non_object_body_returns_400(self):
+        """Regression test: a non-object JSON body on PUT must return 400,
+        not 500. Same root cause as the POST case: `request.json.copy()` +
+        `data.pop("elements", None)` raises a raw `TypeError` on a list.
+        """
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.put(url_for("apiv2.topic", topic=topic), [{"not": "a topic"}])
+        assert response.status_code == 400
+
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""
         owner = self.login()
@@ -482,6 +583,84 @@ class TopicAPITest(APITestCase):
         self.assertIn("uri", data)
         self.assertTrue(data["uri"].startswith("http"))
 
+    def test_featured_is_readonly_on_create(self):
+        """It should ignore featured when creating a topic (readonly)"""
+        self.login()
+        data = TopicWithElementsFactory.as_payload()
+        data["featured"] = True
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        topic = Topic.objects.first()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_is_readonly_on_update(self):
+        """It should ignore featured when updating a topic (readonly)"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner, featured=False)
+        data = {"featured": True}
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_admin_post_requires_authentication(self):
+        """It should require authentication to feature a topic"""
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is False
+
+    def test_featured_admin_post_requires_admin(self):
+        """It should require admin to feature a topic"""
+        self.login()
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is False
+
+    def test_featured_admin_post_as_admin(self):
+        """It should allow admin to feature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is True
+        assert response.json["featured"] is True
+
+    def test_featured_admin_delete_requires_authentication(self):
+        """It should require authentication to unfeature a topic"""
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is True
+
+    def test_featured_admin_delete_requires_admin(self):
+        """It should require admin to unfeature a topic"""
+        self.login()
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is True
+
+    def test_featured_admin_delete_as_admin(self):
+        """It should allow admin to unfeature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
@@ -507,6 +686,27 @@ class TopicElementsAPITest(APITestCase):
         ]
         no_elt = next(_elt for _elt in data if not _elt["element"])
         assert no_elt["element"] is None
+
+    def test_elements_list_with_nested_x_fields_mask(self):
+        """X-Fields mask should be able to traverse the `element` nested reference.
+
+        Regression test for https://github.com/opendatateam/udata/issues/3755:
+        requesting `data{id,element{id}}` returned a 400 "Mask is inconsistent
+        with model" because the GenericReferenceField was exposed as a Raw field
+        instead of a Nested model.
+        """
+        topic = TopicFactory()
+        dataset_elt = TopicElementDatasetFactory(topic=topic)
+
+        response = self.get(
+            url_for("apiv2.topic_elements", topic=topic),
+            headers={"X-Fields": "data{id,element{id}},next_page"},
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(dataset_elt.id)
+        assert data[0]["element"] == {"id": str(dataset_elt.element.id)}
 
     def test_elements_list_pagination(self):
         topic = TopicFactory()
@@ -724,7 +924,32 @@ class TopicElementsAPITest(APITestCase):
             [{"element": {"class": "Reuse", "id": dataset.id}}],
         )
         assert response.status_code == 400
-        assert "n'existe pas" in response.json["errors"][0]["element"][0]
+        assert "Unknown reference" in response.json["errors"][0]["element"][0]
+
+    def test_add_element_with_malformed_class_returns_400(self):
+        """Regression test: an unknown `class` or missing `class` key in an
+        element reference must return 400, not 500. `patch()` raises a raw
+        `ValueError` from `db.resolve_model()` for unknown classes and a
+        `KeyError` from `value["class"]` for missing keys, and the endpoint's
+        `except FieldValidationError` catches neither.
+        """
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+
+        # Unknown class -> ValueError.
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"class": "NotAModel", "id": "abc"}}],
+        )
+        assert response.status_code == 400
+
+        # Missing `class` key -> KeyError.
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"id": str(dataset.id)}}],
+        )
+        assert response.status_code == 400
 
     def test_add_empty_element(self):
         owner = self.login()
@@ -734,6 +959,20 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["errors"][0]["element"][0] == _(
             "A topic element must have a title or an element."
         )
+
+    def test_add_element_ignores_arbitrary_topic_in_payload(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"title": "should stay in the URL topic", "topic": str(other_topic.id)}],
+        )
+        assert response.status_code == 201
+
+        assert TopicElement.objects(topic=topic).count() == 1
+        assert TopicElement.objects(topic=other_topic).count() == 0
 
     def test_add_datasets_perm(self):
         user = UserFactory()
@@ -856,6 +1095,20 @@ class TopicElementAPITest(APITestCase):
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 403
 
+    def test_delete_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicWithElementsFactory(owner=UserFactory())
+        other_element = other_topic.elements[0]
+
+        response = self.delete(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id)
+        )
+        assert response.status_code == 404
+
+        other_topic.reload()
+        assert other_element.id in (elt.id for elt in other_topic.elements)
+
     def test_update_element(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
@@ -907,3 +1160,34 @@ class TopicElementAPITest(APITestCase):
         assert element.tags == ["baz"]
         assert element.extras == {"foo": "bar"}
         assert element.element is None
+
+    def test_update_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+        other_element = TopicElementFactory(topic=other_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id),
+            {"title": "modified title"},
+        )
+        assert response.status_code == 404
+
+        other_element.reload()
+        assert other_element.title == "original title"
+
+    def test_update_element_cannot_move_to_own_topic(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=owner)
+        own_element = TopicElementFactory(topic=own_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=own_element.id),
+            {"title": "modified title", "topic": str(other_topic.id)},
+        )
+        assert response.status_code == 200
+
+        own_element.reload()
+        assert own_element.title == "modified title"
+        assert own_element.topic.id == own_topic.id

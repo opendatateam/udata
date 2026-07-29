@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import CASCADE
 from mongoengine.signals import post_save
@@ -24,7 +24,7 @@ class Assignment(db.Document):
     subject = field(
         db.GenericReferenceField(choices=ASSIGNABLE_OBJECT_TYPES, required=True),
     )
-    created_at = field(db.DateTimeField(default=datetime.utcnow), readonly=True)
+    created_at = field(db.DateTimeField(default=lambda: datetime.now(UTC)), readonly=True)
 
     meta = {
         "indexes": [
@@ -60,6 +60,6 @@ post_save.connect(_auto_assign_on_create)
 
 
 @Owned.on_owner_change.connect
-def clean_assignments_on_owner_change(document, previous):
+def clean_assignments_on_owner_change(document, previous, **kwargs):
     """Remove all assignments for an object when its ownership changes (e.g. transfer)."""
     Assignment.objects(subject=document).delete()

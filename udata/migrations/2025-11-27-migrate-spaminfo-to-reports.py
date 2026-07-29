@@ -19,7 +19,7 @@ New structure (Report document):
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from bson import DBRef
 
@@ -63,12 +63,12 @@ def migrate(db):
             "subject": subject_ref,
             "reason": REASON_AUTO_SPAM,
             "message": "Migrated from legacy SpamInfo",
-            "reported_at": datetime.utcnow(),
+            "reported_at": datetime.now(UTC),
         }
 
         if status == NO_SPAM:
             # no_spam means it was reviewed and dismissed (false positive)
-            report_doc["dismissed_at"] = datetime.utcnow()
+            report_doc["dismissed_at"] = datetime.now(UTC)
             # Callbacks were already executed, no need to store them
             dismissed_count += 1
         else:

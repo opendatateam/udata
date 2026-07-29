@@ -3,6 +3,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     DictField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     IntField,
     ListField,
     ReferenceField,
@@ -12,6 +13,8 @@ from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.models import Dataset
+from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.organization.models import Organization
@@ -30,7 +33,7 @@ class SiteSettings(EmbeddedDocument):
     home_reuses = ListField(ReferenceField(Reuse))
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=SITE_BLOCS_FIELDS)
 class Site(WithMetrics, Document):
     id = field(StringField(primary_key=True), readonly=True)
     title = field(StringField(required=True), description="The site display title")
@@ -39,9 +42,9 @@ class Site(WithMetrics, Document):
     configs = DictField()
     themes = DictField()
     settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_page = field(ReferenceField("Page"), attribute="datasets_page.id")
-    reuses_page = field(ReferenceField("Page"), attribute="reuses_page.id")
-    dataservices_page = field(ReferenceField("Page"), attribute="dataservices_page.id")
+    datasets_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    reuses_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    dataservices_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
     __metrics_keys__ = [
         "max_dataset_followers",
@@ -100,9 +103,9 @@ class Site(WithMetrics, Document):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects.visible().count()
-        self.metrics["datasets_visits_by_months"] = get_metrics_for_model(
-            "site", None, ["visit_dataset"]
-        )[0]
+        visits = get_metrics_for_model("site", None, ["visit_dataset"])
+        if visits is not None:
+            self.metrics["datasets_visits_by_months"] = visits[0]
         self.save()
 
     def count_resources(self):
@@ -114,9 +117,9 @@ class Site(WithMetrics, Document):
             ),
             {},
         ).get("count", 0)
-        self.metrics["resources_downloads_by_months"] = get_metrics_for_model(
-            "site", None, ["download_resource"]
-        )[0]
+        downloads = get_metrics_for_model("site", None, ["download_resource"])
+        if downloads is not None:
+            self.metrics["resources_downloads_by_months"] = downloads[0]
         self.save()
 
     def count_reuses(self):
@@ -247,14 +250,14 @@ current_site = LocalProxy(get_current_site)
 
 
 @Dataset.on_delete.connect
-def remove_from_home_datasets(dataset):
+def remove_from_home_datasets(dataset, **kwargs):
     if dataset in current_site.settings.home_datasets:
         current_site.settings.home_datasets.remove(dataset)
         current_site.save()
 
 
 @Reuse.on_delete.connect
-def remove_from_home_reuses(reuse):
+def remove_from_home_reuses(reuse, **kwargs):
     if reuse in current_site.settings.home_reuses:
         current_site.settings.home_reuses.remove(reuse)
         current_site.save()

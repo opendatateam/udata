@@ -1,16 +1,21 @@
 import factory
 import mongoengine
 import pytest
+from flask_restx import marshal
 from flask_restx.reqparse import Argument, RequestParser
 from flask_storage.mongo import ImageField
 from mongoengine import PULL, EmbeddedDocument
 from mongoengine.fields import (
     DateTimeField,
+    DictField,
     EmbeddedDocumentField,
+    FloatField,
+    IntField,
     ListField,
     ReferenceField,
     StringField,
 )
+from werkzeug.exceptions import BadRequest
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -22,6 +27,7 @@ from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
@@ -64,6 +70,11 @@ class FakeEmbedded(EmbeddedDocument):
     description = field(
         StringField(required=True),
         markdown=True,
+    )
+    # Tuple-form choices `(value, label)` to exercise patch()'s choices validation,
+    # which must validate against the value and never the label.
+    status = field(
+        StringField(choices=[("active", "Active"), ("inactive", "Inactive")]),
     )
 
 
@@ -136,8 +147,13 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     deleted = field(
         DateTimeField(),
     )
+
     archived = field(
         DateTimeField(),
+    )
+
+    score = field(
+        FloatField(),
     )
 
     embedded = field(EmbeddedDocumentField(FakeEmbedded))
@@ -176,6 +192,56 @@ class FakeFactory(ModelFactory):
     description = factory.Faker("text")
     url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
     archived = None
+    score = factory.Faker("pyfloat", left_digits=1, right_digits=1)
+
+
+@generate_fields()
+class FakeWithHref(Document):
+    """Exercises the `href` / `href_total` / `href_extra` field params: the list is
+    exposed as a link object whose `total` comes from a stored counter (not
+    len(value)) and whose extra keys are merged in."""
+
+    things = field(
+        ListField(StringField()),
+        href=lambda o: f"/fake-with-href/{o.id}/things/",
+        href_total=lambda o: o.things_total,
+        href_extra=lambda o: {"by_kind": o.things_by_kind},
+    )
+    # Plain (non-`field()`) storage, like harvest's items_total: not in __read_fields__.
+    things_total = IntField(default=0)
+    things_by_kind = DictField()
+
+    meta = {"collection": "fake_with_href_api_fields"}
+
+
+@generate_fields()
+class FakeWithHrefFallback(Document):
+    """`href` alone, without `href_total`/`href_extra`: `total` falls back to len(value)."""
+
+    things = field(
+        ListField(StringField()),
+        href=lambda o: f"/fake-with-href-fallback/{o.id}/things/",
+    )
+
+    meta = {"collection": "fake_with_href_fallback_api_fields"}
+
+
+@generate_fields()
+class FakeWithFilteredList(Document):
+    """Exercises `attribute` on a list of embedded documents: the list is read through a
+    property of the document that filters it."""
+
+    embeddeds = field(
+        ListField(EmbeddedDocumentField(FakeEmbedded)),
+        readonly=True,
+        attribute="visible_embeddeds",
+    )
+
+    meta = {"collection": "fake_with_filtered_list_api_fields"}
+
+    @property
+    def visible_embeddeds(self) -> list[FakeEmbedded]:
+        return [embedded for embedded in self.embeddeds if embedded.status == "active"]
 
 
 class IndexParserTest(PytestOnlyDBTestCase):
@@ -370,12 +436,81 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             assert results.page_size == 5
             assert results.page == 3
 
-    def test_negative_page_size_returns_404(self, app) -> None:
-        """Negative page_size should return a 404 error."""
-        from werkzeug.exceptions import NotFound
+    def test_invalid_pagination_returns_400(self, app) -> None:
+        """A non-positive page/page_size is rejected at parse time with a 400.
 
+        It used to slip through to ``Pagination`` and surface as a 404.
+        """
         FakeFactory()
 
-        with app.test_request_context("/foobar", query_string={"page": 1, "page_size": -5}):
-            with pytest.raises(NotFound):
-                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+        for query in (
+            {"page": 1, "page_size": -5},
+            {"page": 1, "page_size": 0},
+            {"page": 0, "page_size": 5},
+        ):
+            with app.test_request_context("/foobar", query_string=query):
+                with pytest.raises(BadRequest):
+                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+
+
+class PatchChoicesValidationTest(PytestOnlyDBTestCase):
+    """patch() never runs MongoEngine's validate(), so it re-checks `choices`
+    itself for StringFields (the most common enum-bug class). These cases are
+    not reachable through models that only use plain-string choices."""
+
+    def test_invalid_choice_raises(self) -> None:
+        with pytest.raises(FieldValidationError):
+            patch(FakeEmbedded(), {"status": "bogus"})
+
+    def test_valid_choice_is_accepted(self) -> None:
+        embedded = patch(FakeEmbedded(), {"status": "active"})
+        assert embedded.status == "active"
+
+    def test_choice_label_is_not_a_valid_value(self) -> None:
+        """Choices are `(value, label)` tuples: only the value is valid, never the label."""
+        with pytest.raises(FieldValidationError):
+            patch(FakeEmbedded(), {"status": "Active"})
+
+    def test_none_skips_choices_validation(self) -> None:
+        """An explicit null on a choices field must not raise."""
+        embedded = patch(FakeEmbedded(), {"status": None})
+        assert embedded.status is None
+
+
+class HrefFieldTest(PytestOnlyDBTestCase):
+    def test_href_total_and_extra(self, app) -> None:
+        """`href_total` provides the link total (instead of len(value)) and
+        `href_extra` merges extra keys into the link object."""
+        obj = FakeWithHref(things=["a", "b"], things_total=42, things_by_kind={"x": 2})
+        with app.test_request_context("/"):
+            link = marshal(obj, FakeWithHref.__read_fields__)["things"]
+        assert link["rel"] == "subsection"
+        assert link["type"] == "GET"
+        # total comes from things_total (42), NOT len(things) (2).
+        assert link["total"] == 42
+        assert link["by_kind"] == {"x": 2}
+
+    def test_href_total_defaults_to_len(self, app) -> None:
+        """Without `href_total`, the link total falls back to len(value)."""
+        obj = FakeWithHrefFallback(things=["a", "b", "c"])
+        with app.test_request_context("/"):
+            link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
+        assert link["total"] == 3
+
+
+class ListAttributeFieldTest(PytestOnlyDBTestCase):
+    def test_list_attribute_is_resolved_on_the_document(self, app) -> None:
+        """`attribute` on a list points to a property of the document, and the items are
+        still serialized in full: it must not be propagated to the inner field, or each
+        item would look that attribute up on itself and marshal to null."""
+        obj = FakeWithFilteredList(
+            embeddeds=[
+                FakeEmbedded(title="shown", description="a description", status="active"),
+                FakeEmbedded(title="filtered out", description="a description", status="inactive"),
+            ]
+        )
+        with app.test_request_context("/"):
+            embeddeds = marshal(obj, FakeWithFilteredList.__read_fields__)["embeddeds"]
+        assert len(embeddeds) == 1
+        assert embeddeds[0]["title"] == "shown"
+        assert embeddeds[0]["description"] == "a description"

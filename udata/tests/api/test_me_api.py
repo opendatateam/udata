@@ -1,7 +1,9 @@
 from datetime import UTC, datetime, timedelta, timezone
+from io import BytesIO
 
 from flask import url_for
 
+from udata.core import storages
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -11,7 +13,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, User
-from udata.tests.helpers import capture_mails
+from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
 from . import APITestCase
@@ -43,6 +45,46 @@ class MeAPITest(APITestCase):
         """It should raise a 401 on GET /me if no user is authenticated"""
         response = self.get(url_for("api.me"))
         self.assert401(response)
+
+    def test_my_avatar_upload(self):
+        """It should upload an avatar directly into the avatars storage"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(user.avatar)
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_my_avatar_upload_with_crop(self):
+        """It should upload a cropped avatar using the bbox parameter"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png"), "bbox": "10,10,40,40"},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertEqual(user.avatar.bbox, [10, 10, 40, 40])
+
+    def test_my_avatar_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
 
     def test_update_profile(self):
         """It should update my profile from the API"""
@@ -442,7 +484,7 @@ class MeAPITest(APITestCase):
         # Simulate a naive datetime as MongoDB might return.
         # Without the timezone fix, this would raise:
         # TypeError: can't compare offset-naive and offset-aware datetimes
-        future_naive = datetime.utcnow() + timedelta(days=30)
+        future_naive = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30)
         token, plaintext = ApiToken.generate(user, expires_at=future_naive)
 
         result, error = ApiToken.authenticate(plaintext)
@@ -450,7 +492,7 @@ class MeAPITest(APITestCase):
         self.assertIsNone(error)
 
         # Also verify the expired naive case
-        past_naive = datetime.utcnow() - timedelta(hours=1)
+        past_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
         token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
 
         result2, error2 = ApiToken.authenticate(plaintext2)

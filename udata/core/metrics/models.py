@@ -10,6 +10,7 @@ class WithMetrics(object):
         DictField(),
         readonly=True,
         auditable=False,
+        attribute=lambda o: o.get_metrics(),
     )
 
     __metrics_keys__ = []

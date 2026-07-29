@@ -1,4 +1,5 @@
 import datetime
+import warnings
 
 import requests
 from bson.objectid import ObjectId
@@ -23,8 +24,9 @@ from udata.utils import raise_if_redirect, to_iso_datetime
 from udata_search_service.consumers import DataserviceConsumer
 from udata_search_service.services import DataserviceService
 
-# Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
-MAX_DOCUMENTATION_SIZE = 100 * 1024
+# Maximum size in bytes for fetched documentation content. Sized for large
+# swaggers like API Entreprise (~2.2 MB).
+MAX_DOCUMENTATION_SIZE = 3 * 1024 * 1024
 
 __all__ = ("DataserviceSearch",)
 
@@ -41,6 +43,7 @@ class DataserviceApiParser(ModelApiParser):
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("is_restricted", type=bool, location="args")
+        self.parser.add_argument("access_type", type=str, choices=list(AccessType), location="args")
         self.parser.add_argument("featured", type=bool, location="args")
 
     @staticmethod
@@ -59,11 +62,18 @@ class DataserviceApiParser(ModelApiParser):
                 api.abort(400, "Organization arg must be an identifier")
             dataservices = dataservices.filter(organization=args["organization"])
         if "is_restricted" in args:
+            warnings.warn(
+                "`is_restricted` parameter is deprecated. Use `access_type` instead.",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
             dataservices = dataservices.filter(
                 access_type__in=[AccessType.RESTRICTED]
                 if boolean(args["is_restricted"])
                 else [AccessType.OPEN, AccessType.OPEN_WITH_ACCOUNT]
             )
+        if args.get("access_type"):
+            dataservices = dataservices.filter(access_type=args["access_type"])
         if args.get("featured"):
             dataservices = dataservices.filter(featured=args["featured"])
         return dataservices

@@ -1,9 +1,12 @@
+import fnmatch
 import logging
 from datetime import UTC, datetime
+from urllib.parse import urlparse
 
-from flask import url_for
+from flask import current_app, url_for
 from flask_login import current_user
 from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -14,6 +17,7 @@ from mongoengine.fields import (
 )
 from mongoengine.signals import post_save
 
+from udata import uris
 from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
@@ -90,6 +94,48 @@ class Message(SpamMixin, EmbeddedDocument):
         return message
 
 
+def is_valid_notification_external_url(url) -> bool:
+    """True if `url` is an http(s) URL whose host is in the allow-list.
+
+    Used both as the write-time validator (via `NotificationExtra`) and the
+    read-time filter (in `Discussion.notification_url`). Keeping a single
+    source of truth means a config change is reflected on both sides.
+    """
+    if not url or not isinstance(url, str):
+        return False
+    try:
+        # Delegate scheme, credentials and well-formedness checks to the
+        # shared URL validator instead of reimplementing them. It also rejects
+        # malformed URLs (no `ValueError` from `urlparse` bubbles up), userinfo
+        # (a `attacker.com\@host` phishing vector) and dangerous schemes such
+        # as `javascript:`. The extra local/private/TLD checks it performs are
+        # safe here: the URL is only ever shown in a mail, never fetched.
+        uris.validate(url, schemes=("http", "https"), credentials=False)
+    except uris.ValidationError:
+        return False
+    host = urlparse(url).hostname or ""
+    allowed = current_app.config.get("DISCUSSION_ALLOWED_EXTERNAL_DOMAINS", [])
+    # `fnmatchcase` keeps the match deterministic across OSes (`fnmatch` is
+    # case-insensitive on Windows). `hostname` is already lowercased by Python.
+    return any(fnmatch.fnmatchcase(host, pattern) for pattern in allowed)
+
+
+def _validate_notification_external_url(value):
+    if not is_valid_notification_external_url(value):
+        raise ValidationError("Invalid or disallowed notification.external_url")
+
+
+class NotificationExtra(EmbeddedDocument):
+    """Typed sub-document of `Discussion.extras["notification"]`.
+
+    `external_url` lets a third-party frontend (e.g. Ecosphères) override the
+    URL pointed to in notification emails; it is validated here against the
+    `DISCUSSION_ALLOWED_EXTERNAL_DOMAINS` allow-list.
+    """
+
+    external_url = StringField(validation=_validate_notification_external_url)
+
+
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
@@ -103,7 +149,7 @@ class Discussion(SpamMixin, Linkable, Document):
     closed = DateTimeField()
     closed_by = ReferenceField("User")
     closed_by_organization = ReferenceField("Organization")
-    extras = ExtrasField()
+    extras = ExtrasField({"notification": NotificationExtra})
 
     meta = {
         "indexes": [
@@ -189,6 +235,27 @@ class Discussion(SpamMixin, Linkable, Document):
     def self_api_url(self, **kwargs):
         return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
 
+    @property
+    def notification_url(self):
+        """URL to point to in notification emails.
+
+        Returns the allow-listed `extras.notification.external_url` when present
+        and valid (e.g. a Topic displayed on a third-party platform such as
+        Ecosphères), otherwise the subject's canonical page via `url_for()`.
+
+        Defense in depth: re-validate the stored `external_url` at read-time.
+        Data written before the validator existed, raw DB writes (imports,
+        migrations), or a config change tightening the allow-list could all
+        leave an unsafe URL in storage.
+        """
+        # Raw DB writes (imports, migrations) bypassing mongoengine validation
+        # can leave `notification` set to `None`, hence the `or {}` coercion.
+        notification = (self.extras or {}).get("notification") or {}
+        meta_url = notification.get("external_url")
+        if is_valid_notification_external_url(meta_url):
+            return f"{meta_url}#discussion-{self.id}"
+        return self.url_for()
+
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
         if self.user:
@@ -227,13 +294,19 @@ class Discussion(SpamMixin, Linkable, Document):
         on_discussion_deleted.send(self)
         return result
 
-    def remove_message(self, message_index):
-        """Remove a message from the discussion and trigger deletion signal"""
-        if 0 <= message_index < len(self.discussion):
-            message = self.discussion[message_index]
-            self.discussion.pop(message_index)
-            self.save()
-            on_discussion_message_deleted.send(self, message=message)
+    def remove_message(self, message_id):
+        """Remove a message by its UUID and trigger deletion signal"""
+        for i, message in enumerate(self.discussion):
+            if message.id == message_id:
+                self.discussion.pop(i)
+                self.save()
+
+                from udata.core.reports.models import Report
+
+                Report.mark_subject_deleted_by_embed_id(self, message.id)
+
+                on_discussion_message_deleted.send(self, message=message)
+                return
 
 
 post_save.connect(Discussion.post_save, sender=Discussion)

@@ -33,6 +33,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.spam.models import SpamMixin
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
@@ -136,10 +137,14 @@ class HarvestMetadata(EmbeddedDocument):
     )
 
     created_at = field(
-        DateTimeField(), description="Date of the creation as provided by the harvested catalog"
+        DateTimeField(), description="Date of creation as provided by the harvested catalog"
     )
     issued_at = field(
-        DateTimeField(), description="Release date as provided by the harvested catalog"
+        DateTimeField(), description="Date of release as provided by the harvested catalog"
+    )
+    modified_at = field(
+        DateTimeField(),
+        description="Date of last modification as provided by the harvested catalog",
     )
     last_update = field(DateTimeField(), description="Date of the last harvesting")
     archived_at = field(DateTimeField())
@@ -187,6 +192,7 @@ def filter_by_reuse(base_query, filter_value):
 )
 class Dataservice(
     Auditable,
+    SpamMixin,
     WithMetrics,
     WithAccessType,
     DataserviceBadgeMixin,
@@ -211,6 +217,12 @@ class Dataservice(
     on_delete = Signal()
 
     verbose_name = _("dataservice")
+
+    def fields_to_check_for_spam(self):
+        return {"title": self.title, "description": self.description}
+
+    def spam_is_whitelisted(self) -> bool:
+        return self.organization and self.organization.certified
 
     def __str__(self):
         return self.title or ""
@@ -349,6 +361,7 @@ class Dataservice(
         "discussions_open",
         "followers",
         "followers_by_months",
+        "reuses",
         "views",
     ]
 
@@ -387,5 +400,16 @@ class Dataservice(
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
+    def count_reuses(self):
+        from udata.models import Reuse
+
+        # Not using visible() here because it excludes reuses without datasets,
+        # but a reuse can legitimately reference only a dataservice.
+        self.metrics["reuses"] = (
+            Reuse.objects(dataservices=self).filter(private__ne=True, deleted=None).count()
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
+post_save.connect(SpamMixin.post_save, sender=Dataservice)

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField, StringField
@@ -8,7 +8,6 @@ from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.actions import notifier
 
-from .api import source_fields
 from .models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -31,7 +30,7 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
     source = field(
         ReferenceField(HarvestSource),
         readonly=True,
-        nested_fields=source_fields,
+        nested_fields=HarvestSource.__read_fields__,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -92,7 +91,7 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
         details__source=source, details__status=VALIDATION_PENDING, handled_at=None
     )
     for notification in pending_notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
     for recipient in recipients:
@@ -124,7 +123,7 @@ def on_harvest_source_refused(source: HarvestSource, **kwargs):
         details__source=source, details__status=VALIDATION_PENDING, handled_at=None
     )
     for notification in pending_notifications:
-        notification.handled_at = datetime.utcnow()
+        notification.handled_at = datetime.now(UTC)
         notification.save()
 
     for recipient in recipients:

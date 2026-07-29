@@ -5,7 +5,6 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
@@ -31,7 +30,7 @@ class OwnedQuerySet(UDataQuerySet):
         if user.sysadmin:
             return self()
 
-        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owners = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
@@ -92,7 +91,6 @@ class Owned(object):
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
-        nested_fields=org_ref_fields,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,
@@ -154,3 +152,24 @@ def owned_post_save(sender, document, **kwargs):
 
 
 post_save.connect(owned_post_save)
+
+
+def get_responsible_users(owned_obj: Owned, role: str = "admin") -> list[User]:
+    """
+    Get all users responsible for an owned object (owner + org members with role).
+
+    Useful for notifications, permissions, emails, etc.
+
+    Args:
+        owned_obj: An object with owner and organization attributes (from Owned mixin)
+        role: The organization member role to include (default: "admin")
+
+    Returns:
+        List of User objects (owner + org members with specified role)
+    """
+    recipients = []
+    if owned_obj.owner:
+        recipients.append(owned_obj.owner)
+    if owned_obj.organization:
+        recipients.extend([m.user for m in owned_obj.organization.members if m.role == role])
+    return recipients

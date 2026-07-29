@@ -1,5 +1,5 @@
 from udata.api import api, base_reference, fields
-from udata.auth.helpers import current_user_is_admin_or_self
+from udata.core.user.models import _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
 
@@ -30,58 +30,6 @@ user_ref_fields = api.inherit(
     },
 )
 
-from udata.core.organization.api_fields import member_email_with_visibility_check, org_ref_fields  # noqa
-
-user_fields = api.model(
-    "User",
-    {
-        "id": fields.String(description="The user identifier", readonly=True),
-        "slug": fields.String(description="The user permalink string", readonly=True),
-        "first_name": fields.String(description="The user first name", required=True),
-        "last_name": fields.String(description="The user last name", required=True),
-        "email": fields.Raw(
-            attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
-            description="The user email",
-            readonly=True,
-        ),
-        "avatar": fields.ImageField(original=True, description="The user avatar URL"),
-        "avatar_thumbnail": fields.ImageField(
-            attribute="avatar",
-            size=BIGGEST_AVATAR_SIZE,
-            description="The user avatar thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_AVATAR_SIZE),
-        ),
-        "website": fields.String(description="The user website"),
-        "about": fields.Markdown(description="The user self description"),
-        "roles": fields.List(fields.String, description="Site wide user roles"),
-        "active": fields.Boolean(),
-        "organizations": fields.List(
-            fields.Nested(org_ref_fields), description="The organization the user belongs to"
-        ),
-        "since": fields.ISODateTime(
-            attribute="created_at", description="The registeration date", required=True
-        ),
-        "last_login_at": fields.Raw(
-            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
-            description="The user last connection date (only present for global admins and on /me)",
-            readonly=True,
-        ),
-        "uri": fields.String(
-            attribute=lambda u: u.self_api_url(),
-            description="The API URI for this user",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda u: u.self_web_url(),
-            description="The user web page URL",
-            readonly=True,
-        ),
-        "metrics": fields.Raw(
-            attribute=lambda o: o.get_metrics(), description="The user metrics", readonly=True
-        ),
-    },
-)
-
 me_metrics_fields = api.model(
     "MyMetrics",
     {
@@ -100,8 +48,6 @@ me_metrics_fields = api.model(
     },
 )
 
-user_page_fields = api.model("UserPage", fields.pager(user_fields))
-
 user_suggestion_fields = api.model(
     "UserSuggestion",
     {
@@ -109,10 +55,13 @@ user_suggestion_fields = api.model(
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user last name", readonly=True),
         "avatar_url": fields.ImageField(
-            size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
+            attribute="avatar",
+            size=BIGGEST_AVATAR_SIZE,
+            description="The user avatar URL",
+            readonly=True,
         ),
         "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o["email"]),
+            attribute=lambda o: _visible_email(o),
             description="The user email (only the domain for non-admin user)",
             readonly=True,
         ),

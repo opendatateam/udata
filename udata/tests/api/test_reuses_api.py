@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from io import BytesIO
 
 import feedparser
 import pytest
@@ -6,6 +7,7 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -23,6 +25,7 @@ from udata.tests.helpers import (
     assert403,
     assert404,
     assert410,
+    create_test_image,
 )
 from udata.utils import faker
 
@@ -40,6 +43,45 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == len(reuses)
+
+    def test_reuse_image_upload(self):
+        """The reuse owner should upload an image into the images storage"""
+        user = self.login()
+        reuse = ReuseFactory(owner=user)
+        response = self.post(
+            url_for("api.reuse_image", reuse=reuse),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert200(response)
+        assert response.json["success"]
+
+        reuse.reload()
+        assert reuse.image
+        assert reuse.image.filename in storages.images
+        assert reuse.image.original in storages.images
+
+    def test_reuse_image_upload_forbidden_for_non_owner(self):
+        """It should forbid a non-owner from uploading a reuse image"""
+        self.login()
+        reuse = ReuseFactory(owner=UserFactory())
+        response = self.post(
+            url_for("api.reuse_image", reuse=reuse),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert403(response)
+
+    def test_reuse_image_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        user = self.login()
+        reuse = ReuseFactory(owner=user)
+        response = self.post(
+            url_for("api.reuse_image", reuse=reuse),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)
 
     def test_reuse_api_list_with_sorts(self):
         ReuseFactory(title="A", created_at="2024-03-01")

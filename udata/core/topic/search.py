@@ -83,4 +83,8 @@ class TopicSearch(ModelSearchAdapter):
             "organization": str(topic.organization.id) if topic.organization else None,
             "organization_name": topic.organization.name if topic.organization else None,
             "producer_type": get_producer_type(topic),
+            "elements": [
+                {"title": e.title, "description": e.description, "tags": e.tags or []}
+                for e in topic.elements
+            ],
         }

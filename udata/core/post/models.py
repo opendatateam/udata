@@ -1,13 +1,19 @@
 from flask import url_for
 from flask_storage.mongo import ImageField
-from mongoengine import DENY, PULL
+from mongoengine import PULL
 from mongoengine.errors import ValidationError
-from mongoengine.fields import DateTimeField, ListField, ReferenceField, StringField
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentListField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
-from udata.core.pages.models import Page
 from udata.core.storages import default_image_basename, images
 from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
@@ -19,13 +25,14 @@ from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
+from .permissions import PostReadPermission
 
 __all__ = ("Post",)
 
 
 class PostQuerySet(UDataQuerySet):
-    def published(self):
-        return self(published__ne=None).order_by("-published")
+    def visible(self):
+        return self(published__ne=None)
 
 
 @generate_fields(
@@ -35,6 +42,7 @@ class PostQuerySet(UDataQuerySet):
         {"key": "modified", "value": "last_modified"},
     ],
     default_sort="-published",
+    page_mask_exclude=["blocs"],
 )
 class Post(Datetimed, Linkable, Document[PostQuerySet]):
     name = field(
@@ -54,11 +62,9 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         StringField(),
         markdown=True,
     )
-    content_as_page = field(
-        ReferenceField("Page", reverse_delete_rule=DENY),
-        nested_fields=Page.__read_fields__,
-        allow_null=True,
-        description="Reference to a Page when body_type is 'blocs'",
+    blocs = field(
+        EmbeddedDocumentListField(Bloc),
+        generic=True,
     )
     image_url = field(
         StringField(),
@@ -136,13 +142,17 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
 
     verbose_name = _("post")
 
+    @property
+    def is_visible(self):
+        return self.published is not None
+
+    @property
+    def permissions(self):
+        return {"read": PostReadPermission(self)}
+
     def clean(self):
-        if self.body_type == "blocs":
-            if not self.content_as_page:
-                raise ValidationError("content_as_page is required when body_type is 'blocs'")
-        else:
-            if not self.content:
-                raise ValidationError("content is required when body_type is 'markdown' or 'html'")
+        if self.body_type != "blocs" and not self.content:
+            raise ValidationError("content is required when body_type is 'markdown' or 'html'")
 
     def __str__(self):
         return self.name or ""
