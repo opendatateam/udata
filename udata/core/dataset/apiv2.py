@@ -7,7 +7,7 @@ from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
-from udata.api import API, apiv2, fields
+from udata.api import API, add_pagination_arguments, apiv2, fields
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
@@ -87,12 +87,7 @@ log = logging.getLogger(__name__)
 ns = apiv2.namespace("datasets", "Dataset related operations")
 search_parser = DatasetSearch.as_request_parser(store_missing=False)
 resources_parser = apiv2.parser()
-resources_parser.add_argument(
-    "page", type=int, default=1, location="args", help="The page to fetch"
-)
-resources_parser.add_argument(
-    "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(resources_parser, page_size=DEFAULT_PAGE_SIZE)
 resources_parser.add_argument(
     "type", type=str, location="args", help="The type of resources to fetch"
 )

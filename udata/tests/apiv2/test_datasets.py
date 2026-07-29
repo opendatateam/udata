@@ -16,6 +16,7 @@ from udata.core.dataset.factories import (
 from udata.core.dataset.models import ResourceMixin
 from udata.core.organization.factories import Member, OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
 from udata.models import Dataset
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_not_emit
@@ -47,6 +48,13 @@ class DatasetAPIV2Test(APITestCase):
 
         assert data["data"][1]["community_resources"]["total"] == 0
         assert data["data"][0]["community_resources"]["total"] == 0
+
+    def test_list_invalid_pagination_params_return_400(self):
+        """The shared positive page/page_size validation also guards list endpoints."""
+        DatasetFactory()
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.datasets", **params))
+            self.assert400(response)
 
     def test_filter_by_reuse(self):
         DatasetFactory(title="Dataset without reuse")
@@ -435,6 +443,18 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["total"] == 1
         assert data["data"][0]["title"] == "alpha report"
 
+    def test_invalid_pagination_params_return_400(self):
+        """Out-of-range page/page_size must be rejected with a 400.
+
+        A non-positive ``page_size`` used to reach the ``$slice`` aggregation as a
+        negative length and crash with a 500 (OperationFailure: "Third argument to
+        $slice must be positive").
+        """
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(3)])
+        for params in ({"page_size": -1}, {"page_size": 0}, {"page": 0}, {"page": -1}):
+            response = self.get(url_for("apiv2.resources", dataset=dataset.id, **params))
+            self.assert400(response)
+
 
 class DatasetExtrasAPITest(APITestCase):
     def setUp(self):
@@ -453,6 +473,35 @@ class DatasetExtrasAPITest(APITestCase):
         data = response.json
         assert data["test::extra"] == "test-value"
         assert data["check::date"] == "2024-04-14T08:42:00"
+
+    def test_update_dataset_extras_without_permission(self):
+        """It should return a 403 when the user cannot edit the dataset"""
+        someone_else_dataset = DatasetFactory(owner=UserFactory())
+
+        response = self.put(
+            url_for("apiv2.dataset_extras", dataset=someone_else_dataset),
+            {"test::extra": "test-value"},
+        )
+
+        self.assert403(response)
+        assert "message" in response.json
+        someone_else_dataset.reload()
+        assert "test::extra" not in someone_else_dataset.extras
+
+    def test_delete_dataset_extras_without_permission(self):
+        """It should return a 403 when the user cannot delete the dataset extras"""
+        someone_else_dataset = DatasetFactory(owner=UserFactory())
+        someone_else_dataset.extras = {"test::extra": "test-value"}
+        someone_else_dataset.save()
+
+        response = self.delete(
+            url_for("apiv2.dataset_extras", dataset=someone_else_dataset), ["test::extra"]
+        )
+
+        self.assert403(response)
+        assert "message" in response.json
+        someone_else_dataset.reload()
+        assert someone_else_dataset.extras["test::extra"] == "test-value"
 
     def test_update_dataset_extras(self):
         self.dataset.extras = {

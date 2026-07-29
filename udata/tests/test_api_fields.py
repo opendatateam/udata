@@ -15,6 +15,7 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
+from werkzeug.exceptions import BadRequest
 
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -225,6 +226,24 @@ class FakeWithHrefFallback(Document):
     meta = {"collection": "fake_with_href_fallback_api_fields"}
 
 
+@generate_fields()
+class FakeWithFilteredList(Document):
+    """Exercises `attribute` on a list of embedded documents: the list is read through a
+    property of the document that filters it."""
+
+    embeddeds = field(
+        ListField(EmbeddedDocumentField(FakeEmbedded)),
+        readonly=True,
+        attribute="visible_embeddeds",
+    )
+
+    meta = {"collection": "fake_with_filtered_list_api_fields"}
+
+    @property
+    def visible_embeddeds(self) -> list[FakeEmbedded]:
+        return [embedded for embedded in self.embeddeds if embedded.status == "active"]
+
+
 class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
@@ -417,15 +436,21 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             assert results.page_size == 5
             assert results.page == 3
 
-    def test_negative_page_size_returns_404(self, app) -> None:
-        """Negative page_size should return a 404 error."""
-        from werkzeug.exceptions import NotFound
+    def test_invalid_pagination_returns_400(self, app) -> None:
+        """A non-positive page/page_size is rejected at parse time with a 400.
 
+        It used to slip through to ``Pagination`` and surface as a 404.
+        """
         FakeFactory()
 
-        with app.test_request_context("/foobar", query_string={"page": 1, "page_size": -5}):
-            with pytest.raises(NotFound):
-                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+        for query in (
+            {"page": 1, "page_size": -5},
+            {"page": 1, "page_size": 0},
+            {"page": 0, "page_size": 5},
+        ):
+            with app.test_request_context("/foobar", query_string=query):
+                with pytest.raises(BadRequest):
+                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
 
 
 class PatchChoicesValidationTest(PytestOnlyDBTestCase):
@@ -471,3 +496,21 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class ListAttributeFieldTest(PytestOnlyDBTestCase):
+    def test_list_attribute_is_resolved_on_the_document(self, app) -> None:
+        """`attribute` on a list points to a property of the document, and the items are
+        still serialized in full: it must not be propagated to the inner field, or each
+        item would look that attribute up on itself and marshal to null."""
+        obj = FakeWithFilteredList(
+            embeddeds=[
+                FakeEmbedded(title="shown", description="a description", status="active"),
+                FakeEmbedded(title="filtered out", description="a description", status="inactive"),
+            ]
+        )
+        with app.test_request_context("/"):
+            embeddeds = marshal(obj, FakeWithFilteredList.__read_fields__)["embeddeds"]
+        assert len(embeddeds) == 1
+        assert embeddeds[0]["title"] == "shown"
+        assert embeddeds[0]["description"] == "a description"

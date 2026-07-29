@@ -121,18 +121,23 @@ def get_json_ld_extra(key, value):
 @generate_fields()
 class HarvestDatasetMetadata(EmbeddedDocument):
     backend = StringField()
+    domain = StringField()
+
+    source_id = StringField()
+
+    remote_id = StringField()
+    remote_url = URLField()
+
+    uri = StringField()
+
     created_at = DateTimeField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
-    source_id = StringField()
-    remote_id = StringField()
-    domain = StringField()
     last_update = DateTimeField()
-    remote_url = URLField()
-    uri = StringField()
-    dct_identifier = StringField()
     archived_at = DateTimeField()
     archived = StringField()
+
+    dct_identifier = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
@@ -1003,10 +1008,11 @@ class Dataset(
     def _atomic_resources_update(self, match_resource=None, **kwargs):
         """Apply an atomic update to a dataset whose in-memory resources just changed.
 
-        Refreshes what Dataset.clean() would recompute on a full save: last_update
-        first, because compute_quality() reads next_update, which derives from it.
-        `match_resource` scopes the query to a single resource, so that callers can
-        target it with the positional `$` operator.
+        Refreshes what Dataset.clean() would recompute on a full save, in memory
+        and in database: last_update first, because compute_quality() reads
+        next_update, which derives from it. `match_resource` scopes the query to a
+        single resource, so that callers can target it with the positional `$`
+        operator.
 
         The search reindexing is asked for explicitly: an atomic update emits no
         post_save, which is what used to reindex the dataset through save(). Only
@@ -1018,9 +1024,10 @@ class Dataset(
             query = query.filter(resources__id=match_resource.id)
 
         self.last_update = self.compute_last_update()
+        self.quality_cached = self.compute_quality()
         query.update_one(
             set__last_update=self.last_update,
-            set__quality_cached=self.compute_quality(),
+            set__quality_cached=self.quality_cached,
             **kwargs,
         )
         reindex_model_on_save(Dataset, self)
@@ -1035,31 +1042,37 @@ class Dataset(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources.insert(0, resource)
+        self.last_modified_internal = datetime.now(UTC)
 
         self._atomic_resources_update(
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Keep the in-memory document consistent with what we persist below, so we
+        # don't need a self.reload() afterwards. reload() would re-read and
+        # re-deserialize every embedded resource (O(N), ~1.3s on a 15k-resource
+        # dataset) for nothing: nothing downstream consumes a fully-reloaded object
+        # (the endpoint returns `resource`, and the on_resource_updated handlers only
+        # read document.resources / document.organization, all up to date here).
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
+        self.last_modified_internal = datetime.now(UTC)
 
         self._atomic_resources_update(
             match_resource=resource,
             set__resources__S=resource,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource_extras(self, resource):
@@ -1072,9 +1085,9 @@ class Dataset(
         document, O(N) in embedded resources, whereas this re-ships only the
         changed extras subdocument.
 
-        Unlike update_resource, it neither reloads the dataset nor emits
-        on_resource_updated: the caller of this path is Hydra itself, and a reload
-        is another O(N) read on the very datasets this exists to speed up.
+        Unlike update_resource, it does not emit on_resource_updated: the caller of
+        this path is Hydra itself, so the signal would publish its own check back to
+        the resources analyser and record a user activity for a change no user made.
         """
         # An atomic update runs no document validation, so the types registered on
         # the extras field (check:available, check:status, check:date) would accept
@@ -1088,12 +1101,14 @@ class Dataset(
         )
 
     def remove_resource(self, resource):
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources = [r for r in self.resources if r.id != resource.id]
+        self.last_modified_internal = datetime.now(UTC)
 
         self._atomic_resources_update(
             pull__resources__id=resource.id,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
         # Deletes resource's file from file storage
@@ -1105,7 +1120,6 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property

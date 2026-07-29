@@ -13,7 +13,7 @@ from typing_extensions import override
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestError, HarvestItem
-from udata.i18n import gettext as _
+from udata.i18n import lazy_gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
