@@ -55,5 +55,11 @@ def migrate(db):
     )
     log.info(f"Marked {reports.modified_count} report(s) as handled")
 
+    # Same for the notifications: `cleanup_discussion_notifications` deletes them
+    # on `on_discussion_deleted`, and a notification pointing at a deleted
+    # discussion makes the whole notification listing crash for its recipient.
+    notifications = db.notification.delete_many({"details.discussion": {"$in": ids}})
+    log.info(f"Deleted {notifications.deleted_count} notification(s)")
+
     deleted = db.discussion.delete_many({"_id": {"$in": ids}})
     log.info(f"Deleted {deleted.deleted_count} discussion(s) on an unsupported subject")

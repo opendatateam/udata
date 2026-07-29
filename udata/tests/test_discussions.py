@@ -1,17 +1,19 @@
 from datetime import UTC, datetime
 
 import pytest
+from bson import DBRef
 from flask import url_for
+from mongoengine.connection import get_db
 from mongoengine.errors import ValidationError
 from werkzeug.test import TestResponse
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
-from udata.core.discussions.factories import DiscussionFactory
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
-from udata.core.discussions.notifications import DiscussionStatus
+from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -26,13 +28,14 @@ from udata.core.discussions.tasks import (
 from udata.core.linkable import Linkable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
-from udata.core.reports.constants import REASON_AUTO_SPAM
+from udata.core.reports.constants import REASON_AUTO_SPAM, REASON_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.db.migrations import load_migration
 from udata.features.notifications.models import Notification
 from udata.models import Dataset, License, Member
 from udata.mongo import db
@@ -1708,3 +1711,102 @@ class DiscussionExternalNotificationTest(APITestCase):
         )
         self.assert201(response)
         assert Discussion.objects(subject=topic).count() == 1
+
+
+class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
+    def insert_legacy_discussion(self, subject=None):
+        """Insert a discussion the model now rejects.
+
+        Those only exist as data written before `Discussion.subject` was
+        restricted, so mongoengine cannot be used to create them.
+        """
+        document = {
+            "title": faker.sentence(),
+            "created": datetime.now(UTC),
+            "discussion": [],
+        }
+        if subject is not None:
+            document["subject"] = subject
+        return Discussion._get_collection().insert_one(document).inserted_id
+
+    def report_discussion(self, discussion_id):
+        return (
+            Report._get_collection()
+            .insert_one(
+                {
+                    "subject": {"_cls": "Discussion", "_ref": DBRef("discussion", discussion_id)},
+                    "reason": REASON_SPAM,
+                    "reported_at": datetime.now(UTC),
+                    "subject_deleted_at": None,
+                }
+            )
+            .inserted_id
+        )
+
+    def notify_discussion(self, user, discussion_id):
+        notification = Notification(
+            user=user,
+            details=DiscussionNotificationDetails(
+                discussion=Discussion.objects.get(pk=discussion_id),
+                status=DiscussionStatus.NEW_DISCUSSION,
+            ),
+        )
+        notification.save()
+        return notification.id
+
+    def run_migration(self):
+        migration = load_migration("2026-07-29-delete-discussions-on-unsupported-subjects.py")
+        migration.migrate(get_db())
+
+    def test_migration_deletes_the_discussions_no_subject_can_display(self):
+        user = self.login()
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        kept = DiscussionFactory(
+            user=user,
+            subject=DatasetFactory(),
+            discussion=[MessageDiscussionFactory(posted_by=user)],
+        )
+        on_license = self.insert_legacy_discussion(
+            {"_cls": "License", "_ref": DBRef("license", license.id)}
+        )
+        without_subject = self.insert_legacy_discussion()
+
+        kept_report = self.report_discussion(kept.id)
+        on_license_report = self.report_discussion(on_license)
+        kept_notification = self.notify_discussion(user, kept.id)
+        on_license_notification = self.notify_discussion(user, on_license)
+        without_subject_notification = self.notify_discussion(user, without_subject)
+
+        # Both listings crash on those discussions before the migration.
+        self.assert500(self.get(url_for("api.discussions")))
+        self.assert500(self.get(url_for("api.notifications")))
+
+        self.run_migration()
+
+        response = self.get(url_for("api.discussions"))
+        self.assert200(response)
+        assert [d["id"] for d in response.json["data"]] == [str(kept.id)]
+
+        response = self.get(url_for("api.notifications"))
+        self.assert200(response)
+        assert [n["id"] for n in response.json["data"]] == [str(kept_notification)]
+
+        assert Notification.objects(id__in=[on_license_notification]).count() == 0
+        assert Notification.objects(id__in=[without_subject_notification]).count() == 0
+
+        # The report on a deleted discussion leaves the moderation queue, the one
+        # on the discussion that survived stays untouched.
+        assert Report.objects.get(pk=on_license_report).subject_deleted_at is not None
+        assert Report.objects.get(pk=kept_report).subject_deleted_at is None
+
+    def test_migration_keeps_the_supported_discussions(self):
+        user = self.login()
+        discussion = DiscussionFactory(user=user, subject=DatasetFactory())
+        report = self.report_discussion(discussion.id)
+
+        self.run_migration()
+
+        assert Discussion.objects.count() == 1
+        assert Discussion.objects.first() == discussion
+        assert Report.objects.get(pk=report).subject_deleted_at is None
