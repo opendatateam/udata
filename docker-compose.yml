@@ -27,6 +27,7 @@ services:
           - node.name=es01
           - cluster.name=es-docker-cluster
           - cluster.initial_master_nodes=es01
+          - cluster.routing.allocation.disk.threshold_enabled=false
           - ES_JAVA_OPTS=-Xms750m -Xmx750m
         volumes:
           - search-data:/usr/share/elasticsearch/data

@@ -24,8 +24,9 @@ from udata.utils import raise_if_redirect, to_iso_datetime
 from udata_search_service.consumers import DataserviceConsumer
 from udata_search_service.services import DataserviceService
 
-# Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
-MAX_DOCUMENTATION_SIZE = 100 * 1024
+# Maximum size in bytes for fetched documentation content. Sized for large
+# swaggers like API Entreprise (~2.2 MB).
+MAX_DOCUMENTATION_SIZE = 3 * 1024 * 1024
 
 __all__ = ("DataserviceSearch",)
 

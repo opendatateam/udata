@@ -45,7 +45,7 @@ class PostsAPI(API):
         posts = Post.objects()
 
         if not (AdminPermission().can() and args["with_drafts"]):
-            posts = posts.published()
+            posts = posts.visible()
 
         # The search is already handled by apply_sort_filters if searchable=True
         return Post.apply_pagination(Post.apply_sort_filters(posts))
@@ -77,7 +77,7 @@ class PostsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        posts: list[Post] = Post.objects(kind="news").published().order_by("-published").limit(15)
+        posts: list[Post] = Post.objects(kind="news").visible().order_by("-published").limit(15)
         for post in posts:
             feed.add_item(
                 post.name,
@@ -102,6 +102,9 @@ class PostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def get(self, post):
         """Get a given post"""
+        if not post.permissions["read"].can():
+            api.abort(404)
+
         # Batch-load the references embedded in blocs to avoid N+1 dereferencing
         # (one query per card's organization) when marshalling the response.
         prefetch_blocs_references(Post, post, "blocs")
@@ -133,7 +136,8 @@ class PublishPostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def post(self, post):
         """Publish an existing post"""
-        post.modify(published=datetime.now(UTC))
+        post.published = datetime.now(UTC)
+        post.save()
         return post
 
     @api.secure(admin_permission)
@@ -141,7 +145,8 @@ class PublishPostAPI(API):
     @api.marshal_with(Post.__read_fields__)
     def delete(self, post):
         """Unpublish an existing post"""
-        post.modify(published=None)
+        post.published = None
+        post.save()
         return post
 
 

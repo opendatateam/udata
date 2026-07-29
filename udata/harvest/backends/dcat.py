@@ -13,7 +13,7 @@ from typing_extensions import override
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestError, HarvestItem
-from udata.i18n import gettext as _
+from udata.i18n import lazy_gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
@@ -301,6 +301,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
     <csw:GetRecords xmlns:apiso="http://www.opengis.net/cat/csw/apiso/1.0"
                     xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
+                    xmlns:gmd="http://www.isotc211.org/2005/gmd"
                     service="CSW" version="2.0.2" outputFormat="application/xml"
                     resultType="results" startPosition="{start}" maxRecords="25"
                     outputSchema="{output_schema}">

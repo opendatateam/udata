@@ -1,8 +1,6 @@
 import uuid
 
 from dateutil.parser import parse
-from flask import url_for
-from flask_storage.mongo import ImageReference
 from mongoengine.errors import DoesNotExist
 from mongoengine.errors import ValidationError as MongoValidationError
 from mongoengine.fields import BooleanField as MongoBooleanField
@@ -22,7 +20,6 @@ from wtforms_json import flatten_json
 
 from udata import tags, uris
 from udata.auth import admin_permission, current_user
-from udata.core.storages import tmp
 from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectField
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
@@ -240,13 +237,6 @@ class URLField(EmptyNone, Field):
             self.data = self.data.strip()
 
 
-class UploadableURLField(URLField):
-    def __init__(self, *args, **kwargs):
-        storage = kwargs.pop("storage")
-        self.endpoint = url_for("storage.upload", name=storage.name)
-        super(UploadableURLField, self).__init__(*args, **kwargs)
-
-
 class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
     pass
 
@@ -306,54 +296,6 @@ class FormField(FieldHelper, fields.FormField):
     @property
     def has_data(self):
         return self._formdata and any(k.startswith(self.prefix) for k in self._formdata)
-
-
-class TmpFilename(Field):
-    def _value(self):
-        return ""
-
-
-class BBoxField(Field):
-    def _value(self):
-        if self.data:
-            return ",".join([str(x) for x in self.data])
-        else:
-            return ""
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = [int(float(x)) for x in valuelist[0].split(",")]
-        else:
-            self.data = None
-
-
-class ImageForm(WTForm):
-    filename = TmpFilename()
-    bbox = BBoxField(validators=[validators.optional()])
-
-
-class ImageField(FormField):
-    def __init__(self, label=None, validators=None, **kwargs):
-        self.sizes = kwargs.pop("sizes", [100])
-        self.placeholder = kwargs.pop("placeholder", "default")
-        super(ImageField, self).__init__(ImageForm, label, validators, **kwargs)
-
-    def process(self, formdata, data=unset_value, **kwargs):
-        self.src = data(100) if isinstance(data, ImageReference) else None
-        super(ImageField, self).process(formdata, data, **kwargs)
-
-    def populate_obj(self, obj, name):
-        field = getattr(obj, name)
-        bbox = self.form.bbox.data or None
-        filename = self.form.filename.data or None
-        if filename and filename in tmp:
-            with tmp.open(filename, "rb") as infile:
-                field.save(infile, filename, bbox=bbox)
-            tmp.delete(filename)
-
-    @property
-    def endpoint(self):
-        return url_for("storage.upload", name="tmp")
 
 
 def nullable_text(value):
