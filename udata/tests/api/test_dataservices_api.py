@@ -92,7 +92,7 @@ class DataserviceAPITest(APITestCase):
 
         # filter on multiple tags should exclude partial matches
         DataserviceFactory(tags=["my-tag"])
-        response = self.get("/api/1/dataservices/?tag=my-tag&tag=other")
+        response = self.get(url_for("api.dataservices", tag=["my-tag", "other"]))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_dataservice.id)

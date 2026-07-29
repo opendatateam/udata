@@ -104,7 +104,7 @@ class SiteCsvExportsTest(APITestCase):
         both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
         only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
 
-        response = self.get("/api/1/site/datasets.csv?tag=tag-a&tag=tag-b")
+        response = self.get(url_for("api.site_datasets_csv", tag=["tag-a", "tag-b"]))
 
         self.assert200(response)
         csvfile = StringIO(response.data.decode("utf8"))
@@ -234,7 +234,7 @@ class SiteCsvExportsTest(APITestCase):
         both_tags = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a", "tag-b"])
         only_a = DatasetFactory(resources=[ResourceFactory()], tags=["tag-a"])
 
-        response = self.get("/api/1/site/resources.csv?tag=tag-a&tag=tag-b")
+        response = self.get(url_for("api.site_datasets_resources_csv", tag=["tag-a", "tag-b"]))
 
         self.assert200(response)
         csvfile = StringIO(response.data.decode("utf8"))
@@ -380,7 +380,7 @@ class SiteCsvExportsTest(APITestCase):
         matching_reuse = ReuseFactory(datasets=[dataset])
         other_reuse = ReuseFactory(datasets=[DatasetFactory()])
 
-        response = self.get(f"/api/1/site/reuses.csv?dataset={dataset.id}")
+        response = self.get(url_for("api.site_reuses_csv", dataset=dataset.id))
 
         self.assert200(response)
         csvfile = StringIO(response.data.decode("utf8"))
@@ -401,7 +401,7 @@ class SiteCsvExportsTest(APITestCase):
         )
         only_a = ReuseFactory(datasets=[DatasetFactory()], tags=["tag-a"])
 
-        response = self.get("/api/1/site/reuses.csv?tag=tag-a&tag=tag-b")
+        response = self.get(url_for("api.site_reuses_csv", tag=["tag-a", "tag-b"]))
 
         self.assert200(response)
         csvfile = StringIO(response.data.decode("utf8"))
@@ -414,6 +414,42 @@ class SiteCsvExportsTest(APITestCase):
         self.assertIn(str(both_tags.id), ids)
         self.assertIn(str(both_tags_and_more.id), ids)
         self.assertNotIn(str(only_a.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_featured_filter(self):
+        featured = ReuseFactory(datasets=[DatasetFactory()], featured=True)
+        not_featured = ReuseFactory(datasets=[DatasetFactory()], featured=False)
+
+        response = self.get(url_for("api.site_reuses_csv", featured=True))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(featured.id), ids)
+
+        response = self.get(url_for("api.site_reuses_csv", featured=False))
+
+        self.assert200(response)
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(not_featured.id), ids)
+
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_reuses_csv_with_invalid_filter_value(self):
+        ReuseFactory(datasets=[DatasetFactory()])
+
+        self.assert400(self.get(url_for("api.site_reuses_csv", type="not-a-reuse-type")))
+        self.assert400(self.get(url_for("api.site_reuses_csv", sort="not-a-sort")))
 
     @pytest.mark.options(EXPORT_CSV_MODELS=[])
     def test_dataservices_csv(self):
@@ -506,7 +542,7 @@ class SiteCsvExportsTest(APITestCase):
         )
         only_a = DataserviceFactory(datasets=[DatasetFactory()], tags=["tag-a"])
 
-        response = self.get("/api/1/site/dataservices.csv?tag=tag-a&tag=tag-b")
+        response = self.get(url_for("api.site_dataservices_csv", tag=["tag-a", "tag-b"]))
 
         self.assert200(response)
         csvfile = StringIO(response.data.decode("utf8"))

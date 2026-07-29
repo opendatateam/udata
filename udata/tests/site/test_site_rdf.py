@@ -319,6 +319,34 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
         assert len(datasets) == 2
 
+    def test_catalog_rdf_filter_dataservices_tags(self, client):
+        both_tags = DataserviceFactory(datasets=[], tags=["tag-a", "tag-b"])
+        only_a = DataserviceFactory(datasets=[], tags=["tag-a"])
+
+        # A single tag matches every dataservice carrying it, not only those
+        # whose tag list is exactly `["tag-a"]`.
+        url = url_for("api.site_rdf_catalog_format", _format="xml", tag="tag-a")
+
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format="xml")
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert {str(graph.value(d, DCT.identifier)) for d in dataservices} == {
+            str(both_tags.id),
+            str(only_a.id),
+        }
+
+        # Several tags require all of them.
+        url = url_for("api.site_rdf_catalog_format", _format="xml", tag=["tag-a", "tag-b"])
+
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format="xml")
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert {str(graph.value(d, DCT.identifier)) for d in dataservices} == {str(both_tags.id)}
+
     def test_catalog_rdf_dataservices(self, client):
         dataset_a = DatasetFactory.create()
         dataset_b = DatasetFactory.create()

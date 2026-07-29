@@ -131,7 +131,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
 
         # filter on multiple tags should exclude partial matches
         ReuseFactory(tags=["my-tag"], topic="health", type="api")
-        response = self.get("/api/1/reuses/?tag=my-tag&tag=other")
+        response = self.get(url_for("api.reuses", tag=["my-tag", "other"]))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_reuse.id)
