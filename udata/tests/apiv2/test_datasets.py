@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 from mongoengine.context_managers import query_counter
@@ -8,6 +8,7 @@ import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,
@@ -761,6 +762,27 @@ class DatasetResourceExtrasAPITest(APITestCase):
 
         self.dataset.reload()
         assert self.dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+    def test_update_resource_extras_recomputes_quality_from_the_new_last_update(self):
+        # quality_cached embeds next_update, which derives from last_update: the
+        # targeted update must refresh last_update *before* recomputing quality,
+        # otherwise a daily dataset stays late even once its resource is fresh.
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2020-01-01T00:00:00"}
+        )
+        dataset = DatasetFactory(
+            owner=self.user, frequency=UpdateFrequency.DAILY, resources=[resource]
+        )
+        assert dataset.quality["update_fulfilled_in_time"] is False
+
+        data = {"analysis:last-modified-at": datetime.now(UTC).replace(tzinfo=None).isoformat()}
+        response = self.put(
+            url_for("apiv2.resource_extras", dataset=dataset, rid=resource.id), data
+        )
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.quality["update_fulfilled_in_time"] is True
 
     def test_delete_resource_extras_refreshes_last_update(self):
         # Deleting `analysis:last-modified-at` makes the remote resource fall back

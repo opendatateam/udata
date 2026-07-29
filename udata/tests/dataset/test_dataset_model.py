@@ -35,7 +35,6 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.followers.signals import on_follow, on_unfollow
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema
@@ -98,29 +97,14 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         with pytest.raises(ValidationError):
             dataset.add_resource(resource)
 
-    def test_clean_validates_custom_extras(self):
-        # The other custom: extras tests go through the v2 extras endpoint; this one
-        # covers the plain save() path used by the v1 API and harvesting.
-        org = OrganizationFactory()
-        org.extras = {"custom": [{"title": "color", "description": "banner color", "type": "str"}]}
-        org.save()
-        dataset = DatasetFactory(organization=org)
+    def test_clean_rejects_custom_extras_without_organization(self):
+        # custom: metadatas are declared by an organization, so a dataset owned by a
+        # user alone can never carry one.
+        dataset = DatasetFactory(owner=UserFactory())
 
-        # Undeclared custom metadata is rejected on a full save.
-        dataset.extras = {"custom:size": "large"}
-        with pytest.raises(MongoEngineValidationError):
-            dataset.save()
-
-        # Declared metadata but wrong type is rejected too.
-        dataset.extras = {"custom:color": 123}
-        with pytest.raises(MongoEngineValidationError):
-            dataset.save()
-
-        # Declared metadata with the right type goes through.
         dataset.extras = {"custom:color": "blue"}
-        dataset.save()
-        dataset.reload()
-        assert dataset.extras["custom:color"] == "blue"
+        with pytest.raises(MongoEngineValidationError):
+            dataset.save()
 
     def test_update_resource(self):
         user = UserFactory()
