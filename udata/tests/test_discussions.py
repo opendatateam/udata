@@ -31,7 +31,7 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.features.notifications.models import Notification
-from udata.models import Dataset, Member
+from udata.models import Dataset, License, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
@@ -317,6 +317,29 @@ class DiscussionsTest(APITestCase):
             url_for("api.discussions"), {"title": "test title", "comment": "bla bla"}
         )
         self.assertStatus(response, 400)
+
+    def test_new_discussion_on_unsupported_subject_class(self):
+        """A discussion can only target a model that supports discussions.
+
+        Anything else (a License here) used to be accepted by the API and then
+        crashed every subsequent listing of the discussions.
+        """
+        self.login()
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "License",
+                    "id": license.id,
+                },
+            },
+        )
+        self.assertStatus(response, 400)
+        assert Discussion.objects.count() == 0
 
     def test_new_discussion_with_extras(self):
         user = self.login()

@@ -17,7 +17,7 @@ class UserModelTest(APITestCase):
         org = OrganizationFactory(editors=[user])
         discussion = DiscussionFactory(
             user=user,
-            subject=org,
+            subject=DatasetFactory(organization=org),
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user),

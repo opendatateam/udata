@@ -25,6 +25,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
+from .constants import DISCUSSION_SUBJECTS
 from .signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -142,7 +143,7 @@ class Discussion(SpamMixin, Linkable, Document):
     user = ReferenceField("User")
     organization = ReferenceField("Organization")
 
-    subject = GenericReferenceField()
+    subject = GenericReferenceField(choices=DISCUSSION_SUBJECTS)
     title = StringField(required=True)
     discussion = ListField(EmbeddedDocumentField(Message))
     created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
