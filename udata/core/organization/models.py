@@ -242,6 +242,10 @@ class Organization(
             max_size=LOGO_MAX_SIZE,
             thumbnails=LOGO_SIZES,
         ),
+        # Read-only: the logo is managed through the dedicated upload endpoint
+        # (POST /organizations/<id>/logo/). Left writable, patch() would set it
+        # from the raw URL echoed back by clients, wiping thumbnails/original.
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_LOGO_SIZE,
@@ -251,7 +255,11 @@ class Organization(
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
-    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
+    # Deliberately not wrapped with `field()`: membership requests and invitations carry
+    # the identity of the applicants and free-text comments about them, so they are never
+    # part of the organization API payload. They are served by the dedicated, permission
+    # checked `/organizations/<org>/membership/` endpoint.
+    requests = ListField(EmbeddedDocumentField(MembershipRequest))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)

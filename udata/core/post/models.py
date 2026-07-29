@@ -25,13 +25,14 @@ from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
+from .permissions import PostReadPermission
 
 __all__ = ("Post",)
 
 
 class PostQuerySet(UDataQuerySet):
-    def published(self):
-        return self(published__ne=None).order_by("-published")
+    def visible(self):
+        return self(published__ne=None)
 
 
 @generate_fields(
@@ -140,6 +141,14 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     }
 
     verbose_name = _("post")
+
+    @property
+    def is_visible(self):
+        return self.published is not None
+
+    @property
+    def permissions(self):
+        return {"read": PostReadPermission(self)}
 
     def clean(self):
         if self.body_type != "blocs" and not self.content:

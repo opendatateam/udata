@@ -137,10 +137,14 @@ class HarvestMetadata(EmbeddedDocument):
     )
 
     created_at = field(
-        DateTimeField(), description="Date of the creation as provided by the harvested catalog"
+        DateTimeField(), description="Date of creation as provided by the harvested catalog"
     )
     issued_at = field(
-        DateTimeField(), description="Release date as provided by the harvested catalog"
+        DateTimeField(), description="Date of release as provided by the harvested catalog"
+    )
+    modified_at = field(
+        DateTimeField(),
+        description="Date of last modification as provided by the harvested catalog",
     )
     last_update = field(DateTimeField(), description="Date of the last harvesting")
     archived_at = field(DateTimeField())
@@ -358,6 +362,7 @@ class Dataservice(
         "discussions_open",
         "followers",
         "followers_by_months",
+        "reuses",
         "views",
     ]
 
@@ -393,6 +398,16 @@ class Dataservice(
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.metrics["followers_by_months"] = get_stock_metrics(
             Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_reuses(self):
+        from udata.models import Reuse
+
+        # Not using visible() here because it excludes reuses without datasets,
+        # but a reuse can legitimately reference only a dataservice.
+        self.metrics["reuses"] = (
+            Reuse.objects(dataservices=self).filter(private__ne=True, deleted=None).count()
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 

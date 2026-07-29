@@ -126,7 +126,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
     tags = field(ListField(StringField()))
     color = field(IntField())
 
-    featured = field(BooleanField(default=False), auditable=False)
+    featured = field(BooleanField(default=False), readonly=True, auditable=False)
     private = field(BooleanField())
     extras = field(ExtrasField(), auditable=False)
 

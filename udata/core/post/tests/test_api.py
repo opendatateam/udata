@@ -23,6 +23,7 @@ from udata.tests.helpers import (
     assert204,
     assert400,
     assert403,
+    assert404,
     create_test_image,
 )
 
@@ -91,6 +92,20 @@ class PostsAPITest(APITestCase):
         owner = response.json["owner"]
         assert isinstance(owner, dict)
         assert owner["id"] == str(admin.id)
+
+    def test_post_api_get_draft(self):
+        """An unpublished post should only be readable by a sysadmin"""
+        draft = PostFactory(published=None)
+
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(UserFactory())
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(AdminFactory())
+        response = self.get(url_for("api.post", post=draft))
+        assert200(response)
+        assert response.json["id"] == str(draft.id)
 
     def test_post_api_get_with_dangling_dataset_reference(self):
         """Getting a post should not crash when one of its datasets was hard-deleted,
@@ -255,6 +270,44 @@ class PostsAPITest(APITestCase):
         response = self.get(url_for("api.posts", with_drafts=True))
         assert200(response)
         assert len(response.json["data"]) == 3
+
+    def test_post_search_api_excludes_drafts(self):
+        """The v2 search endpoint should never expose unpublished posts"""
+        published = PostFactory.create_batch(3)
+        PostFactory(published=None)
+        expected = {str(post.id) for post in published}
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == expected
+
+        # Unlike the v1 list endpoint, the v2 search has no `with_drafts` bypass:
+        # drafts are not indexed at all, so sysadmins do not see them either.
+        self.login(AdminFactory())
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == expected
+
+    def test_post_search_api_filters_on_query_and_tags(self):
+        """The Mongo fallback of the v2 search should actually apply `q` and `tag`"""
+        named = PostFactory(name="Foobar", tags=["transport"])
+        both_tags = PostFactory(name="Something else", tags=["transport", "sante"])
+        PostFactory(name="Something else", tags=["sante"])
+
+        response = self.get(url_for("apiv2.post_search", q="Foobar"))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(named.id)]
+
+        response = self.get(url_for("apiv2.post_search", tag="transport"))
+        assert200(response)
+        assert {p["id"] for p in response.json["data"]} == {str(named.id), str(both_tags.id)}
+
+        response = self.get(url_for("apiv2.post_search", tag=["transport", "sante"]))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both_tags.id)]
 
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""

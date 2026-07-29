@@ -150,21 +150,50 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         )
         assert400(response)
 
-    def test_organization_api_get_with_membership_request_without_created_by(self):
-        """Old membership requests may have created_by=None, the API should not 500"""
-        user = UserFactory()
-        request = MembershipRequest(user=user, comment="a comment", created_by=None)
-        organization = OrganizationFactory(requests=[request])
-        response = self.get(url_for("api.organization", org=organization))
-        assert200(response)
+    def test_organization_api_get_never_exposes_requests(self):
+        """Membership requests are served by /membership/, never by the organization"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
 
-    def test_organization_api_get_with_pending_membership_request_without_handled_by(self):
-        """Pending membership requests have handled_by=None, the API should not 500"""
-        user = UserFactory()
-        request = MembershipRequest(user=user, comment="a comment", status="pending")
-        organization = OrganizationFactory(requests=[request])
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_get_never_exposes_requests_to_org_admin(self):
+        """Not even to the members allowed to handle them: they use /membership/"""
+        admin = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[membership_request]
+        )
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_get_requests_cannot_be_asked_through_x_fields(self):
+        """The field is not part of the model at all, so no mask can bring it back"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
+
+        response = self.get(
+            url_for("api.organization", org=organization), headers={"X-Fields": "requests"}
+        )
+        assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_list_never_exposes_requests(self):
+        """Membership requests are not exposed through the organization list either"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        OrganizationFactory(requests=[membership_request])
+
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        assert "requests" not in response.json["data"][0]
 
     def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
@@ -205,6 +234,67 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert Organization.objects.count() == 1
         assert Organization.objects.first().description == "new description"
+
+    def test_organization_api_update_preserves_logo(self):
+        """Updating an org via PUT must not touch its logo when the client
+        echoes the logo URL back in the payload.
+
+        Regression: the logo ImageField was writable, so patch() rebuilt it
+        from the raw URL, corrupting the filename and dropping thumbnails and
+        original. Logo changes go through the dedicated upload endpoint only.
+        """
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        # Give the org a real logo with generated thumbnails and original.
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+        original = org.logo.original
+        thumbnails = dict(org.logo.thumbnails)
+        assert filename
+
+        # The client fetches the org (logo marshalled as a full URL) and PUTs
+        # the whole payload back to change only the description.
+        data = self.get(url_for("api.organization", org=org)).json
+        assert data["logo"], "The logo URL should be part of the GET payload"
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
+        assert org.logo.original == original
+        assert dict(org.logo.thumbnails) == thumbnails
+
+    def test_organization_api_update_empty_logo_preserves_logo(self):
+        """Sending an empty/absent logo in the PUT payload must not wipe the
+        stored logo (same regression, wipe path instead of corruption)."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+
+        data = org.to_dict()
+        data["logo"] = ""
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
 
     def test_organization_api_update_business_number_id(self):
         """It should update an organization from the API by adding a business number id"""

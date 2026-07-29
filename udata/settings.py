@@ -429,6 +429,7 @@ class Defaults(object):
         "ecw",
         "svgz",
         "jp2",
+        "webp",
         # Geo
         "shp",
         "kml",
@@ -484,6 +485,7 @@ class Defaults(object):
         "image/jpeg",
         "image/png",
         "image/svg+xml",
+        "image/webp",
         "text/html",
         "text/calendar",
         "text/plain",
