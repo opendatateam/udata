@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from flask import current_app
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.user import tasks
 from udata.core.user.factories import UserFactory
@@ -94,7 +95,7 @@ class UserTasksTest(APITestCase):
             inactive_deletion_notified_at=notification_comparison_date,
         )
         UserFactory(current_login_at=datetime.now(UTC))  # Active user
-        discussion = DiscussionFactory(user=inactive_user_to_delete)
+        discussion = DiscussionFactory(user=inactive_user_to_delete, subject=DatasetFactory())
         discussion_title = discussion.title
 
         with capture_mails() as mails:

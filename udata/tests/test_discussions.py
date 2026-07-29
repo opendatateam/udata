@@ -2,10 +2,12 @@ from datetime import UTC, datetime
 
 import pytest
 from flask import url_for
+from mongoengine.errors import ValidationError
 from werkzeug.test import TestResponse
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
@@ -21,6 +23,7 @@ from udata.core.discussions.tasks import (
     notify_new_discussion,
     notify_new_discussion_comment,
 )
+from udata.core.linkable import Linkable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.reports.constants import REASON_AUTO_SPAM
@@ -32,11 +35,40 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.features.notifications.models import Notification
 from udata.models import Dataset, License, Member
+from udata.mongo import db
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from .api import APITestCase
+from .api import APITestCase, PytestOnlyDBTestCase
 from .helpers import assert_emit, assert_not_emit
+
+
+class DiscussionModelTest(PytestOnlyDBTestCase):
+    def test_subject_is_required(self):
+        """Every code path reading a subject assumes there is one.
+
+        `self_web_url()`, `mails.py` and `notifications.py` all dereference it
+        without a guard, so a subject-less discussion crashes the listings the
+        same way an unsupported class does.
+        """
+        with pytest.raises(ValidationError):
+            Discussion(title="test discussion").save()
+
+    def test_subject_class_is_restricted(self):
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        with pytest.raises(ValidationError):
+            Discussion(title="test discussion", subject=license).save()
+
+    def test_every_discussion_subject_can_carry_a_discussion(self):
+        """`DISCUSSION_SUBJECTS` holds class names, so a typo no longer breaks at
+        import time: it would silently forbid the model, and make the migration
+        delete its existing discussions.
+        """
+        for class_name in DISCUSSION_SUBJECTS:
+            model = db.resolve_model(class_name)
+            assert issubclass(model, Linkable)
+            assert hasattr(model, "count_discussions")
 
 
 class DiscussionsTest(APITestCase):
@@ -519,7 +551,8 @@ class DiscussionsTest(APITestCase):
     def test_list_discussions_org(self) -> None:
         organization: Organization = OrganizationFactory()
         user: User = UserFactory()
-        _discussion: Discussion = DiscussionFactory(user=user)
+        # Discussion on another organization, must be filtered out
+        _discussion: Discussion = DiscussionFactory(user=user, subject=DatasetFactory())
         dataset = DatasetFactory(organization=organization)
         dataservice = DataserviceFactory(organization=organization)
         reuse = ReuseFactory(organization=organization)

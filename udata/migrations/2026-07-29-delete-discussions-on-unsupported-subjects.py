@@ -1,13 +1,15 @@
 """
-Delete the discussions opened on a model that does not support discussions.
+Delete the discussions that no subject can display: those opened on a model that
+does not support discussions, and those without any subject at all.
 
-`Discussion.subject` used to accept any registered document, so a discussion
-could be opened on e.g. a `License`. Such a discussion is displayed nowhere,
-notifies nobody, and crashes every listing of the discussions since
-`self_web_url()` is only defined on the models of `DISCUSSION_SUBJECTS`.
+`Discussion.subject` used to accept any registered document, and to be optional,
+so a discussion could be opened on e.g. a `License`, or on nothing. Such a
+discussion is displayed nowhere, notifies nobody, and crashes every listing of
+the discussions since `self_web_url()` is only defined on the models of
+`DISCUSSION_SUBJECTS`.
 
-The field now restricts the accepted classes; this removes the documents
-written before that constraint existed.
+The field is now restricted to those classes and required; this removes the
+documents written before that constraint existed.
 """
 
 import logging
@@ -24,6 +26,8 @@ log = logging.getLogger(__name__)
 def migrate(db):
     # Raw queries and no mongoengine: dereferencing those subjects or emitting
     # the deletion signals is exactly what crashes on them.
+    # `$nin` also matches the documents where the path is missing, which is how
+    # the subject-less discussions are caught here.
     query = {"subject._cls": {"$nin": list(DISCUSSION_SUBJECTS)}}
 
     counts = Counter()

@@ -402,6 +402,7 @@ class UserAPITest(APITestCase):
         file = create_test_image()
         discussion = DiscussionFactory(
             user=user_to_delete,
+            subject=DatasetFactory(),
             discussion=[
                 MessageDiscussionFactory(posted_by=user_to_delete),
                 MessageDiscussionFactory(posted_by=user_to_delete),
@@ -455,6 +456,7 @@ class UserAPITest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user_to_delete),

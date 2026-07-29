@@ -55,6 +55,7 @@ class UserModelTest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=other_user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=other_user),
                 MessageDiscussionFactory(posted_by=user),

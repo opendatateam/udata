@@ -1,6 +1,7 @@
 import pytest
 from mongoengine.errors import ValidationError
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.topic.activities import (
     UserCreatedTopic,
@@ -150,9 +151,10 @@ class TopicModelTest(PytestOnlyDBTestCase):
 
     def test_topic_element_wrong_class(self):
         # use a model instance that is not supported
+        discussion = DiscussionFactory(subject=DatasetFactory())
+        topic = TopicFactory()
         with pytest.raises(ValidationError):
-            topic = TopicFactory()
-            TopicElementFactory(topic=topic, element=DiscussionFactory())
+            TopicElementFactory(topic=topic, element=discussion)
 
     def test_topic_deletion_deletes_associated_elements(self):
         """Test that deleting a topic also deletes its associated TopicElements"""
