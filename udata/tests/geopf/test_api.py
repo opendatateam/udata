@@ -57,7 +57,7 @@ class GeopfAuthApiTest(APITestCase):
             response = self.get(url_for("api.geopf_auth"))
 
         self.assertEqual(response.status_code, 302)
-        assert response.location.startswith(f"{CDATA_BASE_URL}/datasets/{dataset.slug}")
+        assert response.location.startswith(f"{CDATA_BASE_URL}/admin/datasets/{dataset.id}/files")
         stored = GeopfToken.objects.get(user=user.id)
         assert stored.access_token == "at"
         assert stored.refresh_token == "rt"
@@ -116,6 +116,43 @@ class GeopfStatusApiTest(APITestCase):
         response = self.get(url_for("api.geopf_status"))
         self.assert200(response)
         assert response.json["connected"] is True
+
+    def test_connected_refreshes_and_reports_new_expiry_when_access_token_stale(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="stale",
+            refresh_token="still-good",
+            expires_at=datetime.now(UTC) - timedelta(hours=1),
+        ).save()
+        new_token = {
+            "access_token": "fresh",
+            "refresh_token": "fresh-refresh",
+            "expires_in": 3600,
+        }
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.fetch_access_token.return_value = new_token
+            response = self.get(url_for("api.geopf_status"))
+
+        self.assert200(response)
+        assert response.json["connected"] is True
+        assert GeopfToken.objects.get(user=user).access_token == "fresh"
+
+    def test_not_connected_when_refresh_token_is_also_dead(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="stale",
+            refresh_token="dead",
+            expires_at=datetime.now(UTC) - timedelta(hours=1),
+        ).save()
+
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.fetch_access_token.side_effect = Exception("invalid_grant")
+            response = self.get(url_for("api.geopf_status"))
+
+        self.assert200(response)
+        assert response.json == {"connected": False, "expires_at": None}
 
 
 @TEST_GEOPF_CONF

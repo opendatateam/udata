@@ -27,13 +27,15 @@ udata calls the entrepôt API **as the data.gouv.fr user who asks for it**, not 
 |---|---|---|
 | Check link status | `GET /api/1/geopf/status/` | JSON |
 | Start the OAuth link | `GET /api/1/geopf/login/?dataset_id=<id>` | browser navigation, requires an existing udata session |
-| OAuth callback | `GET /api/1/geopf/auth` | browser navigation; exchanges the code, persists the token, redirects back to the dataset's cdata page |
+| OAuth callback | `GET /api/1/geopf/auth` | browser navigation; exchanges the code, persists the token, redirects back to the dataset's cdata admin files page |
 | Disconnect | `DELETE /api/1/geopf/token/` | JSON |
 | List available entrepôts | `GET /api/1/geopf/datastores/` | JSON |
 
 Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/`refresh_token` encrypted at rest with Fernet; see `GEOPF_TOKEN_ENCRYPTION_KEY`), refreshed automatically before use when expired. Both access and refresh tokens currently live 12h on sso.geopf.fr; the push task additionally refreshes proactively when the token wouldn't outlive the pipeline's worst-case duration (two poll timeouts), so long polls can't outrun it.
 
-The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it to the dataset's cdata page itself (`Dataset.self_web_url()`), falling back to the homepage if it's missing or unknown.
+`/status/` reflects usability, not just presence: it attempts a refresh if the access token is expired (refreshing it as a side effect) and only reports `connected: false` if that fails, meaning the refresh token is also dead and the user needs to reconnect.
+
+The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it server-side to the dataset's admin files page (`/admin/datasets/<id>/files`), falling back to the homepage if it's missing or unknown.
 
 If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect. This is the same for both push and pull.
 

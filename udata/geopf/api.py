@@ -4,7 +4,7 @@ from flask import current_app, redirect, request, session, url_for
 from udata.api import API, api
 from udata.auth import current_user
 from udata.core.dataset.models import Dataset
-from udata.uris import homepage_url
+from udata.uris import cdata_url, homepage_url
 from udata.utils import get_by
 
 from .auth import oauth, resolve_access_token, store_token
@@ -18,15 +18,16 @@ DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 
 
 def _redirect_target(dataset_id):
-    """Resolve a dataset id to its cdata page, falling back to the homepage.
+    """Resolve a dataset id to its cdata admin files page, falling back to the homepage.
 
     We only ever accept an *id* from the client here, never a path or URL:
-    it's resolved to a URL entirely server-side via `Dataset.self_web_url()`,
-    so there is no open-redirect surface.
+    it's resolved to a URL entirely server-side via `cdata_url()`, so there
+    is no open-redirect surface.
     """
     if dataset_id:
         try:
-            url = Dataset.objects.get(id=dataset_id).self_web_url(flash="connected")
+            dataset = Dataset.objects.get(id=dataset_id)
+            url = cdata_url(f"/admin/datasets/{dataset.id}/files", flash="connected")
             if url:
                 return url
         except (Dataset.DoesNotExist, mongoengine.errors.ValidationError):
@@ -62,10 +63,17 @@ class GeopfStatusAPI(API):
     @api.secure
     @api.doc("geopf_status")
     def get(self):
-        """Whether the current user has an active geopf link."""
-        geopf_token = GeopfToken.objects(user=current_user.id).first()
-        if geopf_token is None:
+        """Whether the current user has an active, usable geopf link.
+
+        A stored token whose access token is merely expired still counts as
+        connected (it gets refreshed here as a side effect); only a token
+        that can no longer be refreshed reports as disconnected.
+        """
+        try:
+            resolve_access_token(user=current_user._get_current_object())
+        except GeopfReauthRequired:
             return {"connected": False, "expires_at": None}
+        geopf_token = GeopfToken.objects(user=current_user.id).first()
         return {"connected": True, "expires_at": geopf_token.expires_at.isoformat()}
 
 
