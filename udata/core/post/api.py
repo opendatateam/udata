@@ -8,7 +8,6 @@ from udata.api import API, api
 from udata.api_fields import patch, patch_and_save
 from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
-from udata.core.edito_blocs.models import prefetch_blocs_references
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -104,10 +103,6 @@ class PostAPI(API):
         """Get a given post"""
         if not post.permissions["read"].can():
             api.abort(404)
-
-        # Batch-load the references embedded in blocs to avoid N+1 dereferencing
-        # (one query per card's organization) when marshalling the response.
-        prefetch_blocs_references(Post, post, "blocs")
         return post
 
     @api.doc("update_post")

@@ -148,7 +148,7 @@ class PostsAPITest(APITestCase):
         projected = self.get(url).json
 
         # Same request, but loading the full documents (no field projection).
-        with mock.patch("udata.core.edito_blocs.models.CARD_UNUSED_HEAVY_FIELDS", ()):
+        with mock.patch("udata.core.edito_blocs.base.CARD_UNUSED_HEAVY_FIELDS", ()):
             full = self.get(url).json
 
         assert projected["blocs"] == full["blocs"]
