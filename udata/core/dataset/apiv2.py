@@ -376,6 +376,13 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
+        # Deliberately a full save here, unlike the resource extras endpoints below,
+        # which go through the targeted Dataset.update_resource_extras(). A save is
+        # O(N) in the number of embedded resources (~3.4s on a 10k-resources dataset),
+        # but this endpoint sees 2 real calls per 50 days in production against 2.7M
+        # for the resource one: the cost is never paid in practice, and save() keeps
+        # the full extras validation and the search reindexing without us restating
+        # them by hand.
         dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
@@ -563,7 +570,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras
 
     @apiv2.secure
@@ -582,5 +589,5 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras, 204

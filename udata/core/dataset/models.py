@@ -58,6 +58,7 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
+from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -1004,6 +1005,33 @@ class Dataset(
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def _atomic_resources_update(self, match_resource=None, **kwargs):
+        """Apply an atomic update to a dataset whose in-memory resources just changed.
+
+        Refreshes what Dataset.clean() would recompute on a full save, in memory
+        and in database: last_update first, because compute_quality() reads
+        next_update, which derives from it. `match_resource` scopes the query to a
+        single resource, so that callers can target it with the positional `$`
+        operator.
+
+        The search reindexing is asked for explicitly: an atomic update emits no
+        post_save, which is what used to reindex the dataset through save(). Only
+        that receiver is called back — re-emitting post_save would also run spam
+        detection and ownership handling, which a resource change does not concern.
+        """
+        query = Dataset.objects(id=self.id)
+        if match_resource is not None:
+            query = query.filter(resources__id=match_resource.id)
+
+        self.last_update = self.compute_last_update()
+        self.quality_cached = self.compute_quality()
+        query.update_one(
+            set__last_update=self.last_update,
+            set__quality_cached=self.quality_cached,
+            **kwargs,
+        )
+        reindex_model_on_save(Dataset, self)
+
     def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
@@ -1017,11 +1045,9 @@ class Dataset(
         # Update the in-memory document to match what we persist, avoiding a costly
         # self.reload() (see update_resource).
         self.resources.insert(0, resource)
-        self.quality_cached = self.compute_quality()
         self.last_modified_internal = datetime.now(UTC)
 
-        self.update(
-            set__quality_cached=self.quality_cached,
+        self._atomic_resources_update(
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
             set__last_modified_internal=self.last_modified_internal,
         )
@@ -1039,26 +1065,48 @@ class Dataset(
         # read document.resources / document.organization, all up to date here).
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
-        self.quality_cached = self.compute_quality()
         self.last_modified_internal = datetime.now(UTC)
 
-        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
-            set__quality_cached=self.quality_cached,
+        self._atomic_resources_update(
+            match_resource=resource,
             set__resources__S=resource,
             set__last_modified_internal=self.last_modified_internal,
         )
 
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
+    def update_resource_extras(self, resource):
+        """Persist a single resource's extras with a targeted positional update.
+
+        `resource` must be the in-memory instance held in `self.resources` (its
+        extras are already mutated by the caller). This is on Hydra's hot callback
+        path (run for every resource, on datasets with 15k+ resources): a full
+        resource.save() -> dataset.save() re-serializes and rewrites the whole
+        document, O(N) in embedded resources, whereas this re-ships only the
+        changed extras subdocument.
+
+        Unlike update_resource, it does not emit on_resource_updated: the caller of
+        this path is Hydra itself, so the signal would publish its own check back to
+        the resources analyser and record a user activity for a change no user made.
+        """
+        # An atomic update runs no document validation, so the types registered on
+        # the extras field (check:available, check:status, check:date) would accept
+        # anything. Only the extras are validated: validating the whole resource
+        # would reject unrelated invalid legacy fields and lock Hydra out of the
+        # very resources it has to keep checking.
+        Resource.extras.validate(resource.extras)
+        self._atomic_resources_update(
+            match_resource=resource,
+            set__resources__S__extras=resource.extras,
+        )
+
     def remove_resource(self, resource):
         # Update the in-memory document to match what we persist, avoiding a costly
         # self.reload() (see update_resource).
         self.resources = [r for r in self.resources if r.id != resource.id]
-        self.quality_cached = self.compute_quality()
         self.last_modified_internal = datetime.now(UTC)
 
-        self.update(
-            set__quality_cached=self.quality_cached,
+        self._atomic_resources_update(
             pull__resources__id=resource.id,
             set__last_modified_internal=self.last_modified_internal,
         )
