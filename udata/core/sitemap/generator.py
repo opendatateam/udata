@@ -114,7 +114,7 @@ def generate_sitemaps():
                 ACL=S3_PUBLIC_ACL,
                 ContentType="application/xml",
             )
-            index_files.append({"loc": f"{base_url}/{prefix}/{filename}"})
+            index_files.append({"loc": f"{base_url.rstrip('/')}/{prefix}/{filename}"})
             total_urls += len(chunk)
 
     store_bytes(
