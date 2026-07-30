@@ -587,6 +587,8 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        if not member:
+            api.abort(404)
         old_role = member.role
         patch(member, request)
         org.save()
