@@ -17,7 +17,7 @@ ns = api.namespace("geopf", "Géoplateforme related operations")
 DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 
 
-def _redirect_target(dataset_id):
+def _redirect_target(dataset_id: str | None) -> str:
     """Resolve a dataset id to its cdata admin geopf page, falling back to the homepage."""
     if dataset_id:
         try:

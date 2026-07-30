@@ -31,8 +31,13 @@ log = logging.getLogger(__name__)
 
 @task(name="geopf.push_resource", bind=True, ignore_result=False)
 def push_resource_to_geopf(
-    self, dataset_id, resource_id, user_id=None, datastore_id=None, access_token=None
-):
+    self,
+    dataset_id: str,
+    resource_id: str,
+    user_id: str | None = None,
+    datastore_id: str | None = None,
+    access_token: str | None = None,
+) -> None:
     """Push a resource (format in `GEOPF_PUSHABLE_FORMATS`) to Géoplateforme as the acting user.
 
     Pass `user_id` for the normal path (their stored `GeopfToken` is looked
@@ -123,7 +128,7 @@ def push_resource_to_geopf(
     _set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
 
 
-def _run_pipeline(dataset, resource, datastore_id, client):
+def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
     datasheet_name = str(dataset.id)
     stored_data_name = f"_{resource.id}"
     filename = _resource_filename(resource)
@@ -244,13 +249,13 @@ def _run_pipeline(dataset, resource, datastore_id, client):
     log.info("geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, url)
 
 
-def fiche_url(datastore_id, datasheet_name):
+def fiche_url(datastore_id: str, datasheet_name: str) -> str:
     """URL of the datasheet's fiche on the cartes.gouv.fr dashboard."""
     base = current_app.config["GEOPF_DASHBOARD_BASE"]
     return f"{base}/tableau-de-bord/entrepots/{datastore_id}/donnees/{datasheet_name}"
 
 
-def _resource_filename(resource):
+def _resource_filename(resource) -> str:
     if resource.fs_filename:
         return os.path.basename(resource.fs_filename)
     parsed = urlparse(resource.url)
@@ -274,7 +279,7 @@ class _download_to_tempfile:
     (see PRs #3877/#3878).
     """
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
         self._tmp = None
 
@@ -300,7 +305,7 @@ class _download_to_tempfile:
             os.unlink(self._tmp.name)
             raise
 
-    def __exit__(self, *_):
+    def __exit__(self, *_) -> None:
         if self._tmp:
             self._tmp.close()
             try:
@@ -309,7 +314,7 @@ class _download_to_tempfile:
                 pass
 
 
-def sync_metadata(dataset, client):
+def sync_metadata(dataset, client) -> str:
     """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
     datasheet_name = str(dataset.id)
     xml = dataset_to_iso19115(dataset, datastore_id=client.datastore)
@@ -326,7 +331,9 @@ def sync_metadata(dataset, client):
 
 
 @task(name="geopf.pull_offerings", bind=True, ignore_result=False)
-def pull_offerings_from_geopf(self, dataset_id, user_id=None, access_token=None):
+def pull_offerings_from_geopf(
+    self, dataset_id: str, user_id: str | None = None, access_token: str | None = None
+) -> int:
     """Pull Géoplateforme offerings into resources for a dataset, as the acting user.
 
     Pass `user_id` for the normal path (their stored `GeopfToken` is looked
@@ -407,7 +414,7 @@ def pull_offerings_for_dataset(dataset, token) -> int:
     return len(live_offering_ids)
 
 
-def _upsert_offering_resource(dataset, offering):
+def _upsert_offering_resource(dataset, offering: dict) -> None:
     offering_id = offering["_id"]
     service_type = offering.get("type", "")
     layer_name = offering.get("layer_name", "")
@@ -456,14 +463,14 @@ def _offering_url(offering: dict) -> str:
     return urls[0].get("url", "") if urls else ""
 
 
-def _set_dataset_extras(dataset, extras: dict):
+def _set_dataset_extras(dataset, extras: dict) -> None:
     dataset.extras.update(extras)
     Dataset.objects(id=dataset.id).update_one(
         **{f"set__extras__{k}": v for k, v in extras.items()},
     )
 
 
-def _set_extras(dataset, resource, extras: dict):
+def _set_extras(dataset, resource, extras: dict) -> None:
     """Update resource extras in-place and persist without reloading the full dataset."""
     resource = get_by(dataset.resources, id=resource.id)
     resource.extras.update(extras)

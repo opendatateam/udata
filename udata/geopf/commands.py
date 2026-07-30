@@ -16,14 +16,14 @@ def grp():
     pass
 
 
-def _require_datastore_id(datastore_id):
+def _require_datastore_id(datastore_id: str | None) -> str:
     datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
     if not datastore_id:
         raise click.ClickException("Provide --datastore-id or configure GEOPF_DATASTORE_ID")
     return datastore_id
 
 
-def _resolve_token_option(user_id, token):
+def _resolve_token_option(user_id: str | None, token: str | None) -> str:
     """Resolve --user-id/--token CLI options to a usable access token."""
     if bool(user_id) == bool(token):
         raise click.ClickException("Provide exactly one of --user-id or --token")

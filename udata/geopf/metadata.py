@@ -159,7 +159,7 @@ EXTENT_TEMPLATE = """\
       </gmd:extent>"""
 
 
-def _bbox(dataset):
+def _bbox(dataset) -> tuple[float, float, float, float] | None:
     """Return (west, south, east, north) from dataset.spatial.geom, or None if unavailable.
 
     Zone-based coverage has no stored geometry and is not supported.
@@ -174,7 +174,7 @@ def _bbox(dataset):
     return None
 
 
-def _org_name(dataset):
+def _org_name(dataset) -> str:
     if dataset.organization:
         return dataset.organization.name
     if dataset.owner:
@@ -182,14 +182,14 @@ def _org_name(dataset):
     return ""
 
 
-def _contact_email(dataset):
+def _contact_email(dataset) -> str | None:
     for cp in dataset.contact_points or []:
         if cp.email:
             return cp.email
     return None
 
 
-def _topic_category(dataset):
+def _topic_category(dataset) -> str | None:
     if dataset.tags:
         tags_lower = {t.lower() for t in dataset.tags}
         return next(
