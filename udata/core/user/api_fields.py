@@ -4,9 +4,11 @@ from udata.core.user.models import User, _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
 
-# `User.organizations` is a reverse query (`cached_property`), so it cannot be
-# wrapped with `field()` on the model — post-decorate the generated read fields
-# here to expose it as a list of org references.
+# `organizations` cannot be declared with `field()` on the model for two reasons: the
+# getter loop of `generate_fields` only builds a `Nested` or a scalar, never a
+# `List(Nested(…))`, and `user/models.py` cannot import `Organization` at module level
+# since `organization/models.py` already imports it. Hence the post-decoration here,
+# where importing `Organization` is safe.
 User.__read_fields__["organizations"] = fields.List(
     fields.Nested(Organization.__ref_fields__),
     attribute=lambda u: list(u.organizations),

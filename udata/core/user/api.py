@@ -58,7 +58,9 @@ def _apply_admin_only_fields(user: User, data: dict) -> None:
             roles.append(role)
         user.roles = roles
     if "active" in data:
-        user.active = bool(data["active"])
+        # No `bool()` coercion: it would turn the string "false" into True and silently
+        # keep the account enabled. Let mongoengine reject non-booleans with a 400.
+        user.active = data["active"]
 
 
 class UserApiParser(ModelApiParser):

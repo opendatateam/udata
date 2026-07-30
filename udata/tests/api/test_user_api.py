@@ -10,7 +10,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
-from udata.models import Discussion, Follow, Member, MembershipRequest
+from udata.models import Discussion, Follow, Member, MembershipRequest, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -353,6 +353,30 @@ class UserAPITest(APITestCase):
         self.assert201(response)
         self.assertEqual(response.json["roles"], ["admin"])
         self.assertFalse(response.json["active"])
+
+    def test_user_api_create_with_a_non_boolean_active(self):
+        """A string must not be coerced into a boolean: "false" would enable the account"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "active": "false",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_without_a_required_field(self):
+        """It should raise a 400 when a required field is missing"""
+        self.login(AdminFactory())
+        data = {
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
 
     def test_user_api_create_with_a_non_existing_role(self):
         """It should raise a 400 when creating a user with an unknown role"""
