@@ -9,7 +9,7 @@ from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
 from udata.geopf.models import GeopfToken
 from udata.tests.api import APITestCase
-from udata.tests.geopf import TEST_API_BASE, TEST_ENCRYPTION_KEY, TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_GEOPF_CONF
 
 CDATA_BASE_URL = "https://cdata.example.com"
 
@@ -279,7 +279,9 @@ class GeopfPushApiTest(APITestCase):
     def test_allows_format_permitted_by_config(self):
         user = self.login()
         resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
-        dataset = DatasetFactory(owner=user, resources=[resource])
+        dataset = DatasetFactory(
+            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+        )
         GeopfToken(
             user=user,
             access_token="a",
@@ -303,7 +305,9 @@ class GeopfPushApiTest(APITestCase):
     def test_connected_enqueues_push_task(self):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
-        dataset = DatasetFactory(owner=user, resources=[resource])
+        dataset = DatasetFactory(
+            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+        )
         GeopfToken(
             user=user,
             access_token="a",
@@ -346,28 +350,16 @@ class GeopfPushApiTest(APITestCase):
             str(dataset.id), str(resource.id), str(user.id), "ds-chosen"
         )
 
-
-# Class-level options win over method-level ones for conflicting keys
-# (pytest-flask applies markers closest-first).
-@pytest.mark.options(
-    GEOPF_API_BASE=TEST_API_BASE,
-    GEOPF_TOKEN_ENCRYPTION_KEY=TEST_ENCRYPTION_KEY,
-    GEOPF_DATASTORE_ID=None,
-)
-class GeopfPushApiNoDatastoreTest(APITestCase):
-    def _connect(self, user):
+    def test_no_resolvable_datastore_returns_400(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
         GeopfToken(
             user=user,
             access_token="a",
             refresh_token="r",
             expires_at=datetime.now(UTC) + timedelta(hours=1),
         ).save()
-
-    def test_no_resolvable_datastore_returns_400(self):
-        user = self.login()
-        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
-        dataset = DatasetFactory(owner=user, resources=[resource])
-        self._connect(user)
 
         response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
         self.assert400(response)
@@ -380,7 +372,12 @@ class GeopfPushApiNoDatastoreTest(APITestCase):
             resources=[resource],
             extras={"geopf:push:datastore-id": "ds-pinned"},
         )
-        self._connect(user)
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
 
         with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
             response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))

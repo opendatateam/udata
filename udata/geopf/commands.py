@@ -1,5 +1,4 @@
 import click
-from flask import current_app
 
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
@@ -17,9 +16,8 @@ def grp():
 
 
 def _require_datastore_id(datastore_id: str | None) -> str:
-    datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
     if not datastore_id:
-        raise click.ClickException("Provide --datastore-id or configure GEOPF_DATASTORE_ID")
+        raise click.ClickException("Provide --datastore-id")
     return datastore_id
 
 
@@ -45,9 +43,7 @@ user_id_option = click.option(
 token_option = click.option(
     "--token", help="Act with this raw access token, bypassing any stored token"
 )
-datastore_id_option = click.option(
-    "--datastore-id", help="Datastore to push into (defaults to GEOPF_DATASTORE_ID)"
-)
+datastore_id_option = click.option("--datastore-id", help="Datastore to push into")
 
 
 @grp.command("push-resource")

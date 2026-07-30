@@ -144,17 +144,16 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert offering_resource.url == "http://wfs.example.com"
         assert offering_resource.format == "wfs"
 
-    def test_falls_back_to_configured_datastore_id(self):
-        # no geopf:push:datastore-id: dataset pushed before dataset-level tracking existed
+    def test_skips_when_no_datastore_pinned(self):
+        # no geopf:push:datastore-id: dataset was never successfully pushed
         gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
         dataset = DatasetFactory(resources=[gpkg])
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = []
 
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
-            pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
+            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
 
-        mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
+        assert count == 0
+        mock_client_cls.assert_not_called()
 
     def test_updates_url_for_changed_offering(self):
         gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
@@ -216,7 +215,8 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         with patch("udata.geopf.tasks._run_pipeline"):
             push_resource_to_geopf.apply(
-                args=[str(dataset.id), resource_id], kwargs={"access_token": "test-token"}
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
             )
 
         dataset.reload()
@@ -232,7 +232,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
             with pytest.raises(GeopfError):
                 push_resource_to_geopf.apply(
                     args=[str(dataset.id), resource_id],
-                    kwargs={"access_token": "test-token"},
+                    kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
                     throw=True,
                 )
 
@@ -250,7 +250,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
             with pytest.raises(GeopfTimeoutError):
                 push_resource_to_geopf.apply(
                     args=[str(dataset.id), resource_id],
-                    kwargs={"access_token": "test-token"},
+                    kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
                     throw=True,
                 )
 
@@ -276,7 +276,8 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         with patch("udata.geopf.tasks._run_pipeline") as mock_pipeline:
             push_resource_to_geopf.apply(
-                args=[str(dataset.id), resource_id], kwargs={"access_token": "test-token"}
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
             )
 
         mock_pipeline.assert_called_once()
@@ -331,11 +332,10 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         assert dataset.extras.get("geopf:push:datastore-id") == "ds-established"
 
 
-@pytest.mark.options(GEOPF_DATASTORE_ID=None)
 class PushResourceTaskSkipTest(PytestOnlyDBTestCase):
     """Task early-return paths that need no GEOPF credentials configured."""
 
-    def test_skips_when_config_missing(self):
+    def test_skips_when_no_datastore_id_resolvable(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(resources=[resource])
         resource_id = str(dataset.resources[0].id)

@@ -17,7 +17,7 @@ Two independent flows, each triggered explicitly by a user, each running as its 
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
 
-**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. A dataset also lives in exactly one entrepôt: the datastore is resolved (explicit choice, or `GEOPF_DATASTORE_ID` fallback) on a dataset's first push and stored as `geopf:push:datastore-id` (dataset extra) once that push succeeds (a failed push doesn't pin anything), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
+**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it. A dataset also lives in exactly one entrepôt: the frontend lets the user pick one (via `GET /api/1/geopf/datastores/`) and passes it explicitly as `datastore_id` on the dataset's first push; it's stored as `geopf:push:datastore-id` (dataset extra) once that push succeeds (a failed push doesn't pin anything), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
 
 ## Authentication
 
@@ -123,7 +123,7 @@ Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as th
 
 ### Workflow
 
-1. Resolve the dataset's datastore (`geopf:push:datastore-id`, falling back to `GEOPF_DATASTORE_ID` for datasets pushed before that tracking existed), and collect `geopf:push:stored-data-id` from each of its push resources.
+1. Resolve the dataset's datastore (`geopf:push:datastore-id` dataset extra; datasets with no pin yet are skipped), and collect `geopf:push:stored-data-id` from each of its push resources.
 2. For each stored data id, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
 3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
 4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
@@ -156,7 +156,7 @@ Set on resources created (or updated) by the pull flow. These resources are dist
 udata geopf push-resource <dataset_id> <resource_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
 ```
 
-Runs the full upload pipeline synchronously for a single resource, same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` defaults to `GEOPF_DATASTORE_ID` if omitted. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
+Runs the full upload pipeline synchronously for a single resource, same path as the Celery task. `--user-id` uses that user's stored `GeopfToken` (refreshed as needed); `--token` bypasses stored-token resolution entirely with a raw access token, for ops/debugging. `--datastore-id` is required unless the dataset already has one pinned. Useful for retrying after a timeout or failure. If the previous attempt left a livraison on Géoplateforme, delete it via the cartes.gouv.fr UI before retrying.
 
 ```
 udata geopf push-metadata <dataset_id> (--user-id <id> | --token <token>) [--datastore-id <id>]
@@ -170,16 +170,13 @@ Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a fu
 udata geopf pull-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (falling back to `GEOPF_DATASTORE_ID`). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate pull or verifying the pull logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (no-op if the dataset has no pinned datastore). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate pull or verifying the pull logic.
 
 ## Configuration
 
 ```python
 GEOPF_API_BASE = "https://data.geopf.fr/api"  # default
 GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"  # default, used to build fiche URLs
-# FIXME: temporary default datastore, until cdata has a datastore picker and
-# every dataset's first push carries an explicit datastore_id chosen by the user.
-GEOPF_DATASTORE_ID = "<your entrepôt UUID>"
 
 # Resource formats eligible for push. Only gpkg is actually processed today
 # (SRS detection is gpkg-specific, see Limitations), so adding a format here
@@ -205,7 +202,6 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 
 - Only formats listed in `GEOPF_PUSHABLE_FORMATS` are synchronised (`gpkg` by default); other formats are silently skipped. SRS detection (`udata/geopf/srs.py`) only supports `gpkg` today, so adding a format to the setting alone isn't enough to actually push it.
 - Updates to an existing pushed resource are not yet handled: a resource can only be pushed once via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/`.
-- `GEOPF_DATASTORE_ID` is currently a single test default used when a push doesn't pass an explicit `datastore_id`; that fallback should go away once every push reliably supplies one.
 - SRS is auto-detected from the file before upload. GeoPackage reads the WKT definition from `gpkg_spatial_ref_sys` (via sqlite3 + pyproj). Other vector formats (Shapefile via `.prj`, GeoJSON/KML/KMZ/GPX which are always WGS 84) and raster formats (GeoTIFF via rasterio) can be added to `udata/geopf/srs.py` without changing the pipeline.
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.

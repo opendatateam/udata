@@ -127,11 +127,7 @@ class GeopfPushAPI(API):
             api.abort(409, "Not connected to Géoplateforme")
 
         datastore_id = (request.get_json(silent=True) or {}).get("datastore_id")
-        if not (
-            datastore_id
-            or dataset.extras.get("geopf:push:datastore-id")
-            or current_app.config.get("GEOPF_DATASTORE_ID")
-        ):
+        if not (datastore_id or dataset.extras.get("geopf:push:datastore-id")):
             api.abort(400, "No datastore_id provided and no datastore configured for this dataset")
 
         task = push_resource_to_geopf.delay(

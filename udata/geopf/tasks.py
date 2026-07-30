@@ -73,14 +73,9 @@ def push_resource_to_geopf(
                 datastore_id,
             )
         datastore_id = existing_datastore_id
-    else:
-        # FIXME: temporary default datastore, until cdata has a datastore picker
-        # for a dataset's first push.
-        datastore_id = datastore_id or current_app.config.get("GEOPF_DATASTORE_ID")
     if not datastore_id:
         log.warning(
-            "geopf: no datastore_id provided and GEOPF_DATASTORE_ID not configured, "
-            "skipping push dataset=%s resource=%s",
+            "geopf: no datastore_id provided, skipping push dataset=%s resource=%s",
             dataset_id,
             resource_id,
         )
@@ -376,14 +371,11 @@ def pull_offerings_for_dataset(dataset, token) -> int:
     """Pull Géoplateforme offerings into udata resources. Returns count of live offerings.
 
     `token` is a geopf access token for the acting user. A dataset lives in
-    exactly one entrepôt (`geopf:push:datastore-id`, dataset extra, falling
-    back to `GEOPF_DATASTORE_ID` for datasets pushed before that tracking
-    existed); every one of its push resources' `geopf:push:stored-data-id` is
-    looked up within that same datastore.
+    exactly one entrepôt (`geopf:push:datastore-id`, dataset extra); every one
+    of its push resources' `geopf:push:stored-data-id` is looked up within
+    that same datastore.
     """
-    datastore_id = dataset.extras.get("geopf:push:datastore-id") or current_app.config.get(
-        "GEOPF_DATASTORE_ID"
-    )
+    datastore_id = dataset.extras.get("geopf:push:datastore-id")
     stored_data_ids = {
         r.extras["geopf:push:stored-data-id"]
         for r in dataset.resources
