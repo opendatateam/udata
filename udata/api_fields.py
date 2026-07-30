@@ -447,11 +447,18 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
         yield key, field, info
 
         if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-            yield (
-                f"{key}_thumbnail",
-                field,
-                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True, "attribute": key},
-            )
+            thumbnail_info = {
+                **info,
+                **info.get("thumbnail_info", {}),
+                "is_thumbnail": True,
+                "attribute": key,
+            }
+            # `rename` names the image field itself. The thumbnail derives its own API
+            # name from it: inheriting it as-is would give both the same key, and the
+            # thumbnail (yielded last) would silently overwrite the image field.
+            if info.get("rename"):
+                thumbnail_info["rename"] = f"{info['rename']}_thumbnail"
+            yield f"{key}_thumbnail", field, thumbnail_info
 
 
 def save_class_by_parents(cls):
@@ -548,16 +555,19 @@ def generate_fields(**kwargs) -> Callable:
             read, write = convert_db_to_field(key, field, info)
 
             # `rename` lets a field appear in the API under a different name than its
-            # Python attribute (e.g. `created_at` exposed as `since`). Patch needs the
-            # reverse mapping to know which attribute to assign to.
+            # Python attribute (e.g. `created_at` exposed as `since`).
             api_key = info.get("rename") or key
             if api_key != key:
-                api_key_to_attribute[api_key] = key
                 # The read field is stored under the renamed API key, so without an
                 # explicit `attribute` flask-restx would resolve the value from a
                 # non-existent `api_key` attribute and always serialize null.
                 if read is not None and read.attribute is None:
                     read.attribute = key
+                # The reverse mapping only serves `patch()`, which reads it after
+                # finding the key in `__write_fields__` — where a field lands exactly
+                # when `write` is set. Mapping a readonly field would be unreachable.
+                if write is not None:
+                    api_key_to_attribute[api_key] = key
 
             if read:
                 read_fields[api_key] = read
@@ -607,9 +617,9 @@ def generate_fields(**kwargs) -> Callable:
                 def field_constructor(**kwargs):
                     return restx_fields.Nested(nested_fields, **kwargs)
 
+            # Getters are readonly, so they never reach `__write_fields__` and need no
+            # entry in `api_key_to_attribute`: the rename only applies on the read side.
             api_method_key = additional_field_info.get("rename") or method_name
-            if api_method_key != method_name:
-                api_key_to_attribute[api_method_key] = method_name
 
             read_fields[api_method_key] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
