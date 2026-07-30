@@ -37,6 +37,8 @@ Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/
 
 `/token/` (disconnect) revokes the refresh token at sso.geopf.fr before deleting the local `GeopfToken`, so a leaked token can't still be used against the geopf API after the user disconnects. Revocation is best-effort: if the IdP is unreachable, the failure is only logged and the local link is removed regardless.
 
+geopf has no datastore-scoped listing endpoint; `/datastores/` discovers them via `GET {GEOPF_API_BASE}/users/me`, whose `communities_member[]` each carry a `community.datastore` id and a `rights` array (`COMMUNITY`, `PROCESSING`, `ANNEX`, `BROADCAST`, `UPLOAD`). Only memberships with `UPLOAD` + `PROCESSING` + `BROADCAST` together are returned, since those are exactly the rights the push pipeline needs (upload, vector integration, and a visible offering); anything less can't complete a push.
+
 The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it server-side to the dataset's admin geopf page (`/admin/datasets/<id>/geopf`), falling back to the homepage if it's missing or unknown.
 
 If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect. This is the same for both push and pull.
@@ -60,7 +62,7 @@ Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resou
 2. **Upload (livraison)**: create an upload, push the file and its MD5 checksum, close the upload.
 3. **Wait for checks**: poll `/uploads/{id}/checks` until `asked` and `in_progress` are empty; fail if any check fails.
 4. **Tag upload**: attach `datasheet_name` tag so the upload is associated with the fiche.
-5. **Processing**: launch the vector integration processing job; poll until `SUCCESS`.
+5. **Processing**: discover the datastore's registered "vector integration" processing (`GET /datastores/{datastore}/processings`, matched by type: input accepts a `VECTOR` upload, output is a `VECTOR-DB` stored_data — processing ids aren't global, they're registered per datastore and differ between e.g. production and sandbox entrepôts), launch it, poll until `SUCCESS`.
 6. **Delete upload**: clean up the livraison once processing has consumed it.
 7. **Tag stored data**: attach `datasheet_name` tag to the resulting stored data.
 8. **Metadata**: generate ISO 19115 XML from the dataset and push it:
@@ -97,7 +99,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 | ISO 19115 field | Source |
 |---|---|
-| `fileIdentifier` | `dataset.id` |
+| `fileIdentifier` | `dataset.id`, prefixed `SANDBOX_` when pushing to `SANDBOX_DATASTORE_ID` (see Limitations) |
 | `organisationName` (metadata contact + data contact) | `dataset.organization.name` or `dataset.owner.fullname` |
 | `electronicMailAddress` (metadata contact + data contact) | First `dataset.contact_points` entry with an email; omitted if none, see note below |
 | `pointOfContact` in `identificationInfo` | Org name + email (omitted if no org/owner) |
@@ -187,10 +189,6 @@ GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})  # default
 # Maximum size (bytes) of a remote resource file downloaded for a push
 GEOPF_MAX_REMOTE_FILE_SIZE = 1_000_000_000  # default, 1 GB
 
-# "Intégration de données vectorielles" processing on the entrepôt
-# (may differ on other geopf instances)
-GEOPF_VECTOR_PROCESSING_ID = "0de8c60b-9938-4be9-aa36-9026b77c3c96"  # default
-
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"
@@ -212,3 +210,4 @@ The plugin is registered as a udata entry point (`udata.plugins`) and activated 
 - Bounding box is only extracted from raw `dataset.spatial.geom`; zone-based spatial coverage (the common case) has no stored geometry in udata and produces no extent in the metadata.
 - `topicCategory` is inferred from free-form tags via a keyword mapping; it will often be absent and is never guaranteed to be accurate.
 - Contact points have no UI and must be set via API (`POST /api/1/contacts/`, then `PUT /api/1/datasets/{id}/`); datasets uploaded through the standard funnel will have no contact point and the metadata email fields will be absent. Run `udata geopf push-metadata` after adding one.
+- geopf's "découverte" sandbox datastore (`SANDBOX_DATASTORE_ID` in `udata/geopf/metadata.py`, `122b878c-aad8-4507-87b2-465e664467d3`) requires metadata `fileIdentifier` to be prefixed `SANDBOX_`; undocumented in geopf's API. `dataset_to_iso19115` prefixes it automatically when pushing to that specific datastore id; other datastores are unaffected. Other non-standard datastores may have similar undocumented naming rules not yet accounted for.

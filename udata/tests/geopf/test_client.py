@@ -92,12 +92,55 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
 @TEST_GEOPF_CONF
 class GeopfClientProcessingTest(PytestOnlyTestCase):
     def test_launch_processing_returns_exec_id(self, rmock):
+        rmock.get(
+            f"{TEST_API_URL}/processings",
+            json=[
+                {
+                    "_id": "proc-raster",
+                    "input_types": {"upload": ["RASTER"]},
+                    "output_type": {"stored_data": "ROK4-PYRAMID-RASTER"},
+                },
+                {
+                    "_id": "proc-vector",
+                    "input_types": {"upload": ["VECTOR"]},
+                    "output_type": {"stored_data": "VECTOR-DB"},
+                },
+            ],
+        )
         rmock.post(f"{TEST_API_URL}/processings/executions", json={"_id": "exec-1"})
         rmock.post(f"{TEST_API_URL}/processings/executions/exec-1/launch", json={})
         exec_id = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).launch_processing(
             "u1", "stored-name"
         )
         assert exec_id == "exec-1"
+        executions_request = next(
+            r for r in rmock.request_history if r.url.endswith("/processings/executions")
+        )
+        assert executions_request.json()["processing"] == "proc-vector"
+
+        processings_request = next(
+            r for r in rmock.request_history if r.path.endswith("/processings")
+        )
+        # "output_types" (plural) is the query param geopf expects; it populates
+        # the response's "output_type" (singular) field. Mismatching this means
+        # the field is silently omitted and no processing ever matches.
+        assert "fields=input_types%2coutput_types" in processings_request.query
+
+    def test_launch_processing_raises_when_no_matching_processing(self, rmock):
+        rmock.get(
+            f"{TEST_API_URL}/processings",
+            json=[
+                {
+                    "_id": "proc-raster",
+                    "input_types": {"upload": ["RASTER"]},
+                    "output_type": {"stored_data": "ROK4-PYRAMID-RASTER"},
+                }
+            ],
+        )
+        with pytest.raises(GeopfError, match="No VECTOR"):
+            GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).launch_processing(
+                "u1", "stored-name"
+            )
 
     def test_poll_execution_success(self, rmock):
         rmock.get(
@@ -201,11 +244,46 @@ class ExtractFileIdentifierTest:
 
 @TEST_GEOPF_CONF
 class GeopfClientDatastoresTest(PytestOnlyTestCase):
-    def test_list_datastores_returns_list(self, rmock):
-        datastores = [{"_id": "ds-1", "name": "my-entrepot"}]
-        rmock.get(f"{TEST_API_BASE}/datastores", json=datastores)
+    def test_list_datastores_returns_full_rights_memberships(self, rmock):
+        rmock.get(
+            f"{TEST_API_BASE}/users/me",
+            json={
+                "communities_member": [
+                    {
+                        "rights": ["UPLOAD", "PROCESSING", "BROADCAST"],
+                        "community": {"datastore": "ds-1", "name": "my-entrepot"},
+                    }
+                ]
+            },
+        )
         result = GeopfClient(token=TEST_TOKEN).list_datastores()
-        assert result == datastores
+        assert result == [
+            {
+                "datastore_id": "ds-1",
+                "name": "my-entrepot",
+                "rights": ["UPLOAD", "PROCESSING", "BROADCAST"],
+            }
+        ]
+
+    def test_list_datastores_excludes_partial_rights_memberships(self, rmock):
+        rmock.get(
+            f"{TEST_API_BASE}/users/me",
+            json={
+                "communities_member": [
+                    {
+                        "rights": ["UPLOAD", "COMMUNITY"],
+                        "community": {"datastore": "ds-readonly", "name": "not-publishable"},
+                    }
+                ]
+            },
+        )
+        result = GeopfClient(token=TEST_TOKEN).list_datastores()
+        assert result == []
+
+    def test_list_datastores_empty_when_no_memberships(self, rmock):
+        rmock.get(f"{TEST_API_BASE}/users/me", json={})
+        result = GeopfClient(token=TEST_TOKEN).list_datastores()
+        assert result == []
 
 
 @TEST_GEOPF_CONF

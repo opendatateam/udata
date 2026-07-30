@@ -312,7 +312,7 @@ class _download_to_tempfile:
 def sync_metadata(dataset, client):
     """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
     datasheet_name = str(dataset.id)
-    xml = dataset_to_iso19115(dataset)
+    xml = dataset_to_iso19115(dataset, datastore_id=client.datastore)
     metadata_id = dataset.extras.get("geopf:push:metadata-id")
     if metadata_id:
         client.update_metadata(metadata_id, xml)

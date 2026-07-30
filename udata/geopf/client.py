@@ -14,6 +14,10 @@ log = logging.getLogger(__name__)
 POLL_INTERVAL = 10  # seconds between status checks
 POLL_TIMEOUT = 1800  # seconds, default 30 minutes; override via GEOPF_POLL_TIMEOUT config
 
+# Community rights (per GET /users/me's communities_member[].rights) needed to
+# fully complete the push pipeline: upload, processing, and a visible offering.
+REQUIRED_PUBLISH_RIGHTS = {"UPLOAD", "PROCESSING", "BROADCAST"}
+
 
 class GeopfError(Exception):
     pass
@@ -112,9 +116,37 @@ class GeopfClient:
 
     # --- processing ---
 
+    def _find_vector_processing_id(self) -> str:
+        """Find this datastore's registered "vector integration" processing.
+
+        Processing ids are per-datastore, not global (sandbox entrepôts don't
+        carry the same ids as production ones), so there is no single id that
+        works everywhere. Matched by type rather than name (a human label, not
+        guaranteed stable or unique): the one whose input accepts a VECTOR
+        upload and whose output is a VECTOR-DB stored_data.
+        """
+        resp = self.session.get(
+            self._url("processings"),
+            # "output_types" (plural) is the query param's name per geopf's API;
+            # the response field it populates is "output_type" (singular).
+            params={"fields": "input_types,output_types", "limit": 100},
+        )
+        self._raise(resp)
+        for processing in resp.json():
+            input_types = processing.get("input_types") or {}
+            output_type = processing.get("output_type") or {}
+            if (
+                "VECTOR" in (input_types.get("upload") or [])
+                and output_type.get("stored_data") == "VECTOR-DB"
+            ):
+                return processing["_id"]
+        raise GeopfError(
+            f"No VECTOR -> VECTOR-DB processing available on datastore {self.datastore}"
+        )
+
     def launch_processing(self, upload_id, stored_data_name, srs=DEFAULT_SRS):
         payload = {
-            "processing": current_app.config["GEOPF_VECTOR_PROCESSING_ID"],
+            "processing": self._find_vector_processing_id(),
             "inputs": {"upload": [upload_id]},
             "output": {"stored_data": {"name": stored_data_name}},
             "parameters": {"srs": srs},
@@ -154,14 +186,28 @@ class GeopfClient:
     # --- datastores ---
 
     def list_datastores(self) -> list:
-        """Return the datastores (entrepôts) accessible to the current user's token.
+        """Return the datastores (entrepôts) the current user has full publish rights on.
 
-        Instance-level call, not scoped to `self.datastore`.
-        # FIXME: confirm the exact route against geopf's API docs once available.
+        geopf has no datastore-scoped listing endpoint; discovered instead via
+        `GET /users/me` -> `communities_member[].community.datastore`, each
+        membership carrying its own `rights`. Full publish rights means
+        UPLOAD (livraison), PROCESSING (vector integration) and BROADCAST
+        (making the resulting offering visible) are all present together;
+        a membership missing any of those can't complete the push pipeline,
+        so it's filtered out here rather than surfaced as a dead end.
         """
-        resp = self.session.get(f"{self.base}/datastores")
+        resp = self.session.get(f"{self.base}/users/me")
         self._raise(resp)
-        return resp.json()
+        memberships = resp.json().get("communities_member", [])
+        return [
+            {
+                "datastore_id": m["community"]["datastore"],
+                "name": m["community"].get("name"),
+                "rights": m.get("rights", []),
+            }
+            for m in memberships
+            if REQUIRED_PUBLISH_RIGHTS.issubset(m.get("rights", []))
+        ]
 
     # --- offerings ---
 

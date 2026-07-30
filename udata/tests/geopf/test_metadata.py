@@ -6,7 +6,7 @@ from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.factories import UserFactory
-from udata.geopf.metadata import XML_NS, dataset_to_iso19115
+from udata.geopf.metadata import SANDBOX_DATASTORE_ID, XML_NS, dataset_to_iso19115
 from udata.tests.api import PytestOnlyDBTestCase
 
 
@@ -28,6 +28,18 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
     def test_file_identifier(self):
         dataset = DatasetFactory.build()
         root = _parse(dataset)
+        fid = _text(root, ".//gmd:fileIdentifier/gco:CharacterString")
+        assert fid == str(dataset.id)
+
+    def test_file_identifier_prefixed_on_sandbox_datastore(self):
+        dataset = DatasetFactory.build()
+        root = fromstring(dataset_to_iso19115(dataset, datastore_id=SANDBOX_DATASTORE_ID))
+        fid = _text(root, ".//gmd:fileIdentifier/gco:CharacterString")
+        assert fid == f"SANDBOX_{dataset.id}"
+
+    def test_file_identifier_unprefixed_on_other_datastores(self):
+        dataset = DatasetFactory.build()
+        root = fromstring(dataset_to_iso19115(dataset, datastore_id="some-other-datastore"))
         fid = _text(root, ".//gmd:fileIdentifier/gco:CharacterString")
         assert fid == str(dataset.id)
 

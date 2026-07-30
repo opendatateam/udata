@@ -238,12 +238,13 @@ class GeopfDatastoresApiTest(APITestCase):
             expires_at=datetime.now(UTC) + timedelta(hours=1),
         ).save()
 
+        datastores = [{"datastore_id": "ds-1", "name": "my-entrepot", "rights": ["UPLOAD"]}]
         with patch("udata.geopf.api.GeopfClient") as mock_client_cls:
-            mock_client_cls.return_value.list_datastores.return_value = [{"_id": "ds-1"}]
+            mock_client_cls.return_value.list_datastores.return_value = datastores
             response = self.get(url_for("api.geopf_datastores"))
 
         self.assert200(response)
-        assert response.json == [{"_id": "ds-1"}]
+        assert response.json == datastores
 
 
 @TEST_GEOPF_CONF

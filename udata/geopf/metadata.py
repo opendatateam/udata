@@ -5,6 +5,10 @@ XML_NS = {
     "gco": "http://www.isotc211.org/2005/gco",
 }
 
+# geopf's "découverte" sandbox datastore requires metadata fileIdentifier to
+# be prefixed with "SANDBOX" (undocumented in geopf's API).
+SANDBOX_DATASTORE_ID = "122b878c-aad8-4507-87b2-465e664467d3"
+
 # ISO 19115 MD_TopicCategoryCode → matching French/English tag keywords
 TOPIC_MAP = {
     "farming": ["agriculture", "agricole", "farming"],
@@ -194,8 +198,10 @@ def _topic_category(dataset):
     return None
 
 
-def dataset_to_iso19115(dataset) -> bytes:
+def dataset_to_iso19115(dataset, datastore_id: str | None = None) -> bytes:
     file_identifier = str(dataset.id)
+    if datastore_id == SANDBOX_DATASTORE_ID:
+        file_identifier = f"SANDBOX_{file_identifier}"
     abstract = dataset.description or dataset.title
     org_name = _org_name(dataset)
     email = _contact_email(dataset)
