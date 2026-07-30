@@ -250,6 +250,44 @@ class PartialEditorDatasetAPITest(APITestCase):
         )
         self.assert400(response)
 
+    def test_malformed_assignments_payload_is_rejected(self):
+        """A payload that isn't a list of {class, id} objects returns 400, not 500."""
+        self.login(self.admin_user)
+        url = url_for(
+            "api.member_assignments",
+            org=self.org,
+            user=self.partial_editor_user,
+        )
+
+        for payload in (
+            # Double-encoded JSON: iterating the string yields characters
+            '[{"class": "Dataset", "id": "%s"}]' % self.dataset_assigned.id,
+            # A single object instead of a list: iterating a dict yields keys
+            {"class": "Dataset", "id": str(self.dataset_assigned.id)},
+            # A list of ids instead of a list of objects
+            [str(self.dataset_assigned.id)],
+            42,
+        ):
+            response = self.put(url, payload)
+            self.assert400(response)
+
+        self.assertEqual(
+            Assignment.objects(user=self.partial_editor_user, organization=self.org).count(), 0
+        )
+
+    def test_assignment_with_invalid_id_is_rejected(self):
+        """An id that isn't a valid ObjectId returns 400, not 500."""
+        self.login(self.admin_user)
+        response = self.put(
+            url_for(
+                "api.member_assignments",
+                org=self.org,
+                user=self.partial_editor_user,
+            ),
+            [{"class": "Dataset", "id": "not-an-object-id"}],
+        )
+        self.assert400(response)
+
     def test_cannot_assign_to_non_partial_editor(self):
         """Cannot assign objects to members who are not partial_editors."""
         self.login(self.admin_user)
