@@ -35,7 +35,7 @@ _SITEMAP_CONFIGS = [
         "organizations", Organization, "visible", ["slug", "last_modified"], "last_modified"
     ),
     SitemapConfig("reuses", Reuse, "visible", ["slug", "last_modified"], "last_modified"),
-    SitemapConfig("posts", Post, "published", ["slug", "last_modified"], "last_modified"),
+    SitemapConfig("posts", Post, "visible", ["slug", "last_modified"], "last_modified"),
     SitemapConfig(
         "dataservices",
         Dataservice,
@@ -61,7 +61,10 @@ def render_xml(root_tag, items, child_tag):
 def _iter_urls(qs, only_fields, lastmod_attr):
     for obj in qs.only(*only_fields).batch_size(BATCH_SIZE).no_cache().timeout(False):
         lastmod = getattr(obj, lastmod_attr)
-        yield {"loc": obj.self_web_url(), "lastmod": lastmod.isoformat() if lastmod else None}
+        yield {
+            "loc": obj.self_web_url(),
+            "lastmod": lastmod.strftime("%Y-%m-%dT%H:%M:%SZ") if lastmod else None,
+        }
 
 
 def _iter_chunks(urls, size):
