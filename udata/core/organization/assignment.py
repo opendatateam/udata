@@ -5,7 +5,6 @@ from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
 from udata.core.owned import Owned
-from udata.core.user.models import User
 from udata.mongo import db
 
 from .constants import ASSIGNABLE_OBJECT_TYPES
@@ -15,7 +14,6 @@ from .constants import ASSIGNABLE_OBJECT_TYPES
 class Assignment(db.Document):
     user = field(
         db.ReferenceField("User", required=True, reverse_delete_rule=CASCADE),
-        nested_fields=User.__ref_fields__,
     )
     organization = field(
         db.ReferenceField("Organization", required=True),

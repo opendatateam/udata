@@ -57,7 +57,6 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     )
     user = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=User.__ref_fields__,
         readonly=True,
         allow_null=True,
         auditable=False,

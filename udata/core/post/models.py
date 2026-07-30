@@ -15,7 +15,6 @@ from udata.core.dataset.api_fields import dataset_fields
 from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
-from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
@@ -104,7 +103,6 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
 
     owner = field(
         ReferenceField("User"),
-        nested_fields=User.__ref_fields__,
         readonly=True,
         allow_null=True,
         description="The owner user",

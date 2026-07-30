@@ -64,7 +64,6 @@ def filter_by_subject_type(base_query, filter_value):
 class Report(Document[ReportQuerySet]):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=User.__ref_fields__,
         description="Only set if a user was connected when reporting an element.",
         readonly=True,
         allow_null=True,
@@ -83,7 +82,6 @@ class Report(Document[ReportQuerySet]):
     )
     subject_deleted_by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=User.__ref_fields__,
         allow_null=True,
         readonly=True,
     )
@@ -112,7 +110,6 @@ class Report(Document[ReportQuerySet]):
     )
     dismissed_by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=User.__ref_fields__,
         allow_null=True,
     )
 

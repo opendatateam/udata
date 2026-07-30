@@ -82,7 +82,6 @@ class Owned(object):
 
     owner = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=User.__ref_fields__,
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
         checks=[check_owner_is_current_user, only_creation],
         allow_null=True,

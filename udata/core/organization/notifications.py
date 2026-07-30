@@ -23,7 +23,6 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
     )
     request_user = field(
         ReferenceField(User),
-        nested_fields=User.__ref_fields__,
         readonly=True,
         auditable=False,
         allow_null=True,
