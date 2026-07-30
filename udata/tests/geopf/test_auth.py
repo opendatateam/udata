@@ -1,10 +1,10 @@
 from datetime import UTC, datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from udata.core.user.factories import UserFactory
-from udata.geopf.auth import resolve_access_token
+from udata.geopf.auth import resolve_access_token, revoke_token
 from udata.geopf.client import GeopfReauthRequired
 from udata.geopf.models import GeopfToken
 from udata.tests.api import PytestOnlyDBTestCase
@@ -108,3 +108,62 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
             mock_oauth.geopf.fetch_access_token.side_effect = Exception("boom")
             with pytest.raises(GeopfReauthRequired):
                 resolve_access_token(user=user)
+
+
+@TEST_GEOPF_CONF
+class RevokeTokenTest(PytestOnlyDBTestCase):
+    def test_posts_refresh_token_to_revocation_endpoint(self):
+        user = UserFactory()
+        geopf_token = GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="the-refresh-token",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with (
+            patch("udata.geopf.auth.oauth") as mock_oauth,
+            patch("udata.geopf.auth.requests.post") as mock_post,
+        ):
+            mock_oauth.geopf.load_server_metadata.return_value = {
+                "revocation_endpoint": "https://sso.example.com/revoke"
+            }
+            mock_post.return_value = MagicMock(status_code=200)
+            revoke_token(geopf_token)
+
+        args, kwargs = mock_post.call_args
+        assert args[0] == "https://sso.example.com/revoke"
+        assert kwargs["data"]["token"] == "the-refresh-token"
+        assert kwargs["data"]["token_type_hint"] == "refresh_token"
+
+    def test_does_not_raise_when_no_revocation_endpoint(self):
+        user = UserFactory()
+        geopf_token = GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.load_server_metadata.return_value = {}
+            revoke_token(geopf_token)  # must not raise
+
+    def test_does_not_raise_when_revocation_call_fails(self):
+        user = UserFactory()
+        geopf_token = GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with (
+            patch("udata.geopf.auth.oauth") as mock_oauth,
+            patch("udata.geopf.auth.requests.post") as mock_post,
+        ):
+            mock_oauth.geopf.load_server_metadata.return_value = {
+                "revocation_endpoint": "https://sso.example.com/revoke"
+            }
+            mock_post.side_effect = Exception("network error")
+            revoke_token(geopf_token)  # must not raise

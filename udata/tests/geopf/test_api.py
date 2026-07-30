@@ -166,9 +166,60 @@ class GeopfTokenApiTest(APITestCase):
             expires_at=datetime.now(UTC) + timedelta(hours=1),
         ).save()
 
-        response = self.delete(url_for("api.geopf_token"))
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.load_server_metadata.return_value = {
+                "revocation_endpoint": "https://sso.example.com/revoke"
+            }
+            response = self.delete(url_for("api.geopf_token"))
+
         self.assert204(response)
         assert GeopfToken.objects(user=user.id).first() is None
+
+    def test_disconnect_revokes_refresh_token_at_idp(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="the-refresh-token",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with (
+            patch("udata.geopf.auth.oauth") as mock_oauth,
+            patch("udata.geopf.auth.requests.post") as mock_post,
+        ):
+            mock_oauth.geopf.load_server_metadata.return_value = {
+                "revocation_endpoint": "https://sso.example.com/revoke"
+            }
+            mock_post.return_value = MagicMock(status_code=200)
+            response = self.delete(url_for("api.geopf_token"))
+
+        self.assert204(response)
+        mock_post.assert_called_once()
+        args, kwargs = mock_post.call_args
+        assert args[0] == "https://sso.example.com/revoke"
+        assert kwargs["data"]["token"] == "the-refresh-token"
+
+    def test_disconnect_succeeds_even_if_revocation_fails(self):
+        user = self.login()
+        GeopfToken(
+            user=user,
+            access_token="a",
+            refresh_token="r",
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+        ).save()
+
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.load_server_metadata.side_effect = Exception("unreachable")
+            response = self.delete(url_for("api.geopf_token"))
+
+        self.assert204(response)
+        assert GeopfToken.objects(user=user.id).first() is None
+
+    def test_disconnect_with_no_stored_token_is_a_noop(self):
+        self.login()
+        response = self.delete(url_for("api.geopf_token"))
+        self.assert204(response)
 
 
 @TEST_GEOPF_CONF

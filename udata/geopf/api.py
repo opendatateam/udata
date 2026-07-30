@@ -7,7 +7,7 @@ from udata.core.dataset.models import Dataset
 from udata.uris import cdata_url, homepage_url
 from udata.utils import get_by
 
-from .auth import oauth, resolve_access_token, store_token
+from .auth import oauth, resolve_access_token, revoke_token, store_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
 from .models import GeopfToken
 from .tasks import pull_offerings_from_geopf, push_resource_to_geopf
@@ -18,12 +18,7 @@ DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 
 
 def _redirect_target(dataset_id):
-    """Resolve a dataset id to its cdata admin geopf page, falling back to the homepage.
-
-    We only ever accept an *id* from the client here, never a path or URL:
-    it's resolved to a URL entirely server-side via `cdata_url()`, so there
-    is no open-redirect surface.
-    """
+    """Resolve a dataset id to its cdata admin geopf page, falling back to the homepage."""
     if dataset_id:
         try:
             dataset = Dataset.objects.get(id=dataset_id)
@@ -83,7 +78,10 @@ class GeopfTokenAPI(API):
     @api.doc("geopf_disconnect")
     def delete(self):
         """Disconnect the current user from Géoplateforme."""
-        GeopfToken.objects(user=current_user.id).delete()
+        geopf_token = GeopfToken.objects(user=current_user.id).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
         return "", 204
 
 
