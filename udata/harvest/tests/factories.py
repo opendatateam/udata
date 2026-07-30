@@ -2,10 +2,12 @@ import factory
 import pytest
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
+from typing_extensions import override
 
+from udata.core.dataset.models import Dataset
 from udata.factories import ModelFactory
 
-from .. import backends
+from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
 from ..models import HarvestItem, HarvestJob, HarvestSource
 
 
@@ -42,35 +44,34 @@ mock_process = ns.signal("backend:process")
 DEFAULT_COUNT = 3
 
 
-class FactoryBackend(backends.BaseBackend):
+class FactoryBackend(BaseBackend):
     name = "factory"
     filters = (
-        backends.HarvestFilter("Test", "test", int, "An integer"),
-        backends.HarvestFilter("Tag", "tag", str),
+        HarvestFilter("Test", "test", int, "An integer"),
+        HarvestFilter("Tag", "tag", str),
     )
     features = (
-        backends.HarvestFeature("test", "Test"),
-        backends.HarvestFeature("toggled", "Toggled", "A togglable", True),
+        HarvestFeature("test", "Test"),
+        HarvestFeature("toggled", "Toggled", "A togglable", True),
     )
     extra_configs = (
-        backends.HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
-        backends.HarvestExtraConfig("Test Str", "test_str", str),
+        HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
+        HarvestExtraConfig("Test Str", "test_str", str),
     )
 
+    @override
     def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get("count", DEFAULT_COUNT)):
-            self.process_dataset(str(i))
+            self.process_item(str(i), self.process_dataset)
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
-        mock_process.send(self, item=item.remote_id)
-
-        dataset = self.get_dataset(item.remote_id)
-        dataset.title = f"dataset-{item.remote_id}"
-
-        return dataset
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        mock_process.send(self, item=harvest_item.remote_id)
+        item = self.get_item(harvest_item.remote_id, Dataset)
+        item.title = f"dataset-{harvest_item.remote_id}"
+        return item
 
 
 class MockBackendsMixin(object):

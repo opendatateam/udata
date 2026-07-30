@@ -141,6 +141,14 @@ class HarvestDatasetMetadata(EmbeddedDocument):
     ckan_name = StringField()
     ckan_source = StringField()
 
+    @property
+    def archived_reason(self):
+        return self.archived
+
+    @archived_reason.setter
+    def archived_reason(self, value: str | None):
+        self.archived = value
+
 
 class HarvestResourceMetadata(EmbeddedDocument):
     issued_at = DateTimeField()
@@ -701,6 +709,14 @@ class Dataset(
 
     missing_resources = False
 
+    @property
+    def archived_at(self):
+        return self.archived
+
+    @archived_at.setter
+    def archived_at(self, value: datetime | None):
+        self.archived = value  # type: ignore[assignment]
+
     def fields_to_check_for_spam(self):
         return {"title": self.title, "description": self.description}
 
@@ -1209,6 +1225,10 @@ class Dataset(
             Follow.objects(following=self), date_label="since"
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def set_harvested(self):
+        if not self.harvest:
+            self.harvest = HarvestDatasetMetadata()
 
 
 pre_init.connect(Dataset.pre_init, sender=Dataset)

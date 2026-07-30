@@ -3,18 +3,17 @@ from urllib.parse import urlparse
 
 import pytest
 import requests
+from typing_extensions import override
 from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.models import HarvestItem
-from udata.models import Dataset
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
@@ -55,46 +54,39 @@ class FakeBackend(BaseBackend):
         HarvestExtraConfig("Test Str", "test_str", str),
     )
 
+    @override
     def inner_harvest(self):
         for remote_id in self.source.config.get("dataset_remote_ids", []):
-            self.process_dataset(remote_id)
+            self.process_item(remote_id, self.process_dataset)
             if self.has_reached_max_items():
                 return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
-            self.process_dataservice(remote_id)
+            self.process_item(remote_id, self.process_dataservice)
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
-        dataset = self.get_dataset(item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        item = self.get_item(harvest_item.remote_id, Dataset)
+        fields = DatasetFactory.as_dict(visible=True).items()
+        self._init_item(item, fields)
+        return item
 
-        for key, value in DatasetFactory.as_dict(visible=True).items():
-            if getattr(dataset, key) is None:
-                setattr(dataset, key, value)
+    def process_dataservice(self, harvest_item: HarvestItem) -> Dataservice:
+        item = self.get_item(harvest_item.remote_id, Dataservice)
+        fields = DataserviceFactory.as_dict().items()
+        self._init_item(item, fields)
+        return item
+
+    def _init_item(self, item, fields):
+        for key, value in fields:
+            if getattr(item, key) is None:
+                setattr(item, key, value)
         if self.source.config.get("last_modified"):
-            dataset.last_modified_internal = self.source.config["last_modified"]
-        if not dataset.harvest:
-            dataset.harvest = HarvestDatasetMetadata()
-        dataset.harvest.remote_url = (
-            f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
-        )
-        return dataset
-
-    def inner_process_dataservice(self, item: HarvestItem):
-        dataservice = self.get_dataservice(item.remote_id)
-
-        for key, value in DataserviceFactory.as_dict().items():
-            if getattr(dataservice, key) is None:
-                setattr(dataservice, key, value)
-        if self.source.config.get("last_modified"):
-            dataservice.last_modified_internal = self.source.config["last_modified"]
-        if not dataservice.harvest:
-            dataservice.harvest = HarvestDataserviceMetadata()
-        dataservice.harvest.remote_url = (
-            f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
-        )
-        return dataservice
+            item.last_modified_internal = self.source.config["last_modified"]
+        clazz = type(item).__name__.lower()
+        position = len(self.job.items)
+        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
 
 
 class HarvestFilterTest:

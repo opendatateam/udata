@@ -16,27 +16,33 @@ and storing them into udata to be able to search and find them.
 After a harvester for a given source has been created and validated,
 it will run either on demand or periodically.
 
-Running an harvester for a given source follow this pseudo-code in specific backends:
+Running an harvester for a given source follows this pseudo-code in specific backends:
 ```
-def inner_harvest():
-    datasets = get_datasets_from_source()
-    for dataset in datasets:
-        self.process_dataset(some_id, args1, args2, args3)
+class MyHarvester(BaseBackend):
+    @override
+    def inner_harvest(self):
+        records = self.get_records_from_source()
+        for record in records:
+            # assuming all records are datasets
+            self.process_item(record.id, self.my_dataset_processor, *args)
 
-def inner_process_dataset(item: HarvestItem, args1, args2, args3):
-    dataset = self.get_dataset(item.remote_id)
-
-    update_dataset(dataset, args1, args2)
-
-    return dataset
+    def my_dataset_processor(self, harvest_item: HarvestItem, *args) -> Dataset:
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
+        update_dataset(dataset, *args)
+        return dataset
 ```
 
-The call to `process_dataset` is a wrapper:
-1. Create the `HarvestItem`
-2. Call the `inner_process_dataset` (backend dependent update of the `Dataset` object // without saving! See step 5.)
-3. Catch errors to save the logs inside the `HarvestItem`
-4. Update the `HarvestMetadata` inside the `Dataset` with domain, source, last_update, etc.
-5. Save the updated `Dataset` (if not in dryrun mode)
+The call to `process_item` is a wrapper that, for a given record, performs the following steps:
+1. Create a new `HarvestItem` in the running job for that record.
+2. Call the processor function (`my_dataset_processor` in pseudo-code above).
+   That backend/type-specific processor function is responsible for:
+   1. Computing a datagouv id (usually from the record id).
+   1. Calling `get_item` to retrieve/create the corresponding datagouv item.
+   2. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
+   3. Returning the updated datagouv item.
+3. Update the datagouv item `HarvestMetadata` with domain, source, last_update, etc.,
+4. Catch any warning/error and record them in `HarvestItem`.
+5. Save the updated datagouv item (except in dryrun mode).
 
 | Property            | Meaning                                                          |
 |---------------------|------------------------------------------------------------------|
@@ -290,15 +296,21 @@ If none matches, no license is set on the dataset.
 
 ### CKAN
 
+**WARNING: This section is outdated.**
+
 This backend harvests CKAN repositories/portals through their API
 and [is available as a udata extension](https://github.com/opendatateam/udata-ckan).
 
 ### OpenDataSoft
 
+**WARNING: This section is outdated.**
+
 This backend harvests OpenDataSoft repositories/portals through their API (v1)
 and [is available as a udata extension](https://github.com/opendatateam/udata-ods).
 
 ### Custom
+
+**WARNING: This section is outdated.**
 
 You can implement your own backends by extending `udata.harvest.backends.BaseBackend`
 and implementing the `initialize()` and `process()` methods.

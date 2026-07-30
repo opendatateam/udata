@@ -6,10 +6,11 @@ from uuid import UUID
 
 from dateutil.parser import ParserError
 from mongoengine import Q
+from typing_extensions import override
 
 from udata import uris
 from udata.core.dataset.constants import UpdateFrequency
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import Dataset, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
@@ -95,6 +96,7 @@ class CkanBackend(BaseBackend):
         response = self.get(url)
         return response.json()
 
+    @override
     def inner_harvest(self):
         """List all datasets for a given ..."""
         fix = False  # Fix should be True for CKAN < '1.8'
@@ -121,12 +123,12 @@ class CkanBackend(BaseBackend):
 
         for name in names:
             # We use `name` as `remote_id` for now, we'll be replace at the beginning of the process
-            self.process_dataset(name)
+            self.process_item(name, self.process_dataset)
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(self, item: HarvestItem):
-        response = self.get_action("package_show", id=item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        response = self.get_action("package_show", id=harvest_item.remote_id)
 
         result = response["result"]
         # DKAN returns a list where CKAN returns an object
@@ -136,7 +138,7 @@ class CkanBackend(BaseBackend):
 
         # Replace the `remote_id` from `name` to `id`.
         if result.get("id"):
-            item.remote_id = result["id"]
+            harvest_item.remote_id = result["id"]
 
         data = self.validate(result, self.schema)
 
@@ -144,10 +146,7 @@ class CkanBackend(BaseBackend):
         if not len(data.get("resources", [])):
             raise HarvestSkipException(f"Dataset {data['name']} has no record")
 
-        dataset = self.get_dataset(item.remote_id)
-
-        if not dataset.harvest:
-            dataset.harvest = HarvestDatasetMetadata()
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         # Core attributes
         if not dataset.slug:

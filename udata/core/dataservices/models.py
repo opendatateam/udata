@@ -410,6 +410,10 @@ class Dataservice(
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
+    def set_harvested(self):
+        if not self.harvest:
+            self.harvest = HarvestMetadata()
+
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
 post_save.connect(SpamMixin.post_save, sender=Dataservice)

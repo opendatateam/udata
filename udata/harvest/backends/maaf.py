@@ -5,9 +5,11 @@ from collections import OrderedDict
 from urllib.parse import urljoin
 
 from lxml import etree, html
+from typing_extensions import override
 from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
 from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.models import Dataset
 from udata.harvest.backends import BaseBackend
 from udata.harvest.filters import (
     boolean,
@@ -135,6 +137,7 @@ class MaafBackend(BaseBackend):
     display_name = "MAAF"
     verify_ssl = False
 
+    @override
     def inner_harvest(self):
         """Parse the index pages HTML to find link to dataset descriptors"""
         directories = [self.source.url]
@@ -149,20 +152,20 @@ class MaafBackend(BaseBackend):
                 elif href.lower().endswith(".xml"):
                     # We use the URL as `remote_id` for now, we'll be replace at
                     # the beginning of the process
-                    self.process_dataset(urljoin(directory, href))
+                    self.process_item(urljoin(directory, href), self.process_dataset)
                     if self.has_reached_max_items():
                         return
                 else:
                     log.debug("Skip %s", href)
 
-    def inner_process_dataset(self, item: HarvestItem):
-        response = self.get(item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        response = self.get(harvest_item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
 
         # Replace the `remote_id` from the URL to `id`.
-        item.remote_id = metadata["id"]
-        dataset = self.get_dataset(item.remote_id)
+        harvest_item.remote_id = metadata["id"]
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         dataset.title = metadata["title"]
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
