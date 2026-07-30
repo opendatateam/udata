@@ -105,58 +105,58 @@ TEMPLATE = """\
 """
 
 KEYWORDS_TEMPLATE = """\
-      <gmd:descriptiveKeywords>
-        <gmd:MD_Keywords>
-          {keyword_elements}
-        </gmd:MD_Keywords>
-      </gmd:descriptiveKeywords>"""
+<gmd:descriptiveKeywords>
+  <gmd:MD_Keywords>
+    {keyword_elements}
+  </gmd:MD_Keywords>
+</gmd:descriptiveKeywords>"""
 
 CONTACT_INFO_TEMPLATE = """\
-      <gmd:contactInfo>
-        <gmd:CI_Contact>
-          <gmd:address>
-            <gmd:CI_Address>
-              <gmd:electronicMailAddress>
-                <gco:CharacterString>{email}</gco:CharacterString>
-              </gmd:electronicMailAddress>
-            </gmd:CI_Address>
-          </gmd:address>
-        </gmd:CI_Contact>
-      </gmd:contactInfo>"""
+<gmd:contactInfo>
+  <gmd:CI_Contact>
+    <gmd:address>
+      <gmd:CI_Address>
+        <gmd:electronicMailAddress>
+          <gco:CharacterString>{email}</gco:CharacterString>
+        </gmd:electronicMailAddress>
+      </gmd:CI_Address>
+    </gmd:address>
+  </gmd:CI_Contact>
+</gmd:contactInfo>"""
 
 POINT_OF_CONTACT_TEMPLATE = """\
-      <gmd:pointOfContact>
-        <gmd:CI_ResponsibleParty>
-          <gmd:organisationName>
-            <gco:CharacterString>{org_name}</gco:CharacterString>
-          </gmd:organisationName>
-          {contact_info_block}
-          <gmd:role>
-            <gmd:CI_RoleCode
-              codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
-              codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
-          </gmd:role>
-        </gmd:CI_ResponsibleParty>
-      </gmd:pointOfContact>"""
+<gmd:pointOfContact>
+  <gmd:CI_ResponsibleParty>
+    <gmd:organisationName>
+      <gco:CharacterString>{org_name}</gco:CharacterString>
+    </gmd:organisationName>
+    {contact_info_block}
+    <gmd:role>
+      <gmd:CI_RoleCode
+        codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
+        codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+    </gmd:role>
+  </gmd:CI_ResponsibleParty>
+</gmd:pointOfContact>"""
 
 TOPIC_CATEGORY_TEMPLATE = """\
-      <gmd:topicCategory>
-        <gmd:MD_TopicCategoryCode>{topic}</gmd:MD_TopicCategoryCode>
-      </gmd:topicCategory>"""
+<gmd:topicCategory>
+  <gmd:MD_TopicCategoryCode>{topic}</gmd:MD_TopicCategoryCode>
+</gmd:topicCategory>"""
 
 EXTENT_TEMPLATE = """\
-      <gmd:extent>
-        <gmd:EX_Extent>
-          <gmd:geographicElement>
-            <gmd:EX_GeographicBoundingBox>
-              <gmd:westBoundLongitude><gco:Decimal>{west}</gco:Decimal></gmd:westBoundLongitude>
-              <gmd:eastBoundLongitude><gco:Decimal>{east}</gco:Decimal></gmd:eastBoundLongitude>
-              <gmd:southBoundLatitude><gco:Decimal>{south}</gco:Decimal></gmd:southBoundLatitude>
-              <gmd:northBoundLatitude><gco:Decimal>{north}</gco:Decimal></gmd:northBoundLatitude>
-            </gmd:EX_GeographicBoundingBox>
-          </gmd:geographicElement>
-        </gmd:EX_Extent>
-      </gmd:extent>"""
+<gmd:extent>
+  <gmd:EX_Extent>
+    <gmd:geographicElement>
+      <gmd:EX_GeographicBoundingBox>
+        <gmd:westBoundLongitude><gco:Decimal>{west}</gco:Decimal></gmd:westBoundLongitude>
+        <gmd:eastBoundLongitude><gco:Decimal>{east}</gco:Decimal></gmd:eastBoundLongitude>
+        <gmd:southBoundLatitude><gco:Decimal>{south}</gco:Decimal></gmd:southBoundLatitude>
+        <gmd:northBoundLatitude><gco:Decimal>{north}</gco:Decimal></gmd:northBoundLatitude>
+      </gmd:EX_GeographicBoundingBox>
+    </gmd:geographicElement>
+  </gmd:EX_Extent>
+</gmd:extent>"""
 
 
 def _bbox(dataset) -> tuple[float, float, float, float] | None:
@@ -219,7 +219,7 @@ def dataset_to_iso19115(dataset, datastore_id: str | None = None) -> bytes:
 
     keywords_block = ""
     if dataset.tags:
-        kw_elems = "\n          ".join(
+        kw_elems = "\n".join(
             f"<gmd:keyword><gco:CharacterString>{escape(t)}</gco:CharacterString></gmd:keyword>"
             for t in dataset.tags
         )
