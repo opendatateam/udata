@@ -36,7 +36,19 @@ DEFAULT_SORTING = "-created_at"
 
 
 def _apply_admin_only_fields(user: User, data: dict) -> None:
-    """Apply admin-only fields (roles, active) that aren't in __write_fields__."""
+    """Apply admin-only fields (roles, active) that aren't in __write_fields__.
+
+    `roles` cannot be a regular write field: the API exposes role names, but `patch()`
+    resolves references through their primary key (`wrap_primary_key`) and `Role._id`
+    is an ObjectId. Making `Role.name` the primary key — as `License.id` does — would
+    turn `roles` into a plain write field. Two things have to come with it: a
+    `checks=[…]` rejecting non-admins on the field itself, since it would then be
+    writable through `/me`, and an `is_value_modified` able to compare lists of
+    references, or an unchanged `roles` payload would start answering 400.
+
+    `active` has no such type constraint: the same `checks=[…]` is all it would take to
+    make it a regular write field, no primary key change involved.
+    """
     if "roles" in data:
         roles = []
         for name in data["roles"] or []:

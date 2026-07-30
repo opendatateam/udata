@@ -405,6 +405,23 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertEqual(response.json["roles"], ["admin"])
+        # Assert on the stored user, not only on the marshalled response: the role name
+        # has to be resolved into a `Role` reference for the grant to survive the save.
+        user.reload()
+        self.assertTrue(user.sysadmin)
+
+    def test_user_api_update_removing_roles(self):
+        """An admin should be able to demote a user with an empty roles list"""
+        self.login(AdminFactory())
+        user = AdminFactory()
+        self.assertTrue(user.sysadmin)
+        data = user.to_dict()
+        data["roles"] = []
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.roles, [])
+        self.assertFalse(user.sysadmin)
 
     def test_user_api_update_with_a_non_existing_role(self):
         """It should raise a 400"""
