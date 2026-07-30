@@ -60,9 +60,7 @@ def push_resource(dataset_id, resource_id, user_id, token, datastore_id):
         raise click.ClickException(f"User {user_id} not found")
 
     datastore_id = _require_datastore_id(datastore_id)
-    push_resource_to_geopf(  # type: ignore[call-arg] (Celery injects self for bind=True tasks)
-        dataset_id, resource_id, user_id, datastore_id, token
-    )
+    push_resource_to_geopf(dataset_id, resource_id, user_id, datastore_id, token)
 
 
 @grp.command("push-metadata")
@@ -101,7 +99,5 @@ def pull_offerings(dataset_id, user_id, token):
     if user_id and not User.objects(id=user_id).first():
         raise click.ClickException(f"User {user_id} not found")
 
-    n = pull_offerings_from_geopf(  # type: ignore[call-arg] (Celery injects self for bind=True tasks)
-        dataset_id, user_id, token
-    )
+    n = pull_offerings_from_geopf(dataset_id, user_id, token)
     click.echo(f"pulled={n} offerings for dataset {dataset_id}")
