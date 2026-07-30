@@ -262,10 +262,10 @@ def _open_resource_file(resource):
     """Return a context manager yielding an open binary file for the resource."""
     if resource.filetype == "file" and resource.fs_filename:
         return storages.resources.open(resource.fs_filename, "rb")
-    return _download_to_tempfile(resource.url)
+    return _DownloadToTempfile(resource.url)
 
 
-class _download_to_tempfile:
+class _DownloadToTempfile:
     """Download a remote URL to a temp file, yield it, clean up on exit.
 
     FIXME: `self.url` is user-controlled (remote resource URL), so this fetch
