@@ -1,4 +1,5 @@
 import os
+from collections.abc import Callable
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -239,3 +240,39 @@ def create_geozones_fixtures():
 
 def security_gettext(string):
     return FsDomain(current_app).gettext(string)
+
+
+def parametrize_with_ids(argnames, argvalues, idgetter: int | Callable[..., object] | None = None):
+    """
+    `pytest.mark.parametrize`-like decorator with nicer support for parameter-set ids.
+
+    :param argnames: same as `pytest.mark.parametrize`
+
+    :param argvalues: same as `pytest.mark.parametrize`, or `(id, *argvalues)` when `idgetter` is None
+
+    :param idgetter: set parameter-set `id` from its `argvalues` tuple
+       None: use first value in `argvalues`, removing it from tuple
+       integer: use value at given position in `argvalues`
+       callable: use return value of `idgetter(argvalues)`
+
+    Examples::
+      @parametrize_with_ids("a, b", [("x", 1, 2), ("y", 3, 4)])
+      => ids=["x", "y"], argvalues=[(1, 2), (3, 4)]
+
+      @parametrize_with_ids("a, b", [(1, 2), (3, 4)], idgetter=0)
+      => ids=[1, 3], argvalues=[(1, 2), (3, 4)]
+
+      @parametrize_with_ids("a, b", [(1, 2), (3, 4)], idgetter=sum)
+      => ids=[3, 7], argvalues=[(1, 2), (3, 4)]
+    """
+    if isinstance(idgetter, int):
+        _argvalues = [(r[idgetter], *r) for r in argvalues]
+    elif isinstance(idgetter, Callable):
+        _argvalues = [(idgetter(r), *r) for r in argvalues]
+    else:
+        _argvalues = argvalues
+
+    return pytest.mark.parametrize(
+        argnames,
+        [pytest.param(*v, id=i) for i, *v in _argvalues],
+    )

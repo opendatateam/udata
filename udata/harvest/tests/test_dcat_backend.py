@@ -19,7 +19,7 @@ from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
-from udata.tests.helpers import assert200
+from udata.tests.helpers import assert200, parametrize_with_ids
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -977,14 +977,17 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.errors) == 1
         assert "404 Client Error" in job.errors[0].message
 
-    @pytest.mark.parametrize(
+    @parametrize_with_ids(
         "exception",
         [
-            requests.exceptions.ConnectTimeout("Connection timed out"),
-            requests.exceptions.ConnectionError(
-                "Failed to resolve 'example.com' (Name resolution failed)"
+            ("timeout", requests.exceptions.ConnectTimeout("Connection timed out")),
+            (
+                "resolution",
+                requests.exceptions.ConnectionError(
+                    "Failed to resolve 'example.com' (Name resolution failed)"
+                ),
             ),
-            requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"),
+            ("certificate", requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED")),
         ],
     )
     def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
@@ -1071,9 +1074,13 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
-    @pytest.mark.parametrize(
+    @parametrize_with_ids(
         "schema_name, schema_uri",
-        [("dcat", "http://www.w3.org/ns/dcat#"), ("geodcatap", "http://data.europa.eu/930/")],
+        [
+            ("dcat", "http://www.w3.org/ns/dcat#"),
+            ("geodcatap", "http://data.europa.eu/930/"),
+        ],
+        idgetter=0,
     )
     def test_geonetwork(self, rmock, schema_name, schema_uri):
         geodcatap = schema_name == "geodcatap"
@@ -1274,12 +1281,12 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert job.status == "done"
         assert len(job.items) == 1
 
-    @pytest.mark.parametrize(
+    @parametrize_with_ids(
         "remote_url_prefix",
         [
-            None,
-            "http://catalog.example.com",  # no trailing slash
-            "http://catalog.example.com/",  # trailing slash
+            ("none", None),
+            ("trailing-slash", "http://catalog.example.com/"),
+            ("no-trailing-slash", "http://catalog.example.com"),
         ],
     )
     def test_url_prefix(self, rmock, remote_url_prefix: str):
@@ -1376,14 +1383,18 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
-    @pytest.mark.parametrize(
+    @parametrize_with_ids(
         "remote_url_prefix",
         [
-            None,
-            # trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
-            # no trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
+            ("none", None),
+            (
+                "trailing-slash",
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
+            ),
+            (
+                "no-trailing-slash",
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
+            ),
         ],
     )
     def test_geo2france(self, rmock, remote_url_prefix: str):
