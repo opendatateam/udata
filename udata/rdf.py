@@ -401,27 +401,19 @@ def contact_points_from_rdf(
             log.warning(
                 f"Found a `Literal` inside {predicate}, `foaf:Agent` or `vcard:Kind` expected."
             )
-            name, email, contact_form = obj.toPython(), None, None
+            infos = obj.toPython(), None, None
+        elif predicate == DCAT.contactPoint:
+            infos = contact_point_from_vcard(obj)
+            if not any(infos):
+                infos = contact_point_from_foaf(obj)
         else:
-            rdf_type = None
-            if val := obj.value(RDF.type):
-                rdf_type = val.identifier
-            if rdf_type is None:
-                rdf_type = guess_contact_point_type(obj, predicate)
-                if rdf_type is None:
-                    log.warning(f"Unsupported contact point with type=None and role={role}")
-                    continue
-            if rdf_type in VCARD:
-                name, email, contact_form = contact_point_from_vcard(obj)
-            elif rdf_type in FOAF:
-                name, email, contact_form = contact_point_from_foaf(obj)
-            else:
-                log.warning(f"Unsupported contact point with type={rdf_type} and role={role}")
-                continue
-
-        if not any([name, email, contact_form]):
+            infos = contact_point_from_foaf(obj)
+            if not any(infos):
+                infos = contact_point_from_vcard(obj)
+        if not any(infos):
             log.warning(f"Empty contact point with role={role}")
             continue
+        name, email, contact_form = infos
 
         # Create of get contact point object
         owner_label = "organization" if isinstance(owner, Organization) else "owner"
@@ -446,18 +438,6 @@ def contact_points_from_rdf(
             continue
 
         yield cast(ContactPoint, contact)
-
-
-def guess_contact_point_type(obj: RdfResource, predicate: URIRef) -> URIRef | None:
-    predicates = set(r.identifier for r in obj.predicates())
-    has_vcard = any(p in VCARD for p in predicates)
-    has_foaf = any(p in FOAF for p in predicates)
-    if has_vcard and has_foaf:
-        return VCARD.Kind if predicate == DCAT.contactPoint else FOAF.Agent
-    elif has_vcard:
-        return VCARD.Kind
-    elif has_foaf:
-        return FOAF.Agent
 
 
 def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
@@ -486,13 +466,17 @@ def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, 
 
 def contact_point_from_foaf(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
     contact_point_org = obj.value(ORG.memberOf)
+    contact_point_member = obj.value(FOAF.member)
     name = contact_point_name(
-        rdf_value(obj, FOAF.name) or rdf_value(obj, SKOS.prefLabel),
+        rdf_value(obj, FOAF.name)
+        or rdf_value(obj, SKOS.prefLabel)
+        or (rdf_value(contact_point_member, FOAF.name) if contact_point_member else None),
         rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
     )
     email = (
         rdf_value(obj, FOAF.mbox)
         or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
+        or (contact_point_member and rdf_value(contact_point_member, FOAF.mbox))
         or None
     )
     email = email.replace("mailto:", "").strip() if email else None
