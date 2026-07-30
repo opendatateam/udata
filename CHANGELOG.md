@@ -1,5 +1,19 @@
 # Changelog
 
+## 17.0.8 (2026-07-30)
+
+- chore(deps): lock file maintenance ([#3865](https://github.com/opendatateam/udata/pull/3865))
+- chore(deps): update dependency faker to >=40.36, <40.37 ([#3825](https://github.com/opendatateam/udata/pull/3825))
+- chore: remove dead udata/core/jobs/actions.py module ([#3856](https://github.com/opendatateam/udata/pull/3856))
+- docs: update deprecated commands related to dev optional deps ([#3883](https://github.com/opendatateam/udata/pull/3883))
+- fix: error message if failing to download geozones ([#3858](https://github.com/opendatateam/udata/pull/3858))
+- fix: filter with multiple tags ([#3712](https://github.com/opendatateam/udata/pull/3712))
+- perf: improve edito blocs perfs ([#3791](https://github.com/opendatateam/udata/pull/3791))
+- perf: skip reload() in update/add/remove_resource ([#3852](https://github.com/opendatateam/udata/pull/3852))
+- perf: targeted update_one for resource extras instead of full save ([#3851](https://github.com/opendatateam/udata/pull/3851))
+- test: check Saxon can start within a uwsgi worker's address space limit ([#3882](https://github.com/opendatateam/udata/pull/3882))
+
+
 ## 17.0.7 (2026-07-27)
 
 - chore: add default access type to dataset & dataservices ([#3879](https://github.com/opendatateam/udata/pull/3879))
