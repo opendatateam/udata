@@ -1,4 +1,5 @@
 import logging
+import re
 
 import mongoengine
 from flask import abort, request, url_for
@@ -6,7 +7,7 @@ from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
-from udata.api import API, apiv2, fields
+from udata.api import API, add_pagination_arguments, apiv2, fields
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
@@ -14,6 +15,7 @@ from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
 from udata.core.user.models import User
+from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
@@ -31,7 +33,7 @@ from .api_fields import (
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset
+from .models import CommunityResource, Dataset, Resource
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -85,12 +87,7 @@ log = logging.getLogger(__name__)
 ns = apiv2.namespace("datasets", "Dataset related operations")
 search_parser = DatasetSearch.as_request_parser(store_missing=False)
 resources_parser = apiv2.parser()
-resources_parser.add_argument(
-    "page", type=int, default=1, location="args", help="The page to fetch"
-)
-resources_parser.add_argument(
-    "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(resources_parser, page_size=DEFAULT_PAGE_SIZE)
 resources_parser.add_argument(
     "type", type=str, location="args", help="The type of resources to fetch"
 )
@@ -379,6 +376,13 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
+        # Deliberately a full save here, unlike the resource extras endpoints below,
+        # which go through the targeted Dataset.update_resource_extras(). A save is
+        # O(N) in the number of embedded resources (~3.4s on a 10k-resources dataset),
+        # but this endpoint sees 2 real calls per 50 days in production against 2.7M
+        # for the resource one: the cost is never paid in practice, and save() keeps
+        # the full extras validation and the search reindexing without us restating
+        # them by hand.
         dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
@@ -401,7 +405,7 @@ class DatasetExtrasAPI(API):
         return dataset.extras, 204
 
 
-@ns.route("/<dataset:dataset>/resources/", endpoint="resources")
+@ns.route("/<dataset_without_resources:dataset>/resources/", endpoint="resources")
 class ResourcesAPI(API):
     @apiv2.doc("list_resources")
     @apiv2.expect(resources_parser)
@@ -418,31 +422,45 @@ class ResourcesAPI(API):
         list_resources_url = url_for("apiv2.resources", dataset=dataset.id, _external=True)
         next_page = f"{list_resources_url}?page={page + 1}&page_size={page_size}"
         previous_page = f"{list_resources_url}?page={page - 1}&page_size={page_size}"
-        res = dataset.resources
 
+        # Filter the resources server-side so a dataset with many or heavy
+        # resources isn't fully loaded just to serve a single page (the route
+        # loads the dataset without its resources, see the converter).
+        conditions = []
         if args["type"]:
-            res = [elem for elem in res if elem["type"] == args["type"]]
+            conditions.append({"$eq": ["$$item.type", args["type"]]})
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
-
         if args["q"]:
-            res = [elem for elem in res if args["q"].lower() in elem["title"].lower()]
+            # re.escape to match the previous substring (not regex) behaviour
+            conditions.append(
+                {
+                    "$regexMatch": {
+                        "input": "$$item.title",
+                        "regex": re.escape(args["q"]),
+                        "options": "i",
+                    }
+                }
+            )
             next_page += f"&q={args['q']}"
             previous_page += f"&q={args['q']}"
 
-        if page > 1:
-            offset = page_size * (page - 1)
-        else:
-            offset = 0
-        paginated_result = res[offset : (page_size + offset if page_size is not None else None)]
-
+        paginated_result, total = paginate_embedded_list(
+            Dataset,
+            dataset.id,
+            "resources",
+            Resource,
+            page=page,
+            page_size=page_size,
+            condition={"$and": conditions} if conditions else None,
+        )
         return {
             "data": paginated_result,
-            "next_page": next_page if page_size + offset < len(res) else None,
+            "next_page": next_page if page * page_size < total else None,
             "page": page,
             "page_size": page_size,
             "previous_page": previous_page if page > 1 else None,
-            "total": len(res),
+            "total": total,
         }
 
 
@@ -552,7 +570,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras
 
     @apiv2.secure
@@ -571,5 +589,5 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras, 204

@@ -60,6 +60,6 @@ post_save.connect(_auto_assign_on_create)
 
 
 @Owned.on_owner_change.connect
-def clean_assignments_on_owner_change(document, previous):
+def clean_assignments_on_owner_change(document, previous, **kwargs):
     """Remove all assignments for an object when its ownership changes (e.g. transfer)."""
     Assignment.objects(subject=document).delete()

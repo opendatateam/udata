@@ -1,5 +1,6 @@
 from blinker import Signal
 from flask.helpers import url_for
+from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument, Q
 from mongoengine.fields import (
     BooleanField,
@@ -11,6 +12,7 @@ from mongoengine.fields import (
     StringField,
     UUIDField,
 )
+from mongoengine.signals import post_delete
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -20,12 +22,15 @@ from udata.core.dataset.permissions import OwnablePermission, OwnableReadPermiss
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url
+
+from .constants import IMAGE_MAX_SIZE
 
 visualization_permissions_fields = api.model(
     "VisualizationPermissions",
@@ -146,6 +151,16 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     y_axis = field(EmbeddedDocumentField(YAxis))
     series = field(EmbeddedDocumentListField(DataSeries, required=True))
 
+    image = field(
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+            max_size=IMAGE_MAX_SIZE,
+        ),
+        readonly=True,
+        show_as_ref=True,
+    )
+
     @property
     @field(
         nested_fields=visualization_permissions_fields,
@@ -191,3 +206,18 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     on_update = Signal()
 
     verbose_name = _("chart")
+
+    @classmethod
+    def clean_image_on_delete(cls, sender, document, **kwargs):
+        """Clean up image files when a Chart is deleted"""
+        from udata.core.storages import images
+
+        if sender == Chart and document.image.filename is not None:
+            storage = images
+            storage.delete(document.image.filename)
+            storage.delete(document.image.original)
+            for key, value in document.image.thumbnails.items():
+                storage.delete(value)
+
+
+post_delete.connect(Chart.clean_image_on_delete, sender=Chart)

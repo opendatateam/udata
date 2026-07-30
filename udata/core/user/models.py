@@ -144,8 +144,11 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     avatar_url = URLField()
     avatar = field(
         ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
-        show_as_ref=True,
+        # Read-only: the avatar is managed through the dedicated upload endpoint
+        # (POST /me/avatar/). Consistent with the other ImageFields and guards
+        # against patch() overwriting it with a raw URL, wiping thumbnails.
         readonly=True,
+        show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_AVATAR_SIZE,
         },

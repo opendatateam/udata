@@ -38,6 +38,7 @@ from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema
+from udata.search import reindex
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
@@ -96,6 +97,15 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         with pytest.raises(ValidationError):
             dataset.add_resource(resource)
 
+    def test_clean_rejects_custom_extras_without_organization(self):
+        # custom: metadatas are declared by an organization, so a dataset owned by a
+        # user alone can never carry one.
+        dataset = DatasetFactory(owner=UserFactory())
+
+        dataset.extras = {"custom:color": "blue"}
+        with pytest.raises(MongoEngineValidationError):
+            dataset.save()
+
     def test_update_resource(self):
         user = UserFactory()
         resource = ResourceFactory()
@@ -109,6 +119,160 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert len(dataset.resources) == 1
         assert dataset.resources[0].id == resource.id
         assert dataset.resources[0].description == "New description"
+
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_update_resource_extras_reindexes_dataset(self, mocker):
+        # The targeted update emits no post_save, so the search reindexing a full
+        # save used to trigger has to be asked for explicitly: without it the
+        # dataset keeps a stale last_update in the search index.
+        job_reindex = mocker.patch.object(reindex, "delay")
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        job_reindex.reset_mock()
+
+        resource.extras["check:available"] = True
+        dataset.update_resource_extras(resource)
+
+        job_reindex.assert_called_once()
+
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_resource_changes_reindex_dataset(self, mocker):
+        # Same reason as above for the three other atomic resource writes.
+        job_reindex = mocker.patch.object(reindex, "delay")
+        dataset = DatasetFactory()
+        resource = ResourceFactory()
+        job_reindex.reset_mock()
+
+        dataset.add_resource(resource)
+        assert job_reindex.call_count == 1
+
+        resource.description = "New description"
+        dataset.update_resource(resource)
+        assert job_reindex.call_count == 2
+
+        dataset.remove_resource(resource)
+        assert job_reindex.call_count == 3
+
+    def test_add_resource_refreshes_last_update(self):
+        # last_update is the most recent resource date, so adding a resource that
+        # is more recent than the dataset itself must move it.
+        dataset = DatasetFactory()
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2026-06-15T12:00:00"}
+        )
+
+        dataset.add_resource(resource)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2026, 6, 15, 12, 0, 0)
+
+    def test_update_resource_refreshes_last_update(self):
+        # A remote resource reads its last_modified from analysis:last-modified-at,
+        # so editing it through update_resource must move the dataset last_update.
+        resource = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-01-01T00:00:00"}
+        )
+        dataset = DatasetFactory(resources=[resource])
+        assert dataset.last_update == datetime(2024, 1, 1)
+
+        resource.extras["analysis:last-modified-at"] = "2024-06-15T12:00:00"
+        dataset.update_resource(resource)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+    def test_remove_resource_refreshes_last_update(self):
+        # Removing the most recent resource must bring last_update back down to
+        # the remaining one, not leave the deleted resource's date behind.
+        old = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-01-01T00:00:00"}
+        )
+        recent = ResourceFactory(
+            filetype="remote", extras={"analysis:last-modified-at": "2024-06-15T12:00:00"}
+        )
+        dataset = DatasetFactory(resources=[old, recent])
+        assert dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
+
+        dataset.remove_resource(recent)
+
+        dataset.reload()
+        assert dataset.last_update == datetime(2024, 1, 1)
+
+    def test_update_resource_refreshes_quality_without_reload(self):
+        # quality_cached depends on resource extras (check:available feeds
+        # all_resources_available). After update_resource — and without any reload —
+        # the in-memory document AND the persisted document must reflect the change.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": True})
+        dataset = DatasetFactory(resources=[resource])
+        assert dataset.quality["all_resources_available"] is True
+
+        resource.extras["check:available"] = False
+        dataset.update_resource(resource)
+
+        # in-memory, no reload
+        assert dataset.quality["all_resources_available"] is False
+        # persisted
+        assert Dataset.objects(id=dataset.id).first().quality["all_resources_available"] is False
+
+    def test_add_resource_keeps_in_memory_and_persisted_consistent(self):
+        # add_resource performs a divergent double write: it pushes resource.to_mongo()
+        # to the DB but inserts the live resource object in memory. Since no reload()
+        # re-syncs them anymore, both representations must agree.
+        resource = ResourceFactory(filetype="remote", extras={"check:available": False})
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+
+        dataset.add_resource(resource)
+
+        persisted = Dataset.objects(id=dataset.id).first()
+        assert [r.id for r in dataset.resources] == [r.id for r in persisted.resources]
+        assert dataset.resources[0].id == resource.id
+        assert persisted.resources[0].id == resource.id
+        # quality is recomputed identically in memory and in the DB
+        assert (
+            dataset.quality["all_resources_available"]
+            == persisted.quality["all_resources_available"]
+            is False
+        )
+
+    def test_remove_resource_refreshes_in_memory_and_persisted(self):
+        # remove_resource updates the in-memory document (resources list + quality_cached)
+        # to match what it persists, without a reload(). check:available feeds
+        # all_resources_available: dropping the unavailable resource flips it to True.
+        available = ResourceFactory(filetype="remote", extras={"check:available": True})
+        unavailable = ResourceFactory(filetype="remote", extras={"check:available": False})
+        dataset = DatasetFactory(resources=[available, unavailable])
+        assert dataset.quality["all_resources_available"] is False
+
+        with assert_emit(Dataset.on_resource_removed):
+            dataset.remove_resource(unavailable)
+
+        # in-memory, no reload
+        assert [r.id for r in dataset.resources] == [available.id]
+        assert dataset.quality["all_resources_available"] is True
+        # persisted
+        persisted = Dataset.objects(id=dataset.id).first()
+        assert [r.id for r in persisted.resources] == [available.id]
+        assert persisted.quality["all_resources_available"] is True
+
+    @pytest.mark.parametrize("operation", ["add", "update", "remove"])
+    def test_resource_method_refreshes_last_modified_in_memory(self, operation):
+        # add/update/remove_resource set last_modified_internal in memory. Previously a
+        # reload() re-read it from the DB; now it must be fresh without any reload.
+        existing = ResourceFactory()
+        dataset = DatasetFactory(resources=[existing])
+        # Arrange a clearly stale timestamp so any refresh is unambiguous.
+        old = datetime(2000, 1, 1)
+        dataset.last_modified_internal = old
+
+        if operation == "add":
+            dataset.add_resource(ResourceFactory())
+        elif operation == "update":
+            existing.description = "Updated"
+            dataset.update_resource(existing)
+        else:
+            dataset.remove_resource(existing)
+
+        assert dataset.last_modified > old
 
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()

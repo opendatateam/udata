@@ -12,7 +12,7 @@ from mongoengine.fields import (
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.edito_blocs.models import Bloc
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.core.user.models import User
@@ -25,13 +25,14 @@ from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
+from .permissions import PostReadPermission
 
 __all__ = ("Post",)
 
 
 class PostQuerySet(UDataQuerySet):
-    def published(self):
-        return self(published__ne=None).order_by("-published")
+    def visible(self):
+        return self(published__ne=None)
 
 
 @generate_fields(
@@ -140,6 +141,14 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     }
 
     verbose_name = _("post")
+
+    @property
+    def is_visible(self):
+        return self.published is not None
+
+    @property
+    def permissions(self):
+        return {"read": PostReadPermission(self)}
 
     def clean(self):
         if self.body_type != "blocs" and not self.content:

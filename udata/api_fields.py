@@ -41,7 +41,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -95,13 +95,41 @@ class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
-        self.fields_by_type = fields_by_type
+        # `fields_by_type` may be a callable resolved lazily on first use (and then
+        # memoized). This lets generic embedded lists discover their subclasses at
+        # marshalling time rather than at class-decoration time, when the subclass
+        # registry can still be incomplete because of import ordering / cycles
+        # (e.g. `Organization.blocs`, decorated before the `Bloc` subclasses are loaded).
+        self._fields_by_type = fields_by_type
+
+    @property
+    def fields_by_type(self):
+        if callable(self._fields_by_type):
+            self._fields_by_type = self._fields_by_type()
+        return self._fields_by_type
 
     def format(self, value):
         # Value is one of the generic object
         data = marshal(value, self.fields_by_type[value.__class__.__name__])
         data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
         return data
+
+
+class PrefetchingList(restx_fields.List):
+    """A list that batch-loads what its items reference before marshalling them.
+
+    Without this, each item dereferences its own references (and theirs) one query at
+    a time while being serialized. The whole list is available here, so a document
+    class can resolve them all at once — see the `prefetch` option of `generate_fields`.
+    """
+
+    def __init__(self, cls_or_instance, prefetch=None, **kwargs):
+        super().__init__(cls_or_instance, **kwargs)
+        self.prefetch = prefetch
+
+    def format(self, value):
+        self.prefetch(value or [])
+        return super().format(value)
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -208,30 +236,49 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+        # `attribute` says where to read the list on the parent document. Propagating it
+        # to the inner field would make every item look that same attribute up on itself
+        # (and serialize as null), so it stays on the list.
+        nested_info = {
+            **{k: v for k, v in info.items() if k != "attribute"},
+            **inner_info,
+            **info.get("inner_field_info", {}),
+        }
 
         generic = info.get("generic", False)
+        prefetch = None
 
-        allowed_classes = (
-            classes_by_parents[field.field.document_type_obj]
-            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
-            and field.field.document_type_obj in classes_by_parents
-            else set()
-        )
-        if generic and allowed_classes:
-            generic_fields = {
-                cls.__name__: convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
-                    mongoengine.fields.EmbeddedDocumentField(cls),
-                    nested_info,
-                )
-                for cls in allowed_classes
-            }
+        if generic and isinstance(field.field, mongoengine.fields.EmbeddedDocumentField):
+            # Resolve the allowed subclasses lazily (at marshalling time) rather than now.
+            # `classes_by_parents` is populated as each subclass module is imported, and an
+            # import cycle can decorate the parent before its subclasses are registered
+            # (e.g. `Organization.blocs`). Deferring the lookup to the first marshalling —
+            # which happens from the API layer, after every model is loaded — guarantees the
+            # registry is complete, instead of falling back to the bare `{id}` parent model.
+            parent = field.field.document_type_obj
 
-            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
-            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+            def generic_fields():
+                return {
+                    cls.__name__: convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        mongoengine.fields.EmbeddedDocumentField(cls),
+                        nested_info,
+                    )
+                    for cls in classes_by_parents.get(parent, set())
+                }
+
+            field_read = GenericField(lambda: {k: v[0].model for k, v in generic_fields().items()})
+            field_write = GenericField(lambda: {k: v[1].model for k, v in generic_fields().items()})
+
+            # The base class may declare a `prefetch` (see `generate_fields`) to batch-load
+            # what its instances reference — e.g. `Bloc` and the datasets/reuses shown by
+            # its cards. Reading it here rather than calling it from each endpoint means it
+            # runs exactly when the list is serialized: a masked-out field is dropped from
+            # the model before `output()` (see `flask_restx.marshalling.marshal`), so it
+            # costs nothing on responses that don't include the list.
+            prefetch = getattr(parent, "__prefetch__", None)
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -258,6 +305,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         for ref in (getattr(obj, _key, None) or [])
                         if not isinstance(ref, DBRef)
                     ]
+                if prefetch is not None:
+                    return PrefetchingList(field_read, prefetch=prefetch, **kwargs)
                 return restx_fields.List(field_read, **kwargs)
 
         # But we want to keep the `constructor_write` to allow changing the list.
@@ -580,6 +629,14 @@ def generate_fields(**kwargs) -> Callable:
         page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
         page_mask: str | None = kwargs.pop("page_mask", None)
 
+        # A class whose instances reference other documents can declare how to batch-load
+        # them, so a list of such instances doesn't dereference one document at a time
+        # while being marshalled. Set on the base class, it applies to every generic
+        # embedded list built on it (see the `ListField` branch of `convert_db_to_field`).
+        prefetch: Callable | None = kwargs.pop("prefetch", None)
+        if prefetch is not None:
+            cls.__prefetch__ = staticmethod(prefetch)
+
         read_mask = None
         if read_mask_exclude:
             read_mask = ",".join(k for k in read_fields if k not in read_mask_exclude)
@@ -609,12 +666,7 @@ def generate_fields(**kwargs) -> Callable:
         parser: RequestParser = api.parser()
 
         if paginable:
-            parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(parser)
 
         if sortables:
             choices: list[str] = [sortable["key"] for sortable in sortables] + [
@@ -640,6 +692,9 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                # A list field accepts the parameter several times, and
+                # `apply_sort_filters` then requires all the values (`__all`).
+                action="append" if filterable.get("is_list") else "store",
             )
 
         cls.__index_parser__ = parser
@@ -684,9 +739,12 @@ def generate_fields(**kwargs) -> Callable:
                     if query:
                         base_query = filterable["query"](base_query, filter)
                     else:
+                        column = filterable["column"]
+                        if filterable.get("is_list"):
+                            column = f"{column}__all"
                         base_query = base_query.filter(
                             **{
-                                filterable["column"]: filter,
+                                column: filter,
                             }
                         )
 
@@ -1141,6 +1199,23 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # "key" is the param key in the URL
     if "key" not in filterable:
         filterable["key"] = column
+
+    # For simple list fields (e.g. tags), allow multiple filter values via
+    # action="append" and use __all to match documents containing all values.
+    # Excluded: EmbeddedDocumentListField (filtered on a sub-field like
+    # badges__kind, where __all semantics don't apply).
+    # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
+    # Dataservice.contact_points) — these are filtered by a single ObjectId
+    # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
+    # Supporting it would also require updating the ObjectId validation above.
+    if (
+        isinstance(field, mongo_fields.ListField)
+        and not isinstance(field, mongo_fields.EmbeddedDocumentListField)
+        and not isinstance(
+            field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
+        )
+    ):
+        filterable["is_list"] = True
 
     # If we do a filter on a embed document, get the class info
     # of this document to see if there is a default filter value

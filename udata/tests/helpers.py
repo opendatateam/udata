@@ -192,11 +192,6 @@ def assert500(response):
     assert_status(response, 500)
 
 
-def data_path(filename):
-    """Get a test data path"""
-    return os.path.join(os.path.dirname(__file__), "data", filename)
-
-
 def assert_command_ok(result):
     __tracebackhide__ = True
     msg = "Command failed with exit code {0.exit_code} and output:\n{0.output}"

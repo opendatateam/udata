@@ -13,7 +13,7 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.search import DataserviceApiParser
+from udata.core.dataservices.search import parse_dataservice_filters
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
@@ -80,6 +80,11 @@ def resolve_assignment_subjects(raw_assignments, org):
     return subjects
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. Organization declares none today, so
+# nothing is duplicated yet, but any filter added on both sides would have to be
+# kept in sync. Meant to disappear once the callers use
+# `Organization.apply_sort_filters()`.
 class OrgApiParser(ModelApiParser):
     sorts = {
         "name": "name",
@@ -291,7 +296,7 @@ class OrganizationRdfFormatAPI(API):
             Dataset.objects(organization=org).visible(), params
         )
         datasets = datasets.paginate(params["page"], params["page_size"])
-        dataservices = DataserviceApiParser.parse_filters(
+        dataservices = parse_dataservice_filters(
             Dataservice.objects(organization=org).visible(), params
         )
         dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
@@ -395,19 +400,13 @@ class MembershipRequestAPI(API):
                     403,
                     "You can only access your own membership requests or the one of your organizations.",
                 )
-            if args["status"]:
-                return [
-                    r
-                    for r in org.requests
-                    if (
-                        r.status == args["status"]
-                        and r.user is not None
-                        and str(r.user.id) == args["user"]
-                    )
-                ]
-            return [
+            # Email invitations have no user attached, hence the `is not None` guard.
+            requests = [
                 r for r in org.requests if r.user is not None and str(r.user.id) == args["user"]
             ]
+            if args["status"]:
+                return [r for r in requests if r.status == args["status"]]
+            return requests
         org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
