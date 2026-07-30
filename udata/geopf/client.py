@@ -1,6 +1,7 @@
 import io
 import logging
 import time
+from typing import IO
 from xml.etree.ElementTree import fromstring
 
 import requests
@@ -53,12 +54,12 @@ class GeopfClient:
         if token:
             self.session.headers["Authorization"] = f"Bearer {token}"
 
-    def _url(self, path):
+    def _url(self, path: str) -> str:
         if not self.datastore:
             raise GeopfError("GeopfClient: no datastore_id configured for this call")
         return f"{self.base}/datastores/{self.datastore}/{path}"
 
-    def _raise(self, resp):
+    def _raise(self, resp: requests.Response) -> None:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
@@ -66,7 +67,7 @@ class GeopfClient:
 
     # --- livraison ---
 
-    def create_upload(self, name, description, srs=DEFAULT_SRS):
+    def create_upload(self, name: str, description: str, srs: str = DEFAULT_SRS) -> str:
         resp = self.session.post(
             self._url("uploads"),
             json={"name": name, "type": "VECTOR", "srs": srs, "description": description},
@@ -74,7 +75,7 @@ class GeopfClient:
         self._raise(resp)
         return resp.json()["_id"]
 
-    def push_file(self, upload_id, fileobj, filename):
+    def push_file(self, upload_id: str, fileobj: IO[bytes], filename: str) -> None:
         resp = self.session.post(
             self._url(f"uploads/{upload_id}/data"),
             params={"path": f"/{filename}"},
@@ -82,7 +83,7 @@ class GeopfClient:
         )
         self._raise(resp)
 
-    def push_md5(self, upload_id, filename, md5):
+    def push_md5(self, upload_id: str, filename: str, md5: str) -> None:
         content = f"{md5}  {filename}\n"
         resp = self.session.post(
             self._url(f"uploads/{upload_id}/md5"),
@@ -90,11 +91,11 @@ class GeopfClient:
         )
         self._raise(resp)
 
-    def close_upload(self, upload_id):
+    def close_upload(self, upload_id: str) -> None:
         resp = self.session.post(self._url(f"uploads/{upload_id}/close"))
         self._raise(resp)
 
-    def poll_upload(self, upload_id):
+    def poll_upload(self, upload_id: str) -> str:
         """Poll /checks until all checks complete. Returns 'CLOSED' or 'UNSTABLE'."""
         deadline = time.time() + self.poll_timeout
         while time.time() < deadline:
@@ -110,7 +111,7 @@ class GeopfClient:
             f"Upload {upload_id} checks did not complete within {self.poll_timeout}s"
         )
 
-    def delete_upload(self, upload_id):
+    def delete_upload(self, upload_id: str) -> None:
         resp = self.session.delete(self._url(f"uploads/{upload_id}"))
         self._raise(resp)
 
@@ -144,7 +145,9 @@ class GeopfClient:
             f"No VECTOR -> VECTOR-DB processing available on datastore {self.datastore}"
         )
 
-    def launch_processing(self, upload_id, stored_data_name, srs=DEFAULT_SRS):
+    def launch_processing(
+        self, upload_id: str, stored_data_name: str, srs: str = DEFAULT_SRS
+    ) -> str:
         payload = {
             "processing": self._find_vector_processing_id(),
             "inputs": {"upload": [upload_id]},
@@ -159,7 +162,8 @@ class GeopfClient:
         self._raise(resp)
         return exec_id
 
-    def poll_execution(self, exec_id):
+    def poll_execution(self, exec_id: str) -> tuple[str, str | None]:
+        """Poll until the execution finishes. Returns (status, stored_data_id)."""
         deadline = time.time() + self.poll_timeout
         while time.time() < deadline:
             resp = self.session.get(self._url(f"processings/executions/{exec_id}"))
@@ -175,7 +179,7 @@ class GeopfClient:
 
     # --- tagging ---
 
-    def tag_entity(self, entity_type, entity_id, datasheet_name):
+    def tag_entity(self, entity_type: str, entity_id: str, datasheet_name: str) -> None:
         # entity_type: "uploads", "stored_data", "metadata"
         resp = self.session.post(
             self._url(f"{entity_type}/{entity_id}/tags"),
@@ -222,7 +226,7 @@ class GeopfClient:
 
     # --- metadata ---
 
-    def upload_metadata(self, xml_bytes):
+    def upload_metadata(self, xml_bytes: bytes) -> str:
         """Upload metadata, updating in-place if the file_identifier already exists."""
         resp = self.session.post(
             self._url("metadata"),
@@ -240,7 +244,7 @@ class GeopfClient:
         self._raise(resp)
         return resp.json()["_id"]
 
-    def _find_metadata_id(self, file_identifier):
+    def _find_metadata_id(self, file_identifier: str) -> str | None:
         resp = self.session.get(self._url("metadata"))
         self._raise(resp)
         for item in resp.json():
@@ -248,7 +252,7 @@ class GeopfClient:
                 return item["_id"]
         return None
 
-    def update_metadata(self, metadata_id, xml_bytes):
+    def update_metadata(self, metadata_id: str, xml_bytes: bytes) -> str:
         resp = self.session.put(
             self._url(f"metadata/{metadata_id}"),
             files={"file": ("metadata.xml", io.BytesIO(xml_bytes), "application/xml")},
@@ -257,7 +261,7 @@ class GeopfClient:
         return metadata_id
 
 
-def _extract_file_identifier(xml_bytes):
+def _extract_file_identifier(xml_bytes: bytes) -> str:
     el = fromstring(xml_bytes).find("gmd:fileIdentifier/gco:CharacterString", XML_NS)
     if el is None or not el.text:
         raise GeopfError("Could not extract file_identifier from metadata XML")
