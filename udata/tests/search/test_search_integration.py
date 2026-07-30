@@ -1,4 +1,5 @@
 import pytest
+from flask import url_for
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
@@ -10,7 +11,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -396,6 +397,33 @@ class SearchIntegrationTest(APITestCase):
         assert response.json["total"] >= 1
         names = [p["name"] for p in response.json["data"]]
         assert "Actualités open data" in names
+
+    def test_post_search_follows_publication_state(self):
+        """A post should be searchable only while it is published."""
+        post = PostFactory(name="Draft not yet published", published=None)
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        self.login(AdminFactory())
+        self.assert200(self.post(url_for("api.publish_post", post=post)))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(post.id)]
+
+        self.assert200(self.delete(url_for("api.publish_post", post=post)))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert response.json["total"] == 0
 
     def test_dataset_filter_by_multiple_tags(self):
         """Test filtering datasets by multiple tags."""

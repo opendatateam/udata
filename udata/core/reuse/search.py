@@ -2,7 +2,7 @@ import datetime
 
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
-from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
+from udata.core.reuse.api import DEFAULT_SORTING, parse_reuse_filters
 from udata.core.topic.models import TopicElement
 from udata.models import Organization, Reuse, User
 from udata.search import (
@@ -56,7 +56,7 @@ class ReuseSearch(ModelSearchAdapter):
     @classmethod
     def mongo_search(cls, args):
         reuses = Reuse.objects.visible()
-        reuses = ReuseApiParser.parse_filters(reuses, args)
+        reuses = parse_reuse_filters(reuses, args)
 
         sort = (
             cls.parse_sort(args["sort"])

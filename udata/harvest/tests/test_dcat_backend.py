@@ -5,7 +5,7 @@ from datetime import date
 
 import pytest
 import requests
-from flask import current_app
+from flask import current_app, url_for
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.dataservices.factories import DataserviceFactory
@@ -18,7 +18,8 @@ from udata.harvest.backends.dcat import CswDcatBackend
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.storage.s3 import get_from_json
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
+from udata.tests.helpers import assert200
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -1598,3 +1599,27 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         dataset = Dataset.objects[0]
         assert dataset.harvest.remote_url == "http://catalog.example.com/id-1"
+
+
+@pytest.mark.options(HARVESTER_BACKENDS=["csw-dcat"])
+class CswDcatBackendI18nTest(PytestOnlyAPITestCase):
+    def test_backends_endpoint_translates_labels(self):
+        """Features and extra configs are built when the backend class is defined, outside of any
+        request: their labels must be lazily translated, otherwise they keep the language that was
+        active at import time for the whole process lifetime.
+
+        This test relies on `CswDcatBackend` being imported at module level, i.e. before any
+        request: an eagerly translated label would be stuck to the untranslated message."""
+        response = self.get(url_for("api.harvest_backends", lang="fr"))
+        assert200(response)
+
+        (backend,) = response.json
+        assert [(c["label"], c["description"]) for c in backend["extra_configs"]] == [
+            (
+                "Préfixe d'URL distante",
+                "Un préfixe utilisé pour construire l'URL distante des éléments récoltés.",
+            )
+        ]
+        assert [f["description"] for f in backend["features"]] == [
+            "Requêter GeoDCAT-AP auprès du serveur CSW (doit être supporté par le serveur)."
+        ]

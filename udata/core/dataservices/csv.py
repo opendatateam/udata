@@ -31,6 +31,15 @@ class DataserviceCsvAdapter(csv.Adapter):
         ("archived", lambda d: d.archived_at or False),
         ("tags", lambda d: ",".join(d.tags)),
         ("datasets", lambda d: ",".join([str(d.id) for d in d.datasets])),
+        ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
+        ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
+        ("harvest.remote_id", lambda r: r.harvest and r.harvest.remote_id),
+        ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
+        ("harvest.uri", lambda r: r.harvest and r.harvest.uri),
+        ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
+        ("harvest.issued_at", lambda r: r.harvest and r.harvest.issued_at),
+        ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.last_update", lambda r: r.harvest and r.harvest.last_update),
     )
 
     def dynamic_fields(self):

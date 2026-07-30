@@ -3,6 +3,7 @@ from io import BytesIO, StringIO
 
 import pytest
 from flask import url_for
+from mongoengine.context_managers import query_counter
 
 import udata.core.organization.constants as org_constants
 from udata.core import csv, storages
@@ -11,7 +12,12 @@ from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.edito_blocs.models import AccordionItemBloc, AccordionListBloc, MarkdownBloc
+from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
+    DatasetsListBloc,
+    MarkdownBloc,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -150,21 +156,50 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         )
         assert400(response)
 
-    def test_organization_api_get_with_membership_request_without_created_by(self):
-        """Old membership requests may have created_by=None, the API should not 500"""
-        user = UserFactory()
-        request = MembershipRequest(user=user, comment="a comment", created_by=None)
-        organization = OrganizationFactory(requests=[request])
-        response = self.get(url_for("api.organization", org=organization))
-        assert200(response)
+    def test_organization_api_get_never_exposes_requests(self):
+        """Membership requests are served by /membership/, never by the organization"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
 
-    def test_organization_api_get_with_pending_membership_request_without_handled_by(self):
-        """Pending membership requests have handled_by=None, the API should not 500"""
-        user = UserFactory()
-        request = MembershipRequest(user=user, comment="a comment", status="pending")
-        organization = OrganizationFactory(requests=[request])
         response = self.get(url_for("api.organization", org=organization))
         assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_get_never_exposes_requests_to_org_admin(self):
+        """Not even to the members allowed to handle them: they use /membership/"""
+        admin = self.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[membership_request]
+        )
+
+        response = self.get(url_for("api.organization", org=organization))
+        assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_get_requests_cannot_be_asked_through_x_fields(self):
+        """The field is not part of the model at all, so no mask can bring it back"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        organization = OrganizationFactory(requests=[membership_request])
+
+        response = self.get(
+            url_for("api.organization", org=organization), headers={"X-Fields": "requests"}
+        )
+        assert200(response)
+        assert "requests" not in response.json
+
+    def test_organization_api_list_never_exposes_requests(self):
+        """Membership requests are not exposed through the organization list either"""
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment="secret comment")
+        OrganizationFactory(requests=[membership_request])
+
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        assert "requests" not in response.json["data"][0]
 
     def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
@@ -205,6 +240,67 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert Organization.objects.count() == 1
         assert Organization.objects.first().description == "new description"
+
+    def test_organization_api_update_preserves_logo(self):
+        """Updating an org via PUT must not touch its logo when the client
+        echoes the logo URL back in the payload.
+
+        Regression: the logo ImageField was writable, so patch() rebuilt it
+        from the raw URL, corrupting the filename and dropping thumbnails and
+        original. Logo changes go through the dedicated upload endpoint only.
+        """
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        # Give the org a real logo with generated thumbnails and original.
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+        original = org.logo.original
+        thumbnails = dict(org.logo.thumbnails)
+        assert filename
+
+        # The client fetches the org (logo marshalled as a full URL) and PUTs
+        # the whole payload back to change only the description.
+        data = self.get(url_for("api.organization", org=org)).json
+        assert data["logo"], "The logo URL should be part of the GET payload"
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
+        assert org.logo.original == original
+        assert dict(org.logo.thumbnails) == thumbnails
+
+    def test_organization_api_update_empty_logo_preserves_logo(self):
+        """Sending an empty/absent logo in the PUT payload must not wipe the
+        stored logo (same regression, wipe path instead of corruption)."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        self.post(
+            url_for("api.organization_logo", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        org.reload()
+        filename = org.logo.filename
+
+        data = org.to_dict()
+        data["logo"] = ""
+        data["description"] = "new description"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.description == "new description"
+        assert org.logo.filename == filename
 
     def test_organization_api_update_business_number_id(self):
         """It should update an organization from the API by adding a business number id"""
@@ -324,6 +420,39 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert response.json["presentation_blocs"][0]["class"] == "MarkdownBloc"
         assert response.json["presentation_blocs"][0]["title"] == "Welcome"
         assert response.json["presentation_blocs"][0]["content"] == "Hello"
+
+    def test_blocs_references_are_batched(self):
+        """The cards embedded in an organization's blocs must not be dereferenced one
+        by one: the query count has to stay flat as the number of cards grows."""
+
+        def query_count(nb_cards):
+            owners = [UserFactory() for _ in range(4)]
+            org = OrganizationFactory(
+                presentation_blocs=[
+                    DatasetsListBloc(
+                        title="Featured",
+                        datasets=[
+                            DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)
+                        ],
+                    )
+                ],
+                presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            )
+            url = url_for("api.organization", org=org)
+            headers = {"X-Fields": "{presentation_blocs}"}
+            assert200(self.get(url, headers=headers))  # warm up one-time queries
+            with query_counter() as counter:
+                response = self.get(url, headers=headers)
+                count = int(counter)
+            assert200(response)
+            assert len(response.json["presentation_blocs"][0]["datasets"]) == nb_cards
+            return count
+
+        many, few = query_count(20), query_count(2)
+        assert many == few, (
+            f"the query count grows with the number of cards ({many} for 20 cards, "
+            f"{few} for 2): the references are dereferenced one by one"
+        )
 
     def test_draft_blocs_hidden_from_public(self):
         """Without a publication date, blocs are a draft and never shown to the public."""

@@ -90,6 +90,12 @@ DEFAULT_SORTING = "-created_at_internal"
 SUGGEST_SORTING = "-metrics.followers"
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. `owner` and `organization` (from `Owned`)
+# and `access_type` (from `WithAccessType`) are declared in both places and must be
+# kept in sync, or a filter silently works on one path only; the others have no
+# `filterable=` counterpart yet. Meant to disappear once the callers use
+# `Dataset.apply_sort_filters()`.
 class DatasetApiParser(ModelApiParser):
     sorts = {
         "title": "title",

@@ -1,5 +1,54 @@
 # Changelog
 
+## 17.0.8 (2026-07-30)
+
+- chore(deps): lock file maintenance ([#3865](https://github.com/opendatateam/udata/pull/3865))
+- chore(deps): update dependency faker to >=40.36, <40.37 ([#3825](https://github.com/opendatateam/udata/pull/3825))
+- chore: remove dead udata/core/jobs/actions.py module ([#3856](https://github.com/opendatateam/udata/pull/3856))
+- docs: update deprecated commands related to dev optional deps ([#3883](https://github.com/opendatateam/udata/pull/3883))
+- fix: error message if failing to download geozones ([#3858](https://github.com/opendatateam/udata/pull/3858))
+- fix: filter with multiple tags ([#3712](https://github.com/opendatateam/udata/pull/3712))
+- perf: improve edito blocs perfs ([#3791](https://github.com/opendatateam/udata/pull/3791))
+- perf: skip reload() in update/add/remove_resource ([#3852](https://github.com/opendatateam/udata/pull/3852))
+- perf: targeted update_one for resource extras instead of full save ([#3851](https://github.com/opendatateam/udata/pull/3851))
+- test: check Saxon can start within a uwsgi worker's address space limit ([#3882](https://github.com/opendatateam/udata/pull/3882))
+
+
+## 17.0.7 (2026-07-27)
+
+- chore: add default access type to dataset & dataservices ([#3879](https://github.com/opendatateam/udata/pull/3879))
+- feat(catalog): add resource harvest.last_update ([#3880](https://github.com/opendatateam/udata/pull/3880))
+- fix: activity derefences ([#3868](https://github.com/opendatateam/udata/pull/3868))
+- fix: lazily translate DCAT harvester labels so they are not frozen at import time ([#3881](https://github.com/opendatateam/udata/pull/3881))
+- fix: never expose unpublished posts through the search and detail endpoints ([#3876](https://github.com/opendatateam/udata/pull/3876))
+- fix: notifications dereferences ([#3867](https://github.com/opendatateam/udata/pull/3867))
+
+
+## 17.0.6 (2026-07-24)
+
+- chore(docker): disable elasticsearch disk threshold ([#3861](https://github.com/opendatateam/udata/pull/3861))
+- chore(jobs): require admin permission for celery jobs api routes ([#3869](https://github.com/opendatateam/udata/pull/3869))
+- ci: redirect inv stdin to /dev/null to bypass invoke v3 tty crash ([#3866](https://github.com/opendatateam/udata/pull/3866))
+- feat(topic): featured property is read only and has dedicated admin permission routes ([#3870](https://github.com/opendatateam/udata/pull/3870))
+- fix: stop leaking membership requests through the public organization API ([#3875](https://github.com/opendatateam/udata/pull/3875))
+- fix(topics): check element is part of Topic ([#3874](https://github.com/opendatateam/udata/pull/3874))
+- test: explicit CSV export config ([#3871](https://github.com/opendatateam/udata/pull/3871))
+
+
+## 17.0.5 (2026-07-22)
+
+- feat(dataservices): compute reuses metric ([#3816](https://github.com/opendatateam/udata/pull/3816))
+- feat(harvest,catalog): sync dataset/dataservice harvest info ([#3864](https://github.com/opendatateam/udata/pull/3864))
+- fix(dataservices): parse swagger and scope to bouquet fiche for search ([#3783](https://github.com/opendatateam/udata/pull/3783))
+
+
+## 17.0.4 (2026-07-06)
+
+- chore(deps): lock file maintenance ([#3850](https://github.com/opendatateam/udata/pull/3850))
+- feat: accept webp as image format ([#3855](https://github.com/opendatateam/udata/pull/3855))
+- fix: removing logo on description update ([#3859](https://github.com/opendatateam/udata/pull/3859))
+
+
 ## 17.0.3 (2026-06-29)
 
 - feat: add parsing_table for tabular detection ([#3845](https://github.com/opendatateam/udata/pull/3845))
