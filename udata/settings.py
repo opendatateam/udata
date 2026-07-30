@@ -690,11 +690,12 @@ class Defaults(object):
     # Maximum size (bytes) of a remote resource file downloaded for a push.
     GEOPF_MAX_REMOTE_FILE_SIZE = 1_000_000_000  # 1 GB
     # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
-    # udata acts as a confidential client authenticating on behalf of the data.gouv.fr user.
     GEOPF_OAUTH_CLIENT_ID = None
     GEOPF_OAUTH_CLIENT_SECRET = None
-    GEOPF_OAUTH_OPENID_CONF_URL = None  # .../realms/geoplateforme/.well-known/openid-configuration
-    GEOPF_OAUTH_SCOPE = "openid"  # confirmed working against sso.geopf.fr; "default" 400s there
+    GEOPF_OAUTH_OPENID_CONF_URL = (
+        "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"
+    )
+    GEOPF_OAUTH_SCOPE = "openid"
     # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest.
     GEOPF_TOKEN_ENCRYPTION_KEY = None
 
