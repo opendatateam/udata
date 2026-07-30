@@ -35,7 +35,7 @@ Tokens are stored per user (`GeopfToken`, one document per user, `access_token`/
 
 `/status/` reflects usability, not just presence: it attempts a refresh if the access token is expired (refreshing it as a side effect) and only reports `connected: false` if that fails, meaning the refresh token is also dead and the user needs to reconnect.
 
-`/token/` (disconnect) revokes the refresh token at sso.geopf.fr (RFC 7009) before deleting the local `GeopfToken`, so a leaked token can't still be used against the geopf API after the user disconnects. Revocation is best-effort: if the IdP is unreachable, the failure is only logged and the local link is removed regardless.
+`/token/` (disconnect) revokes the refresh token at sso.geopf.fr before deleting the local `GeopfToken`, so a leaked token can't still be used against the geopf API after the user disconnects. Revocation is best-effort: if the IdP is unreachable, the failure is only logged and the local link is removed regardless.
 
 The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it server-side to the dataset's admin geopf page (`/admin/datasets/<id>/geopf`), falling back to the homepage if it's missing or unknown.
 

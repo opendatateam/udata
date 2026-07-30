@@ -1,10 +1,7 @@
 """OAuth2 client integration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
 
-udata is a confidential OIDC client authenticating as the acting data.gouv.fr
-user (delegated authorization: "the user's own rights on geopf apply"), not
-as a shared service identity. Mirrors `udata.auth.proconnect`'s client setup,
-but persists tokens (see `GeopfToken`) since geopf API calls happen from
-Celery tasks, long after any browser session that started the link is gone.
+Mirrors `udata.auth.proconnect`'s client setup, but persists tokens (see `GeopfToken`)
+since geopf API calls happen from Celery tasks.
 """
 
 import logging
@@ -57,7 +54,7 @@ def _refresh(geopf_token: GeopfToken) -> GeopfToken:
 
 
 def revoke_token(geopf_token: GeopfToken) -> None:
-    """Best-effort revoke of the refresh token at geopf's Keycloak (RFC 7009).
+    """Best-effort revoke of the refresh token at geopf's oauth server.
 
     Failures (including no OAuth client configured, an unreachable IdP, or
     a missing revocation_endpoint) are only logged: disconnecting the local
@@ -88,7 +85,9 @@ def resolve_access_token(user=None, raw_token: str | None = None, min_validity: 
     `--token` option). Otherwise `user` is required: looks up their stored
     `GeopfToken`, refreshing it first if expired, or if it expires within
     `min_validity` seconds (pass the expected duration of the work ahead so
-    the token outlives it). Raises `GeopfReauthRequired` when there is no
+    the token outlives it).
+
+    Raises `GeopfReauthRequired` when there is no
     token or refresh fails, so the caller (API endpoint, task, CLI) can
     surface a "connect to Géoplateforme" prompt instead of a generic error.
     """
