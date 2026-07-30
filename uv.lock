@@ -852,19 +852,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-sitemap"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "blinker" },
-    { name = "flask" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/d7/146fa795769b53e10371e18b2e73acd269a249ca1ed77dec16fae61b53b6/Flask-Sitemap-0.4.0.tar.gz", hash = "sha256:a59f726e889a1c7a71c6d0980fb62c2a9f382c73391567e00f8af892bb4ec731", size = 19881, upload-time = "2022-02-16T22:13:32.356Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/b9/05b383a9dd81715ecc9a3d535839b23e602851e841fd5fa501338153406f/Flask_Sitemap-0.4.0-py2.py3-none-any.whl", hash = "sha256:bafdcca1fc321aafb8c086a8bd260591df29c521032001533327825acff976b8", size = 9999, upload-time = "2022-02-16T22:13:31.211Z" },
-]
-
-[[package]]
 name = "flask-storage"
 version = "1.4.5"
 source = { registry = "https://pypi.org/simple" }
@@ -2488,7 +2475,6 @@ dependencies = [
     { name = "flask-principal" },
     { name = "flask-restx" },
     { name = "flask-security" },
-    { name = "flask-sitemap" },
     { name = "flask-storage" },
     { name = "flask-wtf" },
     { name = "geojson" },
@@ -2583,7 +2569,6 @@ requires-dist = [
     { name = "flask-principal", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-restx", specifier = ">=1.3.0,<2.0.0" },
     { name = "flask-security", specifier = ">=5.1.2,<6.0.0" },
-    { name = "flask-sitemap", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
