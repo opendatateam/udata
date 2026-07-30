@@ -57,7 +57,7 @@ class GeopfAuthApiTest(APITestCase):
             response = self.get(url_for("api.geopf_auth"))
 
         self.assertEqual(response.status_code, 302)
-        assert response.location.startswith(f"{CDATA_BASE_URL}/admin/datasets/{dataset.id}/files")
+        assert response.location.startswith(f"{CDATA_BASE_URL}/admin/datasets/{dataset.id}/geopf")
         stored = GeopfToken.objects.get(user=user.id)
         assert stored.access_token == "at"
         assert stored.refresh_token == "rt"

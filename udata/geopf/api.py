@@ -18,7 +18,7 @@ DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 
 
 def _redirect_target(dataset_id):
-    """Resolve a dataset id to its cdata admin files page, falling back to the homepage.
+    """Resolve a dataset id to its cdata admin geopf page, falling back to the homepage.
 
     We only ever accept an *id* from the client here, never a path or URL:
     it's resolved to a URL entirely server-side via `cdata_url()`, so there
@@ -27,7 +27,7 @@ def _redirect_target(dataset_id):
     if dataset_id:
         try:
             dataset = Dataset.objects.get(id=dataset_id)
-            url = cdata_url(f"/admin/datasets/{dataset.id}/files", flash="connected")
+            url = cdata_url(f"/admin/datasets/{dataset.id}/geopf", flash="connected")
             if url:
                 return url
         except (Dataset.DoesNotExist, mongoengine.errors.ValidationError):
