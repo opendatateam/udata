@@ -21,7 +21,7 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api import api
+from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
@@ -77,6 +77,18 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
+def _email_for_admin_or_self(user):
+    """Return the email only to a sysadmin or to the user themselves, `None` otherwise.
+
+    Stricter than `_visible_email`, which always yields at least a domain: the user API
+    (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all, whereas
+    `_visible_email` serves the org contexts where members are allowed to reach out.
+    """
+    if current_user_is_admin_or_self():
+        return user.email
+    return None
+
+
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
@@ -120,7 +132,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     )
     email = field(
         StringField(max_length=255, required=True, unique=True),
-        attribute=_visible_email,
+        attribute=_email_for_admin_or_self,
         checks=[check_is_email],
     )
     password = StringField()
@@ -507,17 +519,23 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 datastore = MongoEngineUserDatastore(db, User, Role)
 
 
-# Extended User reference exposing `email` and `last_login_at`. Reuses the
-# generated read fields (keeping their `_visible_email`/`_visible_login_date`
-# visibility logic) instead of redeclaring them. Used in contexts where org
-# admins/editors are allowed to see member contact info — e.g. organization
-# `members` and `requests`. These fields are kept off the default `__ref_fields__`
-# so they don't leak in activity/follow/post nested user references.
+# Extended User reference exposing `email` and `last_login_at`, for the contexts where
+# org admins/editors are allowed to see member contact info — organization `members` and
+# `requests`. Both are kept off the default `__ref_fields__` so they don't leak in
+# activity/follow/post nested user references.
+#
+# `email` is declared here rather than reused from `__read_fields__` because the two
+# obey different rules: `_visible_email` grants org members a partial address, while the
+# user API hands third parties nothing (see `_email_for_admin_or_self`).
 user_with_email_ref_fields = api.inherit(
     "UserReferenceWithEmail",
     User.__ref_fields__,
     {
-        "email": User.__read_fields__["email"],
+        "email": fields.String(
+            attribute=_visible_email,
+            description="The user email, obfuscated unless the caller may see it",
+            readonly=True,
+        ),
         "last_login_at": User.__read_fields__["last_login_at"],
     },
 )

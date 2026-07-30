@@ -317,6 +317,26 @@ class UserAPITest(APITestCase):
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
 
+    def test_get_user_hides_email_from_a_third_party(self):
+        """A third party gets no email at all, not even an obfuscated one"""
+        user = UserFactory(email="john@example.org")
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+        self.login(UserFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+    def test_get_user_exposes_email_to_an_admin(self):
+        """A sysadmin still gets the full email"""
+        user = UserFactory(email="john@example.org")
+        self.login(AdminFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertEqual(response.json["email"], "john@example.org")
+
     def test_user_api_create_as_admin(self):
         """It should create a user"""
         self.login(AdminFactory())
