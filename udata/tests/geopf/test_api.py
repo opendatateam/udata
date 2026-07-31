@@ -207,10 +207,10 @@ class GeopfTokenApiTest(APITestCase):
 
 @TEST_GEOPF_CONF
 class GeopfDatastoresApiTest(APITestCase):
-    def test_not_connected_returns_409(self):
+    def test_not_connected_returns_424(self):
         self.login()
         response = self.get(url_for("api.geopf_datastores"))
-        self.assertStatus(response, 409)
+        self.assertStatus(response, 424)
 
     def test_connected_lists_datastores(self):
         user = self.login()
@@ -277,13 +277,13 @@ class GeopfPushApiTest(APITestCase):
 
         self.assertStatus(response, 202)
 
-    def test_not_connected_returns_409(self):
+    def test_not_connected_returns_424(self):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(owner=user, resources=[resource])
 
         response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
-        self.assertStatus(response, 409)
+        self.assertStatus(response, 424)
 
     def test_connected_enqueues_push_task(self):
         user = self.login()
@@ -378,12 +378,12 @@ class GeopfPullOfferingsApiTest(APITestCase):
         response = self.post(url_for("api.geopf_pull_offerings", dataset=dataset))
         self.assert403(response)
 
-    def test_not_connected_returns_409(self):
+    def test_not_connected_returns_424(self):
         user = self.login()
         dataset = DatasetFactory(owner=user)
 
         response = self.post(url_for("api.geopf_pull_offerings", dataset=dataset))
-        self.assertStatus(response, 409)
+        self.assertStatus(response, 424)
 
     def test_connected_enqueues_sync_task(self):
         user = self.login()

@@ -94,7 +94,7 @@ class GeopfDatastoresAPI(API):
         try:
             access_token = resolve_access_token(user=current_user._get_current_object())
         except GeopfReauthRequired:
-            api.abort(409, "Not connected to Géoplateforme")
+            api.abort(424, "Not connected to Géoplateforme")
 
         try:
             return GeopfClient(token=access_token).list_datastores()
@@ -124,7 +124,7 @@ class GeopfPushAPI(API):
         try:
             resolve_access_token(user=user)
         except GeopfReauthRequired:
-            api.abort(409, "Not connected to Géoplateforme")
+            api.abort(424, "Not connected to Géoplateforme")
 
         datastore_id = (request.get_json(silent=True) or {}).get("datastore_id")
         if not (datastore_id or dataset.extras.get("geopf:push:datastore-id")):
@@ -148,7 +148,7 @@ class GeopfPullOfferingsAPI(API):
         try:
             resolve_access_token(user=user)
         except GeopfReauthRequired:
-            api.abort(409, "Not connected to Géoplateforme")
+            api.abort(424, "Not connected to Géoplateforme")
 
         task = pull_offerings_from_geopf.delay(str(dataset.id), str(user.id))
         return {"task_id": task.id}, 202

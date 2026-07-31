@@ -41,7 +41,7 @@ geopf has no datastore-scoped listing endpoint; `/datastores/` discovers them vi
 
 The login endpoint takes a `dataset_id`, not a redirect path, to avoid open redirect concerns. The callback resolves it server-side to the dataset's admin geopf page (`/admin/datasets/<id>/geopf`), falling back to the homepage if it's missing or unknown.
 
-If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `409` so the frontend can prompt the user to (re)connect. This is the same for both push and pull.
+If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, surfaced by the API as `424` so the frontend can prompt the user to (re)connect. This is the same for both push and pull.
 
 ## State tracking
 
@@ -54,7 +54,7 @@ Each flow's specific extras keys are listed in its own section below.
 
 ## Push: data.gouv.fr → Géoplateforme
 
-Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for resources whose format is in `GEOPF_PUSHABLE_FORMATS`): `202` + Celery task id, or `409` if not connected. Runs as a Celery task.
+Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resource_id>/` (only offered for resources whose format is in `GEOPF_PUSHABLE_FORMATS`): `202` + Celery task id, or `424` if not connected. Runs as a Celery task.
 
 ### Workflow
 
@@ -119,7 +119,7 @@ One metadata document is generated per dataset (not per resource) and pushed as 
 
 An *offering* is Géoplateforme's term for an OGC service endpoint (WFS, WMS, WMTS, TMS, …) derived from stored data. Once a resource has been pushed, a user can create a service for it through the cartes.gouv.fr dashboard; the pull flow reads those offerings back and mirrors them as resources in udata.
 
-Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as the current user: `202` + Celery task id, or `409` if not connected. Runs as a Celery task, same pattern as push.
+Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as the current user: `202` + Celery task id, or `424` if not connected. Runs as a Celery task, same pattern as push.
 
 ### Workflow
 
