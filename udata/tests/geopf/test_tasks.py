@@ -1,3 +1,4 @@
+import io
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -8,6 +9,7 @@ from udata.geopf.tasks import (
     _DownloadToTempfile,
     _offering_url,
     _resource_filename,
+    _run_pipeline,
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
@@ -185,8 +187,70 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
 
 @TEST_GEOPF_CONF
+class RunPipelineTest(PytestOnlyDBTestCase):
+    def test_sets_done_status_and_last_synced_at_on_success(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        client = MagicMock(datastore="ds-1")
+        client.create_upload.return_value = "upload-1"
+        client.poll_upload.return_value = "CLOSED"
+        client.launch_processing.return_value = "exec-1"
+        client.poll_execution.return_value = ("SUCCESS", "sd-1")
+        client.upload_metadata.return_value = "meta-1"
+
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+            mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
+            _run_pipeline(dataset, resource, "ds-1", client)
+
+        client.delete_upload.assert_called_once_with("upload-1")
+        dataset.reload()
+        r = next(r for r in dataset.resources if r.id == resource.id)
+        assert r.extras.get("geopf:push:status") == "done"
+        assert r.extras.get("geopf:push:stored-data-id") == "sd-1"
+        assert "geopf:push:last-synced-at" in r.extras
+        assert dataset.extras.get("geopf:push:fiche-url")
+
+    def test_leaves_upload_in_place_on_timeout(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        client = MagicMock(datastore="ds-1")
+        client.create_upload.return_value = "upload-1"
+        client.poll_upload.return_value = "CLOSED"
+        client.launch_processing.return_value = "exec-1"
+        client.poll_execution.side_effect = GeopfTimeoutError("still running")
+
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+            mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
+            with pytest.raises(GeopfTimeoutError):
+                _run_pipeline(dataset, resource, "ds-1", client)
+
+        client.delete_upload.assert_not_called()
+
+    def test_cleans_up_orphaned_upload_on_pipeline_failure(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        client = MagicMock(datastore="ds-1")
+        client.create_upload.return_value = "upload-1"
+        client.poll_upload.return_value = "CLOSED"
+        client.launch_processing.side_effect = GeopfError("boom")
+
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+            mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
+            with pytest.raises(GeopfError):
+                _run_pipeline(dataset, resource, "ds-1", client)
+
+        client.delete_upload.assert_called_once_with("upload-1")
+
+
+@TEST_GEOPF_CONF
 class PushResourceTaskTest(PytestOnlyDBTestCase):
-    def test_sets_pending_then_done_on_success(self):
+    def test_sets_pending_status_before_running_pipeline(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(resources=[resource])
         resource_id = str(dataset.resources[0].id)
@@ -308,10 +372,6 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_called_once_with(token="test-token", datastore_id="ds-established")
         dataset.reload()
         assert dataset.extras.get("geopf:push:datastore-id") == "ds-established"
-
-
-class PushResourceTaskSkipTest(PytestOnlyDBTestCase):
-    """Task early-return paths that need no GEOPF credentials configured."""
 
     def test_skips_when_no_datastore_id_resolvable(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
