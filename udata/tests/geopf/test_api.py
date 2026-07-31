@@ -14,6 +14,15 @@ from udata.tests.geopf import TEST_API_BASE, TEST_GEOPF_CONF
 CDATA_BASE_URL = "https://cdata.example.com"
 
 
+def create_geopf_token(user, access_token="a", refresh_token="r", expires_at=None):
+    return GeopfToken(
+        user=user,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_at=expires_at or datetime.now(UTC) + timedelta(hours=1),
+    ).save()
+
+
 @TEST_GEOPF_CONF
 class GeopfLoginApiTest(APITestCase):
     def test_requires_login(self):
@@ -110,8 +119,7 @@ class GeopfStatusApiTest(APITestCase):
 
     def test_connected(self):
         user = self.login()
-        expires_at = datetime.now(UTC) + timedelta(hours=1)
-        GeopfToken(user=user, access_token="a", refresh_token="r", expires_at=expires_at).save()
+        create_geopf_token(user)
 
         response = self.get(url_for("api.geopf_status"))
         self.assert200(response)
@@ -119,12 +127,12 @@ class GeopfStatusApiTest(APITestCase):
 
     def test_connected_refreshes_and_reports_new_expiry_when_access_token_stale(self):
         user = self.login()
-        GeopfToken(
-            user=user,
+        create_geopf_token(
+            user,
             access_token="stale",
             refresh_token="still-good",
             expires_at=datetime.now(UTC) - timedelta(hours=1),
-        ).save()
+        )
         new_token = {
             "access_token": "fresh",
             "refresh_token": "fresh-refresh",
@@ -140,12 +148,12 @@ class GeopfStatusApiTest(APITestCase):
 
     def test_not_connected_when_refresh_token_is_also_dead(self):
         user = self.login()
-        GeopfToken(
-            user=user,
+        create_geopf_token(
+            user,
             access_token="stale",
             refresh_token="dead",
             expires_at=datetime.now(UTC) - timedelta(hours=1),
-        ).save()
+        )
 
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.fetch_access_token.side_effect = Exception("invalid_grant")
@@ -159,12 +167,7 @@ class GeopfStatusApiTest(APITestCase):
 class GeopfTokenApiTest(APITestCase):
     def test_disconnect_revokes_refresh_token_at_idp(self):
         user = self.login()
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="the-refresh-token",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user, refresh_token="the-refresh-token")
 
         with (
             patch("udata.geopf.auth.oauth") as mock_oauth,
@@ -185,12 +188,7 @@ class GeopfTokenApiTest(APITestCase):
 
     def test_disconnect_succeeds_even_if_revocation_fails(self):
         user = self.login()
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.load_server_metadata.side_effect = Exception("unreachable")
@@ -214,12 +212,7 @@ class GeopfDatastoresApiTest(APITestCase):
 
     def test_connected_lists_datastores(self):
         user = self.login()
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         datastores = [{"datastore_id": "ds-1", "name": "my-entrepot", "rights": ["UPLOAD"]}]
         with patch("udata.geopf.api.GeopfClient") as mock_client_cls:
@@ -265,12 +258,7 @@ class GeopfPushApiTest(APITestCase):
         dataset = DatasetFactory(
             owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
         )
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
             response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
@@ -291,12 +279,7 @@ class GeopfPushApiTest(APITestCase):
         dataset = DatasetFactory(
             owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
         )
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         mock_task = MagicMock(id="task-123")
         with patch(
@@ -312,12 +295,7 @@ class GeopfPushApiTest(APITestCase):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(owner=user, resources=[resource])
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         mock_task = MagicMock(id="task-123")
         with patch(
@@ -337,12 +315,7 @@ class GeopfPushApiTest(APITestCase):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(owner=user, resources=[resource])
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
         self.assert400(response)
@@ -355,12 +328,7 @@ class GeopfPushApiTest(APITestCase):
             resources=[resource],
             extras={"geopf:push:datastore-id": "ds-pinned"},
         )
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
             response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
@@ -388,12 +356,7 @@ class GeopfPullOfferingsApiTest(APITestCase):
     def test_connected_enqueues_sync_task(self):
         user = self.login()
         dataset = DatasetFactory(owner=user)
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user)
 
         mock_task = MagicMock(id="task-456")
         with patch(
