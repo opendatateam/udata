@@ -9,7 +9,7 @@ from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
 from udata.geopf.models import GeopfToken
 from udata.tests.api import APITestCase
-from udata.tests.geopf import TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_API_BASE, TEST_GEOPF_CONF
 
 CDATA_BASE_URL = "https://cdata.example.com"
 
@@ -24,7 +24,7 @@ class GeopfLoginApiTest(APITestCase):
         self.login()
         dataset = DatasetFactory()
         with patch("udata.geopf.api.oauth") as mock_oauth:
-            mock_oauth.geopf.authorize_redirect.return_value = redirect("https://sso.geopf.fr/auth")
+            mock_oauth.geopf.authorize_redirect.return_value = redirect(TEST_API_BASE)
             response = self.get(url_for("api.geopf_login", dataset_id=str(dataset.id)))
 
         self.assertEqual(response.status_code, 302)
@@ -35,7 +35,7 @@ class GeopfLoginApiTest(APITestCase):
     def test_stores_none_when_no_dataset_id_given(self):
         self.login()
         with patch("udata.geopf.api.oauth") as mock_oauth:
-            mock_oauth.geopf.authorize_redirect.return_value = redirect("https://sso.geopf.fr/auth")
+            mock_oauth.geopf.authorize_redirect.return_value = redirect(TEST_API_BASE)
             self.get(url_for("api.geopf_login"))
 
         with self.client.session_transaction() as sess:
@@ -157,24 +157,6 @@ class GeopfStatusApiTest(APITestCase):
 
 @TEST_GEOPF_CONF
 class GeopfTokenApiTest(APITestCase):
-    def test_disconnect_removes_stored_token(self):
-        user = self.login()
-        GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
-
-        with patch("udata.geopf.auth.oauth") as mock_oauth:
-            mock_oauth.geopf.load_server_metadata.return_value = {
-                "revocation_endpoint": "https://sso.example.com/revoke"
-            }
-            response = self.delete(url_for("api.geopf_token"))
-
-        self.assert204(response)
-        assert GeopfToken.objects(user=user.id).first() is None
-
     def test_disconnect_revokes_refresh_token_at_idp(self):
         user = self.login()
         GeopfToken(
@@ -195,6 +177,7 @@ class GeopfTokenApiTest(APITestCase):
             response = self.delete(url_for("api.geopf_token"))
 
         self.assert204(response)
+        assert GeopfToken.objects(user=user.id).first() is None
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
         assert args[0] == "https://sso.example.com/revoke"
