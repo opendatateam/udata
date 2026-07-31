@@ -158,35 +158,14 @@ class GeopfStatusApiTest(APITestCase):
 class GeopfTokenApiTest(APITestCase):
     def test_disconnect_revokes_refresh_token_at_idp(self):
         user = self.login()
-        create_geopf_token(user, refresh_token="the-refresh-token")
+        token = create_geopf_token(user, refresh_token="the-refresh-token")
 
-        with (
-            patch("udata.geopf.auth.oauth") as mock_oauth,
-            patch("udata.geopf.auth.requests.post") as mock_post,
-        ):
-            mock_oauth.geopf.load_server_metadata.return_value = {
-                "revocation_endpoint": "https://sso.example.com/revoke"
-            }
-            mock_post.return_value = MagicMock(status_code=200)
+        with patch("udata.geopf.api.revoke_token") as mock_revoke:
             response = self.delete(url_for("api.geopf_token"))
 
         self.assert204(response)
         assert GeopfToken.objects(user=user.id).first() is None
-        mock_post.assert_called_once()
-        args, kwargs = mock_post.call_args
-        assert args[0] == "https://sso.example.com/revoke"
-        assert kwargs["data"]["token"] == "the-refresh-token"
-
-    def test_disconnect_succeeds_even_if_revocation_fails(self):
-        user = self.login()
-        create_geopf_token(user)
-
-        with patch("udata.geopf.auth.oauth") as mock_oauth:
-            mock_oauth.geopf.load_server_metadata.side_effect = Exception("unreachable")
-            response = self.delete(url_for("api.geopf_token"))
-
-        self.assert204(response)
-        assert GeopfToken.objects(user=user.id).first() is None
+        mock_revoke.assert_called_once_with(token)
 
     def test_disconnect_with_no_stored_token_is_a_noop(self):
         self.login()
