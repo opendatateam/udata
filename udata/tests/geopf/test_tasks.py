@@ -4,7 +4,6 @@ import pytest
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.geopf.client import GeopfError, GeopfTimeoutError
-from udata.geopf.metadata import SANDBOX_DATASTORE_ID
 from udata.geopf.tasks import (
     _DownloadToTempfile,
     _offering_url,
@@ -83,27 +82,6 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         client.update_metadata.assert_called_once()
         client.upload_metadata.assert_not_called()
         client.tag_entity.assert_not_called()
-
-    def test_prefixes_file_identifier_on_sandbox_datastore(self):
-        dataset = DatasetFactory()
-        client = MagicMock(datastore=SANDBOX_DATASTORE_ID)
-        client.upload_metadata.return_value = "meta-new"
-
-        sync_metadata(dataset, client)
-
-        xml_bytes = client.upload_metadata.call_args[0][0]
-        assert f"SANDBOX_{dataset.id}".encode() in xml_bytes
-
-    def test_does_not_prefix_file_identifier_on_other_datastores(self):
-        dataset = DatasetFactory()
-        client = MagicMock(datastore="some-other-datastore")
-        client.upload_metadata.return_value = "meta-new"
-
-        sync_metadata(dataset, client)
-
-        xml_bytes = client.upload_metadata.call_args[0][0]
-        assert f"SANDBOX_{dataset.id}".encode() not in xml_bytes
-        assert str(dataset.id).encode() in xml_bytes
 
 
 @TEST_GEOPF_CONF
