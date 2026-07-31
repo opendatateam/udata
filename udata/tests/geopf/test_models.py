@@ -9,20 +9,14 @@ from udata.core.user.factories import UserFactory
 from udata.geopf.models import GeopfToken
 from udata.mongo.encrypted_field import CIPHERTEXT_PREFIX
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.geopf import TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_GEOPF_CONF, create_geopf_token
 
 
 @TEST_GEOPF_CONF
 class GeopfTokenTest(PytestOnlyDBTestCase):
     def test_round_trips_encrypted_fields(self):
         user = UserFactory()
-        token = GeopfToken(
-            user=user,
-            access_token="plain-access",
-            refresh_token="plain-refresh",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        )
-        token.save()
+        token = create_geopf_token(user, access_token="plain-access", refresh_token="plain-refresh")
 
         raw = GeopfToken._get_collection().find_one({"_id": token.id})
         assert raw["access_token"].startswith(CIPHERTEXT_PREFIX)
@@ -36,12 +30,7 @@ class GeopfTokenTest(PytestOnlyDBTestCase):
 
     def test_wrong_key_raises_instead_of_returning_ciphertext(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
-            access_token="plain-access",
-            refresh_token="plain-refresh",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user, access_token="plain-access", refresh_token="plain-refresh")
 
         other_key = Fernet.generate_key().decode()
         with pytest.raises(RuntimeError, match="GEOPF_TOKEN_ENCRYPTION_KEY"):
@@ -50,20 +39,12 @@ class GeopfTokenTest(PytestOnlyDBTestCase):
 
     def test_is_expired_true_in_the_past(self):
         user = UserFactory()
-        token = GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        token = create_geopf_token(
+            user, expires_at=datetime.now(UTC) - timedelta(seconds=1), save=False
         )
         assert token.is_expired()
 
     def test_is_expired_false_in_the_future(self):
         user = UserFactory()
-        token = GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        )
+        token = create_geopf_token(user, save=False)
         assert not token.is_expired()

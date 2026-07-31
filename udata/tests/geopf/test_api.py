@@ -9,18 +9,9 @@ from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
 from udata.geopf.models import GeopfToken
 from udata.tests.api import APITestCase
-from udata.tests.geopf import TEST_API_BASE, TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_API_BASE, TEST_GEOPF_CONF, create_geopf_token
 
 CDATA_BASE_URL = "https://cdata.example.com"
-
-
-def create_geopf_token(user, access_token="a", refresh_token="r", expires_at=None):
-    return GeopfToken(
-        user=user,
-        access_token=access_token,
-        refresh_token=refresh_token,
-        expires_at=expires_at or datetime.now(UTC) + timedelta(hours=1),
-    ).save()
 
 
 @TEST_GEOPF_CONF

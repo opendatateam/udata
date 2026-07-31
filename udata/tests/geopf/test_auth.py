@@ -8,7 +8,7 @@ from udata.geopf.auth import resolve_access_token, revoke_token
 from udata.geopf.client import GeopfReauthRequired
 from udata.geopf.models import GeopfToken
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.geopf import TEST_GEOPF_CONF
+from udata.tests.geopf import TEST_GEOPF_CONF, create_geopf_token
 
 
 @TEST_GEOPF_CONF
@@ -27,23 +27,18 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
 
     def test_returns_stored_token_when_valid(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
-            access_token="valid-access",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        create_geopf_token(user, access_token="valid-access")
 
         assert resolve_access_token(user=user) == "valid-access"
 
     def test_refreshes_and_persists_when_expired(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
+        create_geopf_token(
+            user,
             access_token="old-access",
             refresh_token="old-refresh",
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
-        ).save()
+        )
 
         new_token = {
             "access_token": "new-access",
@@ -64,12 +59,12 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
 
     def test_refreshes_when_expiring_within_min_validity(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
+        create_geopf_token(
+            user,
             access_token="soon-stale",
             refresh_token="old-refresh",
             expires_at=datetime.now(UTC) + timedelta(minutes=10),
-        ).save()
+        )
 
         new_token = {
             "access_token": "new-access",
@@ -84,12 +79,9 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
 
     def test_no_refresh_when_valid_beyond_min_validity(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
-            access_token="still-good",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=2),
-        ).save()
+        create_geopf_token(
+            user, access_token="still-good", expires_at=datetime.now(UTC) + timedelta(hours=2)
+        )
 
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             assert resolve_access_token(user=user, min_validity=3600) == "still-good"
@@ -97,12 +89,12 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
 
     def test_refresh_failure_raises_reauth_required(self):
         user = UserFactory()
-        GeopfToken(
-            user=user,
+        create_geopf_token(
+            user,
             access_token="old-access",
             refresh_token="old-refresh",
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
-        ).save()
+        )
 
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.fetch_access_token.side_effect = Exception("boom")
@@ -114,12 +106,7 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
 class RevokeTokenTest(PytestOnlyDBTestCase):
     def test_posts_refresh_token_to_revocation_endpoint(self):
         user = UserFactory()
-        geopf_token = GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="the-refresh-token",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        geopf_token = create_geopf_token(user, refresh_token="the-refresh-token")
 
         with (
             patch("udata.geopf.auth.oauth") as mock_oauth,
@@ -138,12 +125,7 @@ class RevokeTokenTest(PytestOnlyDBTestCase):
 
     def test_does_not_raise_when_no_revocation_endpoint(self):
         user = UserFactory()
-        geopf_token = GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        geopf_token = create_geopf_token(user)
 
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.load_server_metadata.return_value = {}
@@ -151,12 +133,7 @@ class RevokeTokenTest(PytestOnlyDBTestCase):
 
     def test_does_not_raise_when_revocation_call_fails(self):
         user = UserFactory()
-        geopf_token = GeopfToken(
-            user=user,
-            access_token="a",
-            refresh_token="r",
-            expires_at=datetime.now(UTC) + timedelta(hours=1),
-        ).save()
+        geopf_token = create_geopf_token(user)
 
         with (
             patch("udata.geopf.auth.oauth") as mock_oauth,
