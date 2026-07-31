@@ -100,6 +100,7 @@ class GeopfClientProcessingTest(PytestOnlyTestCase):
                     "input_types": {"upload": ["RASTER"]},
                     "output_type": {"stored_data": "ROK4-PYRAMID-RASTER"},
                 },
+                # this one will be found by input/ouput types
                 {
                     "_id": "proc-vector",
                     "input_types": {"upload": ["VECTOR"]},
@@ -121,9 +122,6 @@ class GeopfClientProcessingTest(PytestOnlyTestCase):
         processings_request = next(
             r for r in rmock.request_history if r.path.endswith("/processings")
         )
-        # "output_types" (plural) is the query param geopf expects; it populates
-        # the response's "output_type" (singular) field. Mismatching this means
-        # the field is silently omitted and no processing ever matches.
         assert "fields=input_types%2coutput_types" in processings_request.query
 
     def test_launch_processing_raises_when_no_matching_processing(self, rmock):
