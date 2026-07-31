@@ -7,7 +7,7 @@ from pyproj import CRS
 from udata.geopf.srs import detect_srs
 
 
-def _make_gpkg(epsg: int | None) -> tempfile.NamedTemporaryFile:
+def _make_gpkg(epsg: int | None):
     """Create a minimal GPKG SQLite file with one geometry column. Returns an open temp file."""
     tmp = tempfile.NamedTemporaryFile(suffix=".gpkg")
     with sqlite3.connect(tmp.name) as conn:
