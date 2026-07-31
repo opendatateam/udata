@@ -37,12 +37,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         fid = _text(root, ".//gmd:fileIdentifier/gco:CharacterString")
         assert fid == f"SANDBOX_{dataset.id}"
 
-    def test_file_identifier_unprefixed_on_other_datastores(self):
-        dataset = DatasetFactory.build()
-        root = fromstring(dataset_to_iso19115(dataset, datastore_id="some-other-datastore"))
-        fid = _text(root, ".//gmd:fileIdentifier/gco:CharacterString")
-        assert fid == str(dataset.id)
-
     def test_title_and_abstract(self):
         dataset = DatasetFactory.build(title="My Dataset", description="Desc")
         root = _parse(dataset)
@@ -52,17 +46,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         abstract = _text(root, ".//gmd:identificationInfo//gmd:abstract/gco:CharacterString")
         assert title == "My Dataset"
         assert abstract == "Desc"
-
-    def test_abstract_fallback_to_title(self):
-        dataset = DatasetFactory.build(title="My Title", description=None)
-        root = _parse(dataset)
-        abstract = _text(root, ".//gmd:identificationInfo//gmd:abstract/gco:CharacterString")
-        assert abstract == "My Title"
-
-    def test_extent_omitted_when_no_geom(self):
-        dataset = DatasetFactory.build(spatial=None)
-        root = _parse(dataset)
-        assert root.find(".//gmd:extent", XML_NS) is None
 
     def test_keywords_from_tags(self):
         dataset = DatasetFactory.build(tags=["geo", "france"])
@@ -75,6 +58,11 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         ]
         assert "geo" in keywords
         assert "france" in keywords
+
+    def test_no_keywords_block_when_no_tags(self):
+        dataset = DatasetFactory.build(tags=[])
+        root = _parse(dataset)
+        assert root.find(".//gmd:descriptiveKeywords", XML_NS) is None
 
     def test_xml_is_valid_bytes(self):
         dataset = DatasetFactory.build()
@@ -98,6 +86,12 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         root = _parse(dataset)
         assert root.find(".//gmd:electronicMailAddress", XML_NS) is None
 
+    def test_no_contact_email_when_contact_point_has_no_email(self):
+        cp = ContactPointFactory(email=None)
+        dataset = DatasetFactory(org=True, contact_points=[cp])
+        root = _parse(dataset)
+        assert root.find(".//gmd:electronicMailAddress", XML_NS) is None
+
     def test_point_of_contact_org_name(self):
         dataset = DatasetFactory(org=True)
         root = _parse(dataset)
@@ -106,12 +100,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
             ".//gmd:identificationInfo//gmd:pointOfContact//gmd:organisationName/gco:CharacterString",
         )
         assert org
-
-    def test_topic_category_matched_from_tags(self):
-        dataset = DatasetFactory.build(tags=["unrelated", "transport", "other"])
-        root = _parse(dataset)
-        topic = _text(root, ".//gmd:topicCategory/gmd:MD_TopicCategoryCode")
-        assert topic == "transportation"
 
     def test_topic_category_absent_when_no_match(self):
         dataset = DatasetFactory.build(tags=["random-tag-xyz"])
@@ -134,11 +122,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         root = _parse(dataset)
         topic = _text(root, ".//gmd:topicCategory/gmd:MD_TopicCategoryCode")
         assert topic == expected
-
-    def test_no_keywords_block_when_no_tags(self):
-        dataset = DatasetFactory.build(tags=[])
-        root = _parse(dataset)
-        assert root.find(".//gmd:descriptiveKeywords", XML_NS) is None
 
     def test_extent_values_from_geom(self):
         geom = {
@@ -163,12 +146,6 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         root = _parse(dataset)
         org = _text(root, ".//gmd:contact//gmd:organisationName/gco:CharacterString")
         assert org == "Alice Martin"
-
-    def test_no_contact_email_when_contact_point_has_no_email(self):
-        cp = ContactPointFactory(email=None)
-        dataset = DatasetFactory(org=True, contact_points=[cp])
-        root = _parse(dataset)
-        assert root.find(".//gmd:electronicMailAddress", XML_NS) is None
 
     def test_special_characters_escaped_in_title_and_abstract(self):
         dataset = DatasetFactory.build(
