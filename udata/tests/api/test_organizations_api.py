@@ -1321,6 +1321,19 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.is_member(updated_user)
         assert organization.is_admin(updated_user)
 
+    def test_update_member_not_in_organization(self):
+        user = self.login()
+        other_user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.member", org=organization, user=other_user)
+        response = self.put(api_url, {"role": "admin"})
+
+        assert404(response)
+
+        organization.reload()
+        assert not organization.is_member(other_user)
+
     def test_only_admin_can_update_member(self):
         user = self.login()
         updated_user = UserFactory()
