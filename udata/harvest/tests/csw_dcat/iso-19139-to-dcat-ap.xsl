@@ -192,19 +192,17 @@
     </xsl:choose>
   </xsl:variable>
 
-<!-- Parameter $locale-prefix -->
+
+<!-- Parameter $locale-preferred-lang -->
 <!--
-  This parameter specifies the prefix (can be empty) used in ISO 19139 language tags 
+  This parameter specifies the preferred language for localized text.
+  Must be a valid gmd:locale//gmd:LanguageCode/@codeListValue, or empty.
 -->
 
-  <xsl:param name="locale-prefix">locale-</xsl:param>
+  <xsl:param name="locale-preferred-lang">eng</xsl:param>
 
-<!-- Parameter $locale-default-lang -->
-<!--
-  This parameter specifies the default language tag used in ISO 19139 language tags 
--->
-
-  <xsl:param name="locale-default-lang">en</xsl:param>
+  <xsl:variable name="locale-preferred-id"
+                select="//gmd:PT_Locale[gmd:languageCode/gmd:LanguageCode/@codeListValue = $locale-preferred-lang]/@id"/>
 
 
 <!-- Parameter $include-deprecated -->
@@ -430,12 +428,12 @@
 
 -->
 
-  <!-- 
+  <!--
     Function to extract text content from ISO 19139 multilingual elements.
     Handles three patterns:
     1. gmx:Anchor - returns the text content
-    2. gco:CharacterString - returns the text content  
-    3. gmd:PT_FreeText with LocalisedCharacterStrings - returns English text if available, otherwise first available
+    2. gco:CharacterString - returns the text content
+    3. gmd:PT_FreeText with LocalisedCharacterStrings - returns preferred localized text if available, otherwise first available
   -->
   <xsl:function name="local:getTextContent">
     <xsl:param name="element"/>
@@ -451,13 +449,14 @@
       <!-- Handle PT_FreeText with LocalisedCharacterStrings -->
       <xsl:when test="$element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString">
         <xsl:choose>
-          <!-- Try to find English locale first -->
-          <xsl:when test="$element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[@locale='#{$locale-prefix}{$locale-default-lang}']">
-            <xsl:value-of select="normalize-space($element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[@locale='#${locale-prefix}{$locale-default-lang}'][1])"/>
+          <!-- Try to find preferred locale first -->
+          <xsl:when test="$locale-preferred-id != ''
+                          and $element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[@locale = concat('#', $locale-preferred-id)]">
+            <xsl:value-of select="normalize-space($element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[@locale = concat('#', $locale-preferred-id)])"/>
           </xsl:when>
           <!-- Otherwise use the first available LocalisedCharacterString -->
           <xsl:otherwise>
-            <xsl:value-of select="normalize-space($element/gmd:PT_FreeText/gmd:textGroup/gmd:LocalisedCharacterString[1])"/>
+            <xsl:value-of select="normalize-space($element/gmd:PT_FreeText/gmd:textGroup[1]/gmd:LocalisedCharacterString)"/>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:when>
@@ -1474,11 +1473,11 @@
 
           <xsl:variable name="TitleOrDescriptionOrPlaceholder">
             <xsl:choose>
-              <xsl:when test="normalize-space(gmd:name/*) != ''">
-                <xsl:value-of select="normalize-space(gmd:name/*)"/>
+              <xsl:when test="local:getTextContent(gmd:name) != ''">
+                <xsl:value-of select="local:getTextContent(gmd:name)"/>
               </xsl:when>
-              <xsl:when test="normalize-space(gmd:description/*) != ''">
-                <xsl:value-of select="normalize-space(gmd:description)"/>
+              <xsl:when test="local:getTextContent(gmd:description) != ''">
+                <xsl:value-of select="local:getTextContent(gmd:description)"/>
               </xsl:when>
               <xsl:otherwise>
                 <xsl:text>N/A</xsl:text>
@@ -4221,14 +4220,16 @@
     <xsl:param name="term"/>
     <xsl:for-each select="gmd:PT_FreeText/*/gmd:LocalisedCharacterString">
       <xsl:variable name="value" select="normalize-space(.)"/>
-      <xsl:variable name="langs">
-        <xsl:call-template name="Alpha3-to-Alpha2">
-          <xsl:with-param name="lang" select="substring-after(translate(translate(@locale, $uppercase, $lowercase), '#', ''), $locale-prefix)"/>
-        </xsl:call-template>
-      </xsl:variable>
       <xsl:if test="$value != ''">
+        <xsl:variable name="locale-id" select="substring-after(@locale, '#')"/>
+        <xsl:variable name="lang-alpha3" select="//gmd:PT_Locale[@id = $locale-id]/gmd:languageCode/gmd:LanguageCode/@codeListValue"/>
+        <xsl:variable name="lang-alpha2">
+          <xsl:call-template name="Alpha3-to-Alpha2">
+            <xsl:with-param name="lang" select="$lang-alpha3"/>
+          </xsl:call-template>
+        </xsl:variable>
         <xsl:element name="{$term}">
-          <xsl:attribute name="xml:lang"><xsl:value-of select="$langs"/></xsl:attribute>
+          <xsl:attribute name="xml:lang"><xsl:value-of select="$lang-alpha2"/></xsl:attribute>
           <xsl:value-of select="$value"/>
         </xsl:element>
       </xsl:if>
