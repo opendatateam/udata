@@ -57,6 +57,14 @@ SUGGEST_SORTING = "-metrics.followers"
 
 def resolve_assignment_subjects(raw_assignments, org):
     """Resolve raw {class, id} dicts into model instances belonging to org."""
+    if not isinstance(raw_assignments, list) or not all(
+        isinstance(raw, dict) for raw in raw_assignments
+    ):
+        raise FieldValidationError(
+            field="assignments",
+            message="Expected a list of {class, id} objects",
+        )
+
     subjects = []
     for raw in raw_assignments:
         cls_name = raw.get("class")
