@@ -554,7 +554,10 @@ class DiscussionsTest(APITestCase):
     def test_list_discussions_org(self) -> None:
         organization: Organization = OrganizationFactory()
         user: User = UserFactory()
-        _discussion: Discussion = DiscussionFactory(user=user)
+        # Discussion on a dataset of another organization, must be filtered out
+        _discussion: Discussion = DiscussionFactory(
+            user=user, subject=DatasetFactory(organization=OrganizationFactory())
+        )
         dataset = DatasetFactory(organization=organization)
         dataservice = DataserviceFactory(organization=organization)
         reuse = ReuseFactory(organization=organization)
@@ -1728,19 +1731,14 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
             document["subject"] = subject
         return Discussion._get_collection().insert_one(document).inserted_id
 
-    def report_discussion(self, discussion_id):
-        return (
-            Report._get_collection()
-            .insert_one(
-                {
-                    "subject": {"_cls": "Discussion", "_ref": DBRef("discussion", discussion_id)},
-                    "reason": REASON_SPAM,
-                    "reported_at": datetime.now(UTC),
-                    "subject_deleted_at": None,
-                }
-            )
-            .inserted_id
+    def report_discussion(self, discussion_id, subject_deleted_at=None):
+        report = Report(
+            subject=Discussion.objects.get(pk=discussion_id),
+            reason=REASON_SPAM,
+            subject_deleted_at=subject_deleted_at,
         )
+        report.save()
+        return report.id
 
     def notify_discussion(self, user, discussion_id):
         notification = Notification(
@@ -1773,6 +1771,10 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
 
         kept_report = self.report_discussion(kept.id)
         on_license_report = self.report_discussion(on_license)
+        on_license_handled_report = self.report_discussion(
+            on_license, subject_deleted_at=datetime(2026, 1, 1, tzinfo=UTC)
+        )
+        handled_at = Report.objects.get(pk=on_license_handled_report).subject_deleted_at
         kept_notification = self.notify_discussion(user, kept.id)
         on_license_notification = self.notify_discussion(user, on_license)
         without_subject_notification = self.notify_discussion(user, without_subject)
@@ -1799,13 +1801,19 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
         assert Report.objects.get(pk=on_license_report).subject_deleted_at is not None
         assert Report.objects.get(pk=kept_report).subject_deleted_at is None
 
-    def test_migration_keeps_the_supported_discussions(self):
+        # A report already out of the queue keeps the date it was handled at.
+        assert Report.objects.get(pk=on_license_handled_report).subject_deleted_at == handled_at
+
+    def test_migration_is_a_noop_without_unsupported_discussions(self):
+        """The nominal case in production: a healthy base must come out untouched."""
         user = self.login()
-        discussion = DiscussionFactory(user=user, subject=DatasetFactory())
+        discussion = DiscussionFactory(user=user)
         report = self.report_discussion(discussion.id)
+        notification = self.notify_discussion(user, discussion.id)
 
         self.run_migration()
 
         assert Discussion.objects.count() == 1
         assert Discussion.objects.first() == discussion
         assert Report.objects.get(pk=report).subject_deleted_at is None
+        assert Notification.objects(id=notification).count() == 1

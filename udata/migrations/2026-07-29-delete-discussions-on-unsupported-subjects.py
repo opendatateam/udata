@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from bson import DBRef
 
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
+from udata.search import unindex
 
 log = logging.getLogger(__name__)
 
@@ -63,3 +64,10 @@ def migrate(db):
 
     deleted = db.discussion.delete_many({"_id": {"$in": ids}})
     log.info(f"Deleted {deleted.deleted_count} discussion(s) on an unsupported subject")
+
+    # `unindex_model_on_delete` is connected to `post_delete`, which the raw
+    # deletion above does not emit: without this the discussions would stay in
+    # the search index for good. Unindexing only needs the id, so unlike the
+    # deletion itself it can go through the regular task.
+    for discussion_id in ids:
+        unindex.delay("Discussion", str(discussion_id))
