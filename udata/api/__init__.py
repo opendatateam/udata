@@ -3,6 +3,7 @@ import urllib.parse
 from functools import wraps
 
 import mongoengine
+from babel import Locale, UnknownLocaleError
 from flask import (
     Blueprint,
     current_app,
@@ -208,10 +209,16 @@ def output_json(data, code, headers=None):
 @apiv1_blueprint.before_request
 @apiv2_blueprint.before_request
 def set_api_language():
-    if "lang" in request.args:
-        g.lang_code = request.args["lang"]
-    else:
-        g.lang_code = get_locale()
+    lang = request.args.get("lang")
+    if lang is not None:
+        try:
+            # Validate here what Babel would parse later: an invalid value would otherwise
+            # raise on the first translation, far from the request parsing.
+            Locale.parse(lang)
+        except (ValueError, UnknownLocaleError):
+            log.warning("Ignoring unknown `lang` query parameter: %r", lang)
+            lang = None
+    g.lang_code = lang or get_locale()
 
 
 def extract_name_from_path(path):
