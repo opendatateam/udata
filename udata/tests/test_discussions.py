@@ -554,8 +554,7 @@ class DiscussionsTest(APITestCase):
     def test_list_discussions_org(self) -> None:
         organization: Organization = OrganizationFactory()
         user: User = UserFactory()
-        # Discussion on another organization, must be filtered out
-        _discussion: Discussion = DiscussionFactory(user=user, subject=DatasetFactory())
+        _discussion: Discussion = DiscussionFactory(user=user)
         dataset = DatasetFactory(organization=organization)
         dataservice = DataserviceFactory(organization=organization)
         reuse = ReuseFactory(organization=organization)

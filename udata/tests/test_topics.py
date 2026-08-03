@@ -1,7 +1,6 @@
 import pytest
 from mongoengine.errors import ValidationError
 
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.topic.activities import (
     UserCreatedTopic,
@@ -151,7 +150,7 @@ class TopicModelTest(PytestOnlyDBTestCase):
 
     def test_topic_element_wrong_class(self):
         # use a model instance that is not supported
-        discussion = DiscussionFactory(subject=DatasetFactory())
+        discussion = DiscussionFactory()
         topic = TopicFactory()
         with pytest.raises(ValidationError):
             TopicElementFactory(topic=topic, element=discussion)

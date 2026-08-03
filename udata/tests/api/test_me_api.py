@@ -398,10 +398,8 @@ class MeAPITest(APITestCase):
         disc_msg = DiscMsg(content=disc_msg_content, posted_by=user)
         other_disc_msg_content = faker.sentence()
         other_disc_msg = DiscMsg(content=other_disc_msg_content, posted_by=other_user)
+        discussion = DiscussionFactory(user=user, discussion=[disc_msg, other_disc_msg])
         dataset = DatasetFactory(owner=user)
-        discussion = DiscussionFactory(
-            user=user, subject=dataset, discussion=[disc_msg, other_disc_msg]
-        )
         reuse = ReuseFactory(owner=user)
         resource = CommunityResourceFactory(owner=user)
         activity = UserCreatedDataset.objects().create(actor=user, related_to=dataset)
