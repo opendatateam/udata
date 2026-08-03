@@ -3,6 +3,7 @@ import urllib.parse
 from functools import wraps
 
 import mongoengine
+from babel import Locale, UnknownLocaleError
 from flask import (
     Blueprint,
     current_app,
@@ -14,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.inputs import positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
@@ -33,6 +35,24 @@ apiv2_blueprint = Blueprint("apiv2", __name__, url_prefix="/api/2")
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
+
+
+def add_pagination_arguments(parser: RequestParser, *, page_size: int = 20) -> RequestParser:
+    """Add the standard ``page``/``page_size`` query arguments to ``parser``.
+
+    Both are validated as strictly positive integers, so an out-of-range value
+    (``0`` or negative) yields a clean 400 instead of failing deeper down — e.g.
+    a negative length reaching a Mongo ``$slice`` aggregation, which is a 500.
+    """
+    parser.add_argument("page", type=positive, default=1, location="args", help="The page to fetch")
+    parser.add_argument(
+        "page_size",
+        type=positive,
+        default=page_size,
+        location="args",
+        help="The page size to fetch",
+    )
+    return parser
 
 
 class UDataApi(Api):
@@ -145,12 +165,7 @@ class UDataApi(Api):
         return response
 
     def page_parser(self) -> RequestParser:
-        parser = self.parser()
-        parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-        parser.add_argument(
-            "page_size", type=int, default=20, location="args", help="The page size to fetch"
-        )
-        return parser
+        return add_pagination_arguments(self.parser())
 
 
 api = UDataApi(
@@ -194,10 +209,16 @@ def output_json(data, code, headers=None):
 @apiv1_blueprint.before_request
 @apiv2_blueprint.before_request
 def set_api_language():
-    if "lang" in request.args:
-        g.lang_code = request.args["lang"]
-    else:
-        g.lang_code = get_locale()
+    lang = request.args.get("lang")
+    if lang is not None:
+        try:
+            # Validate here what Babel would parse later: an invalid value would otherwise
+            # raise on the first translation, far from the request parsing.
+            Locale.parse(lang)
+        except (ValueError, UnknownLocaleError):
+            log.warning("Ignoring unknown `lang` query parameter: %r", lang)
+            lang = None
+    g.lang_code = lang or get_locale()
 
 
 def extract_name_from_path(path):
@@ -235,6 +256,7 @@ def collect_stats(response):
 
 
 default_error = api.model("Error", {"message": fields.String})
+default_error_v2 = apiv2.inherit("Error", default_error)
 
 
 @api.errorhandler(PermissionDenied)
@@ -303,6 +325,13 @@ def handle_validation_error(error: mongoengine.errors.ValidationError):
         },
         400,
     )
+
+
+@apiv2.errorhandler(PermissionDenied)
+@apiv2.marshal_with(default_error_v2, code=403)
+def handle_permission_denied_v2(error):
+    """Error occuring when the user does not have the required permissions"""
+    return handle_permission_denied(error)
 
 
 @apiv2.errorhandler(mongoengine.errors.ValidationError)

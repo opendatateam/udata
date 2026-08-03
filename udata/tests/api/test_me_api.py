@@ -1,7 +1,9 @@
 from datetime import UTC, datetime, timedelta, timezone
+from io import BytesIO
 
 from flask import url_for
 
+from udata.core import storages
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -11,7 +13,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, User
-from udata.tests.helpers import capture_mails
+from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
 from . import APITestCase
@@ -44,6 +46,46 @@ class MeAPITest(APITestCase):
         response = self.get(url_for("api.me"))
         self.assert401(response)
 
+    def test_my_avatar_upload(self):
+        """It should upload an avatar directly into the avatars storage"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(user.avatar)
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_my_avatar_upload_with_crop(self):
+        """It should upload a cropped avatar using the bbox parameter"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png"), "bbox": "10,10,40,40"},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertEqual(user.avatar.bbox, [10, 10, 40, 40])
+
+    def test_my_avatar_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
+
     def test_update_profile(self):
         """It should update my profile from the API"""
         self.login()
@@ -57,6 +99,53 @@ class MeAPITest(APITestCase):
         self.user.reload()
         self.assertEqual(self.user.about, "new about")
         self.assertTrue(self.user.active)
+
+    def test_update_profile_rejects_urls_in_name(self):
+        """It should reject URLs embedded in first_name/last_name"""
+        self.login()
+        data = self.user.to_dict()
+        data["first_name"] = "John http://dumdum.fr"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "first_name" in response.json["errors"]
+
+        data = self.user.to_dict()
+        data["last_name"] = "Doe https://etalab.studio"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "last_name" in response.json["errors"]
+
+    def test_get_profile_exposes_creation_date_as_since(self):
+        """`since` should expose the registration date (created_at), not null"""
+        self.login()
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+        self.assertIsNotNone(response.json["since"])
+        self.assertEqual(response.json["since"], self.user.created_at.isoformat())
+
+    def test_update_profile_rejects_invalid_email(self):
+        """It should reject a malformed email"""
+        self.login()
+        data = self.user.to_dict()
+        data["email"] = "not-an-email"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+
+    def test_update_profile_ignores_roles_and_active(self):
+        """A non-admin must not grant themselves roles or toggle active via /me"""
+        self.login()
+        self.assertEqual(self.user.roles, [])
+        self.assertTrue(self.user.active)
+        data = self.user.to_dict()
+        data["roles"] = ["admin"]
+        data["active"] = False
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertEqual(self.user.roles, [])
+        self.assertTrue(self.user.active)
+        self.assertFalse(self.user.sysadmin)
 
     def test_my_metrics(self):
         self.login()

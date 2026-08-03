@@ -45,14 +45,16 @@ def metrics_by_label(monthly_metrics: dict, metrics_labels: list[str]) -> list[O
 
 def get_metrics_for_model(
     model: str, id: str | ObjectId | None, metrics_labels: list[str]
-) -> list[OrderedDict | dict]:
+) -> list[OrderedDict] | None:
     """
-    Get distant metrics for a particular model object
+    Get distant metrics for a particular model object.
+
+    Returns None when metrics could not be fetched (no METRICS_API configured or
+    request failure). Callers must not override previously stored metrics in that
+    case, otherwise a transient metrics API error would wipe valid data.
     """
     if not current_app.config["METRICS_API"]:
-        # TODO: How to best deal with no METRICS_API, prevent calling or return empty?
-        # raise ValueError("missing config METRICS_API to use this function")
-        return [{} for _ in range(len(metrics_labels))]
+        return None
     models = model + "s" if id else model  # TODO: not clean of a hack
     model_metrics_api = f"{current_app.config['METRICS_API']}/{models}/data/"
     try:
@@ -65,7 +67,7 @@ def get_metrics_for_model(
         return metrics_by_label(monthly_metrics, metrics_labels)
     except requests.exceptions.RequestException as e:
         log.exception(f"Error while getting metrics for {model}({id}): {e}")
-        return [{} for _ in range(len(metrics_labels))]
+        return None
 
 
 def get_download_url(model: str, id: str | ObjectId | None) -> str:

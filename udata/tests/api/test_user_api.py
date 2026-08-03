@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from io import BytesIO
 
 from flask import url_for
 
@@ -9,7 +10,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
-from udata.models import Discussion, Follow, Member, MembershipRequest
+from udata.models import Discussion, Follow, Member, MembershipRequest, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -281,12 +282,60 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.user_avatar", user=user))
         self.assert403(response)
 
+    def test_change_avatar_user_as_admin(self):
+        """An admin should upload an avatar for a given user"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(user.avatar)
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_change_avatar_user_rejects_non_image(self):
+        """It should reject a non-image file"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
+
     def test_get_inactive_user_with_an_admin(self):
         """It should get a user"""
         user = UserFactory(active=False)
         self.login(AdminFactory())
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
+
+    def test_get_user_hides_email_from_a_third_party(self):
+        """A third party gets no email at all, not even an obfuscated one"""
+        user = UserFactory(email="john@example.org")
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+        self.login(UserFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+    def test_get_user_exposes_email_to_an_admin(self):
+        """A sysadmin still gets the full email"""
+        user = UserFactory(email="john@example.org")
+        self.login(AdminFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertEqual(response.json["email"], "john@example.org")
 
     def test_user_api_create_as_admin(self):
         """It should create a user"""
@@ -309,6 +358,57 @@ class UserAPITest(APITestCase):
         }
         response = self.post(url_for("api.users"), data=data)
         self.assert403(response)
+
+    def test_user_api_create_with_roles_and_active(self):
+        """An admin should be able to set roles and active when creating a user"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["admin"],
+            "active": False,
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert201(response)
+        self.assertEqual(response.json["roles"], ["admin"])
+        self.assertFalse(response.json["active"])
+
+    def test_user_api_create_with_a_non_boolean_active(self):
+        """A string must not be coerced into a boolean: "false" would enable the account"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "active": "false",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_without_a_required_field(self):
+        """It should raise a 400 when a required field is missing"""
+        self.login(AdminFactory())
+        data = {
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_with_a_non_existing_role(self):
+        """It should raise a 400 when creating a user with an unknown role"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["non_existing_role"],
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
 
     def test_user_api_update(self):
         """It should update a user"""
@@ -349,6 +449,23 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertEqual(response.json["roles"], ["admin"])
+        # Assert on the stored user, not only on the marshalled response: the role name
+        # has to be resolved into a `Role` reference for the grant to survive the save.
+        user.reload()
+        self.assertTrue(user.sysadmin)
+
+    def test_user_api_update_removing_roles(self):
+        """An admin should be able to demote a user with an empty roles list"""
+        self.login(AdminFactory())
+        user = AdminFactory()
+        self.assertTrue(user.sysadmin)
+        data = user.to_dict()
+        data["roles"] = []
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.roles, [])
+        self.assertFalse(user.sysadmin)
 
     def test_user_api_update_with_a_non_existing_role(self):
         """It should raise a 400"""
@@ -426,6 +543,7 @@ class UserAPITest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user_to_delete),

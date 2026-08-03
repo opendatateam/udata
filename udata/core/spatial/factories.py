@@ -8,6 +8,17 @@ from udata.utils import faker_provider
 from . import geoids
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
 
+SAMPLE_GEOM = {
+    "type": "MultiPolygon",
+    "coordinates": [
+        [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],
+        [
+            [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+            [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]],
+        ],
+    ],
+}
+
 
 @faker_provider
 class GeoJsonProvider(BaseProvider):

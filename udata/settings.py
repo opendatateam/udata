@@ -187,10 +187,11 @@ class Defaults(object):
     # Flask WTF settings
     CSRF_SESSION_KEY = "Default uData csrf key"
 
-    # Flask-Sitemap settings
-    # TODO: chose between explicit or automagic for params-less endpoints
-    # SITEMAP_INCLUDE_RULES_WITHOUT_PARAMS = False
-    SITEMAP_BLUEPRINT_URL_PREFIX = None
+    # Sitemap settings
+    SITEMAP_S3_BUCKET: str | None = None
+    SITEMAP_S3_FILENAME_PREFIX: str = "sitemaps"
+    SITEMAP_URLS_PER_FILE: int = 50000
+    SITEMAP_BASE_URL: str | None = None
 
     AUTO_INDEX = True
 
@@ -428,6 +429,7 @@ class Defaults(object):
         "ecw",
         "svgz",
         "jp2",
+        "webp",
         # Geo
         "shp",
         "kml",
@@ -483,6 +485,7 @@ class Defaults(object):
         "image/jpeg",
         "image/png",
         "image/svg+xml",
+        "image/webp",
         "text/html",
         "text/calendar",
         "text/plain",

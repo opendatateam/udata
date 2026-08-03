@@ -10,6 +10,7 @@ from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
     ListField,
@@ -25,12 +26,14 @@ from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.checks import check_is_email
+from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
-from udata.core.user.models import User
+from udata.core.user.models import User, user_with_email_ref_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
@@ -105,7 +108,11 @@ class Team(EmbeddedDocument):
 
 @generate_fields()
 class Member(EmbeddedDocument):
-    user = field(ReferenceField(User), readonly=True)
+    user = field(
+        ReferenceField(User),
+        nested_fields=user_with_email_ref_fields,
+        readonly=True,
+    )
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
     since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
@@ -133,7 +140,12 @@ class MembershipRequest(EmbeddedDocument):
     """
 
     id = field(AutoUUIDField(), readonly=True)
-    user = field(ReferenceField(User), allow_null=True, readonly=True)
+    user = field(
+        ReferenceField(User),
+        nested_fields=user_with_email_ref_fields,
+        allow_null=True,
+        readonly=True,
+    )
     status = field(StringField(choices=list(MEMBERSHIP_STATUS), default="pending"), readonly=True)
 
     created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
@@ -209,7 +221,7 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields()
+@generate_fields(read_mask_exclude=["presentation_blocs"])
 class Organization(
     Auditable,
     SpamMixin,
@@ -240,6 +252,10 @@ class Organization(
             max_size=LOGO_MAX_SIZE,
             thumbnails=LOGO_SIZES,
         ),
+        # Read-only: the logo is managed through the dedicated upload endpoint
+        # (POST /organizations/<id>/logo/). Left writable, patch() would set it
+        # from the raw URL echoed back by clients, wiping thumbnails/original.
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_LOGO_SIZE,
@@ -249,11 +265,32 @@ class Organization(
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
-    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
+    # Deliberately not wrapped with `field()`: membership requests and invitations carry
+    # the identity of the applicants and free-text comments about them, so they are never
+    # part of the organization API payload. They are served by the dedicated, permission
+    # checked `/organizations/<org>/membership/` endpoint.
+    requests = ListField(EmbeddedDocumentField(MembershipRequest))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)
     extras = field(OrganizationExtrasField(), auditable=False)
+
+    presentation_blocs = field(
+        EmbeddedDocumentListField(Bloc),
+        generic=True,
+        # Read through `public_presentation_blocs` so the API hides unpublished blocs from
+        # the public. Writes still target the real `presentation_blocs` attribute (patch()
+        # addresses fields by key).
+        attribute="public_presentation_blocs",
+    )
+    presentation_blocs_published_at = field(
+        DateTimeField(),
+        description=(
+            "Publication date of the organization presentation blocs. Set it to make the "
+            "blocs publicly visible; leave it empty to keep them hidden (draft). "
+            "Organization administrators always see the blocs regardless of this date."
+        ),
+    )
 
     deleted = field(DateTimeField(), readonly=True)
 
@@ -277,6 +314,18 @@ class Organization(
 
     def __str__(self):
         return self.name or ""
+
+    @property
+    def public_presentation_blocs(self):
+        """Presentation blocs as exposed through the API.
+
+        Hidden from the public until they are published (`presentation_blocs_published_at` is
+        set); organization administrators always see them so they can prepare the edito
+        before it goes live.
+        """
+        if self.presentation_blocs_published_at is not None or self.permissions["edit"].can():
+            return self.presentation_blocs
+        return []
 
     @property
     @field(nested_fields=org_permissions_fields, show_as_ref=True)
@@ -473,8 +522,6 @@ class Organization(
             raise FieldValidationError(field="user", message="Either user or email is required")
 
         if email:
-            from udata.core.contact_point.models import check_is_email
-
             check_is_email(email, field="email")
 
         if role not in ORG_ROLES:

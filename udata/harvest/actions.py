@@ -44,9 +44,18 @@ def list_sources(owner=None, deleted=False):
     return list(sources)
 
 
-def get_job(ident):
-    """Get an harvest job given its ID"""
-    return HarvestJob.objects.get(id=ident)
+def get_job(ident, *, with_items=True):
+    """Get an harvest job given its ID.
+
+    The heavy `data` blob is never serialized by the read endpoints, so it's
+    always excluded. `with_items=False` additionally drops the embedded items,
+    for routes that expose them only as a counters link and never load or
+    dereference them.
+    """
+    qs = HarvestJob.objects.exclude("data")
+    if not with_items:
+        qs = qs.exclude("items")
+    return qs.get(id=ident)
 
 
 def create_source(
@@ -128,9 +137,14 @@ def delete_source(source: HarvestSource):
 def clean_source(source: HarvestSource):
     """Deletes all datasets linked to a harvest source"""
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    organizations = set()
     for dataset in datasets:
+        if dataset.organization:
+            organizations.add(dataset.organization)
         dataset.deleted = datetime.now(UTC)
-        dataset.save()
+        dataset.save(signal_kwargs={"ignores": ["metrics"]})
+    for org in organizations:
+        org.count_datasets()
     return len(datasets)
 
 

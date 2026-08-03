@@ -1,5 +1,13 @@
-from flask import url_for
+from io import BytesIO
+from unittest import mock
 
+from flask import url_for
+from mongoengine.context_managers import query_counter
+
+from udata.core import storages
+from udata.core.access_type.constants import AccessAudienceCondition, AccessAudienceType
+from udata.core.access_type.models import AccessAudience
+from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.edito_blocs.models import (
@@ -9,12 +17,21 @@ from udata.core.edito_blocs.models import (
     DatasetsListBloc,
     ReusesListBloc,
 )
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
-from udata.tests.helpers import assert200, assert201, assert204
+from udata.tests.helpers import (
+    assert200,
+    assert201,
+    assert204,
+    assert400,
+    assert403,
+    assert404,
+    create_test_image,
+)
 
 
 class PostsAPITest(APITestCase):
@@ -52,6 +69,209 @@ class PostsAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert "blocs" not in response.json["data"][0]
 
+    def test_post_api_get_blocs_no_n_plus_1(self):
+        """Fetching a blocs page must not dereference references one by one.
+
+        Each card (dataset/reuse/dataservice) embeds its organization. Without
+        batching, every card triggers its own organization query, so the query
+        count scales with the number of cards (hundreds on real pages). The
+        `prefetch_blocs_references` helper must keep it flat.
+        """
+        orgs = OrganizationFactory.create_batch(4)
+
+        def query_count(cards_per_bloc):
+            def datasets():
+                return [
+                    DatasetFactory(organization=orgs[i % len(orgs)]) for i in range(cards_per_bloc)
+                ]
+
+            # Datasets spread across 4 top-level blocs + 2 blocs nested in an accordion.
+            top_level = [DatasetsListBloc(title=f"Top {i}", datasets=datasets()) for i in range(4)]
+            accordion = AccordionListBloc(
+                title="Accordion",
+                items=[
+                    AccordionItemBloc(
+                        title=f"Item {i}",
+                        content=[DatasetsListBloc(title=f"Nested {i}", datasets=datasets())],
+                    )
+                    for i in range(2)
+                ],
+            )
+            reuses = [ReuseFactory(organization=orgs[i % len(orgs)]) for i in range(cards_per_bloc)]
+            dataservices = [
+                DataserviceFactory(organization=orgs[i % len(orgs)]) for i in range(cards_per_bloc)
+            ]
+            blocs = top_level + [
+                accordion,
+                ReusesListBloc(title="Reuses", reuses=reuses),
+                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+            ]
+            post = PostFactory(body_type="blocs", content=None, blocs=blocs, datasets=[], reuses=[])
+
+            url = url_for("api.post", post=post)
+            assert200(self.get(url))  # warm up one-time queries
+
+            with query_counter() as counter:
+                response = self.get(url)
+                count = int(counter)
+            assert200(response)
+
+            # A reference the prefetch fails to resolve silently drops from the list —
+            # which *lowers* the query count. Assert every card is there, with its
+            # organization resolved, so a flat count really means "batched".
+            org_ids = {str(o.id) for o in orgs}
+            by_class = {}
+            for bloc in response.json["blocs"]:
+                by_class.setdefault(bloc["class"], []).append(bloc)
+            accordion_items = by_class["AccordionListBloc"][0]["items"]
+            dataset_blocs = by_class["DatasetsListBloc"] + [
+                item["content"][0] for item in accordion_items
+            ]
+            assert len(dataset_blocs) == 6  # 4 top-level + 2 nested in the accordion
+            cards = [card for bloc in dataset_blocs for card in bloc["datasets"]]
+            cards += by_class["ReusesListBloc"][0]["reuses"]
+            cards += by_class["DataservicesListBloc"][0]["dataservices"]
+            assert len(cards) == cards_per_bloc * 8
+            for card in cards:
+                assert card["organization"]["id"] in org_ids
+
+            return count
+
+        many, few = query_count(5), query_count(1)
+        assert many == few, (
+            f"the query count grows with the number of cards ({many} for 5 cards per "
+            f"bloc, {few} for 1): the references are dereferenced one by one"
+        )
+
+    def test_post_api_blocs_projection_keeps_output_intact(self):
+        """Projecting out heavy unused fields must not change the serialized cards.
+
+        `prefetch_blocs_references` loads each card without the list fields no card
+        mask serializes (a dataset's `resources` can hold dozens of sub-documents —
+        deserializing them dominates the response time). The output must stay
+        identical to a full-document load; this locks against projecting out a field
+        a card actually needs.
+
+        Every entry of `CARD_UNUSED_HEAVY_FIELDS` is populated here, on each model
+        that owns it: an empty field serializes the same whether it was projected out
+        or not, so the comparison would hold without checking anything.
+        """
+        org = OrganizationFactory()
+        contact_point = ContactPointFactory(role="contact")
+        audiences = [
+            AccessAudience(role=AccessAudienceType.COMPANY, condition=AccessAudienceCondition.YES)
+        ]
+
+        datasets = [
+            DatasetFactory(
+                organization=org,
+                nb_resources=8,
+                contact_points=[contact_point],
+                access_audiences=audiences,
+            )
+            for _ in range(3)
+        ]
+        dataservices = [
+            DataserviceFactory(
+                organization=org,
+                datasets=datasets,
+                contact_points=[contact_point],
+                access_audiences=audiences,
+            )
+            for _ in range(2)
+        ]
+        reuses = [
+            ReuseFactory(organization=org, datasets=datasets, dataservices=dataservices)
+            for _ in range(2)
+        ]
+        post = PostFactory(
+            body_type="blocs",
+            content=None,
+            blocs=[
+                DatasetsListBloc(title="Datasets", datasets=datasets),
+                ReusesListBloc(title="Reuses", reuses=reuses),
+                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+            ],
+            datasets=[],
+            reuses=[],
+        )
+        url = url_for("api.post", post=post)
+
+        projected = self.get(url).json
+
+        # Same request, but loading the full documents (no field projection).
+        with mock.patch("udata.core.edito_blocs.base.CARD_UNUSED_HEAVY_FIELDS", ()):
+            full = self.get(url).json
+
+        assert projected["blocs"] == full["blocs"]
+        # `quality` carries resource-derived criteria: the card reads them from the
+        # stored cache, which is why `resources` can be dropped from the load.
+        card = projected["blocs"][0]["datasets"][0]
+        assert card["quality"]["has_resources"] is True
+
+    def test_post_api_blocs_preserve_reference_order(self):
+        """Batch-loading a bloc's references must not reorder its cards.
+
+        `id__in` returns the documents in the model's default order (`Dataset` sorts
+        by `-created_at_internal`), not in the order of the reference list, so the
+        prefetch reorders them from the stored references. Bloc lists are editorial
+        content: their order is the behaviour.
+        """
+        created = [DatasetFactory() for _ in range(6)]
+        # Interleaved, so the list order matches neither the creation order nor its
+        # reverse — the two orders a batch query can return on its own.
+        datasets = created[::2] + created[1::2]
+        post = PostFactory(
+            body_type="blocs",
+            content=None,
+            blocs=[DatasetsListBloc(title="Ordered", datasets=datasets)],
+            datasets=[],
+            reuses=[],
+        )
+
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        cards = response.json["blocs"][0]["datasets"]
+        assert [card["id"] for card in cards] == [str(dataset.id) for dataset in datasets]
+
+    def test_post_list_does_not_dereference_blocs(self):
+        """The list endpoint masks out blocs, so it must not dereference them.
+
+        Blocs are excluded from `/posts` via the page mask. Dereferencing their
+        references (datasets, organizations…) here would add latency for data that
+        is never serialized, so the query count must not grow with the bloc contents.
+        """
+        org = OrganizationFactory()
+        post = PostFactory(body_type="blocs", content=None, blocs=[], datasets=[], reuses=[])
+
+        def query_count(nb_cards):
+            post.blocs = [
+                DatasetsListBloc(
+                    title="Heavy",
+                    datasets=[DatasetFactory(organization=org) for _ in range(nb_cards)],
+                )
+            ]
+            post.save()
+
+            url = url_for("api.posts")
+            assert200(self.get(url))  # warm up one-time queries
+
+            with query_counter() as counter:
+                response = self.get(url)
+                count = int(counter)
+            assert200(response)
+            assert "blocs" not in response.json["data"][0]
+            return count
+
+        # Compared against an empty bloc, not a smaller one: a prefetch that ignores
+        # the mask costs a constant batch query, which a "20 vs 2 cards" comparison
+        # would not see. An empty bloc has nothing to load, so it gives the baseline.
+        filled, empty = query_count(20), query_count(0)
+        assert filled == empty, (
+            f"the query count grows with the bloc contents ({filled} with cards, "
+            f"{empty} without): the masked-out blocs are dereferenced"
+        )
+
     def test_search_post(self):
         """It should fetch a post list from the API"""
         name_match = PostFactory(name="Foobar", published="2025-01-01")
@@ -81,6 +301,20 @@ class PostsAPITest(APITestCase):
         owner = response.json["owner"]
         assert isinstance(owner, dict)
         assert owner["id"] == str(admin.id)
+
+    def test_post_api_get_draft(self):
+        """An unpublished post should only be readable by a sysadmin"""
+        draft = PostFactory(published=None)
+
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(UserFactory())
+        assert404(self.get(url_for("api.post", post=draft)))
+
+        self.login(AdminFactory())
+        response = self.get(url_for("api.post", post=draft))
+        assert200(response)
+        assert response.json["id"] == str(draft.id)
 
     def test_post_api_get_with_dangling_dataset_reference(self):
         """Getting a post should not crash when one of its datasets was hard-deleted,
@@ -246,6 +480,44 @@ class PostsAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 3
 
+    def test_post_search_api_excludes_drafts(self):
+        """The v2 search endpoint should never expose unpublished posts"""
+        published = PostFactory.create_batch(3)
+        PostFactory(published=None)
+        expected = {str(post.id) for post in published}
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == expected
+
+        # Unlike the v1 list endpoint, the v2 search has no `with_drafts` bypass:
+        # drafts are not indexed at all, so sysadmins do not see them either.
+        self.login(AdminFactory())
+
+        response = self.get(url_for("apiv2.post_search"))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert {p["id"] for p in response.json["data"]} == expected
+
+    def test_post_search_api_filters_on_query_and_tags(self):
+        """The Mongo fallback of the v2 search should actually apply `q` and `tag`"""
+        named = PostFactory(name="Foobar", tags=["transport"])
+        both_tags = PostFactory(name="Something else", tags=["transport", "sante"])
+        PostFactory(name="Something else", tags=["sante"])
+
+        response = self.get(url_for("apiv2.post_search", q="Foobar"))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(named.id)]
+
+        response = self.get(url_for("apiv2.post_search", tag="transport"))
+        assert200(response)
+        assert {p["id"] for p in response.json["data"]} == {str(named.id), str(both_tags.id)}
+
+        response = self.get(url_for("apiv2.post_search", tag=["transport", "sante"]))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both_tags.id)]
+
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""
         datasets = DatasetFactory.create_batch(2)
@@ -339,3 +611,42 @@ class PostsAPITest(APITestCase):
         content = response.data.decode("utf-8")
         assert news_post.name in content
         assert page_post.name not in content
+
+    def test_post_image_upload(self):
+        """An admin should upload a post image into the images storage"""
+        post = PostFactory()
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert200(response)
+        assert response.json["success"]
+
+        post.reload()
+        assert post.image
+        assert post.image.filename in storages.images
+        assert post.image.original in storages.images
+
+    def test_post_image_upload_requires_admin(self):
+        """It should forbid a non-admin from uploading a post image"""
+        post = PostFactory()
+        self.login(UserFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        assert403(response)
+
+    def test_post_image_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        post = PostFactory()
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.post_image", post=post),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)

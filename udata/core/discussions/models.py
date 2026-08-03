@@ -21,16 +21,14 @@ from udata import uris
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.linkable import Linkable
-from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
 from udata.core.spam.models import SpamMixin, spam_protected
-from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
-from .constants import COMMENT_SIZE_LIMIT
+from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
 from .signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -66,13 +64,11 @@ class Message(SpamMixin, EmbeddedDocument):
     posted_by = field(
         ReferenceField("User"),
         readonly=True,
-        nested_fields=user_ref_fields,
         allow_null=True,
     )
     posted_by_organization = field(
         ReferenceField("Organization"),
         readonly=True,
-        nested_fields=Organization.__ref_fields__,
         allow_null=True,
     )
     last_modified_at = field(DateTimeField(), readonly=True, allow_null=True)
@@ -179,20 +175,18 @@ class Discussion(SpamMixin, Linkable, Document):
     user = field(
         ReferenceField("User"),
         readonly=True,
-        nested_fields=user_ref_fields,
         allow_null=True,
         description="The discussion author",
     )
     organization = field(
         ReferenceField("Organization"),
-        nested_fields=Organization.__ref_fields__,
         allow_null=True,
         description="The organization to publish on behalf of",
         checks=[check_organization_is_valid_for_current_user, only_creation],
     )
 
     subject = field(
-        GenericReferenceField(required=True),
+        GenericReferenceField(choices=DISCUSSION_SUBJECTS, required=True),
         nested_fields=api.model_reference,
         description="The discussion target object",
     )
@@ -218,14 +212,12 @@ class Discussion(SpamMixin, Linkable, Document):
     closed_by = field(
         ReferenceField("User"),
         readonly=True,
-        nested_fields=user_ref_fields,
         allow_null=True,
         description="The user who closed the discussion",
     )
     closed_by_organization = field(
         ReferenceField("Organization"),
         readonly=True,
-        nested_fields=Organization.__ref_fields__,
         allow_null=True,
         description="The organization who closed the discussion",
     )
