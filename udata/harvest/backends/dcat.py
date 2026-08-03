@@ -26,7 +26,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
-from udata.utils import safe_unicode
+from udata.utils import safe_unicode, uniquify
 
 from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
@@ -179,7 +179,7 @@ class DcatBackend(BaseBackend):
         # Rdflib subjects() will return the same node multiple times if it matches different types,
         # which can occur with ISO series converted by SEMIC (by default it sets rdf:type to both
         # Dataset and DatasetSeries).
-        for node in set(page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
+        for node in uniquify(page.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
             remote_id = page.value(node, DCT.identifier)
             if self.is_dataset_external_to_this_page(page, node):
                 continue

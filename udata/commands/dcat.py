@@ -15,6 +15,7 @@ from udata.harvest.backends.dcat import (
 )
 from udata.harvest.models import HarvestItem
 from udata.rdf import DCAT, DCT, namespace_manager
+from udata.utils import uniquify
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
         _subgraph = Graph(namespace_manager=namespace_manager)
         graph += _subgraph.parse(data=serialized, format=format)
 
-        for node in set(subgraph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
+        for node in uniquify(subgraph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
             identifier = subgraph.value(node, DCT.identifier)
             kwargs = {"nid": str(node), "page": page_number}
             kwargs["type"] = "uriref" if isinstance(node, URIRef) else "blank"
