@@ -1,6 +1,7 @@
 from datetime import UTC, date, datetime
 from uuid import UUID
 
+import pytest
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -18,7 +19,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.url_field import URLField
 from udata.tests import PytestOnlyTestCase
-from udata.tests.helpers import parametrize_with_ids
+from udata.tests.helpers import argvalues
 
 
 class ExtrasFieldTest(PytestOnlyTestCase):
@@ -133,9 +134,9 @@ class ExtrasFieldTest(PytestOnlyTestCase):
             }
         }
 
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "dbfield, value, type, expected",
-        [
+        argvalues(
             (
                 DateTimeField,
                 "2018-05-29T13:15:04.397603",
@@ -154,8 +155,8 @@ class ExtrasFieldTest(PytestOnlyTestCase):
                 UUID,
                 UUID("e3b06d6d-90c0-4407-adc0-de81d327f181"),
             ),
-        ],
-        idgetter=lambda t: t[0].__name__,
+            ids=lambda t: t[0].__name__,
+        ),
     )
     def test_can_parse_registered_data(self, dbfield, value, type, expected):
         Fake, FakeForm = self.factory()
@@ -173,9 +174,9 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         assert isinstance(fake.extras["my:extra"], type)
         assert fake.extras["my:extra"] == expected
 
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "dbfield, value",
-        [
+        argvalues(
             (DateTimeField, "xxxx"),
             (DateField, "xxxx"),
             (IntField, "xxxx"),
@@ -183,8 +184,8 @@ class ExtrasFieldTest(PytestOnlyTestCase):
             (FloatField, "xxxx"),
             (URLField, "not-an-url"),
             (UUIDField, "not-a-uuid"),
-        ],
-        idgetter=lambda t: t[0].__name__,
+            ids=lambda t: t[0].__name__,
+        ),
     )
     def test_fail_bad_registered_data(self, dbfield, value):
         Fake, FakeForm = self.factory()

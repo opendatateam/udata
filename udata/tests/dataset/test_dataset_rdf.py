@@ -71,7 +71,7 @@ from udata.rdf import (
     slugify_tag,
 )
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
-from udata.tests.helpers import assert200, assert_redirects, parametrize_with_ids
+from udata.tests.helpers import argvalues, assert200, assert_redirects
 from udata.utils import faker
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
@@ -1432,59 +1432,59 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert temporal_from_rdf(g.resource(node)) is None
         assert temporal_from_rdf(Literal("unparseable")) is None
 
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "node_type, geom_type, datatype, serialize",
-        [
+        argvalues(
             (
-                "bbox-geojson",
                 DCT.Location,
                 DCAT.bbox,
                 GEOSPARQL.geoJSONLiteral,
                 _to_geojson,
+                "bbox-geojson",
             ),
             (  # replaced by GEOSPARQL.geoJSONLiteral
-                "bbox-geojson-deprecated",
                 DCT.Location,
                 DCAT.bbox,
                 "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
                 _to_geojson,
+                "bbox-geojson-deprecated",
             ),
             (
-                "bbox-wkt",
                 DCT.Location,
                 DCAT.bbox,
                 GEOSPARQL.wktLiteral,
                 _to_wkt,
+                "bbox-wkt",
             ),
             (
-                "geometry-geojson",
                 DCT.Location,
                 LOCN.geometry,
                 GEOSPARQL.geoJSONLiteral,
                 _to_geojson,
+                "geometry-geojson",
             ),
             (
-                "geometry-wkt",
                 DCT.Location,
                 LOCN.geometry,
                 GEOSPARQL.wktLiteral,
                 _to_wkt,
+                "geometry-wkt",
             ),
             (  # old GeoNetwork dcat exposition
-                "polygon-geometry",
                 Namespace("http://www.opengis.net/rdf#").Polygon,
                 LOCN.geometry,
                 "http://www.opengis.net/rdf#wktLiteral",
                 _to_wkt,
+                "polygon-geometry",
             ),
             (  # old GeoNetwork dcat exposition
-                "polygon-aswkt",
                 Namespace("http://www.opengis.net/rdf#").Polygon,
                 GEOSPARQL.asWKT,
                 "http://www.opengis.net/rdf#wktLiteral",
                 _to_wkt,
+                "polygon-aswkt",
             ),
-        ],
+        ),
     )
     def test_parse_spatial_geometry(self, node_type, geom_type, datatype, serialize):
         g = Graph()
@@ -2012,27 +2012,26 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
 
 
 class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "xml, expected_licenses",
         [
-            (t[0], XML_RDF_TEMPLATE.format(xml_fragment=t[1]), t[2])
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
             for t in [
                 (
-                    "uriref",
                     """
                     <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
                     """,
                     {"https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"},
+                    "uriref",
                 ),
                 (
-                    "value",
                     """
                     <dct:license>License from value</dct:license>
                     """,
                     {"License from value"},
+                    "value",
                 ),
                 (
-                    "label",
                     """
                     <dct:license>
                        <rdf:Description>
@@ -2041,9 +2040,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dct:license>
                     """,
                     {"License from label"},
+                    "label",
                 ),
                 (
-                    "uriref-precedence",
                     """
                     <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
                        No conditions apply to access and use.
@@ -2052,9 +2051,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     {
                         "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
                     },
+                    "uriref-precedence",
                 ),
                 (
-                    "resource",
                     """
                        <dct:license rdf:resource="http://example.org/custom-license"/>
                     </rdf:Description>
@@ -2063,9 +2062,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        <dct:description>A license specific to our organization</dct:description>
                     """,
                     {"License from resource"},
+                    "resource",
                 ),
                 (
-                    "multiple",
                     """
                     <dct:license>License 1</dct:license>
                     <dct:license>
@@ -2075,6 +2074,7 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dct:license>
                     """,
                     {"License 1", "License 2"},
+                    "multiple",
                 ),
             ]
         ],
@@ -2206,14 +2206,13 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
         assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
 
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "xml, expected_provenances",
         [
-            (t[0], XML_RDF_TEMPLATE.format(xml_fragment=t[1]), t[2])
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
             for t in [
                 # Old DCAT* specs
                 (
-                    "label",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2222,10 +2221,10 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dct:provenance>
                     """,
                     {"Provenance from label"},
+                    "label",
                 ),
                 # New DCAT* specs
                 (
-                    "description",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2234,9 +2233,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dct:provenance>
                     """,
                     {"Provenance from description"},
+                    "description",
                 ),
                 (
-                    "multiple",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2250,17 +2249,17 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dct:provenance>
                     """,
                     {"Statement 1", "Statement 2"},
+                    "multiple",
                 ),
                 # Supported theoretical(?) cases
                 (
-                    "value",
                     """
                     <dct:provenance>Provenance from value</dct:provenance>
                     """,
                     {"Provenance from value"},
+                    "value",
                 ),
                 (
-                    "resource",
                     """
                        <dct:provenance rdf:resource="http://example.org/provenance"/>
                     </rdf:Description>
@@ -2268,6 +2267,7 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        <dct:description>Provenance from separate resource</dct:description>
                     """,
                     {"Provenance from separate resource"},
+                    "resource",
                 ),
             ]
         ],
@@ -2279,14 +2279,12 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         provenances = provenances_from_rdf(dataset)
         assert provenances == expected_provenances
 
-    @parametrize_with_ids(
+    @pytest.mark.parametrize(
         "xml, expected_format",
         [
-            (t[0], XML_RDF_TEMPLATE.format(xml_fragment=t[1]), t[2])
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
             for t in [
-                # DCAT* and GeoDCAT-AP for distributions other than services
-                (
-                    "dct:format",
+                (  # DCAT* and GeoDCAT-AP for distributions other than services
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2299,10 +2297,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "zip",
+                    "dct:format",
                 ),
-                # DCAT* and older GeoDCAT-AP for service distributions
-                (
-                    "dct:conformsTo",
+                (  # DCAT* and older GeoDCAT-AP for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2322,10 +2319,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wms",
+                    "dct:conformsTo",
                 ),
-                # GeoDCAT-AP 3+ for service distributions
-                (
-                    "geodcatap:serviceProtocol",
+                (  # GeoDCAT-AP 3+ for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2348,6 +2344,7 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wfs",
+                    "geodcatap:serviceProtocol",
                 ),
             ]
         ],
