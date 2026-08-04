@@ -6,6 +6,7 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.storages import images
 from udata.core.user.factories import UserFactory
 from udata.models import Reuse
 from udata.search.query import ES_MAX_RESULT_WINDOW
@@ -271,6 +272,27 @@ class ReuseListAPIV2Test(APITestCase):
         assert200(response)
         ids = {r["id"] for r in response.json["data"]}
         assert ids == {str(linked_reuse.id)}
+
+    def test_reuse_list_does_not_copy_the_image_storage(self):
+        # Regression: mongoengine deep-copies the document's fields when
+        # auto-dereferencing is off, and `Reuse.image` is an ImageField holding
+        # the image storage, hence its backend. On the S3 backend that backend
+        # owns boto3 clients, which recurse until RecursionError when copied.
+        reuse = VisibleReuseFactory(datasets=DatasetFactory.create_batch(1))
+
+        class UncopyableBackend:
+            def __deepcopy__(self, memo):
+                raise AssertionError("the image storage backend must not be copied")
+
+        original_backend = images.backend
+        images.backend = UncopyableBackend()
+        try:
+            response = self.get(url_for("apiv2.reuses"))
+        finally:
+            images.backend = original_backend
+
+        assert200(response)
+        assert [r["id"] for r in response.json["data"]] == [str(reuse.id)]
 
     def test_reuse_list_exposes_owner(self):
         """The `owner` reference is dereferenced and serialized under
