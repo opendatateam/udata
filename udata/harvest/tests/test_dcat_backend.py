@@ -19,7 +19,7 @@ from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
-from udata.tests.helpers import assert200
+from udata.tests.helpers import argvalues, assert200
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -979,13 +979,16 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "exception",
-        [
-            requests.exceptions.ConnectTimeout("Connection timed out"),
-            requests.exceptions.ConnectionError(
-                "Failed to resolve 'example.com' (Name resolution failed)"
+        argvalues(
+            (requests.exceptions.ConnectTimeout("Connection timed out"), "timeout"),
+            (
+                requests.exceptions.ConnectionError(
+                    "Failed to resolve 'example.com' (Name resolution failed)"
+                ),
+                "resolution",
             ),
-            requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"),
-        ],
+            (requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"), "certificate"),
+        ),
     )
     def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
         """Connection exceptions should be logged as warning, not sent to Sentry."""
@@ -1073,7 +1076,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 class CswDcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "schema_name, schema_uri",
-        [("dcat", "http://www.w3.org/ns/dcat#"), ("geodcatap", "http://data.europa.eu/930/")],
+        argvalues(
+            ("dcat", "http://www.w3.org/ns/dcat#"),
+            ("geodcatap", "http://data.europa.eu/930/"),
+            ids=lambda values: values[0],
+        ),
     )
     def test_geonetwork(self, rmock, schema_name, schema_uri):
         geodcatap = schema_name == "geodcatap"
@@ -1276,11 +1283,11 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "remote_url_prefix",
-        [
-            None,
-            "http://catalog.example.com",  # no trailing slash
-            "http://catalog.example.com/",  # trailing slash
-        ],
+        argvalues(
+            (None, "none"),
+            ("http://catalog.example.com/", "trailing-slash"),
+            ("http://catalog.example.com", "no-trailing-slash"),
+        ),
     )
     def test_url_prefix(self, rmock, remote_url_prefix: str):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1378,13 +1385,17 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
-        [
-            None,
-            # trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
-            # no trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
-        ],
+        argvalues(
+            (None, "none"),
+            (
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
+                "trailing-slash",
+            ),
+            (
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
+                "no-trailing-slash",
+            ),
+        ),
     )
     def test_geo2france(self, rmock, remote_url_prefix: str):
         mock_xslt(rmock)
