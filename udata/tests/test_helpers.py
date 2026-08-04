@@ -17,6 +17,11 @@ class ArgvaluesTest:
             (("http://example.com/",), "trailing-slash"),
         ]
 
+    def test_single_iterable_of_parameter_sets(self):
+        params = argvalues((n * 2, str(n)) for n in (1, 2))
+
+        assert [(p.values, p.id) for p in params] == [((2,), "1"), ((4,), "2")]
+
     def test_ids_callable_receives_the_whole_values_tuple(self):
         params = argvalues((1, 2), (3, 4), ids=lambda values: f"sum-{sum(values)}")
 
