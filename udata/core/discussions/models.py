@@ -132,7 +132,7 @@ class Message(SpamMixin, EmbeddedDocument):
             )
             return message
 
-        message += f" sur la discussion « [{discussion.title}]({discussion.url_for()}) »"
+        message += f" sur la discussion « [{discussion.title}]({discussion.url_for()}) »"
         return message
 
 
@@ -407,7 +407,7 @@ class Discussion(SpamMixin, Linkable, Document):
         return self.url_for()
 
     def spam_report_message(self, breadcrumb):
-        message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
+        message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
         if self.user:
             message += f" de [{self.user.fullname}]({self.user.url_for()})"
 

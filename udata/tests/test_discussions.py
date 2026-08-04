@@ -667,6 +667,45 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
         self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
 
+    def test_list_discussions_search_sorts_by_relevance(self):
+        """Searching without an explicit `sort` orders by text relevance, and only an
+        explicit `sort` overrides it. Relevance and `-created` must disagree here,
+        otherwise the assertions would hold under either ordering.
+        """
+        user = UserFactory()
+        dataset = DatasetFactory()
+
+        # Matches on `title` (index weight 10) but is the oldest of the two.
+        most_relevant = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="something in title",
+            created=datetime(2023, 1, 1, tzinfo=UTC),
+            discussion=[Message(posted_by=user, content="a message")],
+        )
+        # Matches on `discussion.content` (index weight 5) but is the most recent.
+        most_recent = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion a",
+            created=datetime(2024, 1, 1, tzinfo=UTC),
+            discussion=[Message(posted_by=user, content="a message with something")],
+        )
+
+        response = self.get(url_for("api.discussions", q="something"))
+        self.assert200(response)
+        self.assertEqual(
+            [d["id"] for d in response.json["data"]],
+            [str(most_relevant.id), str(most_recent.id)],
+        )
+
+        response = self.get(url_for("api.discussions", q="something", sort="-created"))
+        self.assert200(response)
+        self.assertEqual(
+            [d["id"] for d in response.json["data"]],
+            [str(most_recent.id), str(most_relevant.id)],
+        )
+
     def assertIdIn(self, json_data: dict, id_: str) -> None:
         for item in json_data:
             if item["id"] == id_:
