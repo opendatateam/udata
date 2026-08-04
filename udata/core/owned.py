@@ -74,8 +74,6 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
             _("Permission denied for this organization"), field="organization"
         )
 
-    return org
-
 
 class Owned(object):
     """

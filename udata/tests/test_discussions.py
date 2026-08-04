@@ -199,6 +199,99 @@ class DiscussionsTest(APITestCase):
         )
         self.assert400(response)
 
+    def test_new_discussion_on_behalf_of_org_as_object(self):
+        """The frontend sends the whole organization object, not only its id."""
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": {"id": str(org.id)},
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(org.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": {"id": str(org.id)}, "comment": "A comment"},
+        )
+        self.assert200(response)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(org.id)
+
+    def test_close_discussion_on_behalf_of_org_as_object(self):
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": True, "organization": {"id": str(org.id)}},
+        )
+        self.assert200(response)
+        assert response.json["closed_by_organization"]["id"] == str(org.id)
+
+        discussion.reload()
+        assert discussion.closed_by_organization == org
+
+    def test_write_endpoints_reject_a_non_object_payload(self):
+        """A JSON body decoding to anything but an object must be a 400, not a 500."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        for payload in ["a string", 42, ["a", "list"]]:
+            self.assert400(self.post(url_for("api.discussions"), payload))
+            self.assert400(self.post(url_for("api.discussion", id=discussion.id), payload))
+            self.assert400(self.put(url_for("api.discussion", id=discussion.id), payload))
+            self.assert400(
+                self.put(
+                    url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                    payload,
+                )
+            )
+
+    def test_close_discussion_with_a_non_boolean_close(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        # A string spelling out a false value must not close the discussion.
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": "false", "comment": "A comment"},
+        )
+        self.assert200(response)
+        discussion.reload()
+        assert discussion.closed is None
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": "not a boolean", "comment": "A comment"},
+        )
+        self.assert400(response)
+        discussion.reload()
+        assert discussion.closed is None
+
     @pytest.mark.options(SPAM_WORDS=["spam"], CDATA_BASE_URL="https://data.gouv.fr")
     def test_spam_in_new_discussion_title(self):
         self.login()
@@ -344,6 +437,24 @@ class DiscussionsTest(APITestCase):
             },
         )
         self.assertStatus(response, 400)
+
+    def test_new_discussion_empty_comment(self):
+        self.login()
+        dataset = Dataset.objects.create(title="Test dataset")
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": "",
+                "subject": {
+                    "class": "Dataset",
+                    "id": dataset.id,
+                },
+            },
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(Discussion.objects.count(), 0)
 
     def test_new_discussion_missing_title(self):
         self.login()
@@ -676,6 +787,10 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["user"]["id"], str(user.id))
 
+    def test_list_discussions_user_is_not_an_identifier(self):
+        response = self.get(url_for("api.discussions", user="not an identifier"))
+        self.assert400(response)
+
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title="Test dataset")
         user = UserFactory()
@@ -698,6 +813,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data["discussion"][0]["content"], "bla bla")
         self.assertEqual(data["discussion"][0]["posted_by"]["id"], str(user.id))
         self.assertIsNotNone(data["discussion"][0]["posted_on"])
+        self.assertEqual(data["url"], discussion.self_api_url())
+        self.assertEqual(data["self_web_url"], discussion.self_web_url())
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_comment_to_discussion(self):

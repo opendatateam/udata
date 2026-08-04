@@ -141,6 +141,20 @@ class UDataApi(Api):
 
         return wrapper
 
+    def json_payload(self) -> dict:
+        """Return the request body as a dict, rejecting any other JSON shape.
+
+        A JSON body can decode to a string, a number or a list, none of which the
+        handlers can consume: without this check they raise an `AttributeError` and
+        the client gets a 500 instead of a 400.
+        """
+        data = request.json
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            self.abort(400, errors={"request": "expecting a JSON object"})
+        return data
+
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
         if "application/json" not in request.headers.get("Content-Type", ""):

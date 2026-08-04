@@ -699,6 +699,7 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                help=filterable.get("help", None),
                 # A list field accepts the parameter several times, and
                 # `apply_sort_filters` then requires all the values (`__all`).
                 action="append" if filterable.get("is_list") else "store",

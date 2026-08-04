@@ -3,8 +3,10 @@ import logging
 from datetime import UTC, datetime
 from urllib.parse import urlparse
 
+from bson import ObjectId
 from flask import current_app, url_for
 from flask_login import current_user
+from flask_restx.inputs import boolean
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
@@ -27,6 +29,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
+from udata.utils import id_or_404
 
 from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
 from .signals import (
@@ -164,10 +167,68 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
+def filter_by_subject(base_query, filter_value):
+    return base_query.generic_in(subject=filter_value)
+
+
+def filter_by_organization(base_query, filter_value):
+    # Deferred: the subject models import `Discussion` at module level.
+    from udata.core.dataservices.models import Dataservice
+    from udata.core.dataset.models import Dataset
+    from udata.core.organization.models import Organization
+    from udata.core.reuse.models import Reuse
+
+    org = Organization.objects.get_or_404(id=id_or_404(filter_value))
+    subjects = (
+        list(Reuse.objects(organization=org).only("id"))
+        + list(Dataset.objects(organization=org).only("id"))
+        + list(Dataservice.objects(organization=org).only("id"))
+    )
+    return base_query(subject__in=subjects)
+
+
+def filter_by_user(base_query, filter_value):
+    return base_query(discussion__posted_by=ObjectId(filter_value))
+
+
+def filter_by_closed(base_query, filter_value):
+    if filter_value:
+        return base_query(closed__ne=None)
+    return base_query(closed=None)
+
+
 @generate_fields(
     searchable=True,
     default_sort="-created",
     additional_sorts=[{"key": "discussion.posted_on", "value": "discussion.posted_on"}],
+    standalone_filters=[
+        {
+            "key": "closed",
+            "type": boolean,
+            "query": filter_by_closed,
+            "help": "Filters discussions on their closed status if specified",
+        },
+        {
+            "key": "for",
+            "type": str,
+            "is_list": True,
+            "query": filter_by_subject,
+            "help": "Filter discussions for a given subject",
+        },
+        {
+            "key": "org",
+            "type": str,
+            "query": filter_by_organization,
+            "help": "Filter discussions for a given organization",
+        },
+        {
+            "key": "user",
+            "type": str,
+            "constraints": ["objectid"],
+            "query": filter_by_user,
+            "help": "Filter discussions created by a user",
+        },
+    ],
 )
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
