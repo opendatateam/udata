@@ -1,10 +1,12 @@
 import os
+from collections.abc import Callable, Iterable
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
 
 import pytest
+from _pytest.mark import ParameterSet
 from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
@@ -239,3 +241,32 @@ def create_geozones_fixtures():
 
 def security_gettext(string):
     return FsDomain(current_app).gettext(string)
+
+
+def argvalues(
+    *argvalues: tuple | Iterable[tuple], ids: Callable[[tuple], str] | None = None
+) -> list[ParameterSet]:
+    """
+    `pytest.mark.parametrize` helper with nicer support for parameter-set ids.
+
+    :param argvalues: parameter-set tuples, each one ending with its `id` when `ids` is None.
+       A single iterable of such tuples is also accepted, so that parameter sets can be built
+       by a comprehension: `argvalues((foo(x), x) for x in values)`.
+
+    :param ids: build each parameter-set `id` from its whole values tuple. Unlike the `ids`
+       callable of `pytest.mark.parametrize`, which is called on each value separately.
+
+    Examples::
+      @pytest.mark.parametrize("a, b", argvalues((1, 2, "x"), (3, 4, "y")))
+      => @pytest.mark.parametrize("a, b", [(1, 2), (3, 4)], ids=["x", "y"])
+
+      @pytest.mark.parametrize("a, b", argvalues((1, 2), (3, 4), ids=lambda v: f"sum-{sum(v)}"))
+      => @pytest.mark.parametrize("a, b", [(1, 2), (3, 4)], ids=["sum-3", "sum-7"])
+    """
+    if len(argvalues) == 1 and not isinstance(argvalues[0], tuple):
+        argvalues = tuple(argvalues[0])
+
+    if ids is None:
+        return [pytest.param(*values, id=param_id) for *values, param_id in argvalues]
+
+    return [pytest.param(*values, id=ids(values)) for values in argvalues]

@@ -1,5 +1,11 @@
 # Changelog
 
+## 17.1.0 (2026-08-03)
+
+- feat(catalog): add dataset and dataservices harvest.last_update ([#3885](https://github.com/opendatateam/udata/pull/3885))
+- feat(sitemap): add task for sitemap generation ([#3830](https://github.com/opendatateam/udata/pull/3830))
+
+
 ## 17.0.8 (2026-07-30)
 
 - chore(deps): lock file maintenance ([#3865](https://github.com/opendatateam/udata/pull/3865))

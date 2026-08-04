@@ -8,7 +8,7 @@ from udata.api import API, api, fields
 from udata.core.dataset.permissions import OwnableReadPermission
 from udata.core.organization.models import Organization
 from udata.core.owned import Owned
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.models import Activity
 
 log = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ activity_fields = api.model(
     "Activity",
     {
         "actor": fields.Nested(
-            user_ref_fields, description="The user who performed the action", readonly=True
+            User.__ref_fields__, description="The user who performed the action", readonly=True
         ),
         "organization": fields.Nested(
             Organization.__ref_fields__,
