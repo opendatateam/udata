@@ -324,10 +324,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
         # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
-        # expose read as a `Nested` so X-Fields masks can traverse the reference. Without
-        # this, the field is exposed as a `Raw`-based GenericField (with choices) or as a
-        # `lazy_reference` Nested (without choices) — both fail on resolved documents that
-        # don't have a `document_type` attribute.
+        # expose read as a `Nested` so X-Fields masks can traverse the reference (e.g.
+        # `element{id}`), which a `Raw`-based GenericField does not allow. It also opts out
+        # of the `constructor` above, which reads `document_type` — an attribute the
+        # resolved document stored here does not have, unlike a `LazyReference`.
+        # `choices` restricts the referenced classes and has no say in either.
         shared_nested_fields = info.get("nested_fields")
         if shared_nested_fields is not None:
 
