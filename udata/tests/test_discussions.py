@@ -1762,10 +1762,10 @@ class DiscussionExternalNotificationTest(APITestCase):
         assert len(mails) == 1
 
     def test_edit_discussion_ignores_extras_in_payload(self):
-        # Guard-rail: `DiscussionEditForm` only declares `title`, so an
-        # `extras` field in the PUT payload must be silently discarded.
-        # If someone later adds `extras` to the edit form without porting
-        # the allow-list validation, this test will fail.
+        # Guard-rail: the PUT handler only forwards `title` to `patch_and_save`, so an
+        # `extras` field in the payload must be silently discarded. If someone later
+        # forwards the whole payload without porting the allow-list validation, this
+        # test will fail.
         user = self.login()
         discussion = Discussion.objects.create(
             subject=DatasetFactory(owner=user),

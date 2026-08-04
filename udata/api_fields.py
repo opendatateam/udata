@@ -319,6 +319,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
+        # Write always takes a reference; so does read unless a branch below overrides it.
+        def constructor(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
+
         # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
         # expose read as a `Nested` so X-Fields masks can traverse the reference. Without
         # this, the field is exposed as a `Raw`-based GenericField (with choices) or as a
@@ -343,13 +347,6 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
             def constructor_read(**kwargs):
                 return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
-        else:
-
-            def constructor_read(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
-
-        def constructor_write(**kwargs):
-            return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.

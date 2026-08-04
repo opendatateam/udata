@@ -58,23 +58,34 @@ discussion_permissions_fields = api.model(
 class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
-    id = field(AutoUUIDField(), readonly=True)
-    content = field(StringField(required=True, max_length=COMMENT_SIZE_LIMIT))
+    id = field(AutoUUIDField(), readonly=True, description="The message identifier")
+    content = field(
+        StringField(required=True, max_length=COMMENT_SIZE_LIMIT),
+        description="The message body",
+    )
     posted_on = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
+        description="The message posting date",
     )
     posted_by = field(
         ReferenceField("User"),
         readonly=True,
         allow_null=True,
+        description="The message author",
     )
     posted_by_organization = field(
         ReferenceField("Organization"),
         readonly=True,
         allow_null=True,
+        description="The organization to show to users",
     )
-    last_modified_at = field(DateTimeField(), readonly=True, allow_null=True)
+    last_modified_at = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="The message last edit date",
+    )
 
     @property
     @field(nested_fields=message_permissions_fields)
@@ -317,10 +328,6 @@ class Discussion(SpamMixin, Linkable, Document):
             "close": DiscussionAuthorOrSubjectOwnerPermission(self),
         }
 
-    @field(description="The discussion API URI")
-    def url(self):
-        return self.self_api_url()
-
     @property
     def closed_by_name(self):
         if self.closed_by_organization:
@@ -374,6 +381,7 @@ class Discussion(SpamMixin, Linkable, Document):
     def self_web_url(self, **kwargs):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
 
+    @field(rename="url", description="The discussion API URI")
     def self_api_url(self, **kwargs):
         return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
 
