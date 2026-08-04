@@ -1,11 +1,12 @@
 import os
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
 
 import pytest
+from _pytest.mark import ParameterSet
 from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
@@ -242,41 +243,23 @@ def security_gettext(string):
     return FsDomain(current_app).gettext(string)
 
 
-def argvalues(
-    *argvalues, ids: int | Callable[..., object] | None = None
-) -> Iterable[pytest.mark.ParameterSet]:
+def argvalues(*argvalues: tuple, ids: Callable[[tuple], str] | None = None) -> list[ParameterSet]:
     """
     `pytest.mark.parametrize` helper with nicer support for parameter-set ids.
 
-    :param argvalues: same as `pytest.mark.parametrize`, or `(*argvalues, id)` when `ids` is None
+    :param argvalues: parameter-set tuples, each one ending with its `id` when `ids` is None
 
-    :param ids: set parameter-set `id` from its `argvalues` tuple
-       - None: use last value in `argvalues`, removing it from tuple
-       - integer: use value at given position in `argvalues`
-       - callable: use return value of `ids(argvalues)`
+    :param ids: build each parameter-set `id` from its whole values tuple. Unlike the `ids`
+       callable of `pytest.mark.parametrize`, which is called on each value separately.
 
     Examples::
-      @parameterize("a, b", argvalues((1, 2, "x"), (3, 4, "y")))
-      => @parameterize("a, b", [(1, 2), (3, 4)], ids=["x", "y"])
+      @pytest.mark.parametrize("a, b", argvalues((1, 2, "x"), (3, 4, "y")))
+      => @pytest.mark.parametrize("a, b", [(1, 2), (3, 4)], ids=["x", "y"])
 
-      @parametrize("a, b", argvalues((1, 2), (3, 4), ids=0))
-      => @parameterize("a, b", [(1, 2), (3, 4)], ids=[1, 3])
-
-      @parametrize("a, b", argvalues((1, 2), (3, 4), ids=sum))
-      => @parameterize("a, b", [(1, 2), (3, 4)], ids=[3, 7])
+      @pytest.mark.parametrize("a, b", argvalues((1, 2), (3, 4), ids=lambda v: f"sum-{sum(v)}"))
+      => @pytest.mark.parametrize("a, b", [(1, 2), (3, 4)], ids=["sum-3", "sum-7"])
     """
-    if (
-        len(argvalues) == 1
-        and not isinstance(argvalues[0], tuple)
-        and isinstance(argvalues[0], Iterable)
-    ):
-        argvalues = list(argvalues[0])
+    if ids is None:
+        return [pytest.param(*values, id=param_id) for *values, param_id in argvalues]
 
-    if isinstance(ids, int):
-        _argvalues = [(*v, v[ids]) for v in argvalues]
-    elif isinstance(ids, Callable):
-        _argvalues = [(*v, ids(v)) for v in argvalues]
-    else:
-        _argvalues = argvalues
-
-    return [pytest.param(*values, id=name) for *values, name in _argvalues]
+    return [pytest.param(*values, id=ids(values)) for values in argvalues]

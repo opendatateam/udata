@@ -1079,7 +1079,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         argvalues(
             ("dcat", "http://www.w3.org/ns/dcat#"),
             ("geodcatap", "http://data.europa.eu/930/"),
-            ids=0,
+            ids=lambda values: values[0],
         ),
     )
     def test_geonetwork(self, rmock, schema_name, schema_uri):
