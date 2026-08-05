@@ -97,7 +97,7 @@ class DiscussionAPI(API):
             api.abort(403, "Can't add comments on a closed discussion")
 
         data = api.json_payload()
-        close = boolean(data["close"]) if data.get("close") is not None else False
+        close = boolean(data.get("close") or False)
         comment = data.get("comment")
         # `comment` doesn't go through `patch()` here, so apply its blank-is-absent rule
         # before deciding whether the request carries anything.
@@ -241,22 +241,25 @@ class DiscussionsAPI(API):
     @api.secure
     @api.doc("create_discussion")
     @api.expect(start_discussion_fields)
-    @api.marshal_with(Discussion.__read_fields__)
+    @api.marshal_with(Discussion.__read_fields__, code=201)
     def post(self):
         """Create a new Discussion"""
         data = api.json_payload()
 
         # `comment` lives in the top-level payload but ends up inside the first Message,
         # which is why we cannot rely on Discussion's `patch()` alone for it. The message
-        # goes through `patch()` too, so that an empty comment is rejected here like it is
+        # goes through `patch()` too, so that a blank comment is emptied here like it is
         # on the other endpoints.
-        discussion = patch(Discussion(), data)
-        discussion.user = current_user._get_current_object()
-        message = Message(
-            posted_by=current_user.id,
-            posted_by_organization=discussion.organization,
-        )
-        discussion.discussion = [patch(message, {"content": data.get("comment")})]
+        discussion = patch(Discussion(user=current_user.id), data)
+        discussion.discussion = [
+            patch(
+                Message(
+                    posted_by=current_user.id,
+                    posted_by_organization=discussion.organization,
+                ),
+                {"content": data.get("comment")},
+            )
+        ]
 
         discussion.save()
         discussion.signal_new()
