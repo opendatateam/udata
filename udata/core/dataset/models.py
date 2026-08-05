@@ -1312,9 +1312,25 @@ class ResourceSchema(object):
         return None
 
 
+def get_dataset_by_resource_id(id):
+    """Fetch the dataset holding a resource, given the resource UUID
+
+    Resource ids are resolved globally (see the `/datasets/r/<id>` permalink), but nothing
+    enforces their uniqueness across datasets. An ambiguous id resolves to nothing rather
+    than letting an arbitrary dataset answer for another one's resource.
+    """
+    datasets = list(Dataset.objects(resources__id=id).limit(2))
+    if len(datasets) > 1:
+        # Corrupted data that no API path should be able to produce: report it instead of
+        # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
+        log.error(f"Resource #{id} is duplicated across several datasets")
+        return None
+    return datasets[0] if datasets else None
+
+
 def get_resource(id):
     """Fetch a resource given its UUID"""
-    dataset = Dataset.objects(resources__id=id).first()
+    dataset = get_dataset_by_resource_id(id)
     if dataset:
         return get_by(dataset.resources, id=id)
     else:

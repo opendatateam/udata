@@ -543,7 +543,8 @@ class NestedModelList(fields.FieldList):
 
     def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        self.initial_data = data
+        # `data` is `unset_value` when the form is built without an instance
+        self.initial_data = data or []
         self.is_list_data = formdata and self.name in formdata
         self.is_dict_data = formdata and any(k.startswith(self.prefix) for k in formdata)
         self.has_data = self.is_list_data or self.is_dict_data
@@ -599,16 +600,26 @@ class NestedModelList(fields.FieldList):
             data = None
             if hasattr(self.nested_model, "id") and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
-                # `initial_data` is unset when there is no instance yet, and the submitted id
-                # may not match any existing entry: there is then nothing to prefill and the
-                # entry is treated as a new one, keeping the submitted id.
-                data = get_by(self.initial_data or [], id=id)
+                data = get_by(self.initial_data, id=id)
                 if data is not None:
                     initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
 
                     for key, value in initial.items():
                         if key not in formdata:
                             formdata[key] = value
+                else:
+                    try:
+                        self.nested_model.id.validate(id)
+                    except MongoValidationError:
+                        # Keep the malformed id so the nested form rejects the whole payload
+                        pass
+                    else:
+                        # The id is well-formed but matches no existing entry, e.g. a client
+                        # sending back an entry deleted in the meantime. Drop it so the entry
+                        # is created with a server-generated id: resource ids are resolved
+                        # globally by `/datasets/r/<id>`, so honouring a client-chosen one
+                        # would let anyone squat another dataset's permalink.
+                        del formdata[idkey]
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 

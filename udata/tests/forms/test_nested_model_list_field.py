@@ -238,8 +238,9 @@ class NestedModelListFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertEqual(len(fake.nested), 1)
-        self.assertEqual(str(fake.nested[0].id), unknown_id)
         self.assertEqual(fake.nested[0].name, name)
+        self.assertIsNotNone(fake.nested[0].id)
+        self.assertNotEqual(str(fake.nested[0].id), unknown_id)
 
     def test_with_id_without_instance(self):
         fake = Fake()
@@ -253,8 +254,37 @@ class NestedModelListFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertEqual(len(fake.nested), 1)
-        self.assertEqual(str(fake.nested[0].id), unknown_id)
         self.assertEqual(fake.nested[0].name, name)
+        self.assertIsNotNone(fake.nested[0].id)
+        self.assertNotEqual(str(fake.nested[0].id), unknown_id)
+
+    def test_with_malformed_id(self):
+        """A malformed id is a client error, not an entry to create"""
+        fake = Fake.objects.create(nested=[Nested(name=faker.name())])
+        form = self.factory({"nested": [{"id": "not-an-uuid", "name": faker.name()}]}, fake)
+
+        self.assertFalse(form.validate())
+        self.assertIn("nested", form.errors)
+
+    def test_with_unknown_id_still_resolves_the_known_ones(self):
+        known = Nested(name=faker.name())
+        fake = Fake.objects.create(nested=[known])
+        unknown_id = str(uuid4())
+        name = faker.name()
+        form = self.factory(
+            {"nested": [{"id": str(known.id)}, {"id": unknown_id, "name": name}]}, fake
+        )
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 2)
+        self.assertEqual(fake.nested[0].id, known.id)
+        self.assertEqual(fake.nested[0].name, known.name)
+        self.assertEqual(fake.nested[1].name, name)
+        self.assertNotEqual(str(fake.nested[1].id), unknown_id)
 
     def test_with_non_submitted_initial_elements(self):
         fake = Fake.objects.create(
