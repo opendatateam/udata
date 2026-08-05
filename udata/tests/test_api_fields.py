@@ -543,6 +543,18 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         assert embedded.status is None
 
 
+class PatchBlankStringTest(PytestOnlyDBTestCase):
+    def test_blank_string_is_stored_as_none(self) -> None:
+        """A string field only made of whitespace holds no value, so `required=True`
+        rejects it at save() instead of storing spaces."""
+        for value in ["", "   ", "\n\t "]:
+            assert patch(Fake(), {"title": value}).title is None
+
+    def test_surrounding_whitespace_is_kept(self) -> None:
+        """Only fully blank strings are emptied: the value itself is never trimmed."""
+        assert patch(Fake(), {"title": "  a title  "}).title == "  a title  "
+
+
 class HrefFieldTest(PytestOnlyDBTestCase):
     def test_href_total_and_extra(self, app) -> None:
         """`href_total` provides the link total (instead of len(value)) and

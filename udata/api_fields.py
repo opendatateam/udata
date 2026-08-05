@@ -958,7 +958,13 @@ def patch(obj: _T, request) -> _T:
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+            # A blank string is an absent value, otherwise `required=True` happily
+            # stores a title or a comment made of spaces.
+            if (
+                isinstance(model_attribute, mongo_fields.StringField)
+                and isinstance(value, str)
+                and not value.strip()
+            ):
                 value = None
 
             if hasattr(model_attribute, "from_input"):

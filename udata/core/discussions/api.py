@@ -99,6 +99,10 @@ class DiscussionAPI(API):
         data = api.json_payload()
         close = boolean(data["close"]) if data.get("close") is not None else False
         comment = data.get("comment")
+        # `comment` doesn't go through `patch()` here, so apply its blank-is-absent rule
+        # before deciding whether the request carries anything.
+        if isinstance(comment, str) and not comment.strip():
+            comment = None
 
         if not close and not comment:
             api.abort(

@@ -442,19 +442,39 @@ class DiscussionsTest(APITestCase):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
 
-        response = self.post(
-            url_for("api.discussions"),
-            {
-                "title": "test title",
-                "comment": "",
-                "subject": {
-                    "class": "Dataset",
-                    "id": dataset.id,
+        for comment in ["", "   "]:
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test title",
+                    "comment": comment,
+                    "subject": {
+                        "class": "Dataset",
+                        "id": dataset.id,
+                    },
                 },
-            },
-        )
-        self.assertStatus(response, 400)
-        self.assertEqual(Discussion.objects.count(), 0)
+            )
+            self.assertStatus(response, 400)
+            self.assertEqual(Discussion.objects.count(), 0)
+
+    def test_new_discussion_empty_title(self):
+        self.login()
+        dataset = Dataset.objects.create(title="Test dataset")
+
+        for title in ["", "   "]:
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": title,
+                    "comment": "bla bla",
+                    "subject": {
+                        "class": "Dataset",
+                        "id": dataset.id,
+                    },
+                },
+            )
+            self.assertStatus(response, 400)
+            self.assertEqual(Discussion.objects.count(), 0)
 
     def test_new_discussion_missing_title(self):
         self.login()
@@ -892,6 +912,32 @@ class DiscussionsTest(APITestCase):
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
 
+    def test_add_empty_comment_to_discussion(self):
+        """A blank comment is not a comment: alone it is a 400, and it never adds a message."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        for comment in ["", "   "]:
+            response = self.post(url_for("api.discussion", id=discussion.id), {"comment": comment})
+            self.assert400(response)
+
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id), {"comment": "   ", "close": True}
+        )
+        self.assert200(response)
+
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+        assert discussion.closed is not None
+
     def test_comment_size_limit(self):
         user = self.login()
         dataset = Dataset.objects.create(title="Test dataset", owner=user)
@@ -1271,8 +1317,9 @@ class DiscussionsTest(APITestCase):
             subject=dataset, user=user, title="test discussion", discussion=[message]
         )
 
-        response = self.put(url_for("api.discussion", id=discussion.id), {"title": ""})
-        self.assert400(response)
+        for title in ["", "   "]:
+            response = self.put(url_for("api.discussion", id=discussion.id), {"title": title})
+            self.assert400(response)
 
         response = self.put(url_for("api.discussion", id=discussion.id), {})
         self.assert400(response)
@@ -1364,11 +1411,15 @@ class DiscussionsTest(APITestCase):
             subject=dataset, user=user, title="test discussion", discussion=[message]
         )
 
-        response = self.put(
-            url_for("api.discussion_comment", id=discussion.id, cidx=0),
-            {"comment": ""},
-        )
-        self.assert400(response)
+        for comment in ["", "   "]:
+            response = self.put(
+                url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                {"comment": comment},
+            )
+            self.assert400(response)
+
+        discussion.reload()
+        assert discussion.discussion[0].content == "bla bla"
 
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
