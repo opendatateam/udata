@@ -1,5 +1,17 @@
 # Changelog
 
+## 17.2.0 (2026-08-05)
+
+- feat: migrate users to api fields ([#3777](https://github.com/opendatateam/udata/pull/3777))
+- feat: SSRF hardened http client ([#3877](https://github.com/opendatateam/udata/pull/3877))
+- fix: fall back to the default locale on an invalid lang query parameter ([#3886](https://github.com/opendatateam/udata/pull/3886))
+- fix: infinite recursion on reuse endpoints ([#3892](https://github.com/opendatateam/udata/pull/3892))
+- fix: restrict Discussion.subject to models supporting discussions ([#3884](https://github.com/opendatateam/udata/pull/3884))
+- fix: return 400 instead of 500 on malformed member assignments payload ([#3887](https://github.com/opendatateam/udata/pull/3887))
+- fix: return 404 instead of 500 when updating a non-member ([#3888](https://github.com/opendatateam/udata/pull/3888))
+- refactor(test): extract parametrize_with_ids helper ([#3889](https://github.com/opendatateam/udata/pull/3889))
+
+
 ## 17.1.0 (2026-08-03)
 
 - feat(catalog): add dataset and dataservices harvest.last_update ([#3885](https://github.com/opendatateam/udata/pull/3885))
