@@ -125,14 +125,10 @@ def store_resource(csvfile, model, dataset):
     prefix = "/".join((dataset.slug, timestr))
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
-        stored_filename = storage.save(infile, prefix=prefix, filename=filename)
-    r_info = storage.metadata(stored_filename)
-    r_info["last_modified_internal"] = r_info.pop("modified")
-    r_info["fs_filename"] = stored_filename
-    checksum = r_info.pop("checksum")
-    algo, checksum = checksum.split(":", 1)
-    r_info["format"] = storages.utils.extension(stored_filename)
-    r_info["checksum"] = Checksum(type=algo, value=checksum)
+        stream = storages.utils.MeasuredStream(infile)
+        stored_filename = storage.save(stream, prefix=prefix, filename=filename)
+    r_info = storages.utils.stored_file_infos(storage, stored_filename, stream)
+    r_info["checksum"] = Checksum(type="sha1", value=r_info.pop("sha1"))
     r_info["filesize"] = r_info.pop("size")
     del r_info["filename"]
     r_info["title"] = filename
