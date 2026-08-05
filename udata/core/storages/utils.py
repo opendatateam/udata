@@ -2,11 +2,15 @@ import hashlib
 import mimetypes
 import os
 import zlib
+from datetime import UTC, datetime
 
 from flask import current_app
 from slugify import Slugify
 
 CHUNK_SIZE = 2**16
+
+# What a file whose extension tells us nothing is served as.
+DEFAULT_MIME = "application/octet-stream"
 
 
 slugify = Slugify(separator="-", to_lower=True, safe_chars=".")
@@ -80,3 +84,46 @@ def extension(filename):
 
 def normalize(filename):
     return slugify(filename)
+
+
+class MeasuredStream:
+    """Wrap an upload stream to digest and size its content as it is read.
+
+    The stream is handed to the storage, so the digest and the length describe
+    exactly what was written, without a second pass over the file.
+    """
+
+    def __init__(self, stream):
+        self.stream = stream
+        self.hasher = hashlib.sha1()
+        self.size = 0
+
+    def read(self, size=-1):
+        data = self.stream.read(size)
+        self.hasher.update(data)
+        self.size += len(data)
+        return data
+
+    @property
+    def sha1(self):
+        return self.hasher.hexdigest()
+
+
+def stored_file_infos(storage, fs_filename, stream: MeasuredStream) -> dict:
+    """Describe a file that was just written to `storage` out of `stream`.
+
+    Everything is derived from the upload itself rather than read back from
+    the backend: an S3 ETag is not a digest of the content once an object is
+    uploaded in several parts, and the stored content type is only ever what
+    the backend guessed when writing.
+    """
+    return {
+        "url": storage.url(fs_filename, external=True),
+        "fs_filename": fs_filename,
+        "filename": os.path.basename(fs_filename),
+        "size": stream.size,
+        "sha1": stream.sha1,
+        "mime": mime(fs_filename) or DEFAULT_MIME,
+        "format": extension(fs_filename),
+        "last_modified_internal": datetime.now(UTC),
+    }
