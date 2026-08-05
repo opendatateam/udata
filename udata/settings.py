@@ -349,7 +349,7 @@ class Defaults(object):
     HARVEST_GRAPHS_S3_BUCKET = None  # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
     HARVEST_GRAPHS_S3_FILENAME_PREFIX = ""  # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
 
-    HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/refs/heads/geodcat-ap-2.0.0/iso-19139-to-dcat-ap.xsl"
+    HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/refs/heads/3.x-datagouv/iso-19139-to-dcat-ap.xsl"
 
     # If set, harvest emit activities associated with this user as actor
     # It should be a dedicated service account
