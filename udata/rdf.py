@@ -20,6 +20,7 @@ from rdflib.namespace import (
     XSD,
     Namespace,
     NamespaceManager,
+    split_uri,
 )
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
@@ -33,6 +34,7 @@ from udata.harvest.filters import normalize_tag
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
+from udata.utils import uniquify
 
 log = logging.getLogger(__name__)
 
@@ -162,6 +164,10 @@ CONTACT_POINT_ENTITY_TO_ROLE = {
 }
 
 
+def localname(uriref: URIRef) -> str:
+    return split_uri(uriref)[1]
+
+
 def guess_format(string):
     """Guess format given an extension or a mime-type"""
     if string in ACCEPTED_MIME_TYPES:
@@ -251,13 +257,13 @@ def serialize_value(value, unwrap: list[URIRef] | None = None):
         return value.identifier.toPython()
 
 
-def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> set[str]:
-    """Returns a set of serialized values for a predicate from a RdfResource"""
-    return {
+def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> list[str]:
+    """Returns a list of unique serialized values for a predicate from a RdfResource"""
+    return uniquify(
         value
-        for info in resource.objects(predicate=predicate)
-        if (value := serialize_value(info, unwrap=unwrap))
-    }
+        for obj in resource.objects(predicate=predicate)
+        if (value := serialize_value(obj, unwrap=unwrap))
+    )
 
 
 def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
