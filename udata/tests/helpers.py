@@ -19,6 +19,11 @@ requires_search_service = pytest.mark.skipif(
     reason="Set UDATA_TEST_SEARCH_INTEGRATION=1 to run search integration tests",
 )
 
+requires_s3_service = pytest.mark.skipif(
+    not os.environ.get("UDATA_TEST_S3_INTEGRATION"),
+    reason="Set UDATA_TEST_S3_INTEGRATION=1 to run S3 storage integration tests",
+)
+
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.
     """Lax date comparison, avoid comparing milliseconds and seconds."""
