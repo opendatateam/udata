@@ -221,6 +221,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(datasets) == 1
         assert datasets[0].title == "DCE – Bassin Artois-Picardie - Etat global"
 
+        # the node is typed both Dataset and DatasetSeries, but must only be harvested once
+        source.reload()
+        assert len(source.get_last_job().items) == 1
+
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
 
