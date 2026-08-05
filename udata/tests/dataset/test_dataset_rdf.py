@@ -2149,7 +2149,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             ]
         ],
     )
-    def test_license_from_rdf(self, xml: str, expected_licenses: set[str]):
+    def test_license_from_rdf(self, xml: str, expected_licenses: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
@@ -2253,7 +2253,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             ]
         ],
     )
-    def test_access_rights_from_rdf(self, xml: str, expected_access_rights: set[str]):
+    def test_access_rights_from_rdf(self, xml: str, expected_access_rights: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
@@ -2326,7 +2326,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             ]
         ],
     )
-    def test_rights_from_rdf(self, xml: str, expected_rights: set[str]):
+    def test_rights_from_rdf(self, xml: str, expected_rights: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
@@ -2450,7 +2450,7 @@ class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
             ]
         ],
     )
-    def test_provenances_from_rdf(self, xml: str, expected_provenances: set[str]):
+    def test_provenances_from_rdf(self, xml: str, expected_provenances: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))

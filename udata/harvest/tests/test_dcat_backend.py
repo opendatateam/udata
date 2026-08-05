@@ -1604,7 +1604,6 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         </csw:GetRecordsResponse>
         """
         mock_xslt(rmock)
-        rmock.get("http://data.example.com/datasets/dataset-1", status_code=200)
         rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
         rmock.post(rmock.ANY, text=xml)
 

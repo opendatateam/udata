@@ -9,7 +9,6 @@ from collections.abc import Collection
 from datetime import UTC, date, datetime
 from fractions import Fraction
 from itertools import chain
-from typing import TypeVar
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -148,8 +147,6 @@ QUDT_TO_UDATA = {
     QUDT.KiloM: DistanceUom.KILOMETER,
     QUDT.M: DistanceUom.METER,
 }
-
-DatasetOrResource = TypeVar("DatasetOrResource", bound=Dataset | Resource)
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -806,7 +803,7 @@ def inspire_category_from_rights(rights: Collection[str]) -> InspireLimitationCa
     return None
 
 
-def set_dcat_extra(obj: DatasetOrResource, property: URIRef | str, value: str | Collection):
+def set_dcat_extra(obj: Dataset | Resource, property: URIRef | str, value: str | Collection):
     key = localname(property) if isinstance(property, URIRef) else property
     if not isinstance(value, str):
         value = list(value)
@@ -816,13 +813,15 @@ def set_dcat_extra(obj: DatasetOrResource, property: URIRef | str, value: str | 
     }
 
 
-def get_dcat_extra(obj: DatasetOrResource, property: URIRef | str):
+def get_dcat_extra(obj: Dataset | Resource, property: URIRef | str) -> str | list | None:
     key = localname(property) if isinstance(property, URIRef) else property
     if dcat := obj.extras.get("dcat"):
         return dcat.get(key)
 
 
-def get_unanimous_dcat_extra(resources: list[Resource], property: URIRef | str):
+def get_unanimous_dcat_extra(
+    resources: list[Resource], property: URIRef | str
+) -> str | list | None:
     if not resources:
         return None
     key = localname(property) if isinstance(property, URIRef) else property
@@ -1007,7 +1006,7 @@ def dataset_from_rdf(
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    # dataset.extra.dcat.rights is set from (in order, first match wins):
+    # dataset.extras["dcat"]["rights"] is set from (in order, first match wins):
     # 1. Dataset dct:rights metadata.
     # 2. Distributions dct:rights metadata, but only if all distributions carry the same metadata.
     #    This heuristic is needed to "reverse" the ISO-to-DCAT conversion from SEMIC, which moves
@@ -1016,7 +1015,7 @@ def dataset_from_rdf(
     if rights:
         set_dcat_extra(dataset, DCT.rights, rights)
 
-    # same heuristic as dataset.extra.dcat.rights above
+    # same heuristic as dataset.extras["dcat"]["rights"] above
     access_rights = (
         access_rights_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.accessRights) or []
     )
@@ -1028,7 +1027,7 @@ def dataset_from_rdf(
         dataset.access_type = AccessType.RESTRICTED
         dataset.access_type_reason_category = inspire_category
 
-    # same heuristic as dataset.extra.dcat.rights above
+    # same heuristic as dataset.extras["dcat"]["rights"] above
     licenses = licenses_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.license) or []
     if licenses:
         set_dcat_extra(dataset, DCT.license, licenses)
@@ -1036,8 +1035,8 @@ def dataset_from_rdf(
     # dataset.license is set from (in order, first match wins):
     # 1. Dataset dct:license.
     # 2. Dataset dct:rights (SEMIC outputs non-URI licenses as rights).
-    # 3. Distributions dct:license (contrary to dataset.extra.dcat.license, not all distributions
-    #    have to carry the same metadata).
+    # 3. Distributions dct:license (contrary to dataset.extras["dcat"]["license"], not all
+    #    distributions have to carry the same metadata).
     default_license = dataset.license or License.default()
     resources_licenses = uniquify(
         license
