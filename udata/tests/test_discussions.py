@@ -912,8 +912,8 @@ class DiscussionsTest(APITestCase):
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
 
-    def test_add_empty_comment_to_discussion(self):
-        """A blank comment is not a comment: alone it is a 400, and it never adds a message."""
+    def test_comment_discussion_without_comment_nor_close(self):
+        """Nothing to post and nothing to close is a 400, whatever shape the emptiness takes."""
         user = self.login()
         dataset = DatasetFactory()
         discussion = DiscussionFactory(
@@ -922,12 +922,23 @@ class DiscussionsTest(APITestCase):
             discussion=[Message(content="bla bla", posted_by=user)],
         )
 
-        for comment in ["", "   "]:
-            response = self.post(url_for("api.discussion", id=discussion.id), {"comment": comment})
+        for payload in [{}, {"close": False}, {"comment": ""}, {"comment": "   "}]:
+            response = self.post(url_for("api.discussion", id=discussion.id), payload)
             self.assert400(response)
 
         discussion.reload()
         assert len(discussion.discussion) == 1
+        assert discussion.closed is None
+
+    def test_close_discussion_with_a_blank_comment(self):
+        """A blank comment alongside `close` closes the discussion without adding a message."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
 
         response = self.post(
             url_for("api.discussion", id=discussion.id), {"comment": "   ", "close": True}
