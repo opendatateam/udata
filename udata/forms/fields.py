@@ -596,17 +596,19 @@ class NestedModelList(fields.FieldList):
             idkey = basekey.format("id")
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
+            data = None
             if hasattr(self.nested_model, "id") and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
-                data = get_by(self.initial_data, id=id)
+                # `initial_data` is unset when there is no instance yet, and the submitted id
+                # may not match any existing entry: there is then nothing to prefill and the
+                # entry is treated as a new one, keeping the submitted id.
+                data = get_by(self.initial_data or [], id=id)
+                if data is not None:
+                    initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
 
-                initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
-
-                for key, value in initial.items():
-                    if key not in formdata:
-                        formdata[key] = value
-            else:
-                data = None
+                    for key, value in initial.items():
+                        if key not in formdata:
+                            formdata[key] = value
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 

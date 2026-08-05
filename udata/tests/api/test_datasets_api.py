@@ -893,6 +893,29 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), initial_length + 1)
 
+    def test_dataset_api_update_with_resource_unknown_id(self):
+        """A resource submitted with an id matching nothing should be added as a new one
+
+        Regression test: it used to crash with a 500 while looking for the initial
+        values to prefill the resource with (e.g. a client sending back a resource
+        deleted in the meantime).
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, nb_resources=1)
+        data = dataset.to_dict()
+        unknown_id = str(uuid4())
+        resource_data = ResourceFactory.as_dict()
+        resource_data["id"] = unknown_id
+        data["resources"].append(resource_data)
+
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual(len(dataset.resources), 2)
+        self.assertEqual(str(dataset.resources[1].id), unknown_id)
+        self.assertEqual(dataset.resources[1].title, resource_data["title"])
+
     def test_dataset_api_update_private(self):
         user = self.login()
         dataset = HiddenDatasetFactory(owner=user)

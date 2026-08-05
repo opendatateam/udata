@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import DictField, EmbeddedDocumentField, ListField, StringField
 from werkzeug.datastructures import MultiDict
@@ -223,6 +225,36 @@ class NestedModelListFieldTest(TestCase):
         for idx, id in enumerate(order):
             self.assertEqual(fake.nested[idx].id, id)
         self.assertIsNotNone(fake.nested[2].id)
+
+    def test_with_unknown_id_on_existing_instance(self):
+        fake = Fake.objects.create(nested=[Nested(name=faker.name())])
+        unknown_id = str(uuid4())
+        name = faker.name()
+        form = self.factory({"nested": [{"id": unknown_id, "name": name}]}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 1)
+        self.assertEqual(str(fake.nested[0].id), unknown_id)
+        self.assertEqual(fake.nested[0].name, name)
+
+    def test_with_id_without_instance(self):
+        fake = Fake()
+        unknown_id = str(uuid4())
+        name = faker.name()
+        form = self.factory({"nested": [{"id": unknown_id, "name": name}]})
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 1)
+        self.assertEqual(str(fake.nested[0].id), unknown_id)
+        self.assertEqual(fake.nested[0].name, name)
 
     def test_with_non_submitted_initial_elements(self):
         fake = Fake.objects.create(
