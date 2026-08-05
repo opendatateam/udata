@@ -27,6 +27,11 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
+      - image: minio/minio
+        environment:
+          MINIO_ROOT_USER: udata
+          MINIO_ROOT_PASSWORD: udata-secret
+        command: ["server", "/data"]
       - image: elasticsearch:<< parameters.elasticsearch-version >>
         environment:
           discovery.type: single-node
@@ -42,6 +47,10 @@ jobs:
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
+      UDATA_TEST_S3_INTEGRATION: "1"
+      UDATA_TEST_S3_ENDPOINT: "http://localhost:9000"
+      UDATA_TEST_S3_ACCESS_KEY: "udata"
+      UDATA_TEST_S3_SECRET_KEY: "udata-secret"
     steps:
       - checkout
       - run:
@@ -90,6 +99,19 @@ jobs:
               sleep 2
             done
             echo "Elasticsearch failed to start"
+            exit 1
+      - run:
+          name: Wait for MinIO
+          command: |
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:9000/minio/health/live > /dev/null; then
+                echo "MinIO is ready"
+                exit 0
+              fi
+              echo "Waiting for MinIO... ($i/30)"
+              sleep 1
+            done
+            echo "MinIO failed to start"
             exit 1
       - run:
           name: Initialize Elasticsearch indices

@@ -1,4 +1,11 @@
+import os
+from uuid import uuid4
+
 import pytest
+
+# The storages the resources migration is about. The others keep their own
+# tests on the local backend.
+S3_TESTED_STORAGES = ("resources", "chunks")
 
 
 def pytest_configure(config):
@@ -52,3 +59,36 @@ def instance_path(app, tmpdir):
     storages.init_app(app)
 
     return tmpdir
+
+
+@pytest.fixture
+def s3_storages(app, instance_path):
+    """Store resources and chunks on S3 instead of the local filesystem.
+
+    Mirrors `instance_path`, which forces every storage to the local backend:
+    both rewrite the configuration then reconfigure the storages. Requires a
+    running S3 service, so tests using it must be marked with
+    `requires_s3_service` (see `udata.tests.helpers`).
+    """
+    from udata.core import storages
+
+    app.config["FS_S3_ENDPOINT"] = os.environ["UDATA_TEST_S3_ENDPOINT"]
+    app.config["FS_S3_REGION"] = os.environ.get("UDATA_TEST_S3_REGION", "us-east-1")
+    app.config["FS_S3_ACCESS_KEY"] = os.environ["UDATA_TEST_S3_ACCESS_KEY"]
+    app.config["FS_S3_SECRET_KEY"] = os.environ["UDATA_TEST_S3_SECRET_KEY"]
+
+    # A bucket set per test: the suite runs on parallel xdist workers, and the
+    # backend never removes the buckets it creates.
+    suffix = uuid4().hex
+    for name in S3_TESTED_STORAGES:
+        app.config[f"{name.upper()}_FS_BACKEND"] = "s3"
+        app.config[f"{name.upper()}_FS_BUCKET_NAME"] = f"udata-test-{name}-{suffix}"
+
+    storages.init_app(app)
+
+    yield
+
+    for name in S3_TESTED_STORAGES:
+        bucket = getattr(storages, name).backend.bucket
+        bucket.objects.all().delete()
+        bucket.delete()
