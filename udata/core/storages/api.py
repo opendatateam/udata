@@ -1,3 +1,4 @@
+import io
 import os
 from datetime import UTC, datetime
 
@@ -111,25 +112,56 @@ def save_chunk(file, args):
     raise UploadProgress()
 
 
+class ChunksReader(io.RawIOBase):
+    """A read-only stream over the parts of a chunked upload, in order.
+
+    Parts are fetched one at a time so a single chunk sits in memory at any
+    point: the destination storage pulls from this stream instead of being
+    handed the whole reassembled file.
+    """
+
+    def __init__(self, uuid, totalparts):
+        self.uuid = uuid
+        self.totalparts = totalparts
+        self.next_part = 0
+        self.buffer = b""
+
+    def readable(self):
+        return True
+
+    def readinto(self, target):
+        while not self.buffer and self.next_part < self.totalparts:
+            self.buffer = chunks.read(chunk_filename(self.uuid, self.next_part))
+            self.next_part += 1
+
+        size = min(len(target), len(self.buffer))
+        target[:size] = self.buffer[:size]
+        self.buffer = self.buffer[size:]
+        return size
+
+
 def combine_chunks(storage, args, prefix=None):
     """
     Combine a chunked file into a whole file again.
-    Goes through each part, in order,
-    and appends that part's bytes to another destination file.
+    Streams every part, in order, into the destination storage.
     Chunks are stored in the chunks storage.
+
+    Saving (rather than writing to an open file) is what applies the storage
+    checks — the allowed extensions in particular — to chunked uploads too.
     """
     uuid = args["uuid"]
     # Normalize filename including extension
     target = utils.normalize(args["filename"])
-    if prefix:
-        target = os.path.join(prefix, target)
-    with storage.open(target, "wb") as out:
-        for i in range(args["totalparts"]):
-            partname = chunk_filename(uuid, i)
-            out.write(chunks.read(partname))
-            chunks.delete(partname)
+    stream = io.BufferedReader(ChunksReader(uuid, args["totalparts"]))
+
+    fs_filename = storage.save(stream, filename=target, prefix=prefix)
+
+    # Chunks are dropped once the whole file made it to its destination, so a
+    # failed combination can be retried instead of losing the upload.
+    for part in range(args["totalparts"]):
+        chunks.delete(chunk_filename(uuid, part))
     chunks.delete(chunk_filename(uuid, META))
-    return target
+    return fs_filename
 
 
 def handle_upload(storage, prefix=None):

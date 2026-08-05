@@ -1,4 +1,5 @@
 from io import BytesIO
+from uuid import uuid4
 
 import pytest
 from flask import url_for
@@ -78,3 +79,38 @@ class S3ResourceUploadTest(APITestCase):
         resource = dataset.resources[0]
         assert resource.fs_filename in storages.resources
         assert storages.resources.read(resource.fs_filename) == b"aaa"
+
+    def test_chunked_upload_stores_the_combined_file(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        url = url_for("api.upload_new_dataset_resource", dataset=dataset)
+        uuid = str(uuid4())
+        parts = [b"a", b"b", b"c", b"d"]
+
+        for index, part in enumerate(parts):
+            response = self.post(
+                url,
+                {
+                    "file": (BytesIO(part), "blob"),
+                    "uuid": uuid,
+                    "filename": "test.txt",
+                    "partindex": index,
+                    "partbyteoffset": 0,
+                    "totalparts": len(parts),
+                    "chunksize": 1,
+                },
+                json=False,
+            )
+            self.assert200(response)
+
+        response = self.post(
+            url,
+            {"uuid": uuid, "filename": "test.txt", "totalparts": len(parts)},
+            json=False,
+        )
+
+        self.assert201(response)
+        dataset.reload()
+        resource = dataset.resources[0]
+        assert storages.resources.read(resource.fs_filename) == b"abcd"
+        assert list(storages.chunks.list_files()) == []

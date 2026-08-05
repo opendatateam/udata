@@ -2065,6 +2065,48 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
         self.assertEqual(list(storages.chunks.list_files()), [])
 
+    def test_create_with_file_chunks_unauthorized_extension(self):
+        """It should reject a chunked upload whose extension is not allowed"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        uuid = str(uuid4())
+        url = url_for("api.upload_new_dataset_resource", dataset=dataset)
+
+        for i, chunk in enumerate([b"a", b"b"]):
+            response = self.post(
+                url,
+                {
+                    "file": (BytesIO(chunk), "blob"),
+                    "uuid": uuid,
+                    "filename": "test.exe",
+                    "partindex": i,
+                    "partbyteoffset": 0,
+                    "totalfilesize": 2,
+                    "totalparts": 2,
+                    "chunksize": 1,
+                },
+                json=False,
+            )
+            self.assert200(response)
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "test.exe",
+                "totalfilesize": 2,
+                "totalparts": 2,
+            },
+            json=False,
+        )
+
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.resources, [])
+        self.assertEqual(list(storages.resources.list_files()), [])
+
     def test_create_with_file_chunk_bad_size(self):
         """It should reject a chunk whose size does not match chunksize"""
         user = self.login()
