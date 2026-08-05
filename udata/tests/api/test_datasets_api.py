@@ -2899,6 +2899,65 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(list(storages.resources.list_files()), [])
 
 
+@pytest.mark.options(READ_ONLY_MODE=True)
+class ReadOnlyModeAPITest(APITestCase):
+    """Read-only mode must block every endpoint storing a resource file."""
+
+    def setUp(self):
+        self.user = self.login()
+
+    def test_upload_new_dataset_resource(self):
+        dataset = DatasetFactory(owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_upload_dataset_resource(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource], owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_upload_new_community_resource(self):
+        dataset = DatasetFactory(owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_new_community_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_reupload_community_resource(self):
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(owner=self.user), owner=self.user
+        )
+
+        response = self.post(
+            url_for("api.upload_community_resource", community=community_resource),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+
 class ResourcesTypesAPITest(APITestCase):
     def test_resource_types_list(self):
         """It should fetch the resource types list from the API"""
