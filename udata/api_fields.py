@@ -688,7 +688,7 @@ def generate_fields(**kwargs) -> Callable:
 
         searchable: bool = kwargs.pop("searchable", False)
         if searchable:
-            parser.add_argument("q", type=str, location="args")
+            parser.add_argument("q", type=str, location="args", help="The search query")
 
         for filterable in filterables:
             parser.add_argument(
