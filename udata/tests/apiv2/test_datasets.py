@@ -17,6 +17,7 @@ from udata.core.dataset.factories import (
 from udata.core.dataset.models import ResourceMixin
 from udata.core.organization.factories import Member, OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.storages import images
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset
 from udata.tests.api import APITestCase
@@ -109,6 +110,28 @@ class DatasetAPIV2Test(APITestCase):
         with query_counter() as counter:
             DatasetApiParser.parse_filters(Dataset.objects, {"dataservice": str(dataservice.id)})
             assert counter == 1
+
+    def test_filter_by_reuse_does_not_copy_the_image_storage(self):
+        # Regression: mongoengine deep-copies the document's fields when
+        # auto-dereferencing is off, and `Reuse.image` is an ImageField holding
+        # the image storage, hence its backend. On the S3 backend that backend
+        # owns boto3 clients, which recurse until RecursionError when copied.
+        dataset = DatasetFactory(title="Dataset with reuse")
+        reuse = ReuseFactory(datasets=[dataset.id])
+
+        class UncopyableBackend:
+            def __deepcopy__(self, memo):
+                raise AssertionError("the image storage backend must not be copied")
+
+        original_backend = images.backend
+        images.backend = UncopyableBackend()
+        try:
+            response = self.get(url_for("apiv2.datasets", reuse=reuse.id))
+        finally:
+            images.backend = original_backend
+
+        self.assert200(response)
+        assert [d["id"] for d in response.json["data"]] == [str(dataset.id)]
 
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]
