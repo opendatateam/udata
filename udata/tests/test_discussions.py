@@ -266,6 +266,34 @@ class DiscussionsTest(APITestCase):
                 )
             )
 
+    def test_write_endpoints_reject_a_non_json_content_type(self):
+        """These handlers read their body through `json_payload()`, not `api.validate()`.
+
+        `request.json` answers a non-JSON content type with a 415, where the form endpoints
+        going through `api.validate()` answer a 400 (see `JSONFormRequestTest`).
+        """
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+        headers = {"Content-Type": "multipart/form-data"}
+
+        for response in [
+            self.post(url_for("api.discussions"), {}, json=False, headers=headers),
+            self.post(url_for("api.discussion", id=discussion.id), {}, json=False, headers=headers),
+            self.put(url_for("api.discussion", id=discussion.id), {}, json=False, headers=headers),
+            self.put(
+                url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                {},
+                json=False,
+                headers=headers,
+            ),
+        ]:
+            self.assertStatus(response, 415)
+
     def test_close_discussion_with_a_non_boolean_close(self):
         user = self.login()
         dataset = DatasetFactory()
@@ -1428,6 +1456,9 @@ class DiscussionsTest(APITestCase):
                 {"comment": comment},
             )
             self.assert400(response)
+
+        response = self.put(url_for("api.discussion_comment", id=discussion.id, cidx=0), {})
+        self.assert400(response)
 
         discussion.reload()
         assert discussion.discussion[0].content == "bla bla"
