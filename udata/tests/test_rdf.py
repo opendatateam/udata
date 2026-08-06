@@ -32,6 +32,7 @@ from udata.rdf import (
 )
 from udata.tests import TestCase
 from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.helpers import argvalues
 
 
 class ContentNegociationTest(TestCase):
@@ -149,101 +150,98 @@ class ContactToRdfTest:
 
 
 class ContactFromRdfTest(PytestOnlyDBTestCase):
-    cases = [  # (id, user_info, org_info)
+    cases = [  # (user_info, org_info, id)
         (
+            ("me", "me@example.com", "http://example.com/me"),
+            None,
             "individual-full",
-            ("me", "me@example.com", "http://example.com/me"),
-            None,
         ),
         (
+            None,
+            ("org", "org@example.com", "http://example.com/org"),
             "organization-full",
-            None,
-            ("org", "org@example.com", "http://example.com/org"),
         ),
         (
-            "both-full",
             ("me", "me@example.com", "http://example.com/me"),
             ("org", "org@example.com", "http://example.com/org"),
+            "both-full",
         ),
         (
-            "individual-noname",
             (None, "me@example.com", "http://example.com/me"),
             None,
+            "individual-noname",
         ),
         (
-            "individual-noemail",
             ("me", None, "http://example.com/me"),
             None,
+            "individual-noemail",
         ),
         (
-            "individual-noform",
             ("me", "me@example.com", None),
             None,
+            "individual-noform",
         ),
         (
-            "individual-nothing",
             (None, None, None),
             None,
+            "individual-nothing",
         ),
         (
-            "organization-noname",
             None,
             (None, "org@example.com", "http://example.com/org"),
+            "organization-noname",
         ),
         (
-            "organization-noemail",
             None,
             ("org", None, "http://example.com/org"),
+            "organization-noemail",
         ),
         (
-            "organization-noform",
             None,
             ("org", "org@example.com", None),
+            "organization-noform",
         ),
         (
-            "organization-nothing",
             None,
             (None, None, None),
+            "organization-nothing",
         ),
         (
-            "both-noorgname",
             ("me", "me@example.com", "http://example.com/me"),
             (None, "org@example.com", "http://example.com/org"),
+            "both-noorgname",
         ),
         (
-            "both-noorgemail",
             ("me", "me@example.com", "http://example.com/me"),
             ("org", None, "http://example.com/org"),
+            "both-noorgemail",
         ),
         # (
         #     "both-noorgform" => currently not supported in either VCARD or FOAF
         # ),
         (
-            "both-nousername",
             (None, "me@example.com", "http://example.com/me"),
             ("org", "org@example.com", "http://example.com/org"),
+            "both-nousername",
         ),
         (
-            "both-nouseremail",
             ("me", None, "http://example.com/me"),
             ("org", "org@example.com", "http://example.com/org"),
+            "both-nouseremail",
         ),
         (
-            "both-noname",
             (None, "me@example.com", "http://example.com/me"),
             (None, "org@example.com", "http://example.com/org"),
+            "both-noname",
         ),
         (
-            "both-noemail",
             ("me", None, "http://example.com/me"),
             ("org", None, "http://example.com/org"),
+            "both-noemail",
         ),
     ]
 
-    @pytest.mark.parametrize(
-        "user_info, org_info",
-        [pytest.param(user_info, org_info, id=id) for id, user_info, org_info in cases],
-    )
+    @pytest.mark.parametrize("user_info, org_info", argvalues(cases))
     @pytest.mark.parametrize("typed", [True, False], ids=["typed", "untyped"])
     @pytest.mark.parametrize(
         "predicate", [DCAT.contactPoint, DCT.creator], ids=["compliant", "lenient"]
@@ -306,10 +304,7 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
             assert contact_points[0].email == expected_email
             assert contact_points[0].contact_form == expected_form
 
-    @pytest.mark.parametrize(
-        "user_info, org_info",
-        [pytest.param(user_info, org_info, id=id) for id, user_info, org_info in cases],
-    )
+    @pytest.mark.parametrize("user_info, org_info", argvalues(cases))
     @pytest.mark.parametrize("typed", [True, False], ids=["typed", "untyped"])
     @pytest.mark.parametrize(
         "predicate", [DCT.creator, DCAT.contactPoint], ids=["compliant", "lenient"]
