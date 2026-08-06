@@ -319,40 +319,35 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
-        if field.choices:
-            # When the user supplies a single shared `nested_fields` model (e.g.
-            # `api.model_reference`), expose it as a `Nested` so X-Fields masks can
-            # traverse the reference (e.g. `element{id}`). Without this, the field
-            # is exposed as a `Raw`-based GenericField and any nested mask fails
-            # with "Mask is inconsistent with model".
-            shared_nested_fields = info.get("nested_fields")
-            if shared_nested_fields is not None:
+        # Write always takes a reference; so does read unless a branch below overrides it.
+        def constructor(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
 
-                def constructor_read(**kwargs):
-                    return restx_fields.Nested(shared_nested_fields, **kwargs)
-            else:
-                generic_fields = {}
-                for cls in field.choices:
-                    cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                    generic_fields[cls.__name__] = convert_db_to_field(
-                        f"{key}.{cls.__name__}",
-                        # Instead of having GenericReferenceField() we'll create fields for each
-                        # of the subclasses with ReferenceField(Organization)…
-                        mongoengine.fields.ReferenceField(cls),
-                        info,
-                    )
+        # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
+        # expose read as a `Nested` so X-Fields masks can traverse the reference (e.g.
+        # `element{id}`), which a `Raw`-based GenericField does not allow. It also opts out
+        # of the `constructor` above, which reads `document_type` — an attribute the
+        # resolved document stored here does not have, unlike a `LazyReference`.
+        # `choices` restricts the referenced classes and has no say in either.
+        shared_nested_fields = info.get("nested_fields")
+        if shared_nested_fields is not None:
 
-                def constructor_read(**kwargs):
-                    return GenericField(
-                        {k: v[0].model for k, v in generic_fields.items()}, **kwargs
-                    )
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(shared_nested_fields, **kwargs)
+        elif field.choices:
+            generic_fields = {}
+            for cls in field.choices:
+                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                generic_fields[cls.__name__] = convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericReferenceField() we'll create fields for each
+                    # of the subclasses with ReferenceField(Organization)…
+                    mongoengine.fields.ReferenceField(cls),
+                    info,
+                )
 
-            def constructor_write(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
-        else:
-
-            def constructor(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
+            def constructor_read(**kwargs):
+                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
@@ -693,7 +688,7 @@ def generate_fields(**kwargs) -> Callable:
 
         searchable: bool = kwargs.pop("searchable", False)
         if searchable:
-            parser.add_argument("q", type=str, location="args")
+            parser.add_argument("q", type=str, location="args", help="The search query")
 
         for filterable in filterables:
             parser.add_argument(
@@ -702,6 +697,7 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                help=filterable.get("help", None),
                 # A list field accepts the parameter several times, and
                 # `apply_sort_filters` then requires all the values (`__all`).
                 action="append" if filterable.get("is_list") else "store",
@@ -962,7 +958,13 @@ def patch(obj: _T, request) -> _T:
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+            # A blank string is an absent value, otherwise `required=True` happily
+            # stores a title or a comment made of spaces.
+            if (
+                isinstance(model_attribute, mongo_fields.StringField)
+                and isinstance(value, str)
+                and not value.strip()
+            ):
                 value = None
 
             if hasattr(model_attribute, "from_input"):

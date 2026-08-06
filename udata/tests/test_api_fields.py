@@ -19,6 +19,7 @@ from mongoengine.fields import (
 )
 from werkzeug.exceptions import BadRequest
 
+from udata.api import api
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization import constants as org_constants
@@ -274,6 +275,24 @@ class FakeWithRename(Document):
 
 
 @generate_fields()
+class FakeWithGenericReference(Document):
+    """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
+
+    A `GenericReferenceField` stores a resolved document, which the default
+    `LazyReference` model cannot serialize (it reads `document_type`, an attribute only
+    a `LazyReference` has). `nested_fields` is what lets the caller opt out of it, and
+    it must be honoured whether or not `choices` constrains the allowed classes.
+    """
+
+    subject = field(
+        mongoengine.fields.GenericReferenceField(),
+        nested_fields=api.model_reference,
+    )
+
+    meta = {"collection": "fake_with_generic_reference_api_fields"}
+
+
+@generate_fields()
 class FakeWithFilteredList(Document):
     """Exercises `attribute` on a list of embedded documents: the list is read through a
     property of the document that filters it."""
@@ -524,6 +543,18 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         assert embedded.status is None
 
 
+class PatchBlankStringTest(PytestOnlyDBTestCase):
+    def test_blank_string_is_stored_as_none(self) -> None:
+        """A string field only made of whitespace holds no value, so `required=True`
+        rejects it at save() instead of storing spaces."""
+        for value in ["", "   ", "\n\t "]:
+            assert patch(Fake(), {"title": value}).title is None
+
+    def test_surrounding_whitespace_is_kept(self) -> None:
+        """Only fully blank strings are emptied: the value itself is never trimmed."""
+        assert patch(Fake(), {"title": "  a title  "}).title == "  a title  "
+
+
 class HrefFieldTest(PytestOnlyDBTestCase):
     def test_href_total_and_extra(self, app) -> None:
         """`href_total` provides the link total (instead of len(value)) and
@@ -543,6 +574,30 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class GenericReferenceFieldTest(PytestOnlyDBTestCase):
+    def test_nested_fields_is_honoured_without_choices(self, app) -> None:
+        """`choices` restricts the referenced classes, `nested_fields` describes how the
+        reference is serialized: the two are independent. Reading a reference through the
+        default `LazyReference` model raises on the resolved document a
+        `GenericReferenceField` stores, so ignoring `nested_fields` here is a 500."""
+        organization = OrganizationFactory()
+        obj = FakeWithGenericReference(subject=organization)
+
+        with app.test_request_context("/"):
+            subject = marshal(obj, FakeWithGenericReference.__read_fields__)["subject"]
+
+        assert subject == {"class": "Organization", "id": str(organization.id)}
+
+    def test_write_field_takes_a_class_and_id_reference(self) -> None:
+        """Writing stays keyed on `{class, id}` whatever the read model is."""
+        organization = OrganizationFactory()
+        obj = patch(
+            FakeWithGenericReference(),
+            {"subject": {"class": "Organization", "id": str(organization.id)}},
+        )
+        assert obj.subject == organization
 
 
 class RenameFieldTest(PytestOnlyDBTestCase):
