@@ -429,6 +429,19 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
         assert name == expected_name
 
+    def test_contact_point_from_vcard_org_missing(self):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()  # anonymous org node with no relevant org info
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal(expected_name)))
+        g.add((contact, VCARD.org, org))  # deprecated vcard:org spec
+
+        name, _, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert name == expected_name
+
     @pytest.mark.parametrize("namespaced", [True, False], ids=["namespaced", "plain"])
     @pytest.mark.parametrize(
         "property",
@@ -510,3 +523,15 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
         _, email, _ = contact_point_from_foaf(RdfResource(g, contact))
 
         assert email == expected_email
+
+    def test_contact_point_from_foaf_org_missing(self):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()  # anonymous org node with no relevant org info
+        contact = BNode()
+        g.add((contact, FOAF.name, Literal(expected_name)))
+        g.add((contact, ORG.memberOf, org))
+
+        name, _, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == expected_name

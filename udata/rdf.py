@@ -447,16 +447,18 @@ def contact_points_from_rdf(
 
 
 def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
+    contact_point_org = obj.value(VCARD.org)  # deprecated vcard:org spec
     name = contact_point_name(
         rdf_value(obj, VCARD.fn),
         rdf_value(obj, VCARD["organization-name"])
-        or rdf_value(  # deprecated vcard:org spec
-            obj,
-            VCARD.org,
-            unwrap=[
-                VCARD["organization-name"],
-                VCARD["organisation-name"],  # GeoNetwork incorrectly uses UK spelling
-            ],
+        or (
+            (
+                rdf_value(contact_point_org, VCARD["organization-name"])
+                # GeoNetwork incorrectly uses UK spelling
+                or rdf_value(contact_point_org, VCARD["organisation-name"])
+            )
+            if contact_point_org
+            else None
         ),
     )
     email = rdf_value(obj, VCARD.hasEmail) or rdf_value(obj, VCARD.email) or None
