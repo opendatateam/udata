@@ -5,6 +5,7 @@ This module centralize udata-wide RDF helpers and configuration
 import logging
 import re
 from html.parser import HTMLParser
+from typing import Iterator, cast
 from urllib.parse import quote
 
 import mongoengine
@@ -29,6 +30,8 @@ from rdflib.util import guess_format as raw_guess_format
 
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
+from udata.core.organization.models import Organization
+from udata.core.user.models import User
 from udata.frontend.markdown import parse_html
 from udata.harvest.filters import normalize_tag
 from udata.models import Schema
@@ -388,69 +391,104 @@ def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
     return agent_name or org_name or ""
 
 
-def contact_points_from_rdf(rdf, prop, role, dataset, dryrun=False):
-    if not dataset.organization and not dataset.owner:
+def contact_points_from_rdf(
+    resource: RdfResource,
+    predicate: URIRef,
+    role: str,
+    owner: Organization | User | None,
+    dryrun: bool = False,
+) -> Iterator[ContactPoint]:
+    if not owner:
         return
-    for contact_point in rdf.objects(prop):
-        # Read contact point information
-        if isinstance(contact_point, Literal):
-            log.warning(f"Found a `Literal` inside {prop}, `foaf:Agent` or `vcard:Kind` expected.")
-            name = contact_point.toPython()
-            email = None
-            contact_form = None
-        elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
-            name = contact_point_name(
-                rdf_value(contact_point, VCARD.fn),
-                rdf_value(contact_point, VCARD["organization-name"]),
-            )
-            email = (
-                rdf_value(contact_point, VCARD.hasEmail)
-                or rdf_value(contact_point, VCARD.email)
-                or None
-            )
-            email = email.replace("mailto:", "").strip() if email else None
-            contact_form = rdf_value(contact_point, VCARD.hasUrl)
-        else:
-            contact_point_org = contact_point.value(ORG.memberOf)
-            name = contact_point_name(
-                rdf_value(contact_point, FOAF.name) or rdf_value(contact_point, SKOS.prefLabel),
-                rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
-            )
-            email = (
-                rdf_value(contact_point, FOAF.mbox)
-                or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
-                or None
-            )
-            email = email.replace("mailto:", "").strip() if email else None
-            contact_form = None
 
-        # Tested at validation time, because it depends on the role
-        # if not email and not contact_form:
-        #         continue
+    for obj in resource.objects(predicate):
+        # Parse contact point information
+        if isinstance(obj, Literal):
+            log.warning(
+                f"Found a `Literal` inside {predicate}, `foaf:Agent` or `vcard:Kind` expected."
+            )
+            infos = obj.toPython(), None, None
+        elif predicate == DCAT.contactPoint:
+            infos = contact_point_from_vcard(obj)
+            if not any(infos):
+                infos = contact_point_from_foaf(obj)
+        else:
+            infos = contact_point_from_foaf(obj)
+            if not any(infos):
+                infos = contact_point_from_vcard(obj)
+        if not any(infos):
+            log.warning(f"Empty contact point with role={role}")
+            continue
+        name, email, contact_form = infos
 
         # Create of get contact point object
-        org_or_owner = {}
-        if dataset.organization:
-            org_or_owner = {"organization": dataset.organization}
-        else:
-            org_or_owner = {"owner": dataset.owner}
+        owner_label = "organization" if isinstance(owner, Organization) else "owner"
+        filters = {
+            "name": name,
+            "email": email,
+            "contact_form": contact_form,
+            "role": role,
+            owner_label: owner,
+        }
         try:
             if dryrun:
                 # In dryrun mode, only reuse existing contact points, don't create new ones.
                 # Mongoengine doesn't allow referencing unsaved documents.
-                contact = ContactPoint.objects.filter(
-                    name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
-                ).first()
+                contact = ContactPoint.objects.filter(**filters).first()
                 if not contact:
                     continue
             else:
-                contact, _ = ContactPoint.objects.get_or_create(
-                    name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
-                )
+                contact, _ = ContactPoint.objects.get_or_create(**filters)
         except mongoengine.errors.ValidationError as validation_error:
             log.warning(f"Unable to validate contact point: {validation_error}", exc_info=True)
             continue
-        yield contact
+
+        yield cast(ContactPoint, contact)
+
+
+def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
+    contact_point_org = obj.value(VCARD.org)  # deprecated vcard:org spec
+    name = contact_point_name(
+        rdf_value(obj, VCARD.fn),
+        rdf_value(obj, VCARD["organization-name"])
+        or (
+            (
+                rdf_value(contact_point_org, VCARD["organization-name"])
+                # GeoNetwork incorrectly uses UK spelling
+                or rdf_value(contact_point_org, VCARD["organisation-name"])
+            )
+            if contact_point_org
+            else None
+        ),
+    )
+    email = rdf_value(obj, VCARD.hasEmail) or rdf_value(obj, VCARD.email) or None
+    email = email.replace("mailto:", "").strip() if email else None
+    contact_form = (
+        rdf_value(obj, VCARD.hasURL)
+        or rdf_value(obj, VCARD.url)
+        or rdf_value(obj, VCARD.hasUrl)  # udata previously used incorrect case
+        or None
+    )
+    return name, email, contact_form
+
+
+def contact_point_from_foaf(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
+    contact_point_org = obj.value(ORG.memberOf)
+    contact_point_member = obj.value(FOAF.member)
+    name = contact_point_name(
+        rdf_value(obj, FOAF.name)
+        or rdf_value(obj, SKOS.prefLabel)
+        or (rdf_value(contact_point_member, FOAF.name) if contact_point_member else None),
+        rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
+    )
+    email = (
+        rdf_value(obj, FOAF.mbox)
+        or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
+        or (contact_point_member and rdf_value(contact_point_member, FOAF.mbox))
+        or None
+    )
+    email = email.replace("mailto:", "").strip() if email else None
+    return name, email, None
 
 
 def contact_points_to_rdf(contacts, graph=None):
@@ -481,7 +519,7 @@ def contact_points_to_rdf(contacts, graph=None):
             if contact.email:
                 node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
             if contact.contact_form:
-                node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+                node.set(VCARD.hasURL, URIRef(contact.contact_form))
         else:
             node.set(RDF.type, FOAF.Agent)
             node.set(FOAF.name, Literal(contact.name))

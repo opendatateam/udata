@@ -962,8 +962,9 @@ def dataset_from_rdf(
     description = default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
+    owner = dataset.organization or dataset.owner
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataset, dryrun=dryrun)
+        contact_points_from_rdf(d, rdf_entity, role, owner, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataset.contact_points = [  # Flattened list of contact points
