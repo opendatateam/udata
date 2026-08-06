@@ -23,6 +23,7 @@ from udata import uris
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.linkable import Linkable
+from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
@@ -183,10 +184,11 @@ def filter_by_subject(base_query, filter_value):
 
 
 def filter_by_organization(base_query, filter_value):
-    # Deferred: the subject models import `Discussion` at module level.
+    # Deferred: `Dataservice` imports `Discussion` at module level, so importing the subject
+    # models here would load `Reuse` — which declares a delete rule on `Dataservice` — before
+    # `Dataservice` itself is registered.
     from udata.core.dataservices.models import Dataservice
     from udata.core.dataset.models import Dataset
-    from udata.core.organization.models import Organization
     from udata.core.reuse.models import Reuse
 
     org = Organization.objects.get_or_404(id=id_or_404(filter_value))

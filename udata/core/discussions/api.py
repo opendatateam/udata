@@ -98,16 +98,6 @@ class DiscussionAPI(API):
 
         data = api.json_payload()
         close = boolean(data.get("close") or False)
-        comment = data.get("comment")
-        # `comment` doesn't go through `patch()` here, so apply its blank-is-absent rule
-        # before deciding whether the request carries anything.
-        if isinstance(comment, str) and not comment.strip():
-            comment = None
-
-        if not close and not comment:
-            api.abort(
-                400, "Can only close without message. Please provide either `close` or a `comment`."
-            )
 
         # `posted_by_organization` and `closed_by_organization` are readonly on the models,
         # so the generic `patch()` flow cannot reach them: resolve the organization here.
@@ -117,13 +107,18 @@ class DiscussionAPI(API):
         if organization:
             check_organization_is_valid_for_current_user(organization)
 
-        message_idx = None
-        if comment:
-            message = Message(
-                content=comment,
-                posted_by=current_user.id,
-                posted_by_organization=organization,
+        message = patch(
+            Message(posted_by=current_user.id, posted_by_organization=organization),
+            {"content": data.get("comment")},
+        )
+
+        if not close and not message.content:
+            api.abort(
+                400, "Can only close without message. Please provide either `close` or a `comment`."
             )
+
+        message_idx = None
+        if message.content:
             discussion.discussion.append(message)
             message_idx = len(discussion.discussion) - 1
 
