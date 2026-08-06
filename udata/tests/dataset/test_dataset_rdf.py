@@ -27,18 +27,23 @@ from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
     FREQ_TERM_TO_UDATA,
     access_right_to_rdf,
+    access_rights_from_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
-    infer_dataset_access_rights,
+    get_dcat_extra,
+    get_unanimous_dcat_extra,
+    inspire_category_from_rights,
     license_to_rdf,
     licenses_from_rdf,
     provenances_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
+    rights_from_rdf,
     rights_to_rdf,
+    set_dcat_extra,
     spatial_from_rdf,
     spatial_resolution_from_rdf,
     temporal_from_rdf,
@@ -71,7 +76,7 @@ from udata.rdf import (
     slugify_tag,
 )
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
-from udata.tests.helpers import assert200, assert_redirects
+from udata.tests.helpers import argvalues, assert200, assert_redirects
 from udata.utils import faker
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
@@ -1240,59 +1245,56 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "node_type, geom_type, datatype, serialize",
-        (
-            pytest.param(*params, id=id)
-            for id, *params in [
-                (
-                    "bbox-geojson",
-                    DCT.Location,
-                    DCAT.bbox,
-                    GEOSPARQL.geoJSONLiteral,
-                    _to_geojson,
-                ),
-                (  # replaced by GEOSPARQL.geoJSONLiteral
-                    "bbox-geojson-deprecated",
-                    DCT.Location,
-                    DCAT.bbox,
-                    "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
-                    _to_geojson,
-                ),
-                (
-                    "bbox-wkt",
-                    DCT.Location,
-                    DCAT.bbox,
-                    GEOSPARQL.wktLiteral,
-                    _to_wkt,
-                ),
-                (
-                    "geometry-geojson",
-                    DCT.Location,
-                    LOCN.geometry,
-                    GEOSPARQL.geoJSONLiteral,
-                    _to_geojson,
-                ),
-                (
-                    "geometry-wkt",
-                    DCT.Location,
-                    LOCN.geometry,
-                    GEOSPARQL.wktLiteral,
-                    _to_wkt,
-                ),
-                (  # old GeoNetwork dcat exposition
-                    "polygon-geometry",
-                    Namespace("http://www.opengis.net/rdf#").Polygon,
-                    LOCN.geometry,
-                    "http://www.opengis.net/rdf#wktLiteral",
-                    _to_wkt,
-                ),
-                (  # old GeoNetwork dcat exposition
-                    "polygon-aswkt",
-                    Namespace("http://www.opengis.net/rdf#").Polygon,
-                    GEOSPARQL.asWKT,
-                    "http://www.opengis.net/rdf#wktLiteral",
-                    _to_wkt,
-                ),
-            ]
+        argvalues(
+            (
+                DCT.Location,
+                DCAT.bbox,
+                GEOSPARQL.geoJSONLiteral,
+                _to_geojson,
+                "bbox-geojson",
+            ),
+            (  # replaced by GEOSPARQL.geoJSONLiteral
+                DCT.Location,
+                DCAT.bbox,
+                "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
+                _to_geojson,
+                "bbox-geojson-deprecated",
+            ),
+            (
+                DCT.Location,
+                DCAT.bbox,
+                GEOSPARQL.wktLiteral,
+                _to_wkt,
+                "bbox-wkt",
+            ),
+            (
+                DCT.Location,
+                LOCN.geometry,
+                GEOSPARQL.geoJSONLiteral,
+                _to_geojson,
+                "geometry-geojson",
+            ),
+            (
+                DCT.Location,
+                LOCN.geometry,
+                GEOSPARQL.wktLiteral,
+                _to_wkt,
+                "geometry-wkt",
+            ),
+            (  # old GeoNetwork dcat exposition
+                Namespace("http://www.opengis.net/rdf#").Polygon,
+                LOCN.geometry,
+                "http://www.opengis.net/rdf#wktLiteral",
+                _to_wkt,
+                "polygon-geometry",
+            ),
+            (  # old GeoNetwork dcat exposition
+                Namespace("http://www.opengis.net/rdf#").Polygon,
+                GEOSPARQL.asWKT,
+                "http://www.opengis.net/rdf#wktLiteral",
+                _to_wkt,
+                "polygon-aswkt",
+            ),
         ),
     )
     def test_parse_spatial_geometry(self, node_type, geom_type, datatype, serialize):
@@ -1820,153 +1822,7 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         )
 
 
-class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
-    @pytest.mark.parametrize(
-        "xml, expected_licenses",
-        [
-            pytest.param(
-                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_licenses, id=id
-            )
-            for id, xml_fragment, expected_licenses in [
-                (
-                    "uriref",
-                    """
-                    <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
-                    """,
-                    {"https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"},
-                ),
-                (
-                    "value",
-                    """
-                    <dct:license>License from value</dct:license>
-                    """,
-                    {"License from value"},
-                ),
-                (
-                    "label",
-                    """
-                    <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License from label</rdfs:label>
-                       </rdf:Description>
-                    </dct:license>
-                    """,
-                    {"License from label"},
-                ),
-                (
-                    "uriref-precedence",
-                    """
-                    <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
-                       No conditions apply to access and use.
-                    </dct:license>
-                    """,
-                    {
-                        "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
-                    },
-                ),
-                (
-                    "resource",
-                    """
-                       <dct:license rdf:resource="http://example.org/custom-license"/>
-                    </rdf:Description>
-                    <rdf:Description rdf:about="http://example.org/custom-license">
-                       <rdfs:label>License from resource</rdfs:label>
-                       <dct:description>A license specific to our organization</dct:description>
-                    """,
-                    {"License from resource"},
-                ),
-                (
-                    "multiple",
-                    """
-                    <dct:license>License 1</dct:license>
-                    <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License 2</rdfs:label>
-                       </rdf:Description>
-                    </dct:license>
-                    """,
-                    {"License 1", "License 2"},
-                ),
-            ]
-        ],
-    )
-    def test_licenses_from_rdf(self, xml: str, expected_licenses: set[str]):
-        graph = Graph()
-        graph.parse(data=xml, format="xml")
-        dataset = graph.resource(URIRef("http://example.org/dataset"))
-        licenses = licenses_from_rdf(dataset)
-        assert licenses == expected_licenses
-
-    def test_access_rights_from_rdf(self, app):
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Pas de restriction d'accès public selon INSPIRE")))
-
-        dataset = g.resource(node)
-        resources_access_rights = [{"resource rights 1"}, {"resource rights 2"}]
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Pas de restriction d'accès public selon INSPIRE"}
-        assert access_type is None
-        assert inspire_category is None
-
-    def test_with_inspire_support_enabled_matches_category(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
-        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
-
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add(
-            (
-                node,
-                DCT.accessRights,
-                Literal(
-                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-                ),
-            )
-        )
-
-        dataset = g.resource(node)
-        resources_access_rights = []
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {
-            "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-        }
-        assert access_type == AccessType.RESTRICTED
-        assert inspire_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
-
-    def test_with_inspire_support_enabled_no_match(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
-        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
-
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Some unknown rights")))
-
-        dataset = g.resource(node)
-        resources_access_rights = []
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Some unknown rights"}
-        assert access_type is None
-        assert inspire_category is None
-
+class DatasetToRdfUtilsTest(PytestOnlyDBTestCase):
     def test_rights_to_rdf_with_license_with_url_and_access_type_open(self, app):
         dataset = DatasetFactory(
             license=LicenseFactory(title="the license title", url="https://example.com/license"),
@@ -2017,16 +1873,330 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
         assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
 
+
+class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize(
+        "xml, expected_licenses",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    """,
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
+                    "uri",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    """,
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
+                    "uri_strict",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="http://creativecommons.org/licenses/by-sa/3.0/"/>
+                    </dct:license>
+                    """,
+                    [
+                        "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+                        "http://creativecommons.org/licenses/by-sa/3.0/",
+                    ],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:license>License from value</dct:license>
+                    """,
+                    ["License from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <rdf:Description>
+                        <rdfs:label>License from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:license>
+                    """,
+                    ["License from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
+                      License from value
+                    </dct:license>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+                    ],
+                    "lenient_uri_wins",
+                ),
+                (
+                    """
+                       <dct:license rdf:resource="http://example.org/custom-license"/>
+                    </rdf:Description>
+                    <rdf:Description rdf:about="http://example.org/custom-license">
+                       <rdfs:label>License from resource</rdfs:label>
+                       <dct:description>A license specific to our organization</dct:description>
+                    """,
+                    ["License from resource"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_license_from_rdf(self, xml: str, expected_licenses: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        licenses = licenses_from_rdf(dataset)
+        assert licenses == expected_licenses
+
+    @pytest.mark.parametrize(
+        "xml, expected_access_rights",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "uri",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement rdf:about="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "uri_strict",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights from statement</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from statement"],
+                    "text",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 1</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 2</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights 1", "Access rights 2"],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:accessRights>Access rights from value</dct:accessRights>
+                    """,
+                    ["Access rights from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">
+                      Access rights from value
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "lenient_uri_wins",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <dct:description>Access rights from description</dct:description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_access_rights_from_rdf(self, xml: str, expected_access_rights: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        access_rights = access_rights_from_rdf(dataset)
+        assert access_rights == expected_access_rights
+
+    @pytest.mark.parametrize(
+        "xml, expected_rights",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights from statement</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights from statement"],
+                    "text",
+                ),
+                (
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 1</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 2</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights 1", "Rights 2"],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:rights>Rights from value</dct:rights>
+                    """,
+                    ["Rights from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:rights>
+                       <rdf:Description>
+                          <rdfs:label>Rights from label</rdfs:label>
+                       </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:rights>
+                      <rdf:Description>
+                        <dct:description>Rights from description</dct:description>
+                        <rdfs:label>Rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_rights_from_rdf(self, xml: str, expected_rights: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        rights = rights_from_rdf(dataset)
+        assert rights == expected_rights
+
+    @pytest.mark.parametrize(
+        "inspire_support, input_strings, expected_category",
+        argvalues(
+            (
+                True,
+                [
+                    "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b"
+                ],
+                InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                "single_inspire_restriction",
+            ),
+            (
+                True,
+                [
+                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)",
+                    "L124-5-II-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)",
+                ],
+                InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                "multiple_inspire_restrictions",
+            ),
+            (
+                True,
+                ["Pas de restriction d'accès public selon INSPIRE"],
+                None,
+                "inspire_no_restriction",
+            ),
+            (
+                True,
+                ["Some unknown rights"],
+                None,
+                "unknown_rights",
+            ),
+            (
+                # don't detect a valid restriction when INSPIRE_SUPPORT is disabled
+                False,
+                [
+                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                ],
+                None,
+                "inspire_off",
+            ),
+        ),
+    )
+    def test_inspire_category(self, app, inspire_support, input_strings, expected_category):
+        app.config["INSPIRE_SUPPORT"] = inspire_support
+        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
+
+        category = inspire_category_from_rights(input_strings)
+
+        assert category is expected_category
+
     @pytest.mark.parametrize(
         "xml, expected_provenances",
         [
-            pytest.param(
-                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_provenances, id=id
-            )
-            for id, xml_fragment, expected_provenances in [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
                 # Old DCAT* specs
                 (
-                    "label",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2034,11 +2204,11 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from label"},
+                    ["Provenance from label"],
+                    "label",
                 ),
                 # New DCAT* specs
                 (
-                    "description",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2046,10 +2216,10 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from description"},
+                    ["Provenance from description"],
+                    "description",
                 ),
                 (
-                    "multiple",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -2062,30 +2232,31 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Statement 1", "Statement 2"},
+                    ["Statement 1", "Statement 2"],
+                    "multiple",
                 ),
                 # Supported theoretical(?) cases
                 (
-                    "value",
                     """
                     <dct:provenance>Provenance from value</dct:provenance>
                     """,
-                    {"Provenance from value"},
+                    ["Provenance from value"],
+                    "value",
                 ),
                 (
-                    "resource",
                     """
                        <dct:provenance rdf:resource="http://example.org/provenance"/>
                     </rdf:Description>
                     <rdf:Description rdf:about="http://example.org/provenance">
                        <dct:description>Provenance from separate resource</dct:description>
                     """,
-                    {"Provenance from separate resource"},
+                    ["Provenance from separate resource"],
+                    "resource",
                 ),
             ]
         ],
     )
-    def test_provenances_from_rdf(self, xml: str, expected_provenances: set[str]):
+    def test_provenances_from_rdf(self, xml: str, expected_provenances: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
@@ -2095,11 +2266,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "xml, expected_format",
         [
-            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_format, id=id)
-            for id, xml_fragment, expected_format in [
-                # DCAT* and GeoDCAT-AP for distributions other than services
-                (
-                    "dct:format",
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (  # DCAT* and GeoDCAT-AP for distributions other than services
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2112,10 +2281,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "zip",
+                    "dct:format",
                 ),
-                # DCAT* and older GeoDCAT-AP for service distributions
-                (
-                    "dct:conformsTo",
+                (  # DCAT* and older GeoDCAT-AP for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2135,10 +2303,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wms",
+                    "dct:conformsTo",
                 ),
-                # GeoDCAT-AP 3+ for service distributions
-                (
-                    "geodcatap:serviceProtocol",
+                (  # GeoDCAT-AP 3+ for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -2161,6 +2328,7 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wfs",
+                    "geodcatap:serviceProtocol",
                 ),
             ]
         ],
@@ -2172,3 +2340,88 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         resource = graph.resource(distribution)
         format = format_from_rdf(resource)
         assert format == expected_format
+
+
+class DcatHelpersTest:
+    def test_set_dcat_extra(self):
+        dataset = Dataset()
+
+        # assign
+        set_dcat_extra(dataset, "foo", "aa")
+        assert dataset.extras["dcat"]["foo"] == "aa"
+
+        # override
+        set_dcat_extra(dataset, "foo", "bb")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+
+        # extend
+        set_dcat_extra(dataset, "bar", "cc")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+        assert dataset.extras["dcat"]["bar"] == "cc"
+
+        # list type
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert dataset.extras["dcat"]["foo"] == ["aa", "bb"]
+        set_dcat_extra(dataset, "foo", ["aa"])
+        assert dataset.extras["dcat"]["foo"] == ["aa"]  # != "aa"
+
+        # set type
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = dataset.extras["dcat"]["foo"]
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # uriref
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert dataset.extras["dcat"]["accessRights"] == "xx"
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert dataset.extras["dcat"]["foo"] == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert dataset.extras["dcat"]["foo"] == []
+
+    def test_get_dcat_extra(self):
+        dataset = Dataset()
+
+        # missing
+        assert get_dcat_extra(dataset, "missing") is None
+
+        # str
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert get_dcat_extra(dataset, DCT.accessRights) == "xx"
+        assert get_dcat_extra(dataset, "accessRights") == "xx"
+
+        # list
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert get_dcat_extra(dataset, "foo") == ["aa", "bb"]
+
+        # set
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = get_dcat_extra(dataset, "foo")
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert get_dcat_extra(dataset, "foo") == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert get_dcat_extra(dataset, "foo") == []
+
+    def test_get_unanimous_dcat_extra(self):
+        r1 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r2 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r3 = Resource(extras={"dcat": {"accessRights": "bb"}})
+        r4 = Resource(extras={"dcat": {}})
+        r5 = Resource()
+
+        assert get_unanimous_dcat_extra([r1, r2], "accessRights") == "aa"
+        assert get_unanimous_dcat_extra([r1, r2], DCT.accessRights) == "aa"
+
+        assert get_unanimous_dcat_extra([r1, r3], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r4], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r5], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r4, r5], DCT.accessRights) is None
+
+        assert get_unanimous_dcat_extra([], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r2], "foo") is None

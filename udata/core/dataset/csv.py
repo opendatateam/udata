@@ -56,6 +56,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
         ("harvest.issued_at", lambda r: r.harvest and r.harvest.issued_at),
         ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.last_update", lambda r: r.harvest and r.harvest.last_update),
         ("harvest.dct_identifier", lambda r: r.harvest and r.harvest.dct_identifier),
         ("quality_score", lambda o: format(o.quality["score"], ".2f")),
         # schema? what is the schema of a dataset?

@@ -14,6 +14,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
+from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
 
@@ -30,7 +31,6 @@ from .api_fields import (
     schema_fields,
     spatial_coverage_fields,
     temporal_coverage_fields,
-    user_ref_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset, Resource
@@ -191,7 +191,7 @@ dataset_fields = apiv2.model(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
@@ -274,7 +274,7 @@ specific_resource_fields = apiv2.model(
 
 apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
-apiv2.inherit("UserReference", user_ref_fields)
+apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
 apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
@@ -376,6 +376,13 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
+        # Deliberately a full save here, unlike the resource extras endpoints below,
+        # which go through the targeted Dataset.update_resource_extras(). A save is
+        # O(N) in the number of embedded resources (~3.4s on a 10k-resources dataset),
+        # but this endpoint sees 2 real calls per 50 days in production against 2.7M
+        # for the resource one: the cost is never paid in practice, and save() keeps
+        # the full extras validation and the search reindexing without us restating
+        # them by hand.
         dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
@@ -563,7 +570,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras
 
     @apiv2.secure
@@ -582,5 +589,5 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras, 204

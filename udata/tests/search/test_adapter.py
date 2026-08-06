@@ -591,3 +591,10 @@ class DataserviceSearchAdapterTest(APITestCase):
 
         assert "producer_type" in serialized
         assert serialized["producer_type"] == [USER]
+
+    def test_fetch_documentation_content_of_a_private_address_returns_none(self):
+        """BlockedAddressError is neither a RequestException nor an OSError, so it
+        would escape serialize() and abort the whole indexing run. URLField keeps
+        a private address out of the stored value, but not out of what the host
+        resolves to at fetch time — hence the guard, and hence this test."""
+        assert DataserviceSearch.fetch_documentation_content("http://10.0.0.1/doc") is None

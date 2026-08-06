@@ -642,14 +642,14 @@ wheels = [
 
 [[package]]
 name = "faker"
-version = "40.21.0"
+version = "40.36.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/6f/d7b251fb31de7dce0e482680bf7ca876aa0043f475c04aeefa1459ea80d4/faker-40.21.0.tar.gz", hash = "sha256:2fdee1b650a723a54432db9c6dfe17cfa29d1adc8bd60520444a07698524ba4d", size = 1970295, upload-time = "2026-06-02T17:53:46.27Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/d2/026af1e002bbc6df534d1f8262b18ec79a974f928e9290bfbfdfe7c7b2af/faker-40.36.0.tar.gz", hash = "sha256:754048c76c03afa7de83eee8f4bcee3cf668cbb7d995f54a4e9678db7f110308", size = 2025903, upload-time = "2026-07-24T21:11:33.088Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/77/6adb5a9dcd028f687f81fc9f789591f9572cb5a46454337122add004e134/faker-40.21.0-py3-none-any.whl", hash = "sha256:cb6601b2ae8e128895dc96814d271eab6b930a2d2d7932c6f9ff26785c24ee18", size = 2008808, upload-time = "2026-06-02T17:53:44.346Z" },
+    { url = "https://files.pythonhosted.org/packages/50/9a/b947ed175ce9a0dcb070ccf3607f0ce8720cfb5ed1a36166a150b2acd5af/faker-40.36.0-py3-none-any.whl", hash = "sha256:82b9497d9cfe017048075bcf969298a74b1b6e39f5e4dad1211085d1133f7b62", size = 2062829, upload-time = "2026-07-24T21:11:31.37Z" },
 ]
 
 [[package]]
@@ -852,21 +852,8 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-sitemap"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "blinker" },
-    { name = "flask" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/d7/146fa795769b53e10371e18b2e73acd269a249ca1ed77dec16fae61b53b6/Flask-Sitemap-0.4.0.tar.gz", hash = "sha256:a59f726e889a1c7a71c6d0980fb62c2a9f382c73391567e00f8af892bb4ec731", size = 19881, upload-time = "2022-02-16T22:13:32.356Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/b9/05b383a9dd81715ecc9a3d535839b23e602851e841fd5fa501338153406f/Flask_Sitemap-0.4.0-py2.py3-none-any.whl", hash = "sha256:bafdcca1fc321aafb8c086a8bd260591df29c521032001533327825acff976b8", size = 9999, upload-time = "2022-02-16T22:13:31.211Z" },
-]
-
-[[package]]
 name = "flask-storage"
-version = "1.4.5"
+version = "1.4.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -876,7 +863,7 @@ dependencies = [
     { name = "werkzeug" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/95/44615202af3620754f4b93a1593ac1c89083674475f1f66fe754fa68616e/flask_storage-1.4.5-py3-none-any.whl", hash = "sha256:dc996bcbe4a46db46377755e04b28f81ec0246b3b4a5111129ab5eb989ac76ab", size = 20081, upload-time = "2026-06-24T08:57:41.227Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/e5/adca163cab6cd4c7f8938a49d3476c75485faceebf7e831aa32429fa66dc/flask_storage-1.4.6-py3-none-any.whl", hash = "sha256:b65be40978ae56fbc8b12a37fc681064b5da41c27c0477cd5fe93a410338bebb", size = 19320, upload-time = "2026-08-05T08:40:25.002Z" },
 ]
 
 [[package]]
@@ -2488,7 +2475,6 @@ dependencies = [
     { name = "flask-principal" },
     { name = "flask-restx" },
     { name = "flask-security" },
-    { name = "flask-sitemap" },
     { name = "flask-storage" },
     { name = "flask-wtf" },
     { name = "geojson" },
@@ -2583,7 +2569,6 @@ requires-dist = [
     { name = "flask-principal", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-restx", specifier = ">=1.3.0,<2.0.0" },
     { name = "flask-security", specifier = ">=5.1.2,<6.0.0" },
-    { name = "flask-sitemap", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
@@ -2628,7 +2613,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.7.0,<8.0" },
-    { name = "faker", specifier = ">=40.21,<40.22" },
+    { name = "faker", specifier = ">=40.36,<40.37" },
     { name = "feedparser", specifier = ">=6.0.11,<7.0" },
     { name = "flake8", specifier = ">=7.1.2,<8.0" },
     { name = "flask-shell-ipython", specifier = ">=0.5.3,<1.0" },

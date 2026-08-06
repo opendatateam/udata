@@ -21,9 +21,11 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
+from udata.core.checks import check_is_email, check_no_urls
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
@@ -75,9 +77,33 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
+def _email_for_admin_or_self(user):
+    """Return the email only to a sysadmin or to the user themselves, `None` otherwise.
+
+    Stricter than `_visible_email`, which always yields at least a domain: the user API
+    (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all, whereas
+    `_visible_email` serves the org contexts where members are allowed to reach out.
+    """
+    if current_user_is_admin_or_self():
+        return user.email
+    return None
+
+
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
+    return None
+
+
+def _visible_password_rotation_demanded(user):
+    if current_user_is_admin_or_self():
+        return user.password_rotation_demanded
+    return None
+
+
+def _visible_password_rotation_performed(user):
+    if current_user_is_admin_or_self():
+        return user.password_rotation_performed
     return None
 
 
@@ -101,22 +127,33 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
+        readonly=True,
         show_as_ref=True,
     )
     email = field(
         StringField(max_length=255, required=True, unique=True),
-        show_as_ref=True,
-        attribute=_visible_email,
+        attribute=_email_for_admin_or_self,
+        checks=[check_is_email],
     )
-    password = field(StringField())
-    active = field(BooleanField())
-    fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
-    roles = field(ListField(ReferenceField(Role), default=[]))
+    password = StringField()
+    # Admin-only writable, handled manually in the admin endpoints.
+    active = field(BooleanField(), readonly=True)
+    fs_uniquifier = StringField(max_length=64, unique=True, sparse=True)
+    # Admin-only writable, handled manually in the admin endpoints.
+    roles = field(ListField(ReferenceField(Role), default=list), readonly=True)
 
-    first_name = field(StringField(max_length=255, required=True), show_as_ref=True)
-    last_name = field(StringField(max_length=255, required=True), show_as_ref=True)
+    first_name = field(
+        StringField(max_length=255, required=True),
+        show_as_ref=True,
+        checks=[check_no_urls],
+    )
+    last_name = field(
+        StringField(max_length=255, required=True),
+        show_as_ref=True,
+        checks=[check_no_urls],
+    )
 
-    avatar_url = field(URLField())
+    avatar_url = URLField()
     avatar = field(
         ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
         # Read-only: the avatar is managed through the dedicated upload endpoint
@@ -134,18 +171,30 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         markdown=True,
     )
 
-    prefered_language = field(StringField())
+    prefered_language = StringField()
 
     created_at = field(
-        DateTimeField(default=lambda: datetime.now(UTC), required=True), auditable=False
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        auditable=False,
+        readonly=True,
+        rename="since",
     )
 
-    # The field below is required for Flask-security
-    # when SECURITY_CONFIRMABLE is True
-    confirmed_at = field(DateTimeField(), auditable=False)
+    # Required for Flask-security when SECURITY_CONFIRMABLE is True.
+    confirmed_at = DateTimeField()
 
-    password_rotation_demanded = field(DateTimeField(), auditable=False)
-    password_rotation_performed = field(DateTimeField(), auditable=False)
+    password_rotation_demanded = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        attribute=_visible_password_rotation_demanded,
+    )
+    password_rotation_performed = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        attribute=_visible_password_rotation_performed,
+    )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
     # Flask-Security's naming is counter-intuitive: `current_login_at` is the most recent
@@ -155,25 +204,25 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     last_login_at = field(
         DateTimeField(),
         auditable=False,
-        show_as_ref=True,
+        readonly=True,
         attribute=_visible_login_date,
     )
-    current_login_at = field(DateTimeField(), auditable=False)
-    last_login_ip = field(StringField(), auditable=False)
-    current_login_ip = field(StringField(), auditable=False)
-    login_count = field(IntField(), auditable=False)
+    current_login_at = DateTimeField()
+    last_login_ip = StringField()
+    current_login_ip = StringField()
+    login_count = IntField()
 
     # Two-Factor authentification fields
-    tf_primary_method = field(StringField(), auditable=False)
-    tf_totp_secret = field(StringField(), auditable=False)
+    tf_primary_method = StringField()
+    tf_totp_secret = StringField()
 
-    deleted = field(DateTimeField())
-    ext = field(MapField(GenericEmbeddedDocumentField()))
-    extras = field(ExtrasField(), auditable=False)
+    deleted = DateTimeField()
+    ext = MapField(GenericEmbeddedDocumentField())
+    extras = ExtrasField()
 
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
-    inactive_deletion_notified_at = field(DateTimeField(), auditable=False)
+    inactive_deletion_notified_at = DateTimeField()
 
     before_save = Signal()
     after_save = Signal()
@@ -468,6 +517,29 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)
+
+
+# Extended User reference exposing `email` and `last_login_at`, for the contexts where
+# org admins/editors are allowed to see member contact info — organization `members` and
+# `requests`. Both are kept off the default `__ref_fields__` so they don't leak in
+# activity/follow/post nested user references.
+#
+# `email` is declared here rather than reused from `__read_fields__` because the two
+# obey different rules: `_visible_email` grants org members a partial address, while the
+# user API hands third parties nothing (see `_email_for_admin_or_self`).
+user_with_email_ref_fields = api.inherit(
+    "UserReferenceWithEmail",
+    User.__ref_fields__,
+    {
+        "email": fields.String(
+            attribute=_visible_email,
+            description="The user email, obfuscated unless the caller may see it",
+            readonly=True,
+        ),
+        "last_login_at": User.__read_fields__["last_login_at"],
+    },
+)
+
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
