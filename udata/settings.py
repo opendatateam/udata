@@ -176,6 +176,11 @@ class Defaults(object):
     CAPTCHETAT_TOKEN_CACHE_KEY = "captchetat-bearer-token"
     CAPTCHETAT_STYLE_NAME = "captchaFR"
 
+    # Public "Recherche d'entreprises" API used to enrich organizations from their SIRET.
+    # Disabled by default; set to "https://recherche-entreprises.api.gouv.fr" to enable.
+    RECHERCHE_ENTREPRISES_BASE_URL = None
+    RECHERCHE_ENTREPRISES_TIMEOUT = 5
+
     # Sentry configuration
     SENTRY_DSN = None
     SENTRY_TAGS = {}
@@ -740,6 +745,7 @@ class Testing(object):
     HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
+    RECHERCHE_ENTREPRISES_BASE_URL = None
     API_TOKEN_SECRET = "test-secret"
     SPAM_WORDS = []
     SPAM_ALLOWED_LANGS = []
