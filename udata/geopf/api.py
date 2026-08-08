@@ -1,0 +1,154 @@
+import mongoengine
+from flask import current_app, redirect, request, session, url_for
+
+from udata.api import API, api
+from udata.auth import current_user
+from udata.core.dataset.models import Dataset
+from udata.uris import cdata_url, homepage_url
+from udata.utils import get_by
+
+from .auth import oauth, resolve_access_token, revoke_token, store_token
+from .client import GeopfClient, GeopfError, GeopfReauthRequired
+from .models import GeopfToken
+from .tasks import pull_offerings_from_geopf, push_resource_to_geopf
+
+ns = api.namespace("geopf", "Géoplateforme related operations")
+
+DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
+
+
+def _redirect_target(dataset_id: str | None) -> str:
+    """Resolve a dataset id to its cdata admin geopf page, falling back to the homepage."""
+    if dataset_id:
+        try:
+            dataset = Dataset.objects.get(id=dataset_id)
+            url = cdata_url(f"/admin/datasets/{dataset.id}/geopf", flash="connected")
+            if url:
+                return url
+        except (Dataset.DoesNotExist, mongoengine.errors.ValidationError):
+            pass
+    return homepage_url(flash="connected")
+
+
+@ns.route("/login/", endpoint="geopf_login")
+class GeopfLoginAPI(API):
+    @api.secure
+    @api.doc("geopf_login")
+    def get(self):
+        """Start the OAuth link between the current user and their geopf identity."""
+        session[DATASET_SESSION_KEY] = request.args.get("dataset_id")
+        redirect_uri = url_for("api.geopf_auth", _external=True)
+        return oauth.geopf.authorize_redirect(redirect_uri)
+
+
+@ns.route("/auth", endpoint="geopf_auth")
+class GeopfAuthAPI(API):
+    @api.secure
+    @api.doc("geopf_auth")
+    def get(self):
+        """OAuth callback: exchange the code, persist the token, bounce back to cdata."""
+        token = oauth.geopf.authorize_access_token()
+        store_token(current_user._get_current_object(), token)
+        dataset_id = session.pop(DATASET_SESSION_KEY, None)
+        return redirect(_redirect_target(dataset_id))
+
+
+@ns.route("/status/", endpoint="geopf_status")
+class GeopfStatusAPI(API):
+    @api.secure
+    @api.doc("geopf_status")
+    def get(self):
+        """Whether the current user has an active, usable geopf link.
+
+        A stored token whose access token is merely expired still counts as
+        connected (it gets refreshed here as a side effect); only a token
+        that can no longer be refreshed reports as disconnected.
+        """
+        try:
+            resolve_access_token(user=current_user._get_current_object())
+        except GeopfReauthRequired:
+            return {"connected": False, "expires_at": None}
+        geopf_token = GeopfToken.objects(user=current_user.id).first()
+        return {"connected": True, "expires_at": geopf_token.expires_at.isoformat()}
+
+
+@ns.route("/token/", endpoint="geopf_token")
+class GeopfTokenAPI(API):
+    @api.secure
+    @api.doc("geopf_disconnect")
+    def delete(self):
+        """Disconnect the current user from Géoplateforme."""
+        geopf_token = GeopfToken.objects(user=current_user.id).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
+        return "", 204
+
+
+@ns.route("/datastores/", endpoint="geopf_datastores")
+class GeopfDatastoresAPI(API):
+    @api.secure
+    @api.doc("geopf_datastores")
+    def get(self):
+        """List the entrepôts (datastores) available to the current user's geopf account."""
+        try:
+            access_token = resolve_access_token(user=current_user._get_current_object())
+        except GeopfReauthRequired:
+            api.abort(424, "Not connected to Géoplateforme")
+
+        try:
+            return GeopfClient(token=access_token).list_datastores()
+        except GeopfError as e:
+            api.abort(502, str(e))
+
+
+@ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push")
+class GeopfPushAPI(API):
+    @api.secure
+    @api.doc("geopf_push")
+    def post(self, dataset, rid):
+        """Push a resource to Géoplateforme, as the current user."""
+        dataset.permissions["edit_resources"].test()
+
+        resource = get_by(dataset.resources, id=rid)
+        if resource is None:
+            api.abort(404, "Resource not found")
+        pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
+        if not resource.format or resource.format.lower() not in pushable_formats:
+            api.abort(
+                400,
+                f"Only {', '.join(sorted(pushable_formats))} resources can be pushed to Géoplateforme",
+            )
+
+        user = current_user._get_current_object()
+        try:
+            resolve_access_token(user=user)
+        except GeopfReauthRequired:
+            api.abort(424, "Not connected to Géoplateforme")
+
+        datastore_id = (request.get_json(silent=True) or {}).get("datastore_id")
+        if not (datastore_id or dataset.extras.get("geopf:push:datastore-id")):
+            api.abort(400, "No datastore_id provided and no datastore configured for this dataset")
+
+        task = push_resource_to_geopf.delay(
+            str(dataset.id), str(resource.id), str(user.id), datastore_id
+        )
+        return {"task_id": task.id}, 202
+
+
+@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings")
+class GeopfPullOfferingsAPI(API):
+    @api.secure
+    @api.doc("geopf_pull_offerings")
+    def post(self, dataset):
+        """Pull Géoplateforme offerings into resources for this dataset, as the current user."""
+        dataset.permissions["edit_resources"].test()
+
+        user = current_user._get_current_object()
+        try:
+            resolve_access_token(user=user)
+        except GeopfReauthRequired:
+            api.abort(424, "Not connected to Géoplateforme")
+
+        task = pull_offerings_from_geopf.delay(str(dataset.id), str(user.id))
+        return {"task_id": task.id}, 202
