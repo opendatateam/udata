@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
@@ -94,6 +96,7 @@ class TopicElement(Auditable, Document):
             reindex.delay(*as_task_param(document.element))
         if document.topic:
             reindex.delay(*as_task_param(document.topic))
+            cls._bump_topic_last_modified(document.topic)
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -103,10 +106,16 @@ class TopicElement(Auditable, Document):
                 reindex.delay(*as_task_param(document.element))
             if document.topic:
                 reindex.delay(*as_task_param(document.topic))
+                cls._bump_topic_last_modified(document.topic)
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
         cls.on_delete.send(document)
+
+    @staticmethod
+    def _bump_topic_last_modified(topic):
+        """Update the parent topic's last_modified without emitting a topic update activity"""
+        Topic.objects(id=topic.id).update(last_modified=datetime.now(UTC))
 
 
 @generate_fields()
