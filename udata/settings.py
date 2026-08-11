@@ -45,9 +45,10 @@ class Defaults(object):
     CELERY_RESULT_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["pickle", "json"]
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-    CELERY_BEAT_SCHEDULER = "udata.tasks.Scheduler"
+    CELERY_BEAT_SCHEDULER = "celery_mongobeat.beat.MongoScheduler"
+    # Shared with `PeriodicTask.meta["collection"]`: the beat and the API must
+    # read the very same collection.
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
-    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = "default"

@@ -256,16 +256,17 @@ wheels = [
 ]
 
 [[package]]
-name = "celerybeat-mongo"
+name = "celery-mongobeat"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "celery" },
-    { name = "mongoengine" },
     { name = "pymongo" },
-    { name = "setuptools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cc/03/b627785eb48910179f5880f90576de501869d9ab8b6845bf979a10da389c/celerybeat-mongo-0.2.0.tar.gz", hash = "sha256:e65b2ec62da522b3d08987175e22c620b75c7c779d45bb15266da1925fda1f6f", size = 5035, upload-time = "2020-02-17T17:53:25.587Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/c6/79b9029b760555da9b0d1aeadef5e7600b1c1063655f28c29cbb36d050e2/celery_mongobeat-0.2.0.tar.gz", hash = "sha256:d5dfa195c75accfddca6b173945a8e8e401162374e15b800218c07a1233d2100", size = 31338, upload-time = "2026-02-17T15:39:14.78Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/20/d01dd3380cf1103ab0fbcbe0a74cc852c6bba632435f5efa1c74ccd9b73e/celery_mongobeat-0.2.0-py3-none-any.whl", hash = "sha256:8fe17a55fe88a4b71f9edd0332f154698236b890c85fa9dffac0c52f3c46dee1", size = 22024, upload-time = "2026-02-17T15:39:13.624Z" },
+]
 
 [[package]]
 name = "certifi"
@@ -2458,7 +2459,7 @@ dependencies = [
     { name = "boto3" },
     { name = "botocore" },
     { name = "celery" },
-    { name = "celerybeat-mongo" },
+    { name = "celery-mongobeat" },
     { name = "click" },
     { name = "elasticsearch" },
     { name = "elasticsearch-dsl" },
@@ -2552,7 +2553,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.26.102,<2.0.0" },
     { name = "botocore", specifier = ">=1.29.165,<2.0.0" },
     { name = "celery", specifier = ">=5.4.0,<6.0.0" },
-    { name = "celerybeat-mongo", specifier = ">=0.2.0,<1.0.0" },
+    { name = "celery-mongobeat", specifier = ">=0.2.0,<1.0.0" },
     { name = "click", specifier = ">=8.1.8,<9.0.0" },
     { name = "elasticsearch", specifier = ">=7.17.0,<8.0.0" },
     { name = "elasticsearch-dsl", specifier = ">=7.4.0,<8.0.0" },

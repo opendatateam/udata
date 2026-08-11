@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
-from celerybeatmongo.schedulers import MongoScheduler
 
 log = logging.getLogger(__name__)
 
@@ -29,14 +28,6 @@ class JobTask(ContextTask):
     @property
     def log(self):
         return get_task_logger(self.name)
-
-
-class Scheduler(MongoScheduler):
-    def apply_async(self, entry, **kwargs):
-        """A MongoScheduler storing the last task_id"""
-        result = super(Scheduler, self).apply_async(entry, **kwargs)
-        entry._task.last_run_id = result.id
-        return result
 
 
 celery = Celery(task_cls=ContextTask)

@@ -279,6 +279,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             # the model before `output()` (see `flask_restx.marshalling.marshal`), so it
             # costs nothing on responses that don't include the list.
             prefetch = getattr(parent, "__prefetch__", None)
+        elif field.field is None:
+            # An untyped `ListField()` holds arbitrary values, so there is no inner
+            # field to convert — expose them as-is, like `DictField` does.
+            field_read = field_write = restx_fields.Raw()
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -953,6 +957,11 @@ def patch(obj: _T, request) -> _T:
     from udata.mongo.engine import db
 
     data = request.json if isinstance(request, Request) else request
+    # A body that is valid JSON but not an object (a list, a string, a number, null)
+    # would blow up on `data.items()` below and surface as a 500. Endpoints used to get
+    # this for free from `api.validate()`, which every migrated endpoint has dropped.
+    if not isinstance(data, dict):
+        api.abort(400, "Expected a JSON object")
     api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
 
     for api_key, value in data.items():
