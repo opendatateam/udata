@@ -279,6 +279,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             # the model before `output()` (see `flask_restx.marshalling.marshal`), so it
             # costs nothing on responses that don't include the list.
             prefetch = getattr(parent, "__prefetch__", None)
+        elif field.field is None:
+            # An untyped `ListField()` holds arbitrary values, so there is no inner
+            # field to convert — expose them as-is, like `DictField` does.
+            field_read = field_write = restx_fields.Raw()
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",

@@ -182,6 +182,7 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json["name"], task.name)
         self.assertEqual(response.json["description"], task.description)
         self.assertEqual(response.json["task"], task.task)
+        self.assertEqual(response.json["schedule"], "5 * * * *")
 
     def test_update_job_need_admin(self):
         @job("a-job")
@@ -226,7 +227,7 @@ class JobsAPITest(APITestCase):
                 "name": task.name,
                 "description": "New description",
                 "task": task.task,
-                "crontab": task.crontab.to_json(),
+                "crontab": {"minute": "5", "hour": "2"},
             },
         )
         self.assert200(response)
@@ -235,7 +236,8 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json["name"], task.name)
         self.assertEqual(response.json["task"], task.task)
         self.assertEqual(response.json["description"], "New description")
-        self.assertIsNotNone(response.json["crontab"])
+        self.assertEqual(response.json["crontab"]["minute"], "5")
+        self.assertEqual(response.json["crontab"]["hour"], "2")
         self.assertIsNone(response.json["interval"])
 
     def test_update_job_change_type(self):

@@ -274,6 +274,16 @@ class FakeWithRename(Document):
 
 
 @generate_fields()
+class FakeWithUntypedList(Document):
+    """An untyped `ListField()` has no inner field to convert (e.g. a Celery task's
+    positional arguments, which may hold anything)."""
+
+    things = field(ListField())
+
+    meta = {"collection": "fake_with_untyped_list_api_fields"}
+
+
+@generate_fields()
 class FakeWithFilteredList(Document):
     """Exercises `attribute` on a list of embedded documents: the list is read through a
     property of the document that filters it."""
@@ -618,3 +628,10 @@ class ListAttributeFieldTest(PytestOnlyDBTestCase):
         assert len(embeddeds) == 1
         assert embeddeds[0]["title"] == "shown"
         assert embeddeds[0]["description"] == "a description"
+
+    def test_untyped_list_keeps_heterogeneous_values(self, app) -> None:
+        """An untyped `ListField()` has no inner field: its values go through as-is."""
+        obj = FakeWithUntypedList(things=["a string", 42, {"a-key": "a-value"}])
+        with app.test_request_context("/"):
+            things = marshal(obj, FakeWithUntypedList.__read_fields__)["things"]
+        assert things == ["a string", 42, {"a-key": "a-value"}]

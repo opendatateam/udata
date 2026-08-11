@@ -5,65 +5,14 @@ from flask import request
 from kombu.utils.encoding import safe_repr
 
 from udata.api import API, api, fields
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.tasks import celery, schedulables
 from udata.utils import id_or_404
 
-from .forms import CrontabTaskForm, IntervalTaskForm
-from .models import PERIODS, PeriodicTask
+from .models import PeriodicTask
 
 ns = api.namespace("workers", "Asynchronous workers related operations", path="")
-
-crontab_fields = api.model(
-    "Crontab",
-    {
-        "minute": fields.String(
-            description="Cron expression for minute", required=True, default="*"
-        ),
-        "hour": fields.String(description="Cron expression for hour", required=True, default="*"),
-        "day_of_week": fields.String(
-            description="Cron expression for day of week", required=True, default="*"
-        ),
-        "day_of_month": fields.String(
-            description="Cron expression for day of month", required=True, default="*"
-        ),
-        "month_of_year": fields.String(
-            description="Cron expression for month of year", required=True, default="*"
-        ),
-    },
-)
-
-interval_fields = api.model(
-    "Interval",
-    {
-        "every": fields.Integer(description="The interval without unit", required=True),
-        "period": fields.String(
-            description="The period/interval type", required=True, enum=PERIODS
-        ),
-    },
-)
-
-job_fields = api.model(
-    "Job",
-    {
-        "id": fields.String(description="The job unique identifier", readonly=True),
-        "name": fields.String(description="The job unique name", required=True),
-        "description": fields.String(description="The job description"),
-        "task": fields.String(
-            description="The task name", required=True, enum=[job.name for job in schedulables()]
-        ),
-        "crontab": fields.Nested(crontab_fields, allow_null=True),
-        "interval": fields.Nested(interval_fields, allow_null=True),
-        "args": fields.List(fields.Raw, description="The job execution arguments", default=[]),
-        "kwargs": fields.Raw(description="The job execution keyword arguments", default={}),
-        "schedule": fields.String(
-            attribute="schedule_display", description="The schedule display", readonly=True
-        ),
-        "last_run_at": fields.ISODateTime(description="The last job execution date", readonly=True),
-        "last_run_id": fields.String(description="The last execution task id", readonly=True),
-        "enabled": fields.Boolean(description="Is this job enabled", default=False),
-    },
-)
 
 task_fields = api.model(
     "Task",
@@ -79,27 +28,32 @@ task_fields = api.model(
 )
 
 
+def abort_if_both_schedules(payload):
+    """A task carries either a crontab or an interval, never both.
+
+    `PeriodicTask.clean()` enforces it too, but only at save time and as a 500;
+    this gives the caller a proper 400.
+    """
+    if "crontab" in payload and "interval" in payload:
+        api.abort(400, "Cannot define both interval and crontab schedule")
+
+
 @ns.route("/jobs/", endpoint="jobs")
 class JobsAPI(API):
     @api.secure(admin_permission)
     @api.doc(id="list_jobs")
-    @api.marshal_list_with(job_fields)
+    @api.marshal_list_with(PeriodicTask.__read_fields__)
     def get(self):
         """List all scheduled jobs"""
         return list(PeriodicTask.objects)
 
     @api.secure(admin_permission)
-    @api.expect(job_fields)
-    @api.marshal_with(job_fields)
+    @api.expect(PeriodicTask.__write_fields__)
+    @api.marshal_with(PeriodicTask.__read_fields__)
     def post(self):
         """Create a new scheduled job"""
-        if "crontab" in request.json and "interval" in request.json:
-            api.abort(400, "Cannot define both interval and crontab schedule")
-        if "crontab" in request.json:
-            form = api.validate(CrontabTaskForm)
-        else:
-            form = api.validate(IntervalTaskForm)
-        return form.save(), 201
+        abort_if_both_schedules(request.json)
+        return patch_and_save(PeriodicTask(), request), 201
 
 
 @ns.route("/jobs/<string:id>/", endpoint="job")
@@ -112,25 +66,27 @@ class JobAPI(API):
         return task
 
     @api.secure(admin_permission)
-    @api.marshal_with(job_fields)
+    @api.marshal_with(PeriodicTask.__read_fields__)
     def get(self, id):
         """Fetch a single scheduled job"""
         return self.get_or_404(id_or_404(id))
 
     @api.secure(admin_permission)
-    @api.marshal_with(job_fields)
+    @api.expect(PeriodicTask.__write_fields__)
+    @api.marshal_with(PeriodicTask.__read_fields__)
     def put(self, id):
         """Update a single scheduled job"""
         task = self.get_or_404(id_or_404(id))
+        abort_if_both_schedules(request.json)
+        task = patch(task, request)
+        # Switching schedule type only sends the new one, so the old one has to be
+        # dropped explicitly — otherwise `clean()` would reject the task as carrying both.
         if "crontab" in request.json:
             task.interval = None
-            task.crontab = PeriodicTask.Crontab()
-            form = api.validate(CrontabTaskForm, task)
-        else:
+        elif "interval" in request.json:
             task.crontab = None
-            task.interval = PeriodicTask.Interval()
-            form = api.validate(IntervalTaskForm, task)
-        return form.save()
+        task.save()
+        return task
 
     @api.secure(admin_permission)
     @api.response(204, "Successfuly deleted")
