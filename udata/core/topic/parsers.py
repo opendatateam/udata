@@ -12,8 +12,6 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
 
-# Maps each filter arg to the model it looks up, mirroring the
-# `reuse`/`dataservice` filters on the datasets list API.
 ELEMENT_FILTER_MODELS = {
     "dataset": Dataset,
     "reuse": Reuse,
@@ -132,7 +130,7 @@ class TopicApiParser(ModelApiParser):
             if not element_id:
                 continue
             if not ObjectId.is_valid(element_id):
-                api.abort(400, f"{arg.capitalize()} arg must be an identifier")
+                api.abort(400, f"{arg} arg must be an identifier")
             element = model.objects(id=element_id).first()
             if element is None or not element.permissions["read"].can():
                 # return an empty queryset when nested element can't be read
