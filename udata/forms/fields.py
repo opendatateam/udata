@@ -686,8 +686,9 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
+        # Some forms (like DiscussionCreateForm) are not model forms
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
@@ -718,8 +719,9 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
+        # Some forms (like DiscussionCreateForm) are not model forms
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id

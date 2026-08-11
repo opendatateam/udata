@@ -4,9 +4,10 @@ import click
 
 from udata.commands import KO, OK, cli, green, red
 from udata.harvest.backends import get_all_backends, is_backend_enabled
-from udata.models import Dataset
+from udata.models import Dataset, Organization, User
 
-from . import actions
+from . import actions, signals
+from .models import DEFAULT_HARVEST_FREQUENCY, HarvestSource
 
 log = logging.getLogger(__name__)
 
@@ -27,9 +28,15 @@ def grp():
 def create(name, url, backend, frequency=None, owner=None, org=None):
     """Create a new harvest source"""
     log.info('Creating a new Harvest source "%s"', name)
-    source = actions.create_source(
-        name, url, backend, frequency=frequency, owner=owner, organization=org
+    source = HarvestSource.objects.create(
+        name=name,
+        url=url,
+        backend=backend,
+        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
+        owner=User.get(owner) if owner else None,
+        organization=Organization.get(org) if org else None,
     )
+    signals.harvest_source_created.send(source)
     log.info(
         """Created a new Harvest source:
     name: {0.name},

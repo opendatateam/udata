@@ -28,8 +28,10 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
+from udata.utils import safe_unicode
 
 from .api_fields import source_permissions_fields
 
@@ -176,9 +178,85 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
+# `udata.harvest.backends` imports this module, so both checks below resolve it
+# lazily at call time rather than at import time.
+def check_backend_is_enabled(value, field, **_kwargs):
+    from .backends import get_enabled_backends
+
+    if not value:
+        raise FieldValidationError(_("A backend is required"), field=field)
+    if value not in get_enabled_backends():
+        raise FieldValidationError(f'Unknown backend "{value}"', field=field)
+
+
+def check_config_matches_backend(_value, data, obj, **_kwargs):
+    """Validate `config` against the specs declared by the selected backend.
+
+    Registered on both `backend` and `config` because either one changing can
+    invalidate the pair, and a check only runs for the field that was modified.
+    """
+    from .backends import get_enabled_backends
+
+    backend = get_enabled_backends().get(data.get("backend", obj.backend))
+    config = data.get("config", obj.config)
+    if backend is None or not config:
+        return
+
+    for filter_config in config.get("filters") or []:
+        if not ("key" in filter_config and "value" in filter_config):
+            raise FieldValidationError(
+                "A field should have both key and value properties", field="config"
+            )
+        specs = next((f for f in backend.filters if f.key == filter_config["key"]), None)
+        if not specs:
+            raise FieldValidationError(
+                f'Unknown filter key "{filter_config["key"]}" for "{backend.name}" backend',
+                field="config",
+            )
+        if isinstance(filter_config["value"], str):
+            filter_config["value"] = safe_unicode(filter_config["value"])  # Fix encoding error
+        if not isinstance(filter_config["value"], specs.type):
+            raise FieldValidationError(
+                f'"{specs.key}" filter should be of type "{specs.type.__name__}"', field="config"
+            )
+
+    for extra_config in config.get("extra_configs") or []:
+        if not ("key" in extra_config and "value" in extra_config):
+            raise FieldValidationError(
+                "A field should have both key and value properties", field="config"
+            )
+        specs = next((f for f in backend.extra_configs if f.key == extra_config["key"]), None)
+        if not specs:
+            raise FieldValidationError(
+                f'Unknown extra config key "{extra_config["key"]}" for "{backend.name}" backend',
+                field="config",
+            )
+        if not isinstance(extra_config["value"], specs.type):
+            raise FieldValidationError(
+                f'"{specs.key}" extra config should be of type "{specs.type.__name__}"',
+                field="config",
+            )
+
+    for key, enabled in (config.get("features") or {}).items():
+        if not isinstance(enabled, bool):
+            raise FieldValidationError("A feature should be a boolean", field="config")
+        if not any(f.key == key for f in backend.features):
+            raise FieldValidationError(
+                f'Unknown feature "{key}" for "{backend.name}" backend', field="config"
+            )
+
+
+# Both must run even when their field is absent from the payload: an update can
+# change the backend without resending the config (and the other way around),
+# and the preview endpoint never saves, so nothing else would catch an unknown
+# backend before `get_backend()` raises.
+check_backend_is_enabled.run_even_if_missing = True
+check_config_matches_backend.run_even_if_missing = True
+
+
 @generate_fields(searchable=True)
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
-    name = field(StringField(max_length=255), description="The source display name")
+    name = field(StringField(max_length=255, required=True), description="The source display name")
     slug = field(
         SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True),
         readonly=True,
@@ -188,9 +266,14 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
     url = field(URLField(required=True), description="The source base URL")
     backend = field(
         StringField(required=True),
+        checks=[check_backend_is_enabled, check_config_matches_backend],
         description="The source backend",
     )
-    config = field(DictField(), description="The configuration as key-value pairs")
+    config = field(
+        DictField(),
+        checks=[check_config_matches_backend],
+        description="The configuration as key-value pairs",
+    )
     periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=NULLIFY)
     created_at = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),

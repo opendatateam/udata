@@ -9,7 +9,7 @@ from udata.harvest.notifications import (
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
-from .. import actions
+from .. import actions, signals
 from .factories import HarvestSourceFactory, MockBackendsMixin
 
 
@@ -34,11 +34,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         admin2 = AdminFactory()
         user = UserFactory()
 
-        source = actions.create_source(
-            name="Test Source",
-            url="http://example.com",
-            backend="dcat",
-        )
+        source = HarvestSourceFactory(name="Test Source", url="http://example.com", backend="dcat")
+        signals.harvest_source_created.send(source)
 
         # Admins should receive notifications
         admin1_notifications = Notification.objects(user=admin1)
