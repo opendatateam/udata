@@ -12,13 +12,14 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
 
-# Classes a Topic's elements can be. Extending support to a new element class
-# only requires adding it here (see also TopicElement.element's choices).
-ELEMENT_MODELS = {
-    "Dataset": Dataset,
-    "Dataservice": Dataservice,
-    "Reuse": Reuse,
-}
+# Classes a Topic's elements can be, keyed by each model's own class name so
+# this can't drift from the field's own choices via a hand-typed string.
+# Extending support to a new element class means adding it both here and to
+# TopicElement.element's `choices`.
+ELEMENT_MODELS = {cls._class_name: cls for cls in (Dataset, Dataservice, Reuse)}
+assert set(ELEMENT_MODELS) == set(
+    TopicElement._fields["element"].choices
+), "ELEMENT_MODELS must mirror TopicElement.element's allowed choices"
 
 
 class TopicElementsParser(ModelApiParser):
@@ -76,7 +77,7 @@ class TopicApiParser(ModelApiParser):
             "element",
             type=str,
             location="args",
-            help="An element id to filter topics containing it (requires `element_class`)",
+            help="A nested element id to filter topics containing it (requires `element_class`)",
         )
         self.parser.add_argument(
             "element_class",
@@ -136,9 +137,7 @@ class TopicApiParser(ModelApiParser):
             model = ELEMENT_MODELS[args["element_class"]]
             element = model.objects(id=args["element"]).first()
             if element is None or not element.permissions["read"].can():
-                # Don't leak whether a private/nonexistent element exists: just
-                # yield no results, like the other id-based filters above do
-                # for an unknown id.
+                # return an empty queryset when nested element can't be read
                 return topics.none()
             topics = topics.for_element(element)
         return topics
