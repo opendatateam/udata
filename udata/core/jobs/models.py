@@ -15,6 +15,7 @@ from mongoengine.fields import (
 from udata.api_fields import field, generate_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
+from udata.tasks import schedulables
 
 __all__ = ("PeriodicTask", "PERIODS")
 
@@ -69,7 +70,14 @@ class PeriodicTask(Document):
 
     name = field(StringField(unique=True, required=True), description="The job unique name")
     description = field(StringField(), description="The job description")
-    task = field(StringField(required=True), description="The task name")
+    task = field(
+        StringField(required=True),
+        description="The task name",
+        # Resolved lazily: flask-restx evaluates a callable `enum` when it renders the
+        # schema, by which time Celery has registered the jobs — at import time here,
+        # `schedulables()` would still be empty.
+        enum=lambda: [job.name for job in schedulables()],
+    )
     crontab = field(EmbeddedDocumentField(Crontab), allow_null=True)
     interval = field(EmbeddedDocumentField(Interval), allow_null=True)
     args = field(ListField(), description="The job execution arguments")

@@ -5,7 +5,7 @@ from flask import request
 from kombu.utils.encoding import safe_repr
 
 from udata.api import API, api, fields
-from udata.api_fields import patch, patch_and_save
+from udata.api_fields import patch_and_save
 from udata.auth import admin_permission
 from udata.tasks import celery, schedulables
 from udata.utils import id_or_404
@@ -28,16 +28,6 @@ task_fields = api.model(
 )
 
 
-def abort_if_both_schedules(payload):
-    """A task carries either a crontab or an interval, never both.
-
-    `PeriodicTask.clean()` enforces it too, but only at save time and as a 500;
-    this gives the caller a proper 400.
-    """
-    if "crontab" in payload and "interval" in payload:
-        api.abort(400, "Cannot define both interval and crontab schedule")
-
-
 @ns.route("/jobs/", endpoint="jobs")
 class JobsAPI(API):
     @api.secure(admin_permission)
@@ -52,7 +42,6 @@ class JobsAPI(API):
     @api.marshal_with(PeriodicTask.__read_fields__)
     def post(self):
         """Create a new scheduled job"""
-        abort_if_both_schedules(request.json)
         return patch_and_save(PeriodicTask(), request), 201
 
 
@@ -77,16 +66,13 @@ class JobAPI(API):
     def put(self, id):
         """Update a single scheduled job"""
         task = self.get_or_404(id_or_404(id))
-        abort_if_both_schedules(request.json)
-        task = patch(task, request)
-        # Switching schedule type only sends the new one, so the old one has to be
-        # dropped explicitly — otherwise `clean()` would reject the task as carrying both.
-        if "crontab" in request.json:
+        # Sending one schedule and not the other switches type: drop the one left out,
+        # so `clean()` only rejects payloads that really carry both.
+        if "crontab" in request.json and "interval" not in request.json:
             task.interval = None
-        elif "interval" in request.json:
+        elif "interval" in request.json and "crontab" not in request.json:
             task.crontab = None
-        task.save()
-        return task
+        return patch_and_save(task, request)
 
     @api.secure(admin_permission)
     @api.response(204, "Successfuly deleted")

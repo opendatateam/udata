@@ -144,6 +144,35 @@ class JobsAPITest(APITestCase):
         response = self.post(url_for("api.jobs"), data)
         self.assertStatus(response, 400)
 
+    def test_create_job_with_args_and_kwargs(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        data = {
+            "name": "A parameterized job",
+            "task": "a-job",
+            "crontab": {"minute": "0"},
+            "args": ["an-arg", 42],
+            "kwargs": {"a-key": "a-value"},
+        }
+
+        self.login(AdminFactory())
+        response = self.post(url_for("api.jobs"), data)
+        self.assert201(response)
+
+        self.assertEqual(response.json["args"], ["an-arg", 42])
+        self.assertEqual(response.json["kwargs"], {"a-key": "a-value"})
+
+        task = PeriodicTask.objects.get(name=data["name"])
+        self.assertEqual(task.args, ["an-arg", 42])
+        self.assertEqual(task.kwargs, {"a-key": "a-value"})
+
+    def test_fail_on_create_with_a_non_object_body(self):
+        self.login(AdminFactory())
+        response = self.post(url_for("api.jobs"), ["not", "an", "object"])
+        self.assertStatus(response, 400)
+
     def test_create_manual_job(self):
         pass
 
@@ -274,6 +303,94 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json["interval"]["every"], 5)
         self.assertEqual(response.json["interval"]["period"], "minutes")
         self.assertIsNone(response.json["crontab"])
+
+    def test_update_job_change_type_back_to_crontab(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            task="a-job",
+            interval=PeriodicTask.Interval(every=5, period="minutes"),
+        )
+
+        self.login(AdminFactory())
+        response = self.put(
+            url_for("api.job", id=task.id),
+            {"name": task.name, "task": task.task, "crontab": {"minute": "5"}},
+        )
+        self.assert200(response)
+
+        self.assertEqual(response.json["crontab"]["minute"], "5")
+        self.assertIsNone(response.json["interval"])
+
+    def test_update_job_keeps_the_schedule_when_the_payload_carries_none(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+
+        self.login(AdminFactory())
+        response = self.put(url_for("api.job", id=task.id), {"description": "New description"})
+        self.assert200(response)
+
+        self.assertEqual(response.json["description"], "New description")
+        self.assertEqual(response.json["crontab"]["minute"], "5")
+
+    def test_update_job_drops_a_schedule_set_to_null(self):
+        """Sending `{"crontab": {...}, "interval": null}` is the REST-natural way to
+        switch schedule type, and must not be mistaken for carrying both."""
+
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            task="a-job",
+            interval=PeriodicTask.Interval(every=5, period="minutes"),
+        )
+
+        self.login(AdminFactory())
+        response = self.put(
+            url_for("api.job", id=task.id),
+            {"crontab": {"minute": "5"}, "interval": None},
+        )
+        self.assert200(response)
+
+        self.assertEqual(response.json["crontab"]["minute"], "5")
+        self.assertIsNone(response.json["interval"])
+
+    def test_fail_on_update_with_both_crontab_and_interval(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+
+        self.login(AdminFactory())
+        response = self.put(
+            url_for("api.job", id=task.id),
+            {
+                "crontab": {"minute": "0"},
+                "interval": {"every": 5, "period": "minutes"},
+            },
+        )
+        self.assertStatus(response, 400)
+
+        task.reload()
+        self.assertEqual(task.crontab.minute, "5")
+        self.assertIsNone(task.interval)
 
     def test_delete_job_need_admin(self):
         @job("a-job")

@@ -15,9 +15,20 @@ from mongoengine.connection import get_db
 from mongoengine.errors import ValidationError
 
 from udata.core.jobs.models import PeriodicTask
+from udata.db.migrations import load_migration
 from udata.settings import Defaults
 from udata.tasks import celery
 from udata.tests.api import PytestOnlyDBTestCase
+
+LEGACY_FIELDS = load_migration("2026-08-11-clean-periodic-task-legacy-fields.py").LEGACY_FIELDS
+
+#: What the old stack stored for a crontab, minus the minute the tests set themselves.
+CRONTAB_DEFAULTS = {
+    "hour": "*",
+    "day_of_week": "*",
+    "day_of_month": "*",
+    "month_of_year": "*",
+}
 
 
 def beat_entry_for(task: PeriodicTask):
@@ -100,6 +111,28 @@ class PeriodicTaskBeatContractTest(PytestOnlyDBTestCase):
         )
 
         assert PeriodicTask.objects.get(id=task.id).name == "a legacy job"
+
+    def test_migration_makes_a_legacy_document_usable_again(self):
+        """A document written by the old stack carries keys the strict model rejects,
+        and an embedded `_cls` the beat chokes on. The migration is what makes both work."""
+        legacy = {
+            "name": "a legacy job",
+            "task": "a-job",
+            "enabled": True,
+            "args": [],
+            "kwargs": {},
+            "_cls": "PeriodicTask.PeriodicTask",
+            "crontab": {"_cls": "Crontab.Crontab", **CRONTAB_DEFAULTS, "minute": "5"},
+            **{key: "a value" for key in LEGACY_FIELDS if "." not in key},
+        }
+        inserted = get_db().schedules.insert_one(legacy)
+
+        migration = load_migration("2026-08-11-clean-periodic-task-legacy-fields.py")
+        migration.migrate(get_db())
+
+        task = PeriodicTask.objects.get(id=inserted.inserted_id)
+        assert task.crontab.minute == "5"
+        assert beat_entry_for(task).schedule.minute == {5}
 
     def test_refuses_both_a_crontab_and_an_interval(self):
         with pytest.raises(ValidationError):
