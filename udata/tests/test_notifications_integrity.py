@@ -10,6 +10,7 @@ from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.features.transfer.factories import TransferFactory
+from udata.harvest.actions import delete_source, purge_sources
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.tests.api import PytestOnlyDBTestCase
@@ -74,9 +75,10 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
 
     def test_harvest_source_notification_cleanup_on_source_delete(self):
         """Test that notifications are cleaned up when a harvest source is deleted."""
-        # Create admin user and harvest source
-        admin = AdminFactory()
+        # The source is created first: creating one notifies every existing sysadmin,
+        # which would add a notification on top of the one this test creates.
         source = HarvestSourceFactory()
+        admin = AdminFactory()
 
         # Create a notification for this harvest source
         notification = Notification(
@@ -89,8 +91,6 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 1
 
         # Delete the harvest source
-        from udata.harvest.actions import delete_source
-
         delete_source(source)
 
         # Verify notification is cleaned up (via signal)
@@ -98,11 +98,10 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
 
     def test_harvest_source_notification_cleanup_on_source_purge(self):
         """Test that notifications are cleaned up when a harvest source is purged."""
-        # Create admin user and harvest source
-        from udata.core.user.factories import AdminFactory
-
-        admin = AdminFactory()
+        # The source is created first: creating one notifies every existing sysadmin,
+        # which would add a notification on top of the one this test creates.
         source = HarvestSourceFactory()
+        admin = AdminFactory()
 
         # Create a notification for this harvest source
         notification = Notification(
@@ -115,8 +114,6 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 1
 
         # Mark source as deleted and purge it
-        from udata.harvest.actions import delete_source, purge_sources
-
         delete_source(source)
         purge_sources()
 
