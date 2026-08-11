@@ -6,8 +6,19 @@ from mongoengine import Q
 
 from udata.api import add_pagination_arguments, api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
+
+# Classes a Topic's elements can be. Extending support to a new element class
+# only requires adding it here (see also TopicElement.element's choices).
+ELEMENT_MODELS = {
+    "Dataset": Dataset,
+    "Dataservice": Dataservice,
+    "Reuse": Reuse,
+}
 
 
 class TopicElementsParser(ModelApiParser):
@@ -61,6 +72,19 @@ class TopicApiParser(ModelApiParser):
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("owner", type=str, location="args")
         self.parser.add_argument("featured", type=boolean, location="args")
+        self.parser.add_argument(
+            "element",
+            type=str,
+            location="args",
+            help="An element id to filter topics containing it (requires `element_class`)",
+        )
+        self.parser.add_argument(
+            "element_class",
+            type=str,
+            location="args",
+            choices=list(ELEMENT_MODELS),
+            help="The class of the `element` arg",
+        )
 
     @staticmethod
     def parse_filters(topics, args):
@@ -104,4 +128,17 @@ class TopicApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             topics = topics.filter(owner=args["owner"])
+        if args.get("element"):
+            if not args.get("element_class"):
+                api.abort(400, "`element_class` is required when filtering by `element`")
+            if not ObjectId.is_valid(args["element"]):
+                api.abort(400, "Element arg must be an identifier")
+            model = ELEMENT_MODELS[args["element_class"]]
+            element = model.objects(id=args["element"]).first()
+            if element is None or not element.permissions["read"].can():
+                # Don't leak whether a private/nonexistent element exists: just
+                # yield no results, like the other id-based filters above do
+                # for an unknown id.
+                return topics.none()
+            topics = topics.for_element(element)
         return topics

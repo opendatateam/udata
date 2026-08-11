@@ -1,5 +1,6 @@
 import pytest
 from flask import url_for
+from mongoengine.context_managers import query_counter
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -12,6 +13,7 @@ from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
 from udata.core.topic.factories import (
+    TopicElementDataserviceFactory,
     TopicElementDatasetFactory,
     TopicElementFactory,
     TopicElementReuseFactory,
@@ -417,6 +419,132 @@ class TopicsListAPITest(APITestCase):
         self.login()
         response = self.post(url_for("apiv2.topics_list"), [{"not": "a topic"}])
         assert response.status_code == 400
+
+
+class TopicsListFilterByElementAPITest(APITestCase):
+    def test_filter_by_dataset_element(self):
+        dataset = DatasetFactory()
+        other_dataset = DatasetFactory()
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset)
+        other_topic = TopicFactory()
+        TopicElementDatasetFactory(topic=other_topic, element=other_dataset)
+
+        response = self.get(
+            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset")
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_dataservice_element(self):
+        dataservice = DataserviceFactory()
+        topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=topic, element=dataservice)
+        unrelated_topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=unrelated_topic, element=DataserviceFactory())
+
+        response = self.get(
+            url_for("apiv2.topics_list", element=dataservice.id, element_class="Dataservice")
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_reuse_element(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", element=reuse.id, element_class="Reuse"))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_element_excludes_private_topics(self):
+        dataset = DatasetFactory()
+        private_topic = TopicFactory(private=True)
+        TopicElementDatasetFactory(topic=private_topic, element=dataset)
+
+        response = self.get(
+            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset")
+        )
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_element_and_tag(self):
+        dataset = DatasetFactory()
+        tagged_topic = TopicFactory(tags=["my-tag"])
+        TopicElementDatasetFactory(topic=tagged_topic, element=dataset)
+        untagged_topic = TopicFactory(tags=["other-tag"])
+        TopicElementDatasetFactory(topic=untagged_topic, element=dataset)
+
+        response = self.get(
+            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset", tag="my-tag")
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(tagged_topic.id)
+
+    def test_filter_by_element_without_element_class_returns_400(self):
+        dataset = DatasetFactory()
+        response = self.get(url_for("apiv2.topics_list", element=dataset.id))
+        assert response.status_code == 400
+
+    def test_filter_by_element_with_invalid_element_class_returns_400(self):
+        dataset = DatasetFactory()
+        response = self.get(
+            url_for("apiv2.topics_list", element=dataset.id, element_class="NotAModel")
+        )
+        assert response.status_code == 400
+
+    def test_filter_by_element_with_invalid_id_returns_400(self):
+        response = self.get(
+            url_for("apiv2.topics_list", element="not-an-id", element_class="Dataset")
+        )
+        assert response.status_code == 400
+
+    def test_filter_by_unknown_element_returns_empty(self):
+        response = self.get(
+            url_for("apiv2.topics_list", element=DatasetFactory().id, element_class="Dataset")
+        )
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_element_query_count_is_independent_of_topic_size(self):
+        # Regression guard: nothing in this path should iterate a topic's
+        # elements one by one (e.g. the HATEOAS element count must stay a
+        # single `.count()`, not a per-element query), so the query count for
+        # a topic with many other elements must match one with few.
+        # This does NOT verify that TopicElement.element/.topic stay indexed -
+        # that's checked manually via `.explain()`, see PR description.
+        small_topic_dataset = DatasetFactory()
+        TopicElementDatasetFactory(topic=TopicFactory(), element=small_topic_dataset)
+
+        big_topic = TopicFactory()
+        big_topic_dataset = DatasetFactory()
+        TopicElementDatasetFactory(topic=big_topic, element=big_topic_dataset)
+        TopicElementDatasetFactory.create_batch(50, topic=big_topic)
+
+        with query_counter() as counter:
+            self.get(
+                url_for(
+                    "apiv2.topics_list", element=small_topic_dataset.id, element_class="Dataset"
+                )
+            )
+            small_topic_count = int(counter)
+
+        with query_counter() as counter:
+            self.get(
+                url_for("apiv2.topics_list", element=big_topic_dataset.id, element_class="Dataset")
+            )
+            big_topic_count = int(counter)
+
+        assert small_topic_count == big_topic_count
 
 
 class TopicAPITest(APITestCase):
