@@ -16,6 +16,7 @@ from udata.harvest.backends import get_enabled_backends
 from udata.models import Member, PeriodicTask
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
+    argvalues,
     assert200,
     assert201,
     assert204,
@@ -184,6 +185,27 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         """A source referencing a backend that is not enabled is rejected"""
         self.login()
         data = {"name": faker.word(), "url": faker.url(), "backend": "not-a-backend"}
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_empty_backend(self):
+        """An empty backend is rejected, even though it matches the unset stored value"""
+        self.login()
+        data = {"name": faker.word(), "url": faker.url(), "backend": ""}
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_non_object_config(self):
+        """A config that is not an object is rejected, not crashed on"""
+        self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": ["not-an-object"],
+        }
         response = self.post(url_for("api.harvest_sources"), data)
 
         assert400(response)
@@ -454,8 +476,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
             "backend": "factory",
         }
         api_url = url_for("api.harvest_source", source=source)
-        with assert_emit(signals.harvest_source_updated):
-            response = self.put(api_url, data)
+        response = self.put(api_url, data)
         assert200(response)
         assert response.json["url"] == new_url
 
@@ -697,6 +718,23 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
 
         assert_preview_datasets_have_no_link(response)
+
+    @pytest.mark.parametrize(
+        "payload",
+        argvalues(
+            ({"url": faker.url(), "backend": "factory"}, "no-name"),
+            ({"name": faker.word(), "backend": "factory"}, "no-url"),
+            ({"name": faker.word(), "url": faker.url()}, "no-backend"),
+            ({"name": faker.word(), "url": faker.url(), "backend": ""}, "empty-backend"),
+            ({"name": faker.word(), "url": "not-an-url", "backend": "factory"}, "invalid-url"),
+        ),
+    )
+    def test_source_from_incomplete_config(self, payload):
+        """The preview never saves, so the payload is validated by the field checks alone"""
+        self.login()
+        response = self.post(url_for("api.preview_harvest_source_config"), payload)
+
+        assert400(response)
 
     def test_delete_source(self):
         user = self.login()

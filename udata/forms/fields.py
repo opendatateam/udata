@@ -686,10 +686,8 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
-        # Some forms (like DiscussionCreateForm) are not model forms
         if (
-            isinstance(form, ModelForm)
-            and form.instance
+            form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
             and not admin_permission
@@ -719,7 +717,7 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
-        # Some forms (like DiscussionCreateForm) are not model forms
+        # Some forms (like DiscussionCommentForm) are not model forms
         if (
             isinstance(form, ModelForm)
             and form.instance
@@ -828,13 +826,3 @@ class ExtrasField(Field):
             self.errors = None
 
         return not bool(self.errors)
-
-
-class DictField(Field):
-    def process_formdata(self, valuelist):
-        if valuelist:
-            data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = data
-            else:
-                raise ValueError("Unsupported data type")

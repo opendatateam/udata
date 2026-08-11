@@ -17,6 +17,7 @@ from mongoengine.fields import (
 )
 from werkzeug.utils import cached_property
 
+from udata import uris
 from udata.api import fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.auth import admin_permission
@@ -31,7 +32,6 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
-from udata.utils import safe_unicode
 
 from .api_fields import source_permissions_fields
 
@@ -178,13 +178,27 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
+# `required` on the model guards the database, but MongoEngine only enforces it
+# at save() time and the preview endpoint builds a source it never saves. What a
+# payload must satisfy is therefore also expressed as checks, which `patch()`
+# runs on every write path.
+def check_is_filled(value, field, **_kwargs):
+    if not value:
+        raise FieldValidationError(_("This field is required"), field=field)
+
+
+def check_url_is_valid(value, field, **_kwargs):
+    try:
+        uris.validate(value)
+    except uris.ValidationError as e:
+        raise FieldValidationError(str(e), field=field)
+
+
 # `udata.harvest.backends` imports this module, so both checks below resolve it
 # lazily at call time rather than at import time.
 def check_backend_is_enabled(value, field, **_kwargs):
     from .backends import get_enabled_backends
 
-    if not value:
-        raise FieldValidationError(_("A backend is required"), field=field)
     if value not in get_enabled_backends():
         raise FieldValidationError(f'Unknown backend "{value}"', field=field)
 
@@ -201,9 +215,13 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
     config = data.get("config", obj.config)
     if backend is None or not config:
         return
+    if not isinstance(config, dict):
+        raise FieldValidationError("The configuration should be an object", field="config")
 
     for filter_config in config.get("filters") or []:
-        if not ("key" in filter_config and "value" in filter_config):
+        if not isinstance(filter_config, dict) or not (
+            "key" in filter_config and "value" in filter_config
+        ):
             raise FieldValidationError(
                 "A field should have both key and value properties", field="config"
             )
@@ -213,15 +231,15 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
                 f'Unknown filter key "{filter_config["key"]}" for "{backend.name}" backend',
                 field="config",
             )
-        if isinstance(filter_config["value"], str):
-            filter_config["value"] = safe_unicode(filter_config["value"])  # Fix encoding error
         if not isinstance(filter_config["value"], specs.type):
             raise FieldValidationError(
                 f'"{specs.key}" filter should be of type "{specs.type.__name__}"', field="config"
             )
 
     for extra_config in config.get("extra_configs") or []:
-        if not ("key" in extra_config and "value" in extra_config):
+        if not isinstance(extra_config, dict) or not (
+            "key" in extra_config and "value" in extra_config
+        ):
             raise FieldValidationError(
                 "A field should have both key and value properties", field="config"
             )
@@ -237,7 +255,10 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
                 field="config",
             )
 
-    for key, enabled in (config.get("features") or {}).items():
+    features = config.get("features") or {}
+    if not isinstance(features, dict):
+        raise FieldValidationError("Features should be an object", field="config")
+    for key, enabled in features.items():
         if not isinstance(enabled, bool):
             raise FieldValidationError("A feature should be a boolean", field="config")
         if not any(f.key == key for f in backend.features):
@@ -246,27 +267,36 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
             )
 
 
-# Both must run even when their field is absent from the payload: an update can
-# change the backend without resending the config (and the other way around),
-# and the preview endpoint never saves, so nothing else would catch an unknown
-# backend before `get_backend()` raises.
+# All of these must run even when their field is absent from the payload: a
+# required field has to be rejected when it is missing, and an update can change
+# the backend without resending the config (and the other way around).
+check_is_filled.run_even_if_missing = True
+check_url_is_valid.run_even_if_missing = True
 check_backend_is_enabled.run_even_if_missing = True
 check_config_matches_backend.run_even_if_missing = True
 
 
 @generate_fields(searchable=True)
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
-    name = field(StringField(max_length=255, required=True), description="The source display name")
+    name = field(
+        StringField(max_length=255, required=True),
+        checks=[check_is_filled],
+        description="The source display name",
+    )
     slug = field(
         SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True),
         readonly=True,
         description="The source permalink string",
     )
     description = field(StringField(), markdown=True, description="The source description")
-    url = field(URLField(required=True), description="The source base URL")
+    url = field(
+        URLField(required=True),
+        checks=[check_is_filled, check_url_is_valid],
+        description="The source base URL",
+    )
     backend = field(
         StringField(required=True),
-        checks=[check_backend_is_enabled, check_config_matches_backend],
+        checks=[check_is_filled, check_backend_is_enabled, check_config_matches_backend],
         description="The source backend",
     )
     config = field(

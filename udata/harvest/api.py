@@ -178,9 +178,7 @@ class SourceAPI(API):
     def put(self, source: HarvestSource):
         """Update a harvest source"""
         source.permissions["edit"].test()
-        source = patch_and_save(source, request)
-        signals.harvest_source_updated.send(source)
-        return source
+        return patch_and_save(source, request)
 
     @api.secure
     @api.doc("delete_harvest_source")
