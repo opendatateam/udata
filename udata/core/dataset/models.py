@@ -544,7 +544,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
                 "Weakly referenced object for resource.dataset no longer exists, "
                 "using a poor performance query instead."
             )
-            return Dataset.objects(resources__id=self.id).first()
+            return get_dataset_by_resource_id(self.id)
 
     def save(self, *args, **kwargs):
         if not self.dataset:
