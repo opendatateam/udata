@@ -329,6 +329,53 @@ def url_from_rdf(rdf, prop):
     return serialize_value(value)
 
 
+def _extract_theme_info(theme):
+    """
+    Extract normalized (label, uri, scheme_label, scheme_uri) from a DCAT.theme node.
+
+    For RdfResource themes, tries multiple label predicates with fallback.
+    Blank node identifiers are normalized to None.
+    For Literal themes, returns the value with no scheme info.
+    """
+    if isinstance(theme, RdfResource):
+        label = None
+        for pred in (SKOS.prefLabel, DCT.title, RDFS.label, SKOS.altLabel):
+            label = rdf_value(theme, pred)
+            if label:
+                break
+        uri = None if isinstance(theme.identifier, BNode) else theme.identifier.toPython()
+        scheme = theme.value(SKOS.inScheme)
+        scheme_uri = None
+        scheme_label = None
+        if scheme:
+            scheme_uri = (
+                None if isinstance(scheme.identifier, BNode) else scheme.identifier.toPython()
+            )
+            for pred in (DCT.title, SKOS.prefLabel, RDFS.label):
+                scheme_label = rdf_value(scheme, pred)
+                if scheme_label:
+                    break
+        return label, uri, scheme_label, scheme_uri
+    else:
+        return theme.toPython(), None, None, None
+
+
+def themes_data_from_rdf(rdf) -> list[dict]:
+    """
+    Extract structured theme information from DCAT.theme for analysis/storage.
+
+    Returns a list of dicts with label, uri, scheme_label, and scheme_uri for each theme.
+    Blank node URIs are normalized to None.
+    """
+    themes = []
+    for theme in rdf.objects(DCAT.theme):
+        label, uri, scheme_label, scheme_uri = _extract_theme_info(theme)
+        themes.append(
+            {"label": label, "uri": uri, "scheme_label": scheme_label, "scheme_uri": scheme_uri}
+        )
+    return themes
+
+
 def theme_labels_from_rdf(rdf):
     """
     Get theme labels to use as keywords.
@@ -339,33 +386,20 @@ def theme_labels_from_rdf(rdf):
       We filter on this thesaurus based on its name (expecting "GEMET - INSPIRE themes, version 1.0") or its uri.
     """
     for theme in rdf.objects(DCAT.theme):
+        label, uri, scheme_label, scheme_uri = _extract_theme_info(theme)
         if isinstance(theme, RdfResource):
-            label = rdf_value(theme, SKOS.prefLabel)
-            uri = theme.identifier.toPython()
-            if current_app.config["HVD_SUPPORT"] and uri in EU_HVD_CATEGORIES:
+            if current_app.config["HVD_SUPPORT"] and uri and uri in EU_HVD_CATEGORIES:
                 # Map label from EU HVD categories
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield "hvd"
             if current_app.config["INSPIRE_SUPPORT"]:
-                if uri.startswith(INSPIRE_GEMET_THEME_NAMESPACE):
+                if uri and uri.startswith(INSPIRE_GEMET_THEME_NAMESPACE):
                     yield "inspire"
-                else:
-                    # Check if the theme belongs to the GEMET INSPIRE scheme
-                    if scheme := theme.value(SKOS.inScheme):
-                        scheme_title = (
-                            rdf_value(scheme, DCT.title)
-                            or rdf_value(scheme, SKOS.prefLabel)
-                            or rdf_value(scheme, RDFS.label)
-                        )
-                        scheme_uri = scheme.identifier.toPython()
-                        if (
-                            scheme_title
-                            and scheme_title.lower() == "gemet - inspire themes, version 1.0"
-                        ) or scheme_uri in INSPIRE_GEMET_SCHEME_URIS:
-                            yield "inspire"
-        else:
-            label = theme.toPython()
+                elif (
+                    scheme_label and scheme_label.lower() == "gemet - inspire themes, version 1.0"
+                ) or (scheme_uri and scheme_uri in INSPIRE_GEMET_SCHEME_URIS):
+                    yield "inspire"
         if label:
             yield label
 
