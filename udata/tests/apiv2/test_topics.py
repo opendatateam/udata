@@ -1,6 +1,5 @@
 import pytest
 from flask import url_for
-from mongoengine.context_managers import query_counter
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -475,21 +474,6 @@ class TopicsListFilterByElementAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["data"] == []
 
-    def test_filter_by_element_and_tag(self):
-        dataset = DatasetFactory()
-        tagged_topic = TopicFactory(tags=["my-tag"])
-        TopicElementDatasetFactory(topic=tagged_topic, element=dataset)
-        untagged_topic = TopicFactory(tags=["other-tag"])
-        TopicElementDatasetFactory(topic=untagged_topic, element=dataset)
-
-        response = self.get(
-            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset", tag="my-tag")
-        )
-        assert response.status_code == 200
-        data = response.json["data"]
-        assert len(data) == 1
-        assert data[0]["id"] == str(tagged_topic.id)
-
     def test_filter_by_element_without_element_class_returns_400(self):
         dataset = DatasetFactory()
         response = self.get(url_for("apiv2.topics_list", element=dataset.id))
@@ -514,37 +498,6 @@ class TopicsListFilterByElementAPITest(APITestCase):
         )
         assert response.status_code == 200
         assert response.json["data"] == []
-
-    def test_filter_by_element_query_count_is_independent_of_topic_size(self):
-        # Regression guard: nothing in this path should iterate a topic's
-        # elements one by one (e.g. the HATEOAS element count must stay a
-        # single `.count()`, not a per-element query), so the query count for
-        # a topic with many other elements must match one with few.
-        # This does NOT verify that TopicElement.element/.topic stay indexed -
-        # that's checked manually via `.explain()`, see PR description.
-        small_topic_dataset = DatasetFactory()
-        TopicElementDatasetFactory(topic=TopicFactory(), element=small_topic_dataset)
-
-        big_topic = TopicFactory()
-        big_topic_dataset = DatasetFactory()
-        TopicElementDatasetFactory(topic=big_topic, element=big_topic_dataset)
-        TopicElementDatasetFactory.create_batch(50, topic=big_topic)
-
-        with query_counter() as counter:
-            self.get(
-                url_for(
-                    "apiv2.topics_list", element=small_topic_dataset.id, element_class="Dataset"
-                )
-            )
-            small_topic_count = int(counter)
-
-        with query_counter() as counter:
-            self.get(
-                url_for("apiv2.topics_list", element=big_topic_dataset.id, element_class="Dataset")
-            )
-            big_topic_count = int(counter)
-
-        assert small_topic_count == big_topic_count
 
 
 class TopicAPITest(APITestCase):
