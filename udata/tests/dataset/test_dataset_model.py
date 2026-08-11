@@ -1,3 +1,5 @@
+import gc
+import logging
 from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -632,6 +634,28 @@ class ResourceModelTest(PytestOnlyDBTestCase):
         with assert_not_emit(*unexpected_signals), assert_emit(post_save):
             resource.title = "New title"
             resource.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def test_dataset_fallback_ignores_ambiguous_id(self, caplog):
+        """A resource whose id is duplicated across datasets has no resolvable dataset
+
+        Once the weak reference to the parent dataset is collected, the only way back is
+        a global lookup on the resource id, which nothing makes unique across datasets.
+        Answering an arbitrary dataset would make `save()` write to that other dataset,
+        silently dropping the change made here.
+        """
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        dataset = DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        resource = dataset.resources[0]
+        del dataset
+        gc.collect()
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert resource.dataset is None
+        assert str(shared_id) in caplog.text
+
+        with pytest.raises(RuntimeError):
+            resource.save()
 
 
 class LicenseModelTest(PytestOnlyDBTestCase):

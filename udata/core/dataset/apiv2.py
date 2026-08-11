@@ -33,7 +33,7 @@ from .api_fields import (
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource
+from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -512,7 +512,7 @@ class DatasetSchemasAPI(API):
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
     def get(self, rid):
-        dataset = Dataset.objects(resources__id=rid).first()
+        dataset = get_dataset_by_resource_id(rid)
         if dataset:
             if not dataset.permissions["read"].can():
                 if not dataset.private and dataset.deleted:
