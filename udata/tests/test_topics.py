@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from mongoengine.errors import ValidationError
 
@@ -154,6 +156,50 @@ class TopicModelTest(PytestOnlyDBTestCase):
         topic = TopicFactory()
         with pytest.raises(ValidationError):
             TopicElementFactory(topic=topic, element=discussion)
+
+    def test_topic_element_change_updates_topic_last_modified(self, job_reindex):
+        """Creating, updating or deleting a TopicElement should bump the topic's last_modified"""
+        # mongoengine returns naive datetimes on reload, so compare against a naive value
+        old = datetime(2000, 1, 1)
+        topic = TopicFactory()
+
+        # Use .update() (bypasses pre_save) to plant an old timestamp before each op
+        Topic.objects(id=topic.id).update(last_modified=old)
+        element = TopicElementDatasetFactory(topic=topic)
+        topic.reload()
+        assert topic.last_modified > old
+
+        Topic.objects(id=topic.id).update(last_modified=old)
+        element.title = "Updated title"
+        element.save()
+        topic.reload()
+        assert topic.last_modified > old
+
+        Topic.objects(id=topic.id).update(last_modified=old)
+        element.delete()
+        topic.reload()
+        assert topic.last_modified > old
+
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_topic_element_change_reindexes_topic_once(self, job_reindex):
+        """Creating, updating or deleting a TopicElement should reindex the topic exactly once"""
+        topic = TopicFactory()
+
+        def topic_reindex_calls():
+            return [c for c in job_reindex.call_args_list if c.args == ("Topic", str(topic.id))]
+
+        job_reindex.reset_mock()
+        element = TopicElementDatasetFactory(topic=topic)
+        assert len(topic_reindex_calls()) == 1
+
+        job_reindex.reset_mock()
+        element.title = "Updated title"
+        element.save()
+        assert len(topic_reindex_calls()) == 1
+
+        job_reindex.reset_mock()
+        element.delete()
+        assert len(topic_reindex_calls()) == 1
 
     def test_topic_deletion_deletes_associated_elements(self):
         """Test that deleting a topic also deletes its associated TopicElements"""
