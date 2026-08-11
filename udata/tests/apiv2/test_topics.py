@@ -421,7 +421,7 @@ class TopicsListAPITest(APITestCase):
 
 
 class TopicsListFilterByElementAPITest(APITestCase):
-    def test_filter_by_dataset_element(self):
+    def test_filter_by_dataset(self):
         dataset = DatasetFactory()
         other_dataset = DatasetFactory()
         topic = TopicFactory()
@@ -429,85 +429,61 @@ class TopicsListFilterByElementAPITest(APITestCase):
         other_topic = TopicFactory()
         TopicElementDatasetFactory(topic=other_topic, element=other_dataset)
 
-        response = self.get(
-            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset")
-        )
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
         assert response.status_code == 200
         data = response.json["data"]
         assert len(data) == 1
         assert data[0]["id"] == str(topic.id)
 
-    def test_filter_by_dataservice_element(self):
+    def test_filter_by_dataservice(self):
         dataservice = DataserviceFactory()
         topic = TopicFactory()
         TopicElementDataserviceFactory(topic=topic, element=dataservice)
         unrelated_topic = TopicFactory()
         TopicElementDataserviceFactory(topic=unrelated_topic, element=DataserviceFactory())
 
-        response = self.get(
-            url_for("apiv2.topics_list", element=dataservice.id, element_class="Dataservice")
-        )
+        response = self.get(url_for("apiv2.topics_list", dataservice=dataservice.id))
         assert response.status_code == 200
         data = response.json["data"]
         assert len(data) == 1
         assert data[0]["id"] == str(topic.id)
 
-    def test_filter_by_reuse_element(self):
+    def test_filter_by_reuse(self):
         reuse = ReuseFactory()
         topic = TopicFactory()
         TopicElementReuseFactory(topic=topic, element=reuse)
 
-        response = self.get(url_for("apiv2.topics_list", element=reuse.id, element_class="Reuse"))
+        response = self.get(url_for("apiv2.topics_list", reuse=reuse.id))
         assert response.status_code == 200
         data = response.json["data"]
         assert len(data) == 1
         assert data[0]["id"] == str(topic.id)
 
-    def test_filter_by_element_excludes_private_topics(self):
+    def test_filter_by_dataset_excludes_private_topics(self):
         dataset = DatasetFactory()
         private_topic = TopicFactory(private=True)
         TopicElementDatasetFactory(topic=private_topic, element=dataset)
 
-        response = self.get(
-            url_for("apiv2.topics_list", element=dataset.id, element_class="Dataset")
-        )
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
         assert response.status_code == 200
         assert response.json["data"] == []
 
-    def test_filter_by_unreadable_element_returns_empty(self):
+    def test_filter_by_unreadable_dataset_returns_empty(self):
         # Topic is public, but the element itself is private.
         private_dataset = DatasetFactory(private=True)
         topic = TopicFactory()
         TopicElementDatasetFactory(topic=topic, element=private_dataset)
 
-        response = self.get(
-            url_for("apiv2.topics_list", element=private_dataset.id, element_class="Dataset")
-        )
+        response = self.get(url_for("apiv2.topics_list", dataset=private_dataset.id))
         assert response.status_code == 200
         assert response.json["data"] == []
 
-    def test_filter_by_element_without_element_class_returns_400(self):
-        dataset = DatasetFactory()
-        response = self.get(url_for("apiv2.topics_list", element=dataset.id))
+    def test_filter_by_invalid_dataset_id_returns_400(self):
+        response = self.get(url_for("apiv2.topics_list", dataset="not-an-id"))
         assert response.status_code == 400
 
-    def test_filter_by_element_with_invalid_element_class_returns_400(self):
-        dataset = DatasetFactory()
-        response = self.get(
-            url_for("apiv2.topics_list", element=dataset.id, element_class="NotAModel")
-        )
-        assert response.status_code == 400
-
-    def test_filter_by_element_with_invalid_id_returns_400(self):
-        response = self.get(
-            url_for("apiv2.topics_list", element="not-an-id", element_class="Dataset")
-        )
-        assert response.status_code == 400
-
-    def test_filter_by_unknown_element_returns_empty(self):
-        response = self.get(
-            url_for("apiv2.topics_list", element=DatasetFactory().id, element_class="Dataset")
-        )
+    def test_filter_by_unknown_dataset_returns_empty(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=DatasetFactory().id))
         assert response.status_code == 200
         assert response.json["data"] == []
 

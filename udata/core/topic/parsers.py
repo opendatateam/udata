@@ -6,11 +6,19 @@ from mongoengine import Q
 
 from udata.api import add_pagination_arguments, api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
-from udata.mongo.engine import db
 
-ELEMENT_CLASSES = TopicElement._fields["element"].choices
+# Maps each filter arg to the model it looks up, mirroring the
+# `reuse`/`dataservice` filters on the datasets list API.
+ELEMENT_FILTER_MODELS = {
+    "dataset": Dataset,
+    "reuse": Reuse,
+    "dataservice": Dataservice,
+}
 
 
 class TopicElementsParser(ModelApiParser):
@@ -65,17 +73,16 @@ class TopicApiParser(ModelApiParser):
         self.parser.add_argument("owner", type=str, location="args")
         self.parser.add_argument("featured", type=boolean, location="args")
         self.parser.add_argument(
-            "element",
-            type=str,
-            location="args",
-            help="A nested element id to filter topics containing it (requires `element_class`)",
+            "dataset", type=str, location="args", help="A dataset id to filter topics containing it"
         )
         self.parser.add_argument(
-            "element_class",
+            "reuse", type=str, location="args", help="A reuse id to filter topics containing it"
+        )
+        self.parser.add_argument(
+            "dataservice",
             type=str,
             location="args",
-            choices=ELEMENT_CLASSES,
-            help="The class of the `element` arg",
+            help="A dataservice id to filter topics containing it",
         )
 
     @staticmethod
@@ -120,13 +127,13 @@ class TopicApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             topics = topics.filter(owner=args["owner"])
-        if args.get("element"):
-            if not args.get("element_class"):
-                api.abort(400, "`element_class` is required when filtering by `element`")
-            if not ObjectId.is_valid(args["element"]):
-                api.abort(400, "Element arg must be an identifier")
-            model = db.resolve_model(args["element_class"])
-            element = model.objects(id=args["element"]).first()
+        for arg, model in ELEMENT_FILTER_MODELS.items():
+            element_id = args.get(arg)
+            if not element_id:
+                continue
+            if not ObjectId.is_valid(element_id):
+                api.abort(400, f"{arg.capitalize()} arg must be an identifier")
+            element = model.objects(id=element_id).first()
             if element is None or not element.permissions["read"].can():
                 # return an empty queryset when nested element can't be read
                 return topics.none()
