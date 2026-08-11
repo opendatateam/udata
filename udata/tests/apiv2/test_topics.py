@@ -474,6 +474,18 @@ class TopicsListFilterByElementAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["data"] == []
 
+    def test_filter_by_unreadable_element_returns_empty(self):
+        # Topic is public, but the element itself is private.
+        private_dataset = DatasetFactory(private=True)
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=private_dataset)
+
+        response = self.get(
+            url_for("apiv2.topics_list", element=private_dataset.id, element_class="Dataset")
+        )
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
     def test_filter_by_element_without_element_class_returns_400(self):
         dataset = DatasetFactory()
         response = self.get(url_for("apiv2.topics_list", element=dataset.id))
