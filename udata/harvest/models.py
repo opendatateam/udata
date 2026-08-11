@@ -250,9 +250,7 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
 
 # Both must run even when their field is absent from the payload: an update can
 # change the backend without resending the config (and the other way around),
-# and a stored backend that is no longer enabled must keep being rejected — as
-# the `SelectField` of the form this replaces did, since it validated the
-# instance value when the payload left it out.
+# and a stored backend that is no longer enabled must keep being rejected.
 check_backend_is_enabled.run_even_if_missing = True
 check_config_matches_backend.run_even_if_missing = True
 
@@ -264,7 +262,14 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         description="The source display name",
     )
     slug = field(
-        SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True),
+        SlugField(
+            max_length=255,
+            required=True,
+            unique=True,
+            populate_from="name",
+            update=True,
+            follow=True,
+        ),
         readonly=True,
         description="The source permalink string",
     )

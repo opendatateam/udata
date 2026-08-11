@@ -50,6 +50,15 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         user_notifications = Notification.objects(user=user)
         assert user_notifications.count() == 0
 
+    def test_saving_an_existing_source_creates_no_new_notification(self):
+        admin = AdminFactory()
+        source = HarvestSourceFactory()
+
+        source.url = "http://example.com/moved"
+        source.save()
+
+        assert Notification.objects(user=admin).count() == 1
+
     def test_validate_source_creates_notification_for_owner(self):
         owner = UserFactory()
         source = HarvestSourceFactory(owner=owner)

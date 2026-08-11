@@ -270,9 +270,7 @@ class PreviewSourceConfigAPI(API):
         """Preview an harvesting from a source created with the given payload"""
         source = source_from_payload(request)
         # This source is never saved, so nothing else would validate it.
-        # `clean=False` because `Owned.clean()` queries the database on a
-        # primary key this document does not have yet.
-        source.validate(clean=False)
+        source.validate()
         return actions.preview(source)
 
 

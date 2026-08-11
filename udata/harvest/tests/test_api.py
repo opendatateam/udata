@@ -24,6 +24,7 @@ from udata.tests.helpers import (
     assert403,
     assert404,
     assert_emit,
+    assert_redirects,
 )
 from udata.utils import faker
 
@@ -540,6 +541,57 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         response = self.put(api_url, {"backend": "not-a-backend"})
 
         assert400(response)
+
+    def test_update_source_with_a_stored_backend_no_longer_enabled(self):
+        """A backend left out of the payload is validated against the enabled ones too"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user, backend="not-enabled-anymore")
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"url": faker.url()})
+
+        assert400(response)
+
+    def test_update_source_renaming_redirects_the_previous_slug(self):
+        """Renaming a source moves its slug and leaves the previous one redirecting"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user, name="Old name")
+        previous_url = url_for("api.harvest_source", source=source)
+
+        response = self.put(previous_url, {"name": "New name"})
+        assert200(response)
+        assert response.json["slug"] == "new-name"
+
+        source.reload()
+        assert source.slug == "new-name"
+        assert_redirects(self.get(previous_url), url_for("api.harvest_source", source=source))
+
+    def test_update_source_resending_its_producer(self):
+        """Clients resend the unchanged producer on every save: that is not a change"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        source = HarvestSourceFactory(organization=org)
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"organization": str(org.id), "owner": None})
+
+        assert200(response)
+        source.reload()
+        assert source.organization == org
+
+    def test_update_source_cannot_change_its_producer(self):
+        """The producer is set at creation and cannot be transferred through an update"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+        new_org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"organization": str(new_org.id)})
+
+        assert400(response)
+        source.reload()
+        assert source.organization is None
+        assert source.owner == user
 
     def test_update_source_require_permission(self):
         """It should not update a source if not the owner"""
