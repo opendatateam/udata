@@ -6,20 +6,11 @@ from mongoengine import Q
 
 from udata.api import add_pagination_arguments, api
 from udata.api.parsers import ModelApiParser
-from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import Dataset
-from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
+from udata.mongo.engine import db
 
-# Classes a Topic's elements can be, keyed by each model's own class name so
-# this can't drift from the field's own choices via a hand-typed string.
-# Extending support to a new element class means adding it both here and to
-# TopicElement.element's `choices`.
-ELEMENT_MODELS = {cls._class_name: cls for cls in (Dataset, Dataservice, Reuse)}
-assert set(ELEMENT_MODELS) == set(
-    TopicElement._fields["element"].choices
-), "ELEMENT_MODELS must mirror TopicElement.element's allowed choices"
+ELEMENT_CLASSES = TopicElement._fields["element"].choices
 
 
 class TopicElementsParser(ModelApiParser):
@@ -83,7 +74,7 @@ class TopicApiParser(ModelApiParser):
             "element_class",
             type=str,
             location="args",
-            choices=list(ELEMENT_MODELS),
+            choices=ELEMENT_CLASSES,
             help="The class of the `element` arg",
         )
 
@@ -134,7 +125,7 @@ class TopicApiParser(ModelApiParser):
                 api.abort(400, "`element_class` is required when filtering by `element`")
             if not ObjectId.is_valid(args["element"]):
                 api.abort(400, "Element arg must be an identifier")
-            model = ELEMENT_MODELS[args["element_class"]]
+            model = db.resolve_model(args["element_class"])
             element = model.objects(id=args["element"]).first()
             if element is None or not element.permissions["read"].can():
                 # return an empty queryset when nested element can't be read
