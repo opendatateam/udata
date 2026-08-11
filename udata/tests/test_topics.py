@@ -180,6 +180,27 @@ class TopicModelTest(PytestOnlyDBTestCase):
         topic.reload()
         assert topic.last_modified > old
 
+    @pytest.mark.options(AUTO_INDEX=True, ELASTICSEARCH_URL="http://localhost:9200")
+    def test_topic_element_change_reindexes_topic_once(self, job_reindex):
+        """Creating, updating or deleting a TopicElement should reindex the topic exactly once"""
+        topic = TopicFactory()
+
+        def topic_reindex_calls():
+            return [c for c in job_reindex.call_args_list if c.args == ("Topic", str(topic.id))]
+
+        job_reindex.reset_mock()
+        element = TopicElementDatasetFactory(topic=topic)
+        assert len(topic_reindex_calls()) == 1
+
+        job_reindex.reset_mock()
+        element.title = "Updated title"
+        element.save()
+        assert len(topic_reindex_calls()) == 1
+
+        job_reindex.reset_mock()
+        element.delete()
+        assert len(topic_reindex_calls()) == 1
+
     def test_topic_deletion_deletes_associated_elements(self):
         """Test that deleting a topic also deletes its associated TopicElements"""
         topic = TopicWithElementsFactory()

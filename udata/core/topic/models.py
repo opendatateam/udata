@@ -94,7 +94,6 @@ class TopicElement(Auditable, Document):
             reindex.delay(*as_task_param(document.element))
         if document.topic:
             document.topic.save()
-            reindex.delay(*as_task_param(document.topic))
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -104,7 +103,6 @@ class TopicElement(Auditable, Document):
                 reindex.delay(*as_task_param(document.element))
             if document.topic:
                 document.topic.save()
-                reindex.delay(*as_task_param(document.topic))
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
