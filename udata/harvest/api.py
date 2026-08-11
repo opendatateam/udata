@@ -10,7 +10,7 @@ from udata.flask_mongoengine.pagination import Pagination
 from udata.harvest.backends import get_enabled_backends
 from udata.mongo.queryset import DBPaginator
 
-from . import actions, signals
+from . import actions
 from .models import (
     VALIDATION_ACCEPTED,
     HarvestItem,
@@ -134,6 +134,20 @@ source_parser.add_argument(
 )
 
 
+def source_from_payload(request) -> HarvestSource:
+    """Build the unsaved source described by a write payload.
+
+    Shared by creation and preview so that a preview harvests exactly what
+    creating the same source would, producer included.
+    """
+    source = patch(HarvestSource(), request)
+    if source.organization:
+        source.organization.permissions["harvest"].test()
+    if not source.owner and not source.organization:
+        source.owner = current_user._get_current_object()
+    return source
+
+
 @ns.route("/sources/", endpoint="harvest_sources")
 class SourcesAPI(API):
     @api.doc("list_harvest_sources")
@@ -153,13 +167,8 @@ class SourcesAPI(API):
     @api.marshal_with(HarvestSource.__read_fields__)
     def post(self):
         """Create a new harvest source"""
-        source = patch(HarvestSource(), request)
-        if source.organization:
-            source.organization.permissions["harvest"].test()
-        if not source.owner and not source.organization:
-            source.owner = current_user._get_current_object()
+        source = source_from_payload(request)
         source.save()
-        signals.harvest_source_created.send(source)
         return source, 201
 
 
@@ -259,9 +268,11 @@ class PreviewSourceConfigAPI(API):
     @api.marshal_with(preview_job_fields)
     def post(self):
         """Preview an harvesting from a source created with the given payload"""
-        source = patch(HarvestSource(), request)
-        if source.organization:
-            source.organization.permissions["harvest"].test()
+        source = source_from_payload(request)
+        # This source is never saved, so nothing else would validate it.
+        # `clean=False` because `Owned.clean()` queries the database on a
+        # primary key this document does not have yet.
+        source.validate(clean=False)
         return actions.preview(source)
 
 

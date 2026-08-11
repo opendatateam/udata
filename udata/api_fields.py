@@ -1068,12 +1068,8 @@ def patch(obj: _T, request) -> _T:
 
             # Run checks if value is modified.
             # We run checks here (before setattr) to compare old vs new value.
-            # On a creation there is nothing to compare to: an unmodified value
-            # means "equal to the empty default", not "already validated", so
-            # every submitted field is checked (e.g. `""`, normalized to `None`
-            # above, on a field the fresh document leaves unset).
             checks = info.get("checks", [])
-            if obj._created or is_value_modified(getattr(obj, key), value):
+            if is_value_modified(getattr(obj, key), value):
                 for check in checks:
                     # Pass the API key so error messages match the payload the caller sent.
                     run_check(check, value, api_key, obj, data)

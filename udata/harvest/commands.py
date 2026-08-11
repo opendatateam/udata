@@ -6,8 +6,8 @@ from udata.commands import KO, OK, cli, green, red
 from udata.harvest.backends import get_all_backends, is_backend_enabled
 from udata.models import Dataset, Organization, User
 
-from . import actions, signals
-from .models import DEFAULT_HARVEST_FREQUENCY, HarvestSource
+from . import actions
+from .models import HarvestSource
 
 log = logging.getLogger(__name__)
 
@@ -32,11 +32,10 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
         name=name,
         url=url,
         backend=backend,
-        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
+        frequency=frequency,
         owner=User.get(owner) if owner else None,
         organization=Organization.get(org) if org else None,
     )
-    signals.harvest_source_created.send(source)
     log.info(
         """Created a new Harvest source:
     name: {0.name},

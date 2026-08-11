@@ -190,7 +190,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert400(response)
 
     def test_create_source_with_empty_backend(self):
-        """An empty backend is rejected, even though it matches the unset stored value"""
+        """An empty backend is rejected"""
         self.login()
         data = {"name": faker.word(), "url": faker.url(), "backend": ""}
         response = self.post(url_for("api.harvest_sources"), data)
@@ -209,6 +209,35 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         response = self.post(url_for("api.harvest_sources"), data)
 
         assert400(response)
+
+    def test_create_source_with_non_object_features(self):
+        """Features that are not an object are rejected, not crashed on"""
+        self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": {"features": ["test"]},
+        }
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_explicit_null_producer(self):
+        """A payload spelling out both producers as null falls back to the current user"""
+        user = self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "owner": None,
+            "organization": None,
+        }
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert201(response)
+        assert response.json["owner"]["id"] == str(user.id)
+        assert response.json["organization"] is None
 
     def test_create_source_with_org(self):
         """It should create and attach a new source to an organization"""
@@ -730,11 +759,22 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         ),
     )
     def test_source_from_incomplete_config(self, payload):
-        """The preview never saves, so the payload is validated by the field checks alone"""
+        """The preview never saves, so it validates the source explicitly"""
         self.login()
         response = self.post(url_for("api.preview_harvest_source_config"), payload)
 
         assert400(response)
+
+    def test_source_from_config_previews_as_the_current_user(self):
+        """A preview harvests as the producer creating the same source would"""
+        user = self.login()
+        data = {"name": faker.word(), "url": faker.url(), "backend": "factory"}
+        response = self.post(url_for("api.preview_harvest_source_config"), data)
+
+        assert200(response)
+        assert all(
+            item["dataset"]["owner"]["id"] == str(user.id) for item in response.json["items"]
+        )
 
     def test_delete_source(self):
         user = self.login()
