@@ -243,7 +243,7 @@ CONTEXT = {
 }
 
 
-def serialize_value(value, unwrap: list[URIRef] | None = None):
+def serialize_value(value: RdfResource | URIRef | Literal, unwrap: list[URIRef] | None = None):
     """
     If the value is a URIRef or a Literal, return it as a string.
     If the value is a RdfResource:
@@ -260,16 +260,20 @@ def serialize_value(value, unwrap: list[URIRef] | None = None):
         return value.identifier.toPython()
 
 
-def rdf_unique_values(resource, predicate, unwrap: list[URIRef] | None = None) -> list[str]:
+def rdf_unique_values(
+    obj: RdfResource, predicate: URIRef, unwrap: list[URIRef] | None = None
+) -> list[str]:
     """Returns a list of unique serialized values for a predicate from a RdfResource"""
     return uniquify(
         value
-        for obj in resource.objects(predicate=predicate)
-        if (value := serialize_value(obj, unwrap=unwrap))
+        for o in obj.objects(predicate=predicate)
+        if (value := serialize_value(o, unwrap=unwrap))
     )
 
 
-def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
+def rdf_value(
+    obj: RdfResource, predicate: URIRef, default=None, unwrap: list[URIRef] | None = None
+):
     """
     Serialize the value for a predicate on a RdfResource,
     expecting one value only or (at most) one per language for Literals.
@@ -278,12 +282,17 @@ def rdf_value(obj, predicate, default=None, unwrap: list[URIRef] | None = None):
     return serialize_value(value, unwrap=unwrap) if value else default
 
 
+def rdf_resource(obj: RdfResource, predicate: URIRef) -> RdfResource | None:
+    value = obj.value(predicate)
+    return value if isinstance(value, RdfResource) else None
+
+
 def vocabulary_key(uri: str, vocabulary: Namespace) -> str | None:
     if uri.startswith(vocabulary):
         return uri.removeprefix(vocabulary)
 
 
-def default_lang_value(obj, predicate):
+def default_lang_value(obj: RdfResource, predicate: URIRef):
     """
     Return the value with the default language if multiple Literal values exist in different languages.
     """
@@ -447,7 +456,7 @@ def contact_points_from_rdf(
 
 
 def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
-    contact_point_org = obj.value(VCARD.org)  # deprecated vcard:org spec
+    contact_point_org = rdf_resource(obj, VCARD.org)  # deprecated vcard:org spec
     name = contact_point_name(
         rdf_value(obj, VCARD.fn),
         rdf_value(obj, VCARD["organization-name"])
@@ -473,20 +482,24 @@ def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, 
 
 
 def contact_point_from_foaf(obj: RdfResource) -> tuple[str | None, str | None, str | None]:
-    contact_point_org = obj.value(ORG.memberOf)
-    contact_point_member = obj.value(FOAF.member)
-    name = contact_point_name(
-        rdf_value(obj, FOAF.name)
-        or rdf_value(obj, SKOS.prefLabel)
-        or (rdf_value(contact_point_member, FOAF.name) if contact_point_member else None),
-        rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
-    )
-    email = (
-        rdf_value(obj, FOAF.mbox)
-        or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
-        or (contact_point_member and rdf_value(contact_point_member, FOAF.mbox))
-        or None
-    )
+    if org := rdf_resource(obj, ORG.memberOf):
+        name = contact_point_name(
+            rdf_value(obj, FOAF.name) or rdf_value(obj, SKOS.prefLabel),
+            rdf_value(org, FOAF.name),
+        )
+        email = rdf_value(obj, FOAF.mbox) or rdf_value(org, FOAF.mbox)
+    elif member := rdf_resource(obj, FOAF.member):
+        name = contact_point_name(
+            rdf_value(member, FOAF.name),
+            rdf_value(obj, FOAF.name) or rdf_value(obj, SKOS.prefLabel),
+        )
+        email = rdf_value(member, FOAF.mbox) or rdf_value(obj, FOAF.mbox)
+    else:
+        name = contact_point_name(
+            rdf_value(obj, FOAF.name) or rdf_value(obj, SKOS.prefLabel),
+            None,
+        )
+        email = rdf_value(obj, FOAF.mbox)
     email = email.replace("mailto:", "").strip() if email else None
     return name, email, None
 
