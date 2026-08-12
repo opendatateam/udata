@@ -3,7 +3,7 @@ from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
-from udata.api_fields import patch
+from udata.api_fields import patch, patch_and_save
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.flask_mongoengine.pagination import Pagination
@@ -11,7 +11,6 @@ from udata.harvest.backends import get_enabled_backends
 from udata.mongo.queryset import DBPaginator
 
 from . import actions
-from .forms import HarvestSourceForm
 from .models import (
     VALIDATION_ACCEPTED,
     HarvestItem,
@@ -135,6 +134,20 @@ source_parser.add_argument(
 )
 
 
+def source_from_payload(request) -> HarvestSource:
+    """Build the unsaved source described by a write payload.
+
+    Shared by creation and preview so that a preview harvests exactly what
+    creating the same source would, producer included.
+    """
+    source = patch(HarvestSource(), request)
+    if source.organization:
+        source.organization.permissions["harvest"].test()
+    if not source.owner and not source.organization:
+        source.owner = current_user._get_current_object()
+    return source
+
+
 @ns.route("/sources/", endpoint="harvest_sources")
 class SourcesAPI(API):
     @api.doc("list_harvest_sources")
@@ -154,10 +167,8 @@ class SourcesAPI(API):
     @api.marshal_with(HarvestSource.__read_fields__)
     def post(self):
         """Create a new harvest source"""
-        form = api.validate(HarvestSourceForm)
-        if form.organization.data:
-            form.organization.data.permissions["harvest"].test()
-        source = actions.create_source(**form.data)
+        source = source_from_payload(request)
+        source.save()
         return source, 201
 
 
@@ -176,9 +187,7 @@ class SourceAPI(API):
     def put(self, source: HarvestSource):
         """Update a harvest source"""
         source.permissions["edit"].test()
-        form = api.validate(HarvestSourceForm, source)
-        source = actions.update_source(source, form.data)
-        return source
+        return patch_and_save(source, request)
 
     @api.secure
     @api.doc("delete_harvest_source")
@@ -259,10 +268,10 @@ class PreviewSourceConfigAPI(API):
     @api.marshal_with(preview_job_fields)
     def post(self):
         """Preview an harvesting from a source created with the given payload"""
-        form = api.validate(HarvestSourceForm)
-        if form.organization.data:
-            form.organization.data.permissions["harvest"].test()
-        return actions.preview_from_config(**form.data)
+        source = source_from_payload(request)
+        # This source is never saved, so nothing else would validate it.
+        source.validate()
+        return actions.preview(source)
 
 
 @ns.route("/source/<harvest_source:source>/preview/", endpoint="preview_harvest_source")

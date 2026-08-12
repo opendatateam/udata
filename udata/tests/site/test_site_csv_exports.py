@@ -569,7 +569,10 @@ class SiteCsvExportsTest(APITestCase):
             for i in range(5)
         ]
         hidden_harvest = HarvestSource.objects.create(
-            backend="factory", url="https://example.com/deleted", deleted=datetime.now(UTC)
+            backend="factory",
+            name="deleted harvest",
+            url="https://example.com/deleted",
+            deleted=datetime.now(UTC),
         )
 
         response = self.get(url_for("api.site_harvests_csv"))
