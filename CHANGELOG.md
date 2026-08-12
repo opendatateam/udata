@@ -1,5 +1,15 @@
 # Changelog
 
+## 17.3.0 (2026-08-12)
+
+- docs: sync adapting-settings with current settings defaults ([#3902](https://github.com/opendatateam/udata/pull/3902))
+- feat(harvest): SEMICeu converter upgrade ([#3832](https://github.com/opendatateam/udata/pull/3832))
+- fix: block resource file replacement in read-only mode ([#3893](https://github.com/opendatateam/udata/pull/3893))
+- fix: return 200 instead of 500 when a nested entry is submitted with an unknown id ([#3891](https://github.com/opendatateam/udata/pull/3891))
+- fix(topics): update Topic.last_modified on element change ([#3897](https://github.com/opendatateam/udata/pull/3897))
+- test: run storage integration tests against a real S3 service ([#3894](https://github.com/opendatateam/udata/pull/3894))
+
+
 ## 17.2.0 (2026-08-05)
 
 - feat: migrate users to api fields ([#3777](https://github.com/opendatateam/udata/pull/3777))
