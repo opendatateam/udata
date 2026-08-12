@@ -1100,6 +1100,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             backend="csw-dcat",
             url=url,
             config={"features": {"geodcatap": geodcatap}},
+            organization=OrganizationFactory(),
         )
 
         backend = get_backend(source.backend)(source)
@@ -1124,6 +1125,13 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.description.startswith(
             "Part des ménages présents depuis 5 ans ou plus dans leur logement actuel"
         )
+
+        contact = dataset.contact_points[0]
+        assert contact.email == "contact@geo2france.fr"
+        if geodcatap:
+            assert contact.name == "Géo2France (Géo2France)"
+        else:
+            assert contact.name == "Géo2France"
 
         keywords = {
             "logement",
@@ -1155,6 +1163,25 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             assert resource.title == "rectangles_200m_menage_erbm"
             assert resource.type == "main"
             assert resource.format == "ogc:wms"
+
+        # Another dataset with several types of contacts
+        contacts = {
+            (c.name, c.email, c.contact_form, c.role)
+            for c in datasets["0ae299e7-10d6-4290-944e-c6c62e2aeabf"].contact_points
+        }
+        if geodcatap:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "custodian"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+            }
+        else:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "publisher"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+                ("Odema", "odema@cerdd.org", None, "publisher"),
+            }
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(
