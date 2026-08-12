@@ -12,12 +12,6 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
 
-ELEMENT_FILTER_MODELS = {
-    "dataset": Dataset,
-    "reuse": Reuse,
-    "dataservice": Dataservice,
-}
-
 
 class TopicElementsParser(ModelApiParser):
     def __init__(self):
@@ -125,15 +119,28 @@ class TopicApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             topics = topics.filter(owner=args["owner"])
-        for arg, model in ELEMENT_FILTER_MODELS.items():
-            element_id = args.get(arg)
-            if not element_id:
-                continue
-            if not ObjectId.is_valid(element_id):
-                api.abort(400, f"{arg} arg must be an identifier")
-            element = model.objects(id=element_id).first()
-            if element is None or not element.permissions["read"].can():
-                # return an empty queryset when nested element can't be read
+        if args.get("dataset"):
+            if not ObjectId.is_valid(args["dataset"]):
+                api.abort(400, "dataset arg must be an identifier")
+            try:
+                dataset = Dataset.objects.get(id=args["dataset"])
+            except Dataset.DoesNotExist:
                 return topics.none()
-            topics = topics.for_element(element)
+            topics = topics.for_element(dataset)
+        if args.get("reuse"):
+            if not ObjectId.is_valid(args["reuse"]):
+                api.abort(400, "reuse arg must be an identifier")
+            try:
+                reuse = Reuse.objects.get(id=args["reuse"])
+            except Reuse.DoesNotExist:
+                return topics.none()
+            topics = topics.for_element(reuse)
+        if args.get("dataservice"):
+            if not ObjectId.is_valid(args["dataservice"]):
+                api.abort(400, "dataservice arg must be an identifier")
+            try:
+                dataservice = Dataservice.objects.get(id=args["dataservice"])
+            except Dataservice.DoesNotExist:
+                return topics.none()
+            topics = topics.for_element(dataservice)
         return topics

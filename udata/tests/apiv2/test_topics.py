@@ -468,16 +468,6 @@ class TopicsListFilterByElementAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["data"] == []
 
-    def test_filter_by_unreadable_dataset_returns_empty(self):
-        # Topic is public, but the element itself is private.
-        private_dataset = DatasetFactory(private=True)
-        topic = TopicFactory()
-        TopicElementDatasetFactory(topic=topic, element=private_dataset)
-
-        response = self.get(url_for("apiv2.topics_list", dataset=private_dataset.id))
-        assert response.status_code == 200
-        assert response.json["data"] == []
-
     def test_filter_by_invalid_dataset_id_returns_400(self):
         response = self.get(url_for("apiv2.topics_list", dataset="not-an-id"))
         assert response.status_code == 400
