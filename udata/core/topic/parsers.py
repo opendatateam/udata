@@ -119,28 +119,28 @@ class TopicApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             topics = topics.filter(owner=args["owner"])
+
+        # Nested element objects filters
+        for arg in ("dataset", "reuse", "dataservice"):
+            if args.get(arg) and not ObjectId.is_valid(args[arg]):
+                api.abort(400, f"{arg} arg must be an identifier")
         if args.get("dataset"):
-            if not ObjectId.is_valid(args["dataset"]):
-                api.abort(400, "dataset arg must be an identifier")
             try:
                 dataset = Dataset.objects.get(id=args["dataset"])
             except Dataset.DoesNotExist:
                 return topics.none()
             topics = topics.for_element(dataset)
         if args.get("reuse"):
-            if not ObjectId.is_valid(args["reuse"]):
-                api.abort(400, "reuse arg must be an identifier")
             try:
                 reuse = Reuse.objects.get(id=args["reuse"])
             except Reuse.DoesNotExist:
                 return topics.none()
             topics = topics.for_element(reuse)
         if args.get("dataservice"):
-            if not ObjectId.is_valid(args["dataservice"]):
-                api.abort(400, "dataservice arg must be an identifier")
             try:
                 dataservice = Dataservice.objects.get(id=args["dataservice"])
             except Dataservice.DoesNotExist:
                 return topics.none()
             topics = topics.for_element(dataservice)
+
         return topics

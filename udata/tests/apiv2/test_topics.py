@@ -1,4 +1,5 @@
 import pytest
+from bson import ObjectId
 from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -474,6 +475,19 @@ class TopicsListFilterByElementAPITest(APITestCase):
 
     def test_filter_by_unknown_dataset_returns_empty(self):
         response = self.get(url_for("apiv2.topics_list", dataset=DatasetFactory().id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_nonexistent_dataset_still_validates_other_args(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse="not-an-id"))
+        assert response.status_code == 400
+
+    def test_filter_by_nonexistent_dataset_with_valid_reuse_returns_empty(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse=reuse.id))
         assert response.status_code == 200
         assert response.json["data"] == []
 
