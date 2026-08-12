@@ -491,6 +491,21 @@ class TopicsListFilterByElementAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["data"] == []
 
+    def test_filter_by_dataset_and_reuse_combined(self):
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        topic_both = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_both, element=dataset)
+        TopicElementReuseFactory(topic=topic_both, element=reuse)
+        topic_dataset_only = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_dataset_only, element=dataset)
+        topic_reuse_only = TopicFactory()
+        TopicElementReuseFactory(topic=topic_reuse_only, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id, reuse=reuse.id))
+        assert response.status_code == 200
+        assert [t["id"] for t in response.json["data"]] == [str(topic_both.id)]
+
 
 class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
