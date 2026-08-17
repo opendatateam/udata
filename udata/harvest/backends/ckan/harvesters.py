@@ -2,7 +2,6 @@ import json
 import logging
 from datetime import UTC, datetime
 from urllib.parse import urljoin
-from uuid import UUID
 
 from dateutil.parser import ParserError
 from mongoengine import Q
@@ -18,7 +17,7 @@ from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
 from udata.models import GeoZone, License, Resource, SpatialCoverage
 from udata.mongo.datetime_fields import DateRange
-from udata.utils import daterange_end, daterange_start, get_by
+from udata.utils import daterange_end, daterange_start
 
 from .schemas.ckan import schema as ckan_schema
 from .schemas.dkan import schema as dkan_schema
@@ -261,16 +260,17 @@ class CkanBackend(BaseBackend):
         for res in data["resources"]:
             if res["resource_type"] not in ALLOWED_RESOURCE_TYPES:
                 continue
-            try:
-                resource = get_by(dataset.resources, id=UUID(res["id"]))
-            except Exception:
-                log.error("Unable to parse resource ID %s", res["id"])
-                continue
+            remote_id = str(res["id"])
+            resource = next(
+                (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id),
+                None,
+            )
             if not resource:
-                resource = Resource(id=res["id"])
+                resource = Resource()
                 dataset.resources.append(resource)
             if not resource.harvest:
                 resource.harvest = HarvestResourceMetadata()
+            resource.harvest.remote_id = remote_id
             resource.title = res.get("name", "") or ""
             resource.description = parse_html(res.get("description"))
             resource.url = res["url"]

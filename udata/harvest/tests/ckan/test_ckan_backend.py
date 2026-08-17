@@ -42,7 +42,7 @@ def ckan_package(data):
     result_data.update(data)
 
     for res in result_data.get("resources", []):
-        res["id"] = faker.uuid4()
+        res.setdefault("id", faker.uuid4())
         res["resource_type"] = res.get("resource_type", "file")
         res["created"] = res.get("created", faker.date())
         res["last_modified"] = res.get("last_modified", faker.date())
@@ -149,6 +149,18 @@ def minimal(resource_data):
         "resources": [resource_data],
     }
     return data, {"resource_url": resource_data["url"]}
+
+
+@pytest.fixture
+def non_uuid_resource_id(resource_data):
+    resource_data["id"] = "42"
+    data = {
+        "name": faker.unique_string(),
+        "title": faker.sentence(),
+        "notes": faker.paragraph(),
+        "resources": [resource_data],
+    }
+    return data
 
 
 @pytest.fixture
@@ -486,6 +498,33 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset = dataset_for(result)
         assert dataset.harvest.remote_url == data["url"]
         assert dataset.harvest.ckan_source is None
+
+    @pytest.mark.ckan_data("minimal")
+    def test_resource_id_is_not_the_remote_id(self, result):
+        """Resource ids are resolved platform-wide by `/datasets/r/<id>`, so a remote one
+        cannot be adopted: two datasets harvested from the same portal would share it."""
+        remote_id = result["result"]["resources"][0]["id"]
+
+        resource = dataset_for(result).resources[0]
+        assert resource.harvest.remote_id == remote_id
+        assert str(resource.id) != remote_id
+
+    @pytest.mark.ckan_data("minimal")
+    def test_reharvesting_updates_the_same_resource(self, source, result):
+        dataset = dataset_for(result)
+        resource_id = dataset.resources[0].id
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert dataset.resources[0].id == resource_id
+
+    @pytest.mark.ckan_data("non_uuid_resource_id")
+    def test_non_uuid_remote_id_is_harvested(self, result):
+        """Remote ids are opaque strings: DKAN portals number their resources."""
+        resource = dataset_for(result).resources[0]
+        assert resource.harvest.remote_id == "42"
 
     @pytest.mark.ckan_data("ckan_url_is_a_string")
     def test_ckan_url_is_string(self, ckan, data, result):
