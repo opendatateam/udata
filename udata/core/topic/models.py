@@ -52,6 +52,11 @@ class TopicQuerySet(OwnedQuerySet):
     def hidden(self):
         return self(private=True)
 
+    def for_element(self, element):
+        """Filter topics containing the given element (Dataset, Dataservice...)."""
+        topic_ids = TopicElement.objects(element=element).no_dereference().distinct("topic")
+        return self(id__in=topic_ids)
+
 
 @generate_fields()
 class TopicElement(Auditable, Document):
@@ -63,6 +68,8 @@ class TopicElement(Auditable, Document):
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
     element = field(
+        # If modifying choices list below , also look at core/topic/parsers.py's
+        # parse_filters for filtering support
         GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
         nested_fields=api.model_reference,
         allow_null=True,
@@ -75,7 +82,12 @@ class TopicElement(Auditable, Document):
         "indexes": [
             {
                 "fields": ["$title", "$description"],
-            }
+            },
+            # Used to reverse-lookup the topics an element belongs to.
+            "element",
+            # Used by Topic.elements and the per-topic element count (incl. the
+            # API's HATEOAS "elements" link), so it stays indexed even on huge topics.
+            "topic",
         ],
         "auto_create_index_on_save": True,
     }
