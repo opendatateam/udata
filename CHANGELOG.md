@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.4.0 (2026-08-17)
+
+- feat: migrate discussion api fields ([#3775](https://github.com/opendatateam/udata/pull/3775))
+- feat: migrate harvest source writes to api fields ([#3900](https://github.com/opendatateam/udata/pull/3900))
+- fix(harvest): handle DCAT contact points more robustly ([#3862](https://github.com/opendatateam/udata/pull/3862))
+
+
 ## 17.3.0 (2026-08-12)
 
 - docs: sync adapting-settings with current settings defaults ([#3902](https://github.com/opendatateam/udata/pull/3902))
