@@ -47,102 +47,26 @@ def backfill_backends(db):
 
 
 def backfill_remote_ids(db):
-    selector = {
-        "harvest.backend": {"$in": CKAN_BACKENDS},
-        "resources.harvest": {"$exists": True},
-    }
-    filled, left = count_resources_to_fill(db, selector)
+    filled = 0
+    left = 0
+    for dataset in db.dataset.find({"harvest.backend": {"$in": CKAN_BACKENDS}}, {"resources": 1}):
+        updates = {}
+        for index, resource in enumerate(dataset["resources"]):
+            harvest = resource.get("harvest")
+            if not isinstance(harvest, dict):
+                # Only enrich harvest metadata that already exist. A resource without any was
+                # either added by hand, or harvested before udata stored them and its other
+                # harvest fields are lost for good: a block holding nothing but a remote id
+                # would claim a harvest that never happened. The backend recognizes those
+                # resources by their id.
+                left += 1
+            elif "remote_id" not in harvest:
+                # A rerun must not overwrite the id the deduplication reassigned.
+                updates[f"resources.{index}.harvest.remote_id"] = resource["_id"]
 
-    db.dataset.update_many(
-        selector,
-        [
-            {
-                "$set": {
-                    "resources": {
-                        "$map": {
-                            "input": "$resources",
-                            "as": "resource",
-                            "in": {
-                                "$cond": [
-                                    # Only enrich harvest metadata that already exist. A resource
-                                    # without any was either added by hand, or harvested before
-                                    # udata stored them and its other harvest fields are lost for
-                                    # good: a block holding nothing but a remote id would claim a
-                                    # harvest that never happened. The backend recognizes those
-                                    # resources by their id.
-                                    {"$eq": [{"$type": "$$resource.harvest"}, "object"]},
-                                    {
-                                        "$mergeObjects": [
-                                            "$$resource",
-                                            {
-                                                "harvest": {
-                                                    "$mergeObjects": [
-                                                        # Default first: an existing remote id
-                                                        # wins, so a rerun never stores the id
-                                                        # the deduplication reassigned.
-                                                        {"remote_id": "$$resource._id"},
-                                                        "$$resource.harvest",
-                                                    ]
-                                                }
-                                            },
-                                        ]
-                                    },
-                                    "$$resource",
-                                ]
-                            },
-                        }
-                    }
-                }
-            }
-        ],
-    )
+        if updates:
+            db.dataset.update_one({"_id": dataset["_id"]}, {"$set": updates})
+            filled += len(updates)
+
     log.info(f"{filled} resources given their remote id.")
     log.info(f"{left} resources left without one, the backend matches those by id.")
-
-
-def count_resources_to_fill(db, selector):
-    """What this run is about to write, counted while the field is still missing"""
-    harvested = {"$eq": [{"$type": "$$resource.harvest"}, "object"]}
-    counts = next(
-        db.dataset.aggregate(
-            [
-                {"$match": selector},
-                {
-                    "$project": {
-                        "filled": {
-                            "$size": {
-                                "$filter": {
-                                    "input": "$resources",
-                                    "as": "resource",
-                                    "cond": {
-                                        "$and": [
-                                            harvested,
-                                            {
-                                                "$eq": [
-                                                    {"$type": "$$resource.harvest.remote_id"},
-                                                    "missing",
-                                                ]
-                                            },
-                                        ]
-                                    },
-                                }
-                            }
-                        },
-                        "left": {
-                            "$size": {
-                                "$filter": {
-                                    "input": "$resources",
-                                    "as": "resource",
-                                    "cond": {"$not": harvested},
-                                }
-                            }
-                        },
-                    }
-                },
-                {"$group": {"_id": None, "filled": {"$sum": "$filled"}, "left": {"$sum": "$left"}}},
-            ],
-            allowDiskUse=True,
-        ),
-        {"filled": 0, "left": 0},
-    )
-    return counts["filled"], counts["left"]
