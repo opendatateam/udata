@@ -14,7 +14,8 @@ from udata.db import migrations
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.tests.api import PytestOnlyDBTestCase
 
-MIGRATION = "2026-08-17-decouple-resource-id-from-ckan-remote-id.py"
+BACKFILL = "2026-08-17-backfill-harvest-remote-ids.py"
+DEDUPLICATE = "2026-08-18-deduplicate-resource-ids.py"
 
 
 def resource(resource_id=None, harvested=True, **kwargs):
@@ -32,7 +33,10 @@ def resources_of(dataset):
 
 
 def migrate():
-    migrations.get(MIGRATION).migrate(get_db())
+    """Both migrations, in the order `udata db migrate` runs them"""
+    db = get_db()
+    migrations.get(BACKFILL).migrate(db)
+    migrations.get(DEDUPLICATE).migrate(db)
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["ckan", "dkan"])

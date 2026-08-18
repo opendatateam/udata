@@ -1,22 +1,14 @@
 """
-The CKAN backend used to adopt the remote resource id as `Resource.id`, which udata resolves
-platform-wide through the `/datasets/r/<id>` permalink. Whenever a source changed the remote id
-of one of its datasets, udata created a new dataset and archived the previous one, leaving
-several datasets holding resources with the same id. `get_dataset_by_resource_id` refuses to
-answer for such an ambiguous id, so those permalinks return a 404.
-
-The backend now correlates on `harvest.remote_id`, so this migration first gives that field to
-the resources harvested before the change (their id *is* their remote id), then hands a fresh
-id to every duplicated copy but one. The order matters: reassigning ids first would lose the
-remote ids the backfill reads.
+The CKAN backend used to adopt the remote resource id as `Resource.id`. It now correlates on
+`harvest.remote_id`, so the resources harvested before the change need that field: their id *is*
+their remote id.
 
 `harvest.backend` comes first, because the backfill selects on it and it is missing wherever a
-source stopped running (see `backfill_backends`).
+source stopped running (see `backfill_backends`). And `2026-08-18-deduplicate-resource-ids` comes
+after both: reassigning ids first would lose the remote ids this backfill reads.
 """
 
 import logging
-from datetime import datetime
-from uuid import uuid4
 
 from udata.harvest.backends import get_all_backends
 
@@ -29,7 +21,6 @@ CKAN_BACKENDS = ("CKAN", "DKAN")
 def migrate(db):
     backfill_backends(db)
     backfill_remote_ids(db)
-    deduplicate_resource_ids(db)
 
 
 def backfill_backends(db):
@@ -88,7 +79,7 @@ def backfill_remote_ids(db):
                                                     "$mergeObjects": [
                                                         # Default first: an existing remote id
                                                         # wins, so a rerun never stores the id
-                                                        # the deduplication below reassigned.
+                                                        # the deduplication reassigned.
                                                         {"remote_id": "$$resource._id"},
                                                         "$$resource.harvest",
                                                     ]
@@ -155,63 +146,3 @@ def count_resources_to_fill(db, selector):
         {"filled": 0, "left": 0},
     )
     return counts["filled"], counts["left"]
-
-
-def deduplicate_resource_ids(db):
-    duplicates = list(
-        db.dataset.aggregate(
-            [
-                {"$match": {"resources.0": {"$exists": True}}},
-                {"$unwind": "$resources"},
-                {"$group": {"_id": "$resources._id", "datasets": {"$addToSet": "$_id"}}},
-                {"$match": {"$expr": {"$gt": [{"$size": "$datasets"}, 1]}}},
-            ],
-            allowDiskUse=True,
-        )
-    )
-    log.info(f"{len(duplicates)} resource ids are shared by several datasets.")
-
-    reassigned = 0
-    for duplicate in duplicates:
-        resource_id = duplicate["_id"]
-        datasets = list(
-            db.dataset.find(
-                {"_id": {"$in": duplicate["datasets"]}},
-                {"deleted": 1, "archived": 1, "harvest.last_update": 1},
-            )
-        )
-        if not datasets:
-            continue
-        canonical = pick_canonical(datasets)
-        for dataset in datasets:
-            if dataset["_id"] == canonical["_id"]:
-                continue
-            db.dataset.update_one(
-                {"_id": dataset["_id"], "resources._id": resource_id},
-                {"$set": {"resources.$._id": str(uuid4())}},
-            )
-            reassigned += 1
-
-    log.info(f"{reassigned} duplicated resources given a new id.")
-
-
-def pick_canonical(datasets):
-    """The copy that keeps the id, and therefore the permalink
-
-    `get_dataset_by_resource_id` queries the datasets without `visible()`, so a deleted or an
-    archived copy is enough to make an id ambiguous and has to be renumbered like any other.
-    Deleted first, then archived, so that whatever a reader can still reach keeps the id.
-
-    Being live is not enough to tell the current copy from a stale one: a dataset can be left
-    unarchived while its harvest already flagged it `not-on-remote`. The last harvest date
-    settles it, then the creation date so that a rerun picks the same one.
-    """
-    return max(
-        datasets,
-        key=lambda dataset: (
-            dataset.get("deleted") is None and dataset.get("archived") is None,
-            dataset.get("deleted") is None,
-            (dataset.get("harvest") or {}).get("last_update") or datetime.min,
-            dataset["_id"],
-        ),
-    )
