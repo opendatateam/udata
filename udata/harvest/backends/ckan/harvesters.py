@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import UTC, datetime
 from urllib.parse import urljoin
+from uuid import UUID
 
 from dateutil.parser import ParserError
 from mongoengine import Q
@@ -15,7 +16,7 @@ from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
-from udata.models import GeoZone, License, Resource, SpatialCoverage
+from udata.models import Dataset, GeoZone, License, Resource, SpatialCoverage
 from udata.mongo.datetime_fields import DateRange
 from udata.utils import daterange_end, daterange_start
 
@@ -28,7 +29,7 @@ log = logging.getLogger(__name__)
 ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
 
 
-def find_resource(dataset, remote_id: str) -> Resource | None:
+def find_resource(dataset: Dataset, remote_id: str) -> Resource | None:
     """The resource a previous run created for this remote one, if any.
 
     Until this backend stopped adopting the remote id as `Resource.id`, that id *was* the
@@ -36,9 +37,19 @@ def find_resource(dataset, remote_id: str) -> Resource | None:
     survived, but resources harvested before udata stored any have nothing to copy it into,
     and no dataset has it before the migration runs. Their id is the only link left.
     """
-    return next(
+    resource = next(
         (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id), None
-    ) or next((r for r in dataset.resources if str(r.id) == remote_id), None)
+    )
+    if resource:
+        return resource
+    try:
+        # A remote id is an opaque string, but when it is a UUID the portal may spell it in
+        # any case or without dashes: comparing `UUID` compares the value, as the code that
+        # adopted those ids did.
+        adopted_id = UUID(remote_id)
+    except ValueError:
+        return None
+    return next((r for r in dataset.resources if r.id == adopted_id), None)
 
 
 class CkanBackend(BaseBackend):

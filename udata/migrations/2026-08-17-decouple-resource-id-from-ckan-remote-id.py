@@ -6,7 +6,7 @@ several datasets holding resources with the same id. `get_dataset_by_resource_id
 answer for such an ambiguous id, so those permalinks return a 404.
 
 The backend now correlates on `harvest.remote_id`, so this migration first gives that field to
-the resources harvested before the change — their id *is* their remote id — then hands a fresh
+the resources harvested before the change (their id *is* their remote id), then hands a fresh
 id to every duplicated copy but one. The order matters: reassigning ids first would lose the
 remote ids the backfill reads.
 
@@ -15,6 +15,7 @@ source stopped running (see `backfill_backends`).
 """
 
 import logging
+from datetime import datetime
 from uuid import uuid4
 
 from udata.harvest.backends import get_all_backends
@@ -37,9 +38,8 @@ def backfill_backends(db):
     `harvest.backend` is only ever written by a harvest run, and the migration that created
     `harvest` from the extras predates the field by a month, so it could not fill it. Datasets
     whose source has since stopped running kept an empty one, which silently narrows every
-    query selecting on it — `backfill_remote_ids` below included. The source knows.
+    query selecting on it (`backfill_remote_ids` below included). The source knows.
     """
-    updated = 0
     for backend in get_all_backends().values():
         source_ids = [
             str(source["_id"])
@@ -51,16 +51,19 @@ def backfill_backends(db):
             {"harvest.source_id": {"$in": source_ids}, "harvest.backend": None},
             {"$set": {"harvest.backend": backend.display_name}},
         )
-        updated += result.modified_count
-    log.info(f"{updated} harvested datasets given the backend of their source.")
+        if result.modified_count:
+            log.info(f"{result.modified_count} datasets given the {backend.display_name} backend.")
 
 
 def backfill_remote_ids(db):
-    result = db.dataset.update_many(
-        {
-            "harvest.backend": {"$in": CKAN_BACKENDS},
-            "resources.harvest": {"$exists": True},
-        },
+    selector = {
+        "harvest.backend": {"$in": CKAN_BACKENDS},
+        "resources.harvest": {"$exists": True},
+    }
+    filled, left = count_resources_to_fill(db, selector)
+
+    db.dataset.update_many(
+        selector,
         [
             {
                 "$set": {
@@ -70,34 +73,24 @@ def backfill_remote_ids(db):
                             "as": "resource",
                             "in": {
                                 "$cond": [
-                                    {
-                                        "$and": [
-                                            # Only enrich harvest metadata that already exist.
-                                            # A resource without any was either added by hand,
-                                            # or harvested before udata stored them and its
-                                            # other harvest fields are lost for good: a block
-                                            # holding nothing but a remote id would claim a
-                                            # harvest that never happened. The backend
-                                            # recognizes those resources by their id.
-                                            {"$eq": [{"$type": "$$resource.harvest"}, "object"]},
-                                            # A rerun must not store the id reassigned by the
-                                            # deduplication below as the remote one.
-                                            {
-                                                "$eq": [
-                                                    {"$type": "$$resource.harvest.remote_id"},
-                                                    "missing",
-                                                ]
-                                            },
-                                        ]
-                                    },
+                                    # Only enrich harvest metadata that already exist. A resource
+                                    # without any was either added by hand, or harvested before
+                                    # udata stored them and its other harvest fields are lost for
+                                    # good: a block holding nothing but a remote id would claim a
+                                    # harvest that never happened. The backend recognizes those
+                                    # resources by their id.
+                                    {"$eq": [{"$type": "$$resource.harvest"}, "object"]},
                                     {
                                         "$mergeObjects": [
                                             "$$resource",
                                             {
                                                 "harvest": {
                                                     "$mergeObjects": [
-                                                        "$$resource.harvest",
+                                                        # Default first: an existing remote id
+                                                        # wins, so a rerun never stores the id
+                                                        # the deduplication below reassigned.
                                                         {"remote_id": "$$resource._id"},
+                                                        "$$resource.harvest",
                                                     ]
                                                 }
                                             },
@@ -112,7 +105,56 @@ def backfill_remote_ids(db):
             }
         ],
     )
-    log.info(f"{result.modified_count} CKAN harvested datasets given their resources remote ids.")
+    log.info(f"{filled} resources given their remote id.")
+    log.info(f"{left} resources left without one, the backend matches those by id.")
+
+
+def count_resources_to_fill(db, selector):
+    """What this run is about to write, counted while the field is still missing"""
+    harvested = {"$eq": [{"$type": "$$resource.harvest"}, "object"]}
+    counts = next(
+        db.dataset.aggregate(
+            [
+                {"$match": selector},
+                {
+                    "$project": {
+                        "filled": {
+                            "$size": {
+                                "$filter": {
+                                    "input": "$resources",
+                                    "as": "resource",
+                                    "cond": {
+                                        "$and": [
+                                            harvested,
+                                            {
+                                                "$eq": [
+                                                    {"$type": "$$resource.harvest.remote_id"},
+                                                    "missing",
+                                                ]
+                                            },
+                                        ]
+                                    },
+                                }
+                            }
+                        },
+                        "left": {
+                            "$size": {
+                                "$filter": {
+                                    "input": "$resources",
+                                    "as": "resource",
+                                    "cond": {"$not": harvested},
+                                }
+                            }
+                        },
+                    }
+                },
+                {"$group": {"_id": None, "filled": {"$sum": "$filled"}, "left": {"$sum": "$left"}}},
+            ],
+            allowDiskUse=True,
+        ),
+        {"filled": 0, "left": 0},
+    )
+    return counts["filled"], counts["left"]
 
 
 def deduplicate_resource_ids(db):
@@ -138,6 +180,8 @@ def deduplicate_resource_ids(db):
                 {"deleted": 1, "archived": 1, "harvest.last_update": 1},
             )
         )
+        if not datasets:
+            continue
         canonical = pick_canonical(datasets)
         for dataset in datasets:
             if dataset["_id"] == canonical["_id"]:
@@ -160,18 +204,14 @@ def pick_canonical(datasets):
 
     Being live is not enough to tell the current copy from a stale one: a dataset can be left
     unarchived while its harvest already flagged it `not-on-remote`. The last harvest date
-    settles it.
+    settles it, then the creation date so that a rerun picks the same one.
     """
-    live = [
-        dataset
-        for dataset in datasets
-        if dataset.get("deleted") is None and dataset.get("archived") is None
-    ]
-    candidates = live or [dataset for dataset in datasets if dataset.get("deleted") is None]
-    candidates = candidates or datasets
-    harvested = [
-        dataset for dataset in candidates if (dataset.get("harvest") or {}).get("last_update")
-    ]
-    if harvested:
-        return max(harvested, key=lambda dataset: dataset["harvest"]["last_update"])
-    return max(candidates, key=lambda dataset: dataset["_id"])
+    return max(
+        datasets,
+        key=lambda dataset: (
+            dataset.get("deleted") is None and dataset.get("archived") is None,
+            dataset.get("deleted") is None,
+            (dataset.get("harvest") or {}).get("last_update") or datetime.min,
+            dataset["_id"],
+        ),
+    )

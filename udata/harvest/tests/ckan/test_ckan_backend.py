@@ -554,6 +554,23 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         assert {r.harvest.remote_id: r.id for r in dataset.resources} == ids
 
     @pytest.mark.ckan_data("minimal")
+    def test_resource_id_is_matched_on_the_uuid_value_not_its_spelling(self, source, result):
+        """A portal may write the same id in another case, as it always could."""
+        remote_id = result["result"]["resources"][0]["id"]
+        dataset = dataset_for(result)
+        get_db().dataset.update_one(
+            {"_id": dataset.id},
+            {"$set": {"resources.0._id": remote_id}, "$unset": {"resources.0.harvest": ""}},
+        )
+        result["result"]["resources"][0]["id"] = remote_id.upper()
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert str(dataset.resources[0].id) == remote_id
+
+    @pytest.mark.ckan_data("minimal")
     def test_resource_harvested_before_remote_ids_is_recognized(self, source, result):
         """The shape every resource had before this backend stopped adopting the remote id.
         The migration copies that id into `harvest.remote_id`, but only where the harvest
