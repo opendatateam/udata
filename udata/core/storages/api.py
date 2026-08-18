@@ -167,15 +167,14 @@ def handle_upload(storage, prefix=None):
 
     # Saving (rather than writing to an open file) is what applies the storage
     # checks — the allowed extensions in particular — to chunked uploads too.
-    stream = utils.MeasuredStream(source)
-    fs_filename = storage.save(stream, filename=filename, prefix=prefix)
+    fs_filename = storage.save(source, filename=filename, prefix=prefix)
 
     if is_chunk:
         # Chunks are dropped once the whole file made it to its destination, so
         # a failed combination can be retried instead of losing the upload.
         discard_chunks(args["uuid"], args["totalparts"])
 
-    return utils.stored_file_infos(storage, fs_filename, stream)
+    return utils.stored_file_infos(storage, fs_filename)
 
 
 def parse_uploaded_image(field):

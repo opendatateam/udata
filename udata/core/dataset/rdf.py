@@ -148,6 +148,13 @@ QUDT_TO_UDATA = {
     QUDT.M: DistanceUom.METER,
 }
 
+CHECKSUM_ALGORITHMS = {
+    SPDX.checksumAlgorithm_md5: "md5",
+    SPDX.checksumAlgorithm_sha1: "sha1",
+    SPDX.checksumAlgorithm_sha256: "sha256",
+}
+UDATA_CHECKSUM_TO_SPDX = {v: k for k, v in CHECKSUM_ALGORITHMS.items()}
+
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
@@ -318,11 +325,15 @@ def resource_to_rdf(
         r.add(DCAT.mediaType, Literal(resource.mime))
     if resource.format:
         r.add(DCT.format, Literal(resource.format))
-    if resource.checksum:
+    # SPDX names a handful of algorithms, udata accepts more — a resource stored
+    # on S3 is checksummed with CRC32. Building the term from the type would
+    # coin a `checksumAlgorithm_crc32` that no vocabulary defines and that no
+    # consumer can read back, udata's own parser included, so a checksum SPDX
+    # cannot express is left out rather than published under a made-up name.
+    if resource.checksum and (algorithm := UDATA_CHECKSUM_TO_SPDX.get(resource.checksum.type)):
         checksum = graph.resource(BNode())
         checksum.set(RDF.type, SPDX.Checksum)
-        algorithm = "checksumAlgorithm_{0}".format(resource.checksum.type)
-        checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
+        checksum.add(SPDX.algorithm, algorithm)
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
     if is_hvd:
@@ -443,13 +454,6 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
         d.set(predicate, contact_point)
 
     return d
-
-
-CHECKSUM_ALGORITHMS = {
-    SPDX.checksumAlgorithm_md5: "md5",
-    SPDX.checksumAlgorithm_sha1: "sha1",
-    SPDX.checksumAlgorithm_sha256: "sha256",
-}
 
 
 def temporal_from_literal(text):

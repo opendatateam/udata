@@ -396,6 +396,19 @@ class Checksum(EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
+def checksum_from_stored_file_infos(infos: dict) -> Checksum | None:
+    """Take the checksum a storage produced out of the infos it returned.
+
+    The algorithm is the storage's call, so it is looked up rather than
+    assumed, and popped so the rest of the infos can build a `Resource`.
+    Returns `None` when the storage had no checksum to offer.
+    """
+    algorithm = next((algorithm for algorithm in CHECKSUM_TYPES if algorithm in infos), None)
+    if not algorithm:
+        return None
+    return Checksum(type=algorithm, value=infos.pop(algorithm))
+
+
 class ResourceMixin(object):
     id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)

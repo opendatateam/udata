@@ -1,3 +1,4 @@
+import zlib
 from io import BytesIO
 from uuid import uuid4
 
@@ -79,12 +80,12 @@ class S3ResourceUploadTest(APITestCase):
         resource = dataset.resources[0]
         assert resource.fs_filename in storages.resources
         assert storages.resources.read(resource.fs_filename) == b"aaa"
-        # Same values as on the local backend: metadata describes the upload,
-        # not what the storage reports back.
         assert response.json["mime"] == "text/plain"
+        # S3 digests what it stores and hands the result back, so the checksum
+        # is a CRC32 rather than the SHA-1 the filesystem backend computes.
         assert response.json["checksum"] == {
-            "type": "sha1",
-            "value": "7e240de74fb1ed08fa08d38063f6a6a91462a815",
+            "type": "crc32",
+            "value": format(zlib.crc32(b"aaa"), "08x"),
         }
 
     def test_chunked_upload_stores_the_combined_file(self):
@@ -122,8 +123,8 @@ class S3ResourceUploadTest(APITestCase):
         assert storages.resources.read(resource.fs_filename) == b"abcd"
         assert list(storages.chunks.list_files()) == []
         assert response.json["mime"] == "text/plain"
-        # The sha1 of b"abcd", digested while streaming the parts to S3
+        # The CRC32 of b"abcd" proves the parts were combined in order.
         assert response.json["checksum"] == {
-            "type": "sha1",
-            "value": "81fe8bfe87576c3ecb22426f8e57847382917acf",
+            "type": "crc32",
+            "value": format(zlib.crc32(b"abcd"), "08x"),
         }
