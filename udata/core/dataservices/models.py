@@ -23,7 +23,7 @@ from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
-from udata.core.contact_point.models import ContactPoint
+from udata.core.contact_point.models import ContactPoint, validate_contact_points_ownership
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
@@ -227,6 +227,11 @@ class Dataservice(
 
     def __str__(self):
         return self.title or ""
+
+    def validate(self, clean=True):
+        result = super().validate(clean=clean)
+        validate_contact_points_ownership(self)
+        return result
 
     title = field(
         StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True

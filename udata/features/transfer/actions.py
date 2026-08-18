@@ -45,6 +45,14 @@ def accept_transfer(transfer, comment=None):
     elif isinstance(recipient, User):
         subject.owner = recipient
 
+    # Contact points belong to an owner, so they cannot follow the subject as-is:
+    # each one is replaced by its equivalent under the recipient. Reuses have no
+    # contact points at all, hence the `getattr`.
+    if contact_points := getattr(subject, "contact_points", None):
+        subject.contact_points = [
+            contact_point.for_owner(recipient) for contact_point in contact_points
+        ]
+
     subject.save()
 
     return transfer

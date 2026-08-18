@@ -1,4 +1,5 @@
 import os
+import traceback
 from collections.abc import Callable, Iterable
 from contextlib import contextmanager
 from datetime import datetime, timedelta
@@ -202,6 +203,8 @@ def assert500(response):
 def assert_command_ok(result):
     __tracebackhide__ = True
     msg = "Command failed with exit code {0.exit_code} and output:\n{0.output}"
+    if result.exception:
+        msg += "".join(traceback.format_exception(result.exception))
     assert result.exit_code == 0, msg.format(result)
 
 

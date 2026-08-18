@@ -1,11 +1,15 @@
 import pytest
 
 from udata.auth import PermissionDenied, login_user
+from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.contact_point.models import ContactPoint
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
 )
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
@@ -174,6 +178,108 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
         login_user(editor)
         with pytest.raises(PermissionDenied):
             accept_transfer(transfer)
+
+
+class TransferContactPointsTest(PytestOnlyDBTestCase):
+    def test_dataset_contact_points_follow_the_recipient_organization(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert len(subject.contact_points) == 1
+        moved = subject.contact_points[0]
+        assert moved.organization == recipient
+        assert moved.owner is None
+        assert (moved.name, moved.email, moved.role) == (
+            contact_point.name,
+            contact_point.email,
+            contact_point.role,
+        )
+
+    def test_dataset_contact_points_follow_the_recipient_user(self):
+        org = OrganizationFactory()
+        recipient = UserFactory()
+        contact_point = ContactPointFactory(organization=org, role="contact")
+        subject = DatasetFactory(organization=org, contact_points=[contact_point])
+        transfer = TransferFactory(owner=org, recipient=recipient, subject=subject)
+
+        login_user(recipient)
+        accept_transfer(transfer)
+
+        subject.reload()
+        moved = subject.contact_points[0]
+        assert moved.owner == recipient
+        assert moved.organization is None
+
+    def test_dataservice_contact_points_follow_the_recipient(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DataserviceFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert subject.contact_points[0].organization == recipient
+
+    def test_contact_point_is_copied_not_moved(self):
+        """A contact point is shared, so the datasets left behind must keep theirs."""
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        staying = DatasetFactory(owner=owner, contact_points=[contact_point])
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        staying.reload()
+        assert staying.contact_points == [contact_point]
+        contact_point.reload()
+        assert contact_point.owner == owner
+        assert contact_point.organization is None
+
+    def test_existing_contact_point_of_the_recipient_is_reused(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        already_there = ContactPointFactory(
+            organization=recipient,
+            role=contact_point.role,
+            name=contact_point.name,
+            email=contact_point.email,
+            contact_form=contact_point.contact_form,
+        )
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert subject.contact_points == [already_there]
+        assert ContactPoint.objects.count() == 2
+
+    def test_transfering_a_reuse_has_no_contact_points_to_move(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        subject = ReuseFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert subject.organization == recipient
 
 
 class TransferNotificationsTest(PytestOnlyDBTestCase):

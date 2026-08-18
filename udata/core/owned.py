@@ -38,6 +38,11 @@ class OwnedQuerySet(UDataQuerySet):
         return self(visible_query | owned_qs._query_obj)
 
 
+def ownership_filter(owner: Organization | User) -> dict:
+    """Query filter selecting what `owner` owns, whichever kind of owner it is."""
+    return {"organization" if isinstance(owner, Organization) else "owner": owner}
+
+
 def only_creation(_value, is_update, field, **_kwargs):
     from udata.auth import admin_permission, current_user
 

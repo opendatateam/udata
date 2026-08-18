@@ -38,6 +38,7 @@ from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
+    validate_contact_points_ownership,
 )
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
@@ -741,6 +742,11 @@ class Dataset(
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
+
+    def validate(self, clean=True):
+        result = super().validate(clean=clean)
+        validate_contact_points_ownership(self)
+        return result
 
     def clean(self):
         super(Dataset, self).clean()
