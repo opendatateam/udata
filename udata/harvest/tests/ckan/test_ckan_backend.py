@@ -596,6 +596,19 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         resource = dataset_for(result).resources[0]
         assert resource.harvest.remote_id == "42"
 
+    @pytest.mark.ckan_data("non_uuid_resource_id")
+    def test_reharvesting_a_non_uuid_remote_id_does_not_duplicate(self, source, result):
+        """Those resources were dropped until now, so they are all created on the first run
+        and have to be recognized on the second one like any other."""
+        dataset = dataset_for(result)
+        resource_id = dataset.resources[0].id
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert dataset.resources[0].id == resource_id
+
     @pytest.mark.ckan_data("ckan_url_is_a_string")
     def test_ckan_url_is_string(self, ckan, data, result):
         dataset = dataset_for(result)
