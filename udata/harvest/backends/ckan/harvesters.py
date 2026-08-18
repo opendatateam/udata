@@ -28,6 +28,19 @@ log = logging.getLogger(__name__)
 ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
 
 
+def find_resource(dataset, remote_id: str) -> Resource | None:
+    """The resource a previous run created for this remote one, if any.
+
+    Until this backend stopped adopting the remote id as `Resource.id`, that id *was* the
+    remote one. A migration copies it into `harvest.remote_id` where the harvest metadata
+    survived, but resources harvested before udata stored any have nothing to copy it into,
+    and no dataset has it before the migration runs. Their id is the only link left.
+    """
+    return next(
+        (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id), None
+    ) or next((r for r in dataset.resources if str(r.id) == remote_id), None)
+
+
 class CkanBackend(BaseBackend):
     name = "ckan"
     display_name = "CKAN"
@@ -260,11 +273,8 @@ class CkanBackend(BaseBackend):
         for res in data["resources"]:
             if res["resource_type"] not in ALLOWED_RESOURCE_TYPES:
                 continue
-            remote_id = str(res["id"])
-            resource = next(
-                (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id),
-                None,
-            )
+            remote_id = res["id"]
+            resource = find_resource(dataset, remote_id)
             if not resource:
                 resource = Resource()
                 dataset.resources.append(resource)

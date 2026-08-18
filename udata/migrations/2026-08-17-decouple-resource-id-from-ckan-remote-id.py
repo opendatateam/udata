@@ -9,10 +9,15 @@ The backend now correlates on `harvest.remote_id`, so this migration first gives
 the resources harvested before the change — their id *is* their remote id — then hands a fresh
 id to every duplicated copy but one. The order matters: reassigning ids first would lose the
 remote ids the backfill reads.
+
+`harvest.backend` comes first, because the backfill selects on it and it is missing wherever a
+source stopped running (see `backfill_backends`).
 """
 
 import logging
 from uuid import uuid4
+
+from udata.harvest.backends import get_all_backends
 
 log = logging.getLogger(__name__)
 
@@ -21,8 +26,33 @@ CKAN_BACKENDS = ("CKAN", "DKAN")
 
 
 def migrate(db):
+    backfill_backends(db)
     backfill_remote_ids(db)
     deduplicate_resource_ids(db)
+
+
+def backfill_backends(db):
+    """Give every harvested dataset the backend of its source
+
+    `harvest.backend` is only ever written by a harvest run, and the migration that created
+    `harvest` from the extras predates the field by a month, so it could not fill it. Datasets
+    whose source has since stopped running kept an empty one, which silently narrows every
+    query selecting on it — `backfill_remote_ids` below included. The source knows.
+    """
+    updated = 0
+    for backend in get_all_backends().values():
+        source_ids = [
+            str(source["_id"])
+            for source in db.harvest_source.find({"backend": backend.name}, {"_id": 1})
+        ]
+        if not source_ids:
+            continue
+        result = db.dataset.update_many(
+            {"harvest.source_id": {"$in": source_ids}, "harvest.backend": None},
+            {"$set": {"harvest.backend": backend.display_name}},
+        )
+        updated += result.modified_count
+    log.info(f"{updated} harvested datasets given the backend of their source.")
 
 
 def backfill_remote_ids(db):
@@ -42,9 +72,13 @@ def backfill_remote_ids(db):
                                 "$cond": [
                                     {
                                         "$and": [
-                                            # A resource without harvest metadata was added by
-                                            # hand on a harvested dataset: its id never came
-                                            # from the remote.
+                                            # Only enrich harvest metadata that already exist.
+                                            # A resource without any was either added by hand,
+                                            # or harvested before udata stored them and its
+                                            # other harvest fields are lost for good: a block
+                                            # holding nothing but a remote id would claim a
+                                            # harvest that never happened. The backend
+                                            # recognizes those resources by their id.
                                             {"$eq": [{"$type": "$$resource.harvest"}, "object"]},
                                             # A rerun must not store the id reassigned by the
                                             # deduplication below as the remote one.
