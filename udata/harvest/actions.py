@@ -19,8 +19,7 @@ from .models import (
     VALIDATION_REFUSED,
     HarvestJob,
     HarvestSource,
-    archive_harvested_dataservice,
-    archive_harvested_dataset,
+    archive_harvested,
 )
 from .tasks import harvest
 
@@ -157,10 +156,10 @@ def purge_sources():
             source.periodic_task.delete()
         datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
         for dataset in datasets:
-            archive_harvested_dataset(dataset, reason="harvester-deleted", dryrun=False)
+            archive_harvested(dataset, reason="harvester-deleted", dryrun=False)
         dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
         for dataservice in dataservices:
-            archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
+            archive_harvested(dataservice, reason="harvester-deleted", dryrun=False)
 
         # Clean up notifications before deleting the source
         from udata.features.notifications.models import Notification

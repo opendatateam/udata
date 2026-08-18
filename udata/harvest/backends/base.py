@@ -3,6 +3,7 @@ import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
+from itertools import chain
 from typing import Concatenate, ParamSpec, TypeVar
 from uuid import UUID
 
@@ -20,12 +21,12 @@ from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import (
+    Harvestable,
     HarvestError,
     HarvestItem,
     HarvestJob,
     HarvestLog,
-    archive_harvested_dataservice,
-    archive_harvested_dataset,
+    archive_harvested,
 )
 from ..signals import after_harvest_job, before_harvest_job
 
@@ -83,7 +84,6 @@ class HarvestFeature(object):
         }
 
 
-Harvestable = Dataset | Dataservice
 H = TypeVar("H", bound=Harvestable)
 
 ItemProcessorParams = ParamSpec("ItemProcessorParams")
@@ -385,29 +385,22 @@ class BaseBackend(ABC):
         local_datasets_not_on_remote = Dataset.objects.filter(**q)
         local_dataservices_not_on_remote = Dataservice.objects.filter(**q)
 
-        for dataset in local_datasets_not_on_remote:
-            if not dataset.harvest.archived_at:
-                archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
-            # add a HarvestItem to the job list (useful for report)
-            # even when archiving has already been done (useful for debug)
-            self.add_harvest_item(
-                HarvestItem(
-                    remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
-                )
-            )
+        for key, obj in chain(
+            (("dataset", d) for d in local_datasets_not_on_remote),
+            (("dataservice", d) for d in local_dataservices_not_on_remote),
+        ):
+            if not obj.harvest.archived_at:
+                archive_harvested(obj, reason="not-on-remote", dryrun=self.dryrun)
 
-        for dataservice in local_dataservices_not_on_remote:
-            if not dataservice.harvest.archived_at:
-                archive_harvested_dataservice(
-                    dataservice, reason="not-on-remote", dryrun=self.dryrun
-                )
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
             self.add_harvest_item(
                 HarvestItem(
-                    remote_id=str(dataservice.harvest.remote_id),
-                    dataservice=dataservice,
-                    status="archived",
+                    **{
+                        "remote_id": str(obj.harvest.remote_id),
+                        key: obj,  # FIXME: consolidate?
+                        "status": "archived",
+                    }
                 )
             )
 
