@@ -20,13 +20,11 @@ from werkzeug.utils import cached_property
 from udata.api import fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.auth import admin_permission
-from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataservices.models import Dataservice, HarvestDataserviceMetadata
 from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.slug_fields import SlugField
 
@@ -375,7 +373,7 @@ def archive_harvested_dataset(dataset, reason, dryrun=False):
     dataset.archived = archival_date
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()
-    dataset.harvest.archived = reason
+    dataset.harvest.archived_reason = reason
     dataset.harvest.archived_at = archival_date
     if dryrun:
         dataset.validate()

@@ -9,7 +9,7 @@ from mock import patch
 
 from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataservices.models import HarvestDataserviceMetadata
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
@@ -405,7 +405,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
-        assert dataset_to_archive.harvest.archived == "harvester-deleted"
+        assert dataset_to_archive.harvest.archived_reason == "harvester-deleted"
         # MongoEngine returns naive datetimes, so normalize before comparison
         archived_at_naive = (
             dataset_to_archive.harvest.archived_at.replace(tzinfo=None)

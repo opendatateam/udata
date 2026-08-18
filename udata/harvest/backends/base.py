@@ -13,8 +13,8 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
-from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
+from udata.core.harvest import HarvestMetadata
 from udata.core.user.models import User
 from udata.utils import raise_if_redirect, safe_unicode
 
@@ -85,11 +85,6 @@ class HarvestFeature(object):
 
 Harvestable = Dataset | Dataservice
 H = TypeVar("H", bound=Harvestable)
-
-# FIXME: should instead be a superclass
-HarvestMetadata = TypeVar(
-    "HarvestMetadata", bound=HarvestDatasetMetadata | HarvestDataserviceMetadata
-)
 
 ItemProcessorParams = ParamSpec("ItemProcessorParams")
 
@@ -346,12 +341,10 @@ class BaseBackend(ABC):
 
     def update_harvest_metadata(self, metadata: HarvestMetadata, remote_id: str) -> HarvestMetadata:
         metadata.backend = self.display_name or "unknown"
-        metadata.source_id = str(self.source.id)
-        if hasattr(metadata, "source_url"):
-            # FIXME: consolidate `source_url` to all HarvestMetadata (or remove)?
-            metadata.source_url = str(self.source.url)
-        metadata.remote_id = remote_id
         metadata.domain = self.source.domain
+        metadata.source_id = str(self.source.id)
+        metadata.source_url = str(self.source.url)
+        metadata.remote_id = remote_id
         metadata.last_update = datetime.now(UTC)
         metadata.archived_at = None
         metadata.archived_reason = None

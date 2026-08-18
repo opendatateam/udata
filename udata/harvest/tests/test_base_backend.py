@@ -348,12 +348,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         dataset_arch.reload()
         assert dataset_arch.archived is not None
-        assert "archived" in dataset_arch.harvest
+        assert "archived_reason" in dataset_arch.harvest
         assert "archived_at" in dataset_arch.harvest
 
         dataset_no_arch.reload()
         assert dataset_no_arch.archived is None
-        assert "archived" not in dataset_no_arch.harvest
+        assert "archived_reason" not in dataset_no_arch.harvest
         assert "archived_at" not in dataset_no_arch.harvest
 
         dataservice_arch.reload()
@@ -369,7 +369,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         # test unarchive: archive manually then relaunch harvest
         dataset = Dataset.objects.get(**{"harvest__remote_id": "dataset-fake-1"})
         dataset.archived = datetime.now(UTC)
-        dataset.harvest.archived = "not-on-remote"
+        dataset.harvest.archived_reason = "not-on-remote"
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.save()
 
@@ -383,7 +383,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         assert dataset.archived is None
-        assert "archived" not in dataset.harvest
+        assert "archived_reason" not in dataset.harvest
         assert "archived_at" not in dataset.harvest
 
         dataservice.reload()

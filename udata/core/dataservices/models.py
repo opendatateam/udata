@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from blinker import Signal
 from flask import url_for
 from flask_babel import LazyString
-from mongoengine import PULL, EmbeddedDocument, Q
+from mongoengine import PULL, Q
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     BooleanField,
@@ -29,6 +29,7 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
+from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -118,37 +119,18 @@ class DataserviceBadgeMixin(BadgeMixin):
 
 
 @generate_fields()
-class HarvestMetadata(EmbeddedDocument):
-    backend = field(StringField())
-    domain = field(StringField())
-
-    source_id = field(StringField())
-    source_url = field(URLField())
-
-    remote_id = field(StringField())
-    remote_url = field(URLField())
-
-    # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
-    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we
-    # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
+class HarvestDataserviceMetadata(HarvestMetadata):
+    # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef`
+    # it's often a auto-generated ID just to link multiple RDF node togethers. When exporting as
+    # RDF to other catalogs, we want to re-use this node ID (only if it's not auto-generated) to
+    # improve compatibility.
     uri = field(
         URLField(),
-        description="RDF node ID if it's an `URIRef`. `None` if it's not present or if it's a random auto-generated ID inside the graph.",
+        description=(
+            "RDF node ID if it's an `URIRef`. "
+            "`None` if it's not present or if it's a random auto-generated ID inside the graph."
+        ),
     )
-
-    created_at = field(
-        DateTimeField(), description="Date of creation as provided by the harvested catalog"
-    )
-    issued_at = field(
-        DateTimeField(), description="Date of release as provided by the harvested catalog"
-    )
-    modified_at = field(
-        DateTimeField(),
-        description="Date of last modification as provided by the harvested catalog",
-    )
-    last_update = field(DateTimeField(), description="Date of the last harvesting")
-    archived_at = field(DateTimeField())
-    archived_reason = field(StringField())
 
 
 def filter_by_topic(base_query, filter_value):
@@ -339,7 +321,7 @@ class Dataservice(
     )
 
     harvest = field(
-        EmbeddedDocumentField(HarvestMetadata),
+        EmbeddedDocumentField(HarvestDataserviceMetadata),
         readonly=True,
         auditable=False,
     )
@@ -412,7 +394,7 @@ class Dataservice(
 
     def set_harvested(self):
         if not self.harvest:
-            self.harvest = HarvestMetadata()
+            self.harvest = HarvestDataserviceMetadata()
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)

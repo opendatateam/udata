@@ -41,6 +41,7 @@ from udata.core.contact_point.models import (
 )
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
+from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -118,42 +119,18 @@ def get_json_ld_extra(key, value):
 
 
 @generate_fields()
-class HarvestDatasetMetadata(EmbeddedDocument):
-    backend = StringField()
-    domain = StringField()
-
-    source_id = StringField()
-
-    remote_id = StringField()
-    remote_url = URLField()
-
+class HarvestDatasetMetadata(HarvestMetadata):
     uri = StringField()
-
-    created_at = DateTimeField()
-    issued_at = DateTimeField()
-    modified_at = DateTimeField()
-    last_update = DateTimeField()
-    archived_at = DateTimeField()
-    archived = StringField()
-
     dct_identifier = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
-    @property
-    def archived_reason(self):
-        return self.archived
-
-    @archived_reason.setter
-    def archived_reason(self, value: str | None):
-        self.archived = value
-
 
 class HarvestResourceMetadata(EmbeddedDocument):
+    uri = StringField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
     last_update = DateTimeField()
-    uri = StringField()
     dct_identifier = StringField()
 
 
