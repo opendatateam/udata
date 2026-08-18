@@ -41,6 +41,9 @@ def migrate(db):
             )
         )
         if not datasets:
+            # `purge_datasets` deletes every soft-deleted dataset in one pass, and a group
+            # whose copies are all deleted is one of the shapes this migration handles: it
+            # can empty one between the aggregation above and this read.
             continue
         canonical = pick_canonical(datasets)
         for dataset in datasets:

@@ -69,4 +69,4 @@ def backfill_remote_ids(db):
             filled += len(updates)
 
     log.info(f"{filled} resources given their remote id.")
-    log.info(f"{left} resources left without one, the backend matches those by id.")
+    log.info(f"{left} resources left without one, their id still is the remote one.")

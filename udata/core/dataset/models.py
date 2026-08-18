@@ -149,9 +149,10 @@ class HarvestResourceMetadata(EmbeddedDocument):
     uri = StringField()
     dct_identifier = StringField()
 
-    # How a backend recognizes an already harvested resource across runs. Only has to be
-    # unique inside its dataset, unlike `Resource.id` which is resolved platform-wide by
-    # the `/datasets/r/<id>` permalink.
+    # How a backend recognizes an already harvested resource across runs, for the backends
+    # whose remote gives its resources an id. Only has to be unique inside its dataset,
+    # unlike `Resource.id` which is resolved platform-wide by the `/datasets/r/<id>`
+    # permalink.
     remote_id = StringField()
 
 
