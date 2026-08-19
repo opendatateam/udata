@@ -91,14 +91,6 @@ class DcatBackend(BaseBackend):
         for graph, page_number in self.graphs:
             self.process_one_dataservices_page(graph, page_number)
 
-        # TODO: move in base to benefit other harvesters
-        if not self.dryrun and self.has_reached_max_items():
-            # We have reached the max_items limit. Warn the user that all the datasets may not be present.
-            error = HarvestError(
-                message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
-            )
-            self.job.errors.append(error)
-
         self.store_graphs(fmt)
 
     def get_format(self) -> str:
@@ -141,9 +133,6 @@ class DcatBackend(BaseBackend):
                     break
 
             yield graph, page_number
-            if self.has_reached_max_items():
-                return
-
             page_number += 1
 
     def process_one_datasets_page(self, graph: Graph, page_number: int):
@@ -156,9 +145,6 @@ class DcatBackend(BaseBackend):
                 remote_id, self.process_dataset, node=node, graph=graph, page_number=page_number
             )
 
-            if self.has_reached_max_items():
-                return
-
     def process_one_dataservices_page(self, graph: Graph, page_number: int):
         access_services = {o for _, _, o in graph.triples((None, DCAT.accessService, None))}
 
@@ -170,9 +156,6 @@ class DcatBackend(BaseBackend):
             self.process_item(
                 remote_id, self.process_dataservice, node=node, graph=graph, page_number=page_number
             )
-
-            if self.has_reached_max_items():
-                return
 
     def is_dataset_external_to_this_graph(self, node: Node, graph: Graph) -> bool:
         # In dataservice nodes we have `servesDataset` or `hasPart` that can contains nodes
@@ -458,9 +441,6 @@ class BaseCswDcatBackend(DcatBackend, ABC):
 
                 yield graph, page_number
 
-                if self.has_reached_max_items():
-                    return
-
             page_number += 1
             start = self._next_position(start, search_results)
             if not start:
@@ -482,8 +462,6 @@ class BaseCswDcatBackend(DcatBackend, ABC):
             or (returned_count == 0)
             # Current next record is lower than previous one
             or (next_record < start)
-            # Enough items have been harvested already
-            or self.has_reached_max_items()
         )
         return None if should_break else next_record
 

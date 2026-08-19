@@ -153,8 +153,6 @@ class MaafBackend(BaseBackend):
                     # We use the URL as `remote_id` for now, we'll be replace at
                     # the beginning of the process
                     self.process_item(urljoin(directory, href), self.process_dataset)
-                    if self.has_reached_max_items():
-                        return
                 else:
                     log.debug("Skip %s", href)
 

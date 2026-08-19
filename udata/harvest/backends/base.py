@@ -90,6 +90,10 @@ H = TypeVar("H", bound=Harvestable)
 ItemProcessorParams = ParamSpec("ItemProcessorParams")
 
 
+class StopHarvest(Exception):
+    pass
+
+
 class BaseBackend(ABC):
     """
     Base class that wrap children methods to add error management and debug logs.
@@ -207,7 +211,13 @@ class BaseBackend(ABC):
                 )
 
         try:
-            self.inner_harvest()
+            try:
+                self.inner_harvest()
+            except StopHarvest:
+                error = HarvestError(
+                    message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
+                )
+                self.job.errors.append(error)
 
             if self.source.autoarchive:
                 self.autoarchive()
@@ -335,10 +345,8 @@ class BaseBackend(ABC):
                 for record in log_catcher.records
             ]
             self.save_job()
-
-    def has_reached_max_items(self) -> bool:
-        """Should be called after process_item to know if we reach the max items"""
-        return self.max_items and len(self.job.items) >= self.max_items
+            if self.max_items and len(self.job.items) >= self.max_items:
+                raise StopHarvest()
 
     def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:

@@ -124,8 +124,6 @@ class CkanBackend(BaseBackend):
         for name in names:
             # We use `name` as `remote_id` for now, we'll be replace at the beginning of the process
             self.process_item(name, self.process_dataset)
-            if self.has_reached_max_items():
-                return
 
     def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
         response = self.get_action("package_show", id=harvest_item.remote_id)

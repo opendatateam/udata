@@ -58,13 +58,9 @@ class FakeBackend(BaseBackend):
     def inner_harvest(self):
         for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_item(remote_id, self.process_dataset)
-            if self.has_reached_max_items():
-                return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
             self.process_item(remote_id, self.process_dataservice)
-            if self.has_reached_max_items():
-                return
 
     def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
         item = self.get_item(harvest_item.remote_id, Dataset)
