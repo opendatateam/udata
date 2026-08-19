@@ -365,7 +365,12 @@ def oauth_error():
 
 def query_client(client_id):
     """Fetch client by ID"""
-    return OAuth2Client.objects(id=ObjectId(client_id)).first()
+    # `client_id` comes straight from the request (query string or POST body),
+    # so it can be anything. An unparseable one is an unknown client: return
+    # `None` and let authlib answer with an `invalid_client` OAuth error.
+    if not ObjectId.is_valid(client_id):
+        return None
+    return OAuth2Client.objects(id=client_id).first()
 
 
 def save_token(token, request):

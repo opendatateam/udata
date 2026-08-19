@@ -320,6 +320,31 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert "error" in response.json
         assert "Redirect URI" in response.json["error_description"]
 
+    @pytest.mark.parametrize("client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7"])
+    def test_authorization_malformed_client_id(self, client_id):
+        """A malformed `client_id` is an unknown client, not a server error."""
+        self.login()
+
+        response = self.get(url_for("oauth.authorize", response_type="code", client_id=client_id))
+
+        assert200(response)
+        assert response.data == b"invalid_client"
+
+    def test_token_malformed_client_id(self):
+        """A malformed `client_id` is an unknown client, not a server error."""
+        response = self.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": "whatever",
+                "client_id": "x",
+            },
+            json=False,
+        )
+
+        assert400(response)
+        assert response.json["error"] == "invalid_client"
+
     def test_authorization_grant_token(self, oauth):
         self.login()
 

@@ -1,6 +1,8 @@
 import logging
 
 from bson import DBRef, ObjectId
+from bson.errors import InvalidId
+from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save
 
 from udata.flask_mongoengine.document import BaseQuerySet
@@ -36,6 +38,21 @@ class DBPaginator(Paginable):
     @property
     def objects(self):
         return self.queryset.items
+
+
+def to_object_id(field_name, value):
+    """Cast a query value to an `ObjectId`.
+
+    Ids reach `generic_in` straight from query strings, where anything can be
+    sent. Raise the `ValidationError` mongoengine raises when querying a regular
+    reference with a malformed id — the API answers it with a 400 — instead of
+    letting bson's `InvalidId` bubble up as a 500. `errors` names the offending
+    filter, so a client sending several of them knows which one to fix.
+    """
+    try:
+        return ObjectId(value)
+    except InvalidId as e:
+        raise ValidationError(str(e), errors={field_name: str(e)})
 
 
 class UDataQuerySet(BaseQuerySet):
@@ -97,18 +114,20 @@ class UDataQuerySet(BaseQuerySet):
                 value = value[0]
             if isinstance(value, (list, tuple)):
                 if all(isinstance(v, str) for v in value):
-                    ids = [ObjectId(v) for v in value]
+                    ids = [to_object_id(key, v) for v in value]
                     query["{0}._ref.$id".format(key)] = {"$in": ids}
                 elif all(isinstance(v, DBRef) for v in value):
                     query["{0}._ref".format(key)] = {"$in": value}
                 elif all(isinstance(v, ObjectId) for v in value):
                     query["{0}._ref.$id".format(key)] = {"$in": value}
+                else:
+                    raise ValidationError(f"`{key}` expects a list of string, ObjectId or DBRef")
             elif isinstance(value, ObjectId):
                 query["{0}._ref.$id".format(key)] = value
             elif isinstance(value, str):
-                query["{0}._ref.$id".format(key)] = ObjectId(value)
+                query["{0}._ref.$id".format(key)] = to_object_id(key, value)
             else:
-                self.error("expect a list of string, ObjectId or DBRef")
+                raise ValidationError(f"`{key}` expects a string, ObjectId or DBRef")
         return self(__raw__=query)
 
 
