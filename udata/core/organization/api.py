@@ -13,12 +13,11 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.search import DataserviceApiParser
+from udata.core.dataservices.search import parse_dataservice_filters
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
@@ -57,6 +56,14 @@ SUGGEST_SORTING = "-metrics.followers"
 
 def resolve_assignment_subjects(raw_assignments, org):
     """Resolve raw {class, id} dicts into model instances belonging to org."""
+    if not isinstance(raw_assignments, list) or not all(
+        isinstance(raw, dict) for raw in raw_assignments
+    ):
+        raise FieldValidationError(
+            field="assignments",
+            message="Expected a list of {class, id} objects",
+        )
+
     subjects = []
     for raw in raw_assignments:
         cls_name = raw.get("class")
@@ -80,6 +87,11 @@ def resolve_assignment_subjects(raw_assignments, org):
     return subjects
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. Organization declares none today, so
+# nothing is duplicated yet, but any filter added on both sides would have to be
+# kept in sync. Meant to disappear once the callers use
+# `Organization.apply_sort_filters()`.
 class OrgApiParser(ModelApiParser):
     sorts = {
         "name": "name",
@@ -291,7 +303,7 @@ class OrganizationRdfFormatAPI(API):
             Dataset.objects(organization=org).visible(), params
         )
         datasets = datasets.paginate(params["page"], params["page_size"])
-        dataservices = DataserviceApiParser.parse_filters(
+        dataservices = parse_dataservice_filters(
             Dataservice.objects(organization=org).visible(), params
         )
         dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
@@ -582,6 +594,8 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        if not member:
+            api.abort(404)
         old_role = member.role
         patch(member, request)
         org.save()
@@ -749,7 +763,7 @@ class OrgReusesAPI(API):
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
-    @api.marshal_list_with(discussion_fields)
+    @api.marshal_list_with(Discussion.__read_fields__)
     def get(self, org):
         """List organization discussions"""
         reuses = Reuse.objects(organization=org).only("id")

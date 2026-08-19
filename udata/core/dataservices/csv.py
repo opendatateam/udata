@@ -39,6 +39,7 @@ class DataserviceCsvAdapter(csv.Adapter):
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
         ("harvest.issued_at", lambda r: r.harvest and r.harvest.issued_at),
         ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.last_update", lambda r: r.harvest and r.harvest.last_update),
     )
 
     def dynamic_fields(self):

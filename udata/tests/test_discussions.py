@@ -1,15 +1,19 @@
 from datetime import UTC, datetime
 
 import pytest
+from bson import DBRef, ObjectId
 from flask import url_for
+from mongoengine.connection import get_db
+from mongoengine.errors import ValidationError
 from werkzeug.test import TestResponse
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.discussions.factories import DiscussionFactory
+from udata.core.discussions.constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
-from udata.core.discussions.notifications import DiscussionStatus
+from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -21,22 +25,53 @@ from udata.core.discussions.tasks import (
     notify_new_discussion,
     notify_new_discussion_comment,
 )
+from udata.core.linkable import Linkable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
-from udata.core.reports.constants import REASON_AUTO_SPAM
+from udata.core.reports.constants import REASON_AUTO_SPAM, REASON_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.db.migrations import load_migration
 from udata.features.notifications.models import Notification
-from udata.models import Dataset, Member
+from udata.models import Dataset, License, Member
+from udata.mongo import db
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from .api import APITestCase
+from .api import APITestCase, PytestOnlyDBTestCase
 from .helpers import assert_emit, assert_not_emit
+
+
+class DiscussionModelTest(PytestOnlyDBTestCase):
+    def test_subject_is_required(self):
+        """Every code path reading a subject assumes there is one.
+
+        `self_web_url()`, `mails.py` and `notifications.py` all dereference it
+        without a guard, so a subject-less discussion crashes the listings the
+        same way an unsupported class does.
+        """
+        with pytest.raises(ValidationError):
+            Discussion(title="test discussion").save()
+
+    def test_subject_class_is_restricted(self):
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        with pytest.raises(ValidationError):
+            Discussion(title="test discussion", subject=license).save()
+
+    def test_every_discussion_subject_can_carry_a_discussion(self):
+        """`DISCUSSION_SUBJECTS` holds class names, so a typo no longer breaks at
+        import time: it would silently forbid the model, and make the migration
+        delete its existing discussions.
+        """
+        for class_name in DISCUSSION_SUBJECTS:
+            model = db.resolve_model(class_name)
+            assert issubclass(model, Linkable)
+            assert hasattr(model, "count_discussions")
 
 
 class DiscussionsTest(APITestCase):
@@ -148,6 +183,142 @@ class DiscussionsTest(APITestCase):
             {"organization": other_org.id, "comment": "A comment"},
         )
         self.assert400(response)
+
+    def test_comment_on_behalf_of_unknown_org(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": str(ObjectId()), "comment": "A comment"},
+        )
+        self.assert400(response)
+
+    def test_new_discussion_on_behalf_of_org_as_object(self):
+        """The frontend sends the whole organization object, not only its id."""
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": {"id": str(org.id)},
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(org.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": {"id": str(org.id)}, "comment": "A comment"},
+        )
+        self.assert200(response)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(org.id)
+
+    def test_close_discussion_on_behalf_of_org_as_object(self):
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": True, "organization": {"id": str(org.id)}},
+        )
+        self.assert200(response)
+        assert response.json["closed_by_organization"]["id"] == str(org.id)
+
+        discussion.reload()
+        assert discussion.closed_by_organization == org
+
+    def test_write_endpoints_reject_a_non_object_payload(self):
+        """A JSON body decoding to anything but an object must be a 400, not a 500."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        for payload in ["a string", 42, ["a", "list"]]:
+            self.assert400(self.post(url_for("api.discussions"), payload))
+            self.assert400(self.post(url_for("api.discussion", id=discussion.id), payload))
+            self.assert400(self.put(url_for("api.discussion", id=discussion.id), payload))
+            self.assert400(
+                self.put(
+                    url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                    payload,
+                )
+            )
+
+    def test_write_endpoints_reject_a_non_json_content_type(self):
+        """These handlers read their body through `json_payload()`, not `api.validate()`.
+
+        `request.json` answers a non-JSON content type with a 415, where the form endpoints
+        going through `api.validate()` answer a 400 (see `JSONFormRequestTest`).
+        """
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+        headers = {"Content-Type": "multipart/form-data"}
+
+        for response in [
+            self.post(url_for("api.discussions"), {}, json=False, headers=headers),
+            self.post(url_for("api.discussion", id=discussion.id), {}, json=False, headers=headers),
+            self.put(url_for("api.discussion", id=discussion.id), {}, json=False, headers=headers),
+            self.put(
+                url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                {},
+                json=False,
+                headers=headers,
+            ),
+        ]:
+            self.assertStatus(response, 415)
+
+    def test_close_discussion_with_a_non_boolean_close(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        # A string spelling out a false value must not close the discussion.
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": "false", "comment": "A comment"},
+        )
+        self.assert200(response)
+        discussion.reload()
+        assert discussion.closed is None
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": "not a boolean", "comment": "A comment"},
+        )
+        self.assert400(response)
+        discussion.reload()
+        assert discussion.closed is None
 
     @pytest.mark.options(SPAM_WORDS=["spam"], CDATA_BASE_URL="https://data.gouv.fr")
     def test_spam_in_new_discussion_title(self):
@@ -295,6 +466,44 @@ class DiscussionsTest(APITestCase):
         )
         self.assertStatus(response, 400)
 
+    def test_new_discussion_empty_comment(self):
+        self.login()
+        dataset = Dataset.objects.create(title="Test dataset")
+
+        for comment in ["", "   "]:
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test title",
+                    "comment": comment,
+                    "subject": {
+                        "class": "Dataset",
+                        "id": dataset.id,
+                    },
+                },
+            )
+            self.assertStatus(response, 400)
+            self.assertEqual(Discussion.objects.count(), 0)
+
+    def test_new_discussion_empty_title(self):
+        self.login()
+        dataset = Dataset.objects.create(title="Test dataset")
+
+        for title in ["", "   "]:
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": title,
+                    "comment": "bla bla",
+                    "subject": {
+                        "class": "Dataset",
+                        "id": dataset.id,
+                    },
+                },
+            )
+            self.assertStatus(response, 400)
+            self.assertEqual(Discussion.objects.count(), 0)
+
     def test_new_discussion_missing_title(self):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
@@ -317,6 +526,29 @@ class DiscussionsTest(APITestCase):
             url_for("api.discussions"), {"title": "test title", "comment": "bla bla"}
         )
         self.assertStatus(response, 400)
+
+    def test_new_discussion_on_unsupported_subject_class(self):
+        """A discussion can only target a model that supports discussions.
+
+        Anything else (a License here) used to be accepted by the API and then
+        crashed every subsequent listing of the discussions.
+        """
+        self.login()
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "License",
+                    "id": license.id,
+                },
+            },
+        )
+        self.assertStatus(response, 400)
+        assert Discussion.objects.count() == 0
 
     def test_new_discussion_with_extras(self):
         user = self.login()
@@ -483,6 +715,45 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
         self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
 
+    def test_list_discussions_search_sorts_by_relevance(self):
+        """Searching without an explicit `sort` orders by text relevance, and only an
+        explicit `sort` overrides it. Relevance and `-created` must disagree here,
+        otherwise the assertions would hold under either ordering.
+        """
+        user = UserFactory()
+        dataset = DatasetFactory()
+
+        # Matches on `title` (index weight 10) but is the oldest of the two.
+        most_relevant = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="something in title",
+            created=datetime(2023, 1, 1, tzinfo=UTC),
+            discussion=[Message(posted_by=user, content="a message")],
+        )
+        # Matches on `discussion.content` (index weight 5) but is the most recent.
+        most_recent = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion a",
+            created=datetime(2024, 1, 1, tzinfo=UTC),
+            discussion=[Message(posted_by=user, content="a message with something")],
+        )
+
+        response = self.get(url_for("api.discussions", q="something"))
+        self.assert200(response)
+        self.assertEqual(
+            [d["id"] for d in response.json["data"]],
+            [str(most_relevant.id), str(most_recent.id)],
+        )
+
+        response = self.get(url_for("api.discussions", q="something", sort="-created"))
+        self.assert200(response)
+        self.assertEqual(
+            [d["id"] for d in response.json["data"]],
+            [str(most_recent.id), str(most_relevant.id)],
+        )
+
     def assertIdIn(self, json_data: dict, id_: str) -> None:
         for item in json_data:
             if item["id"] == id_:
@@ -496,7 +767,10 @@ class DiscussionsTest(APITestCase):
     def test_list_discussions_org(self) -> None:
         organization: Organization = OrganizationFactory()
         user: User = UserFactory()
-        _discussion: Discussion = DiscussionFactory(user=user)
+        # Discussion on a dataset of another organization, must be filtered out
+        _discussion: Discussion = DiscussionFactory(
+            user=user, subject=DatasetFactory(organization=OrganizationFactory())
+        )
         dataset = DatasetFactory(organization=organization)
         dataservice = DataserviceFactory(organization=organization)
         reuse = ReuseFactory(organization=organization)
@@ -544,6 +818,33 @@ class DiscussionsTest(APITestCase):
             # Clean slate
             Discussion.objects.delete()
 
+    def test_list_discussions_sort_by_message_posted_on(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+
+        older = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="older", posted_by=user, posted_on=datetime(2023, 1, 1, tzinfo=UTC))
+            ],
+        )
+        newer = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[
+                Message(content="newer", posted_by=user, posted_on=datetime(2024, 1, 1, tzinfo=UTC))
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", sort="discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(older.id), str(newer.id)])
+
+        response = self.get(url_for("api.discussions", sort="-discussion.posted_on"))
+        self.assert200(response)
+        self.assertEqual([d["id"] for d in response.json["data"]], [str(newer.id), str(older.id)])
+
     def test_list_discussions_user(self):
         dataset = DatasetFactory()
         discussions = []
@@ -573,6 +874,10 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["user"]["id"], str(user.id))
 
+    def test_list_discussions_user_is_not_an_identifier(self):
+        response = self.get(url_for("api.discussions", user="not an identifier"))
+        self.assert400(response)
+
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title="Test dataset")
         user = UserFactory()
@@ -595,6 +900,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data["discussion"][0]["content"], "bla bla")
         self.assertEqual(data["discussion"][0]["posted_by"]["id"], str(user.id))
         self.assertIsNotNone(data["discussion"][0]["posted_on"])
+        self.assertEqual(data["url"], discussion.self_api_url())
+        self.assertEqual(data["self_web_url"], discussion.self_web_url())
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_comment_to_discussion(self):
@@ -632,6 +939,79 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data["discussion"][1]["posted_on"])
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
+
+    def test_comment_discussion_without_comment_nor_close(self):
+        """Nothing to post and nothing to close is a 400, whatever shape the emptiness takes."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        for payload in [{}, {"close": False}, {"comment": ""}, {"comment": "   "}]:
+            response = self.post(url_for("api.discussion", id=discussion.id), payload)
+            self.assert400(response)
+
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+        assert discussion.closed is None
+
+    def test_close_discussion_with_a_blank_comment(self):
+        """A blank comment alongside `close` closes the discussion without adding a message."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id), {"comment": "   ", "close": True}
+        )
+        self.assert200(response)
+
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+        assert discussion.closed is not None
+
+    def test_comment_size_limit(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        too_long = "a" * (COMMENT_SIZE_LIMIT + 1)
+
+        # On creation, the comment is stored in the first message.
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": too_long,
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+        self.assert400(response)
+
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            discussion=[Message(content="bla bla", posted_by=user)],
+        )
+
+        # When adding a comment to an existing discussion.
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"comment": too_long},
+        )
+        self.assert400(response)
+
+        # When editing an existing comment.
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": too_long},
+        )
+        self.assert400(response)
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_spam_comment_to_discussion(self):
@@ -748,6 +1128,26 @@ class DiscussionsTest(APITestCase):
                 {"close": True},
             )
             self.assert200(response)
+
+    def test_close_discussion_on_behalf_of_org(self):
+        user = self.login()
+        org = OrganizationFactory(editors=[user])
+        dataset = DatasetFactory()
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"close": True, "organization": org.id},
+        )
+        self.assert200(response)
+        assert response.json["closed_by"]["id"] == str(user.id)
+        assert response.json["closed_by_organization"]["id"] == str(org.id)
+
+        discussion.reload()
+        assert discussion.closed_by_organization == org
 
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
@@ -948,6 +1348,24 @@ class DiscussionsTest(APITestCase):
         )
         self.assertStatus(response, 403)
 
+    def test_edit_discussion_title_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        for title in ["", "   "]:
+            response = self.put(url_for("api.discussion", id=discussion.id), {"title": title})
+            self.assert400(response)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {})
+        self.assert400(response)
+
+        discussion.reload()
+        assert discussion.title == "test discussion"
+
     def test_edit_discussion_comment(self):
         admin = self.login(AdminFactory())
         user = UserFactory()
@@ -1023,6 +1441,27 @@ class DiscussionsTest(APITestCase):
             {"comment": "unknown uuid"},
         )
         self.assertStatus(response, 404)
+
+    def test_edit_discussion_comment_empty(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        for comment in ["", "   "]:
+            response = self.put(
+                url_for("api.discussion_comment", id=discussion.id, cidx=0),
+                {"comment": comment},
+            )
+            self.assert400(response)
+
+        response = self.put(url_for("api.discussion_comment", id=discussion.id, cidx=0), {})
+        self.assert400(response)
+
+        discussion.reload()
+        assert discussion.discussion[0].content == "bla bla"
 
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
@@ -1455,10 +1894,10 @@ class DiscussionExternalNotificationTest(APITestCase):
         assert len(mails) == 1
 
     def test_edit_discussion_ignores_extras_in_payload(self):
-        # Guard-rail: `DiscussionEditForm` only declares `title`, so an
-        # `extras` field in the PUT payload must be silently discarded.
-        # If someone later adds `extras` to the edit form without porting
-        # the allow-list validation, this test will fail.
+        # Guard-rail: the PUT handler only forwards `title` to `patch_and_save`, so an
+        # `extras` field in the payload must be silently discarded. If someone later
+        # forwards the whole payload without porting the allow-list validation, this
+        # test will fail.
         user = self.login()
         discussion = Discussion.objects.create(
             subject=DatasetFactory(owner=user),
@@ -1652,3 +2091,107 @@ class DiscussionExternalNotificationTest(APITestCase):
         )
         self.assert201(response)
         assert Discussion.objects(subject=topic).count() == 1
+
+
+class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
+    def insert_legacy_discussion(self, subject=None):
+        """Insert a discussion the model now rejects.
+
+        Those only exist as data written before `Discussion.subject` was
+        restricted, so mongoengine cannot be used to create them.
+        """
+        document = {
+            "title": faker.sentence(),
+            "created": datetime.now(UTC),
+            "discussion": [],
+        }
+        if subject is not None:
+            document["subject"] = subject
+        return Discussion._get_collection().insert_one(document).inserted_id
+
+    def report_discussion(self, discussion_id, subject_deleted_at=None):
+        report = Report(
+            subject=Discussion.objects.get(pk=discussion_id),
+            reason=REASON_SPAM,
+            subject_deleted_at=subject_deleted_at,
+        )
+        report.save()
+        return report.id
+
+    def notify_discussion(self, user, discussion_id):
+        notification = Notification(
+            user=user,
+            details=DiscussionNotificationDetails(
+                discussion=Discussion.objects.get(pk=discussion_id),
+                status=DiscussionStatus.NEW_DISCUSSION,
+            ),
+        )
+        notification.save()
+        return notification.id
+
+    def run_migration(self):
+        migration = load_migration("2026-07-29-delete-discussions-on-unsupported-subjects.py")
+        migration.migrate(get_db())
+
+    def test_migration_deletes_the_discussions_no_subject_can_display(self):
+        user = self.login()
+        license = License.objects.create(id="unsupported-subject", title="Test license")
+
+        kept = DiscussionFactory(
+            user=user,
+            subject=DatasetFactory(),
+            discussion=[MessageDiscussionFactory(posted_by=user)],
+        )
+        on_license = self.insert_legacy_discussion(
+            {"_cls": "License", "_ref": DBRef("license", license.id)}
+        )
+        without_subject = self.insert_legacy_discussion()
+
+        kept_report = self.report_discussion(kept.id)
+        on_license_report = self.report_discussion(on_license)
+        on_license_handled_report = self.report_discussion(
+            on_license, subject_deleted_at=datetime(2026, 1, 1, tzinfo=UTC)
+        )
+        handled_at = Report.objects.get(pk=on_license_handled_report).subject_deleted_at
+        kept_notification = self.notify_discussion(user, kept.id)
+        on_license_notification = self.notify_discussion(user, on_license)
+        without_subject_notification = self.notify_discussion(user, without_subject)
+
+        # Both listings crash on those discussions before the migration.
+        self.assert500(self.get(url_for("api.discussions")))
+        self.assert500(self.get(url_for("api.notifications")))
+
+        self.run_migration()
+
+        response = self.get(url_for("api.discussions"))
+        self.assert200(response)
+        assert [d["id"] for d in response.json["data"]] == [str(kept.id)]
+
+        response = self.get(url_for("api.notifications"))
+        self.assert200(response)
+        assert [n["id"] for n in response.json["data"]] == [str(kept_notification)]
+
+        assert Notification.objects(id__in=[on_license_notification]).count() == 0
+        assert Notification.objects(id__in=[without_subject_notification]).count() == 0
+
+        # The report on a deleted discussion leaves the moderation queue, the one
+        # on the discussion that survived stays untouched.
+        assert Report.objects.get(pk=on_license_report).subject_deleted_at is not None
+        assert Report.objects.get(pk=kept_report).subject_deleted_at is None
+
+        # A report already out of the queue keeps the date it was handled at.
+        assert Report.objects.get(pk=on_license_handled_report).subject_deleted_at == handled_at
+
+    def test_migration_is_a_noop_without_unsupported_discussions(self):
+        """The nominal case in production: a healthy base must come out untouched."""
+        user = self.login()
+        discussion = DiscussionFactory(user=user)
+        report = self.report_discussion(discussion.id)
+        notification = self.notify_discussion(user, discussion.id)
+
+        self.run_migration()
+
+        assert Discussion.objects.count() == 1
+        assert Discussion.objects.first() == discussion
+        assert Report.objects.get(pk=report).subject_deleted_at is None
+        assert Notification.objects(id=notification).count() == 1

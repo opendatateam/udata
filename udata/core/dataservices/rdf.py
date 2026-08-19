@@ -52,8 +52,9 @@ def dataservice_from_rdf(
     # TODO detect if it's human-readable or not?
     dataservice.machine_documentation_url = url_from_rdf(d, DCAT.endpointDescription)
 
+    owner = dataservice.organization or dataservice.owner
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataservice, dryrun=dryrun)
+        contact_points_from_rdf(d, rdf_entity, role, owner, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataservice.contact_points = [  # Flattened list of contact points

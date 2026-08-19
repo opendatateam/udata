@@ -43,6 +43,20 @@ services:
             /usr/local/bin/docker-entrypoint.sh eswrapper
           "
 
+    storage:
+        image: minio/minio
+        volumes:
+          - storage-data:/data
+        expose:
+          - "9000"
+        ports:
+          - "9000:9000"
+          - "9001:9001"
+        environment:
+          MINIO_ROOT_USER: udata
+          MINIO_ROOT_PASSWORD: udata-secret
+        command: server /data --console-address ":9001"
+
     mailpit:
         image: axllent/mailpit
         ports:
@@ -56,3 +70,4 @@ volumes:
     db-data:
     broker-data:
     search-data:
+    storage-data:

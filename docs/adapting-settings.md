@@ -50,7 +50,7 @@ The site identifier. It is used to attached some database configuration, metrics
 
 ### THEME
 
-**default**: ``None``
+**default**: `None`
 
 The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
 
@@ -85,16 +85,6 @@ The duration used for templates' cache, in minutes.
 ```
 
 This is the allowed resources extensions list that user can upload.
-
-### RESOURCES_FILE_ALLOWED_DOMAINS
-
-**default**: `[]`
-
-Whitelist of urls domains allowed for resources with `filetype` equals to `file`.
-
-`SERVER_NAME` is always included.
-
-`*` is a supported value as a wildcard allowing all domains.
 
 ### PREVIEW_MODE
 
@@ -132,7 +122,7 @@ NB: this is used by the `datasets/schemas` API to fill the `schema` field of a `
 
 ### URLS_ALLOW_PRIVATE
 
-**default**:  `False`
+**default**: `False`
 
 Whether or not to allow private URLs (private IPs...) submission
 
@@ -177,7 +167,7 @@ URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 
 ### EXPORT_CSV_MODELS
 
-**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'tag')`
+**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'dataservice', 'tag', 'harvest')`
 
 List models that will be exported to CSV by the job `export-csv`.
 You can disable the feature by setting this to an empty list.
@@ -222,14 +212,6 @@ udata search init-es
 **default**: `None` (no prefix)
 
 Optional prefix for Elasticsearch index names. When set, each model gets its own index named `{ELASTICSEARCH_INDEX_BASENAME}-{model}` (e.g. `udata-dataset`, `udata-organization`). When `None` or empty, index names match model names directly (e.g. `dataset`, `organization`).
-
-## Spatial configuration
-
-### SPATIAL_SEARCH_EXCLUDE_LEVELS
-
-**default**: `tuple()`
-
-List spatial levels that shoudn't be indexed (for time, performance and user experience).
 
 ## Harvesting configuration
 
@@ -358,25 +340,25 @@ The OAuth2 error page. Do not modify unless you know what you are doing.
 
 ### SECURITY_PASSWORD_LENGTH_MIN
 
-**default**: `6`
+**default**: `8`
 
 The minimum required password length.
 
 ### SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE
 
-**default**: `False`
+**default**: `True`
 
 If set to `True`, the new passwords will need to contain at least one lowercase character.
 
 ### SECURITY_PASSWORD_REQUIREMENTS_DIGITS
 
-**default**: `False`
+**default**: `True`
 
 If set to `True`, the new passwords will need to contain at least one digit.
 
 ### SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE
 
-**default**: `False`
+**default**: `True`
 
 If set to `True`, the new passwords will need to contain at least one uppercase character.
 
@@ -480,7 +462,7 @@ These settings allow you to customize the notification feature.
 
 ### DAYS_AFTER_NOTIFICATION_EXPIRED
 
-**default**: 90
+**default**: `90`
 
 The delay of days between an handled notification and its deletion.
 
@@ -490,13 +472,13 @@ Theses settings allow you to customize the post feature.
 
 ### POST_DISCUSSIONS_ENABLED
 
-**default** `False`
+**default**: `False`
 
 Whether or not discussions should be enabled on posts
 
 ### POST_DEFAULT_PAGINATION
 
-**default** `20`
+**default**: `20`
 
 The default page size for post listing
 
@@ -549,7 +531,31 @@ Enables the app's read only mode.
 
 ### METHOD_BLOCKLIST
 
-**default**: `['OrganizationListAPI.post', 'ReuseListAPI.post', 'DatasetListAPI.post', 'CommunityResourcesAPI.post', 'UploadNewCommunityResources.post', 'DiscussionAPI.post', 'DiscussionsAPI.post', 'IssuesAPI.post', 'IssueAPI.post', 'SourcesAPI.post', 'FollowAPI.post']`
+**default**:
+```python
+[
+    'OrganizationListAPI.post',
+    'MembershipRequestAPI.post',
+    'MemberAPI.post',
+    'ReuseListAPI.post',
+    'DatasetListAPI.post',
+    'ResourcesAPI.post',
+    'UploadNewDatasetResource.post',
+    'UploadDatasetResource.post',
+    'CommunityResourcesAPI.post',
+    'UploadNewCommunityResources.post',
+    'ReuploadCommunityResource.post',
+    'DiscussionAPI.post',
+    'DiscussionsAPI.post',
+    'SourcesAPI.post',
+    'PreviewSourceConfigAPI.post',
+    'FollowAPI.post',
+    'ContactPointsListAPI.post',
+    'DataservicesAPI.post',
+    'TopicsAPI.post',
+    'TransferRequestsAPI.post',
+]
+```
 
 List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoints listed here will return a `423` response code to any non-admin request.
 
@@ -613,6 +619,6 @@ URI of the external service receiving the resource events.
 
 ### RESOURCES_ANALYSER_API_KEY
 
-**default**: `api_key_to_change`
+**default**: `None`
 
 API key sent in the headers of the endpoint requests as a Bearer token.

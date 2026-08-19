@@ -3,6 +3,7 @@ from io import BytesIO, StringIO
 
 import pytest
 from flask import url_for
+from mongoengine.context_managers import query_counter
 
 import udata.core.organization.constants as org_constants
 from udata.core import csv, storages
@@ -11,7 +12,12 @@ from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.edito_blocs.models import AccordionItemBloc, AccordionListBloc, MarkdownBloc
+from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
+    DatasetsListBloc,
+    MarkdownBloc,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -414,6 +420,39 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert response.json["presentation_blocs"][0]["class"] == "MarkdownBloc"
         assert response.json["presentation_blocs"][0]["title"] == "Welcome"
         assert response.json["presentation_blocs"][0]["content"] == "Hello"
+
+    def test_blocs_references_are_batched(self):
+        """The cards embedded in an organization's blocs must not be dereferenced one
+        by one: the query count has to stay flat as the number of cards grows."""
+
+        def query_count(nb_cards):
+            owners = [UserFactory() for _ in range(4)]
+            org = OrganizationFactory(
+                presentation_blocs=[
+                    DatasetsListBloc(
+                        title="Featured",
+                        datasets=[
+                            DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)
+                        ],
+                    )
+                ],
+                presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
+            )
+            url = url_for("api.organization", org=org)
+            headers = {"X-Fields": "{presentation_blocs}"}
+            assert200(self.get(url, headers=headers))  # warm up one-time queries
+            with query_counter() as counter:
+                response = self.get(url, headers=headers)
+                count = int(counter)
+            assert200(response)
+            assert len(response.json["presentation_blocs"][0]["datasets"]) == nb_cards
+            return count
+
+        many, few = query_count(20), query_count(2)
+        assert many == few, (
+            f"the query count grows with the number of cards ({many} for 20 cards, "
+            f"{few} for 2): the references are dereferenced one by one"
+        )
 
     def test_draft_blocs_hidden_from_public(self):
         """Without a publication date, blocs are a draft and never shown to the public."""
@@ -1281,6 +1320,19 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert organization.is_member(updated_user)
         assert organization.is_admin(updated_user)
+
+    def test_update_member_not_in_organization(self):
+        user = self.login()
+        other_user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.member", org=organization, user=other_user)
+        response = self.put(api_url, {"role": "admin"})
+
+        assert404(response)
+
+        organization.reload()
+        assert not organization.is_member(other_user)
 
     def test_only_admin_can_update_member(self):
         user = self.login()

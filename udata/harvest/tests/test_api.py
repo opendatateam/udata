@@ -15,10 +15,20 @@ from udata.db import migrations
 from udata.harvest.backends import get_enabled_backends
 from udata.models import Member, PeriodicTask
 from udata.tests.api import PytestOnlyAPITestCase
-from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403, assert404
+from udata.tests.helpers import (
+    argvalues,
+    assert200,
+    assert201,
+    assert204,
+    assert400,
+    assert403,
+    assert404,
+    assert_emit,
+    assert_redirects,
+)
 from udata.utils import faker
 
-from .. import actions
+from .. import actions, signals
 from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -141,8 +151,10 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
     def test_create_source_with_owner(self):
         """It should create and attach a new source to an owner"""
         user = self.login()
-        data = {"name": faker.word(), "url": faker.url(), "backend": "factory"}
-        response = self.post(url_for("api.harvest_sources"), data)
+        source_url = faker.url()
+        data = {"name": "Test source", "url": source_url, "backend": "factory"}
+        with assert_emit(signals.harvest_source_created):
+            response = self.post(url_for("api.harvest_sources"), data)
 
         assert201(response)
 
@@ -150,6 +162,83 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert source["validation"]["state"] == VALIDATION_PENDING
         assert source["owner"]["id"] == str(user.id)
         assert source["organization"] is None
+
+        created = HarvestSource.objects.get(id=source["id"])
+        assert created.name == "Test source"
+        assert created.slug == "test-source"
+        assert created.url == source_url
+        assert created.backend == "factory"
+        assert created.frequency == "manual"
+        assert created.active
+        assert created.validation.on is None
+        assert created.validation.by is None
+        assert created.validation.comment is None
+
+    def test_create_source_without_name(self):
+        """A source without a name is rejected"""
+        self.login()
+        data = {"url": faker.url(), "backend": "factory"}
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_unknown_backend(self):
+        """A source referencing a backend that is not enabled is rejected"""
+        self.login()
+        data = {"name": faker.word(), "url": faker.url(), "backend": "not-a-backend"}
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_empty_backend(self):
+        """An empty backend is rejected"""
+        self.login()
+        data = {"name": faker.word(), "url": faker.url(), "backend": ""}
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_non_object_config(self):
+        """A config that is not an object is rejected, not crashed on"""
+        self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": ["not-an-object"],
+        }
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_non_object_features(self):
+        """Features that are not an object are rejected, not crashed on"""
+        self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": {"features": ["test"]},
+        }
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_explicit_null_producer(self):
+        """A payload spelling out both producers as null falls back to the current user"""
+        user = self.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "owner": None,
+            "organization": None,
+        }
+        response = self.post(url_for("api.harvest_sources"), data)
+
+        assert201(response)
+        assert response.json["owner"]["id"] == str(user.id)
+        assert response.json["organization"] is None
 
     def test_create_source_with_org(self):
         """It should create and attach a new source to an organization"""
@@ -421,12 +510,88 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["url"] == new_url
 
+        source.reload()
+        assert source.url == new_url
+
         # Source is now owned by orga, with user as admin
         source.organization = OrganizationFactory(members=[Member(user=user, role="admin")])
         source.save()
         api_url = url_for("api.harvest_source", source=source)
         response = self.put(api_url, data)
         assert200(response)
+
+    def test_update_source_config_without_resending_backend(self):
+        """A config sent alone is still validated against the backend already stored"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"config": {"filters": [{"key": "unknown", "value": "any"}]}})
+        assert400(response)
+
+        response = self.put(api_url, {"config": {"filters": [{"key": "test", "value": 42}]}})
+        assert200(response)
+
+    def test_update_source_with_unknown_backend(self):
+        """A backend sent alone is still validated"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"backend": "not-a-backend"})
+
+        assert400(response)
+
+    def test_update_source_with_a_stored_backend_no_longer_enabled(self):
+        """A backend left out of the payload is validated against the enabled ones too"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user, backend="not-enabled-anymore")
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"url": faker.url()})
+
+        assert400(response)
+
+    def test_update_source_renaming_redirects_the_previous_slug(self):
+        """Renaming a source moves its slug and leaves the previous one redirecting"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user, name="Old name")
+        previous_url = url_for("api.harvest_source", source=source)
+
+        response = self.put(previous_url, {"name": "New name"})
+        assert200(response)
+        assert response.json["slug"] == "new-name"
+
+        source.reload()
+        assert source.slug == "new-name"
+        assert_redirects(self.get(previous_url), url_for("api.harvest_source", source=source))
+
+    def test_update_source_resending_its_producer(self):
+        """Clients resend the unchanged producer on every save: that is not a change"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        source = HarvestSourceFactory(organization=org)
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"organization": str(org.id), "owner": None})
+
+        assert200(response)
+        source.reload()
+        assert source.organization == org
+
+    def test_update_source_cannot_change_its_producer(self):
+        """The producer is set at creation and cannot be transferred through an update"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+        new_org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.harvest_source", source=source)
+        response = self.put(api_url, {"organization": str(new_org.id)})
+
+        assert400(response)
+        source.reload()
+        assert source.organization is None
+        assert source.owner == user
 
     def test_update_source_require_permission(self):
         """It should not update a source if not the owner"""
@@ -634,6 +799,34 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
 
         assert_preview_datasets_have_no_link(response)
+
+    @pytest.mark.parametrize(
+        "payload",
+        argvalues(
+            ({"url": faker.url(), "backend": "factory"}, "no-name"),
+            ({"name": faker.word(), "backend": "factory"}, "no-url"),
+            ({"name": faker.word(), "url": faker.url()}, "no-backend"),
+            ({"name": faker.word(), "url": faker.url(), "backend": ""}, "empty-backend"),
+            ({"name": faker.word(), "url": "not-an-url", "backend": "factory"}, "invalid-url"),
+        ),
+    )
+    def test_source_from_incomplete_config(self, payload):
+        """The preview never saves, so it validates the source explicitly"""
+        self.login()
+        response = self.post(url_for("api.preview_harvest_source_config"), payload)
+
+        assert400(response)
+
+    def test_source_from_config_previews_as_the_current_user(self):
+        """A preview harvests as the producer creating the same source would"""
+        user = self.login()
+        data = {"name": faker.word(), "url": faker.url(), "backend": "factory"}
+        response = self.post(url_for("api.preview_harvest_source_config"), data)
+
+        assert200(response)
+        assert all(
+            item["dataset"]["owner"]["id"] == str(user.id) for item in response.json["items"]
+        )
 
     def test_delete_source(self):
         user = self.login()

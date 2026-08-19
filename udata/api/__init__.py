@@ -3,6 +3,7 @@ import urllib.parse
 from functools import wraps
 
 import mongoengine
+from babel import Locale, UnknownLocaleError
 from flask import (
     Blueprint,
     current_app,
@@ -140,6 +141,20 @@ class UDataApi(Api):
 
         return wrapper
 
+    def json_payload(self) -> dict:
+        """Return the request body as a dict, rejecting any other JSON shape.
+
+        A JSON body can decode to a string, a number or a list, none of which the
+        handlers can consume: without this check they raise an `AttributeError` and
+        the client gets a 500 instead of a 400.
+        """
+        data = request.json
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            self.abort(400, errors={"request": "expecting a JSON object"})
+        return data
+
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
         if "application/json" not in request.headers.get("Content-Type", ""):
@@ -208,10 +223,16 @@ def output_json(data, code, headers=None):
 @apiv1_blueprint.before_request
 @apiv2_blueprint.before_request
 def set_api_language():
-    if "lang" in request.args:
-        g.lang_code = request.args["lang"]
-    else:
-        g.lang_code = get_locale()
+    lang = request.args.get("lang")
+    if lang is not None:
+        try:
+            # Validate here what Babel would parse later: an invalid value would otherwise
+            # raise on the first translation, far from the request parsing.
+            Locale.parse(lang)
+        except (ValueError, UnknownLocaleError):
+            log.warning("Ignoring unknown `lang` query parameter: %r", lang)
+            lang = None
+    g.lang_code = lang or get_locale()
 
 
 def extract_name_from_path(path):

@@ -38,7 +38,7 @@ def update(ctx):
     header(msg)
     info("Updating Python dependencies")
     with ctx.cd(ROOT):
-        ctx.run('pip install -e ".[dev]"')
+        ctx.run("pip install --group dev -e .")
     info("Note: Dependencies are now managed in pyproject.toml")
 
 

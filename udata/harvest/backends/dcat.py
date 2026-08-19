@@ -15,7 +15,7 @@ from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.models import Dataset
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestError, HarvestItem
-from udata.i18n import gettext as _
+from udata.i18n import lazy_gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
@@ -28,7 +28,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
-from udata.utils import safe_unicode
+from udata.utils import safe_unicode, uniquify
 
 from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
 
@@ -136,7 +136,11 @@ class DcatBackend(BaseBackend):
             page_number += 1
 
     def process_one_datasets_page(self, graph: Graph, page_number: int):
-        for node in graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries]):
+        # Manually deduplicate subjects to ensure a node is only processed once.
+        # Rdflib subjects() will return the same node multiple times if it matches different types,
+        # which can occur with ISO series converted by SEMIC (by default it sets rdf:type to both
+        # Dataset and DatasetSeries).
+        for node in uniquify(graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
             if self.is_dataset_external_to_this_graph(node, graph):
                 continue
 
@@ -502,15 +506,20 @@ class CswIso19139DcatBackend(BaseCswDcatBackend):
     name = "csw-iso-19139"
     display_name = "CSW-ISO-19139"
 
+    xslt_params = {
+        "CoupledResourceLookUp": "disabled",
+        "include-deprecated": "yes",  # required for dct:rights
+        "locale-preferred-lang": "fre",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
         xslt_text = self.get(xslt_url).text
         xslt_proc = self.saxon_proc.new_xslt30_processor()
         self.xslt_exec = xslt_proc.compile_stylesheet(stylesheet_text=xslt_text)
-        self.xslt_exec.set_parameter(
-            "CoupledResourceLookUp", self.saxon_proc.make_string_value("disabled")
-        )
+        for key, value in self.xslt_params.items():
+            self.xslt_exec.set_parameter(key, self.saxon_proc.make_string_value(value))
 
     @property
     @override

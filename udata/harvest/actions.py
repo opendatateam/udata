@@ -9,12 +9,11 @@ from flask import current_app
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import Dataset, Organization, PeriodicTask, User
+from udata.models import Dataset, PeriodicTask
 from udata.storage.s3 import delete_file
 
 from . import backends, signals
 from .models import (
-    DEFAULT_HARVEST_FREQUENCY,
     VALIDATION_ACCEPTED,
     VALIDATION_REFUSED,
     HarvestJob,
@@ -55,48 +54,6 @@ def get_job(ident, *, with_items=True):
     if not with_items:
         qs = qs.exclude("items")
     return qs.get(id=ident)
-
-
-def create_source(
-    name,
-    url,
-    backend,
-    description=None,
-    frequency=DEFAULT_HARVEST_FREQUENCY,
-    owner=None,
-    organization=None,
-    config=None,
-    active=None,
-    autoarchive=None,
-):
-    """Create a new harvest source"""
-    if owner and not isinstance(owner, User):
-        owner = User.get(owner)
-
-    if organization and not isinstance(organization, Organization):
-        organization = Organization.get(organization)
-
-    source = HarvestSource.objects.create(
-        name=name,
-        url=url,
-        backend=backend,
-        description=description,
-        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
-        owner=owner,
-        organization=organization,
-        config=config,
-        active=active,
-        autoarchive=autoarchive,
-    )
-    signals.harvest_source_created.send(source)
-    return source
-
-
-def update_source(source: HarvestSource, data):
-    """Update an harvest source"""
-    source.modify(**data)
-    signals.harvest_source_updated.send(source)
-    return source
 
 
 def validate_source(source: HarvestSource, comment=None):
@@ -208,43 +165,6 @@ def launch(source: HarvestSource):
 
 def preview(source: HarvestSource):
     """Preview an harvesting for a given source"""
-    cls = backends.get_backend(source.backend)
-    max_items = current_app.config["HARVEST_PREVIEW_MAX_ITEMS"]
-    backend = cls(source, dryrun=True, max_items=max_items)
-    return backend.harvest()
-
-
-def preview_from_config(
-    name,
-    url,
-    backend,
-    description=None,
-    frequency=DEFAULT_HARVEST_FREQUENCY,
-    owner=None,
-    organization=None,
-    config=None,
-    active=None,
-    autoarchive=None,
-):
-    """Preview an harvesting from a source created with the given parameters"""
-    if owner and not isinstance(owner, User):
-        owner = User.get(owner)
-
-    if organization and not isinstance(organization, Organization):
-        organization = Organization.get(organization)
-
-    source = HarvestSource(
-        name=name,
-        url=url,
-        backend=backend,
-        description=description,
-        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
-        owner=owner,
-        organization=organization,
-        config=config,
-        active=active,
-        autoarchive=autoarchive,
-    )
     cls = backends.get_backend(source.backend)
     max_items = current_app.config["HARVEST_PREVIEW_MAX_ITEMS"]
     backend = cls(source, dryrun=True, max_items=max_items)

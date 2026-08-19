@@ -14,6 +14,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.models import HarvestItem
+from udata.ssrf import BlockedAddressError
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
@@ -83,6 +84,15 @@ class FakeBackend(BaseBackend):
         clazz = type(item).__name__.lower()
         position = len(self.job.items)
         item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
+
+
+class FetchingBackend(FakeBackend):
+    """A backend that really goes over the network, to exercise the HTTP layer."""
+
+    name = "fetching-backend"
+
+    def inner_harvest(self):
+        self.get(self.source.url)
 
 
 class HarvestFilterTest:
@@ -210,6 +220,34 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 getattr(backend, method)(url, data={})
             else:
                 getattr(backend, method)(url)
+
+    @pytest.mark.parametrize("method", ["head", "get", "post"])
+    def test_refuses_to_fetch_a_private_address(self, method):
+        # Deliberately no rmock: requests_mock substitutes the session adapter,
+        # which is precisely the guard under test. Nothing needs to listen on the
+        # address either — it is rejected before connect().
+        backend = FakeBackend(HarvestSourceFactory())
+        url = "http://10.0.0.1/catalog"
+        with pytest.raises(BlockedAddressError, match="private"):
+            if method == "post":
+                backend.post(url, data={})
+            else:
+                getattr(backend, method)(url)
+
+    def test_harvest_a_private_address_fails_the_job(self):
+        # BlockedAddressError is neither a RequestException nor an OSError (so
+        # that urllib3 cannot swallow it): make sure it still lands as a job
+        # failure instead of escaping the harvest task.
+        source = HarvestSourceFactory()
+        # Assigned without saving: URLField keeps a private address out of the
+        # stored value, so the case left to exercise is the one it cannot catch
+        # — a source whose URL only reaches a forbidden address at fetch time.
+        source.url = "http://10.0.0.1/catalog"
+
+        job = FetchingBackend(source).harvest()
+
+        assert job.status == "failed"
+        assert "10.0.0.1" in job.errors[0].message
 
     def test_harvest_item_remote_url(self):
         n = 3

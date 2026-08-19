@@ -1,24 +1,38 @@
 import pytest
 from rdflib import (
+    BNode,
+    Graph,
     Literal,
     URIRef,
 )
+from rdflib.resource import Resource as RdfResource
 
+from udata.core.organization.factories import OrganizationFactory
 from udata.models import ContactPoint
 from udata.rdf import (
     ACCEPTED_MIME_TYPES,
     AGENT_ROLE_TO_RDF_PREDICATE,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
+    DCT,
     FOAF,
     FORMAT_MAP,
+    ORG,
     RDF,
+    SKOS,
     VCARD,
+    contact_point_from_foaf,
+    contact_point_from_vcard,
+    contact_points_from_rdf,
     contact_points_to_rdf,
     guess_format,
     negociate_content,
+    vocabulary_key,
     want_rdf,
 )
 from udata.tests import TestCase
+from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.helpers import argvalues
 
 
 class ContentNegociationTest(TestCase):
@@ -98,7 +112,7 @@ class ContactToRdfTest:
             assert contact_point.value(RDF.type).identifier == VCARD.Kind
             assert contact_point.value(VCARD.fn) == Literal("Organization contact")
             assert contact_point.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-            assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
+            assert contact_point.value(VCARD.hasURL).identifier == URIRef(
                 "https://data.support.com"
             )
             # Default predicate is "contact"
@@ -123,7 +137,7 @@ class ContactToRdfTest:
                 assert contact_point.value(VCARD.hasEmail).identifier == URIRef(
                     "mailto:hello@its.me"
                 )
-                assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
+                assert contact_point.value(VCARD.hasURL).identifier == URIRef(
                     "https://data.support.com"
                 )
             else:
@@ -133,3 +147,399 @@ class ContactToRdfTest:
                 assert contact_point.value(FOAF.page).identifier == URIRef(
                     "https://data.support.com"
                 )
+
+
+class ContactFromRdfTest(PytestOnlyDBTestCase):
+    cases = [  # (user_info, org_info, id)
+        (
+            ("me", "me@example.com", "http://example.com/me"),
+            None,
+            "individual-full",
+        ),
+        (
+            None,
+            ("org", "org@example.com", "http://example.com/org"),
+            "organization-full",
+        ),
+        (
+            ("me", "me@example.com", "http://example.com/me"),
+            ("org", "org@example.com", "http://example.com/org"),
+            "both-full",
+        ),
+        (
+            (None, "me@example.com", "http://example.com/me"),
+            None,
+            "individual-noname",
+        ),
+        (
+            ("me", None, "http://example.com/me"),
+            None,
+            "individual-noemail",
+        ),
+        (
+            ("me", "me@example.com", None),
+            None,
+            "individual-noform",
+        ),
+        (
+            (None, None, None),
+            None,
+            "individual-nothing",
+        ),
+        (
+            None,
+            (None, "org@example.com", "http://example.com/org"),
+            "organization-noname",
+        ),
+        (
+            None,
+            ("org", None, "http://example.com/org"),
+            "organization-noemail",
+        ),
+        (
+            None,
+            ("org", "org@example.com", None),
+            "organization-noform",
+        ),
+        (
+            None,
+            (None, None, None),
+            "organization-nothing",
+        ),
+        (
+            ("me", "me@example.com", "http://example.com/me"),
+            (None, "org@example.com", "http://example.com/org"),
+            "both-noorgname",
+        ),
+        (
+            ("me", "me@example.com", "http://example.com/me"),
+            ("org", None, "http://example.com/org"),
+            "both-noorgemail",
+        ),
+        # (
+        #     "both-noorgform" => currently not supported in either VCARD or FOAF
+        # ),
+        (
+            (None, "me@example.com", "http://example.com/me"),
+            ("org", "org@example.com", "http://example.com/org"),
+            "both-nousername",
+        ),
+        (
+            ("me", None, "http://example.com/me"),
+            ("org", "org@example.com", "http://example.com/org"),
+            "both-nouseremail",
+        ),
+        (
+            (None, "me@example.com", "http://example.com/me"),
+            (None, "org@example.com", "http://example.com/org"),
+            "both-noname",
+        ),
+        (
+            ("me", None, "http://example.com/me"),
+            ("org", None, "http://example.com/org"),
+            "both-noemail",
+        ),
+    ]
+
+    @pytest.mark.parametrize("user_info, org_info", argvalues(cases))
+    @pytest.mark.parametrize("typed", [True, False], ids=["typed", "untyped"])
+    @pytest.mark.parametrize(
+        "predicate", [DCAT.contactPoint, DCT.creator], ids=["compliant", "lenient"]
+    )
+    def test_contact_points_from_rdf_vcard(self, user_info, org_info, typed, predicate):
+        def _vcard(g: Graph, node_type, name, email, form, typed):
+            node = BNode()
+            if typed:
+                g.add((node, RDF.type, node_type))
+            if name:
+                g.add((node, VCARD.fn, Literal(name)))
+            if email:
+                g.add((node, VCARD.hasEmail, Literal("mailto:" + email)))
+            if form:
+                g.add((node, VCARD.hasURL, Literal(form)))
+            return node
+
+        user_name, user_email, user_form = user_info or (None, None, None)
+        org_name, org_email, org_form = org_info or (None, None, None)
+        role = CONTACT_POINT_ENTITY_TO_ROLE[predicate]
+
+        g = Graph()
+        if user_info and org_info:
+            contact = _vcard(g, VCARD.Individual, user_name, user_email, user_form, typed)
+            # only the org name can appear on an individual VCARD
+            if org_name:
+                g.add((contact, VCARD["organization-name"], Literal(org_name)))
+        elif user_info:
+            contact = _vcard(g, VCARD.Individual, user_name, user_email, user_form, typed)
+        elif org_info:
+            contact = _vcard(g, VCARD.Organization, org_name, org_email, org_form, typed)
+        else:
+            assert False, f"invalid test case: {user_info=} {org_info=}"
+        root = BNode()
+        g.add((root, predicate, contact))
+
+        contact_points = list(
+            contact_points_from_rdf(
+                RdfResource(g, root), predicate, role, OrganizationFactory(name="foo")
+            )
+        )
+
+        # Expected name can be a mix of user and org info...
+        expected_name = (
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+        )
+        # ...but other info can't be mixed, so it's either all user or all org
+        if user_info:
+            expected_email = user_email
+            expected_form = user_form
+        else:
+            expected_email = org_email
+            expected_form = org_form
+
+        if not any([expected_name, expected_email, expected_form]):
+            # Empty contact
+            assert len(contact_points) == 0
+        elif role == "contact" and not (expected_email or expected_form):
+            # ContactPoint.validate() rule
+            assert len(contact_points) == 0
+        else:
+            assert len(contact_points) == 1
+            assert contact_points[0].role == role
+            assert contact_points[0].name == expected_name
+            assert contact_points[0].email == expected_email
+            assert contact_points[0].contact_form == expected_form
+
+    @pytest.mark.parametrize("user_info, org_info", argvalues(cases))
+    @pytest.mark.parametrize("primary", ["org", "user"])
+    @pytest.mark.parametrize("typed", [True, False], ids=["typed", "untyped"])
+    @pytest.mark.parametrize(
+        "predicate", [DCT.creator, DCAT.contactPoint], ids=["compliant", "lenient"]
+    )
+    def test_contact_points_from_rdf_foaf(self, user_info, org_info, primary, typed, predicate):
+        def _foaf(g: Graph, node_type, name, email, typed):
+            node = BNode()
+            if typed:
+                g.add((node, RDF.type, node_type))
+            if name:
+                g.add((node, FOAF.name, Literal(name)))
+            if email:
+                g.add((node, FOAF.mbox, Literal("mailto:" + email)))
+            return node
+
+        # No support for contact_form in FOAF
+        user_name, user_email, _ = user_info or (None, None, None)
+        org_name, org_email, _ = org_info or (None, None, None)
+        role = CONTACT_POINT_ENTITY_TO_ROLE[predicate]
+
+        g = Graph()
+        if user_info and org_info:
+            if primary == "org":
+                contact = _foaf(g, FOAF.Organization, org_name, org_email, typed)
+                user = _foaf(g, FOAF.Person, user_name, user_email, typed)
+                g.add((contact, FOAF.member, user))
+            elif primary == "user":
+                contact = _foaf(g, FOAF.Person, user_name, user_email, typed)
+                org = _foaf(g, FOAF.Organization, org_name, org_email, typed)
+                g.add((contact, ORG.memberOf, org))
+            else:
+                assert False, f"invalid test case: {primary=}"
+        elif user_info:
+            contact = _foaf(g, FOAF.Person, user_name, user_email, typed)
+        elif org_info:
+            contact = _foaf(g, FOAF.Organization, org_name, org_email, typed)
+        else:
+            assert False, f"invalid test case: {user_info=} {org_info=}"
+        root = BNode()
+        g.add((root, predicate, contact))
+
+        contact_points = list(
+            contact_points_from_rdf(
+                RdfResource(g, root), predicate, role, OrganizationFactory(name="foo")
+            )
+        )
+
+        # All expected info can come from either user or org, via member/memberOf
+        expected_name = (
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+        )
+        expected_email = user_email or org_email
+
+        if not any([expected_name, expected_email]):
+            # Empty contact
+            assert len(contact_points) == 0
+        elif role == "contact" and not expected_email:
+            # ContactPoint.validate() rule
+            assert len(contact_points) == 0
+        else:
+            assert len(contact_points) == 1
+            assert contact_points[0].role == role
+            assert contact_points[0].name == expected_name
+            assert contact_points[0].email == expected_email
+            assert contact_points[0].contact_form is None
+
+    @pytest.mark.parametrize(
+        "predicate", [DCAT.contactPoint, DCT.creator], ids=["contact", "creator"]
+    )
+    def test_contact_points_from_rdf_literal(self, predicate):
+        role = CONTACT_POINT_ENTITY_TO_ROLE[predicate]
+
+        expected_name = "foo"
+        g = Graph()
+        root = BNode()
+        g.add((root, predicate, Literal(expected_name)))
+
+        contact_points = list(
+            contact_points_from_rdf(
+                RdfResource(g, root), predicate, role, OrganizationFactory(name="foo")
+            )
+        )
+
+        if role == "contact":
+            # ContactPoint.validate() rule
+            assert len(contact_points) == 0
+        else:
+            assert len(contact_points) == 1
+            assert contact_points[0].role == role
+            assert contact_points[0].name == expected_name
+            assert contact_points[0].email is None
+            assert contact_points[0].contact_form is None
+
+    @pytest.mark.parametrize(
+        "property",
+        [VCARD.fn, VCARD["organization-name"]],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_name(self, property):
+        expected_name = "foo"
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal(expected_name)))
+
+        name, _, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert name == expected_name
+
+    @pytest.mark.parametrize(
+        "property",
+        [VCARD["organization-name"], VCARD["organisation-name"]],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_name_deprecated(self, property):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()
+        g.add((org, property, Literal(expected_name)))
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.org, org))  # deprecated vcard:org spec
+
+        name, _, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert name == expected_name
+
+    def test_contact_point_from_vcard_org_missing(self):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()  # anonymous org node with no relevant org info
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal(expected_name)))
+        g.add((contact, VCARD.org, org))  # deprecated vcard:org spec
+
+        name, _, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert name == expected_name
+
+    @pytest.mark.parametrize("namespaced", [True, False], ids=["namespaced", "plain"])
+    @pytest.mark.parametrize(
+        "property",
+        [VCARD.hasEmail, VCARD.email],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_email(self, namespaced, property):
+        expected_email = "foo@example.com"
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal(("mailto:" if namespaced else "") + expected_email)))
+
+        _, email, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert email == expected_email
+
+    @pytest.mark.parametrize(
+        "property",
+        [VCARD.hasURL, VCARD.url, VCARD.hasUrl],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_url(self, property):
+        expected_form = "http://example.com/foo"
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal(expected_form)))
+
+        _, _, form = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert form == expected_form
+
+    @pytest.mark.parametrize(
+        "property",
+        [FOAF.name, SKOS.prefLabel],
+        ids=["foaf:name", "skos:prefLabel"],
+    )
+    def test_contact_point_from_foaf_name(self, property):
+        expected_name = "foo"
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal(expected_name)))
+
+        name, _, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == expected_name
+
+    def test_contact_point_from_foaf_name_memberOf(self):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()
+        g.add((org, FOAF.name, Literal(expected_name)))
+        contact = BNode()
+        g.add((contact, ORG.memberOf, org))
+
+        name, _, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == expected_name
+
+    @pytest.mark.parametrize("namespaced", [True, False], ids=["namespaced", "plain"])
+    def test_contact_point_from_foaf_email(self, namespaced):
+        expected_email = "foo@example.com"
+        g = Graph()
+        contact = BNode()
+        g.add((contact, FOAF.mbox, Literal(("mailto:" if namespaced else "") + expected_email)))
+
+        _, email, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert email == expected_email
+
+    @pytest.mark.parametrize("namespaced", [True, False], ids=["namespaced", "plain"])
+    def test_contact_point_from_foaf_email_memberOf(self, namespaced):
+        expected_email = "foo@example.com"
+        g = Graph()
+        org = BNode()
+        g.add((org, FOAF.mbox, Literal(("mailto:" if namespaced else "") + expected_email)))
+        contact = BNode()
+        g.add((contact, ORG.memberOf, org))
+
+        _, email, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert email == expected_email
+
+    def test_contact_point_from_foaf_org_missing(self):
+        expected_name = "foo"
+        g = Graph()
+        org = BNode()  # anonymous org node with no relevant org info
+        contact = BNode()
+        g.add((contact, FOAF.name, Literal(expected_name)))
+        g.add((contact, ORG.memberOf, org))
+
+        name, _, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == expected_name

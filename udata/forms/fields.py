@@ -23,7 +23,7 @@ from udata.auth import admin_permission, current_user
 from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectField
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
-from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.models import ContactPoint, Dataset, Organization, Reuse, User, db
 from udata.mongo.datetime_fields import DateField as MongoDateField
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.extras_fields import ExtrasField as MongoExtrasField
@@ -164,19 +164,6 @@ class DateField(WTFDateTimeField):
         super(DateField, self).process_formdata(valuelist)
         if self.data is not None and hasattr(self.data, "date"):
             self.data = self.data.date()
-
-
-class RolesField(Field):
-    def process_formdata(self, valuelist):
-        self.data = []
-        for name in valuelist:
-            role = datastore.find_role(name)
-            if role is not None:
-                self.data.append(role)
-            else:
-                raise validators.ValidationError(
-                    _("The role {role} does not exist").format(role=name)
-                )
 
 
 class DateTimeField(Field, WTFDateTimeField):
@@ -556,7 +543,8 @@ class NestedModelList(fields.FieldList):
 
     def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        self.initial_data = data
+        # `data` is `unset_value` when the form is built without an instance
+        self.initial_data = data or []
         self.is_list_data = formdata and self.name in formdata
         self.is_dict_data = formdata and any(k.startswith(self.prefix) for k in formdata)
         self.has_data = self.is_list_data or self.is_dict_data
@@ -609,17 +597,29 @@ class NestedModelList(fields.FieldList):
             idkey = basekey.format("id")
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
+            data = None
             if hasattr(self.nested_model, "id") and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
                 data = get_by(self.initial_data, id=id)
+                if data is not None:
+                    initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
 
-                initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
-
-                for key, value in initial.items():
-                    if key not in formdata:
-                        formdata[key] = value
-            else:
-                data = None
+                    for key, value in initial.items():
+                        if key not in formdata:
+                            formdata[key] = value
+                else:
+                    try:
+                        self.nested_model.id.validate(id)
+                    except MongoValidationError:
+                        # Keep the malformed id so the nested form rejects the whole payload
+                        pass
+                    else:
+                        # The id is well-formed but matches no existing entry, e.g. a client
+                        # sending back an entry deleted in the meantime. Drop it so the entry
+                        # is created with a server-generated id: resource ids are resolved
+                        # globally by `/datasets/r/<id>`, so honouring a client-chosen one
+                        # would let anyone squat another dataset's permalink.
+                        del formdata[idkey]
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 
@@ -700,8 +700,7 @@ class CurrentUserField(ModelFieldMixin, Field):
 
     def pre_validate(self, form):
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
-            and form.instance
+            form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
             and not admin_permission
@@ -731,8 +730,9 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
+        # Some forms (like DiscussionCommentForm) are not model forms
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
@@ -839,13 +839,3 @@ class ExtrasField(Field):
             self.errors = None
 
         return not bool(self.errors)
-
-
-class DictField(Field):
-    def process_formdata(self, valuelist):
-        if valuelist:
-            data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = data
-            else:
-                raise ValueError("Unsupported data type")
