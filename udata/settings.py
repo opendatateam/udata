@@ -218,7 +218,6 @@ class Defaults(object):
     API_TOKEN_SECRET = ""
 
     # OAuth 2 settings
-    OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,

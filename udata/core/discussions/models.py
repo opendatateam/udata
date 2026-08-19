@@ -30,7 +30,6 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
-from udata.utils import id_or_404
 
 from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
 from .signals import (
@@ -191,7 +190,7 @@ def filter_by_organization(base_query, filter_value):
     from udata.core.dataset.models import Dataset
     from udata.core.reuse.models import Reuse
 
-    org = Organization.objects.get_or_404(id=id_or_404(filter_value))
+    org = Organization.objects.get_or_404(id=filter_value)
     subjects = (
         list(Reuse.objects(organization=org).only("id"))
         + list(Dataset.objects(organization=org).only("id"))
@@ -225,12 +224,14 @@ def filter_by_closed(base_query, filter_value):
             "key": "for",
             "type": str,
             "is_list": True,
+            "constraints": ["objectid"],
             "query": filter_by_subject,
             "help": "Filter discussions for a given subject",
         },
         {
             "key": "org",
             "type": str,
+            "constraints": ["objectid"],
             "query": filter_by_organization,
             "help": "Filter discussions for a given organization",
         },
