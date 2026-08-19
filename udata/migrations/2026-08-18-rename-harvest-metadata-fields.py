@@ -1,5 +1,5 @@
 """
-TODO
+Rename Dataset.harvest.archived to Dataset.harvest.archived_at.
 """
 
 import logging
@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing Dataset collection...")
+    log.info("Processing dataset collection...")
     db = get_db()
     result = db.dataset.update_many(
         {},
