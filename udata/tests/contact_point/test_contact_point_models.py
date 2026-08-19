@@ -24,11 +24,23 @@ class ContactPointOwnershipTest(PytestOnlyDBTestCase):
         with pytest.raises(ValidationError):
             DatasetFactory(organization=OrganizationFactory(), contact_points=[contact_point])
 
+    def test_dataset_rejects_a_contact_point_of_another_user(self):
+        contact_point = ContactPointFactory(owner=UserFactory())
+
+        with pytest.raises(ValidationError):
+            DatasetFactory(owner=UserFactory(), contact_points=[contact_point])
+
     def test_dataservice_rejects_a_contact_point_of_another_organization(self):
         contact_point = ContactPointFactory(organization=OrganizationFactory())
 
         with pytest.raises(ValidationError):
             DataserviceFactory(organization=OrganizationFactory(), contact_points=[contact_point])
+
+    def test_dataservice_rejects_a_contact_point_of_another_user(self):
+        contact_point = ContactPointFactory(owner=UserFactory())
+
+        with pytest.raises(ValidationError):
+            DataserviceFactory(owner=UserFactory(), contact_points=[contact_point])
 
     def test_own_contact_point_is_accepted(self):
         org = OrganizationFactory()
@@ -49,6 +61,19 @@ class ContactPointOwnershipTest(PytestOnlyDBTestCase):
         )
 
         assert contact_point.for_owner(org) == existing
+
+    def test_for_owner_skips_a_contact_point_owned_by_both(self):
+        """Nothing forbids a contact point carrying both fields, but it belongs to neither."""
+        org = OrganizationFactory()
+        both = ContactPointFactory(organization=org, owner=UserFactory())
+
+        contact_point = both.for_owner(org)
+
+        assert contact_point != both
+        assert contact_point.organization == org
+        assert contact_point.owner is None
+        # The whole point of `for_owner`: what it returns is acceptable to the objects it is for.
+        DatasetFactory(organization=org, contact_points=[contact_point])
 
 
 class ContactPointTest(PytestOnlyDBTestCase):

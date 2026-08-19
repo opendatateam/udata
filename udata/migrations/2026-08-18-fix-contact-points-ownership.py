@@ -1,7 +1,7 @@
 """
 Accepting a transfer used to move a dataset or a dataservice to its new owner while leaving
 its contact points behind, so those objects ended up referencing contact points owned by
-someone else. `Dataset.clean` and `Dataservice.clean` now reject that state, which would
+someone else. `Dataset.validate` and `Dataservice.validate` now reject that state, which would
 make every subsequent save of those objects fail.
 """
 
@@ -68,10 +68,18 @@ def migrate(db):
                 # what transfers produce, so leave them to be looked at by hand.
                 log.warning(f"{model.__name__} #{document.id} has contact points but no owner.")
                 continue
-            document.contact_points = [
-                contact_point.for_owner(owner) for contact_point in document.contact_points
-            ]
-            document.save()
+            try:
+                document.contact_points = [
+                    contact_point.for_owner(owner) for contact_point in document.contact_points
+                ]
+                document.save()
+            except Exception as error:
+                # A document can fail validation for reasons of its own — a duplicate resource
+                # id, a legacy contact point missing a name. Reporting it and moving on lets the
+                # migration complete, where raising would leave it unapplied and replay forever
+                # on the same document.
+                log.warning(f"{model.__name__} #{document.id} could not be fixed: {error}")
+                continue
             fixed += 1
 
         log.info(f"{fixed} {model.__name__.lower()}s given contact points of their own owner.")

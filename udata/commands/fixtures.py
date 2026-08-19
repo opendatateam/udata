@@ -354,6 +354,10 @@ def import_fixtures(source):
             user = UserFactory()
             dataset = fixture["dataset"]
             dataset = remove_unwanted_keys(dataset, "dataset")
+            # The exported ownership is dropped rather than listed in UNWANTED_KEYS, which is
+            # applied at export time, while `organization` is still needed to build the fixture.
+            dataset.pop("organization", None)
+            dataset.pop("owner", None)
             # The owner comes first: contact points belong to whoever owns the dataset.
             if fixture.get("organization"):
                 organization = fixture["organization"]

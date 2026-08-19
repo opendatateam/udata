@@ -744,9 +744,8 @@ class Dataset(
         cls.before_save.send(document)
 
     def validate(self, clean=True):
-        result = super().validate(clean=clean)
+        super().validate(clean=clean)
         validate_contact_points_ownership(self)
-        return result
 
     def clean(self):
         super(Dataset, self).clean()
