@@ -4,7 +4,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from flask import redirect, url_for
 
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import (
+    DatasetFactory,
+    HiddenDatasetFactory,
+    ResourceFactory,
+)
 from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
 from udata.geopf.models import GeopfToken
@@ -414,10 +418,19 @@ class GeopfDatasetStatusApiTest(APITestCase):
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
         self.assert401(response)
 
-    def test_requires_edit_permission(self):
+    def test_readable_without_edit_permission(self):
+        """Every value here is public through the apiv2 extras endpoints anyway."""
         owner = UserFactory()
         self.login()  # a different user, no rights on the dataset
         dataset = DatasetFactory(owner=owner)
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+
+    def test_hidden_dataset_requires_read_permission(self):
+        owner = UserFactory()
+        self.login()  # a different user, no rights on the dataset
+        dataset = HiddenDatasetFactory(owner=owner)
 
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
         self.assert403(response)

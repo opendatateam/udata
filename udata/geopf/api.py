@@ -105,7 +105,8 @@ class GeopfDatasetStatusAPI(API):
         A `status` of `null` means "never run"; otherwise it is one of
         `pending`, `done`, `error` or `timeout`.
         """
-        dataset.permissions["edit_resources"].test()
+        # endpoint only returns public data
+        dataset.permissions["read"].test()
 
         pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
         pushable = []
