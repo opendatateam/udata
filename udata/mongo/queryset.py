@@ -6,6 +6,7 @@ from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save
 
 from udata.flask_mongoengine.document import BaseQuerySet
+from udata.mongo.errors import FieldValidationError
 from udata.utils import Paginable
 
 log = logging.getLogger(__name__)
@@ -44,15 +45,14 @@ def to_object_id(field_name, value):
     """Cast a query value to an `ObjectId`.
 
     Ids reach `generic_in` straight from query strings, where anything can be
-    sent. Raise the `ValidationError` mongoengine raises when querying a regular
-    reference with a malformed id — the API answers it with a 400 — instead of
-    letting bson's `InvalidId` bubble up as a 500. `errors` names the offending
+    sent. Raise a validation error — which the API answers with a 400 — instead of
+    letting bson's `InvalidId` bubble up as a 500. `field` names the offending
     filter, so a client sending several of them knows which one to fix.
     """
     try:
         return ObjectId(value)
     except InvalidId as e:
-        raise ValidationError(str(e), errors={field_name: str(e)})
+        raise FieldValidationError(str(e), field=field_name)
 
 
 class UDataQuerySet(BaseQuerySet):

@@ -320,14 +320,16 @@ def revoke_token():
 
 def oauth_error_response(error: OAuth2Error):
     """Render an `OAuth2Error` the way RFC 6749 §5.2 mandates: the error code in
-    a JSON body, under the error's own status code.
+    a JSON body, under the error's own status code, with the headers authlib
+    prepared for it — §5.1 asks for `Cache-Control: no-store` on responses tied to
+    an OAuth session, and `get_body()` reflects back the client's `state`.
 
     Returning `error.error` instead — as authlib's Flask example does — sends the
     bare code as a 200 `text/html` body, which every client reads as a success:
     the consent screen then renders an "undefined wants to access your account"
     prompt instead of showing its error state.
     """
-    return jsonify(dict(error.get_body())), error.status_code
+    return jsonify(dict(error.get_body())), error.status_code, error.get_headers()
 
 
 @blueprint.route("/client_info", methods=["GET"])

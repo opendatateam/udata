@@ -326,13 +326,15 @@ class APIAuthTest(PytestOnlyAPITestCase):
     def test_authorization_unusable_client_id(self, client_id):
         """Whether it parses as an ObjectId or not, a `client_id` we have no
         client for gets the OAuth error response — so the consent screen shows
-        its error state instead of prompting for an undefined app."""
+        its error state instead of prompting for an undefined app. The response
+        keeps authlib's headers, since its body reflects the client's `state`."""
         self.login()
 
         response = self.get(url_for("oauth.authorize", response_type="code", client_id=client_id))
 
         assert400(response)
         assert response.json["error"] == "invalid_client"
+        assert response.headers["Cache-Control"] == "no-store"
 
     @pytest.mark.parametrize(
         "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", "6853c089b3ed5781f6adfdf7"]
@@ -345,6 +347,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert400(response)
         assert response.json["error"] == "invalid_client"
+        assert response.headers["Cache-Control"] == "no-store"
 
     def test_token_malformed_client_id(self):
         """A malformed `client_id` is an unknown client, not a server error."""
