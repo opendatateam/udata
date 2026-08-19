@@ -169,10 +169,7 @@ class TransferAPITest(APITestCase):
         response = self.get(url_for("api.transfers", subject="not-an-object-id"))
 
         self.assert400(response)
-        self.assertIn("subject", response.json["errors"])
-        # mongoengine appends `errors` to `message` unless the exception overrides
-        # `__str__`, which would state the offending value twice.
-        self.assertEqual(response.json["message"].count("not-an-object-id"), 1)
+        self.assertIn("`subject`", response.json["message"])
 
     def test_400_on_malformed_recipient_filter(self):
         self.login()
@@ -180,7 +177,7 @@ class TransferAPITest(APITestCase):
         response = self.get(url_for("api.transfers", recipient="not-an-object-id"))
 
         self.assert400(response)
-        self.assertIn("recipient", response.json["errors"])
+        self.assertIn("`recipient`", response.json["message"])
 
     def test_400_on_bad_subject(self):
         self.login()

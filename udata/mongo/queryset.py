@@ -1,12 +1,9 @@
 import logging
 
 from bson import DBRef, ObjectId
-from bson.errors import InvalidId
-from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save
 
 from udata.flask_mongoengine.document import BaseQuerySet
-from udata.mongo.errors import FieldValidationError
 from udata.utils import Paginable
 
 log = logging.getLogger(__name__)
@@ -39,20 +36,6 @@ class DBPaginator(Paginable):
     @property
     def objects(self):
         return self.queryset.items
-
-
-def to_object_id(field_name, value):
-    """Cast a query value to an `ObjectId`.
-
-    Ids reach `generic_in` straight from query strings, where anything can be
-    sent. Raise a validation error — which the API answers with a 400 — instead of
-    letting bson's `InvalidId` bubble up as a 500. `field` names the offending
-    filter, so a client sending several of them knows which one to fix.
-    """
-    try:
-        return ObjectId(value)
-    except InvalidId as e:
-        raise FieldValidationError(str(e), field=field_name)
 
 
 class UDataQuerySet(BaseQuerySet):
@@ -104,7 +87,12 @@ class UDataQuerySet(BaseQuerySet):
         return document, created
 
     def generic_in(self, **kwargs):
-        """Bypass buggy GenericReferenceField querying issue"""
+        """Bypass buggy GenericReferenceField querying issue
+
+        Ids are expected to be valid: callers reject malformed ones where the
+        request is parsed, so anything unusable reaching here is a bug of ours and
+        must surface as a 500 rather than as a client error.
+        """
         query = {}
         for key, value in kwargs.items():
             if not value:
@@ -114,20 +102,20 @@ class UDataQuerySet(BaseQuerySet):
                 value = value[0]
             if isinstance(value, (list, tuple)):
                 if all(isinstance(v, str) for v in value):
-                    ids = [to_object_id(key, v) for v in value]
+                    ids = [ObjectId(v) for v in value]
                     query["{0}._ref.$id".format(key)] = {"$in": ids}
                 elif all(isinstance(v, DBRef) for v in value):
                     query["{0}._ref".format(key)] = {"$in": value}
                 elif all(isinstance(v, ObjectId) for v in value):
                     query["{0}._ref.$id".format(key)] = {"$in": value}
                 else:
-                    raise ValidationError(f"`{key}` expects a list of string, ObjectId or DBRef")
+                    raise TypeError(f"`{key}` expects a list of string, ObjectId or DBRef")
             elif isinstance(value, ObjectId):
                 query["{0}._ref.$id".format(key)] = value
             elif isinstance(value, str):
-                query["{0}._ref.$id".format(key)] = to_object_id(key, value)
+                query["{0}._ref.$id".format(key)] = ObjectId(value)
             else:
-                raise ValidationError(f"`{key}` expects a string, ObjectId or DBRef")
+                raise TypeError(f"`{key}` expects a string, ObjectId or DBRef")
         return self(__raw__=query)
 
 

@@ -682,6 +682,33 @@ class DiscussionsTest(APITestCase):
         self.assert400(response)
         self.assertIn("`for`", response.json["message"])
 
+    def test_list_discussions_for_one_malformed_subject(self):
+        """`for` accepts several values, and every one of them is checked."""
+        dataset = DatasetFactory()
+
+        kwargs = {"for": [str(dataset.id), "dataset:6853c089b3ed5781f6adfdf7"]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert400(response)
+        self.assertIn("`for`", response.json["message"])
+
+    def test_list_discussions_for_several_subjects(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        discussion_for_dataset = DiscussionFactory(subject=dataset, user=user)
+        discussion_for_reuse = DiscussionFactory(subject=reuse, user=user)
+        DiscussionFactory(subject=DatasetFactory(), user=user)
+
+        kwargs = {"for": [str(dataset.id), str(reuse.id)]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert200(response)
+        self.assertEqual(
+            {discussion["id"] for discussion in response.json["data"]},
+            {str(discussion_for_dataset.id), str(discussion_for_reuse.id)},
+        )
+
     def test_list_discussions_search(self):
         user = self.login()
         dataset = DatasetFactory()

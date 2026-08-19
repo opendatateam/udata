@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask import abort, request
 
 from udata.api import API, api, base_reference, fields
@@ -120,10 +121,14 @@ class TransferRequestsAPI(API):
 
         transfers = Transfer.objects
         if args["subject"]:
+            if not ObjectId.is_valid(args["subject"]):
+                api.abort(400, "`subject` must be an identifier")
             transfers = transfers.generic_in(subject=args["subject"])
         if args["subject_type"]:
             transfers = transfers.filter(__raw__={"subject._cls": args["subject_type"]})
         if args["recipient"]:
+            if not ObjectId.is_valid(args["recipient"]):
+                api.abort(400, "`recipient` must be an identifier")
             transfers = transfers.generic_in(recipient=args["recipient"])
         if args["status"]:
             transfers = transfers.filter(status=args["status"])
