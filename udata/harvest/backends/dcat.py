@@ -75,7 +75,6 @@ class DcatBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.graphs = list[tuple[Graph, int]]()
-        self.organizations_to_update = set()
 
     @override
     def inner_harvest(self):
@@ -91,11 +90,6 @@ class DcatBackend(BaseBackend):
         # then one pass of attaching datasets to dataservices.
         for graph, page_number in self.graphs:
             self.process_one_dataservices_page(graph, page_number)
-
-        for org in self.organizations_to_update:
-            org.compute_aggregate_metrics = True
-            org.count_datasets()
-            org.count_dataservices()
 
         # TODO: move in base to benefit other harvesters
         if not self.dryrun and self.has_reached_max_items():
@@ -223,11 +217,6 @@ class DcatBackend(BaseBackend):
             graph, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
-        # TODO: move in base to benefit other harvesters
-        if dataset.organization:
-            dataset.organization.compute_aggregate_metrics = False
-            self.organizations_to_update.add(dataset.organization)
-
         return dataset
 
     def process_dataservice(
@@ -249,10 +238,6 @@ class DcatBackend(BaseBackend):
             remote_url_prefix=remote_url_prefix,
             dryrun=self.dryrun,
         )
-
-        if dataservice.organization:
-            dataservice.organization.compute_aggregate_metrics = False
-            self.organizations_to_update.add(dataservice.organization)
 
         return dataservice
 

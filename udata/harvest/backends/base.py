@@ -16,6 +16,7 @@ import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
+from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.utils import raise_if_redirect, safe_unicode
 
@@ -126,6 +127,7 @@ class BaseBackend(ABC):
             self.job = None
         self.dryrun = dryrun
         self.max_items = max_items or current_app.config["HARVEST_MAX_ITEMS"]
+        self.organizations_to_update = set[Organization]()
 
     @property
     def config(self):
@@ -240,6 +242,7 @@ class BaseBackend(ABC):
             self.job.errors.append(error)
 
         finally:
+            self.update_harvested_organizations()
             self.end_job()
             # Clean harvest_activity_user on global context
             if hasattr(g, "harvest_activity_user"):
@@ -270,6 +273,10 @@ class BaseBackend(ABC):
                 raise HarvestSkipException("missing identifier")
 
             item = item_processor(harvest_item, *args, **kwargs)
+
+            if item.organization:
+                item.organization.compute_aggregate_metrics = False
+                self.organizations_to_update.add(item.organization)
 
             # IMPORTANT:
             # Use `harvest_item.remote_id` from this point, because `item_processor()` could have
@@ -367,6 +374,12 @@ class BaseBackend(ABC):
         if not self.dryrun:
             self.job.save()
         after_harvest_job.send(self)
+
+    def update_harvested_organizations(self):
+        for org in self.organizations_to_update:
+            org.compute_aggregate_metrics = True
+            org.count_datasets()
+            org.count_dataservices()
 
     def autoarchive(self):
         """
