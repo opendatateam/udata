@@ -81,15 +81,15 @@ class DcatBackend(BaseBackend):
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
-        for graph, page_number in self.walk_graph(self.source.url, fmt):
-            self.process_one_datasets_page(graph, page_number)
-            self.graphs.append((graph, page_number))
+        for page_graph, page_number in self.walk_paginated_graph(self.source.url, fmt):
+            self.process_one_datasets_page(page_graph, page_number)
+            self.graphs.append((page_graph, page_number))
 
         # We do a second pass to have all datasets in memory and attach datasets
         # to dataservices. It could be better to be one pass of graph walking and
         # then one pass of attaching datasets to dataservices.
-        for graph, page_number in self.graphs:
-            self.process_one_dataservices_page(graph, page_number)
+        for page_graph, page_number in self.graphs:
+            self.process_one_dataservices_page(page_graph, page_number)
 
         self.store_graphs(fmt)
 
@@ -110,29 +110,29 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
+    def walk_paginated_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
         """
-        Yield all RDF pages as `Graph` from the source
+        Yield each RDF page from the source as a separate `Graph`.
         """
         page_number = 0
         while url:
-            graph = Graph(namespace_manager=namespace_manager)
+            page_graph = Graph(namespace_manager=namespace_manager)
             response = self.get(url)
             response.raise_for_status()
             data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
                 data = data.replace(old_uri, new_uri)
-            graph.parse(data=data, format=fmt)
+            page_graph.parse(data=data, format=fmt)
 
             url = None
             for cls, prop in KNOWN_PAGINATION:
-                if (None, RDF.type, cls) in graph:
-                    pagination = graph.value(predicate=RDF.type, object=cls)
-                    pagination = graph.resource(pagination)
+                if (None, RDF.type, cls) in page_graph:
+                    pagination = page_graph.value(predicate=RDF.type, object=cls)
+                    pagination = page_graph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
 
-            yield graph, page_number
+            yield page_graph, page_number
             page_number += 1
 
     def process_one_datasets_page(self, graph: Graph, page_number: int):
@@ -384,7 +384,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         return "xml"
 
     @override
-    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
+    def walk_paginated_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
         """
         Yield all RDF pages as `Graph` from the source.
         """
@@ -416,10 +416,10 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 if result.node_kind_str != "element":
                     # Saxonche returns all children, including comments and other non-element nodes
                     continue
-                graph = Graph(namespace_manager=namespace_manager)
+                page_graph = Graph(namespace_manager=namespace_manager)
                 try:
                     doc = self.as_dcat(result).to_string("utf-8")
-                    graph.parse(data=doc, format=fmt)
+                    page_graph.parse(data=doc, format=fmt)
                 except Exception as e:
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
@@ -438,12 +438,12 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                     )
                     continue
 
-                if not graph.subjects(
+                if not page_graph.subjects(
                     RDF.type, [DCAT.Dataset, DCAT.DatasetSeries, DCAT.DataService]
                 ):
                     raise ValueError("Failed to fetch CSW content")
 
-                yield graph, page_number
+                yield page_graph, page_number
 
             page_number += 1
             start = self._next_position(start, search_results)

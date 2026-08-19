@@ -64,18 +64,18 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     backend.job = MockJob()
     format = backend.get_format()
     echo(yellow("Detected format: {}".format(format)))
-    graphs = backend.walk_graph(url, format)
+    graphs = backend.walk_paginated_graph(url, format)
 
     # serialize/unserialize graph like in the job mechanism
     full_graph = Graph(namespace_manager=namespace_manager)
-    for graph, page_number in graphs:
-        serialized = graph.serialize(format=format, indent=None)
+    for page_graph, page_number in graphs:
+        serialized = page_graph.serialize(format=format, indent=None)
         full_graph += Graph(namespace_manager=namespace_manager).parse(
             data=serialized, format=format
         )
 
-        for node in uniquify(graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
-            identifier = graph.value(node, DCT.identifier)
+        for node in uniquify(page_graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
+            identifier = page_graph.value(node, DCT.identifier)
             kwargs = {"nid": str(node), "page": page_number}
             kwargs["type"] = "uriref" if isinstance(node, URIRef) else "blank"
             item = HarvestItem(remote_id=str(identifier), kwargs=kwargs)
