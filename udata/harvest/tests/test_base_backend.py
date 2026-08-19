@@ -382,48 +382,48 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         dataset_arch.reload()
         assert dataset_arch.archived is not None
-        assert "archived_reason" in dataset_arch.harvest
         assert "archived_at" in dataset_arch.harvest
+        assert "archived_reason" in dataset_arch.harvest
 
         dataset_no_arch.reload()
         assert dataset_no_arch.archived is None
-        assert "archived_reason" not in dataset_no_arch.harvest
         assert "archived_at" not in dataset_no_arch.harvest
+        assert "archived_reason" not in dataset_no_arch.harvest
 
         dataservice_arch.reload()
         assert dataservice_arch.archived_at is not None
-        assert "archived_reason" in dataservice_arch.harvest
         assert "archived_at" in dataservice_arch.harvest
+        assert "archived_reason" in dataservice_arch.harvest
 
         dataservice_no_arch.reload()
         assert dataservice_no_arch.archived_at is None
-        assert "archived_reason" not in dataservice_no_arch.harvest
         assert "archived_at" not in dataservice_no_arch.harvest
+        assert "archived_reason" not in dataservice_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
         dataset = Dataset.objects.get(**{"harvest__remote_id": "dataset-fake-1"})
         dataset.archived = datetime.now(UTC)
-        dataset.harvest.archived_reason = "not-on-remote"
         dataset.harvest.archived_at = datetime.now(UTC)
+        dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
         dataservice = Dataservice.objects.get(**{"harvest__remote_id": "dataservice-fake-1"})
         dataservice.archived_at = datetime.now(UTC)
-        dataservice.harvest.archived_reason = "not-on-remote"
         dataservice.harvest.archived_at = datetime.now(UTC)
+        dataservice.harvest.archived_reason = "not-on-remote"
         dataservice.save()
 
         backend.harvest()
 
         dataset.reload()
         assert dataset.archived is None
-        assert "archived_reason" not in dataset.harvest
         assert "archived_at" not in dataset.harvest
+        assert "archived_reason" not in dataset.harvest
 
         dataservice.reload()
         assert dataservice.archived_at is None
-        assert "archived_reason" not in dataservice.harvest
         assert "archived_at" not in dataservice.harvest
+        assert "archived_reason" not in dataservice.harvest
 
     def test_harvest_datasets_get_deleted(self):
         nb_datasets = 3

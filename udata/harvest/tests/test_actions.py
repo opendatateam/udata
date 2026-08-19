@@ -359,7 +359,6 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
-        assert dataset_to_archive.harvest.archived_reason == "harvester-deleted"
         # MongoEngine returns naive datetimes, so normalize before comparison
         archived_at_naive = (
             dataset_to_archive.harvest.archived_at.replace(tzinfo=None)
@@ -375,8 +374,8 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         after_naive = after.replace(tzinfo=None)
         assert before_naive <= archived_at_naive <= after_naive
         assert before_naive <= archived_naive <= after_naive
+        assert dataset_to_archive.harvest.archived_reason == "harvester-deleted"
 
-        assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
         dataservice_archived_at_naive = (
             dataservice_to_archive.harvest.archived_at.replace(tzinfo=None)
             if dataservice_to_archive.harvest.archived_at.tzinfo
@@ -389,6 +388,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
             else dataservice_to_archive.archived_at
         )
         assert before_naive <= dataservice_archived_naive <= after_naive
+        assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
