@@ -318,6 +318,18 @@ def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
 
+def oauth_error_response(error: OAuth2Error):
+    """Render an `OAuth2Error` the way RFC 6749 §5.2 mandates: the error code in
+    a JSON body, under the error's own status code.
+
+    Returning `error.error` instead — as authlib's Flask example does — sends the
+    bare code as a 200 `text/html` body, which every client reads as a success:
+    the consent screen then renders an "undefined wants to access your account"
+    prompt instead of showing its error state.
+    """
+    return jsonify(dict(error.get_body())), error.status_code
+
+
 @blueprint.route("/client_info", methods=["GET"])
 def client_info(*args, **kwargs):
     if not current_user or not current_user.is_authenticated:
@@ -326,7 +338,7 @@ def client_info(*args, **kwargs):
     try:
         grant = oauth.get_consent_grant(end_user=current_user)
     except OAuth2Error as error:
-        return error.error
+        return oauth_error_response(error)
 
     return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
 
@@ -338,7 +350,7 @@ def authorize(*args, **kwargs):
         try:
             grant = oauth.get_consent_grant(end_user=current_user)
         except OAuth2Error as error:
-            return error.error
+            return oauth_error_response(error)
         # Bypass authorization screen for internal clients
         # It's not used right now…
         if grant.client.internal:
