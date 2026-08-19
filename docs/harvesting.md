@@ -37,9 +37,9 @@ The call to `process_item` is a wrapper that, for a given record, performs the f
 2. Call the processor function (`my_dataset_processor` in pseudo-code above).
    That backend/type-specific processor function is responsible for:
    1. Computing a datagouv id (usually from the record id).
-   1. Calling `get_item` to retrieve/create the corresponding datagouv item.
-   2. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
-   3. Returning the updated datagouv item.
+   2. Calling `get_item` to retrieve/create the corresponding datagouv item.
+   3. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
+   4. Returning the updated datagouv item.
 3. Update the datagouv item `HarvestMetadata` with domain, source, last_update, etc.,
 4. Catch any warning/error and record them in `HarvestItem`.
 5. Save the updated datagouv item (except in dryrun mode).
