@@ -72,6 +72,78 @@ class GeopfStatusAPI(API):
         return {"connected": True, "expires_at": geopf_token.expires_at.isoformat()}
 
 
+def _resource_summary(resource) -> dict:
+    """The resource fields the geopf sync UI needs to render a row."""
+    return {
+        "id": str(resource.id),
+        "title": resource.title,
+        "format": resource.format,
+        "url": resource.url,
+    }
+
+
+@ns.route("/status/<dataset:dataset>/", endpoint="geopf_dataset_status")
+class GeopfDatasetStatusAPI(API):
+    @api.secure
+    @api.doc("geopf_dataset_status")
+    def get(self, dataset):
+        """A dataset's Géoplateforme sync state, as stored locally.
+
+        A pure read of the dataset's and its resources' `geopf:*` extras: no
+        call to the geopf API and no token refresh, so it answers the same
+        whether or not the current user is connected.
+
+        Resources are split into those eligible for a push (format in
+        `GEOPF_PUSHABLE_FORMATS`) and those that came back from a pull as
+        offerings; the two are disjoint.
+
+        A `status` of `null` means "never run"; otherwise it is one of
+        `pending`, `done`, `error` or `timeout`.
+        """
+        dataset.permissions["edit_resources"].test()
+
+        pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
+        pushable = []
+        offerings = []
+        for resource in dataset.resources:
+            extras = resource.extras
+            offering_id = extras.get("geopf:offering:id")
+            if offering_id:
+                offerings.append(
+                    {
+                        **_resource_summary(resource),
+                        "offering_id": offering_id,
+                        "last_synced_at": extras.get("geopf:offering:last-synced-at"),
+                    }
+                )
+            elif resource.format and resource.format.lower() in pushable_formats:
+                pushable.append(
+                    {
+                        **_resource_summary(resource),
+                        "push": {
+                            "status": extras.get("geopf:push:status"),
+                            "last_synced_at": extras.get("geopf:push:last-synced-at"),
+                            "error": extras.get("geopf:push:error"),
+                            "task_id": extras.get("geopf:push:task-id"),
+                            "stored_data_id": extras.get("geopf:push:stored-data-id"),
+                        },
+                    }
+                )
+
+        return {
+            "datastore_id": dataset.extras.get("geopf:push:datastore-id"),
+            "fiche_url": dataset.extras.get("geopf:push:fiche-url"),
+            "pull": {
+                "status": dataset.extras.get("geopf:pull:status"),
+                "last_synced_at": dataset.extras.get("geopf:pull:last-synced-at"),
+                "error": dataset.extras.get("geopf:pull:error"),
+                "task_id": dataset.extras.get("geopf:pull:task-id"),
+            },
+            "pushable": pushable,
+            "offerings": offerings,
+        }
+
+
 @ns.route("/token/", endpoint="geopf_token")
 class GeopfTokenAPI(API):
     @api.secure

@@ -28,6 +28,7 @@ udata calls the entrepôt API **as the data.gouv.fr user who asks for it**. This
 | Step | Call | Kind |
 |---|---|---|
 | Check link status | `GET /api/1/geopf/status/` | JSON |
+| Read a dataset's sync state | `GET /api/1/geopf/status/<dataset_id>/` | JSON, see [Reading sync state](#reading-sync-state) |
 | Start the OAuth link | `GET /api/1/geopf/login/?dataset_id=<id>` | browser navigation, requires an existing udata session |
 | OAuth callback | `GET /api/1/geopf/auth` | browser navigation; exchanges the code, persists the token, redirects back to the dataset's cdata admin geopf page |
 | Disconnect | `DELETE /api/1/geopf/token/` | JSON |
@@ -53,6 +54,31 @@ Both push and pull follow the same two-level pattern:
 - **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/`, using the task-id extra as the bridge between the two layers.
 
 Each flow's specific extras keys are listed in its own section below.
+
+### Reading sync state
+
+`GET /api/1/geopf/status/<dataset_id>/` returns a dataset's full sync state in one call, so a consumer doesn't have to fetch its resources and re-derive which of them are pushable:
+
+```json
+{
+  "datastore_id": "0f9b…",
+  "fiche_url": "https://cartes.gouv.fr/…",
+  "pull": {"status": "done", "last_synced_at": "…", "error": null, "task_id": "…"},
+  "pushable": [
+    {"id": "…", "title": "communes.gpkg", "format": "gpkg", "url": "…",
+     "push": {"status": "done", "last_synced_at": "…", "error": null,
+              "task_id": "…", "stored_data_id": "…"}}
+  ],
+  "offerings": [
+    {"id": "…", "title": "Service WFS - communes", "format": "wfs", "url": "…",
+     "offering_id": "…", "last_synced_at": "…"}
+  ]
+}
+```
+
+- A projection of the extras documented below. Does not depend on geopf connection status.
+- Resources are split into two disjoint lists: `pushable` for those whose format is in `GEOPF_PUSHABLE_FORMATS`, `offerings` for those carrying a `geopf:offering:id`. An offering is never listed as pushable. Both lists are unpaginated.
+- Every key is always present; an extra that was never written reads as `null`. A `null` `status` means "never run", as opposed to `pending`, `done`, `error` or `timeout`.
 
 ## Push: data.gouv.fr → Géoplateforme
 

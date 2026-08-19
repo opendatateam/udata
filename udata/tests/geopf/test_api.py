@@ -337,3 +337,175 @@ class GeopfPullOfferingsApiTest(APITestCase):
         self.assertStatus(response, 202)
         assert response.json == {"task_id": "task-456"}
         mock_delay.assert_called_once_with(str(dataset.id), str(user.id))
+
+
+@TEST_GEOPF_CONF
+class GeopfDatasetStatusApiTest(APITestCase):
+    def test_requires_login(self):
+        dataset = DatasetFactory()
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert401(response)
+
+    def test_requires_edit_permission(self):
+        owner = UserFactory()
+        self.login()  # a different user, no rights on the dataset
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert403(response)
+
+    def test_empty_dataset(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json == {
+            "datastore_id": None,
+            "fiche_url": None,
+            "pull": {
+                "status": None,
+                "last_synced_at": None,
+                "error": None,
+                "task_id": None,
+            },
+            "pushable": [],
+            "offerings": [],
+        }
+
+    def test_never_pushed_resource(self):
+        """A pushable resource with no geopf extras yet reports every push field as null."""
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json["pushable"] == [
+            {
+                "id": str(resource.id),
+                "title": resource.title,
+                "format": "gpkg",
+                "url": "http://files.example.com/f.gpkg",
+                "push": {
+                    "status": None,
+                    "last_synced_at": None,
+                    "error": None,
+                    "task_id": None,
+                    "stored_data_id": None,
+                },
+            }
+        ]
+
+    def test_pushed_resource(self):
+        user = self.login()
+        resource = ResourceFactory.build(
+            format="gpkg",
+            url="http://files.example.com/f.gpkg",
+            extras={
+                "geopf:push:status": "done",
+                "geopf:push:last-synced-at": "2026-01-02T03:04:05+00:00",
+                "geopf:push:task-id": "task-1",
+                "geopf:push:stored-data-id": "sd-1",
+            },
+        )
+        dataset = DatasetFactory(
+            owner=user,
+            resources=[resource],
+            extras={
+                "geopf:push:datastore-id": "ds-1",
+                "geopf:push:fiche-url": "https://cartes.example.com/fiche",
+                "geopf:pull:status": "error",
+                "geopf:pull:error": "boom",
+                "geopf:pull:task-id": "task-2",
+            },
+        )
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json["datastore_id"] == "ds-1"
+        assert response.json["fiche_url"] == "https://cartes.example.com/fiche"
+        assert response.json["pull"] == {
+            "status": "error",
+            "last_synced_at": None,
+            "error": "boom",
+            "task_id": "task-2",
+        }
+        assert response.json["pushable"][0]["push"] == {
+            "status": "done",
+            "last_synced_at": "2026-01-02T03:04:05+00:00",
+            "error": None,
+            "task_id": "task-1",
+            "stored_data_id": "sd-1",
+        }
+
+    def test_offering_resource(self):
+        user = self.login()
+        resource = ResourceFactory.build(
+            title="Service WFS - communes",
+            format="wfs",
+            url="http://data.example.com/wfs",
+            extras={
+                "geopf:offering:id": "off-1",
+                "geopf:offering:last-synced-at": "2026-01-02T03:04:05+00:00",
+            },
+        )
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json["pushable"] == []
+        assert response.json["offerings"] == [
+            {
+                "id": str(resource.id),
+                "title": "Service WFS - communes",
+                "format": "wfs",
+                "url": "http://data.example.com/wfs",
+                "offering_id": "off-1",
+                "last_synced_at": "2026-01-02T03:04:05+00:00",
+            }
+        ]
+
+    @pytest.mark.options(GEOPF_PUSHABLE_FORMATS=frozenset({"gpkg", "wfs"}))
+    def test_offering_never_listed_as_pushable(self):
+        """Offerings stay out of `pushable` even when their format is configured pushable."""
+        user = self.login()
+        resource = ResourceFactory.build(format="wfs", extras={"geopf:offering:id": "off-1"})
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json["pushable"] == []
+        assert len(response.json["offerings"]) == 1
+
+    def test_non_pushable_format_excluded(self):
+        user = self.login()
+        csv_resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        no_format = ResourceFactory.build(format=None, url="http://files.example.com/f")
+        dataset = DatasetFactory(owner=user, resources=[csv_resource, no_format])
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert response.json["pushable"] == []
+        assert response.json["offerings"] == []
+
+    @pytest.mark.options(GEOPF_PUSHABLE_FORMATS=frozenset({"gpkg", "csv"}))
+    def test_respects_configured_formats(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert [r["id"] for r in response.json["pushable"]] == [str(resource.id)]
+
+    def test_works_when_not_connected(self):
+        """Unlike push/pull, this route reports local state without a geopf link."""
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        assert GeopfToken.objects(user=user.id).first() is None
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(response)
+        assert len(response.json["pushable"]) == 1
