@@ -370,11 +370,6 @@ def authorize(*args, **kwargs):
         return oauth.create_authorization_response(grant_user=grant_user)
 
 
-@blueprint.route("/error")
-def oauth_error():
-    return render_template("api/oauth_error.html")
-
-
 def query_client(client_id):
     """Fetch client by ID"""
     # `client_id` comes straight from the request (query string or POST body),
