@@ -57,7 +57,7 @@ Each flow's specific extras keys are listed in its own section below.
 
 ### Reading sync state
 
-`GET /api/1/geopf/status/<dataset_id>/` returns a dataset's full sync state in one call, so a consumer doesn't have to fetch its resources and re-derive which of them are pushable:
+`GET /api/1/geopf/status/<dataset_id>/` returns a dataset's full sync state in one call:
 
 ```json
 {
@@ -77,8 +77,8 @@ Each flow's specific extras keys are listed in its own section below.
 ```
 
 - A projection of the extras documented below. Does not depend on geopf connection status.
-- Resources are split into two disjoint lists: `pushable` for those whose format is in `GEOPF_PUSHABLE_FORMATS`, `offerings` for those carrying a `geopf:offering:id`. An offering is never listed as pushable. Both lists are unpaginated.
-- Every key is always present; an extra that was never written reads as `null`. A `null` `status` means "never run", as opposed to `pending`, `done`, `error` or `timeout`.
+- Two disjoint, unpaginated lists: `pushable` for formats in `GEOPF_PUSHABLE_FORMATS`, `offerings` for resources carrying a `geopf:offering:id`. An offering is never pushable.
+- Every key is always present; an unwritten extra reads as `null`. A `null` `status` means "never run"; `pending` is set at `202`, not at worker pickup.
 
 ## Push: data.gouv.fr → Géoplateforme
 
@@ -107,8 +107,8 @@ Set on the original pushed resource by the push pipeline.
 
 | Key | Values / type | Description |
 |---|---|---|
-| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` when the task starts, updated on completion or failure. |
-| `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Set when the task starts. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `geopf:push:error`. Updated on completion or failure. |
+| `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
 | `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
 | `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
 | `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
@@ -162,8 +162,8 @@ Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as th
 
 | Key | Values / type | Description |
 |---|---|---|
-| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` when the task starts, updated on completion or failure. |
-| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the pull. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `geopf:pull:error`. Updated on completion or failure. |
+| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the pull. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
 | `geopf:pull:last-synced-at` | ISO 8601 | Timestamp of the last successful pull. |
 | `geopf:pull:error` | string | Error message from the last failed pull. Only present on `error` status. |
 

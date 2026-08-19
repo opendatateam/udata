@@ -305,6 +305,42 @@ class GeopfPushApiTest(APITestCase):
 
         self.assertStatus(response, 202)
 
+    def test_marks_resource_pending_before_the_worker_runs(self):
+        """The status route must report `pending` as soon as the request is accepted."""
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(
+            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+        )
+        create_geopf_token(user)
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+        self.assertStatus(response, 202)
+
+        status = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(status)
+        assert status.json["pushable"][0]["push"]["status"] == "pending"
+        assert status.json["pushable"][0]["push"]["task_id"] == "t"
+
+    def test_clears_the_previous_runs_error(self):
+        user = self.login()
+        resource = ResourceFactory.build(
+            format="gpkg",
+            url="http://files.example.com/f.gpkg",
+            extras={"geopf:push:status": "error", "geopf:push:error": "previously boom"},
+        )
+        dataset = DatasetFactory(
+            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+        )
+        create_geopf_token(user)
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay", return_value=MagicMock(id="t")):
+            self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        status = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        assert status.json["pushable"][0]["push"]["error"] is None
+
 
 @TEST_GEOPF_CONF
 class GeopfPullOfferingsApiTest(APITestCase):
@@ -337,6 +373,38 @@ class GeopfPullOfferingsApiTest(APITestCase):
         self.assertStatus(response, 202)
         assert response.json == {"task_id": "task-456"}
         mock_delay.assert_called_once_with(str(dataset.id), str(user.id))
+
+    def test_marks_dataset_pending_before_the_worker_runs(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        create_geopf_token(user)
+
+        with patch(
+            "udata.geopf.api.pull_offerings_from_geopf.delay", return_value=MagicMock(id="t")
+        ):
+            response = self.post(url_for("api.geopf_pull_offerings", dataset=dataset))
+        self.assertStatus(response, 202)
+
+        status = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert200(status)
+        assert status.json["pull"]["status"] == "pending"
+        assert status.json["pull"]["task_id"] == "t"
+
+    def test_clears_the_previous_runs_error(self):
+        user = self.login()
+        dataset = DatasetFactory(
+            owner=user,
+            extras={"geopf:pull:status": "error", "geopf:pull:error": "previously boom"},
+        )
+        create_geopf_token(user)
+
+        with patch(
+            "udata.geopf.api.pull_offerings_from_geopf.delay", return_value=MagicMock(id="t")
+        ):
+            self.post(url_for("api.geopf_pull_offerings", dataset=dataset))
+
+        status = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        assert status.json["pull"]["error"] is None
 
 
 @TEST_GEOPF_CONF

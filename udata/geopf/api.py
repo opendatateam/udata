@@ -10,7 +10,12 @@ from udata.utils import get_by
 from .auth import oauth, resolve_access_token, revoke_token, store_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
 from .models import GeopfToken
-from .tasks import pull_offerings_from_geopf, push_resource_to_geopf
+from .tasks import (
+    pull_offerings_from_geopf,
+    push_resource_to_geopf,
+    set_dataset_extras,
+    set_resource_extras,
+)
 
 ns = api.namespace("geopf", "Géoplateforme related operations")
 
@@ -202,9 +207,16 @@ class GeopfPushAPI(API):
         if not (datastore_id or dataset.extras.get("geopf:push:datastore-id")):
             api.abort(400, "No datastore_id provided and no datastore configured for this dataset")
 
+        # Mark pending before enqueueing, so the status route doesn't read as
+        # "never pushed" until a worker picks the task up. The id only exists
+        # after `.delay()`, hence the second write.
+        set_resource_extras(
+            dataset, resource, {"geopf:push:status": "pending", "geopf:push:error": None}
+        )
         task = push_resource_to_geopf.delay(
             str(dataset.id), str(resource.id), str(user.id), datastore_id
         )
+        set_resource_extras(dataset, resource, {"geopf:push:task-id": task.id})
         return {"task_id": task.id}, 202
 
 
@@ -222,5 +234,7 @@ class GeopfPullOfferingsAPI(API):
         except GeopfReauthRequired:
             api.abort(424, "Not connected to Géoplateforme")
 
+        set_dataset_extras(dataset, {"geopf:pull:status": "pending", "geopf:pull:error": None})
         task = pull_offerings_from_geopf.delay(str(dataset.id), str(user.id))
+        set_dataset_extras(dataset, {"geopf:pull:task-id": task.id})
         return {"task_id": task.id}, 202

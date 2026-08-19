@@ -96,31 +96,35 @@ def push_resource_to_geopf(
                 resource_id,
                 e,
             )
-            _set_extras(
+            set_resource_extras(
                 dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)}
             )
             raise
 
-    pending = {"geopf:push:status": "pending"}
+    pending = {"geopf:push:status": "pending", "geopf:push:error": None}
     if self.request.id:  # None on synchronous CLI runs
         pending["geopf:push:task-id"] = self.request.id
-    _set_extras(dataset, resource, pending)
+    set_resource_extras(dataset, resource, pending)
 
     client = GeopfClient(token=access_token, datastore_id=datastore_id)
     try:
         _run_pipeline(dataset, resource, datastore_id, client)
     except GeopfTimeoutError as e:
         log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
-        _set_extras(dataset, resource, {"geopf:push:status": "timeout", "geopf:push:error": str(e)})
+        set_resource_extras(
+            dataset, resource, {"geopf:push:status": "timeout", "geopf:push:error": str(e)}
+        )
         raise
     except Exception as e:
         log.exception("geopf: pipeline failed dataset=%s resource=%s", dataset_id, resource_id)
-        _set_extras(dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)})
+        set_resource_extras(
+            dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)}
+        )
         raise
 
     # Pin only after success, so a failed first push can't lock the dataset
     # onto a bad datastore.
-    _set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
+    set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
 
 
 def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
@@ -231,7 +235,7 @@ def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
     sync_metadata(dataset, client)
 
     url = fiche_url(datastore_id, datasheet_name)
-    _set_extras(
+    set_resource_extras(
         dataset,
         resource,
         {
@@ -240,7 +244,7 @@ def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
             "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
         },
     )
-    _set_dataset_extras(dataset, {"geopf:push:fiche-url": url})
+    set_dataset_extras(dataset, {"geopf:push:fiche-url": url})
     log.info("geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, url)
 
 
@@ -321,7 +325,7 @@ def sync_metadata(dataset, client) -> str:
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
         client.tag_entity("metadata", metadata_id, datasheet_name)
-        _set_dataset_extras(dataset, {"geopf:push:metadata-id": metadata_id})
+        set_dataset_extras(dataset, {"geopf:push:metadata-id": metadata_id})
     return metadata_id
 
 
@@ -345,22 +349,22 @@ def pull_offerings_from_geopf(
             log.error(
                 "geopf: no usable geopf token for user=%s dataset=%s: %s", user_id, dataset_id, e
             )
-            _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+            set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
             raise
 
-    pending = {"geopf:pull:status": "pending"}
+    pending = {"geopf:pull:status": "pending", "geopf:pull:error": None}
     if self.request.id:  # None on synchronous CLI runs
         pending["geopf:pull:task-id"] = self.request.id
-    _set_dataset_extras(dataset, pending)
+    set_dataset_extras(dataset, pending)
 
     try:
         n = pull_offerings_for_dataset(dataset, access_token)
     except Exception as e:
         log.exception("geopf: offering pull failed for dataset=%s", dataset_id)
-        _set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+        set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
         raise
 
-    _set_dataset_extras(
+    set_dataset_extras(
         dataset,
         {"geopf:pull:status": "done", "geopf:pull:last-synced-at": datetime.now(UTC).isoformat()},
     )
@@ -447,7 +451,7 @@ def _upsert_offering_resource(dataset, offering: dict) -> None:
         if existing.url != url:
             existing.url = url
             dataset.update_resource(existing)
-        _set_extras(dataset, existing, extras_update)
+        set_resource_extras(dataset, existing, extras_update)
 
 
 def _offering_url(offering: dict) -> str:
@@ -455,14 +459,14 @@ def _offering_url(offering: dict) -> str:
     return urls[0].get("url", "") if urls else ""
 
 
-def _set_dataset_extras(dataset, extras: dict) -> None:
+def set_dataset_extras(dataset, extras: dict) -> None:
     dataset.extras.update(extras)
     Dataset.objects(id=dataset.id).update_one(
         **{f"set__extras__{k}": v for k, v in extras.items()},
     )
 
 
-def _set_extras(dataset, resource, extras: dict) -> None:
+def set_resource_extras(dataset, resource, extras: dict) -> None:
     """Update resource extras in-place and persist without reloading the full dataset."""
     resource = get_by(dataset.resources, id=resource.id)
     resource.extras.update(extras)
