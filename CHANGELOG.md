@@ -1,5 +1,11 @@
 # Changelog
 
+## 17.5.0 (2026-08-19)
+
+- feat(topics): add lookup by element id/class ([#3898](https://github.com/opendatateam/udata/pull/3898))
+- fix(harvest): stop adopting CKAN remote ids as resource ids ([#3904](https://github.com/opendatateam/udata/pull/3904))
+
+
 ## 17.4.0 (2026-08-17)
 
 - feat: migrate discussion api fields ([#3775](https://github.com/opendatateam/udata/pull/3775))
