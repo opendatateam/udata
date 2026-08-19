@@ -7,7 +7,6 @@ from authlib.common.urls import url_decode, urlparse
 from authlib.oauth2.rfc7636 import (
     create_s256_code_challenge,
 )
-from bson import ObjectId
 from flask import url_for
 
 from udata.api import API, api
@@ -322,7 +321,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert "Redirect URI" in response.json["error_description"]
 
     @pytest.mark.parametrize(
-        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", str(ObjectId())]
+        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", "6853c089b3ed5781f6adfdf7"]
     )
     def test_authorization_unusable_client_id(self, client_id):
         """Whether it parses as an ObjectId or not, a `client_id` we have no
@@ -336,7 +335,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert response.json["error"] == "invalid_client"
 
     @pytest.mark.parametrize(
-        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", str(ObjectId())]
+        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", "6853c089b3ed5781f6adfdf7"]
     )
     def test_client_info_unusable_client_id(self, client_id):
         """Same for the endpoint the consent screen actually calls."""
