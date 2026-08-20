@@ -44,6 +44,7 @@ from udata.core.dataset.models import (
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
 from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
+from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -2064,6 +2065,55 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(data["checksum"]["type"], "sha1")
         self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
         self.assertEqual(list(storages.chunks.list_files()), [])
+
+    def test_create_with_file_chunks_unauthorized_extension(self):
+        """It should reject a chunked upload whose extension is not allowed"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        uuid = str(uuid4())
+        url = url_for("api.upload_new_dataset_resource", dataset=dataset)
+
+        for i, chunk in enumerate([b"a", b"b"]):
+            response = self.post(
+                url,
+                {
+                    "file": (BytesIO(chunk), "blob"),
+                    "uuid": uuid,
+                    "filename": "test.exe",
+                    "partindex": i,
+                    "partbyteoffset": 0,
+                    "totalfilesize": 2,
+                    "totalparts": 2,
+                    "chunksize": 1,
+                },
+                json=False,
+            )
+            self.assert200(response)
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "test.exe",
+                "totalfilesize": 2,
+                "totalparts": 2,
+            },
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertIn("This file type is not allowed", response.json["message"])
+        dataset.reload()
+        self.assertEqual(dataset.resources, [])
+        self.assertEqual(list(storages.resources.list_files()), [])
+        # The parts outlive a failed combination so the upload can be retried:
+        # they are dropped only once the file reached its destination.
+        self.assertEqual(
+            set(storages.chunks.list_files()),
+            {chunk_filename(uuid, 0), chunk_filename(uuid, 1), chunk_filename(uuid, META)},
+        )
 
     def test_create_with_file_chunk_bad_size(self):
         """It should reject a chunk whose size does not match chunksize"""
