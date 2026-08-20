@@ -1,3 +1,4 @@
+import flask_babel
 import pytest
 from flask import url_for
 
@@ -23,6 +24,33 @@ class FakeFormAPI(API):
 
         api.validate(FakeForm)
         return {"success": True}
+
+
+@ns.route("/locale", endpoint="fake-locale")
+class FakeLocaleAPI(API):
+    def get(self):
+        return {"locale": str(flask_babel.get_locale())}
+
+
+class APILanguageTest(APITestCase):
+    def test_lang_query_parameter(self):
+        response = self.get(url_for("api.fake-locale", lang="en"))
+
+        self.assert200(response)
+        self.assertEqual(response.json["locale"], "en")
+
+    def test_no_lang_query_parameter(self):
+        response = self.get(url_for("api.fake-locale"))
+
+        self.assert200(response)
+        self.assertEqual(response.json["locale"], "fr")  # DEFAULT_LANGUAGE
+
+    def test_unknown_lang_query_parameter(self):
+        """An unparseable `lang` (e.g. a front-end sending `undefined`) falls back to the default"""
+        response = self.get(url_for("api.fake-locale", lang="undefined"))
+
+        self.assert200(response)
+        self.assertEqual(response.json["locale"], "fr")
 
 
 class OptionsCORSTest(APITestCase):

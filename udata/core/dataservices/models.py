@@ -205,6 +205,7 @@ class Dataservice(
             "$title",
             "metrics.followers",
             "metrics.views",
+            "metadata_modified_at",
         ]
         + Owned.meta["indexes"],
         "queryset_class": DataserviceQuerySet,

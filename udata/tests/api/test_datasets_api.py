@@ -44,6 +44,7 @@ from udata.core.dataset.models import (
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
 from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
+from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -892,6 +893,105 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), initial_length + 1)
+
+    def test_dataset_api_update_with_resource_unknown_id(self):
+        """A resource submitted with an id matching nothing is added with a server-generated id
+
+        Regression test: it used to crash with a 500 while looking for the initial
+        values to prefill the resource with (e.g. a client sending back a resource
+        deleted in the meantime). The submitted id is dropped rather than honoured,
+        so a client cannot pick the id of an existing resource.
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, nb_resources=1)
+        initial_id = dataset.resources[0].id
+        data = dataset.to_dict()
+        # to_dict() serializes embedded resources with the mongo `_id` key
+        data["resources"][0]["id"] = str(initial_id)
+        unknown_id = str(uuid4())
+        resource_data = ResourceFactory.as_dict()
+        resource_data["id"] = unknown_id
+        data["resources"].append(resource_data)
+
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual(len(dataset.resources), 2)
+        self.assertEqual(dataset.resources[0].id, initial_id)
+        self.assertEqual(dataset.resources[1].title, resource_data["title"])
+        self.assertNotEqual(str(dataset.resources[1].id), unknown_id)
+
+    def test_dataset_api_update_with_malformed_resource_id(self):
+        """A malformed resource id is a client error, not an entry to create"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
+        resource_data["id"] = "not-an-uuid"
+        data["resources"] = [resource_data]
+
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+
+    def test_dataset_api_update_cannot_squat_another_dataset_resource_id(self):
+        """A client cannot give one of its resources the id of someone else's resource
+
+        Resource ids are resolved globally by `/datasets/r/<id>`, so honouring a
+        client-chosen id would let anyone hijack another dataset's permalink.
+        """
+        victim = DatasetFactory(nb_resources=1)
+        victim_id = victim.resources[0].id
+
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
+        resource_data["id"] = str(victim_id)
+        data["resources"] = [resource_data]
+
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertNotEqual(dataset.resources[0].id, victim_id)
+        self.assertEqual(Dataset.objects(resources__id=victim_id).count(), 1)
+
+    def test_dataset_api_create_cannot_choose_resource_id(self):
+        """Same guarantee on creation, where there is no instance to prefill from"""
+        self.login()
+        chosen_id = str(uuid4())
+        resource_data = ResourceFactory.as_dict()
+        resource_data["id"] = chosen_id
+        data = DatasetFactory.as_dict()
+        data["resources"] = [resource_data]
+
+        response = self.post(url_for("api.datasets"), data)
+        self.assert201(response)
+
+        dataset = Dataset.objects.get(id=response.json["id"])
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertNotEqual(str(dataset.resources[0].id), chosen_id)
+
+    def test_dataset_api_update_from_api_payload_keeps_resource_ids(self):
+        """A client doing GET then PUT must not renumber the resources
+
+        Resource ids are public permalinks (`/datasets/r/<id>`): they have to survive a
+        round-trip through the API, which is how clients update a dataset.
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, nb_resources=2)
+        initial_ids = [resource.id for resource in dataset.resources]
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+
+        response = self.put(url_for("api.dataset", dataset=dataset), response.json)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual([resource.id for resource in dataset.resources], initial_ids)
 
     def test_dataset_api_update_private(self):
         user = self.login()
@@ -1966,6 +2066,55 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(data["checksum"]["value"], "81fe8bfe87576c3ecb22426f8e57847382917acf")
         self.assertEqual(list(storages.chunks.list_files()), [])
 
+    def test_create_with_file_chunks_unauthorized_extension(self):
+        """It should reject a chunked upload whose extension is not allowed"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        dataset = DatasetFactory(organization=org)
+
+        uuid = str(uuid4())
+        url = url_for("api.upload_new_dataset_resource", dataset=dataset)
+
+        for i, chunk in enumerate([b"a", b"b"]):
+            response = self.post(
+                url,
+                {
+                    "file": (BytesIO(chunk), "blob"),
+                    "uuid": uuid,
+                    "filename": "test.exe",
+                    "partindex": i,
+                    "partbyteoffset": 0,
+                    "totalfilesize": 2,
+                    "totalparts": 2,
+                    "chunksize": 1,
+                },
+                json=False,
+            )
+            self.assert200(response)
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "test.exe",
+                "totalfilesize": 2,
+                "totalparts": 2,
+            },
+            json=False,
+        )
+
+        self.assert400(response)
+        self.assertIn("This file type is not allowed", response.json["message"])
+        dataset.reload()
+        self.assertEqual(dataset.resources, [])
+        self.assertEqual(list(storages.resources.list_files()), [])
+        # The parts outlive a failed combination so the upload can be retried:
+        # they are dropped only once the file reached its destination.
+        self.assertEqual(
+            set(storages.chunks.list_files()),
+            {chunk_filename(uuid, 0), chunk_filename(uuid, 1), chunk_filename(uuid, META)},
+        )
+
     def test_create_with_file_chunk_bad_size(self):
         """It should reject a chunk whose size does not match chunksize"""
         user = self.login()
@@ -2375,6 +2524,27 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.location, "https://example.com/data.csv")
+
+    def test_resource_redirect_ignores_ambiguous_id(self):
+        """A duplicated resource id resolves to nothing rather than to an arbitrary dataset
+
+        Nothing enforces the uniqueness of resource ids across datasets (they are
+        embedded documents), so the global lookup has to fail closed. The duplication is
+        reported as an error since no API path should be able to produce it.
+        """
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with self.assertLogs("udata.core.dataset.models", level="ERROR") as logs:
+            response = self.get(
+                url_for("api.resource_redirect", id=shared_id), follow_redirects=False
+            )
+        self.assert404(response)
+        self.assertIn(str(shared_id), logs.output[0])
+
+        response = self.get(url_for("apiv2.resource", rid=shared_id))
+        self.assert404(response)
 
     def test_follow_dataset(self):
         """It should follow a dataset on POST"""
@@ -2896,6 +3066,65 @@ class CommunityResourceAPITest(APITestCase):
         self.assertStatus(response, 204)
 
         self.assertEqual(CommunityResource.objects.count(), 0)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+
+@pytest.mark.options(READ_ONLY_MODE=True)
+class ReadOnlyModeAPITest(APITestCase):
+    """Read-only mode must block every endpoint storing a resource file."""
+
+    def setUp(self):
+        self.user = self.login()
+
+    def test_upload_new_dataset_resource(self):
+        dataset = DatasetFactory(owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_upload_dataset_resource(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource], owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_upload_new_community_resource(self):
+        dataset = DatasetFactory(owner=self.user)
+
+        response = self.post(
+            url_for("api.upload_new_community_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_reupload_community_resource(self):
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(owner=self.user), owner=self.user
+        )
+
+        response = self.post(
+            url_for("api.upload_community_resource", community=community_resource),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+
+        self.assertStatus(response, 423)
         self.assertEqual(list(storages.resources.list_files()), [])
 
 

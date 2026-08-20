@@ -13,6 +13,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
     def test_resources_csv_adapter(self):
         date_created = datetime(2022, 12, 31)
         date_modified = date_created + timedelta(days=1)
+        date_updated = date_created + timedelta(days=2)
         another_date = date_created + timedelta(days=42)
         dataset = DatasetFactory(
             resources=[
@@ -20,6 +21,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
                     harvest={
                         "issued_at": date_created,
                         "modified_at": date_modified,
+                        "last_update": date_updated,
                         "uri": "http://domain.gouv.fr/dataset/uri",
                     },
                     metrics={
@@ -32,6 +34,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
                 "backend": "dummy_backend",
                 "modified_at": another_date,
                 "created_at": another_date,
+                "last_update": another_date,
             },
         )
         DatasetFactory(resources=[ResourceFactory()])
@@ -42,6 +45,8 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         assert date_created.isoformat() in d_row
         # harvest.modified_at
         assert date_modified.isoformat() in d_row
+        # harvest.last_update
+        assert date_updated.isoformat() in d_row
         # dataset harvest dates should not be here
         assert another_date.isoformat() not in d_row
         # assert resource metrics downloads
@@ -51,6 +56,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         date_created = datetime(2022, 12, 31)
         date_issued = date_created + timedelta(days=1)
         date_modified = date_created + timedelta(days=2)
+        date_updated = date_created + timedelta(days=3)
         harvest_dataset = DatasetFactory(
             harvest={
                 "backend": "dummy_backend",
@@ -61,6 +67,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
                 "created_at": date_created,
                 "issued_at": date_issued,
                 "modified_at": date_modified,
+                "last_update": date_updated,
                 "dct_identifier": "dct-identifier",
             },
         )
@@ -105,6 +112,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         assert harvest_dataset_values["harvest.created_at"] == date_created.isoformat()
         assert harvest_dataset_values["harvest.issued_at"] == date_issued.isoformat()
         assert harvest_dataset_values["harvest.modified_at"] == date_modified.isoformat()
+        assert harvest_dataset_values["harvest.last_update"] == date_updated.isoformat()
         assert harvest_dataset_values["harvest.dct_identifier"] == "dct-identifier"
         assert harvest_dataset_values["resources_count"] == 0
 

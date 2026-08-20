@@ -116,7 +116,6 @@ URLS_ALLOW_PRIVATE = True
 URLS_ALLOW_LOCAL = True
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 
-RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
 FS_ROOT = 'fs'
 
 SESSION_COOKIE_SECURE = False
@@ -268,4 +267,3 @@ Once the project is up and running, it's time to customize it! Take a look at ou
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [pnpm]: https://pnpm.io/
 [udata]: https://github.com/opendatateam/udata
-

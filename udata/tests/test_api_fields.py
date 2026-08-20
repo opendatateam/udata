@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import factory
 import mongoengine
 import pytest
@@ -17,6 +19,7 @@ from mongoengine.fields import (
 )
 from werkzeug.exceptions import BadRequest
 
+from udata.api import api
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization import constants as org_constants
@@ -44,11 +47,21 @@ BADGES: dict[str, str] = {
 URL_RAISE_ERROR: str = "/raise/validation/error"
 URL_EXISTS_ERROR_MESSAGE: str = "Url exists"
 
+FORBIDDEN_VALUE: str = "forbidden"
+FORBIDDEN_MESSAGE: str = "Forbidden value"
+
 
 def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
     return
+
+
+def check_not_forbidden(value: str = "", field: str = "", **_kwargs) -> None:
+    """Fail on a sentinel value, reporting the field key it was handed, so a test can
+    assert the error is keyed on what the caller sent rather than on the attribute."""
+    if value == FORBIDDEN_VALUE:
+        raise FieldValidationError(FORBIDDEN_MESSAGE, field=field)
 
 
 class FakeBadge(Badge):
@@ -224,6 +237,59 @@ class FakeWithHrefFallback(Document):
     )
 
     meta = {"collection": "fake_with_href_fallback_api_fields"}
+
+
+@generate_fields()
+class FakeWithRename(Document):
+    """Exercises `rename` on every kind of field it can apply to: the API key differs
+    from the Python attribute on read, on write (patch must assign the attribute, not
+    the API key), on validation errors, on getters and on image thumbnails."""
+
+    label = field(
+        StringField(),
+        rename="name",
+        checks=[check_not_forbidden],
+    )
+    created_at = field(
+        DateTimeField(),
+        readonly=True,
+        rename="since",
+    )
+    image = field(
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+        ),
+        readonly=True,
+        rename="picture",
+        thumbnail_info={
+            "size": BIGGEST_IMAGE_SIZE,
+        },
+    )
+
+    meta = {"collection": "fake_with_rename_api_fields"}
+
+    @field(description="Link to the API endpoint for this fake", rename="api_url")
+    def uri(self) -> str:
+        return "fake-with-rename/foobar/endpoint/"
+
+
+@generate_fields()
+class FakeWithGenericReference(Document):
+    """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
+
+    A `GenericReferenceField` stores a resolved document, which the default
+    `LazyReference` model cannot serialize (it reads `document_type`, an attribute only
+    a `LazyReference` has). `nested_fields` is what lets the caller opt out of it, and
+    it must be honoured whether or not `choices` constrains the allowed classes.
+    """
+
+    subject = field(
+        mongoengine.fields.GenericReferenceField(),
+        nested_fields=api.model_reference,
+    )
+
+    meta = {"collection": "fake_with_generic_reference_api_fields"}
 
 
 @generate_fields()
@@ -477,6 +543,18 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         assert embedded.status is None
 
 
+class PatchBlankStringTest(PytestOnlyDBTestCase):
+    def test_blank_string_is_stored_as_none(self) -> None:
+        """A string field only made of whitespace holds no value, so `required=True`
+        rejects it at save() instead of storing spaces."""
+        for value in ["", "   ", "\n\t "]:
+            assert patch(Fake(), {"title": value}).title is None
+
+    def test_surrounding_whitespace_is_kept(self) -> None:
+        """Only fully blank strings are emptied: the value itself is never trimmed."""
+        assert patch(Fake(), {"title": "  a title  "}).title == "  a title  "
+
+
 class HrefFieldTest(PytestOnlyDBTestCase):
     def test_href_total_and_extra(self, app) -> None:
         """`href_total` provides the link total (instead of len(value)) and
@@ -496,6 +574,87 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class GenericReferenceFieldTest(PytestOnlyDBTestCase):
+    def test_nested_fields_is_honoured_without_choices(self, app) -> None:
+        """`choices` restricts the referenced classes, `nested_fields` describes how the
+        reference is serialized: the two are independent. Reading a reference through the
+        default `LazyReference` model raises on the resolved document a
+        `GenericReferenceField` stores, so ignoring `nested_fields` here is a 500."""
+        organization = OrganizationFactory()
+        obj = FakeWithGenericReference(subject=organization)
+
+        with app.test_request_context("/"):
+            subject = marshal(obj, FakeWithGenericReference.__read_fields__)["subject"]
+
+        assert subject == {"class": "Organization", "id": str(organization.id)}
+
+    def test_write_field_takes_a_class_and_id_reference(self) -> None:
+        """Writing stays keyed on `{class, id}` whatever the read model is."""
+        organization = OrganizationFactory()
+        obj = patch(
+            FakeWithGenericReference(),
+            {"subject": {"class": "Organization", "id": str(organization.id)}},
+        )
+        assert obj.subject == organization
+
+
+class RenameFieldTest(PytestOnlyDBTestCase):
+    def test_read_fields_use_the_api_key(self) -> None:
+        """Renamed fields are exposed under their API key, and their Python attribute
+        name disappears from the read model."""
+        read_fields = FakeWithRename.__read_fields__
+        assert set(["name", "since", "picture", "api_url"]).issubset(read_fields.keys())
+        for attribute in ["label", "created_at", "image", "uri"]:
+            assert attribute not in read_fields
+
+    def test_read_field_resolves_the_python_attribute(self, app) -> None:
+        """Without an explicit `attribute`, flask-restx would look the value up under the
+        renamed key on the document and marshal null."""
+        obj = FakeWithRename(label="a label")
+        with app.test_request_context("/"):
+            assert marshal(obj, FakeWithRename.__read_fields__)["name"] == "a label"
+
+    def test_thumbnail_does_not_overwrite_its_image_field(self) -> None:
+        """An image field yields a thumbnail alongside it: the thumbnail must derive its
+        own API key from the rename instead of inheriting it and taking its place."""
+        read_fields = FakeWithRename.__read_fields__
+        assert "picture" in read_fields
+        assert "picture_thumbnail" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_write_fields_use_the_api_key(self) -> None:
+        """A writable renamed field is accepted under its API key. A readonly one is not
+        writable at all, whatever the key."""
+        write_fields = FakeWithRename.__write_fields__
+        assert "name" in write_fields
+        assert "label" not in write_fields
+        assert "since" not in write_fields
+        assert "created_at" not in write_fields
+
+    def test_patch_assigns_the_python_attribute(self) -> None:
+        """The payload is keyed on the API name, the assignment targets the attribute."""
+        obj = patch(FakeWithRename(), {"name": "a label"})
+        assert obj.label == "a label"
+
+    def test_patch_ignores_a_renamed_readonly_field(self) -> None:
+        created_at = datetime(2026, 1, 1, tzinfo=UTC)
+        obj = patch(FakeWithRename(created_at=created_at), {"since": datetime(2026, 6, 1)})
+        assert obj.created_at == created_at
+
+    def test_check_error_is_keyed_on_the_api_key(self) -> None:
+        """The error must name the key the caller sent, otherwise the client cannot map
+        it back to the field of its payload."""
+        with pytest.raises(FieldValidationError) as excinfo:
+            patch(FakeWithRename(), {"name": FORBIDDEN_VALUE})
+        assert excinfo.value.field == "name"
+        assert "name" in excinfo.value.errors
+
+    def test_reverse_mapping_only_holds_writable_fields(self) -> None:
+        """`patch()` reads the mapping after finding the key in `__write_fields__`, so
+        an entry for anything else could never be reached."""
+        assert FakeWithRename.__api_key_to_attribute__ == {"name": "label"}
 
 
 class ListAttributeFieldTest(PytestOnlyDBTestCase):

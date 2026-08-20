@@ -1,3 +1,4 @@
+import io
 from datetime import UTC, datetime, timedelta
 from os.path import basename
 from uuid import uuid4
@@ -9,7 +10,7 @@ from werkzeug.wrappers import Request
 
 from udata.core import storages
 from udata.core.storages import utils
-from udata.core.storages.api import META, chunk_filename
+from udata.core.storages.api import META, ChunksReader, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.tests import PytestOnlyTestCase
 from udata.utils import faker
@@ -142,3 +143,46 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
+
+
+@pytest.mark.usefixtures("instance_path")
+class ChunksReaderTest(PytestOnlyTestCase):
+    """The stream a chunked upload is handed to its destination storage as."""
+
+    def store_parts(self, uuid, parts):
+        for index, part in enumerate(parts):
+            storages.chunks.write(chunk_filename(uuid, index), part)
+
+    def test_reads_every_part_in_order(self, client):
+        uuid = str(uuid4())
+        self.store_parts(uuid, [b"first", b"second", b"third"])
+
+        stream = io.BufferedReader(ChunksReader(uuid, 3))
+
+        assert stream.read() == b"firstsecondthird"
+
+    def test_reads_parts_wider_than_the_read_buffer(self, client):
+        # A part is megabytes wide in production while a read asks for a few
+        # kilobytes at a time, so it is always handed over in several reads.
+        # Parts of a single byte never take that path.
+        uuid = str(uuid4())
+        parts = [bytes([index]) * 10000 for index in range(1, 4)]
+        self.store_parts(uuid, parts)
+
+        stream = io.BufferedReader(ChunksReader(uuid, len(parts)), buffer_size=1024)
+
+        assert stream.read() == b"".join(parts)
+
+    def test_a_read_shorter_than_a_part_keeps_the_rest_for_the_next_one(self, client):
+        uuid = str(uuid4())
+        self.store_parts(uuid, [b"0123456789"])
+        reader = ChunksReader(uuid, 1)
+        target = bytearray(4)
+
+        assert reader.readinto(target) == 4
+        assert bytes(target) == b"0123"
+        assert reader.readinto(target) == 4
+        assert bytes(target) == b"4567"
+        assert reader.readinto(target) == 2
+        assert bytes(target[:2]) == b"89"
+        assert reader.readinto(target) == 0
