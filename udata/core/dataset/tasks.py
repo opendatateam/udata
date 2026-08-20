@@ -126,9 +126,7 @@ def store_resource(csvfile, model, dataset):
     prefix = "/".join((dataset.slug, timestr))
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
-        stream = storages.utils.MeasuredStream(infile)
-        stored_filename = storage.save(stream, prefix=prefix, filename=filename)
-    r_info = storages.utils.stored_file_infos(storage, stored_filename, stream)
+        r_info = storages.utils.save_upload(storage, infile, filename, prefix=prefix)
     r_info["checksum"] = Checksum(type=CHECKSUM_TYPE, value=r_info.pop(CHECKSUM_TYPE))
     r_info["filesize"] = r_info.pop("size")
     del r_info["filename"]

@@ -120,6 +120,17 @@ class MeasuredStream:
         return self.hasher.hexdigest()
 
 
+def save_upload(storage, source, filename, prefix=None) -> dict:
+    """Store `source` into `storage` and describe what was written.
+
+    Saving (rather than writing to an open file) is what applies the storage
+    checks, the allowed extensions in particular.
+    """
+    stream = MeasuredStream(source)
+    fs_filename = storage.save(stream, filename=filename, prefix=prefix)
+    return stored_file_infos(storage, fs_filename, stream)
+
+
 def stored_file_infos(storage, fs_filename, stream: MeasuredStream) -> dict:
     """Describe a file that was just written to `storage` out of `stream`.
 
