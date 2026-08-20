@@ -7,6 +7,13 @@ from udata.core.dataset.models import Dataset
 from udata.uris import cdata_url, homepage_url
 from udata.utils import get_by
 
+from .api_fields import (
+    geopf_dataset_status_fields,
+    geopf_datastore_fields,
+    geopf_push_request_fields,
+    geopf_status_fields,
+    geopf_task_fields,
+)
 from .auth import oauth, resolve_access_token, revoke_token, store_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
 from .models import GeopfToken
@@ -20,6 +27,8 @@ from .tasks import (
 ns = api.namespace("geopf", "Géoplateforme related operations")
 
 DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
+
+common_doc = {"params": {"dataset": "The dataset ID or slug", "rid": "The resource ID"}}
 
 
 def _redirect_target(dataset_id: str | None) -> str:
@@ -62,6 +71,7 @@ class GeopfAuthAPI(API):
 class GeopfStatusAPI(API):
     @api.secure
     @api.doc("geopf_status")
+    @api.marshal_with(geopf_status_fields)
     def get(self):
         """Whether the current user has an active, usable geopf link.
 
@@ -87,10 +97,11 @@ def _resource_summary(resource) -> dict:
     }
 
 
-@ns.route("/status/<dataset:dataset>/", endpoint="geopf_dataset_status")
+@ns.route("/status/<dataset:dataset>/", endpoint="geopf_dataset_status", doc=common_doc)
 class GeopfDatasetStatusAPI(API):
     @api.secure
     @api.doc("geopf_dataset_status")
+    @api.marshal_with(geopf_dataset_status_fields)
     def get(self, dataset):
         """A dataset's Géoplateforme sync state, as stored locally.
 
@@ -154,6 +165,7 @@ class GeopfDatasetStatusAPI(API):
 class GeopfTokenAPI(API):
     @api.secure
     @api.doc("geopf_disconnect")
+    @api.response(204, "Disconnected")
     def delete(self):
         """Disconnect the current user from Géoplateforme."""
         geopf_token = GeopfToken.objects(user=current_user.id).first()
@@ -167,6 +179,9 @@ class GeopfTokenAPI(API):
 class GeopfDatastoresAPI(API):
     @api.secure
     @api.doc("geopf_datastores")
+    @api.marshal_list_with(geopf_datastore_fields)
+    @api.response(424, "Not connected to Géoplateforme")
+    @api.response(502, "Géoplateforme API error")
     def get(self):
         """List the entrepôts (datastores) available to the current user's geopf account."""
         try:
@@ -180,10 +195,15 @@ class GeopfDatastoresAPI(API):
             api.abort(502, str(e))
 
 
-@ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push")
+@ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push", doc=common_doc)
 class GeopfPushAPI(API):
     @api.secure
     @api.doc("geopf_push")
+    @api.expect(geopf_push_request_fields)
+    @api.marshal_with(geopf_task_fields, code=202)
+    @api.response(400, "Unsupported resource format or missing datastore_id")
+    @api.response(404, "Resource not found")
+    @api.response(424, "Not connected to Géoplateforme")
     def post(self, dataset, rid):
         """Push a resource to Géoplateforme, as the current user."""
         dataset.permissions["edit_resources"].test()
@@ -221,10 +241,12 @@ class GeopfPushAPI(API):
         return {"task_id": task.id}, 202
 
 
-@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings")
+@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings", doc=common_doc)
 class GeopfPullOfferingsAPI(API):
     @api.secure
     @api.doc("geopf_pull_offerings")
+    @api.marshal_with(geopf_task_fields, code=202)
+    @api.response(424, "Not connected to Géoplateforme")
     def post(self, dataset):
         """Pull Géoplateforme offerings into resources for this dataset, as the current user."""
         dataset.permissions["edit_resources"].test()
