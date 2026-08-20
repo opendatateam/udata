@@ -24,12 +24,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.storage.s3 import store_bytes
 from udata.tasks import job
 
-from .models import (
-    CommunityResource,
-    Dataset,
-    Resource,
-    checksum_from_stored_file_infos,
-)
+from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
 
@@ -130,9 +125,10 @@ def store_resource(csvfile, model, dataset):
     prefix = "/".join((dataset.slug, timestr))
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
-        stored_filename = storage.save(infile, prefix=prefix, filename=filename)
-    r_info = storages.utils.stored_file_infos(storage, stored_filename)
-    r_info["checksum"] = checksum_from_stored_file_infos(r_info)
+        stream = storages.utils.MeasuredStream(infile)
+        stored_filename = storage.save(stream, prefix=prefix, filename=filename)
+    r_info = storages.utils.stored_file_infos(storage, stored_filename, stream)
+    r_info["checksum"] = Checksum(type="sha1", value=r_info.pop("sha1"))
     r_info["filesize"] = r_info.pop("size")
     del r_info["filename"]
     r_info["title"] = filename

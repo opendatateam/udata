@@ -2,6 +2,7 @@ import hashlib
 import mimetypes
 import os
 import zlib
+from datetime import UTC, datetime
 
 from flask import current_app
 from slugify import Slugify
@@ -85,23 +86,44 @@ def normalize(filename):
     return slugify(filename)
 
 
-def stored_file_infos(storage, fs_filename) -> dict:
-    """Describe a file that was just written to `storage`.
+class MeasuredStream:
+    """Wrap an upload stream to digest and size its content as it is read.
 
-    The storage is the one that digested the content, so it is also the one
-    that says with which algorithm: a local file is read back and hashed,
-    while an S3 object carries a checksum computed and verified by the server.
+    The stream is handed to the storage, so the digest and the length describe
+    exactly what was written, without a second pass over the file.
     """
-    infos = storage.metadata(fs_filename)
-    infos["last_modified_internal"] = infos.pop("modified")
-    infos["fs_filename"] = fs_filename
-    infos["format"] = extension(fs_filename)
-    infos["mime"] = infos["mime"] or DEFAULT_MIME
-    # Spread `algo:hash` as `{algo: hash}` so callers can tell which algorithm
-    # the storage came up with. There is none when the backend cannot digest
-    # what it holds — an S3 object stored in several parts before the backend
-    # started asking for a checksum has nothing but its parts' digests.
-    if checksum := infos.pop("checksum"):
-        algo, value = checksum.split(":", 1)
-        infos[algo] = value
-    return infos
+
+    def __init__(self, stream):
+        self.stream = stream
+        self.hasher = hashlib.sha1()
+        self.size = 0
+
+    def read(self, size=-1):
+        data = self.stream.read(size)
+        self.hasher.update(data)
+        self.size += len(data)
+        return data
+
+    @property
+    def sha1(self):
+        return self.hasher.hexdigest()
+
+
+def stored_file_infos(storage, fs_filename, stream: MeasuredStream) -> dict:
+    """Describe a file that was just written to `storage` out of `stream`.
+
+    Everything is derived from the upload itself rather than read back from
+    the backend: an S3 ETag is not a digest of the content once an object is
+    uploaded in several parts, and the stored content type is only ever what
+    the backend guessed when writing.
+    """
+    return {
+        "url": storage.url(fs_filename, external=True),
+        "fs_filename": fs_filename,
+        "filename": os.path.basename(fs_filename),
+        "size": stream.size,
+        "sha1": stream.sha1,
+        "mime": mime(fs_filename) or DEFAULT_MIME,
+        "format": extension(fs_filename),
+        "last_modified_internal": datetime.now(UTC),
+    }

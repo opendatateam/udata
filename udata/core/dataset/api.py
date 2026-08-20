@@ -37,6 +37,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.badges import api as badges_api
 from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
@@ -75,12 +76,12 @@ from .forms import (
     ResourcesListForm,
 )
 from .models import (
+    Checksum,
     CommunityResource,
     Dataset,
     License,
     Resource,
     ResourceSchema,
-    checksum_from_stored_file_infos,
     get_resource,
 )
 from .rdf import dataset_to_rdf
@@ -609,7 +610,10 @@ class UploadMixin(object):
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
         infos["title"] = os.path.basename(infos["filename"])
-        infos["checksum"] = checksum_from_stored_file_infos(infos)
+        checksum_type = next(
+            checksum_type for checksum_type in CHECKSUM_TYPES if checksum_type in infos
+        )
+        infos["checksum"] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
         infos["filesize"] = infos.pop("size")
         del infos["filename"]
         return infos

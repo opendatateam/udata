@@ -195,7 +195,7 @@ RESOURCE_FILETYPES = OrderedDict(
 
 OGC_SERVICE_FORMATS = ["wfs", "wms", "wmts"]
 
-CHECKSUM_TYPES = ("sha1", "sha2", "sha256", "md5", "crc", "crc32")
+CHECKSUM_TYPES = ("sha1", "sha2", "sha256", "md5", "crc")
 DEFAULT_CHECKSUM_TYPE = "sha1"
 
 PIVOTAL_DATA = "pivotal-data"
