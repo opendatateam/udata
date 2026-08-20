@@ -140,28 +140,10 @@ class ChunksReader(io.RawIOBase):
         return size
 
 
-def combine_chunks(storage, args, prefix=None):
-    """
-    Combine a chunked file into a whole file again.
-    Streams every part, in order, into the destination storage.
-    Chunks are stored in the chunks storage.
-
-    Saving (rather than writing to an open file) is what applies the storage
-    checks — the allowed extensions in particular — to chunked uploads too.
-    """
-    uuid = args["uuid"]
-    # Normalize filename including extension
-    target = utils.normalize(args["filename"])
-    stream = io.BufferedReader(ChunksReader(uuid, args["totalparts"]))
-
-    fs_filename = storage.save(stream, filename=target, prefix=prefix)
-
-    # Chunks are dropped once the whole file made it to its destination, so a
-    # failed combination can be retried instead of losing the upload.
-    for part in range(args["totalparts"]):
+def discard_chunks(uuid, totalparts):
+    for part in range(totalparts):
         chunks.delete(chunk_filename(uuid, part))
     chunks.delete(chunk_filename(uuid, META))
-    return fs_filename
 
 
 def handle_upload(storage, prefix=None):
@@ -171,24 +153,26 @@ def handle_upload(storage, prefix=None):
 
     if is_chunk:
         if uploaded_file:
+            # Raises UploadProgress: a part was stored, the file is incomplete.
             save_chunk(uploaded_file, args)
-        else:
-            fs_filename = combine_chunks(storage, args, prefix=prefix)
+        # Normalize filename including extension
+        filename = utils.normalize(args["filename"])
+        source = io.BufferedReader(ChunksReader(args["uuid"], args["totalparts"]))
     elif not uploaded_file:
         raise UploadError("Missing file parameter")
     else:
         # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
-        fs_filename = storage.save(uploaded_file, prefix=prefix, filename=filename)
+        source = uploaded_file
 
-    metadata = storage.metadata(fs_filename)
-    metadata["last_modified_internal"] = metadata.pop("modified")
-    metadata["fs_filename"] = fs_filename
-    checksum = metadata.pop("checksum")
-    algo, checksum = checksum.split(":", 1)
-    metadata[algo] = checksum
-    metadata["format"] = utils.extension(fs_filename)
-    return metadata
+    infos = utils.save_upload(storage, source, filename, prefix=prefix)
+
+    if is_chunk:
+        # Chunks are dropped once the whole file made it to its destination, so
+        # a failed combination can be retried instead of losing the upload.
+        discard_chunks(args["uuid"], args["totalparts"])
+
+    return infos
 
 
 def parse_uploaded_image(field):
