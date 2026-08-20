@@ -853,7 +853,7 @@ wheels = [
 
 [[package]]
 name = "flask-storage"
-version = "1.4.6"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -863,7 +863,7 @@ dependencies = [
     { name = "werkzeug" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/e5/adca163cab6cd4c7f8938a49d3476c75485faceebf7e831aa32429fa66dc/flask_storage-1.4.6-py3-none-any.whl", hash = "sha256:b65be40978ae56fbc8b12a37fc681064b5da41c27c0477cd5fe93a410338bebb", size = 19320, upload-time = "2026-08-05T08:40:25.002Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/19/b846bfbfb0765ece9fe215e1f2084354e642f68bf40cd84ec7b6759b6546/flask_storage-2.0.0-py3-none-any.whl", hash = "sha256:28b592afeb111dd7dad3e5f42c6819ddbdb842871b19f8579cc8b759a17dfbb1", size = 21425, upload-time = "2026-08-20T12:35:23.753Z" },
 ]
 
 [[package]]
@@ -2569,7 +2569,7 @@ requires-dist = [
     { name = "flask-principal", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-restx", specifier = ">=1.3.0,<2.0.0" },
     { name = "flask-security", specifier = ">=5.1.2,<6.0.0" },
-    { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
+    { name = "flask-storage", specifier = ">=2.0.0,<3.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
     { name = "geomet", specifier = ">=1.1.0,<2.0.0" },
