@@ -18,6 +18,7 @@ from udata.core.edito_blocs.models import purge_blocs_references
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
+from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer
 from udata.mongo.document import UDataDocument as Document
@@ -128,7 +129,7 @@ def store_resource(csvfile, model, dataset):
         stream = storages.utils.MeasuredStream(infile)
         stored_filename = storage.save(stream, prefix=prefix, filename=filename)
     r_info = storages.utils.stored_file_infos(storage, stored_filename, stream)
-    r_info["checksum"] = Checksum(type="sha1", value=r_info.pop("sha1"))
+    r_info["checksum"] = Checksum(type=CHECKSUM_TYPE, value=r_info.pop(CHECKSUM_TYPE))
     r_info["filesize"] = r_info.pop("size")
     del r_info["filename"]
     r_info["title"] = filename

@@ -12,6 +12,11 @@ CHUNK_SIZE = 2**16
 # What a file whose extension tells us nothing is served as.
 DEFAULT_MIME = "application/octet-stream"
 
+# What every upload is digested with. It is the algorithm flask-storage's local
+# backend computes on its own, so resources keep the same kind of checksum as
+# the ones stored before we started digesting the upload ourselves.
+CHECKSUM_TYPE = "sha1"
+
 
 slugify = Slugify(separator="-", to_lower=True, safe_chars=".")
 
@@ -91,11 +96,17 @@ class MeasuredStream:
 
     The stream is handed to the storage, so the digest and the length describe
     exactly what was written, without a second pass over the file.
+
+    It exposes nothing but `read` on purpose: boto3 buffers each part of a
+    stream it cannot seek, so it never rewinds the source. Adding `seek` would
+    let a retry digest the same bytes twice, and the checksum would be wrong
+    without anything saying so. The cost is that boto3 cannot size the upload
+    in advance, so its parts stay at 8MB, which caps a file at around 80GB.
     """
 
     def __init__(self, stream):
         self.stream = stream
-        self.hasher = hashlib.sha1()
+        self.hasher = hashlib.new(CHECKSUM_TYPE)
         self.size = 0
 
     def read(self, size=-1):
@@ -105,7 +116,7 @@ class MeasuredStream:
         return data
 
     @property
-    def sha1(self):
+    def checksum(self):
         return self.hasher.hexdigest()
 
 
@@ -122,7 +133,7 @@ def stored_file_infos(storage, fs_filename, stream: MeasuredStream) -> dict:
         "fs_filename": fs_filename,
         "filename": os.path.basename(fs_filename),
         "size": stream.size,
-        "sha1": stream.sha1,
+        CHECKSUM_TYPE: stream.checksum,
         "mime": mime(fs_filename) or DEFAULT_MIME,
         "format": extension(fs_filename),
         "last_modified_internal": datetime.now(UTC),
