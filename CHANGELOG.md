@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.6.0 (2026-08-20)
+
+- chore: bump flask-storage to 2.0.0 to stream uploads to their storage ([#3907](https://github.com/opendatateam/udata/pull/3907))
+- fix: derive upload metadata from the stream instead of the storage backend ([#3896](https://github.com/opendatateam/udata/pull/3896))
+- fix: stream chunked uploads to their storage instead of buffering them ([#3895](https://github.com/opendatateam/udata/pull/3895))
+
+
 ## 17.5.0 (2026-08-19)
 
 - feat(topics): add lookup by element id/class ([#3898](https://github.com/opendatateam/udata/pull/3898))
