@@ -5,13 +5,13 @@ from datetime import UTC, datetime
 from urllib.parse import urlparse
 from uuid import UUID
 
-import requests
 from flask import current_app
 
 from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
 from udata.core.storages.utils import md5
 from udata.core.user.models import User
+from udata.http import ssrf_session
 from udata.tasks import task
 from udata.utils import get_by
 
@@ -272,10 +272,9 @@ def _open_resource_file(resource):
 class _DownloadToTempfile:
     """Download a remote URL to a temp file, yield it, clean up on exit.
 
-    FIXME: `self.url` is user-controlled (remote resource URL), so this fetch
-    is an SSRF vector from the worker (internal hosts, link-local metadata
-    endpoints). Switch to the SSRF-hardened http client once it lands
-    (see PRs #3877/#3878).
+    `self.url` is user-controlled (remote resource URL) and this fetch runs
+    on the worker, so it goes through the SSRF-hardened session rather than
+    a bare `requests.get`.
     """
 
     def __init__(self, url: str):
@@ -286,7 +285,7 @@ class _DownloadToTempfile:
         max_size = current_app.config["GEOPF_MAX_REMOTE_FILE_SIZE"]
         self._tmp = tempfile.NamedTemporaryFile(suffix=".gpkg", delete=False)
         try:
-            with requests.get(self.url, stream=True, timeout=60) as resp:
+            with ssrf_session().get(self.url, stream=True, timeout=60) as resp:
                 resp.raise_for_status()
                 size = 0
                 for chunk in resp.iter_content(65536):
