@@ -118,6 +118,17 @@ class ContactToRdfTest:
             # Default predicate is "contact"
             assert predicate == DCAT.contactPoint
 
+    @pytest.mark.parametrize("role", ["contact", "creator"], ids=["vcard", "foaf"])
+    def test_contact_points_to_rdf_without_a_name(self, role):
+        contact = ContactPoint(email="hello@its.me", role=role)
+
+        contact_rdfs = contact_points_to_rdf([contact], None)
+
+        for contact_point, _predicate in contact_rdfs:
+            assert contact_point.value(VCARD.fn) is None
+            assert contact_point.value(FOAF.name) is None
+            assert contact_point.value(VCARD.hasEmail) or contact_point.value(FOAF.mbox)
+
     @pytest.mark.parametrize("role,predicate", AGENT_ROLE_TO_RDF_PREDICATE.items())
     def test_contact_points_to_rdf_roles(self, role, predicate):
         contact = ContactPoint(

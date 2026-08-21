@@ -137,6 +137,23 @@ class ContactPointAPITest(APITestCase):
         )
         assert ContactPoint.objects.count() == 0
 
+    def test_contact_point_api_create_without_a_name(self):
+        self.login()
+        data = {"email": faker.email(), "role": "creator"}
+        response = self.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.first().name is None
+
+    def test_contact_point_missing_every_information(self):
+        self.login()
+        data = {"role": "creator"}
+        response = self.post(url_for("api.contact_points"), data=data)
+        assert400(response)
+        assert response.json["message"] == _(
+            "A contact point requires a name, an email or a contact form"
+        )
+        assert ContactPoint.objects.count() == 0
+
     def test_contact_point_missing_role(self):
         self.login()
         data = {"name": faker.word(), "email": faker.email()}
