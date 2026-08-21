@@ -226,8 +226,8 @@ def detect_ogc_service(resource: Resource) -> str | None:
     * a REQUEST=GetCapabilities param in url
     It returns the OGC service type or None
     """
-    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
-        return resource.format.strip("ogc:")
+    if resource.format and (format := resource.format.removeprefix("ogc:")) in OGC_SERVICE_FORMATS:
+        return format
     url = resource.url.lower()
     if "request=getcapabilities" in url and any(
         f"service={format}" in url for format in OGC_SERVICE_FORMATS
