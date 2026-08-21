@@ -995,6 +995,19 @@ def patch(obj: _T, request) -> _T:
                     document_type = db.resolve_model(value["class"])
                 except ValueError as e:
                     raise FieldValidationError(message=str(e), field=key)
+                # `resolve_model` resolves against the whole document registry, so
+                # without this the client picks which collection the lookup below
+                # queries — MongoEngine only enforces `choices` at save() time, long
+                # after that query ran. A field without `choices` accepts them all,
+                # by design (e.g. `Transfer.subject`).
+                if (
+                    model_attribute.choices
+                    and document_type._class_name not in model_attribute.choices
+                ):
+                    raise FieldValidationError(
+                        message=f"Value must be one of {model_attribute.choices}",
+                        field=key,
+                    )
                 value = wrap_primary_key(
                     key,
                     model_attribute,
@@ -1133,6 +1146,15 @@ def wrap_primary_key(
 
     if isinstance(value, dict) and "id" in value:
         return wrap_primary_key(field_name, foreign_field, value["id"], document_type)
+
+    # `value` comes straight from the request body and goes straight into the query
+    # below, so anything but a scalar is a set of Mongo operators (`{"$ne": …}`) that
+    # selects an arbitrary document instead of the requested one. MongoEngine catches
+    # them only when the primary key is an `ObjectId`, whose `prepare_query_value`
+    # refuses the dict; on a `StringField` primary key (`License`, `GeoZone`…) the
+    # operators reach the database untouched.
+    if isinstance(value, (dict, list)):
+        raise FieldValidationError(field=field_name, message="Expected a reference id")
 
     document_type = document_type or foreign_field.document_type().__class__
     id_field_name = document_type._meta["id_field"]

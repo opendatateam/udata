@@ -22,6 +22,7 @@ from werkzeug.exceptions import BadRequest
 from udata.api import api
 from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import License
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
@@ -598,6 +599,16 @@ class GenericReferenceFieldTest(PytestOnlyDBTestCase):
             {"subject": {"class": "Organization", "id": str(organization.id)}},
         )
         assert obj.subject == organization
+
+    @pytest.mark.parametrize("operators", [{"$where": "return true"}, {"$ne": "nope"}, {"$gt": ""}])
+    def test_write_field_rejects_mongo_operators_as_id(self, operators: dict) -> None:
+        """An id made of Mongo operators would select an arbitrary document instead of
+        the requested one. MongoEngine catches it on an `ObjectId` primary key, but
+        `License.id` is a `StringField`, so the operators would reach the database."""
+        License(id="fr-lo", title="Licence Ouverte").save()
+
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithGenericReference(), {"subject": {"class": "License", "id": operators}})
 
 
 class RenameFieldTest(PytestOnlyDBTestCase):
