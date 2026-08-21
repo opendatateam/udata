@@ -21,28 +21,40 @@ Running an harvester for a given source follows this pseudo-code in specific bac
 class MyHarvester(BaseBackend):
     @override
     def inner_harvest(self):
-        records = self.get_records_from_source()
-        for record in records:
-            # assuming all records are datasets
-            self.process_item(record.id, self.my_dataset_processor, *args)
+        for record in self.get_records_from_source():
+            # Assuming all items are Datasets (otherwise use specialized processors)
+            self.process_item(record.id, self.dataset_processor, ...)
 
-    def my_dataset_processor(self, harvest_item: HarvestItem, *args) -> Dataset:
-        dataset = self.get_item(harvest_item.remote_id, Dataset)
-        update_dataset(dataset, *args)
+    def get_records_from_source(self) -> Iterator:
+        # Fetch and yield record ids (or full records) from the source
+        yield record from ...
+
+    def dataset_processor(self, harvest_item: HarvestItem, ...) -> Dataset:
+        remote_id = harvest_item.remote_id  # record id on source
+
+        # Get source record metadata for `remote_id` (from source or previously cached data)
+        record = ...
+
+        # Get (or create) datagouv item for `remote_id`
+        dataset = self.get_item(remote_id, Dataset)
+
+        # Update datagouv item with metadata from source record
+        dataset.title = record.get("title")
+        ...
+
         return dataset
 ```
 
 The call to `process_item` is a wrapper that, for a given record, performs the following steps:
-1. Create a new `HarvestItem` in the running job for that record.
-2. Call the processor function (`my_dataset_processor` in pseudo-code above).
+1. Create a new `HarvestItem` in the running job for the record.
+2. Call the processor function (`dataset_processor` in pseudo-code above) on the record.
    That backend/type-specific processor function is responsible for:
-   1. Computing a datagouv id (usually from the record id).
-   2. Calling `get_item` to retrieve/create the corresponding datagouv item.
-   3. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
-   4. Returning the updated datagouv item.
+   1. Calling `get_item` to retrieve/create the corresponding datagouv item.
+   2. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
+   3. Returning the updated datagouv item.
 3. Update the datagouv item `HarvestMetadata` with domain, source, last_update, etc.,
 4. Catch any warning/error and record them in `HarvestItem`.
-5. Save the updated datagouv item (except in dryrun mode).
+5. Save the updated datagouv item (except in "dry run" mode).
 
 | Property            | Meaning                                                          |
 |---------------------|------------------------------------------------------------------|
