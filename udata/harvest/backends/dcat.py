@@ -75,10 +75,10 @@ class DcatBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.graphs = list[tuple[Graph, int]]()
+        self.format = self.get_format()
 
     @override
     def inner_harvest(self):
-        self.format = self.get_format()
         self.job.data = {"format": self.format}
 
         for page_graph, page_number in self.walk_paginated_graph(self.source.url):

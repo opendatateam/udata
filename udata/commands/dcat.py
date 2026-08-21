@@ -62,16 +62,15 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     else:
         backend = DcatBackend(source, dryrun=True)
     backend.job = MockJob()
-    format = backend.get_format()
-    echo(yellow("Detected format: {}".format(format)))
-    graphs = backend.walk_paginated_graph(url, format)
+    echo(yellow("Detected format: {}".format(backend.format)))
+    graphs = backend.walk_paginated_graph(url)
 
     # serialize/unserialize graph like in the job mechanism
     full_graph = Graph(namespace_manager=namespace_manager)
     for page_graph, page_number in graphs:
-        serialized = page_graph.serialize(format=format, indent=None)
+        serialized = page_graph.serialize(format=backend.format, indent=None)
         full_graph += Graph(namespace_manager=namespace_manager).parse(
-            data=serialized, format=format
+            data=serialized, format=backend.format
         )
 
         for node in uniquify(page_graph.subjects(RDF.type, [DCAT.Dataset, DCAT.DatasetSeries])):
