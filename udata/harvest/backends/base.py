@@ -193,6 +193,11 @@ class BaseBackend(ABC):
 
     @abstractmethod
     def inner_harvest(self):
+        """
+        Called by the driver to launch the harvest loop.
+
+        Backend implementations MUST override this method.
+        """
         raise NotImplementedError()
 
     def harvest(self) -> HarvestJob:
@@ -391,6 +396,11 @@ class BaseBackend(ABC):
             delattr(g, "harvest_activity_user")
 
     def inner_end_job(self):
+        """
+        Called by the driver at the end of a job, right before the job is marked as completed.
+
+        Backend implementations can safely override this method to perform finishing operations.
+        """
         pass
 
     def update_harvested_organizations(self):
@@ -436,9 +446,12 @@ class BaseBackend(ABC):
             )
 
     def get_item(self, remote_id: str, item_class: type[H]) -> H:
-        """Get or create a `item_class` given its remote ID (and its source)
-        We first try to match `source_id` to be source domain independent
         """
+        Get or create a `item_class` given its remote ID (and its source).
+
+        Backend implementations MUST call this method in their `item_processor`.
+        """
+        # We first try to match `source_id` to be source domain independent.
         try:
             uris.validate(remote_id)
             item = item_class.objects(harvest__remote_id=remote_id).first()
