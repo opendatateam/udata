@@ -120,7 +120,7 @@ udata = "udata.tests.plugin"
 [dependency-groups]
 dev = [
     "coverage[toml] >= 7.7.0, < 8.0",
-    "faker >=40.36, <40.37",
+    "faker >=40.37, <40.38",
     "feedparser >= 6.0.11, < 7.0",
     "flake8 >= 7.1.2, < 8.0",
     "flask-shell-ipython >= 0.5.3, < 1.0",
