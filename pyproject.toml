@@ -38,6 +38,7 @@ dependencies = [
     "celery>=5.4.0,<6.0.0",
     "celerybeat-mongo>=0.2.0,<1.0.0",
     "click>=8.1.8,<9.0.0",
+    "cryptography>=44.0.0,<50.0.0",
     "email-validator>=2.2.0,<3.0.0",
     "factory-boy>=3.3.3,<4.0.0",
     "feedgenerator>=2.1.0,<3.0.0",
@@ -92,6 +93,7 @@ dependencies = [
     "elasticsearch-dsl>=7.4.0,<8.0.0",
     "beautifulsoup4>=4.14.3,<5.0.0",
     "markdown>=3.10,<4.0",
+    "pyproj>=3.7.2",
 ]
 
 [project.urls]
@@ -110,6 +112,9 @@ csw-iso-19139 = "udata.harvest.backends.dcat:CswIso19139DcatBackend"
 maaf = "udata.harvest.backends.maaf:MaafBackend"
 ckan = "udata.harvest.backends.ckan.harvesters:CkanBackend"
 dkan = "udata.harvest.backends.ckan.harvesters:DkanBackend"
+
+[project.entry-points."udata.plugins"]
+geopf = "udata.geopf"
 
 [project.entry-points."udata.i18n"]
 udata = "udata.translations"
