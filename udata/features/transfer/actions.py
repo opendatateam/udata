@@ -31,6 +31,19 @@ def accept_transfer(transfer, comment=None):
     """Accept an incoming a transfer request"""
     TransferResponsePermission(transfer).test()
 
+    subject = transfer.subject
+    recipient = transfer.recipient
+
+    # Contact points belong to an owner, so they cannot follow the subject as-is: each one
+    # is replaced by its equivalent under the recipient. Reuses have no contact points at
+    # all, hence the `getattr`. Resolved before the transfer is marked accepted because
+    # `for_owner` writes to the database and can fail, and a transfer that has already
+    # responded is refused by the API, leaving no way to retry.
+    contact_points = [
+        contact_point.for_owner(recipient)
+        for contact_point in getattr(subject, "contact_points", None) or []
+    ]
+
     transfer.responded = datetime.now(UTC)
     transfer.responder = current_user._get_current_object()
     transfer.status = "accepted"
@@ -38,20 +51,12 @@ def accept_transfer(transfer, comment=None):
     transfer.save()
     Transfer.after_handle.send(transfer)
 
-    subject = transfer.subject
-    recipient = transfer.recipient
     if isinstance(recipient, Organization):
         subject.organization = recipient
     elif isinstance(recipient, User):
         subject.owner = recipient
-
-    # Contact points belong to an owner, so they cannot follow the subject as-is:
-    # each one is replaced by its equivalent under the recipient. Reuses have no
-    # contact points at all, hence the `getattr`.
-    if contact_points := getattr(subject, "contact_points", None):
-        subject.contact_points = [
-            contact_point.for_owner(recipient) for contact_point in contact_points
-        ]
+    if contact_points:
+        subject.contact_points = contact_points
 
     subject.save()
 

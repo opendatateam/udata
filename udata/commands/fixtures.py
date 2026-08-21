@@ -402,12 +402,17 @@ def import_fixtures(source):
                 DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
-                dataservice["organization"] = get_or_create_organization(dataservice)
+                # An exported dataservice without an organization belongs to the fixture
+                # user, like the dataset above: a contact point needs an owner to belong to.
+                dataservice_owner = get_or_create_organization(dataservice) or user
+                dataservice.pop("organization", None)
                 dataservice["contact_points"] = [
-                    get_or_create_contact_point(contact_point, dataservice["organization"])
+                    get_or_create_contact_point(contact_point, dataservice_owner)
                     for contact_point in dataservice.get("contact_points") or []
                 ]
-                DataserviceFactory(**dataservice, datasets=[dataset])
+                DataserviceFactory(
+                    **dataservice, datasets=[dataset], **ownership_filter(dataservice_owner)
+                )
 
     # Import posts
     for post_data in json_fixtures.get("posts", []):

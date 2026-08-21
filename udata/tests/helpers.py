@@ -202,10 +202,8 @@ def assert500(response):
 
 def assert_command_ok(result):
     __tracebackhide__ = True
-    msg = "Command failed with exit code {0.exit_code} and output:\n{0.output}".format(result)
+    msg = f"Command failed with exit code {result.exit_code} and output:\n{result.output}"
     if result.exception:
-        # Appended after formatting: a traceback holds source lines, and any brace in them
-        # would be read as a format field.
         msg += "\n" + "".join(traceback.format_exception(result.exception))
     assert result.exit_code == 0, msg
 

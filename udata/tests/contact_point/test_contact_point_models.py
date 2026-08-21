@@ -49,6 +49,13 @@ class ContactPointOwnershipTest(PytestOnlyDBTestCase):
         DatasetFactory(organization=org, contact_points=[contact_point])
         DataserviceFactory(organization=org, contact_points=[contact_point])
 
+    def test_a_contact_point_cannot_change_owner(self):
+        contact_point = ContactPointFactory(organization=OrganizationFactory())
+
+        contact_point.organization = OrganizationFactory()
+        with pytest.raises(ValidationError):
+            contact_point.save()
+
     def test_for_owner_reuses_an_existing_equivalent(self):
         org = OrganizationFactory()
         contact_point = ContactPointFactory(owner=UserFactory())

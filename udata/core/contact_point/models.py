@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from mongoengine.errors import ValidationError
 from mongoengine.fields import StringField
 
@@ -10,6 +12,10 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.url_field import URLField
+
+if TYPE_CHECKING:
+    from udata.core.dataservices.models import Dataservice
+    from udata.core.dataset.models import Dataset
 
 __all__ = ("ContactPoint",)
 
@@ -45,6 +51,15 @@ class ContactPoint(Document, Owned):
             raise ValidationError(
                 _("At least an email or a contact form is required for a contact point")
             )
+        # `only_creation` says the same but lets sysadmins through, and a contact point that
+        # moves leaves the objects referencing it pointing at somebody else's, which they
+        # now reject: they could never be saved again. `for_owner` is the way to move.
+        moved = {"owner", "organization"} & set(self._get_changed_fields())
+        if moved and not self._created:
+            raise FieldValidationError(
+                _("A contact point cannot change owner."),
+                field="organization" if "organization" in moved else "owner",
+            )
         return super().validate(clean=clean)
 
     def for_owner(self, owner: Organization | User) -> "ContactPoint":
@@ -64,7 +79,7 @@ class ContactPoint(Document, Owned):
         return contact_point
 
 
-def validate_contact_points_ownership(document) -> None:
+def validate_contact_points_ownership(document: "Dataset | Dataservice") -> None:
     """Check that the contact points of `document` belong to whoever owns it.
 
     Enforced on the model rather than on the API layer because ownership also changes

@@ -1,4 +1,5 @@
 import pytest
+from mongoengine.errors import ValidationError
 
 from udata.auth import PermissionDenied, login_user
 from udata.core.contact_point.factories import ContactPointFactory
@@ -17,6 +18,7 @@ from udata.core.user.metrics import (
 from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
+from udata.features.transfer.models import Transfer
 from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
@@ -280,6 +282,27 @@ class TransferContactPointsTest(PytestOnlyDBTestCase):
 
         subject.reload()
         assert subject.organization == recipient
+
+    def test_a_contact_point_that_cannot_be_carried_over_leaves_the_transfer_pending(self):
+        """The API refuses to respond twice to a transfer, so a failure here would leave it
+        accepted with the subject never transferred, and no way to retry."""
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        # A legacy contact point the model rejects, as `2024-12-05-contact-point-is-now-a-list`
+        # could leave behind: reachable only by writing straight to the collection.
+        ContactPoint.objects(id=contact_point.id).update(unset__name=True)
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        with pytest.raises(ValidationError):
+            accept_transfer(Transfer.objects.get(id=transfer.id))
+
+        transfer.reload()
+        assert transfer.status == "pending"
+        subject.reload()
+        assert subject.owner == owner
 
 
 class TransferNotificationsTest(PytestOnlyDBTestCase):
