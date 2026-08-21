@@ -86,6 +86,23 @@ class MeAPITest(APITestCase):
         )
         self.assert400(response)
 
+    def test_my_avatar_upload_rejects_lying_mimetype(self):
+        """It should reject a file whose content does not match its declared mimetype"""
+        self.login()
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"/></svg>'
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(svg), "logo.svg", "image/png")},
+            json=False,
+        )
+        self.assert400(response)
+
+    def test_my_avatar_upload_without_file(self):
+        """It should reject an upload without any file"""
+        self.login()
+        response = self.post(url_for("api.my_avatar"), {}, json=False)
+        self.assert400(response)
+
     def test_update_profile(self):
         """It should update my profile from the API"""
         self.login()
