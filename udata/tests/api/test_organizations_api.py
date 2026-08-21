@@ -1592,6 +1592,68 @@ class OrganizationDatasetsAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert len(response.json["data"]) == 2
 
+    def test_list_org_datasets_hide_archived_and_deleted(self):
+        """Should not include archived nor deleted datasets when not member"""
+        org = OrganizationFactory()
+        datasets = DatasetFactory.create_batch(3, organization=org)
+        DatasetFactory.create_batch(2, organization=org, archived=datetime.now(UTC))
+        DatasetFactory.create_batch(2, organization=org, deleted=datetime.now(UTC))
+
+        response = self.get(url_for("api.org_datasets", org=org))
+
+        assert200(response)
+        assert {d["id"] for d in response.json["data"]} == {str(d.id) for d in datasets}
+
+    def test_list_org_datasets_include_archived_and_deleted_when_member(self):
+        """Should include archived and deleted datasets when member"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        datasets = DatasetFactory.create_batch(2, organization=org)
+        datasets += DatasetFactory.create_batch(1, organization=org, archived=datetime.now(UTC))
+        datasets += DatasetFactory.create_batch(1, organization=org, deleted=datetime.now(UTC))
+
+        response = self.get(url_for("api.org_datasets", org=org))
+
+        assert200(response)
+        assert {d["id"] for d in response.json["data"]} == {str(d.id) for d in datasets}
+
+    def test_list_org_datasets_applies_filters(self):
+        """Should apply the filters advertised by the dataset parser"""
+        org = OrganizationFactory()
+        DatasetFactory(organization=org, tags=["health"])
+        DatasetFactory(organization=org, tags=["energy"])
+
+        response = self.get(url_for("api.org_datasets", org=org, tag="health"))
+
+        assert200(response)
+        assert len(response.json["data"]) == 1
+
+    def test_list_org_datasets_ignores_other_organization_arg(self):
+        """The organization from the path should win over the query string one"""
+        org = OrganizationFactory()
+        other_org = OrganizationFactory()
+        datasets = DatasetFactory.create_batch(2, organization=org)
+        DatasetFactory.create_batch(3, organization=other_org)
+
+        response = self.get(url_for("api.org_datasets", org=org, organization=str(other_org.id)))
+
+        assert200(response)
+        assert {d["id"] for d in response.json["data"]} == {str(d.id) for d in datasets}
+
+    def test_list_org_datasets_matches_dataset_list_endpoint(self):
+        """Should be an alias of /datasets/?organization=<org>"""
+        org = OrganizationFactory()
+        DatasetFactory.create_batch(3, organization=org)
+        DatasetFactory.create_batch(2, organization=org, archived=datetime.now(UTC))
+        DatasetFactory.create_batch(1, organization=OrganizationFactory())
+
+        org_response = self.get(url_for("api.org_datasets", org=org))
+        list_response = self.get(url_for("api.datasets", organization=str(org.id)))
+
+        assert200(org_response)
+        assert200(list_response)
+        assert org_response.json["data"] == list_response.json["data"]
+
 
 class OrganizationReusesAPITest(PytestOnlyAPITestCase):
     def test_list_org_reuses(self):

@@ -14,7 +14,12 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.search import parse_dataservice_filters
-from udata.core.dataset.api import DatasetApiParser, catalog_parser
+from udata.core.dataset.api import (
+    DatasetApiParser,
+    catalog_parser,
+    dataset_parser,
+    list_visible_datasets,
+)
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
@@ -731,21 +736,20 @@ class AvatarAPI(API):
         return {"image": org.logo}
 
 
-dataset_parser = DatasetApiParser()
-
-
 @ns.route("/<org:org>/datasets/", endpoint="org_datasets")
 class OrgDatasetsAPI(API):
     @api.doc("list_organization_datasets")
     @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self, org):
-        """List organization datasets (including private ones when member)"""
+        """List organization datasets (including private ones when member)
+
+        Alias of `/datasets/?organization=<org>`: same visibility rules, same filters.
+        """
         args = dataset_parser.parse()
-        qs = Dataset.objects.owned_by(org)
-        if not org.permissions["private"].can():
-            qs = qs(private__ne=True)
-        return qs.order_by(args["sort"]).paginate(args["page"], args["page_size"])
+        # The organization from the path always wins over a query string one.
+        args["organization"] = str(org.id)
+        return list_visible_datasets(args)
 
 
 @ns.route("/<org:org>/reuses/", endpoint="org_reuses")

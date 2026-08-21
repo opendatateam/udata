@@ -312,6 +312,21 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
+
+def list_visible_datasets(args):
+    """Paginate the datasets visible to the current user, filtered by `args`.
+
+    Shared by `/datasets/` and `/organizations/<org>/datasets/` so both expose
+    the exact same visibility rules and filters.
+    """
+    datasets = Dataset.objects.visible_by_user(
+        current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+    )
+    datasets = dataset_parser.parse_filters(datasets, args)
+    sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+    return datasets.order_by(sort).paginate(args["page"], args["page_size"])
+
+
 # Build catalog_parser from DatasetApiParser parser with a default page_size of 100
 catalog_parser = DatasetApiParser().parser
 catalog_parser.replace_argument(
@@ -328,13 +343,7 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_page_fields)
     def get(self):
         """List or search all datasets"""
-        args = dataset_parser.parse()
-        datasets = Dataset.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
-        )
-        datasets = dataset_parser.parse_filters(datasets, args)
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
+        return list_visible_datasets(dataset_parser.parse())
 
     @api.secure
     @api.doc("create_dataset", responses={400: "Validation error"})
