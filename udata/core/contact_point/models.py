@@ -30,7 +30,7 @@ MASK_FIELDS = ("id", "name", "email", "contact_form", "role")
 
 @generate_fields(page_mask=",".join(MASK_FIELDS))
 class ContactPoint(Document, Owned):
-    name = field(StringField(max_length=255, required=True), checks=[check_no_urls])
+    name = field(StringField(max_length=255), checks=[check_no_urls])
     email = field(StringField(max_length=255), checks=[check_is_email])
     contact_form = field(URLField())
     role = field(StringField(required=True, choices=list(CONTACT_ROLES)))
@@ -38,6 +38,10 @@ class ContactPoint(Document, Owned):
     meta = {"queryset_class": OwnedQuerySet}
 
     def validate(self, clean=True):
+        # The name is optional, but a contact point holding nothing but a role names nobody
+        # and reaches nobody.
+        if not self.name and not self.email and not self.contact_form:
+            raise ValidationError(_("A contact point requires a name, an email or a contact form"))
         if self.role == "contact" and not self.email and not self.contact_form:
             raise ValidationError(
                 _("At least an email or a contact form is required for a contact point")

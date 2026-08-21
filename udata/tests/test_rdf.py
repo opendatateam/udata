@@ -286,7 +286,7 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
         # Expected name can be a mix of user and org info...
         expected_name = (
-            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name
         )
         # ...but other info can't be mixed, so it's either all user or all org
         if user_info:
@@ -360,7 +360,7 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
         # All expected info can come from either user or org, via member/memberOf
         expected_name = (
-            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name
         )
         expected_email = user_email or org_email
 

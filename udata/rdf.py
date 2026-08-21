@@ -394,10 +394,10 @@ def themes_from_rdf(rdf):
     return sorted({normalize_tag(tag) for tag in tags if normalize_tag(tag)})
 
 
-def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
+def contact_point_name(agent_name: str | None, org_name: str | None) -> str | None:
     if agent_name and org_name:
         return f"{agent_name} ({org_name})"
-    return agent_name or org_name or ""
+    return agent_name or org_name or None
 
 
 def contact_points_from_rdf(
@@ -535,7 +535,8 @@ def contact_points_to_rdf(contacts, graph=None):
                 node.set(VCARD.hasURL, URIRef(contact.contact_form))
         else:
             node.set(RDF.type, FOAF.Agent)
-            node.set(FOAF.name, Literal(contact.name))
+            if contact.name:
+                node.set(FOAF.name, Literal(contact.name))
             if contact.email:
                 node.set(FOAF.mbox, URIRef(f"mailto:{contact.email}"))
             if contact.contact_form:
