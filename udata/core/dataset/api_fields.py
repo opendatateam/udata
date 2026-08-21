@@ -38,10 +38,18 @@ schema_fields = api.model(
     },
 )
 
+# FIXME: do we need this with @generate_fields?
 dataset_harvest_fields = api.model(
     "HarvestDatasetMetadata",
     {
         "backend": fields.String(description="Harvest backend used", allow_null=True),
+        "domain": fields.String(description="The harvested domain", allow_null=True),
+        "source_id": fields.String(description="The harvester id", allow_null=True),
+        "source_url": fields.String(description="The harvester source url", allow_null=True),
+        "remote_id": fields.String(
+            description="The dataset remote id on the source portal", allow_null=True
+        ),
+        "remote_url": fields.String(description="The dataset remote url", allow_null=True),
         "created_at": fields.ISODateTime(
             description="The dataset harvested creation date", allow_null=True, readonly=True
         ),
@@ -51,22 +59,16 @@ dataset_harvest_fields = api.model(
         "modified_at": fields.ISODateTime(
             description="The dataset harvest last modification date", allow_null=True, readonly=True
         ),
-        "source_id": fields.String(description="The harvester id", allow_null=True),
-        "remote_id": fields.String(
-            description="The dataset remote id on the source portal", allow_null=True
-        ),
-        "domain": fields.String(description="The harvested domain", allow_null=True),
         "last_update": fields.ISODateTime(
             description="The dataset last harvest date", allow_null=True
         ),
-        "remote_url": fields.String(description="The dataset remote url", allow_null=True),
+        "archived_at": fields.ISODateTime(description="The archive date", allow_null=True),
+        "archived_reason": fields.String(
+            description="The reason the dataset has been archived", allow_null=True
+        ),
         "uri": fields.String(description="The dataset harveted uri", allow_null=True),
         "dct_identifier": fields.String(
             description="The dct:identifier property from the harvested dataset", allow_null=True
-        ),
-        "archived_at": fields.ISODateTime(description="The archive date", allow_null=True),
-        "archived": fields.String(
-            description="The reason the dataset has been archived", allow_null=True
         ),
     },
 )
@@ -74,6 +76,7 @@ dataset_harvest_fields = api.model(
 resource_harvest_fields = api.model(
     "HarvestResourceMetadata",
     {
+        "uri": fields.String(description="The resource harvest uri", allow_null=True),
         "issued_at": fields.ISODateTime(
             description="The resource harvested release date", allow_null=True, readonly=True
         ),
@@ -85,7 +88,6 @@ resource_harvest_fields = api.model(
         "last_update": fields.ISODateTime(
             description="The resource last harvest date", allow_null=True, readonly=True
         ),
-        "uri": fields.String(description="The resource harvest uri", allow_null=True),
     },
 )
 

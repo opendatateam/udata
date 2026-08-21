@@ -3202,17 +3202,19 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         date = datetime(2022, 2, 22, tzinfo=UTC)
         harvest_metadata = HarvestDatasetMetadata(
             backend="DCAT",
-            created_at=date,
-            modified_at=date,
-            source_id="source_id",
-            remote_id="remote_id",
             domain="domain.gouv.fr",
-            last_update=date,
+            source_id="source_id",
+            source_url="http://example.com/source",
+            remote_id="remote_id",
             remote_url="http://domain.gouv.fr/dataset/remote_url",
+            created_at=date,
+            issued_at=date,
+            modified_at=date,
+            last_update=date,
+            archived_at=date,
+            archived_reason="not-on-remote",
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
-            archived_at=date,
-            archived="not-on-remote",
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
@@ -3220,17 +3222,19 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["harvest"] == {
             "backend": "DCAT",
-            "created_at": date.isoformat(),
-            "modified_at": date.isoformat(),
-            "source_id": "source_id",
-            "remote_id": "remote_id",
             "domain": "domain.gouv.fr",
-            "last_update": date.isoformat(),
+            "source_id": "source_id",
+            "source_url": "http://example.com/source",
+            "remote_id": "remote_id",
             "remote_url": "http://domain.gouv.fr/dataset/remote_url",
+            "created_at": date.isoformat(),
+            "issued_at": date.isoformat(),
+            "modified_at": date.isoformat(),
+            "last_update": date.isoformat(),
+            "archived_at": date.isoformat(),
+            "archived_reason": "not-on-remote",
             "uri": "http://domain.gouv.fr/dataset/uri",
             "dct_identifier": "http://domain.gouv.fr/dataset/identifier",
-            "archived_at": date.isoformat(),
-            "archived": "not-on-remote",
         }
 
     def test_dataset_with_resource_harvest_metadata(self):
