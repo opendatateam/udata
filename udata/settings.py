@@ -563,13 +563,6 @@ class Defaults(object):
     # List of allowed TLDs.
     URLS_ALLOWED_TLDS = tld_set
 
-    # Flask-CDN options
-    # See: https://github.com/libwilliam/flask-cdn#flask-cdn-options
-    # If this value is defined, toggle static assets on external domain
-    CDN_DOMAIN = None
-    # Don't check timestamp on assets (and avoid error on missing assets)
-    CDN_TIMESTAMP = False
-
     # Export CSVs of model objects as resources of a dataset
     ########################################################
     EXPORT_CSV_MODELS = (
