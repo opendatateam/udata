@@ -192,7 +192,7 @@ class BaseBackend(ABC):
             return extra_config["value"]
 
     @abstractmethod
-    def inner_harvest(self) -> None:
+    def inner_harvest(self):
         raise NotImplementedError()
 
     def harvest(self) -> HarvestJob:
@@ -256,11 +256,7 @@ class BaseBackend(ABC):
             self.job.errors.append(error)
 
         finally:
-            self.update_harvested_organizations()
             self.end_job()
-            # Clean harvest_activity_user on global context
-            if hasattr(g, "harvest_activity_user"):
-                delattr(g, "harvest_activity_user")
 
         return self.job
 
@@ -343,14 +339,16 @@ class BaseBackend(ABC):
 
         finally:
             current_app.logger.removeHandler(log_catcher)
-            harvest_item.ended = datetime.now(UTC)
-            harvest_item.logs = [
-                HarvestLog(level=record.levelname, message=record.getMessage())
-                for record in log_catcher.records
-            ]
-            self.save_job()
-            if self.max_items and len(self.job.items) >= self.max_items:
-                raise StopHarvest()
+            self.end_process_item(harvest_item, log_catcher.records)
+
+    def end_process_item(self, harvest_item: HarvestItem, logs: list[logging.LogRecord]):
+        harvest_item.ended = datetime.now(UTC)
+        harvest_item.logs = [
+            HarvestLog(level=log.levelname, message=log.getMessage()) for log in logs
+        ]
+        self.save_job()
+        if self.max_items and len(self.job.items) >= self.max_items:
+            raise StopHarvest()
 
     def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:
@@ -382,10 +380,18 @@ class BaseBackend(ABC):
             self.job.save()
 
     def end_job(self):
+        self.inner_end_job()
+        self.update_harvested_organizations()
         self.job.ended = datetime.now(UTC)
         if not self.dryrun:
             self.job.save()
         after_harvest_job.send(self)
+        # Clean harvest_activity_user on global context
+        if hasattr(g, "harvest_activity_user"):
+            delattr(g, "harvest_activity_user")
+
+    def inner_end_job(self):
+        pass
 
     def update_harvested_organizations(self):
         for org in self.organizations_to_update:

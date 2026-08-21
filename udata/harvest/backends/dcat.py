@@ -78,10 +78,10 @@ class DcatBackend(BaseBackend):
 
     @override
     def inner_harvest(self):
-        fmt = self.get_format()
-        self.job.data = {"format": fmt}
+        self.format = self.get_format()
+        self.job.data = {"format": self.format}
 
-        for page_graph, page_number in self.walk_paginated_graph(self.source.url, fmt):
+        for page_graph, page_number in self.walk_paginated_graph(self.source.url):
             self.process_one_datasets_page(page_graph, page_number)
             self.graphs.append((page_graph, page_number))
 
@@ -91,7 +91,9 @@ class DcatBackend(BaseBackend):
         for page_graph, page_number in self.graphs:
             self.process_one_dataservices_page(page_graph, page_number)
 
-        self.store_graphs(fmt)
+    @override
+    def inner_end_job(self):
+        self.store_graphs()
 
     def get_format(self) -> str:
         fmt = guess_format(self.source.url)
@@ -110,7 +112,7 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def walk_paginated_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
+    def walk_paginated_graph(self, url: str) -> Generator[tuple[Graph, int], None, None]:
         """
         Yield each RDF page from the source as a separate `Graph`.
         """
@@ -122,7 +124,7 @@ class DcatBackend(BaseBackend):
             data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
                 data = data.replace(old_uri, new_uri)
-            page_graph.parse(data=data, format=fmt)
+            page_graph.parse(data=data, format=self.format)
 
             url = None
             for cls, prop in KNOWN_PAGINATION:
@@ -228,7 +230,7 @@ class DcatBackend(BaseBackend):
 
         return dataservice
 
-    def store_graphs(self, fmt: str):
+    def store_graphs(self):
         # The official MongoDB document size in 16MB. The default value here is 15MB to account
         # for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get(
@@ -239,7 +241,7 @@ class DcatBackend(BaseBackend):
 
         bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")
 
-        serialized_graphs = [g.serialize(format=fmt, indent=None) for g, _ in self.graphs]
+        serialized_graphs = [g.serialize(format=self.format, indent=None) for g, _ in self.graphs]
 
         if (
             bucket is not None
@@ -384,7 +386,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         return "xml"
 
     @override
-    def walk_paginated_graph(self, url: str, fmt: str) -> Generator[tuple[Graph, int], None, None]:
+    def walk_paginated_graph(self, url: str) -> Generator[tuple[Graph, int], None, None]:
         """
         Yield all RDF pages as `Graph` from the source.
         """
@@ -419,7 +421,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 page_graph = Graph(namespace_manager=namespace_manager)
                 try:
                     doc = self.as_dcat(result).to_string("utf-8")
-                    page_graph.parse(data=doc, format=fmt)
+                    page_graph.parse(data=doc, format=self.format)
                 except Exception as e:
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
