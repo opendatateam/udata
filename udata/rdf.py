@@ -31,6 +31,7 @@ from rdflib.util import guess_format as raw_guess_format
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.models import Organization
+from udata.core.owned import ownership_filter
 from udata.core.user.models import User
 from udata.frontend.markdown import parse_html
 from udata.harvest.filters import normalize_tag
@@ -431,13 +432,12 @@ def contact_points_from_rdf(
         name, email, contact_form = infos
 
         # Create of get contact point object
-        owner_label = "organization" if isinstance(owner, Organization) else "owner"
         filters = {
             "name": name,
             "email": email,
             "contact_form": contact_form,
             "role": role,
-            owner_label: owner,
+            **ownership_filter(owner),
         }
         try:
             if dryrun:

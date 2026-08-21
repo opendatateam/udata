@@ -38,6 +38,21 @@ class OwnedQuerySet(UDataQuerySet):
         return self(visible_query | owned_qs._query_obj)
 
 
+def ownership_filter(owner: Organization | User) -> dict:
+    """The ownership fields of `owner`, whichever kind of owner it is.
+
+    Both fields are always set: an owner owns through one of them and, just as importantly,
+    not through the other. A filter naming only one would also match documents whose other
+    field points at somebody else — an inconsistent state nothing forbids, since `Owned.clean`
+    only clears a field an object is moving away from.
+    """
+    is_organization = isinstance(owner, Organization)
+    return {
+        "organization": owner if is_organization else None,
+        "owner": None if is_organization else owner,
+    }
+
+
 def only_creation(_value, is_update, field, **_kwargs):
     from udata.auth import admin_permission, current_user
 

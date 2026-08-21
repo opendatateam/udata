@@ -157,7 +157,7 @@ class PostsAPITest(APITestCase):
         or not, so the comparison would hold without checking anything.
         """
         org = OrganizationFactory()
-        contact_point = ContactPointFactory(role="contact")
+        contact_point = ContactPointFactory(role="contact", organization=org)
         audiences = [
             AccessAudience(role=AccessAudienceType.COMPANY, condition=AccessAudienceCondition.YES)
         ]

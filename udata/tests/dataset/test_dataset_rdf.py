@@ -139,6 +139,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
             email="hello@its.me",
             contact_form="https://data.support.com",
             role="contact",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -198,6 +199,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         contact = ContactPointFactory(
             name="Publisher Contact",
             role="publisher",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
