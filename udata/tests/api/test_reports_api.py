@@ -580,3 +580,16 @@ class ReportsAPITest(APITestCase):
 
         report.reload()
         self.assertEqual(report.callbacks, {})
+
+
+class ReportsSubjectRequiredAPITest(APITestCase):
+    def test_reports_api_create_without_subject(self):
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "message": "This is spammy",
+                "reason": REASON_SPAM,
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Report.objects.count(), 0)
