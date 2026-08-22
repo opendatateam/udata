@@ -13,10 +13,11 @@ import slugify
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
 
+from udata.app import cache
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
 from udata.core.spatial import geoids
-from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
+from udata.core.spatial.models import GEOZONE_BBOXES_CACHE_KEY, GeoLevel, GeoZone, SpatialCoverage
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,17 @@ def load_zones(col, json_geozones):
             log.warning("Validation error (%s) for %s with %s", e, geozone["nom"], params)
             continue
     return loaded_geozones
+
+
+def load_geozones_bboxes(col, geozones_bboxes):
+    loaded = 0
+    for zone_id, bbox in geozones_bboxes.items():
+        result = col.objects(id=zone_id).update(set__bbox=bbox)
+        if result:
+            loaded += 1
+        else:
+            log.warning("No matching GeoZone for id %s: skipped", zone_id)
+    return loaded
 
 
 @contextmanager
@@ -145,6 +157,35 @@ def load(geozones_file, levels_file, drop=False):
     log.info("Clean removed geozones in datasets")
     count = fixup_removed_geozone()
     log.info(f"{count} geozones removed from datasets")
+
+
+@grp.command("load-geozones-bboxes")
+@click.argument("geozones-bboxes-file")
+def load_geozones_bboxes_command(geozones_bboxes_file):
+    """
+    Load zone bounding boxes from <geozones-bboxes-file> onto existing GeoZone documents.
+
+    <geozones-bboxes-file> can be either a local path or a remote URL. It's a JSON file:
+    a flat object mapping each zone id to its bounding box, e.g.:
+
+    {
+        "fr:departement:32": [-0.2821, 43.3108, 1.2032, 44.08],
+        "fr:commune:32019": [0.6007, 43.5626, 0.6645, 43.5936]
+    }
+
+    Each bounding box is [minx, miny, maxx, maxy] in WGS84 longitude/latitude.
+    """
+    if geozones_bboxes_file.startswith("http"):
+        json_bboxes = requests.get(geozones_bboxes_file).json()
+    else:
+        with open(geozones_bboxes_file) as f:
+            json_bboxes = json.load(f)
+
+    log.info("Loading zone bboxes")
+    total = load_geozones_bboxes(GeoZone, json_bboxes)
+    log.info("Loaded {total} zone bboxes".format(total=total))
+
+    cache.delete(GEOZONE_BBOXES_CACHE_KEY)
 
 
 @grp.command()
