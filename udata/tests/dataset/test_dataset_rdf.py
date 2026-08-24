@@ -317,6 +317,14 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         contact_rdf = service.value(DCAT.contactPoint)
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
 
+    def test_ogc_lookalike_format_is_not_an_access_service(self):
+        resource = ResourceFactory(format="wmsc", url="https://example.org/wmsc/")
+        dataset = DatasetFactory(resources=[resource])
+
+        r = resource_to_rdf(resource, dataset)
+
+        assert r.value(DCAT.accessService) is None
+
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
