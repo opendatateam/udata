@@ -736,10 +736,10 @@ def generate_fields(**kwargs) -> Callable:
                 filter = args.get(filterable.get("label", filterable["key"]))
                 if filter is not None:
                     for constraint in filterable.get("constraints", []):
-                        if constraint == "objectid" and not ObjectId.is_valid(
-                            args[filterable["key"]]
-                        ):
-                            api.abort(400, f"`{filterable['key']}` must be an identifier")
+                        if constraint == "objectid":
+                            values = filter if filterable.get("is_list") else [filter]
+                            if not all(ObjectId.is_valid(value) for value in values):
+                                api.abort(400, f"`{filterable['key']}` must be an identifier")
 
                     query = filterable.get("query", None)
                     if query:
@@ -1241,7 +1241,6 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
     # Dataservice.contact_points) — these are filtered by a single ObjectId
     # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
-    # Supporting it would also require updating the ObjectId validation above.
     if (
         isinstance(field, mongo_fields.ListField)
         and not isinstance(field, mongo_fields.EmbeddedDocumentListField)
