@@ -9,6 +9,7 @@ from rdflib import Graph, Node
 from rdflib.namespace import RDF
 from saxonche import PySaxonProcessor, PyXdmNode
 from typing_extensions import override
+from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.rdf import dataservice_from_rdf
@@ -75,7 +76,6 @@ class DcatBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.graphs = list[tuple[Graph, int]]()
-        self.format = self.get_format()
 
     @override
     def inner_harvest(self):
@@ -95,7 +95,8 @@ class DcatBackend(BaseBackend):
     def inner_end_job(self):
         self.store_graphs()
 
-    def get_format(self) -> str:
+    @cached_property
+    def format(self) -> str:
         fmt = guess_format(self.source.url)
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
@@ -381,8 +382,9 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         """
         pass
 
+    @property
     @override
-    def get_format(self) -> str:
+    def format(self) -> str:
         return "xml"
 
     @override
