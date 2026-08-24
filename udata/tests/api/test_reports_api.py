@@ -583,6 +583,19 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(report.callbacks, {})
 
 
+class ReportsSubjectRequiredAPITest(APITestCase):
+    def test_reports_api_create_without_subject(self):
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "message": "This is spammy",
+                "reason": REASON_SPAM,
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Report.objects.count(), 0)
+
+
 class ReportsSubjectClassAPITest(APITestCase):
     def test_reports_api_create_with_a_non_reportable_subject_class(self):
         """`class` is resolved against the whole document registry, so a class outside
