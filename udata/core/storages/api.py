@@ -188,6 +188,11 @@ def parse_uploaded_image(field):
         image_format = Image.open(image).format
     except UnidentifiedImageError:
         image_format = None
+    except Image.DecompressionBombError:
+        # A valid image whose header announces more pixels than Pillow accepts to decode.
+        # A few dozen bytes are enough to declare a huge size, so this must be refused
+        # here: every other decoding (resize, optimize, thumbnails) would raise too.
+        api.abort(400, "Image is too large")
     # `Image.open` left the cursor right after the header it read. `field.save` may store
     # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
     # would silently truncate the stored file.

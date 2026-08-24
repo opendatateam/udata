@@ -1,3 +1,5 @@
+import struct
+import zlib
 from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
 
@@ -113,6 +115,33 @@ class MeAPITest(APITestCase):
         response = self.post(
             url_for("api.my_avatar"),
             {"file": (BytesIO(svg), "logo.svg", "image/png")},
+            json=False,
+        )
+        self.assert400(response)
+
+    def test_my_avatar_upload_rejects_decompression_bomb(self):
+        """It should reject a valid image announcing more pixels than Pillow decodes"""
+        self.login()
+
+        def chunk(chunk_type, data):
+            return (
+                struct.pack(">I", len(data))
+                + chunk_type
+                + data
+                + struct.pack(">I", zlib.crc32(chunk_type + data))
+            )
+
+        # A 69 bytes PNG announcing 20000x20000 pixels: `Image.open` refuses it right
+        # after reading the header, before any decoding.
+        bomb = (
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", 20000, 20000, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(b"\x00" * 100))
+            + chunk(b"IEND", b"")
+        )
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(bomb), "bomb.png")},
             json=False,
         )
         self.assert400(response)
