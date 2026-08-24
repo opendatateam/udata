@@ -3,6 +3,7 @@ import os
 from datetime import UTC, datetime
 
 from flask import json
+from PIL import Image, UnidentifiedImageError
 from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
@@ -11,7 +12,7 @@ from . import chunks, utils
 
 META = "meta.json"
 
-IMAGES_MIMETYPES = ("image/jpeg", "image/png", "image/webp")
+IMAGES_FORMATS = ("JPEG", "PNG", "WEBP")
 
 
 uploaded_image_fields = api.model(
@@ -28,7 +29,7 @@ chunk_status_fields = api.model("UploadStatus", {"success": fields.Boolean, "err
 
 
 image_parser = api.parser()
-image_parser.add_argument("file", type=FileStorage, location="files")
+image_parser.add_argument("file", type=FileStorage, location="files", required=True)
 image_parser.add_argument("bbox", type=str, location="form")
 
 
@@ -180,7 +181,23 @@ def parse_uploaded_image(field):
     args = image_parser.parse_args()
 
     image = args["file"]
-    if image.mimetype not in IMAGES_MIMETYPES:
+    # The mimetype is declared by the client and may not match the content at all
+    # (an SVG announced as `image/png` for instance): decode the file to know what
+    # it really is, otherwise Pillow raises further down and the request 500s.
+    try:
+        image_format = Image.open(image).format
+    except UnidentifiedImageError:
+        image_format = None
+    except Image.DecompressionBombError:
+        # A valid image whose header announces more pixels than Pillow accepts to decode.
+        # A few dozen bytes are enough to declare a huge size, so this must be refused
+        # here: every other decoding (resize, optimize, thumbnails) would raise too.
+        api.abort(400, "Image is too large")
+    # `Image.open` left the cursor right after the header it read. `field.save` may store
+    # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
+    # would silently truncate the stored file.
+    image.seek(0)
+    if image_format not in IMAGES_FORMATS:
         api.abort(400, "Unsupported image format")
     bbox = args.get("bbox", None)
     if bbox:
