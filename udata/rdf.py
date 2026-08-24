@@ -400,6 +400,11 @@ def contact_point_name(agent_name: str | None, org_name: str | None) -> str | No
     return agent_name or org_name or None
 
 
+def contact_point_email(mbox: str | None) -> str | None:
+    """A `mailto:` with nothing behind it announces an address it does not carry."""
+    return (mbox or "").removeprefix("mailto:").strip() or None
+
+
 def contact_points_from_rdf(
     resource: RdfResource,
     predicate: URIRef,
@@ -470,8 +475,7 @@ def contact_point_from_vcard(obj: RdfResource) -> tuple[str | None, str | None, 
             else None
         ),
     )
-    email = rdf_value(obj, VCARD.hasEmail) or rdf_value(obj, VCARD.email) or None
-    email = email.replace("mailto:", "").strip() if email else None
+    email = contact_point_email(rdf_value(obj, VCARD.hasEmail) or rdf_value(obj, VCARD.email))
     contact_form = (
         rdf_value(obj, VCARD.hasURL)
         or rdf_value(obj, VCARD.url)
@@ -500,8 +504,7 @@ def contact_point_from_foaf(obj: RdfResource) -> tuple[str | None, str | None, s
             None,
         )
         email = rdf_value(obj, FOAF.mbox)
-    email = email.replace("mailto:", "").strip() if email else None
-    return name, email, None
+    return name, contact_point_email(email), None
 
 
 def contact_points_to_rdf(contacts, graph=None):

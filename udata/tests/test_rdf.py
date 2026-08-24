@@ -479,6 +479,20 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "property",
+        [VCARD.hasEmail, VCARD.email],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_email_announced_but_missing(self, property):
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal("mailto:")))
+
+        _, email, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert email is None
+
+    @pytest.mark.parametrize(
+        "property",
         [VCARD.hasURL, VCARD.url, VCARD.hasUrl],
         ids=lambda u: vocabulary_key(u, VCARD),
     )
@@ -542,6 +556,17 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
         _, email, _ = contact_point_from_foaf(RdfResource(g, contact))
 
         assert email == expected_email
+
+    def test_contact_point_from_foaf_email_announced_but_missing(self):
+        g = Graph()
+        contact = BNode()
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("mailto:")))
+
+        name, email, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == "foo"
+        assert email is None
 
     def test_contact_point_from_foaf_org_missing(self):
         expected_name = "foo"

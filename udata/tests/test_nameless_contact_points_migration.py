@@ -1,4 +1,6 @@
 from mongoengine.connection import get_db
+from rdflib import BNode, Graph, Literal
+from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
@@ -6,6 +8,7 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.db import migrations
+from udata.rdf import DCT, FOAF, RDF, contact_points_from_rdf
 from udata.tests.api import PytestOnlyDBTestCase
 
 MIGRATION = "2026-08-21-clean-nameless-contact-points.py"
@@ -28,6 +31,23 @@ def migrate():
     migrations.get(MIGRATION).migrate(get_db())
 
 
+def harvest(organization, name, mbox):
+    """Harvest a `foaf:Agent` as a rights holder of a dataset, as a DCAT catalog exposes one."""
+    graph = Graph()
+    agent = BNode()
+    graph.add((agent, RDF.type, FOAF.Agent))
+    graph.add((agent, FOAF.name, Literal(name)))
+    graph.add((agent, FOAF.mbox, Literal(mbox)))
+    dataset = BNode()
+    graph.add((dataset, DCT.rightsHolder, agent))
+
+    return list(
+        contact_points_from_rdf(
+            RdfResource(graph, dataset), DCT.rightsHolder, "rightsHolder", organization
+        )
+    )
+
+
 class NamelessContactPointsMigrationTest(PytestOnlyDBTestCase):
     def test_an_empty_name_becomes_no_name(self):
         contact_point = ContactPointFactory(organization=OrganizationFactory(), role="contact")
@@ -38,6 +58,31 @@ class NamelessContactPointsMigrationTest(PytestOnlyDBTestCase):
         contact_point.reload()
         assert contact_point.name is None
         assert contact_point.email
+
+    def test_an_empty_email_becomes_no_email(self):
+        contact_point = ContactPointFactory(organization=OrganizationFactory(), role="creator")
+        strip(contact_point, email="")
+
+        migrate()
+
+        contact_point.reload()
+        assert contact_point.email is None
+        assert contact_point.name
+
+    def test_a_normalized_contact_point_is_reused_by_harvesting(self):
+        """Why the empty emails are normalized: harvesting looks a contact point up by its exact
+        fields before creating one, and an empty string never matches the absent value it now
+        extracts from a bare `mailto:`."""
+        org = OrganizationFactory()
+        harvested = ContactPointFactory(
+            organization=org, role="rightsHolder", name="MNHN", contact_form=None
+        )
+        strip(harvested, email="")
+
+        migrate()
+
+        assert harvest(org, name="MNHN", mbox="mailto:") == [harvested]
+        assert ContactPoint.objects.count() == 1
 
     def test_a_contact_point_nobody_can_reach_is_removed(self):
         org = OrganizationFactory()

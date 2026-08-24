@@ -1,15 +1,20 @@
 """
 Harvesting used to name a contact point after its `foaf:Agent` or `vcard:Kind`, falling back to
-an empty string when neither carried a name. `ContactPoint.name` is now optional, so the empty
-string has to become an absent value: it is the same thing said in two ways, and only one of
-them is falsy everywhere.
+an empty string when neither carried a name, and to read an address out of a bare `mailto:`,
+which left an empty string too. Both now yield an absent value, so the empty strings already in
+base have to become absent as well: it is the same thing said in two ways, and only one of them
+is falsy everywhere.
 
-Those without a name also have no email and no contact form when they come from an agent that
-carried nothing at all, which harvesting stopped creating in #3862. Nobody can be reached
-through them and they render as an empty line under the datasets referencing them, so they are
-removed rather than normalized.
+Normalizing the emails is also what keeps harvesting from duplicating them. It looks a contact
+point up by its exact fields before creating one, and an empty string never matches the absent
+value now extracted.
 
-Written against the collections rather than the models: this is a bulk rewrite of two fields,
+Contact points without a name also have no email and no contact form when they come from an
+agent that carried nothing at all, which harvesting stopped creating in #3862. Nobody can be
+reached through them and they render as an empty line under the datasets referencing them, so
+they are removed rather than normalized.
+
+Written against the collections rather than the models: this is a bulk rewrite of a few fields,
 and loading every document through the ORM to save it back would only add ways to fail.
 """
 
@@ -21,8 +26,11 @@ NO_INFORMATION = {"name": None, "email": None, "contact_form": None}
 
 
 def migrate(db):
-    normalized = db.contact_point.update_many({"name": ""}, {"$unset": {"name": ""}}).modified_count
-    log.info(f"{normalized} contact points had an empty name instead of no name.")
+    for field in ("name", "email"):
+        normalized = db.contact_point.update_many(
+            {field: ""}, {"$unset": {field: ""}}
+        ).modified_count
+        log.info(f"{normalized} contact points had an empty {field} instead of no {field}.")
 
     unreachable = [
         contact_point["_id"] for contact_point in db.contact_point.find(NO_INFORMATION, {"_id": 1})
