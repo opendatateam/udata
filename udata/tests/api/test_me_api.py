@@ -76,6 +76,26 @@ class MeAPITest(APITestCase):
         user.reload()
         self.assertEqual(user.avatar.bbox, [10, 10, 40, 40])
 
+    def test_my_avatar_upload_stores_the_whole_file(self):
+        """It should store the complete file, not just what the format check left"""
+        # Without optimization and without a max size, flask_storage saves the stream
+        # from wherever its cursor is: any byte consumed by the format check would be
+        # missing from the stored avatar.
+        self.app.config["FS_IMAGES_OPTIMIZE"] = False
+        user = self.login()
+        image = create_test_image()
+        expected_size = len(image.getvalue())
+
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (image, "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+
+        user.reload()
+        self.assertEqual(len(storages.avatars.read(user.avatar.filename)), expected_size)
+
     def test_my_avatar_upload_rejects_non_image(self):
         """It should reject a non-image file"""
         self.login()

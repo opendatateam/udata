@@ -188,6 +188,9 @@ def parse_uploaded_image(field):
         image_format = Image.open(image).format
     except UnidentifiedImageError:
         image_format = None
+    # `Image.open` left the cursor right after the header it read. `field.save` may store
+    # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
+    # would silently truncate the stored file.
     image.seek(0)
     if image_format not in IMAGES_FORMATS:
         api.abort(400, "Unsupported image format")
