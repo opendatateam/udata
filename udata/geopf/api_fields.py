@@ -1,4 +1,5 @@
 from udata.api import api, fields
+from udata.geopf.models import GeopfDatasetPullMetadata, GeopfResourcePushMetadata
 
 geopf_status_fields = api.model(
     "GeopfStatus",
@@ -12,34 +13,8 @@ geopf_status_fields = api.model(
     },
 )
 
-geopf_push_status_fields = api.model(
-    "GeopfPushStatus",
-    {
-        "status": fields.String(
-            description="Push status: null (never run), pending, done, error or timeout",
-            allow_null=True,
-        ),
-        "last_synced_at": fields.String(description="Last successful push date", allow_null=True),
-        "error": fields.String(description="The last push error, if any", allow_null=True),
-        "task_id": fields.String(description="The last push Celery task's id", allow_null=True),
-        "stored_data_id": fields.String(
-            description="The geopf stored_data id produced by the last push", allow_null=True
-        ),
-    },
-)
-
-geopf_pull_status_fields = api.model(
-    "GeopfPullStatus",
-    {
-        "status": fields.String(
-            description="Pull status: null (never run), pending, done or error",
-            allow_null=True,
-        ),
-        "last_synced_at": fields.String(description="Last successful pull date", allow_null=True),
-        "error": fields.String(description="The last pull error, if any", allow_null=True),
-        "task_id": fields.String(description="The last pull Celery task's id", allow_null=True),
-    },
-)
+geopf_push_status_fields = GeopfResourcePushMetadata.__read_fields__
+geopf_pull_status_fields = GeopfDatasetPullMetadata.__read_fields__
 
 geopf_pushable_resource_fields = api.model(
     "GeopfPushableResource",
@@ -60,7 +35,7 @@ geopf_offering_resource_fields = api.model(
         "format": fields.String(description="The resource format"),
         "url": fields.String(description="The resource url"),
         "offering_id": fields.String(description="The geopf offering id"),
-        "last_synced_at": fields.String(
+        "last_synced_at": fields.ISODateTime(
             description="Last successful pull date for this offering", allow_null=True
         ),
     },

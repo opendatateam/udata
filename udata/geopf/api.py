@@ -16,12 +16,18 @@ from .api_fields import (
 )
 from .auth import oauth, resolve_access_token, revoke_token, store_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
-from .models import GeopfToken
+from .models import (
+    GeopfToken,
+    dataset_pull_metadata,
+    dataset_push_metadata,
+    resource_offering_metadata,
+    resource_push_metadata,
+)
 from .tasks import (
     pull_offerings_from_geopf,
     push_resource_to_geopf,
-    set_dataset_extras,
-    set_resource_extras,
+    set_dataset_pull_metadata,
+    set_resource_push_metadata,
 )
 
 ns = api.namespace("geopf", "Géoplateforme related operations")
@@ -105,7 +111,7 @@ class GeopfDatasetStatusAPI(API):
     def get(self, dataset):
         """A dataset's Géoplateforme sync state, as stored locally.
 
-        A pure read of the dataset's and its resources' `geopf:*` extras: no
+        A pure read of the dataset's and its resources' `geopf` metadata: no
         call to the geopf API and no token refresh, so it answers the same
         whether or not the current user is connected.
 
@@ -122,40 +128,27 @@ class GeopfDatasetStatusAPI(API):
         pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
         pushable = []
         offerings = []
+        # FIXME: see if more payload can go through @generate_fields stuff by changing API shape
         for resource in dataset.resources:
-            extras = resource.extras
-            offering_id = extras.get("geopf:offering:id")
-            if offering_id:
+            offering = resource_offering_metadata(resource)
+            if offering.id:
                 offerings.append(
                     {
                         **_resource_summary(resource),
-                        "offering_id": offering_id,
-                        "last_synced_at": extras.get("geopf:offering:last-synced-at"),
+                        "offering_id": offering.id,
+                        "last_synced_at": offering.last_synced_at,
                     }
                 )
             elif resource.format and resource.format.lower() in pushable_formats:
                 pushable.append(
-                    {
-                        **_resource_summary(resource),
-                        "push": {
-                            "status": extras.get("geopf:push:status"),
-                            "last_synced_at": extras.get("geopf:push:last-synced-at"),
-                            "error": extras.get("geopf:push:error"),
-                            "task_id": extras.get("geopf:push:task-id"),
-                            "stored_data_id": extras.get("geopf:push:stored-data-id"),
-                        },
-                    }
+                    {**_resource_summary(resource), "push": resource_push_metadata(resource)}
                 )
 
+        push = dataset_push_metadata(dataset)
         return {
-            "datastore_id": dataset.extras.get("geopf:push:datastore-id"),
-            "fiche_url": dataset.extras.get("geopf:push:fiche-url"),
-            "pull": {
-                "status": dataset.extras.get("geopf:pull:status"),
-                "last_synced_at": dataset.extras.get("geopf:pull:last-synced-at"),
-                "error": dataset.extras.get("geopf:pull:error"),
-                "task_id": dataset.extras.get("geopf:pull:task-id"),
-            },
+            "datastore_id": push.datastore_id,
+            "fiche_url": push.fiche_url,
+            "pull": dataset_pull_metadata(dataset),
             "pushable": pushable,
             "offerings": offerings,
         }
@@ -225,19 +218,17 @@ class GeopfPushAPI(API):
             api.abort(424, "Not connected to Géoplateforme")
 
         datastore_id = (request.get_json(silent=True) or {}).get("datastore_id")
-        if not (datastore_id or dataset.extras.get("geopf:push:datastore-id")):
+        if not (datastore_id or dataset_push_metadata(dataset).datastore_id):
             api.abort(400, "No datastore_id provided and no datastore configured for this dataset")
 
         # Mark pending before enqueueing, so the status route doesn't read as
         # "never pushed" until a worker picks the task up. The id only exists
         # after `.delay()`, hence the second write.
-        set_resource_extras(
-            dataset, resource, {"geopf:push:status": "pending", "geopf:push:error": None}
-        )
+        set_resource_push_metadata(dataset, resource, status="pending", error=None)
         task = push_resource_to_geopf.delay(
             str(dataset.id), str(resource.id), str(user.id), datastore_id
         )
-        set_resource_extras(dataset, resource, {"geopf:push:task-id": task.id})
+        set_resource_push_metadata(dataset, resource, task_id=task.id)
         return {"task_id": task.id}, 202
 
 
@@ -257,7 +248,7 @@ class GeopfPullOfferingsAPI(API):
         except GeopfReauthRequired:
             api.abort(424, "Not connected to Géoplateforme")
 
-        set_dataset_extras(dataset, {"geopf:pull:status": "pending", "geopf:pull:error": None})
+        set_dataset_pull_metadata(dataset, status="pending", error=None)
         task = pull_offerings_from_geopf.delay(str(dataset.id), str(user.id))
-        set_dataset_extras(dataset, {"geopf:pull:task-id": task.id})
+        set_dataset_pull_metadata(dataset, task_id=task.id)
         return {"task_id": task.id}, 202

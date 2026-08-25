@@ -4,7 +4,18 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.models import Dataset
 from udata.geopf.client import GeopfError, GeopfTimeoutError
+from udata.geopf.models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPullMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+    dataset_push_metadata,
+    resource_offering_metadata,
+)
 from udata.geopf.tasks import (
     _DownloadToTempfile,
     _offering_url,
@@ -13,6 +24,8 @@ from udata.geopf.tasks import (
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
+    set_dataset_pull_metadata,
+    set_resource_push_metadata,
     sync_metadata,
 )
 from udata.tests import PytestOnlyTestCase
@@ -72,10 +85,12 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         client.upload_metadata.assert_called_once()
         client.tag_entity.assert_called_once_with("metadata", "meta-new", str(dataset.id))
         dataset.reload()
-        assert dataset.extras.get("geopf:push:metadata-id") == "meta-new"
+        assert dataset.geopf.push.metadata_id == "meta-new"
 
     def test_existing_metadata_updates_without_re_tagging(self):
-        dataset = DatasetFactory(extras={"geopf:push:metadata-id": "meta-old"})
+        dataset = DatasetFactory(
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(metadata_id="meta-old"))
+        )
         client = MagicMock()
 
         result = sync_metadata(dataset, client)
@@ -84,6 +99,35 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         client.update_metadata.assert_called_once()
         client.upload_metadata.assert_not_called()
         client.tag_entity.assert_not_called()
+
+
+class MetadataSettersTest(PytestOnlyDBTestCase):
+    """A `None` value must unset the key, not write a literal `null` -- checked against raw BSON,
+    since the marshalled response reads identically either way."""
+
+    def test_none_unsets_dataset_field_rather_than_nulling_it(self):
+        dataset = DatasetFactory(
+            geopf=GeopfDatasetMetadata(pull=GeopfDatasetPullMetadata(error="previously boom"))
+        )
+
+        set_dataset_pull_metadata(dataset, error=None)
+
+        raw = Dataset._get_collection().find_one({"_id": dataset.id})
+        assert "error" not in raw["geopf"]["pull"]
+        assert dataset.geopf.pull.error is None
+
+    def test_none_unsets_resource_field_rather_than_nulling_it(self):
+        resource = ResourceFactory.build(
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(error="previously boom"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        set_resource_push_metadata(dataset, resource, error=None)
+
+        raw = Dataset._get_collection().find_one({"_id": dataset.id})
+        assert "error" not in raw["resources"][0]["geopf"]["push"]
+        assert dataset.resources[0].geopf.push.error is None
 
 
 @TEST_GEOPF_CONF
@@ -98,8 +142,14 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_not_called()
 
     def test_adds_resource_for_new_offering(self):
-        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
-        dataset = DatasetFactory(resources=[gpkg], extras={"geopf:push:datastore-id": "ds-1"})
+        gpkg = ResourceFactory.build(
+            format="gpkg",
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
+        )
+        dataset = DatasetFactory(
+            resources=[gpkg],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
+        )
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = [
             {
@@ -117,7 +167,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert count == 1
         dataset.reload()
         offering_resource = next(
-            (r for r in dataset.resources if r.extras.get("geopf:offering:id") == "offer-1"),
+            (r for r in dataset.resources if resource_offering_metadata(r).id == "offer-1"),
             None,
         )
         assert offering_resource is not None
@@ -125,8 +175,11 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert offering_resource.format == "wfs"
 
     def test_skips_when_no_datastore_pinned(self):
-        # no geopf:push:datastore-id: dataset was never successfully pushed
-        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
+        # no geopf.push.datastore_id: dataset was never successfully pushed
+        gpkg = ResourceFactory.build(
+            format="gpkg",
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
+        )
         dataset = DatasetFactory(resources=[gpkg])
 
         with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
@@ -136,15 +189,19 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_not_called()
 
     def test_updates_url_for_changed_offering(self):
-        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
+        gpkg = ResourceFactory.build(
+            format="gpkg",
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
+        )
         stale_offering = ResourceFactory.build(
             url="http://old.example.com/wfs",
             filetype="remote",
             type="api",
-            extras={"geopf:offering:id": "offer-1"},
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-1")),
         )
         dataset = DatasetFactory(
-            resources=[gpkg, stale_offering], extras={"geopf:push:datastore-id": "ds-1"}
+            resources=[gpkg, stale_offering],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
         )
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = [
@@ -161,19 +218,23 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         resource = next(
-            r for r in dataset.resources if r.extras.get("geopf:offering:id") == "offer-1"
+            r for r in dataset.resources if resource_offering_metadata(r).id == "offer-1"
         )
         assert resource.url == "http://new.example.com/wfs"
 
     def test_removes_resource_for_deleted_offering(self):
-        gpkg = ResourceFactory.build(format="gpkg", extras={"geopf:push:stored-data-id": "sd-1"})
+        gpkg = ResourceFactory.build(
+            format="gpkg",
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
+        )
         gone_offering = ResourceFactory.build(
             filetype="remote",
             type="api",
-            extras={"geopf:offering:id": "offer-gone"},
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-gone")),
         )
         dataset = DatasetFactory(
-            resources=[gpkg, gone_offering], extras={"geopf:push:datastore-id": "ds-1"}
+            resources=[gpkg, gone_offering],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
         )
         mock_client = MagicMock()
         mock_client.list_offerings.return_value = []
@@ -183,7 +244,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
         assert count == 0
         dataset.reload()
-        assert not any(r.extras.get("geopf:offering:id") for r in dataset.resources)
+        assert not any(resource_offering_metadata(r).id for r in dataset.resources)
 
 
 @TEST_GEOPF_CONF
@@ -207,10 +268,10 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.delete_upload.assert_called_once_with("upload-1")
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)
-        assert r.extras.get("geopf:push:status") == "done"
-        assert r.extras.get("geopf:push:stored-data-id") == "sd-1"
-        assert "geopf:push:last-synced-at" in r.extras
-        assert dataset.extras.get("geopf:push:fiche-url")
+        assert r.geopf.push.status == "done"
+        assert r.geopf.push.stored_data_id == "sd-1"
+        assert r.geopf.push.last_synced_at is not None
+        assert dataset.geopf.push.fiche_url
 
     def test_leaves_upload_in_place_on_timeout(self):
         resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
@@ -263,7 +324,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         r = next(r for r in dataset.resources if str(r.id) == resource_id)
-        assert r.extras.get("geopf:push:status") == "pending"
+        assert r.geopf.push.status == "pending"
 
     def test_sets_error_status_on_pipeline_failure(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
@@ -280,8 +341,8 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         r = next(r for r in dataset.resources if str(r.id) == resource_id)
-        assert r.extras.get("geopf:push:status") == "error"
-        assert "boom" in r.extras.get("geopf:push:error", "")
+        assert r.geopf.push.status == "error"
+        assert "boom" in (r.geopf.push.error or "")
 
     def test_sets_timeout_status_on_pipeline_timeout(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
@@ -298,7 +359,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         dataset.reload()
         r = next(r for r in dataset.resources if str(r.id) == resource_id)
-        assert r.extras.get("geopf:push:status") == "timeout"
+        assert r.geopf.push.status == "timeout"
 
     def test_skips_non_gpkg_resource(self):
         resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
@@ -336,7 +397,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
             )
 
         dataset.reload()
-        assert dataset.extras.get("geopf:push:datastore-id") == "ds-1"
+        assert dataset.geopf.push.datastore_id == "ds-1"
 
     def test_failed_push_does_not_persist_datastore_id(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
@@ -352,12 +413,15 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
                 )
 
         dataset.reload()
-        assert "geopf:push:datastore-id" not in dataset.extras
+        assert dataset_push_metadata(dataset).datastore_id is None
 
     def test_subsequent_push_reuses_dataset_datastore_id(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(
-            resources=[resource], extras={"geopf:push:datastore-id": "ds-established"}
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(
+                push=GeopfDatasetPushMetadata(datastore_id="ds-established")
+            ),
         )
         resource_id = str(dataset.resources[0].id)
 
@@ -371,7 +435,7 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         mock_client_cls.assert_called_once_with(token="test-token", datastore_id="ds-established")
         dataset.reload()
-        assert dataset.extras.get("geopf:push:datastore-id") == "ds-established"
+        assert dataset.geopf.push.datastore_id == "ds-established"
 
     def test_skips_when_no_datastore_id_resolvable(self):
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
@@ -395,8 +459,8 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
             )
 
         dataset.reload()
-        assert dataset.extras.get("geopf:pull:status") == "done"
-        assert "geopf:pull:last-synced-at" in dataset.extras
+        assert dataset.geopf.pull.status == "done"
+        assert dataset.geopf.pull.last_synced_at is not None
 
     def test_sets_error_status_on_failure(self):
         dataset = DatasetFactory()
@@ -410,5 +474,5 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
                 )
 
         dataset.reload()
-        assert dataset.extras.get("geopf:pull:status") == "error"
-        assert "boom" in dataset.extras.get("geopf:pull:error", "")
+        assert dataset.geopf.pull.status == "error"
+        assert "boom" in (dataset.geopf.pull.error or "")

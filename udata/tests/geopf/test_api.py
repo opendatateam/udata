@@ -11,7 +11,15 @@ from udata.core.dataset.factories import (
 )
 from udata.core.user.factories import UserFactory
 from udata.geopf.api import DATASET_SESSION_KEY
-from udata.geopf.models import GeopfToken
+from udata.geopf.models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPullMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+    GeopfToken,
+)
 from udata.tests.api import APITestCase
 from udata.tests.geopf import TEST_API_BASE, TEST_GEOPF_CONF, create_geopf_token
 
@@ -230,7 +238,9 @@ class GeopfPushApiTest(APITestCase):
         user = self.login()
         resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
         dataset = DatasetFactory(
-            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+            owner=user,
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-existing")),
         )
         create_geopf_token(user)
 
@@ -251,7 +261,9 @@ class GeopfPushApiTest(APITestCase):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(
-            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+            owner=user,
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-existing")),
         )
         create_geopf_token(user)
 
@@ -300,7 +312,7 @@ class GeopfPushApiTest(APITestCase):
         dataset = DatasetFactory(
             owner=user,
             resources=[resource],
-            extras={"geopf:push:datastore-id": "ds-pinned"},
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-pinned")),
         )
         create_geopf_token(user)
 
@@ -314,7 +326,9 @@ class GeopfPushApiTest(APITestCase):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(
-            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+            owner=user,
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-existing")),
         )
         create_geopf_token(user)
 
@@ -332,10 +346,14 @@ class GeopfPushApiTest(APITestCase):
         resource = ResourceFactory.build(
             format="gpkg",
             url="http://files.example.com/f.gpkg",
-            extras={"geopf:push:status": "error", "geopf:push:error": "previously boom"},
+            geopf=GeopfResourceMetadata(
+                push=GeopfResourcePushMetadata(status="error", error="previously boom")
+            ),
         )
         dataset = DatasetFactory(
-            owner=user, resources=[resource], extras={"geopf:push:datastore-id": "ds-existing"}
+            owner=user,
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-existing")),
         )
         create_geopf_token(user)
 
@@ -398,7 +416,9 @@ class GeopfPullOfferingsApiTest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(
             owner=user,
-            extras={"geopf:pull:status": "error", "geopf:pull:error": "previously boom"},
+            geopf=GeopfDatasetMetadata(
+                pull=GeopfDatasetPullMetadata(status="error", error="previously boom")
+            ),
         )
         create_geopf_token(user)
 
@@ -455,7 +475,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
         }
 
     def test_never_pushed_resource(self):
-        """A pushable resource with no geopf extras yet reports every push field as null."""
+        """A pushable resource with no geopf metadata yet reports every push field as null."""
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
         dataset = DatasetFactory(owner=user, resources=[resource])
@@ -483,23 +503,24 @@ class GeopfDatasetStatusApiTest(APITestCase):
         resource = ResourceFactory.build(
             format="gpkg",
             url="http://files.example.com/f.gpkg",
-            extras={
-                "geopf:push:status": "done",
-                "geopf:push:last-synced-at": "2026-01-02T03:04:05+00:00",
-                "geopf:push:task-id": "task-1",
-                "geopf:push:stored-data-id": "sd-1",
-            },
+            geopf=GeopfResourceMetadata(
+                push=GeopfResourcePushMetadata(
+                    status="done",
+                    last_synced_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
+                    task_id="task-1",
+                    stored_data_id="sd-1",
+                )
+            ),
         )
         dataset = DatasetFactory(
             owner=user,
             resources=[resource],
-            extras={
-                "geopf:push:datastore-id": "ds-1",
-                "geopf:push:fiche-url": "https://cartes.example.com/fiche",
-                "geopf:pull:status": "error",
-                "geopf:pull:error": "boom",
-                "geopf:pull:task-id": "task-2",
-            },
+            geopf=GeopfDatasetMetadata(
+                push=GeopfDatasetPushMetadata(
+                    datastore_id="ds-1", fiche_url="https://cartes.example.com/fiche"
+                ),
+                pull=GeopfDatasetPullMetadata(status="error", error="boom", task_id="task-2"),
+            ),
         )
 
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
@@ -526,10 +547,11 @@ class GeopfDatasetStatusApiTest(APITestCase):
             title="Service WFS - communes",
             format="wfs",
             url="http://data.example.com/wfs",
-            extras={
-                "geopf:offering:id": "off-1",
-                "geopf:offering:last-synced-at": "2026-01-02T03:04:05+00:00",
-            },
+            geopf=GeopfResourceMetadata(
+                offering=GeopfResourceOfferingMetadata(
+                    id="off-1", last_synced_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
+                )
+            ),
         )
         dataset = DatasetFactory(owner=user, resources=[resource])
 
@@ -551,7 +573,10 @@ class GeopfDatasetStatusApiTest(APITestCase):
     def test_offering_never_listed_as_pushable(self):
         """Offerings stay out of `pushable` even when their format is configured pushable."""
         user = self.login()
-        resource = ResourceFactory.build(format="wfs", extras={"geopf:offering:id": "off-1"})
+        resource = ResourceFactory.build(
+            format="wfs",
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="off-1")),
+        )
         dataset = DatasetFactory(owner=user, resources=[resource])
 
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))

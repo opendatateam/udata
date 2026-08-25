@@ -17,9 +17,9 @@ Two independent flows, each triggered explicitly by a user, each running as its 
 
 All entrepôt entities belonging to the same fiche (uploads, stored data, metadata) carry the same `datasheet_name` tag so the platform groups them correctly.
 
-**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `geopf:push:metadata-id` from the second push onward instead of duplicating it.
+**Multiple resources of the same dataset** each get their own `stored_data` (different names), but the shared `datasheet_name` tag is what groups them back under one fiche despite that, and they share a single ISO 19115 metadata document, `sync_metadata` updating the existing `dataset.geopf.push.metadata_id` from the second push onward instead of duplicating it.
 
-**A dataset lives in exactly one entrepôt:** the frontend lets the user pick one (via `GET /api/1/geopf/datastores/`) and passes it explicitly as `datastore_id` on the dataset's first push; it's stored as `geopf:push:datastore-id` (dataset extra) once that push succeeds (a failed push doesn't pin anything), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
+**A dataset lives in exactly one entrepôt:** the frontend lets the user pick one (via `GET /api/1/geopf/datastores/`) and passes it explicitly as `datastore_id` on the dataset's first push; it's stored as `dataset.geopf.push.datastore_id` once that push succeeds (a failed push doesn't pin anything), then reused as-is by every later push of that dataset, matching how geopf itself scopes a fiche to one entrepôt.
 
 ## Authentication
 
@@ -50,10 +50,10 @@ If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, su
 
 Both push and pull follow the same two-level pattern:
 
-- **Extras**: essential fields written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
-- **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/`, using the task-id extra as the bridge between the two layers.
+- **`geopf` metadata**: a typed `GeopfDatasetMetadata`/`GeopfResourceMetadata` embedded document (`dataset.geopf`/`resource.geopf`, see `udata/geopf/models.py`) written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
+- **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/`, using the stored `task_id` field as the bridge between the two layers.
 
-Each flow's specific extras keys are listed in its own section below.
+Each flow's specific metadata fields are listed in its own section below.
 
 ### Reading sync state
 
@@ -76,9 +76,9 @@ Each flow's specific extras keys are listed in its own section below.
 }
 ```
 
-- A projection of the extras documented below. Does not depend on geopf connection status.
-- Two disjoint, unpaginated lists: `pushable` for formats in `GEOPF_PUSHABLE_FORMATS`, `offerings` for resources carrying a `geopf:offering:id`. An offering is never pushable.
-- Every key is always present; an unwritten extra reads as `null`. A `null` `status` means "never run"; `pending` is set at `202`, not at worker pickup.
+- A projection of the `geopf` metadata documented below. Does not depend on geopf connection status.
+- Two disjoint, unpaginated lists: `pushable` for formats in `GEOPF_PUSHABLE_FORMATS`, `offerings` for resources carrying a `resource.geopf.offering.id`. An offering is never pushable.
+- Every key is always present; an unset field reads as `null`. A `null` `status` means "never run"; `pending` is set at `202`, not at worker pickup.
 
 ## Push: data.gouv.fr → Géoplateforme
 
@@ -94,32 +94,32 @@ Triggered explicitly by the user via `POST /api/1/geopf/push/<dataset_id>/<resou
 6. **Delete upload**: clean up the livraison once processing has consumed it.
 7. **Tag stored data**: attach `datasheet_name` tag to the resulting stored data.
 8. **Metadata**: generate ISO 19115 XML from the dataset and push it:
-   - If `geopf:push:metadata-id` is already in dataset extras: update the existing metadata record.
-   - Otherwise: upload (with 409 upsert fallback), tag, and store the ID in extras.
+   - If `dataset.geopf.push.metadata_id` is already set: update the existing metadata record.
+   - Otherwise: upload (with 409 upsert fallback), tag, and store the ID.
 
 On any failure the task attempts to delete the livraison to avoid orphaned uploads, then re-raises so the error is visible in Celery.
 
 ### State tracking
 
-#### Push resource extras
+#### Push resource metadata (`resource.geopf.push`)
 
 Set on the original pushed resource by the push pipeline.
 
-| Key | Values / type | Description |
+| Field | Values / type | Description |
 |---|---|---|
-| `geopf:push:status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `geopf:push:error`. Updated on completion or failure. |
-| `geopf:push:task-id` | Celery task UUID | ID of the Celery task running this push. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
-| `geopf:push:stored-data-id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
-| `geopf:push:last-synced-at` | ISO 8601 | Timestamp of the last successful push. |
-| `geopf:push:error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
+| `status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `error`. Updated on completion or failure. |
+| `task_id` | Celery task UUID | ID of the Celery task running this push. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `stored_data_id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
+| `last_synced_at` | datetime | Timestamp of the last successful push. |
+| `error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
 
-#### Push dataset extras
+#### Push dataset metadata (`dataset.geopf.push`)
 
-| Key | Type | Description |
+| Field | Type | Description |
 |---|---|---|
-| `geopf:push:datastore-id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first *successful* push, reused as-is by every later push. |
-| `geopf:push:metadata-id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. |
-| `geopf:push:fiche-url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
+| `datastore_id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first *successful* push, reused as-is by every later push. |
+| `metadata_id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. Internal only, never surfaced via `/status/`. |
+| `fiche_url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
 
 ### ISO 19115 metadata
 
@@ -151,30 +151,30 @@ Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as th
 
 ### Workflow
 
-1. Resolve the dataset's datastore (`geopf:push:datastore-id` dataset extra; datasets with no pin yet are skipped), and collect `geopf:push:stored-data-id` from each of its push resources.
+1. Resolve the dataset's datastore (`dataset.geopf.push.datastore_id`; datasets with no pin yet are skipped), and collect `resource.geopf.push.stored_data_id` from each of its push resources.
 2. For each stored data id, query `GET /datastores/{datastore_id}/offerings?stored_data={stored_data_id}`.
-3. For each offering: create a new resource if none with matching `geopf:offering:id` exists, or update the URL if it changed.
-4. Remove any resources whose `geopf:offering:id` no longer appears in the live offering set.
+3. For each offering: create a new resource if none with matching `resource.geopf.offering.id` exists, or update the URL if it changed.
+4. Remove any resources whose `resource.geopf.offering.id` no longer appears in the live offering set.
 
 ### State tracking
 
-#### Pull dataset extras
+#### Pull dataset metadata (`dataset.geopf.pull`)
 
-| Key | Values / type | Description |
+| Field | Values / type | Description |
 |---|---|---|
-| `geopf:pull:status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `geopf:pull:error`. Updated on completion or failure. |
-| `geopf:pull:task-id` | Celery task UUID | ID of the Celery task running the pull. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
-| `geopf:pull:last-synced-at` | ISO 8601 | Timestamp of the last successful pull. |
-| `geopf:pull:error` | string | Error message from the last failed pull. Only present on `error` status. |
+| `status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `error`. Updated on completion or failure. |
+| `task_id` | Celery task UUID | ID of the Celery task running the pull. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `last_synced_at` | datetime | Timestamp of the last successful pull. |
+| `error` | string | Error message from the last failed pull. Only present on `error` status. |
 
-#### Offering resource extras
+#### Offering resource metadata (`resource.geopf.offering`)
 
 Set on resources created (or updated) by the pull flow. These resources are distinct from the original push resource.
 
-| Key | Type | Description |
+| Field | Type | Description |
 |---|---|---|
-| `geopf:offering:id` | UUID string | Entrepôt offering ID. Primary key used to match existing resources on subsequent syncs. |
-| `geopf:offering:last-synced-at` | ISO 8601 | Timestamp of the last sync that observed this offering. |
+| `id` | UUID string | Entrepôt offering ID. Primary key used to match existing resources on subsequent syncs. |
+| `last_synced_at` | datetime | Timestamp of the last sync that observed this offering. |
 
 ## CLI
 
@@ -198,7 +198,7 @@ Pushes or refreshes the ISO 19115 metadata for a dataset without triggering a fu
 udata geopf pull-offerings <dataset_id> (--user-id <id> | --token <token>)
 ```
 
-Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `geopf:push:datastore-id` (no-op if the dataset has no pinned datastore). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate pull or verifying the pull logic.
+Pulls live offerings from Géoplateforme and syncs them as resources for the given dataset, against the dataset's own `dataset.geopf.push.datastore_id` (no-op if the dataset has no pinned datastore). Same `--user-id`/`--token` options as `push-resource`. Prints the count of live offerings found. Useful for triggering an immediate pull or verifying the pull logic.
 
 ## Configuration
 

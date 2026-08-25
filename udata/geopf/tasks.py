@@ -24,6 +24,17 @@ from .client import (
     GeopfTimeoutError,
 )
 from .metadata import dataset_to_iso19115
+from .models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPullMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+    dataset_push_metadata,
+    resource_offering_metadata,
+    resource_push_metadata,
+)
 from .srs import DEFAULT_SRS, detect_srs
 
 log = logging.getLogger(__name__)
@@ -62,7 +73,7 @@ def push_resource_to_geopf(
     # A dataset lives in exactly one entrepôt on geopf (the fiche dashboard URL
     # itself is scoped to one datastore), so once a dataset has pushed before,
     # every subsequent push reuses that datastore rather than re-resolving one.
-    existing_datastore_id = dataset.extras.get("geopf:push:datastore-id")
+    existing_datastore_id = dataset_push_metadata(dataset).datastore_id
     if existing_datastore_id:
         if datastore_id and datastore_id != existing_datastore_id:
             log.warning(
@@ -96,35 +107,29 @@ def push_resource_to_geopf(
                 resource_id,
                 e,
             )
-            set_resource_extras(
-                dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)}
-            )
+            set_resource_push_metadata(dataset, resource, status="error", error=str(e))
             raise
 
-    pending = {"geopf:push:status": "pending", "geopf:push:error": None}
+    pending = {"status": "pending", "error": None}
     if self.request.id:  # None on synchronous CLI runs
-        pending["geopf:push:task-id"] = self.request.id
-    set_resource_extras(dataset, resource, pending)
+        pending["task_id"] = self.request.id
+    set_resource_push_metadata(dataset, resource, **pending)
 
     client = GeopfClient(token=access_token, datastore_id=datastore_id)
     try:
         _run_pipeline(dataset, resource, datastore_id, client)
     except GeopfTimeoutError as e:
         log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
-        set_resource_extras(
-            dataset, resource, {"geopf:push:status": "timeout", "geopf:push:error": str(e)}
-        )
+        set_resource_push_metadata(dataset, resource, status="timeout", error=str(e))
         raise
     except Exception as e:
         log.exception("geopf: pipeline failed dataset=%s resource=%s", dataset_id, resource_id)
-        set_resource_extras(
-            dataset, resource, {"geopf:push:status": "error", "geopf:push:error": str(e)}
-        )
+        set_resource_push_metadata(dataset, resource, status="error", error=str(e))
         raise
 
     # Pin only after success, so a failed first push can't lock the dataset
     # onto a bad datastore.
-    set_dataset_extras(dataset, {"geopf:push:datastore-id": datastore_id})
+    set_dataset_push_metadata(dataset, datastore_id=datastore_id)
 
 
 def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
@@ -235,16 +240,14 @@ def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
     sync_metadata(dataset, client)
 
     url = fiche_url(datastore_id, datasheet_name)
-    set_resource_extras(
+    set_resource_push_metadata(
         dataset,
         resource,
-        {
-            "geopf:push:status": "done",
-            "geopf:push:stored-data-id": stored_data_id,
-            "geopf:push:last-synced-at": datetime.now(UTC).isoformat(),
-        },
+        status="done",
+        stored_data_id=stored_data_id,
+        last_synced_at=datetime.now(UTC),
     )
-    set_dataset_extras(dataset, {"geopf:push:fiche-url": url})
+    set_dataset_push_metadata(dataset, fiche_url=url)
     log.info("geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, url)
 
 
@@ -316,7 +319,7 @@ def sync_metadata(dataset, client) -> str:
     """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
     datasheet_name = str(dataset.id)
     xml = dataset_to_iso19115(dataset, datastore_id=client.datastore)
-    metadata_id = dataset.extras.get("geopf:push:metadata-id")
+    metadata_id = dataset_push_metadata(dataset).metadata_id
     if metadata_id:
         client.update_metadata(metadata_id, xml)
         log.info("geopf: updated metadata=%s dataset=%s", metadata_id, dataset.id)
@@ -324,7 +327,7 @@ def sync_metadata(dataset, client) -> str:
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
         client.tag_entity("metadata", metadata_id, datasheet_name)
-        set_dataset_extras(dataset, {"geopf:push:metadata-id": metadata_id})
+        set_dataset_push_metadata(dataset, metadata_id=metadata_id)
     return metadata_id
 
 
@@ -348,25 +351,22 @@ def pull_offerings_from_geopf(
             log.error(
                 "geopf: no usable geopf token for user=%s dataset=%s: %s", user_id, dataset_id, e
             )
-            set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+            set_dataset_pull_metadata(dataset, status="error", error=str(e))
             raise
 
-    pending = {"geopf:pull:status": "pending", "geopf:pull:error": None}
+    pending = {"status": "pending", "error": None}
     if self.request.id:  # None on synchronous CLI runs
-        pending["geopf:pull:task-id"] = self.request.id
-    set_dataset_extras(dataset, pending)
+        pending["task_id"] = self.request.id
+    set_dataset_pull_metadata(dataset, **pending)
 
     try:
         n = pull_offerings_for_dataset(dataset, access_token)
     except Exception as e:
         log.exception("geopf: offering pull failed for dataset=%s", dataset_id)
-        set_dataset_extras(dataset, {"geopf:pull:status": "error", "geopf:pull:error": str(e)})
+        set_dataset_pull_metadata(dataset, status="error", error=str(e))
         raise
 
-    set_dataset_extras(
-        dataset,
-        {"geopf:pull:status": "done", "geopf:pull:last-synced-at": datetime.now(UTC).isoformat()},
-    )
+    set_dataset_pull_metadata(dataset, status="done", last_synced_at=datetime.now(UTC))
     return n
 
 
@@ -374,15 +374,15 @@ def pull_offerings_for_dataset(dataset, token) -> int:
     """Pull Géoplateforme offerings into udata resources. Returns count of live offerings.
 
     `token` is a geopf access token for the acting user. A dataset lives in
-    exactly one entrepôt (`geopf:push:datastore-id`, dataset extra); every one
-    of its push resources' `geopf:push:stored-data-id` is looked up within
-    that same datastore.
+    exactly one entrepôt (`dataset.geopf.push.datastore_id`); every one of
+    its push resources' `resource.geopf.push.stored_data_id` is looked up
+    within that same datastore.
     """
-    datastore_id = dataset.extras.get("geopf:push:datastore-id")
+    datastore_id = dataset_push_metadata(dataset).datastore_id
     stored_data_ids = {
-        r.extras["geopf:push:stored-data-id"]
+        push.stored_data_id
         for r in dataset.resources
-        if r.extras.get("geopf:push:stored-data-id")
+        if (push := resource_push_metadata(r)).stored_data_id
     }
     if not datastore_id or not stored_data_ids:
         return 0
@@ -396,7 +396,7 @@ def pull_offerings_for_dataset(dataset, token) -> int:
 
     # Remove resources whose offering no longer exists on GeoPortail
     for resource in list(dataset.resources):
-        oid = resource.extras.get("geopf:offering:id")
+        oid = resource_offering_metadata(resource).id
         if oid and oid not in live_offering_ids:
             log.info(
                 "geopf: removing resource=%s (offering=%s gone) dataset=%s",
@@ -419,9 +419,9 @@ def _upsert_offering_resource(dataset, offering: dict) -> None:
         return
 
     title = f"Service {service_type} - {layer_name}" if layer_name else f"Service {service_type}"
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(UTC)
     existing = next(
-        (r for r in dataset.resources if r.extras.get("geopf:offering:id") == offering_id),
+        (r for r in dataset.resources if resource_offering_metadata(r).id == offering_id),
         None,
     )
 
@@ -432,10 +432,9 @@ def _upsert_offering_resource(dataset, offering: dict) -> None:
             format=service_type.lower() if service_type else None,
             filetype="remote",
             type="api",
-            extras={
-                "geopf:offering:id": offering_id,
-                "geopf:offering:last-synced-at": now,
-            },
+            geopf=GeopfResourceMetadata(
+                offering=GeopfResourceOfferingMetadata(id=offering_id, last_synced_at=now)
+            ),
         )
         dataset.add_resource(resource)
         log.info(
@@ -446,11 +445,10 @@ def _upsert_offering_resource(dataset, offering: dict) -> None:
             dataset.id,
         )
     else:
-        extras_update = {"geopf:offering:last-synced-at": now}
         if existing.url != url:
             existing.url = url
             dataset.update_resource(existing)
-        set_resource_extras(dataset, existing, extras_update)
+        set_resource_offering_metadata(dataset, existing, last_synced_at=now)
 
 
 def _offering_url(offering: dict) -> str:
@@ -458,17 +456,62 @@ def _offering_url(offering: dict) -> str:
     return urls[0].get("url", "") if urls else ""
 
 
-def set_dataset_extras(dataset, extras: dict) -> None:
-    dataset.extras.update(extras)
-    Dataset.objects(id=dataset.id).update_one(
-        **{f"set__extras__{k}": v for k, v in extras.items()},
+def _set_metadata_section(
+    container, section: str, factory, fields: dict, query, path_prefix: str
+) -> None:
+    """Set fields on `container.geopf.<section>` atomically; `None` unsets rather than nulls."""
+    doc = getattr(container.geopf, section)
+    if doc is None:
+        doc = factory()
+        setattr(container.geopf, section, doc)
+
+    ops = {}
+    for key, value in fields.items():
+        setattr(doc, key, value)
+        path = f"{path_prefix}__{section}__{key}"
+        ops[f"{'unset' if value is None else 'set'}__{path}"] = True if value is None else value
+    query.update_one(**ops)
+
+
+def set_dataset_push_metadata(dataset, **fields) -> None:
+    if dataset.geopf is None:
+        dataset.geopf = GeopfDatasetMetadata()
+    _set_metadata_section(
+        dataset, "push", GeopfDatasetPushMetadata, fields, Dataset.objects(id=dataset.id), "geopf"
     )
 
 
-def set_resource_extras(dataset, resource, extras: dict) -> None:
-    """Update resource extras in-place and persist without reloading the full dataset."""
+def set_dataset_pull_metadata(dataset, **fields) -> None:
+    if dataset.geopf is None:
+        dataset.geopf = GeopfDatasetMetadata()
+    _set_metadata_section(
+        dataset, "pull", GeopfDatasetPullMetadata, fields, Dataset.objects(id=dataset.id), "geopf"
+    )
+
+
+def set_resource_push_metadata(dataset, resource, **fields) -> None:
     resource = get_by(dataset.resources, id=resource.id)
-    resource.extras.update(extras)
-    Dataset.objects(id=dataset.id, resources__id=resource.id).update_one(
-        **{f"set__resources__S__extras__{k}": v for k, v in extras.items()},
+    if resource.geopf is None:
+        resource.geopf = GeopfResourceMetadata()
+    _set_metadata_section(
+        resource,
+        "push",
+        GeopfResourcePushMetadata,
+        fields,
+        Dataset.objects(id=dataset.id, resources__id=resource.id),
+        "resources__S__geopf",
+    )
+
+
+def set_resource_offering_metadata(dataset, resource, **fields) -> None:
+    resource = get_by(dataset.resources, id=resource.id)
+    if resource.geopf is None:
+        resource.geopf = GeopfResourceMetadata()
+    _set_metadata_section(
+        resource,
+        "offering",
+        GeopfResourceOfferingMetadata,
+        fields,
+        Dataset.objects(id=dataset.id, resources__id=resource.id),
+        "resources__S__geopf",
     )
