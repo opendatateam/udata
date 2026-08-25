@@ -8,6 +8,7 @@ from flask_restx import marshal
 
 from udata import search
 from udata.api import API, add_pagination_arguments, apiv2, fields
+from udata.auth import admin_permission
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
@@ -34,7 +35,6 @@ from .api_fields import (
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
-from .permissions import can_write_extra
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -346,15 +346,17 @@ class DatasetAPI(API):
         return dataset
 
 
-def check_extras_are_writable(keys) -> None:
+def check_extras_are_writable(extras_field, keys) -> None:
     """Reject a payload carrying a platform-reserved extra, never ignore it.
 
     These endpoints write exactly the keys they are given — a partial merge for the
     PUTs, a list of keys to drop for the DELETEs — so every key is an explicit write
     intent. Silently dropping one would answer 200/204 to a caller whose write was
-    discarded. The form path is the opposite case, see `sanitize_reserved_extras`.
+    discarded, unlike the form path where a full-object update echoes what it read.
     """
-    reserved = [key for key in keys if not can_write_extra(key)]
+    if admin_permission.can():
+        return
+    reserved = [key for key in keys if extras_field.is_reserved(key)]
     if reserved:
         apiv2.abort(400, f"Extras keys reserved to platform services: {', '.join(reserved)}")
 
@@ -362,8 +364,6 @@ def check_extras_are_writable(keys) -> None:
 @ns.route("/<dataset:dataset>/extras/", endpoint="dataset_extras", doc=common_doc)
 @apiv2.response(400, "Wrong payload format, dict expected")
 @apiv2.response(400, "Wrong payload format, list expected")
-@apiv2.response(400, "Wrong payload format, extras keys must be strings")
-@apiv2.response(400, "Extras keys reserved to platform services")
 @apiv2.response(404, "Dataset not found")
 @apiv2.response(410, "Dataset has been deleted")
 class DatasetExtrasAPI(API):
@@ -386,7 +386,7 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
-        check_extras_are_writable(data)
+        check_extras_are_writable(Dataset.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             dataset.extras.pop(key, None)
@@ -415,7 +415,7 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
-        check_extras_are_writable(data)
+        check_extras_are_writable(Dataset.extras, data)
         for key in data:
             try:
                 del dataset.extras[key]
@@ -560,8 +560,6 @@ class ResourceAPI(API):
 @apiv2.param("rid", "The resource unique identifier")
 @apiv2.response(400, "Wrong payload format, dict expected")
 @apiv2.response(400, "Wrong payload format, list expected")
-@apiv2.response(400, "Wrong payload format, extras keys must be strings")
-@apiv2.response(400, "Extras keys reserved to platform services")
 @apiv2.response(404, "Key not found in existing extras")
 @apiv2.response(410, "Dataset has been deleted")
 class ResourceExtrasAPI(ResourceMixin, API):
@@ -586,7 +584,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
-        check_extras_are_writable(data)
+        check_extras_are_writable(Resource.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             resource.extras.pop(key, None)
@@ -609,7 +607,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
-        check_extras_are_writable(data)
+        check_extras_are_writable(Resource.extras, data)
         try:
             for key in data:
                 del resource.extras[key]

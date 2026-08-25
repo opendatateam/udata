@@ -57,7 +57,7 @@ from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
-from udata.mongo.url_field import AbsoluteURLField, URLField
+from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
 from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
@@ -417,16 +417,22 @@ class ResourceMixin(object):
             "check:date": DateTimeField,
             # These extras hold URLs the frontend renders as download links or
             # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
-            # datafairOrigin as previews). Validating them as an absolute URL
-            # rejects both dangerous schemes (javascript:, data:) and
-            # protocol-relative URLs pointing at another host, at the model
-            # level, on every write path, guarding against stored XSS.
-            "analysis:parsing:parquet_url": AbsoluteURLField,
-            "analysis:parsing:geojson_url": AbsoluteURLField,
-            "analysis:parsing:pmtiles_url": AbsoluteURLField,
-            "apidocUrl": AbsoluteURLField,
-            "datafairOrigin": AbsoluteURLField,
-        }
+            # datafairOrigin as previews). Typing them rejects the dangerous
+            # schemes (javascript:, data:) at the model level, on every write
+            # path, guarding against stored XSS.
+            "analysis:parsing:parquet_url": URLField,
+            "analysis:parsing:geojson_url": URLField,
+            "analysis:parsing:pmtiles_url": URLField,
+            "apidocUrl": URLField,
+            "datafairOrigin": URLField,
+        },
+        # Written by the platform services on resources (hydra analysis and
+        # availability checks, validata, DCAT harvesting), and trusted as-is by the
+        # frontend: letting users write them enables stored XSS (e.g. a `javascript:`
+        # value in `analysis:parsing:*_url`, rendered as a download link) and forged
+        # "platform-generated" metadata. `apidocUrl` and `datafairOrigin` stay user
+        # writable, hence their URL type above.
+        reserved=("analysis:*", "check:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
@@ -635,7 +641,16 @@ class Dataset(
     # datafairOrigin can live on the dataset too (the frontend reads it from the
     # resource or its dataset) and feeds an <iframe> src, so validate it as a URL
     # here as well. See Resource.extras for the rationale.
-    extras = field(ExtrasField({"datafairOrigin": AbsoluteURLField}), auditable=False)
+    # The reserved patterns differ from the resource ones: transport, the
+    # recommendations job and the DCAT harvester write on the dataset, while hydra
+    # and validata write on its resources.
+    extras = field(
+        ExtrasField(
+            {"datafairOrigin": URLField},
+            reserved=("transport:*", "recommendations*", "validation-report:*", "dcat"),
+        ),
+        auditable=False,
+    )
     harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)

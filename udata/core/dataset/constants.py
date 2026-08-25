@@ -2,7 +2,6 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum, auto
-from fnmatch import fnmatchcase
 
 from flask_babel import LazyString
 
@@ -218,33 +217,6 @@ DESCRIPTION_SIZE_LIMIT = 100000
 DESCRIPTION_SHORT_SIZE_LIMIT = 200
 
 FULL_OBJECTS_HEADER = "X-Get-Datasets-Full-Objects"
-
-# Extras produced by platform services (hydra analysis, availability checks,
-# validata, dataset recommendations, transport.data.gouv.fr, DCAT harvesting) and
-# trusted as-is by the frontend. Letting regular users write them enables stored
-# XSS (e.g. a `javascript:` value in `analysis:parsing:*_url`, rendered as a
-# download link by the frontend) and forged "platform-generated" metadata, so only
-# sysadmins — including the platform services that authenticate as such — may set
-# them.
-# Glob patterns rather than plain prefixes: `dcat` is a single key written by the
-# DCAT harvester, not a namespace, and reserving it as a prefix would also freeze
-# unrelated user keys such as `dcatIdentifier`. A trailing `*` marks the entries
-# that really are namespaces.
-RESERVED_EXTRAS_PATTERNS = (
-    "analysis:*",
-    "check:*",
-    "validation-report:*",
-    "transport:*",
-    # `recommendations`, `recommendations:sources`, `recommendations-reuses` and
-    # `recommendations-externals` are all written by the recommendations job.
-    "recommendations*",
-    "dcat",
-)
-
-
-def is_reserved_extra(key: str) -> bool:
-    """Whether an extra key belongs to a platform-reserved namespace."""
-    return any(fnmatchcase(key, pattern) for pattern in RESERVED_EXTRAS_PATTERNS)
 
 
 class FormatFamily(StrEnum):

@@ -593,7 +593,6 @@ class DatasetExtrasAPITest(APITestCase):
         url = url_for("apiv2.dataset_extras", dataset=self.dataset)
 
         self.assert400(self.put(url, {"datafairOrigin": "javascript:alert(1)"}))
-        self.assert400(self.put(url, {"datafairOrigin": "//evil.org/embed"}))
 
         self.assert200(self.put(url, {"datafairOrigin": "https://datafair.example.org"}))
         self.dataset.reload()
@@ -1066,24 +1065,18 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.assert400(
             self.put(url, {"analysis:parsing:parquet_url": "javascript:alert(document.domain)"})
         )
-        # A protocol-relative URL points at an arbitrary host just as well, and
-        # udata.uris accepts a missing scheme by default: these extras require
-        # an absolute http(s) URL.
-        self.assert400(self.put(url, {"analysis:parsing:parquet_url": "//evil.org/x.parquet"}))
         dataset.reload()
         assert "analysis:parsing:parquet_url" not in dataset.resources[0].extras
 
     def test_user_writable_url_extra_is_scheme_validated(self):
         # apidocUrl / datafairOrigin stay user-writable but their scheme is
-        # validated, so they cannot carry a javascript:/data: payload nor point
-        # at another host through a protocol-relative URL.
+        # validated, so they cannot carry a javascript:/data: payload.
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
         url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
 
         self.assert400(self.put(url, {"apidocUrl": "javascript:alert(1)"}))
-        self.assert400(self.put(url, {"apidocUrl": "//evil.org/openapi.json"}))
 
         self.assert200(self.put(url, {"apidocUrl": "https://example.org/openapi.json"}))
         self.dataset.reload()

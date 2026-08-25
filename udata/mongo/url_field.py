@@ -18,27 +18,16 @@ class URLField(StringField):
     :params bool resolve: Resolve hostname for target IPs validation
     :params list schemes: List of allowed schemes
     :params list tlds: List of allowed TLDs
-    :params bool require_scheme: Reject protocol-relative URLs (`//host/path`)
 
     """
 
-    def __init__(
-        self,
-        private=None,
-        local=None,
-        resolve=None,
-        schemes=None,
-        tlds=None,
-        require_scheme=None,
-        **kwargs,
-    ):
+    def __init__(self, private=None, local=None, resolve=None, schemes=None, tlds=None, **kwargs):
         super(URLField, self).__init__(**kwargs)
         self.private = private
         self.local = local
         self.resolve = resolve
         self.schemes = schemes
         self.tlds = tlds
-        self.require_scheme = require_scheme
 
     def to_python(self, value):
         value = super(URLField, self).to_python(value)
@@ -49,25 +38,10 @@ class URLField(StringField):
         super(URLField, self).validate(value)
         kwargs = {
             a: getattr(self, a)
-            for a in ("private", "local", "resolve", "schemes", "tlds", "require_scheme")
+            for a in ("private", "local", "resolve", "schemes", "tlds")
             if getattr(self, a) is not None
         }
         try:
             uris.validate(value, **kwargs)
         except uris.ValidationError as e:
             self.error(str(e))
-
-
-class AbsoluteURLField(URLField):
-    """An URLField rejecting protocol-relative URLs (`//host/path`).
-
-    Those are valid for `udata.uris` — the scheme is left to whoever consumes
-    the URL — but they still point at an arbitrary host, which is not acceptable
-    for a value rendered as a link or an iframe source. Registering extras types
-    instantiates the field class with no argument, hence a subclass rather than
-    a `require_scheme=True` argument.
-    """
-
-    def __init__(self, **kwargs):
-        kwargs.setdefault("require_scheme", True)
-        super().__init__(**kwargs)

@@ -125,21 +125,12 @@ def resolve_hostname(hostname: str, retry=5):
 
 
 def validate(
-    url,
-    schemes=None,
-    tlds=None,
-    private=None,
-    local=None,
-    resolve=None,
-    credentials=None,
-    require_scheme=False,
+    url, schemes=None, tlds=None, private=None, local=None, resolve=None, credentials=None
 ):
     """
     Validate and normalize an URL
 
     :param str url: The URL to validate and normalize
-    :param bool require_scheme: Reject protocol-relative URLs (`//host/path`),
-        which are otherwise accepted with any scheme left to the consumer
     :return str: The normalized URL
     :raises ValidationError: when URL does not validate
     """
@@ -157,8 +148,6 @@ def validate(
         error(url)
 
     scheme = (match.group("scheme") or "").lower()
-    if not scheme and require_scheme:
-        error(url, _("A scheme is required, allowed schemes: {0}").format(", ".join(schemes)))
     if scheme and scheme not in schemes:
         error(url, _("Invalid scheme {0}, allowed schemes: {1}").format(scheme, ", ".join(schemes)))
 

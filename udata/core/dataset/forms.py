@@ -29,7 +29,6 @@ from .models import (
     Resource,
     Schema,
 )
-from .permissions import can_write_extra, sanitize_reserved_extras
 
 __all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
 
@@ -49,26 +48,6 @@ HOSTED_RESOURCE_PROTECTED_FIELDS = (
     "mime",
     "format",
 )
-
-
-class ReservedExtrasField(fields.ExtrasField):
-    """An extras field that keeps platform-reserved keys out of non-sysadmin writes.
-
-    Both hooks are needed because the two write paths differ. A creation never
-    calls `populate_obj`: `ModelForm.save()` builds the model straight from the
-    form data, so the reserved keys have to be dropped from `self.data` itself.
-    An update, on the other hand, replaces the whole extras dict, and would drop
-    the reserved keys a payload does not echo back — hence the merge with the
-    stored values.
-    """
-
-    def process_formdata(self, valuelist):
-        super().process_formdata(valuelist)
-        data = self.data or {}
-        self.data = {key: value for key, value in data.items() if can_write_extra(key)}
-
-    def populate_obj(self, obj, name):
-        setattr(obj, name, sanitize_reserved_extras(getattr(obj, name), self.data or {}))
 
 
 class ChecksumForm(ModelForm):
@@ -139,7 +118,7 @@ class BaseResourceForm(ModelForm):
     filesize = fields.IntegerField(
         _("Size"), [validators.optional()], description=_("The file size in bytes")
     )
-    extras = ReservedExtrasField()
+    extras = fields.ExtrasField()
     schema = fields.FormField(SchemaForm)
 
     def populate_obj(self, obj):
@@ -252,7 +231,7 @@ class DatasetForm(ModelForm):
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))
-    extras = ReservedExtrasField()
+    extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
     contact_points = fields.ContactPointListField()
 

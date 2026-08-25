@@ -27,7 +27,6 @@ from udata.models import ContactPoint, Dataset, Organization, Reuse, User, db
 from udata.mongo.datetime_fields import DateField as MongoDateField
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.extras_fields import ExtrasField as MongoExtrasField
-from udata.mongo.url_field import AbsoluteURLField as MongoAbsoluteURLField
 from udata.mongo.url_field import URLField as MongoURLField
 from udata.utils import get_by, to_iso_date
 
@@ -787,7 +786,6 @@ class ExtrasField(Field):
         MongoStringField: StringField,
         MongoFloatField: FloatField,
         MongoURLField: URLField,
-        MongoAbsoluteURLField: URLField,
         MongoUUIDField: UUIDField,
     }
 
@@ -822,6 +820,9 @@ class ExtrasField(Field):
         else:
             return value
 
+    def can_write(self, key) -> bool:
+        return not self.extras.is_reserved(key) or admin_permission.can()
+
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
@@ -831,6 +832,22 @@ class ExtrasField(Field):
                 raise ValueError("Unsupported data type")
         else:
             self.data = self.parse(self.data or {})
+        self.data = {key: value for key, value in (self.data or {}).items() if self.can_write(key)}
+
+    def populate_obj(self, obj, name):
+        """Restore the reserved extras dropped from a non-sysadmin payload.
+
+        An update replaces the whole dict, so a payload that does not echo a stored
+        reserved key would erase it. Unlike the apiv2 extras endpoints, where every
+        key is an explicit write intent and a reserved one is rejected, a full-object
+        update legitimately echoes the extras it just read, hence a silent restore.
+        """
+        stored = getattr(obj, name, None) or {}
+        setattr(
+            obj,
+            name,
+            (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
+        )
 
     def validate(self, form, extra_validators=tuple()):
         if self.process_errors:
