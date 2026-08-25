@@ -34,6 +34,7 @@ from .api_fields import (
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
+from .permissions import writable_extras_keys
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -370,6 +371,7 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
+        data = {key: data[key] for key in writable_extras_keys(data)}
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             dataset.extras.pop(key, None)
@@ -396,7 +398,7 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
-        for key in data:
+        for key in writable_extras_keys(data):
             try:
                 del dataset.extras[key]
             except KeyError:
@@ -564,6 +566,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
+        data = {key: data[key] for key in writable_extras_keys(data)}
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             resource.extras.pop(key, None)
@@ -585,7 +588,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         try:
-            for key in data:
+            for key in writable_extras_keys(data):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")

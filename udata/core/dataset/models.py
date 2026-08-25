@@ -57,7 +57,7 @@ from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
-from udata.mongo.url_field import URLField
+from udata.mongo.url_field import AbsoluteURLField, URLField
 from udata.mongo.uuid_fields import AutoUUIDField
 from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
@@ -415,6 +415,17 @@ class ResourceMixin(object):
             "check:available": BooleanField,
             "check:status": IntField,
             "check:date": DateTimeField,
+            # These extras hold URLs the frontend renders as download links or
+            # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
+            # datafairOrigin as previews). Validating them as an absolute URL
+            # rejects both dangerous schemes (javascript:, data:) and
+            # protocol-relative URLs pointing at another host, at the model
+            # level, on every write path, guarding against stored XSS.
+            "analysis:parsing:parquet_url": AbsoluteURLField,
+            "analysis:parsing:geojson_url": AbsoluteURLField,
+            "analysis:parsing:pmtiles_url": AbsoluteURLField,
+            "apidocUrl": AbsoluteURLField,
+            "datafairOrigin": AbsoluteURLField,
         }
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
@@ -621,7 +632,10 @@ class Dataset(
     schema = field(EmbeddedDocumentField(Schema))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
-    extras = field(ExtrasField(), auditable=False)
+    # datafairOrigin can live on the dataset too (the frontend reads it from the
+    # resource or its dataset) and feeds an <iframe> src, so validate it as a URL
+    # here as well. See Resource.extras for the rationale.
+    extras = field(ExtrasField({"datafairOrigin": AbsoluteURLField}), auditable=False)
     harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)

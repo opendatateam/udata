@@ -27,6 +27,7 @@ from udata.models import ContactPoint, Dataset, Organization, Reuse, User, db
 from udata.mongo.datetime_fields import DateField as MongoDateField
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.extras_fields import ExtrasField as MongoExtrasField
+from udata.mongo.url_field import AbsoluteURLField as MongoAbsoluteURLField
 from udata.mongo.url_field import URLField as MongoURLField
 from udata.utils import get_by, to_iso_date
 
@@ -221,6 +222,11 @@ class URLField(EmptyNone, Field):
     def process_formdata(self, valuelist):
         super(URLField, self).process_formdata(valuelist)
         if self.data:
+            if not isinstance(self.data, str):
+                # A ValueError is what wtforms (and our own extras parsing) catch
+                # to turn a bad input into a validation error; letting the strip
+                # below raise an AttributeError would surface as a 500 instead.
+                raise ValueError(_("Not a valid URL"))
             self.data = self.data.strip()
 
 
@@ -781,6 +787,7 @@ class ExtrasField(Field):
         MongoStringField: StringField,
         MongoFloatField: FloatField,
         MongoURLField: URLField,
+        MongoAbsoluteURLField: URLField,
         MongoUUIDField: UUIDField,
     }
 

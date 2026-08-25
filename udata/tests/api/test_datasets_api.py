@@ -697,6 +697,28 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras["string"], "value")
         self.assertEqual(dataset.extras["dict"]["foo"], "bar")
 
+    def test_dataset_api_create_ignores_reserved_extras(self):
+        """A creation must drop platform-reserved extras, dataset and resources alike.
+
+        Regression: a POST builds the model straight from the form data instead
+        of going through populate_obj, so a guard living only there let anyone
+        forge platform-generated metadata on a brand new dataset.
+        """
+        data = DatasetFactory.as_dict()
+        data["extras"] = {"transport:url": "https://evil.example/x", "string": "value"}
+        data["resources"] = [ResourceFactory.as_dict()]
+        data["resources"][0]["extras"] = {"check:available": True, "string": "value"}
+
+        with self.api_user():
+            response = self.post(url_for("api.datasets"), data)
+        self.assert201(response)
+
+        dataset = Dataset.objects.first()
+        assert "transport:url" not in dataset.extras
+        assert dataset.extras["string"] == "value"
+        assert "check:available" not in dataset.resources[0].extras
+        assert dataset.resources[0].extras["string"] == "value"
+
     def test_dataset_api_create_with_resources(self):
         """It should create a dataset with resources from the API"""
         data = DatasetFactory.as_dict()
@@ -1043,6 +1065,81 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         resource = dataset.resources[0]
         self.assertEqual(resource.extras, {"extra:id": "id"})
+
+    def test_dataset_api_update_ignores_reserved_resource_extra(self):
+        """A non-admin cannot forge a platform-reserved resource extra via the form.
+
+        Regression: analysis:parsing:*_url was user-writable through the dataset
+        PUT form path and rendered by the frontend as a download link (stored XSS).
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, nb_resources=1)
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(dataset.resources[0].id)
+        data["resources"][0]["extras"] = {
+            "analysis:parsing:parquet_url": "https://example.org/f.parquet"
+        }
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert "analysis:parsing:parquet_url" not in dataset.resources[0].extras
+
+    def test_dataset_api_update_ignores_reserved_dataset_extra(self):
+        """A non-admin cannot forge a platform-reserved dataset extra via the form."""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["extras"] = {"transport:url": "https://transport.data.gouv.fr/x"}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert "transport:url" not in dataset.extras
+
+    def test_dataset_api_update_preserves_existing_reserved_resource_extra(self):
+        """Echoing a hydra-written extra in a full PUT must neither fail nor drop it.
+
+        A datetime extra serializes to a string that differs from the stored value,
+        so a naive change-detection would wrongly reject the legitimate update. The
+        reserved extra is kept untouched instead.
+        """
+        user = self.login()
+        finished_at = datetime(2024, 4, 14, 8, 42)
+        resource = ResourceFactory(extras={"analysis:parsing:finished_at": finished_at})
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["title"] = "new title"
+        data["resources"][0]["extras"] = {"analysis:parsing:finished_at": "2024-04-14T08:42:00"}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].title == "new title"
+        assert dataset.resources[0].extras["analysis:parsing:finished_at"] == finished_at
+
+    def test_dataset_api_update_preserves_omitted_reserved_dataset_extra(self):
+        """A full PUT that drops a reserved dataset extra must not erase it.
+
+        The form replaces the whole extras dict, so the stored reserved keys have
+        to be merged back in — the resource-level counterpart of
+        test_dataset_api_update_preserves_existing_reserved_resource_extra.
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, extras={"recommendations:sources": ["x"]})
+        data = dataset.to_dict()
+        data["extras"] = {}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras["recommendations:sources"] == ["x"]
+
+    def test_dataset_api_update_rejects_wrongly_typed_url_extra(self):
+        """A URL extra fed a non-string must be a validation error, not a crash."""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["extras"] = {"datafairOrigin": 123}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
 
     def test_dataset_api_update_does_not_override_hosted_resource_fields(self):
         """A dataset PUT with stale resources must not override upload-computed fields
