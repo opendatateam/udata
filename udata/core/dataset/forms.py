@@ -29,7 +29,7 @@ from .models import (
     Resource,
     Schema,
 )
-from .permissions import sanitize_reserved_extras, writable_extras_keys
+from .permissions import can_write_extra, sanitize_reserved_extras
 
 __all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
 
@@ -65,7 +65,7 @@ class ReservedExtrasField(fields.ExtrasField):
     def process_formdata(self, valuelist):
         super().process_formdata(valuelist)
         data = self.data or {}
-        self.data = {key: data[key] for key in writable_extras_keys(data)}
+        self.data = {key: value for key, value in data.items() if can_write_extra(key)}
 
     def populate_obj(self, obj, name):
         setattr(obj, name, sanitize_reserved_extras(getattr(obj, name), self.data or {}))

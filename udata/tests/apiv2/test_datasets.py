@@ -527,30 +527,50 @@ class DatasetExtrasAPITest(APITestCase):
         someone_else_dataset.reload()
         assert someone_else_dataset.extras["test::extra"] == "test-value"
 
-    def test_update_dataset_extras_ignores_reserved_key_for_non_admin(self):
+    def test_update_dataset_extras_rejects_reserved_key_for_non_admin(self):
         # transport:url is written by the transport.data.gouv.fr integration and
-        # trusted by the frontend; a regular user's attempt to set it is silently
-        # dropped.
+        # trusted by the frontend. Every key of this payload is an explicit write
+        # intent, so a reserved one is rejected rather than dropped: answering 200
+        # would tell a platform service its write went through when it did not.
         response = self.put(
             url_for("apiv2.dataset_extras", dataset=self.dataset),
             {"transport:url": "https://transport.data.gouv.fr/x"},
         )
-        self.assert200(response)
+        self.assert400(response)
+        assert "transport:url" in response.json["message"]
         self.dataset.reload()
         assert "transport:url" not in self.dataset.extras
 
-    def test_delete_dataset_extras_ignores_reserved_key_for_non_admin(self):
-        # Symmetric to the PUT case: a regular user must not be able to wipe a
-        # platform-written extra either. The deletion is silently dropped.
+    def test_update_dataset_extras_rejects_reserved_key_deletion_by_null(self):
+        # A null value deletes the key, so it is a third write vector alongside the
+        # PUT and the DELETE, and it must be rejected just the same.
         self.dataset.extras = {"transport:url": "https://transport.data.gouv.fr/x"}
         self.dataset.save()
 
-        self.assert204(
+        self.assert400(
+            self.put(url_for("apiv2.dataset_extras", dataset=self.dataset), {"transport:url": None})
+        )
+
+        self.dataset.reload()
+        assert self.dataset.extras["transport:url"] == "https://transport.data.gouv.fr/x"
+
+    def test_delete_dataset_extras_rejects_reserved_key_for_non_admin(self):
+        # Symmetric to the PUT case: a regular user must not be able to wipe a
+        # platform-written extra either.
+        self.dataset.extras = {"transport:url": "https://transport.data.gouv.fr/x"}
+        self.dataset.save()
+
+        self.assert400(
             self.delete(url_for("apiv2.dataset_extras", dataset=self.dataset), ["transport:url"])
         )
 
         self.dataset.reload()
         assert self.dataset.extras["transport:url"] == "https://transport.data.gouv.fr/x"
+
+    def test_delete_dataset_extras_rejects_non_string_key(self):
+        # The payload is a raw JSON list, so its elements are arbitrary values:
+        # a non-string must be a 400, not a crash in the reserved-key matching.
+        self.assert400(self.delete(url_for("apiv2.dataset_extras", dataset=self.dataset), [123]))
 
     def test_update_dataset_extras_reserves_dcat_as_an_exact_key(self):
         # `dcat` is a single key written by the DCAT harvester, not a namespace:
@@ -563,7 +583,7 @@ class DatasetExtrasAPITest(APITestCase):
         assert self.dataset.extras["dcatIdentifier"] == "abc"
 
         for key in ("dcat", "recommendations", "recommendations:sources"):
-            self.assert200(self.put(url, {key: ["forged"]}))
+            self.assert400(self.put(url, {key: ["forged"]}))
             self.dataset.reload()
             assert key not in self.dataset.extras
 
@@ -955,34 +975,55 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.dataset.reload()
         assert self.dataset.resources[0].extras == {"check:available": True}
 
-    def test_update_resource_extras_ignores_reserved_key_for_non_admin(self):
+    def test_update_resource_extras_rejects_reserved_key_for_non_admin(self):
         # analysis:parsing:*_url is produced by the analysis service and rendered
         # by the frontend as a download link; a regular user (even the owner) must
-        # not be able to forge it. The write is silently dropped, not rejected, so
-        # legitimate full-object updates that echo those extras keep working.
+        # not be able to forge it.
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
         url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
 
-        self.assert200(
-            self.put(url, {"analysis:parsing:parquet_url": "https://example.org/f.parquet"})
-        )
+        response = self.put(url, {"analysis:parsing:parquet_url": "https://example.org/f.parquet"})
+        self.assert400(response)
+        assert "analysis:parsing:parquet_url" in response.json["message"]
 
         self.dataset.reload()
         assert "analysis:parsing:parquet_url" not in self.dataset.resources[0].extras
 
-    def test_delete_resource_extras_ignores_reserved_key_for_non_admin(self):
+    def test_update_resource_extras_rejects_reserved_key_deletion_by_null(self):
+        # A null value deletes the key: same write vector, same rejection.
+        resource = ResourceFactory(extras={"check:available": True})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
+
+        self.assert400(self.put(url, {"check:available": None}))
+
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras["check:available"] is True
+
+    def test_delete_resource_extras_rejects_reserved_key_for_non_admin(self):
         resource = ResourceFactory()
         resource.extras = {"check:available": True}
         self.dataset.resources.append(resource)
         self.dataset.save()
         url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
 
-        self.assert204(self.delete(url, ["check:available"]))
+        self.assert400(self.delete(url, ["check:available"]))
 
         self.dataset.reload()
         assert self.dataset.resources[0].extras["check:available"] is True
+
+    def test_delete_resource_extras_rejects_non_string_key(self):
+        # The payload is a raw JSON list, so its elements are arbitrary values:
+        # a non-string must be a 400, not a crash in the reserved-key matching.
+        resource = ResourceFactory()
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
+
+        self.assert400(self.delete(url, [123]))
 
     def test_admin_can_set_reserved_resource_extras(self):
         self.login(AdminFactory())
@@ -999,17 +1040,17 @@ class DatasetResourceExtrasAPITest(APITestCase):
             == "https://example.org/f.parquet"
         )
 
-    def test_delete_reserved_resource_extra_is_a_consistent_no_op(self):
-        # Dropping the key from the payload makes the outcome independent of a
-        # state the caller does not control: a reserved key is a no-op whether it
+    def test_delete_reserved_resource_extra_is_rejected_consistently(self):
+        # Rejecting before touching the stored extras makes the outcome independent
+        # of a state the caller does not control: a reserved key is a 400 whether it
         # is stored or not, instead of 204 in one case and 404 in the other.
         resource = ResourceFactory(extras={"check:available": True})
         self.dataset.resources.append(resource)
         self.dataset.save()
         url = url_for("apiv2.resource_extras", dataset=self.dataset, rid=resource.id)
 
-        self.assert204(self.delete(url, ["check:available"]))
-        self.assert204(self.delete(url, ["check:status"]))
+        self.assert400(self.delete(url, ["check:available"]))
+        self.assert400(self.delete(url, ["check:status"]))
 
         self.dataset.reload()
         assert self.dataset.resources[0].extras["check:available"] is True

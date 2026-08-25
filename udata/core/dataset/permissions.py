@@ -13,32 +13,26 @@ from .constants import is_reserved_extra
 from .models import Resource
 
 
-def writable_extras_keys(keys) -> list[str]:
-    """The extras keys the current user may write, among the given ones.
+def can_write_extra(key: str) -> bool:
+    """Whether the current user may write this extra key.
 
     Reserved extras (analysis, check, recommendations, transport, dcat...) are
     produced by platform services and trusted as-is by the frontend; letting users
-    write them enables stored XSS and forged "platform-generated" metadata. So for
-    anyone but a sysadmin (Hydra and the other services authenticate as such),
-    they are dropped from the payload — silently, like the hosted-resource fields
-    in `BaseResourceForm`, to avoid rejecting legitimate full-object updates that
-    merely echo those extras.
+    write them enables stored XSS and forged "platform-generated" metadata. Only a
+    sysadmin may set them — Hydra and the other services authenticate as such.
     """
-    if admin_permission.can():
-        return list(keys)
-    return [key for key in keys if not is_reserved_extra(key)]
+    return not is_reserved_extra(key) or admin_permission.can()
 
 
 def sanitize_reserved_extras(before: dict, after: dict) -> dict:
     """Force reserved extras back to their stored values for non-sysadmins.
 
-    Reserved extras (analysis, check, recommendations, transport, dcat...) are
-    produced by platform services and trusted as-is by the frontend; letting users
-    write them enables stored XSS and forged "platform-generated" metadata. So for
-    anyone but a sysadmin, any reserved key added, modified or removed in `after`
-    is reset to its `before` value. Unlike `writable_extras_keys`, which filters a
-    partial payload, this one is for the write paths that replace the whole extras
-    dict: dropping a reserved key from the payload would erase the stored value.
+    The form write paths replace the whole extras dict, so a payload that does not
+    echo a stored reserved key would erase it. Unlike the apiv2 extras endpoints,
+    where every key is an explicit write intent and a reserved one is rejected, a
+    full-object update legitimately echoes the extras it just read: reserved keys
+    are silently restored here rather than turned into a validation error, like the
+    hosted-resource fields in `BaseResourceForm`.
     """
     if admin_permission.can():
         return after
