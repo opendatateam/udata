@@ -826,13 +826,15 @@ class ExtrasField(Field):
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = self.parse(data)
-            else:
+            if not isinstance(data, dict):
                 raise ValueError("Unsupported data type")
         else:
-            self.data = self.parse(self.data or {})
-        self.data = {key: value for key, value in (self.data or {}).items() if self.can_write(key)}
+            data = self.data or {}
+        # Filtering before parsing, because parse() records a type error for every
+        # key it reads: a reserved key carrying a bad value would fail the whole
+        # payload with a 400 naming a key the caller may not write anyway, while
+        # the same key with a valid value is silently dropped.
+        self.data = self.parse({key: value for key, value in data.items() if self.can_write(key)})
 
     def populate_obj(self, obj, name):
         """Restore the reserved extras dropped from a non-sysadmin payload.

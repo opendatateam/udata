@@ -1120,8 +1120,7 @@ class DatasetAPITest(APITestCase):
         """A full PUT that drops a reserved dataset extra must not erase it.
 
         The form replaces the whole extras dict, so the stored reserved keys have
-        to be merged back in — the resource-level counterpart of
-        test_dataset_api_update_preserves_existing_reserved_resource_extra.
+        to be merged back in.
         """
         user = self.login()
         dataset = DatasetFactory(owner=user, extras={"recommendations:sources": ["x"]})
@@ -1131,6 +1130,77 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         dataset.reload()
         assert dataset.extras["recommendations:sources"] == ["x"]
+
+    def test_dataset_api_update_preserves_omitted_reserved_resource_extra(self):
+        """A resource whose extras are emptied by a full PUT keeps its reserved keys.
+
+        The resource path differs from the dataset one: NestedModelList rebuilds a
+        subform per resource, so the merge has to happen there too.
+        """
+        user = self.login()
+        resource = ResourceFactory(extras={"check:status": 200})
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["extras"] = {}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].extras["check:status"] == 200
+
+    def test_dataset_api_update_ignores_wrongly_typed_reserved_extra(self):
+        """A reserved key is dropped whatever its value, not rejected on its type.
+
+        The extras are filtered before being parsed: a key the caller may not write
+        must not be able to fail its registered type. Otherwise the same forged key
+        answers 200 with a valid value and 400 with an invalid one, which both
+        contradicts the drop contract and leaks the registered types.
+        """
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["extras"] = {"check:status": "not-an-int"}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert "check:status" not in dataset.resources[0].extras
+
+    def test_dataset_api_update_without_extras_keeps_stored_reserved_extra(self):
+        """A payload that omits `extras` entirely keeps the reserved keys in place.
+
+        wtforms calls process_formdata with an empty valuelist, which falls back on
+        the stored dict: that branch has its own path through the filter and the
+        restore, and no other test goes through it.
+        """
+        user = self.login()
+        dataset = DatasetFactory(owner=user, extras={"recommendations:sources": ["x"]})
+        data = dataset.to_dict()
+        data.pop("extras", None)
+        data["title"] = "new title"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.title == "new title"
+        assert dataset.extras["recommendations:sources"] == ["x"]
+
+    def test_dataset_api_update_as_admin_erases_omitted_reserved_extra(self):
+        """A sysadmin owns the reserved extras, so omitting one deletes it.
+
+        The merge in populate_obj only restores what the caller may not write:
+        for an admin nothing is restored, which is what lets a platform service
+        clear a key it wrote.
+        """
+        self.login(AdminFactory())
+        dataset = DatasetFactory(extras={"recommendations:sources": ["x"]})
+        data = dataset.to_dict()
+        data["extras"] = {}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert "recommendations:sources" not in dataset.extras
 
     def test_dataset_api_update_rejects_wrongly_typed_url_extra(self):
         """A URL extra fed a non-string must be a validation error, not a crash."""

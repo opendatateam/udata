@@ -427,12 +427,14 @@ class ResourceMixin(object):
             "datafairOrigin": URLField,
         },
         # Written by the platform services on resources (hydra analysis and
-        # availability checks, validata, DCAT harvesting), and trusted as-is by the
-        # frontend: letting users write them enables stored XSS (e.g. a `javascript:`
-        # value in `analysis:parsing:*_url`, rendered as a download link) and forged
-        # "platform-generated" metadata. `apidocUrl` and `datafairOrigin` stay user
+        # availability checks, validata, DCAT harvesting, CSV exports), and trusted
+        # as-is by the frontend: letting users write them enables stored XSS (e.g. a
+        # `javascript:` value in `analysis:parsing:*_url`, rendered as a download
+        # link) and forged "platform-generated" metadata. `csv-export:model` is not
+        # rendered but resolves which resource the export job overwrites, so a forged
+        # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
         # writable, hence their URL type above.
-        reserved=("analysis:*", "check:*", "validation-report:*", "dcat"),
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
@@ -640,14 +642,17 @@ class Dataset(
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
     # datafairOrigin can live on the dataset too (the frontend reads it from the
     # resource or its dataset) and feeds an <iframe> src, so validate it as a URL
-    # here as well. See Resource.extras for the rationale.
+    # here as well. transport:url is reserved below, but it is rendered as a plain
+    # anchor by the frontend just like the analysis URLs, so it gets the same
+    # model-level scheme check rather than relying on its producer.
+    # See Resource.extras for the rationale.
     # The reserved patterns differ from the resource ones: transport, the
     # recommendations job and the DCAT harvester write on the dataset, while hydra
     # and validata write on its resources.
     extras = field(
         ExtrasField(
-            {"datafairOrigin": URLField},
-            reserved=("transport:*", "recommendations*", "validation-report:*", "dcat"),
+            {"datafairOrigin": URLField, "transport:url": URLField},
+            reserved=("transport:*", "recommendations*", "dcat"),
         ),
         auditable=False,
     )

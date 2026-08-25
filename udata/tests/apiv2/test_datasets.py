@@ -810,8 +810,20 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert len(self.dataset.resources[0].extras) == 1
         assert self.dataset.resources[0].extras["test::extra"] == "test-value"
 
+
+class DatasetResourcePlatformExtrasAPITest(APITestCase):
+    """Targeted updates of the extras the platform services own.
+
+    They are reserved to sysadmins, which is how Hydra writes them, so the class
+    logs in as one instead of every test replacing a regular-user setUp while
+    still using the dataset that setUp created for it.
+    """
+
+    def setUp(self):
+        self.login(AdminFactory())
+        self.dataset = DatasetFactory(owner=self.user)
+
     def test_update_resource_extras_refreshes_quality(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # quality_cached depends on resource extras: check:available feeds the
         # `all_resources_available` indicator, so the targeted update must recompute it.
         resource = ResourceFactory(filetype="remote", extras={"check:available": True})
@@ -830,7 +842,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.quality["all_resources_available"] is False
 
     def test_delete_resource_extras_refreshes_quality(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # Symmetric to the PUT case: deleting check:available makes the resource
         # availability `unknown` again, so the targeted update must recompute
         # quality_cached on delete too.
@@ -850,7 +861,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.quality["all_resources_available"] is True
 
     def test_update_resource_extras_refreshes_last_update(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # last_update derives from resource.last_modified, which for a remote
         # resource reads the `analysis:last-modified-at` extra. Editing that extra
         # must refresh the dataset's last_update, as Dataset.clean() did on save.
@@ -872,7 +882,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.last_update == datetime(2024, 6, 15, 12, 0, 0)
 
     def test_update_resource_extras_recomputes_quality_from_the_new_last_update(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # quality_cached embeds next_update, which derives from last_update: the
         # targeted update must refresh last_update *before* recomputing quality,
         # otherwise a daily dataset stays late even once its resource is fresh.
@@ -894,7 +903,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert dataset.quality["update_fulfilled_in_time"] is True
 
     def test_delete_resource_extras_refreshes_last_update(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # Deleting `analysis:last-modified-at` makes the remote resource fall back
         # to its last_modified_internal, so last_update must no longer be the
         # deleted date.
@@ -916,7 +924,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.last_update != datetime(2020, 1, 1)
 
     def test_update_resource_extras_targets_correct_resource(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # The positional $ operator must write to the matched resource only, not to
         # the first resource of the array.
         resources = [ResourceFactory() for _ in range(3)]
@@ -936,7 +943,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.resources[2].extras == {}
 
     def test_delete_resource_extras_targets_correct_resource(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # The positional $ operator must delete from the matched resource only.
         resources = [
             ResourceFactory(extras={"check:status": 200, "keep": "value"}) for _ in range(3)
@@ -958,7 +964,6 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert self.dataset.resources[2].extras["check:status"] == 200
 
     def test_update_resource_extras_rejects_wrongly_typed_extras(self):
-        self.login(AdminFactory())  # Hydra writes platform extras as a sysadmin
         # check:available is registered as a BooleanField and check:status as an
         # IntField on the extras field: a targeted update must enforce them just
         # like a full save did, otherwise Hydra can persist a string that
@@ -973,6 +978,12 @@ class DatasetResourceExtrasAPITest(APITestCase):
 
         self.dataset.reload()
         assert self.dataset.resources[0].extras == {"check:available": True}
+
+
+class DatasetResourceReservedExtrasAPITest(APITestCase):
+    def setUp(self):
+        self.login()
+        self.dataset = DatasetFactory(owner=self.user)
 
     def test_update_resource_extras_rejects_reserved_key_for_non_admin(self):
         # analysis:parsing:*_url is produced by the analysis service and rendered
