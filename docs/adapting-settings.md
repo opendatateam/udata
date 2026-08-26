@@ -330,12 +330,6 @@ The full option list is available in
 
 The OAuth2 token duration.
 
-### OAUTH2_PROVIDER_ERROR_ENDPOINT
-
-**default**: `'oauth.oauth_error'`
-
-The OAuth2 error page. Do not modify unless you know what you are doing.
-
 ## Flask-Security options
 
 ### SECURITY_PASSWORD_LENGTH_MIN

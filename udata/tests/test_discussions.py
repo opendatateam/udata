@@ -676,6 +676,39 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(discussions))
 
+    def test_list_discussions_for_malformed_subject(self):
+        kwargs = {"for": "dataset:6853c089b3ed5781f6adfdf7"}
+        response = self.get(url_for("api.discussions", **kwargs))
+        self.assert400(response)
+        self.assertIn("`for`", response.json["message"])
+
+    def test_list_discussions_for_one_malformed_subject(self):
+        """`for` accepts several values, and every one of them is checked."""
+        dataset = DatasetFactory()
+
+        kwargs = {"for": [str(dataset.id), "dataset:6853c089b3ed5781f6adfdf7"]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert400(response)
+        self.assertIn("`for`", response.json["message"])
+
+    def test_list_discussions_for_several_subjects(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        discussion_for_dataset = DiscussionFactory(subject=dataset, user=user)
+        discussion_for_reuse = DiscussionFactory(subject=reuse, user=user)
+        DiscussionFactory(subject=DatasetFactory(), user=user)
+
+        kwargs = {"for": [str(dataset.id), str(reuse.id)]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert200(response)
+        self.assertEqual(
+            {discussion["id"] for discussion in response.json["data"]},
+            {str(discussion_for_dataset.id), str(discussion_for_reuse.id)},
+        )
+
     def test_list_discussions_search(self):
         user = self.login()
         dataset = DatasetFactory()
@@ -760,8 +793,13 @@ class DiscussionsTest(APITestCase):
                 return
         self.fail(f"id {id_} not in {json_data}")
 
-    def test_list_discussions_org_does_not_exist(self) -> None:
+    def test_list_discussions_org_malformed(self) -> None:
         response: TestResponse = self.get(url_for("api.discussions", org="bad org id"))
+        self.assert400(response)
+        self.assertIn("`org`", response.json["message"])
+
+    def test_list_discussions_org_does_not_exist(self) -> None:
+        response: TestResponse = self.get(url_for("api.discussions", org=str(ObjectId())))
         self.assert404(response)
 
     def test_list_discussions_org(self) -> None:

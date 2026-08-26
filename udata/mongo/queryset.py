@@ -87,7 +87,12 @@ class UDataQuerySet(BaseQuerySet):
         return document, created
 
     def generic_in(self, **kwargs):
-        """Bypass buggy GenericReferenceField querying issue"""
+        """Bypass buggy GenericReferenceField querying issue
+
+        Ids are expected to be valid: callers reject malformed ones where the
+        request is parsed, so anything unusable reaching here is a bug of ours and
+        must surface as a 500 rather than as a client error.
+        """
         query = {}
         for key, value in kwargs.items():
             if not value:
@@ -103,12 +108,14 @@ class UDataQuerySet(BaseQuerySet):
                     query["{0}._ref".format(key)] = {"$in": value}
                 elif all(isinstance(v, ObjectId) for v in value):
                     query["{0}._ref.$id".format(key)] = {"$in": value}
+                else:
+                    raise TypeError(f"`{key}` expects a list of string, ObjectId or DBRef")
             elif isinstance(value, ObjectId):
                 query["{0}._ref.$id".format(key)] = value
             elif isinstance(value, str):
                 query["{0}._ref.$id".format(key)] = ObjectId(value)
             else:
-                self.error("expect a list of string, ObjectId or DBRef")
+                raise TypeError(f"`{key}` expects a string, ObjectId or DBRef")
         return self(__raw__=query)
 
 
