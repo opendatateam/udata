@@ -200,7 +200,6 @@ class Defaults(object):
     SITE_KEYWORDS = ["opendata", "udata"]
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
-    SITE_GITHUB_URL = "https://github.com/etalab/udata"
 
     TERMS_OF_USE_URL = None
     TERMS_OF_USE_DELETION_ARTICLE = None
