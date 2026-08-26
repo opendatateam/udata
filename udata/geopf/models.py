@@ -13,14 +13,24 @@ from udata.mongo import db
 from udata.mongo.encrypted_field import EncryptedStringField
 
 
+@generate_fields()
 class GeopfDatasetPushMetadata(EmbeddedDocument):
     """Local state of a dataset's push to Géoplateforme."""
 
-    datastore_id = StringField()
+    datastore_id = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The geopf datastore configured for this dataset's pushes",
+    )
     # StringField, not URLField: server-built from config, never user input.
-    fiche_url = StringField()
-    # Internal only: never surfaced via GeopfDatasetStatusAPI.
-    # FIXME: see why not used and if can be removed or exposed
+    fiche_url = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The cartes.gouv.fr fiche de données url for this dataset",
+    )
+    # Internal only, hence not field-wrapped
     metadata_id = StringField()
 
 
@@ -78,11 +88,17 @@ class GeopfResourcePushMetadata(EmbeddedDocument):
     )
 
 
+@generate_fields()
 class GeopfResourceOfferingMetadata(EmbeddedDocument):
     """Local state of a resource created from a pulled Géoplateforme offering."""
 
-    id = StringField()
-    last_synced_at = DateTimeField()
+    id = field(StringField(), readonly=True, allow_null=True, description="The geopf offering id")
+    last_synced_at = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="Last successful pull date for this offering",
+    )
 
 
 class GeopfResourceMetadata(EmbeddedDocument):

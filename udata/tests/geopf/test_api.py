@@ -462,8 +462,10 @@ class GeopfDatasetStatusApiTest(APITestCase):
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
         self.assert200(response)
         assert response.json == {
-            "datastore_id": None,
-            "fiche_url": None,
+            "push": {
+                "datastore_id": None,
+                "fiche_url": None,
+            },
             "pull": {
                 "status": None,
                 "last_synced_at": None,
@@ -525,8 +527,10 @@ class GeopfDatasetStatusApiTest(APITestCase):
 
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
         self.assert200(response)
-        assert response.json["datastore_id"] == "ds-1"
-        assert response.json["fiche_url"] == "https://cartes.example.com/fiche"
+        assert response.json["push"] == {
+            "datastore_id": "ds-1",
+            "fiche_url": "https://cartes.example.com/fiche",
+        }
         assert response.json["pull"] == {
             "status": "error",
             "last_synced_at": None,
@@ -564,8 +568,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
                 "title": "Service WFS - communes",
                 "format": "wfs",
                 "url": "http://data.example.com/wfs",
-                "offering_id": "off-1",
-                "last_synced_at": "2026-01-02T03:04:05+00:00",
+                "offering": {"id": "off-1", "last_synced_at": "2026-01-02T03:04:05+00:00"},
             }
         ]
 

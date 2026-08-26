@@ -61,8 +61,7 @@ Each flow's specific metadata fields are listed in its own section below.
 
 ```json
 {
-  "datastore_id": "0f9b…",
-  "fiche_url": "https://cartes.gouv.fr/…",
+  "push": {"datastore_id": "0f9b…", "fiche_url": "https://cartes.gouv.fr/…"},
   "pull": {"status": "done", "last_synced_at": "…", "error": null, "task_id": "…"},
   "pushable": [
     {"id": "…", "title": "communes.gpkg", "format": "gpkg", "url": "…",
@@ -71,7 +70,7 @@ Each flow's specific metadata fields are listed in its own section below.
   ],
   "offerings": [
     {"id": "…", "title": "Service WFS - communes", "format": "wfs", "url": "…",
-     "offering_id": "…", "last_synced_at": "…"}
+     "offering": {"id": "…", "last_synced_at": "…"}}
   ]
 }
 ```

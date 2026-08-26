@@ -90,7 +90,7 @@ class GeopfStatusAPI(API):
         except GeopfReauthRequired:
             return {"connected": False, "expires_at": None}
         geopf_token = GeopfToken.objects(user=current_user.id).first()
-        return {"connected": True, "expires_at": geopf_token.expires_at.isoformat()}
+        return {"connected": True, "expires_at": geopf_token.expires_at}
 
 
 def _resource_summary(resource) -> dict:
@@ -128,26 +128,17 @@ class GeopfDatasetStatusAPI(API):
         pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
         pushable = []
         offerings = []
-        # FIXME: see if more payload can go through @generate_fields stuff by changing API shape
         for resource in dataset.resources:
             offering = resource_offering_metadata(resource)
             if offering.id:
-                offerings.append(
-                    {
-                        **_resource_summary(resource),
-                        "offering_id": offering.id,
-                        "last_synced_at": offering.last_synced_at,
-                    }
-                )
+                offerings.append({**_resource_summary(resource), "offering": offering})
             elif resource.format and resource.format.lower() in pushable_formats:
                 pushable.append(
                     {**_resource_summary(resource), "push": resource_push_metadata(resource)}
                 )
 
-        push = dataset_push_metadata(dataset)
         return {
-            "datastore_id": push.datastore_id,
-            "fiche_url": push.fiche_url,
+            "push": dataset_push_metadata(dataset),
             "pull": dataset_pull_metadata(dataset),
             "pushable": pushable,
             "offerings": offerings,
