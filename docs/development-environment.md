@@ -61,7 +61,7 @@ uv sync
 
 #### Local web server is slow
 
-If you're using `{something}.local` as your `SITE_NAME`, you need to add an ipv6 resolution to this FQDN:
+If you're using `{something}.local` as your `SERVER_NAME`, you need to add an ipv6 resolution to this FQDN:
 
 ```
 127.0.0.1   dev.local
@@ -76,37 +76,32 @@ You can use [invoke][] to launch the application services
 (you might want to have each one running in a terminal):
 
 ```shell
-$ inv serve         # Start the development server
+$ uv run inv serve         # Start the development server
 
-$ inv work          # Start a worker process
-$ inv beat          # Start a scheduler process
+$ uv run inv work          # Start a worker process
+$ uv run inv beat          # Start a scheduler process
 ```
 
 ## Common tasks
 
-Most of the common tasks are scripted in the `tasks.py` file (which is using [invoke][]).
+Most of the common tasks are scripted in the `tasks/` package (which is using [invoke][]).
 You can get the documentation related to all tasks with:
 
 ```shell
-$ inv -l
+$ uv run inv -l
 ```
 
-It might be required to update your Python dependencies to ensure compatibility.
-A task is provided to automate it:
+After pulling upstream changes or switching branch, resync your environment:
 
 ```shell
-# Update dependencies
-$ inv update
+# Install the exact dependencies of the current lock file
+$ uv sync
 
-# Update dependencies and migrate data
-$ inv update -m
-```
+# Apply the pending database migrations
+$ uv run udata db migrate
 
-It's advised to update your dependencies when you pull upstream changes or switch branch:
-
-```shell
-# Update dependencies, migrate data, recompile translations...
-$ inv update -m i18nc
+# Recompile the translations
+$ uv run inv i18nc
 ```
 
 Now check out our advanced documentation for a focus on some specific tasks.
@@ -115,12 +110,4 @@ simply provide some fixes to [the translations](adding-translations.md)
 or [the documentation](building-documentation.md).
 
 
-[Python Virtual Environments - a Primer]: https://realpython.com/blog/python/python-virtual-environments-a-primer/
-[dev-server]: http://localhost:7000/
-[git]: https://git-scm.com/
-[github]: https://github.com/opendatateam/udata
-[new issue]: https://github.com/opendatateam/udata/issues/new
-[homebrew]: http://brew.sh/
 [invoke]: http://www.pyinvoke.org/
-[install-virtualenv]: https://virtualenv.pypa.io/en/latest/installation.html
-[nvm-install]: https://github.com/creationix/nvm#installation
