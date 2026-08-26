@@ -1,6 +1,10 @@
 import logging
 import traceback
+from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
+from itertools import chain
+from typing import Concatenate, ParamSpec, TypeVar
 from uuid import UUID
 
 import requests
@@ -10,20 +14,21 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
+from udata.core.harvest import HarvestMetadata
+from udata.core.organization.models import Organization
+from udata.core.user.models import User
 from udata.http import ssrf_session
-from udata.models import Dataset, User
 from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import (
+    Harvestable,
     HarvestError,
     HarvestItem,
     HarvestJob,
     HarvestLog,
-    archive_harvested_dataservice,
-    archive_harvested_dataset,
+    archive_harvested,
 )
 from ..signals import after_harvest_job, before_harvest_job
 
@@ -81,7 +86,16 @@ class HarvestFeature(object):
         }
 
 
-class BaseBackend(object):
+H = TypeVar("H", bound=Harvestable)
+
+ItemProcessorParams = ParamSpec("ItemProcessorParams")
+
+
+class StopHarvest(Exception):
+    pass
+
+
+class BaseBackend(ABC):
     """
     Base class that wrap children methods to add error management and debug logs.
     Also provides a few helpers needed on all or some backends.
@@ -118,6 +132,7 @@ class BaseBackend(object):
             self.job = None
         self.dryrun = dryrun
         self.max_items = max_items or current_app.config["HARVEST_MAX_ITEMS"]
+        self.organizations_to_update = set[Organization]()
         # Harvest source URLs are user-supplied: fetch them through the
         # SSRF-guarded session.
         self.session = ssrf_session()
@@ -176,16 +191,16 @@ class BaseBackend(object):
         if extra_config:
             return extra_config["value"]
 
+    @abstractmethod
     def inner_harvest(self):
-        raise NotImplementedError
+        """
+        Called by the driver to launch the harvest loop.
 
-    def inner_process_dataset(self, item: HarvestItem) -> Dataset:
-        raise NotImplementedError
+        Backend implementations MUST override this method.
+        """
+        raise NotImplementedError()
 
-    def inner_process_dataservice(self, item: HarvestItem) -> Dataservice:
-        raise NotImplementedError
-
-    def harvest(self):
+    def harvest(self) -> HarvestJob:
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status="initialized", started=datetime.now(UTC), source=self.source)
@@ -205,7 +220,13 @@ class BaseBackend(object):
                 )
 
         try:
-            self.inner_harvest()
+            try:
+                self.inner_harvest()
+            except StopHarvest:
+                error = HarvestError(
+                    message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
+                )
+                self.job.errors.append(error)
 
             if self.source.autoarchive:
                 self.autoarchive()
@@ -216,217 +237,177 @@ class BaseBackend(object):
                 self.job.status += "-errors"
 
         except HarvestValidationError as e:
+            self.job.status = "failed"
             log.exception(
                 f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
             )
-
-            self.job.status = "failed"
-
             error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
+
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            self.job.status = "failed"
             log.warning(
                 f'Harvesting connection error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
             )
-
-            self.job.status = "failed"
-
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             self.job.errors.append(error)
+
         except Exception as e:
+            self.job.status = "failed"
             log.exception(
                 f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
             )
-
-            self.job.status = "failed"
-
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             self.job.errors.append(error)
+
         finally:
             self.end_job()
-            # Clean harvest_activity_user on global context
-            if hasattr(g, "harvest_activity_user"):
-                delattr(g, "harvest_activity_user")
 
         return self.job
 
-    def process_dataset(self, remote_id: str, **kwargs):
-        log.debug(f"Processing dataset {remote_id}…")
+    def process_item(
+        self,
+        remote_id: str | None,
+        item_processor: Callable[Concatenate[HarvestItem, ItemProcessorParams], Harvestable],
+        *args: ItemProcessorParams.args,
+        **kwargs: ItemProcessorParams.kwargs,
+    ):
+        # FIXME: use typing.get_type_hints()["return"] or inspect.signature().return_annotation to get item type?
+        log.debug(f"Processing item {remote_id}…")
 
-        # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = self.add_item(
+        # TODO: add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
+        harvest_item = self.add_harvest_item(
             HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         )
 
         log_catcher = LogCatcher()
+        current_app.logger.addHandler(log_catcher)
 
         try:
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            current_app.logger.addHandler(log_catcher)
-            dataset = self.inner_process_dataset(item, **kwargs)
-            if dataset.harvest:
-                item.remote_url = dataset.harvest.remote_url
+            item = item_processor(harvest_item, *args, **kwargs)
 
-            # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
+            if item.organization:
+                item.organization.compute_aggregate_metrics = False
+                self.organizations_to_update.add(item.organization)
 
-            self.ensure_unique_remote_id(item)
+            # IMPORTANT:
+            # Use `harvest_item.remote_id` from this point, because `item_processor()` could have
+            # modified it.
 
-            dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
-            dataset.archived = None
+            # Update `remote_url` right away so it's available even if later code raises
+            harvest_item.remote_url = item.harvest.remote_url
+
+            self.ensure_unique_remote_id(harvest_item)
+
+            item.harvest = self.update_harvest_metadata(item.harvest, harvest_item.remote_id)
+            item.archived_at = None
 
             # TODO: Apply editable mappings
 
             if self.dryrun:
-                dataset.validate()
-                # A preview never saves, so the dataset would keep no pk and could not
-                # be referenced by a dataservice harvested in the same run. Give it the
+                item.validate()
+                # A preview never saves, so the item would keep no pk and could not
+                # be referenced by another item harvested in the same run. Give it the
                 # client-side id that save() would have generated so cross-references
                 # between previewed objects stay valid and distinct.
-                if dataset.pk is None:
-                    dataset.id = ObjectId()
+                if item.pk is None:
+                    item.id = ObjectId()
             else:
-                dataset.save()
-            item.dataset = dataset
-            item.status = "done"
+                item.save()
+
+            # FIXME: consolidate to a single field?
+            if isinstance(item, Dataset):
+                harvest_item.dataset = item
+            elif isinstance(item, Dataservice):
+                harvest_item.dataservice = item
+
+            harvest_item.status = "done"
+
         except HarvestSkipException as e:
-            item.status = "skipped"
+            harvest_item.status = "skipped"
+            log.info(f"Skipped item {harvest_item.remote_id} : {safe_unicode(e)}")
+            harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
-            log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
         except HarvestValidationError as e:
-            item.status = "failed"
+            harvest_item.status = "failed"
+            log.info(f"Error validating item {harvest_item.remote_id} : {safe_unicode(e)}")
+            harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
-            log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
-            item.status = "failed"
-            log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
-
+            harvest_item.status = "failed"
+            log.exception(f"Error while processing {harvest_item.remote_id} : {safe_unicode(e)}")
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            item.errors.append(error)
+            harvest_item.errors.append(error)
+
         finally:
             current_app.logger.removeHandler(log_catcher)
-            item.ended = datetime.now(UTC)
-            item.logs = [
-                HarvestLog(level=record.levelname, message=record.getMessage())
-                for record in log_catcher.records
-            ]
-            self.save_job()
+            self.end_process_item(harvest_item, log_catcher.records)
 
-    def has_reached_max_items(self) -> bool:
-        """Should be called after process_dataset to know if we reach the max items"""
-        return self.max_items and len(self.job.items) >= self.max_items
-
-    def process_dataservice(self, remote_id: str, **kwargs) -> None:
-        log.debug(f"Processing dataservice {remote_id}…")
-
-        # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = self.add_item(
-            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        )
-
-        try:
-            if not remote_id:
-                raise HarvestSkipException("missing identifier")
-
-            dataservice = self.inner_process_dataservice(item, **kwargs)
-            if dataservice.harvest:
-                item.remote_url = dataservice.harvest.remote_url
-
-            self.ensure_unique_remote_id(item)
-
-            dataservice.harvest = self.update_dataservice_harvest_info(
-                dataservice.harvest, remote_id
-            )
-            dataservice.archived_at = None
-
-            # TODO: Apply editable mappings
-
-            if self.dryrun:
-                dataservice.validate()
-            else:
-                dataservice.save()
-            item.dataservice = dataservice
-            item.status = "done"
-        except HarvestSkipException as e:
-            item.status = "skipped"
-
-            log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except HarvestValidationError as e:
-            item.status = "failed"
-
-            log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except Exception as e:
-            item.status = "failed"
-            log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
-
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            item.errors.append(error)
-        finally:
-            item.ended = datetime.now(UTC)
-            self.save_job()
-
-    def ensure_unique_remote_id(self, item):
-        if item.remote_id in self.remote_ids:
-            raise HarvestValidationError(f"Identifier '{item.remote_id}' already exists")
-
-        self.remote_ids.add(item.remote_id)
-
-    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: str):
-        if not harvest:
-            harvest = HarvestDatasetMetadata()
-
-        harvest.backend = self.display_name
-        harvest.source_id = str(self.source.id)
-        harvest.remote_id = remote_id
-        harvest.domain = self.source.domain
-        harvest.last_update = datetime.now(UTC)
-        harvest.archived_at = None
-        harvest.archived = None
-
-        # created_at, modified_at, remote_url, uri, dct_identifier are set in `dataset_from_rdf`
-
-        return harvest
-
-    def update_dataservice_harvest_info(
-        self, harvest: HarvestDataserviceMetadata | None, remote_id: str
-    ):
-        if not harvest:
-            harvest = HarvestDataserviceMetadata()
-
-        harvest.backend = self.display_name
-        harvest.domain = self.source.domain
-
-        harvest.source_id = str(self.source.id)
-        harvest.source_url = str(self.source.url)
-
-        harvest.remote_id = remote_id
-        harvest.last_update = datetime.now(UTC)
-
-        harvest.archived_at = None
-        harvest.archived_reason = None
-
-        return harvest
-
-    def add_item(self, item: HarvestItem) -> HarvestItem:
-        self.job.items.append(item)
+    def end_process_item(self, harvest_item: HarvestItem, logs: list[logging.LogRecord]):
+        harvest_item.ended = datetime.now(UTC)
+        harvest_item.logs = [
+            HarvestLog(level=log.levelname, message=log.getMessage()) for log in logs
+        ]
         self.save_job()
-        return item
+        if self.max_items and len(self.job.items) >= self.max_items:
+            raise StopHarvest()
+
+    def ensure_unique_remote_id(self, harvest_item: HarvestItem):
+        if harvest_item.remote_id in self.remote_ids:
+            raise HarvestValidationError(f"Identifier '{harvest_item.remote_id}' already exists")
+
+        self.remote_ids.add(harvest_item.remote_id)
+
+    def update_harvest_metadata(self, metadata: HarvestMetadata, remote_id: str) -> HarvestMetadata:
+        metadata.backend = self.display_name or "unknown"
+        metadata.domain = self.source.domain
+        metadata.source_id = str(self.source.id)
+        metadata.source_url = str(self.source.url)
+        metadata.remote_id = remote_id
+        metadata.last_update = datetime.now(UTC)
+        metadata.archived_at = None
+        metadata.archived_reason = None
+
+        # created_at, modified_at, remote_url, uri, dct_identifier are set in `*_from_rdf`
+
+        return metadata
+
+    def add_harvest_item(self, harvest_item: HarvestItem) -> HarvestItem:
+        self.job.items.append(harvest_item)
+        self.save_job()
+        return harvest_item
 
     def save_job(self):
         if not self.dryrun:
             self.job.save()
 
     def end_job(self):
+        self.inner_end_job()
+        self.update_harvested_organizations()
         self.job.ended = datetime.now(UTC)
         if not self.dryrun:
             self.job.save()
-
         after_harvest_job.send(self)
+        # Clean harvest_activity_user on global context
+        if hasattr(g, "harvest_activity_user"):
+            delattr(g, "harvest_activity_user")
+
+    def inner_end_job(self):
+        """
+        Called by the driver at the end of a job, right before the job is marked as completed.
+
+        Backend implementations can safely override this method to perform finishing operations.
+        """
+        pass
+
+    def update_harvested_organizations(self):
+        for org in self.organizations_to_update:
+            org.compute_aggregate_metrics = True
+            org.count_datasets()
+            org.count_dataservices()
 
     def autoarchive(self):
         """
@@ -445,41 +426,37 @@ class BaseBackend(object):
         local_datasets_not_on_remote = Dataset.objects.filter(**q)
         local_dataservices_not_on_remote = Dataservice.objects.filter(**q)
 
-        for dataset in local_datasets_not_on_remote:
-            if not dataset.harvest.archived_at:
-                archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
+        for key, obj in chain(
+            (("dataset", d) for d in local_datasets_not_on_remote),
+            (("dataservice", d) for d in local_dataservices_not_on_remote),
+        ):
+            if not obj.harvest.archived_at:
+                archive_harvested(obj, reason="not-on-remote", dryrun=self.dryrun)
+
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.add_item(
+            self.add_harvest_item(
                 HarvestItem(
-                    remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
+                    **{
+                        "remote_id": str(obj.harvest.remote_id),
+                        key: obj,  # FIXME: consolidate?
+                        "status": "archived",
+                    }
                 )
             )
 
-        for dataservice in local_dataservices_not_on_remote:
-            if not dataservice.harvest.archived_at:
-                archive_harvested_dataservice(
-                    dataservice, reason="not-on-remote", dryrun=self.dryrun
-                )
-            # add a HarvestItem to the job list (useful for report)
-            # even when archiving has already been done (useful for debug)
-            self.add_item(
-                HarvestItem(
-                    remote_id=str(dataservice.harvest.remote_id),
-                    dataservice=dataservice,
-                    status="archived",
-                )
-            )
-
-    def get_dataset(self, remote_id):
-        """Get or create a dataset given its remote ID (and its source)
-        We first try to match `source_id` to be source domain independent
+    def get_item(self, remote_id: str, item_class: type[H]) -> H:
         """
+        Get or create a `item_class` given its remote ID (and its source).
+
+        Backend implementations MUST call this method in their `item_processor`.
+        """
+        # We first try to match `source_id` to be source domain independent.
         try:
             uris.validate(remote_id)
-            dataset = Dataset.objects(harvest__remote_id=remote_id).first()
+            item = item_class.objects(harvest__remote_id=remote_id).first()
         except uris.ValidationError:
-            dataset = Dataset.objects(
+            item = item_class.objects(
                 __raw__={
                     "harvest.remote_id": remote_id,
                     "$or": [
@@ -489,43 +466,20 @@ class BaseBackend(object):
                 }
             ).first()
 
-        if dataset:
-            self.ensure_unique_ownership(dataset)
-            return dataset
-
-        if self.source.organization:
-            return Dataset(organization=self.source.organization)
+        if item:
+            self.ensure_unique_ownership(item)
+        elif self.source.organization:
+            item = item_class(organization=self.source.organization)
         elif self.source.owner:
-            return Dataset(owner=self.source.owner)
+            item = item_class(owner=self.source.owner)
+        else:
+            item = item_class()
 
-        return Dataset()
+        item.set_harvested()
 
-    def get_dataservice(self, remote_id):
-        """Get or create a dataservice given its remote ID (and its source)
-        We first try to match `source_id` to be source domain independent
-        """
-        dataservice = Dataservice.objects(
-            __raw__={
-                "harvest.remote_id": remote_id,
-                "$or": [
-                    {"harvest.domain": self.source.domain},
-                    {"harvest.source_id": str(self.source.id)},
-                ],
-            }
-        ).first()
+        return item
 
-        if dataservice:
-            self.ensure_unique_ownership(dataservice)
-            return dataservice
-
-        if self.source.organization:
-            return Dataservice(organization=self.source.organization)
-        elif self.source.owner:
-            return Dataservice(owner=self.source.owner)
-
-        return Dataservice()
-
-    def ensure_unique_ownership(self, item):
+    def ensure_unique_ownership(self, item: Harvestable):
         """Raise if item already belongs to some other owner.
 
         Ressources (datasets, services, ...) must have universally unique
@@ -541,11 +495,11 @@ class BaseBackend(object):
             other_owner = item.organization
         elif item.owner and item.owner != self.source.owner:
             other_owner = item.owner
-        else:
-            return
-        raise HarvestValidationError(
-            f"Item has another owner: {other_owner.page() or other_owner.id}"
-        )
+
+        if other_owner:
+            raise HarvestValidationError(
+                f"Item has another owner: {other_owner.page() or other_owner.id}"
+            )
 
     def validate(self, data, schema):
         """Perform a data validation against a given schema.

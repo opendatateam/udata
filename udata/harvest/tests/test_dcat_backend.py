@@ -119,7 +119,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
-            assert d.harvest.archived is None
+            assert d.harvest.archived_reason is None
 
         # First dataset
         dataset = datasets["1"]
