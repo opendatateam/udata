@@ -77,8 +77,11 @@ pip install --group dev -e .
 
 You can find [common errors and workarounds for MacOS on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
-!!! info
-    With `uv`, the virtual environment is managed automatically. With `pip`, you need to activate the virtualenv manually: `source .venv/bin/activate`.
+!!! info "About the `uv run` prefix"
+    The rest of this guide prefixes every command with `uv run`, which runs it in the
+    project virtualenv without activating it. If you installed with `pip`, activate the
+    virtualenv once (`source .venv/bin/activate`) and drop the prefix: `udata init`,
+    `inv serve`, etc.
 
 ## Configure udata
 
@@ -108,8 +111,8 @@ HARVEST_MAX_ITEMS = 100
 
 DEBUG = True
 SEND_MAIL = False
-SERVER_NAME ='dev.local:7000'
-CDATA_BASE_URL = 'http://localhost:3000'
+SERVER_NAME = 'dev.local:7000'
+CDATA_BASE_URL = 'http://dev.local:3000'
 CACHE_TYPE = 'flask_caching.backends.null'
 
 URLS_ALLOW_PRIVATE = True
@@ -127,6 +130,12 @@ This defines `dev.local:7000` as the URL for your local setup. You’ll have to 
 127.0.0.1       dev.local
 ```
 
+!!! warning "Use the same hostname for udata and cdata"
+    Browser cookies ignore ports but not hostnames. If you serve udata on `dev.local:7000`
+    and open cdata on `localhost:3000`, the session cookie set by udata is never sent back
+    by the browser and you stay logged out, whatever the CORS settings. Both must use the
+    same hostname: `dev.local:7000` and `dev.local:3000`.
+
 !!! WARNING
     For MacOS users, please note that the [control center is listening on port 7000](https://discussions.apple.com/thread/250472145?sortBy=rank),
     so the above won't work. Instead, configure for example port `7001` in the `udata.cfg` file.
@@ -137,7 +146,7 @@ You need to initialize some data before being able to use udata. The following c
 will initialize database, indexes, create fixtures, etc.
 
 ```shell
-udata init
+uv run udata init
 ```
 
 !!! note "Fixtures loading"
@@ -148,7 +157,7 @@ udata init
 You can then start udata server with the `serve` subcommand.
 
 ```shell
-inv serve
+uv run inv serve
 ```
 
 !!! WARNING
@@ -157,7 +166,7 @@ inv serve
     of the documentation and examples.
 
     ```shell
-    inv serve --port 7001
+    uv run inv serve --port 7001
     ```
 
 Now, you can use your udata API!
@@ -169,23 +178,51 @@ curl http://dev.local:7000/api/1/datasets/
 You can see API endpoints by going to [http://dev.local:7000/api/1/](http://dev.local:7000/api/1/) in
 your browser.
 
-Workers are required to execute tasks (search indexation, etc.).
+Workers are required to execute asynchronous tasks (search indexation, etc.). Start one in
+another terminal:
 
-With `uv`:
 ```shell
 cd $UDATA_WORKSPACE/udata
 uv run inv work
 ```
 
-With `pip` (if not already activated):
+# Running udata without a frontend
+
+You now have a working udata instance, without any frontend. This is enough for most
+testing needs, since everything udata does is reachable from the API and the command line:
+
 ```shell
-cd $UDATA_WORKSPACE/udata
-source .venv/bin/activate
-inv work
+# Browse and exercise the API
+curl http://dev.local:7000/api/1/datasets/
+
+# Create an API token from an account you own, then use it as a bearer token
+curl -H "Authorization: Bearer <token>" http://dev.local:7000/api/1/me/
+
+# Create a harvester and run it synchronously, as many times as you need
+uv run udata harvest create dcat https://example.org/catalog.rdf "My harvester"
+uv run udata harvest sources
+uv run udata harvest run <source-id>
+
+# Inspect the database with the models loaded
+uv run udata shell
 ```
 
-!!! info
-    You now have a working udata instance but no frontend for the platform.
+!!! tip "Debugging a harvester"
+    `udata harvest run` is synchronous: it needs no worker and prints everything to your
+    terminal, which makes it the fastest way to replay a harvest against a remote catalog
+    and read the errors.
+
+!!! warning "Enable the backend first"
+    No harvester backend is enabled by default. `harvest create` accepts any backend name,
+    but `harvest run` then fails with `Backend dcat unknown. Make sure it is declared in
+    HARVESTER_BACKENDS.` if it is not enabled. The sample `udata.cfg` above enables `dcat`;
+    add the others you need (`HARVESTER_BACKENDS = ['dcat', 'csw*']`), see
+    [harvesting](harvesting.md).
+
+See [administrative tasks](administrative-tasks.md) for the other commands, [API tokens](api-tokens.md)
+to authenticate your calls and [harvesting](harvesting.md) for the harvesters.
+
+Install cdata below only if you need the web interface itself.
 
 # Install cdata frontend (formerly udata-front)
 
@@ -209,13 +246,7 @@ cd $UDATA_WORKSPACE
 git clone git@github.com:datagouv/cdata.git
 ```
 
-Modify your `udata.cfg` with the following lines.
-
-```shell
-THEME = 'gouvfr'
-```
-
-The last thing to do is to install the frontend [cdata][] packages using [pnpm][].
+Then install its packages using [pnpm][].
 
 !!! info
     cdata uses Node.js, so make sure you have the correct Node.js version installed. Don't forget to run `nvm use` when switching to the cdata directory.
@@ -228,21 +259,46 @@ nvm use
 pnpm install
 ```
 
-Once it's done, you should be able to run the build commands for JavaScript and CSS in cdata.
-Check the [cdata repository][cdata] documentation for the specific build commands.
-
 ## Start udata with cdata
 
-To start udata, the inv command is the same.
+udata and cdata are two separate servers: udata no longer renders any page, it only serves
+the API that cdata calls. You need both running, each in its own terminal.
 
 ```shell
+# Terminal 1: the udata API, on dev.local:7000
 cd $UDATA_WORKSPACE/udata
-inv serve
+uv run inv serve
 ```
 
-You can now visit `dev.local:7000/` in your browser and start playing with your udata instance.
+```shell
+# Terminal 2: the cdata frontend, on dev.local:3000
+cd $UDATA_WORKSPACE/cdata
+pnpm run build
+pnpm run preview
+```
 
-For watching and building frontend assets, check the [cdata repository][cdata] documentation for the specific commands.
+By default cdata calls the API on `http://dev.local:7000`, which matches the `SERVER_NAME`
+set above. `NUXT_PUBLIC_API_BASE` is read when the server starts, not baked at build time,
+so you can point the same build at another instance:
+
+```shell
+NUXT_PUBLIC_API_BASE=http://dev.local:7001 pnpm run preview
+```
+
+!!! info "`preview` or `dev`?"
+    `pnpm run build` + `pnpm run preview` serves the production build — this is what cdata's
+    own end-to-end suite runs against, and what is deployed. Prefer it to run an instance:
+    pages are served already compiled, and you avoid the file-watcher issues that come with
+    the dev server. Use `pnpm run dev` when you are working on cdata itself and want hot
+    reload, rebuilding after each change otherwise.
+
+You can now visit [http://dev.local:3000/](http://dev.local:3000/) in your browser and start
+playing with your instance.
+
+!!! warning
+    Open `dev.local:3000`, not `localhost:3000`. Both resolve to the same server, but the
+    session cookie is set on the `dev.local` host: reaching cdata through `localhost` logs
+    you out on every API call.
 
 !!! note "Tell us what you think"
     You are always welcome to tell us about your experience _installing udata_.
@@ -253,7 +309,7 @@ For watching and building frontend assets, check the [cdata repository][cdata] d
 You can rebuild the search index with the following command.
 
 ```shell
-udata search index
+uv run udata search index
 ```
 
 Finally, you can see other administrative tasks in [administrative-tasks](administrative-tasks.md)

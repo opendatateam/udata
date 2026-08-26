@@ -1,31 +1,11 @@
-# Versioning and deprecating
+# Releasing
 
-## Versioning process
+Every release is a git tag `vX.Y.Z` on `main`, following
+[Python PEP 440 on versioning][pep440]. Between two tags, the version is computed by
+`setuptools_scm` as the next patch plus the number of commits since the tag
+(`17.6.1.dev1`), so you can always tell you are not on a stable release.
 
-udata follows [Python PEP 440 on versioning][pep440] to version its published releases.
-
-### Branches management
-
-There is a main branch on the [udata git repository][github], `main` and some temporary feature branches.
-
-The `main` is the stable development branch on which:
-
-- bug fixes should occur (unless the bug is only present on a maintenance branch)
-- security upgrades are done (unless only necessary on a maintenance branch)
-- the incoming new features (and their bug fixes)
-- the refactoring
-- the dependencies upgrades
-- translations are done
-- releases are done
-
-Every version has a git tag `vX.Y.Z`.
-
-Otherwise the version is `X.Y.Z.dev` (1.1.7.dev) so you can easily see when you are not using a stable release.
-
-The contents of each version (expected or real) is tracked trough [issues][], [pull requests][pulls] and sometimes [discussions][].
-
-
-## Releasing
+## Release process
 
 udata uses a custom release script (`tag-version.sh`) to automate its release process.
 
@@ -49,29 +29,22 @@ The steps to make a release are:
     - push both the commit and the tag to origin
     - create a GitHub release with the same changelog content
 5. check on [github][] that the release has been created
-6. wait for [CircleCI][] tagged build to succeed
+6. wait for the [CircleCI][] build of the changelog commit on `main` to succeed — this is what
+   publishes to PyPI, tagged builds don't publish
 7. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
 8. celebrate!
 
-## Feature branches
+## Breaking changes
 
-Sometimes a new feature or an EPIC requires more than one pull request and a lot of testing.
-For these cases, it's not desirable to use the `main` branch to test until it's stable because we want to keep the `main` branch as stable as possible.
+There is no deprecation window: something that is removed is removed in the release that
+removes it. What is guaranteed instead is that every breaking change ships in a **major**
+version, and is announced.
 
-To handle these cases we are using feature branches, named like `feature/my-feature`. These branches will build on CircleCI and produce a [local version](pep440-local) package.
-
-The local identifier will be the feature branch name so the version number will be `X.Y.Z.devBBB+my-feature` where `BBB` is the build number.
-
-## Deprecation policy
-
-**When it's possible** deprecations are published 2 minor versions before being really dropped.
-It's up to the developers and system administrators to read the [changelog](changelog.md) before upgrading
-(deprecations and breaking changes are published).
+Mark a breaking pull request with a `!` in its conventional commit prefix (`feat!:`,
+`refactor!:`). `tag-version.sh` detects it, puts the entry first and in bold at the top of the
+release notes. Read the [changelog](changelog.md) before upgrading: this is where breaking
+changes, renamed settings and required migrations are documented.
 
 [github]: https://github.com/opendatateam/udata
-[issues]: https://github.com/opendatateam/udata/issues
-[pulls]: https://github.com/opendatateam/udata/pulls
-[discussions]: https://github.com/opendatateam/udata/discussions
 [CircleCI]: https://circleci.com/gh/opendatateam/udata
 [pep440]: https://www.python.org/dev/peps/pep-0440/
-[pep440-local]: https://www.python.org/dev/peps/pep-0440/#local-version-segments

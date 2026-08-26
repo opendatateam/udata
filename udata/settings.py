@@ -209,7 +209,6 @@ class Defaults(object):
     DATASET_HIDDEN_BADGES = []
 
     HARVESTER_BACKENDS = []
-    THEME = None
 
     STATIC_DIRS = []
 
@@ -316,9 +315,6 @@ class Defaults(object):
     #         {"value": "notspecified"}])
     # ]
     LICENSE_GROUPS = None
-
-    # Cache duration for templates.
-    TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
@@ -712,8 +708,6 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     HARVESTER_BACKENDS = ["factory"]
-    TEST_WITH_THEME = False
-    THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
