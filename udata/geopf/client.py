@@ -13,7 +13,6 @@ from udata.geopf.srs import DEFAULT_SRS
 log = logging.getLogger(__name__)
 
 POLL_INTERVAL = 10  # seconds between status checks
-POLL_TIMEOUT = 1800  # seconds, default 30 minutes; override via GEOPF_POLL_TIMEOUT config
 
 # Error response bodies are stored and re-exposed via the public status API ,
 # so bound how much of an untrusted upstream response we repeat (avoids sensitive tracebacks)
@@ -65,7 +64,7 @@ class GeopfClient:
         """
         self.base = current_app.config["GEOPF_API_BASE"]
         self.datastore = datastore_id
-        self.poll_timeout = current_app.config.get("GEOPF_POLL_TIMEOUT", POLL_TIMEOUT)
+        self.poll_timeout = current_app.config["GEOPF_POLL_TIMEOUT"]
         self.session = _TimeoutSession(timeout=current_app.config["GEOPF_REQUEST_TIMEOUT"])
         if token:
             self.session.headers["Authorization"] = f"Bearer {token}"

@@ -18,7 +18,6 @@ from udata.utils import get_by
 
 from .auth import resolve_access_token
 from .client import (
-    POLL_TIMEOUT,
     GeopfClient,
     GeopfError,
     GeopfReauthRequired,
@@ -98,7 +97,7 @@ def push_resource_to_geopf(
         try:
             # The token must outlive the pipeline: up to one full poll for
             # checks plus one for processing.
-            poll_timeout = current_app.config.get("GEOPF_POLL_TIMEOUT", POLL_TIMEOUT)
+            poll_timeout = current_app.config["GEOPF_POLL_TIMEOUT"]
             access_token = resolve_access_token(user=user, min_validity=2 * poll_timeout)
         except GeopfReauthRequired as e:
             log.error(

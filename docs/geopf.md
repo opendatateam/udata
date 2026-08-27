@@ -217,6 +217,9 @@ GEOPF_MAX_FILE_SIZE = 1_000_000_000  # default, 1 GB
 # Per-request timeout (seconds) for calls to the geopf API
 GEOPF_REQUEST_TIMEOUT = 120  # default
 
+# Max duration (seconds) of an upload-checks or processing poll loop
+GEOPF_POLL_TIMEOUT = 1800  # default, 30 minutes
+
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"
