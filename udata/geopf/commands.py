@@ -21,16 +21,21 @@ def _require_datastore_id(datastore_id: str | None) -> str:
     return datastore_id
 
 
-def _resolve_token_option(user_id: str | None, token: str | None) -> str:
-    """Resolve --user-id/--token CLI options to a usable access token."""
+def _check_credentials(user_id: str | None, token: str | None) -> None:
+    """Validate --user-id/--token CLI options: exactly one, and if --user-id, that the
+    user exists."""
     if bool(user_id) == bool(token):
         raise click.ClickException("Provide exactly one of --user-id or --token")
+    if user_id and not User.objects(id=user_id).first():
+        raise click.ClickException(f"User {user_id} not found")
+
+
+def _resolve_token_option(user_id: str | None, token: str | None) -> str:
+    """Resolve --user-id/--token CLI options to a usable access token."""
+    _check_credentials(user_id, token)
     if token:
         return token
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        raise click.ClickException(f"User {user_id} not found")
+    user = User.objects.get(id=user_id)
     try:
         return resolve_access_token(user=user)
     except GeopfReauthRequired as e:
@@ -54,11 +59,7 @@ datastore_id_option = click.option("--datastore-id", help="Datastore to push int
 @datastore_id_option
 def push_resource(dataset_id, resource_id, user_id, token, datastore_id):
     """Push a GPKG resource to Géoplateforme (runs synchronously)."""
-    if bool(user_id) == bool(token):
-        raise click.ClickException("Provide exactly one of --user-id or --token")
-    if user_id and not User.objects(id=user_id).first():
-        raise click.ClickException(f"User {user_id} not found")
-
+    _check_credentials(user_id, token)
     datastore_id = _require_datastore_id(datastore_id)
     push_resource_to_geopf(dataset_id, resource_id, user_id, datastore_id, token)
 
@@ -94,10 +95,6 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
 @token_option
 def pull_offerings(dataset_id, user_id, token):
     """Pull Géoplateforme offerings into resources for a dataset (runs synchronously)."""
-    if bool(user_id) == bool(token):
-        raise click.ClickException("Provide exactly one of --user-id or --token")
-    if user_id and not User.objects(id=user_id).first():
-        raise click.ClickException(f"User {user_id} not found")
-
+    _check_credentials(user_id, token)
     n = pull_offerings_from_geopf(dataset_id, user_id, token)
     click.echo(f"pulled={n} offerings for dataset {dataset_id}")
