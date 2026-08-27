@@ -6,6 +6,7 @@ from flask_storage.errors import OperationNotSupported
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
+from udata.core.user.factories import UserFactory
 from udata.geopf.client import GeopfError, GeopfTimeoutError
 from udata.geopf.models import (
     GeopfDatasetMetadata,
@@ -17,6 +18,7 @@ from udata.geopf.models import (
     dataset_push_metadata,
     resource_offering_metadata,
 )
+from udata.geopf.srs import DEFAULT_SRS
 from udata.geopf.tasks import (
     _DownloadToTempfile,
     _LocalStorageToTempfile,
@@ -321,6 +323,12 @@ class RunPipelineTest(PytestOnlyDBTestCase):
             _run_pipeline(dataset, resource, "ds-1", client)
 
         client.delete_upload.assert_called_once_with("upload-1")
+        client.create_upload.assert_called_once_with(
+            name=f"_{resource.id}", description=dataset.title, srs=DEFAULT_SRS
+        )
+        client.launch_processing.assert_called_once_with(
+            "upload-1", f"_{resource.id}", srs=DEFAULT_SRS
+        )
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)
         assert r.geopf.push.status == "done"
@@ -502,6 +510,28 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
 
         mock_pipeline.assert_not_called()
 
+    def test_user_id_resolves_stored_token(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+        user = UserFactory()
+
+        with patch(
+            "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
+        ) as mock_resolve:
+            with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
+                with patch("udata.geopf.tasks._run_pipeline"):
+                    push_resource_to_geopf.apply(
+                        args=[str(dataset.id), resource_id],
+                        kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
+                    )
+
+        mock_resolve.assert_called_once()
+        assert mock_resolve.call_args.kwargs["user"].id == user.id
+        mock_client_cls.assert_called_once_with(
+            token="resolved-token", datastore_id=TEST_DATASTORE_ID
+        )
+
 
 @TEST_GEOPF_CONF
 class PullOfferingsTaskTest(PytestOnlyDBTestCase):
@@ -531,3 +561,19 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
         dataset.reload()
         assert dataset.geopf.pull.status == "error"
         assert "boom" in (dataset.geopf.pull.error or "")
+
+    def test_user_id_resolves_stored_token(self):
+        dataset = DatasetFactory()
+        user = UserFactory()
+
+        with patch(
+            "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
+        ) as mock_resolve:
+            with patch("udata.geopf.tasks.pull_offerings_for_dataset", return_value=0) as mock_pull:
+                pull_offerings_from_geopf.apply(
+                    args=[str(dataset.id)], kwargs={"user_id": str(user.id)}, throw=True
+                )
+
+        mock_resolve.assert_called_once()
+        assert mock_resolve.call_args.kwargs["user"].id == user.id
+        mock_pull.assert_called_once_with(dataset, "resolved-token")
