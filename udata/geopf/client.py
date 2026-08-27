@@ -252,8 +252,9 @@ class GeopfClient:
         return resp.json()["_id"]
 
     def _find_metadata_id(self, file_identifier: str) -> str | None:
-        resp = self.session.get(self._url("metadata"))
+        resp = self.session.get(self._url("metadata"), params={"file_identifier": file_identifier})
         self._raise(resp)
+        # `file_identifier` can be a partial match, need to check equality
         for item in resp.json():
             if item.get("file_identifier") == file_identifier:
                 return item["_id"]
