@@ -224,7 +224,7 @@ GEOPF_OAUTH_SCOPE = "openid"  # default
 GEOPF_TOKEN_ENCRYPTION_KEY = "<fernet key>"
 ```
 
-The plugin is registered as a udata entry point (`udata.plugins`) and activated by adding `geopf` to the `PLUGINS` list. Note that the API endpoints (`udata/geopf/api.py`) are always registered as a core namespace, regardless of plugin activation; only the OAuth client registration and the config-gated behavior are conditional.
+`geopf` is a regular core module. Its API endpoints (`udata/geopf/api.py`) are always registered, and the OAuth client only activates itself when `GEOPF_OAUTH_OPENID_CONF_URL` is set.
 
 ## Limitations
 
