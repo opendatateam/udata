@@ -193,6 +193,24 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json == {"success": True}
 
+    def test_authorization_head(self, oauth):
+        """Should answer HEAD requests, which Flask routes alongside GET"""
+        self.login()
+
+        response = self.client.head(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                redirect_uri=oauth.default_redirect_uri,
+                code_challenge=create_s256_code_challenge(generate_token(48)),
+                code_challenge_method="S256",
+            )
+        )
+
+        assert200(response)
+        assert response.data == b""
+
     def test_authorization_decline(self, oauth):
         """Should redirect to the redirect_uri on authorization denied"""
         self.login()

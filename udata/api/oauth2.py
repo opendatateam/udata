@@ -348,21 +348,7 @@ def client_info(*args, **kwargs):
 @blueprint.route("/authorize", methods=["GET", "POST"])
 @login_required
 def authorize(*args, **kwargs):
-    if request.method == "GET":
-        try:
-            grant = oauth.get_consent_grant(end_user=current_user)
-        except OAuth2Error as error:
-            return oauth_error_response(error)
-        # Bypass authorization screen for internal clients
-        # It's not used right now…
-        if grant.client.internal:
-            return oauth.create_authorization_response(grant_user=current_user)
-
-        if wants_json():
-            return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
-
-        return render_template("api/oauth_authorize.html", grant=grant)
-    elif request.method == "POST":
+    if request.method == "POST":
         accept = "accept" in request.form
         decline = "decline" in request.form
         if accept and not decline:
@@ -370,6 +356,23 @@ def authorize(*args, **kwargs):
         else:
             grant_user = None
         return oauth.create_authorization_response(grant_user=grant_user)
+
+    # GET, and HEAD which Flask routes here too since it always adds HEAD
+    # alongside GET. RFC 9110 §9.3.2 requires HEAD to behave like GET, minus
+    # the response body, which Werkzeug strips for us.
+    try:
+        grant = oauth.get_consent_grant(end_user=current_user)
+    except OAuth2Error as error:
+        return oauth_error_response(error)
+    # Bypass authorization screen for internal clients
+    # It's not used right now…
+    if grant.client.internal:
+        return oauth.create_authorization_response(grant_user=current_user)
+
+    if wants_json():
+        return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
+
+    return render_template("api/oauth_authorize.html", grant=grant)
 
 
 def query_client(client_id):
