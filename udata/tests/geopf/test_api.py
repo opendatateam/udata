@@ -456,7 +456,15 @@ class GeopfDatasetStatusApiTest(APITestCase):
         dataset = HiddenDatasetFactory(owner=owner)
 
         response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
-        self.assert403(response)
+        # 404, not 403, so a private dataset's existence isn't leaked to non-owners
+        self.assert404(response)
+
+    def test_deleted_public_dataset_returns_410(self):
+        self.login()
+        dataset = DatasetFactory(deleted=datetime.now(UTC))
+
+        response = self.get(url_for("api.geopf_dataset_status", dataset=dataset))
+        self.assert410(response)
 
     def test_empty_dataset(self):
         user = self.login()
