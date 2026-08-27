@@ -44,7 +44,6 @@ We’re using the infamous [simplified Github workflow][simplified-github-workfl
 * create a branch (optionally with the reference to the issue in the name)
 * hack hack hack
 * commit incrementally with readable and detailed commit messages
-* add the change to the `CHANGELOG.md` file if appropriated
 * submit a pull-request against the right branch of this repository:
     * `main` for new features or bug fixes for the current state
     * `vX.Y` for bugfixes or backports on previous versions
@@ -58,6 +57,12 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 ### Merging
 
 When the PR has been approved (at least once), you are free to merge it in main. We have a squash & merge strategy and pay attention to having a clean commit message. You can then delete the branch. If linked with an issue, the issue should be closed automatically.
+
+`CHANGELOG.md` is never edited by hand: it is generated at release time by `tag-version.sh`
+from the squashed commit subjects, which are the PR titles. This is why the title of your PR
+matters — write it as the changelog entry you want to read, following
+[conventional commits](https://www.conventionalcommits.org/) (`fix:`, `feat:`, `feat!:` for a
+breaking change).
 
 ## Discussing strategies
 
@@ -84,10 +89,6 @@ ruff format .
 > WARNING: running `ruff` on the codebase will lint and format all of it, whereas using `pre-commit` will
   only be done on the staged files.
 
-### HTML and CSS code guide
-
-We follow @mdo's [code guide][code-guide].
-
 ### Documentation syntax
 
 We try to stay as close as possible to [CommonMark][] but use default [extensions proposed by MkDocs][extensions-mkdocs].
@@ -99,7 +100,6 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [PEP-0257]: https://www.python.org/dev/peps/pep-0257/
 [PEP-0020]: https://www.python.org/dev/peps/pep-0020/
 [py-style-guide]: https://google.github.io/styleguide/pyguide.html
-[code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721

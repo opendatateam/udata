@@ -48,18 +48,6 @@ The app refuses to start without it.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### THEME
-
-**default**: `None`
-
-The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
-
-### TEMPLATE_CACHE_DURATION
-
-**default**: `5`
-
-The duration used for templates' cache, in minutes.
-
 ### ALLOWED_RESOURCES_EXTENSIONS
 
 **default**:
@@ -567,9 +555,6 @@ SERVER_NAME = 'www.data.dev'
 DEFAULT_LANGUAGE = 'fr'
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'data.dev'
-SITE_URL = 'www.data.dev'
-
-DEBUG_TOOLBAR = True
 
 FS_PREFIX = '/s'
 FS_ROOT = '/srv/http/www.data.dev/fs'

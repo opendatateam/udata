@@ -51,10 +51,6 @@ $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
 ```
-You can also install the extensions you want:
-```shell
-$ pip install udata-piwik
-```
 
 !!! note
     We install Cython before all other dependencies because
@@ -92,13 +88,18 @@ You can use whatever stack you want to run udata, nginx or Apache 2 as reverse p
 
 All you need to remember is that udata requires at least 3 services to run:
 
-- a web frontend using the `udata.wsgi` WSGI entry point.
+- a web application using the `udata.wsgi` WSGI entry point, serving the API
 - a worker service using [celery][]
 - a beat/cron service using [celery][] too
 
+!!! info
+    udata is a backend only: it serves the API and the uploaded files, not the web
+    interface. The pages of data.gouv.fr are rendered by [cdata][], a separate Nuxt
+    application deployed on its own, which calls this API.
+
 We give you an example for a `udata` user serving a `data.example.com` domain from `/srv/udata` on a single server with:
 
-- [nginx][] + [uWSGI][] to run the frontend,
+- [nginx][] + [uWSGI][] to run the API,
 - systemd handling both the worker and the beat services,
 - the middlewares running on the same host.
 
@@ -111,11 +112,11 @@ $ apt-get install nginx-full uwsgi uwsgi-plugin-python3
 
 Let's start with the uwsgi configuration file:
 
-**`/etc/uwsgi/apps-available/udata-front.ini`**
+**`/etc/uwsgi/apps-available/udata-api.ini`**
 
 ```inifile
 ##
-# uWSGI configuration for data.example.com front
+# uWSGI configuration for the data.example.com API
 ##
 
 [uwsgi]
@@ -131,8 +132,8 @@ module = udata.wsgi
 callable = app
 
 ; Sockets and permissions
-stats = /tmp/udata-front-stats.sock
-socket = /tmp/udata-front.sock
+stats = /tmp/udata-api-stats.sock
+socket = /tmp/udata-api.sock
 chmod-socket = 664
 uid = udata
 gid = www-data
@@ -164,7 +165,7 @@ reload-mercy = 8
 Then create the symlink to activate this configuration:
 
 ```shell
-$ ln -s /etc/uwsgi/apps-{available,enabled}/udata-front.ini
+$ ln -s /etc/uwsgi/apps-{available,enabled}/udata-api.ini
 ```
 
 You can now create the systemd unit file for Celery:
@@ -232,7 +233,7 @@ Then define a nginx server host configuration in `/etc/nginx/sites-available/dat
 ## uWSGI
 upstream uwsgi-udata {
     ip_hash;
-    server unix:///tmp/udata-front.sock;
+    server unix:///tmp/udata-api.sock;
     keepalive 32;
 }
 
@@ -244,8 +245,6 @@ server {
     error_log /var/log/nginx/data.example.com.error.log;
 
     client_max_body_size 0; # Disable max client body size
-
-    root /srv/udata/public/;
 
     # Enable gzip compression
     gzip on;
@@ -281,14 +280,6 @@ server {
 
         try_files $uri @wsgi;
 
-        location ~ /static/ {
-            include /etc/nginx/static-common.conf;
-        }
-
-        location ~ /_themes/ {
-            include /etc/nginx/static-common.conf;
-        }
-
         location ~ /s/ {
             # Resources are stored separately
             alias /srv/udata/fs/;
@@ -318,15 +309,11 @@ Create the reusable static cache and CORS snippet in `/etc/nginx/static-common.c
 
 ```nginx
 ##
-#  Common options to properly serve udata static content.
+#  Common options to properly serve the uploaded content
+#  (direct access to resources).
 #
-#  This content as long cache duration and is accessible
-#  by external JS (CORS)
-#
-#  This includes:
-#   - udata assets (for external loading of embeds)
-#   - theme assets (for external loading of embeds)
-#   - uploaded content (direct access to resources)
+#  This content has a long cache duration and is accessible
+#  by external JS (CORS).
 ##
 
 # Cache static assets
@@ -361,8 +348,7 @@ Then create a symlink to activate it:
 $ ln -s /etc/nginx/sites-{available,enabled}/data.example.com
 ```
 
-Before restarting all services to start udata, we need to adjust its configuration
-and collect static assets to make them available for nginx.
+Before restarting all services to start udata, we need to adjust its configuration.
 
 ```shell
 su - udata
@@ -401,18 +387,12 @@ LANGUAGES = {
 # Here is you default language
 DEFAULT_LANGUAGE = 'fr'
 
-# Optionally activate an installed theme
-# THEME = 'my-theme'
+# The frontend origin, allowed to make credentialed calls to this API
+CDATA_BASE_URL = 'https://www.data.example.com'
 
 # Define where resources are stored and exposed
 FS_ROOT = '/srv/udata/fs'
 FS_PREFIX = '/s'
-```
-
-You can now process static assets in the directory declared in the nginx configuration (ie. `/srv/udata/public`):
-
-```shell
-$ udata collect -ni $HOME/public
 ```
 
 Alright, everything is ready to run udata so logout from the `udata` account and restart nginx and uWSGI:
@@ -422,8 +402,11 @@ $ service uwsgi restart
 $ service celery restart
 $ service nginx restart
 ```
-And then go see your awesome open data portal on <http://data.example.com>.
 
+And then check your API on <http://data.example.com/api/1/site/>. To get an actual portal in
+front of it, deploy [cdata][] and point its `NUXT_PUBLIC_API_BASE` at this domain.
+
+[cdata]: https://github.com/datagouv/cdata
 [uwsgi]: https://uwsgi-docs.readthedocs.io/
 [nginx]: https://nginx.org/
 [celery]: http://www.celeryproject.org/
