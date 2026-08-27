@@ -43,6 +43,17 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
                 "name", "description"
             )
 
+    def test_error_body_is_truncated(self, rmock):
+        """The response body is stored and re-exposed via the public status API, so an
+        untrusted, oversized upstream error body must not be repeated in full."""
+        rmock.post(f"{TEST_API_URL}/uploads", status_code=500, text="x" * 2000)
+        with pytest.raises(GeopfError) as exc_info:
+            GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).create_upload(
+                "name", "description"
+            )
+        assert str(exc_info.value).endswith("x" * 500 + "…")
+        assert len(str(exc_info.value)) < 600
+
     def test_push_file_sends_path_param(self, rmock):
         rmock.post(f"{TEST_API_URL}/uploads/u1/data", json={})
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).push_file(

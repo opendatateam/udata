@@ -15,6 +15,10 @@ log = logging.getLogger(__name__)
 POLL_INTERVAL = 10  # seconds between status checks
 POLL_TIMEOUT = 1800  # seconds, default 30 minutes; override via GEOPF_POLL_TIMEOUT config
 
+# Error response bodies are stored and re-exposed via the public status API ,
+# so bound how much of an untrusted upstream response we repeat (avoids sensitive tracebacks)
+ERROR_BODY_LIMIT = 500
+
 # Community rights (per GET /users/me's communities_member[].rights) needed to
 # fully complete the push pipeline: upload, processing, and a visible offering.
 REQUIRED_PUBLISH_RIGHTS = {"UPLOAD", "PROCESSING", "BROADCAST"}
@@ -63,7 +67,10 @@ class GeopfClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            raise GeopfError(f"{resp.status_code} {resp.url}: {resp.text}") from e
+            body = resp.text[:ERROR_BODY_LIMIT]
+            if len(resp.text) > ERROR_BODY_LIMIT:
+                body += "…"
+            raise GeopfError(f"{resp.status_code} {resp.url}: {body}") from e
 
     # --- livraison ---
 
