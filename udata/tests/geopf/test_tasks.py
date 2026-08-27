@@ -2,6 +2,7 @@ import io
 from unittest.mock import MagicMock, patch
 
 import pytest
+from flask_storage.errors import OperationNotSupported
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
@@ -18,7 +19,9 @@ from udata.geopf.models import (
 )
 from udata.geopf.tasks import (
     _DownloadToTempfile,
+    _LocalStorageToTempfile,
     _offering_url,
+    _open_resource_file,
     _resource_filename,
     _run_pipeline,
     pull_offerings_for_dataset,
@@ -65,12 +68,64 @@ class DownloadToTempfileTest(PytestOnlyTestCase):
         with _DownloadToTempfile("https://example.com/data.gpkg") as f:
             assert f.read() == b"x" * 1024
 
-    @pytest.mark.options(GEOPF_MAX_REMOTE_FILE_SIZE=1024)
+    @pytest.mark.options(GEOPF_MAX_FILE_SIZE=1024)
     def test_raises_when_size_limit_exceeded(self, rmock):
         rmock.get("https://example.com/data.gpkg", content=b"x" * 2048)
-        with pytest.raises(GeopfError, match="GEOPF_MAX_REMOTE_FILE_SIZE"):
+        with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
             with _DownloadToTempfile("https://example.com/data.gpkg"):
                 pass
+
+
+class LocalStorageToTempfileTest(PytestOnlyTestCase):
+    def test_yields_a_seekable_copy_regardless_of_backend(self):
+        """The storage backend's own `.open()` may return a non-seekable stream (e.g. a
+        botocore StreamingBody on S3): only chunked `.read(n)` is relied on here, and the
+        result must support seeking back to the start, unlike that stream would."""
+        with patch(
+            "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 1024)
+        ):
+            with _LocalStorageToTempfile("uploads/my-data.gpkg") as f:
+                assert f.read() == b"x" * 1024
+                f.seek(0)
+                assert f.read() == b"x" * 1024
+
+    @pytest.mark.options(GEOPF_MAX_FILE_SIZE=1024)
+    def test_raises_when_size_limit_exceeded(self):
+        """The same GEOPF_MAX_FILE_SIZE limit applies here as for remote downloads."""
+        with patch(
+            "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 2048)
+        ):
+            with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
+                with _LocalStorageToTempfile("uploads/my-data.gpkg"):
+                    pass
+
+
+class OpenResourceFileTest(PytestOnlyTestCase):
+    def test_uses_the_real_path_directly_when_the_backend_supports_it(self):
+        """The common case (e.g. the local backend): no copy, no temp file."""
+        r = ResourceFactory.build(filetype="file", fs_filename="uploads/my-data.gpkg")
+        with patch("udata.geopf.tasks.storages.resources.path", return_value=__file__) as mock_path:
+            with _open_resource_file(r) as f:
+                assert f.name == __file__
+        mock_path.assert_called_once_with(r.fs_filename)
+
+    def test_falls_back_to_a_copy_when_the_backend_has_no_direct_path(self):
+        """E.g. the S3 backend: `.path()` raises `OperationNotSupported`."""
+        r = ResourceFactory.build(filetype="file", fs_filename="uploads/my-data.gpkg")
+        with patch("udata.geopf.tasks.storages.resources.path", side_effect=OperationNotSupported):
+            with patch(
+                "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 16)
+            ):
+                with _open_resource_file(r) as f:
+                    assert f.read() == b"x" * 16
+
+    def test_downloads_remote_resources(self, rmock):
+        r = ResourceFactory.build(
+            filetype="remote", fs_filename=None, url="https://example.com/f.gpkg"
+        )
+        rmock.get("https://example.com/f.gpkg", content=b"x" * 16)
+        with _open_resource_file(r) as f:
+            assert f.read() == b"x" * 16
 
 
 class SyncMetadataTest(PytestOnlyDBTestCase):

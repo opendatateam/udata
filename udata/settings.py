@@ -690,8 +690,9 @@ class Defaults(object):
     # (see udata/geopf/srs.py), so adding a format here without SRS-detection
     # support for it would just fail at upload time.
     GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
-    # Maximum size (bytes) of a remote resource file downloaded for a push.
-    GEOPF_MAX_REMOTE_FILE_SIZE = 1_000_000_000  # 1 GB
+    # Maximum size (bytes) of a resource file materialized to disk for a push,
+    # whether downloaded from a remote URL or copied from local storage.
+    GEOPF_MAX_FILE_SIZE = 1_000_000_000  # 1 GB
     # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
     GEOPF_OAUTH_CLIENT_ID = None
     GEOPF_OAUTH_CLIENT_SECRET = None

@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 from flask import current_app
+from flask_storage.errors import OperationNotSupported
 
 from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
@@ -266,39 +267,43 @@ def _resource_filename(resource) -> str:
 
 
 def _open_resource_file(resource):
-    """Return a context manager yielding an open binary file for the resource."""
+    """Return a context manager yielding an open, seekable binary file for the resource."""
     if resource.filetype == "file" and resource.fs_filename:
-        return storages.resources.open(resource.fs_filename, "rb")
+        try:
+            return open(storages.resources.path(resource.fs_filename), "rb")
+        except OperationNotSupported:
+            # No direct filesystem access (e.g. the S3 backend): download the file
+            return _LocalStorageToTempfile(resource.fs_filename)
     return _DownloadToTempfile(resource.url)
 
 
-class _DownloadToTempfile:
-    """Download a remote URL to a temp file, yield it, clean up on exit.
+class _CopyToTempfile:
+    """Write a subclass-provided chunk stream to a local temp file, yield it, clean up on
+    exit. Subclasses implement `_chunks()`, an iterable of byte chunks, and `_subject`, a
+    description of what's being copied for the size-limit error message."""
 
-    `self.url` is user-controlled (remote resource URL) and this fetch runs
-    on the worker, so it goes through the SSRF-hardened session rather than
-    a bare `requests.get`.
-    """
-
-    def __init__(self, url: str):
-        self.url = url
+    def __init__(self):
         self._tmp = None
 
+    def _chunks(self):
+        raise NotImplementedError
+
+    @property
+    def _subject(self) -> str:
+        raise NotImplementedError
+
     def __enter__(self):
-        max_size = current_app.config["GEOPF_MAX_REMOTE_FILE_SIZE"]
+        max_size = current_app.config["GEOPF_MAX_FILE_SIZE"]
         self._tmp = tempfile.NamedTemporaryFile(suffix=".gpkg", delete=False)
         try:
-            with ssrf_session().get(self.url, stream=True, timeout=60) as resp:
-                resp.raise_for_status()
-                size = 0
-                for chunk in resp.iter_content(65536):
-                    size += len(chunk)
-                    if size > max_size:
-                        raise GeopfError(
-                            f"Remote file at {self.url} exceeds "
-                            f"GEOPF_MAX_REMOTE_FILE_SIZE ({max_size} bytes)"
-                        )
-                    self._tmp.write(chunk)
+            size = 0
+            for chunk in self._chunks():
+                size += len(chunk)
+                if size > max_size:
+                    raise GeopfError(
+                        f"{self._subject} exceeds GEOPF_MAX_FILE_SIZE ({max_size} bytes)"
+                    )
+                self._tmp.write(chunk)
             self._tmp.seek(0)
             return self._tmp
         except Exception:
@@ -313,6 +318,43 @@ class _DownloadToTempfile:
                 os.unlink(self._tmp.name)
             except OSError:
                 pass
+
+
+class _LocalStorageToTempfile(_CopyToTempfile):
+    """Stream a stored resource to a local temp file."""
+
+    def __init__(self, fs_filename: str):
+        super().__init__()
+        self.fs_filename = fs_filename
+
+    def _chunks(self):
+        with storages.resources.open(self.fs_filename, "rb") as src:
+            yield from iter(lambda: src.read(65536), b"")
+
+    @property
+    def _subject(self) -> str:
+        return f"Stored resource {self.fs_filename}"
+
+
+class _DownloadToTempfile(_CopyToTempfile):
+    """Download a remote URL to a local temp file.
+
+    `self.url` is user-controlled (remote resource URL) and this fetch runs
+    on the worker, so it goes through the SSRF-hardened session.
+    """
+
+    def __init__(self, url: str):
+        super().__init__()
+        self.url = url
+
+    def _chunks(self):
+        with ssrf_session().get(self.url, stream=True, timeout=60) as resp:
+            resp.raise_for_status()
+            yield from resp.iter_content(65536)
+
+    @property
+    def _subject(self) -> str:
+        return f"Remote file at {self.url}"
 
 
 def sync_metadata(dataset, client) -> str:
