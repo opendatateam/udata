@@ -60,6 +60,25 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
         assert stored.access_token == "new-access"
         assert stored.refresh_token == "new-refresh"
 
+    def test_keeps_old_refresh_token_when_response_omits_one(self):
+        """A refresh response isn't required to include a new refresh_token (RFC 6749 §6)."""
+        user = UserFactory()
+        create_geopf_token(
+            user,
+            access_token="old-access",
+            refresh_token="old-refresh",
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        )
+
+        new_token = OAuth2Token({"access_token": "new-access", "expires_in": 3600})
+        with patch("udata.geopf.auth.oauth") as mock_oauth:
+            mock_oauth.geopf.fetch_access_token.return_value = new_token
+            resolve_access_token(user=user)
+
+        stored = GeopfToken.objects.get(user=user)
+        assert stored.access_token == "new-access"
+        assert stored.refresh_token == "old-refresh"
+
     def test_refreshes_when_expiring_within_min_validity(self):
         user = UserFactory()
         create_geopf_token(

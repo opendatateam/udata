@@ -35,7 +35,9 @@ def store_token(user, token: dict) -> GeopfToken:
     """Persist an authlib token dict (from the OAuth callback or a refresh) for `user`."""
     geopf_token = GeopfToken.objects(user=user).first() or GeopfToken(user=user)
     geopf_token.access_token = token["access_token"]
-    geopf_token.refresh_token = token["refresh_token"]
+    # A refresh response isn't required to include a new refresh_token:
+    # keep the existing one when the IdP doesn't send a replacement.
+    geopf_token.refresh_token = token.get("refresh_token", geopf_token.refresh_token)
     geopf_token.expires_at = datetime.fromtimestamp(token["expires_at"], UTC)
     geopf_token.save()
     return geopf_token
