@@ -1,6 +1,6 @@
 import click
 
-from udata.commands import cli
+from udata.commands import cli, exit_with_error
 from udata.core.dataset.models import Dataset
 from udata.core.user.models import User
 
@@ -17,7 +17,7 @@ def grp():
 
 def _require_datastore_id(datastore_id: str | None) -> str:
     if not datastore_id:
-        raise click.ClickException("Provide --datastore-id")
+        exit_with_error("Provide --datastore-id")
     return datastore_id
 
 
@@ -25,9 +25,9 @@ def _check_credentials(user_id: str | None, token: str | None) -> None:
     """Validate --user-id/--token CLI options: exactly one, and if --user-id, that the
     user exists."""
     if bool(user_id) == bool(token):
-        raise click.ClickException("Provide exactly one of --user-id or --token")
+        exit_with_error("Provide exactly one of --user-id or --token")
     if user_id and not User.objects(id=user_id).first():
-        raise click.ClickException(f"User {user_id} not found")
+        exit_with_error(f"User {user_id} not found")
 
 
 def _resolve_token_option(user_id: str | None, token: str | None) -> str:
@@ -39,7 +39,7 @@ def _resolve_token_option(user_id: str | None, token: str | None) -> str:
     try:
         return resolve_access_token(user=user)
     except GeopfReauthRequired as e:
-        raise click.ClickException(str(e))
+        exit_with_error(str(e))
 
 
 user_id_option = click.option(
@@ -77,13 +77,13 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
     try:
         dataset = Dataset.objects.get(id=dataset_id)
     except Dataset.DoesNotExist:
-        raise click.ClickException(f"Dataset {dataset_id} not found")
+        exit_with_error(f"Dataset {dataset_id} not found")
 
     try:
         client = GeopfClient(token=access_token, datastore_id=datastore_id)
         metadata_id = sync_metadata(dataset, client)
     except GeopfError as e:
-        raise click.ClickException(str(e))
+        exit_with_error(str(e))
 
     click.echo(f"metadata={metadata_id}")
     click.echo(f"fiche={fiche_url(datastore_id, dataset_id)}")
