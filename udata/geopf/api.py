@@ -34,7 +34,8 @@ ns = api.namespace("geopf", "Géoplateforme related operations")
 
 DATASET_SESSION_KEY = "geopf_oauth_dataset_id"
 
-common_doc = {"params": {"dataset": "The dataset ID or slug", "rid": "The resource ID"}}
+dataset_doc = {"params": {"dataset": "The dataset ID or slug"}}
+resource_doc = {"params": {"dataset": "The dataset ID or slug", "rid": "The resource ID"}}
 
 
 def _redirect_target(dataset_id: str | None) -> str:
@@ -103,7 +104,7 @@ def _resource_summary(resource) -> dict:
     }
 
 
-@ns.route("/status/<dataset:dataset>/", endpoint="geopf_dataset_status", doc=common_doc)
+@ns.route("/status/<dataset:dataset>/", endpoint="geopf_dataset_status", doc=dataset_doc)
 class GeopfDatasetStatusAPI(API):
     @api.secure
     @api.doc("geopf_dataset_status")
@@ -179,7 +180,7 @@ class GeopfDatastoresAPI(API):
             api.abort(502, str(e))
 
 
-@ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push", doc=common_doc)
+@ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push", doc=resource_doc)
 class GeopfPushAPI(API):
     @api.secure
     @api.doc("geopf_push")
@@ -223,7 +224,7 @@ class GeopfPushAPI(API):
         return {"task_id": task.id}, 202
 
 
-@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings", doc=common_doc)
+@ns.route("/pull-offerings/<dataset:dataset>/", endpoint="geopf_pull_offerings", doc=dataset_doc)
 class GeopfPullOfferingsAPI(API):
     @api.secure
     @api.doc("geopf_pull_offerings")
