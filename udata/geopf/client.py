@@ -40,6 +40,18 @@ class GeopfReauthRequired(GeopfError):
     pass
 
 
+class _TimeoutSession(requests.Session):
+    """A requests.Session with a default per-request timeout."""
+
+    def __init__(self, timeout: float):
+        super().__init__()
+        self.default_timeout = timeout
+
+    def request(self, *args, **kwargs):
+        kwargs.setdefault("timeout", self.default_timeout)
+        return super().request(*args, **kwargs)
+
+
 class GeopfClient:
     def __init__(self, token: str | None = None, datastore_id: str | None = None):
         """A geopf entrepôt API client.
@@ -54,7 +66,7 @@ class GeopfClient:
         self.base = current_app.config["GEOPF_API_BASE"]
         self.datastore = datastore_id
         self.poll_timeout = current_app.config.get("GEOPF_POLL_TIMEOUT", POLL_TIMEOUT)
-        self.session = requests.Session()
+        self.session = _TimeoutSession(timeout=current_app.config["GEOPF_REQUEST_TIMEOUT"])
         if token:
             self.session.headers["Authorization"] = f"Bearer {token}"
 

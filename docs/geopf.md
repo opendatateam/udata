@@ -214,6 +214,9 @@ GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})  # default
 # whether downloaded from a remote URL or copied from local storage
 GEOPF_MAX_FILE_SIZE = 1_000_000_000  # default, 1 GB
 
+# Per-request timeout (seconds) for calls to the geopf API
+GEOPF_REQUEST_TIMEOUT = 120  # default
+
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"

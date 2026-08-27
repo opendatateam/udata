@@ -1,4 +1,5 @@
 import io
+from unittest.mock import patch
 
 import pytest
 
@@ -7,6 +8,7 @@ from udata.geopf.client import (
     GeopfError,
     GeopfTimeoutError,
     _extract_file_identifier,
+    _TimeoutSession,
 )
 from udata.tests import PytestOnlyTestCase
 from udata.tests.geopf import (
@@ -310,3 +312,17 @@ class GeopfClientAuthTest(PytestOnlyTestCase):
     def test_no_datastore_id_raises_on_datastore_scoped_call(self):
         with pytest.raises(GeopfError):
             GeopfClient(token=TEST_TOKEN).list_offerings("sd-1")
+
+
+class TimeoutSessionTest(PytestOnlyTestCase):
+    def test_applies_default_timeout(self):
+        session = _TimeoutSession(timeout=42)
+        with patch("requests.Session.request") as mock_request:
+            session.get("https://example.com")
+        assert mock_request.call_args.kwargs["timeout"] == 42
+
+    def test_explicit_timeout_is_not_overridden(self):
+        session = _TimeoutSession(timeout=42)
+        with patch("requests.Session.request") as mock_request:
+            session.get("https://example.com", timeout=5)
+        assert mock_request.call_args.kwargs["timeout"] == 5
