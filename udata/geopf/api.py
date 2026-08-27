@@ -3,9 +3,9 @@ from flask import current_app, redirect, request, session, url_for
 
 from udata.api import API, api
 from udata.auth import current_user
+from udata.core.dataset.api import ResourceMixin
 from udata.core.dataset.models import Dataset
 from udata.uris import cdata_url, homepage_url
-from udata.utils import get_by
 
 from .api_fields import (
     geopf_dataset_status_fields,
@@ -181,7 +181,7 @@ class GeopfDatastoresAPI(API):
 
 
 @ns.route("/push/<dataset:dataset>/<uuid:rid>/", endpoint="geopf_push", doc=resource_doc)
-class GeopfPushAPI(API):
+class GeopfPushAPI(ResourceMixin, API):
     @api.secure
     @api.doc("geopf_push")
     @api.expect(geopf_push_request_fields)
@@ -193,9 +193,7 @@ class GeopfPushAPI(API):
         """Push a resource to Géoplateforme, as the current user."""
         dataset.permissions["edit_resources"].test()
 
-        resource = get_by(dataset.resources, id=rid)
-        if resource is None:
-            api.abort(404, "Resource not found")
+        resource = self.get_resource_or_404(dataset, rid)
         pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]
         if not resource.format or resource.format.lower() not in pushable_formats:
             api.abort(
