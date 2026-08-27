@@ -5,7 +5,7 @@ since geopf API calls happen from Celery tasks.
 """
 
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import requests
 from authlib.integrations.flask_client import OAuth
@@ -36,7 +36,7 @@ def store_token(user, token: dict) -> GeopfToken:
     geopf_token = GeopfToken.objects(user=user).first() or GeopfToken(user=user)
     geopf_token.access_token = token["access_token"]
     geopf_token.refresh_token = token["refresh_token"]
-    geopf_token.expires_at = datetime.now(UTC) + timedelta(seconds=token["expires_in"])
+    geopf_token.expires_at = datetime.fromtimestamp(token["expires_at"], UTC)
     geopf_token.save()
     return geopf_token
 

@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
+from authlib.oauth2.rfc6749 import OAuth2Token
 from flask import redirect, url_for
 
 from udata.core.dataset.factories import (
@@ -63,7 +64,7 @@ class GeopfAuthApiTest(APITestCase):
         with self.client.session_transaction() as sess:
             sess[DATASET_SESSION_KEY] = str(dataset.id)
 
-        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        token = OAuth2Token({"access_token": "at", "refresh_token": "rt", "expires_in": 3600})
         with patch("udata.geopf.api.oauth") as mock_oauth:
             mock_oauth.geopf.authorize_access_token.return_value = token
             response = self.get(url_for("api.geopf_auth"))
@@ -76,7 +77,7 @@ class GeopfAuthApiTest(APITestCase):
 
     def test_redirects_home_when_no_dataset_id_stored(self):
         self.login()
-        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        token = OAuth2Token({"access_token": "at", "refresh_token": "rt", "expires_in": 3600})
         with patch("udata.geopf.api.oauth") as mock_oauth:
             mock_oauth.geopf.authorize_access_token.return_value = token
             response = self.get(url_for("api.geopf_auth"))
@@ -89,7 +90,7 @@ class GeopfAuthApiTest(APITestCase):
         with self.client.session_transaction() as sess:
             sess[DATASET_SESSION_KEY] = "000000000000000000000000"
 
-        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        token = OAuth2Token({"access_token": "at", "refresh_token": "rt", "expires_in": 3600})
         with patch("udata.geopf.api.oauth") as mock_oauth:
             mock_oauth.geopf.authorize_access_token.return_value = token
             response = self.get(url_for("api.geopf_auth"))
@@ -103,7 +104,7 @@ class GeopfAuthApiTest(APITestCase):
         with self.client.session_transaction() as sess:
             sess[DATASET_SESSION_KEY] = "not-an-id"
 
-        token = {"access_token": "at", "refresh_token": "rt", "expires_in": 3600}
+        token = OAuth2Token({"access_token": "at", "refresh_token": "rt", "expires_in": 3600})
         with patch("udata.geopf.api.oauth") as mock_oauth:
             mock_oauth.geopf.authorize_access_token.return_value = token
             response = self.get(url_for("api.geopf_auth"))
@@ -136,11 +137,13 @@ class GeopfStatusApiTest(APITestCase):
             refresh_token="still-good",
             expires_at=datetime.now(UTC) - timedelta(hours=1),
         )
-        new_token = {
-            "access_token": "fresh",
-            "refresh_token": "fresh-refresh",
-            "expires_in": 3600,
-        }
+        new_token = OAuth2Token(
+            {
+                "access_token": "fresh",
+                "refresh_token": "fresh-refresh",
+                "expires_in": 3600,
+            }
+        )
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.fetch_access_token.return_value = new_token
             response = self.get(url_for("api.geopf_status"))

@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
+from authlib.oauth2.rfc6749 import OAuth2Token
 
 from udata.core.user.factories import UserFactory
 from udata.geopf.auth import resolve_access_token, revoke_token
@@ -40,11 +41,13 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
         )
 
-        new_token = {
-            "access_token": "new-access",
-            "refresh_token": "new-refresh",
-            "expires_in": 3600,
-        }
+        new_token = OAuth2Token(
+            {
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "expires_in": 3600,
+            }
+        )
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.fetch_access_token.return_value = new_token
             result = resolve_access_token(user=user)
@@ -66,11 +69,13 @@ class ResolveAccessTokenTest(PytestOnlyDBTestCase):
             expires_at=datetime.now(UTC) + timedelta(minutes=10),
         )
 
-        new_token = {
-            "access_token": "new-access",
-            "refresh_token": "new-refresh",
-            "expires_in": 43200,
-        }
+        new_token = OAuth2Token(
+            {
+                "access_token": "new-access",
+                "refresh_token": "new-refresh",
+                "expires_in": 43200,
+            }
+        )
         with patch("udata.geopf.auth.oauth") as mock_oauth:
             mock_oauth.geopf.fetch_access_token.return_value = new_token
             result = resolve_access_token(user=user, min_validity=3600)
