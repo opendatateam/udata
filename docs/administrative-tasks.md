@@ -197,6 +197,30 @@ It's possible to index or reindex only last modified documents.
 time udata search index -f 2022-02-20-20-02
 ```
 
+## Geospatial zones
+
+To load zone bounding boxes (used for automatic zone detection from a dataset's spatial
+geometry) onto existing `GeoZone` documents:
+
+```shell
+$ udata spatial load-geozones-bboxes <geozones-bboxes-file>
+```
+
+`<geozones-bboxes-file>` can be either a local path or a remote URL. It's a JSON file: a flat
+object mapping each zone id to its bounding box `[minx, miny, maxx, maxy]` (WGS84
+longitude/latitude), e.g.:
+
+```json
+{
+  "fr:departement:32": [-0.2821, 43.3108, 1.2032, 44.08],
+  "fr:commune:32019": [0.6007, 43.5626, 0.6645, 43.5936]
+}
+```
+
+Zone ids must match existing `GeoZone` ids (run `udata spatial load` first if they don't
+exist yet). Ids present in the file with no matching `GeoZone` are skipped and logged as
+warnings, not fatal.
+
 ## Workers
 
 Start a worker with:
