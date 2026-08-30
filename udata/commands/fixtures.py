@@ -106,6 +106,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "self_api_url",
         "self_web_url",
         "permissions",
+        "quality",
     ],
     "post": [
         "uri",
