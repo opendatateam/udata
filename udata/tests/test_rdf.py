@@ -118,6 +118,17 @@ class ContactToRdfTest:
             # Default predicate is "contact"
             assert predicate == DCAT.contactPoint
 
+    @pytest.mark.parametrize("role", ["contact", "creator"], ids=["vcard", "foaf"])
+    def test_contact_points_to_rdf_without_a_name(self, role):
+        contact = ContactPoint(email="hello@its.me", role=role)
+
+        contact_rdfs = contact_points_to_rdf([contact], None)
+
+        for contact_point, _predicate in contact_rdfs:
+            assert contact_point.value(VCARD.fn) is None
+            assert contact_point.value(FOAF.name) is None
+            assert contact_point.value(VCARD.hasEmail) or contact_point.value(FOAF.mbox)
+
     @pytest.mark.parametrize("role,predicate", AGENT_ROLE_TO_RDF_PREDICATE.items())
     def test_contact_points_to_rdf_roles(self, role, predicate):
         contact = ContactPoint(
@@ -286,7 +297,7 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
         # Expected name can be a mix of user and org info...
         expected_name = (
-            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name
         )
         # ...but other info can't be mixed, so it's either all user or all org
         if user_info:
@@ -360,7 +371,7 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
         # All expected info can come from either user or org, via member/memberOf
         expected_name = (
-            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name or ""
+            f"{user_name} ({org_name})" if user_name and org_name else user_name or org_name
         )
         expected_email = user_email or org_email
 
@@ -468,6 +479,20 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "property",
+        [VCARD.hasEmail, VCARD.email],
+        ids=lambda u: vocabulary_key(u, VCARD),
+    )
+    def test_contact_point_from_vcard_email_announced_but_missing(self, property):
+        g = Graph()
+        contact = BNode()
+        g.add((contact, property, Literal("mailto:")))
+
+        _, email, _ = contact_point_from_vcard(RdfResource(g, contact))
+
+        assert email is None
+
+    @pytest.mark.parametrize(
+        "property",
         [VCARD.hasURL, VCARD.url, VCARD.hasUrl],
         ids=lambda u: vocabulary_key(u, VCARD),
     )
@@ -531,6 +556,17 @@ class ContactFromRdfTest(PytestOnlyDBTestCase):
         _, email, _ = contact_point_from_foaf(RdfResource(g, contact))
 
         assert email == expected_email
+
+    def test_contact_point_from_foaf_email_announced_but_missing(self):
+        g = Graph()
+        contact = BNode()
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("mailto:")))
+
+        name, email, _ = contact_point_from_foaf(RdfResource(g, contact))
+
+        assert name == "foo"
+        assert email is None
 
     def test_contact_point_from_foaf_org_missing(self):
         expected_name = "foo"
