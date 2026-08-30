@@ -124,6 +124,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         # First dataset
         dataset = datasets["1"]
         assert dataset.tags == ["tag-1", "tag-2", "tag-3", "tag-4", "theme-1", "theme-2"]
+        assert dataset.extras["dcat"]["themes"] == [
+            {"label": "Theme 1", "uri": None, "scheme_label": None, "scheme_uri": None},
+            {"label": "Theme 2", "uri": None, "scheme_label": None, "scheme_uri": None},
+        ]
         assert len(dataset.resources) == 2
 
         # Second dataset
@@ -486,7 +490,24 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
+        assert datasets["1"].extras["dcat"]["themes"] == [
+            {"label": "Theme 1", "uri": None, "scheme_label": None, "scheme_uri": None},
+            {
+                "label": "Répartition des espèces",
+                "uri": None,
+                "scheme_label": "GEMET - INSPIRE themes, version 1.0",
+                "scheme_uri": None,
+            },
+        ]
         assert set(datasets["2"].tags).issuperset(set(["hydrographie", "inspire"]))
+        assert datasets["2"].extras["dcat"]["themes"] == [
+            {
+                "label": "Hydrographie",
+                "uri": "http://bnode.namespace.voc/theme/hy",
+                "scheme_label": None,
+                "scheme_uri": "http://inspire.ec.europa.eu/theme",
+            },
+        ]
         assert "inspire" not in datasets["3"].tags
 
     def test_simple_nested_attributes(self, rmock):
