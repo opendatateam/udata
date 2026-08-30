@@ -653,6 +653,13 @@ class Defaults(object):
     TCHAP_ROOM_ID = None
     TCHAP_BOT_TOKEN = None
 
+    # DOI (DataCite) settings
+    ###########################################################################
+    DOI_PREFIX = None
+    DOI_REPO_USER = None
+    DOI_REPO_PWD = None
+    DOI_PLATFORM_URI = None
+
     # Tabular API Dataservice ID
     ###########################################################################
     TABULAR_API_DATASERVICE_ID = None
