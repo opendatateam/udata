@@ -20,7 +20,7 @@ oauth = OAuth()
 
 
 def init_app(app):
-    if app.config.get("GEOPF_OAUTH_OPENID_CONF_URL"):
+    if app.config.get("GEOPF_OAUTH_CLIENT_ID"):
         oauth.init_app(app)
         oauth.register(
             name="geopf",
