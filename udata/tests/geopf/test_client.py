@@ -254,6 +254,14 @@ class GeopfClientMetadataTest(PytestOnlyTestCase):
                 TEST_METADATA_XML
             )
 
+    def test_upload_metadata_409_no_match_truncates_body(self, rmock):
+        rmock.post(f"{TEST_API_URL}/metadata", status_code=409, text="x" * 1000)
+        rmock.get(f"{TEST_API_URL}/metadata", json=[])
+        with pytest.raises(GeopfError, match="x" * 500 + "…"):
+            GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).upload_metadata(
+                TEST_METADATA_XML
+            )
+
     def test_update_metadata_returns_id(self, rmock):
         rmock.put(f"{TEST_API_URL}/metadata/meta-1", json={})
         mid = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).update_metadata(

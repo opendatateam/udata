@@ -19,6 +19,13 @@ POLL_INTERVAL = 10  # seconds between status checks
 # so bound how much of an untrusted upstream response we repeat (avoids sensitive tracebacks)
 ERROR_BODY_LIMIT = 500
 
+
+def _truncate_body(text: str) -> str:
+    if len(text) > ERROR_BODY_LIMIT:
+        return text[:ERROR_BODY_LIMIT] + "…"
+    return text
+
+
 # Community rights (per GET /users/me's communities_member[].rights) needed to
 # fully complete the push pipeline: upload, processing, and a visible offering.
 REQUIRED_PUBLISH_RIGHTS = {"UPLOAD", "PROCESSING", "BROADCAST"}
@@ -82,10 +89,7 @@ class GeopfClient:
         try:
             resp.raise_for_status()
         except requests.HTTPError as e:
-            body = resp.text[:ERROR_BODY_LIMIT]
-            if len(resp.text) > ERROR_BODY_LIMIT:
-                body += "…"
-            raise GeopfError(f"{resp.status_code} {resp.url}: {body}") from e
+            raise GeopfError(f"{resp.status_code} {resp.url}: {_truncate_body(resp.text)}") from e
 
     # --- livraison ---
 
@@ -273,7 +277,8 @@ class GeopfClient:
             if existing_id:
                 return self.update_metadata(existing_id, xml_bytes)
             raise GeopfError(
-                f"409 on metadata upload, could not locate existing record: {resp.text}"
+                f"409 on metadata upload, could not locate existing record: "
+                f"{_truncate_body(resp.text)}"
             )
         self._raise(resp)
         return resp.json()["_id"]
