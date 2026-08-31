@@ -134,6 +134,8 @@ def push_resource_to_geopf(
 
 def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
     datasheet_name = str(dataset.id)
+    # Prefixed with "_" because geopf rejects stored data names starting with
+    # a digit, and a Mongo ObjectId can start with one.
     stored_data_name = f"_{resource.id}"
     filename = _resource_filename(resource)
     dataset_id = dataset.id
