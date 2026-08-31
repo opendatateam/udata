@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 import time
 from typing import IO
 from xml.etree.ElementTree import fromstring
@@ -21,6 +22,10 @@ ERROR_BODY_LIMIT = 500
 # Community rights (per GET /users/me's communities_member[].rights) needed to
 # fully complete the push pipeline: upload, processing, and a visible offering.
 REQUIRED_PUBLISH_RIGHTS = {"UPLOAD", "PROCESSING", "BROADCAST"}
+
+# geopf paginates listing endpoints and reports progress via a
+# `Content-Range: <min>-<max>/<total>` response header.
+CONTENT_RANGE_RE = re.compile(r"(?P<min>\d+)-(?P<max>\d+)/(?P<total>\d+)")
 
 
 class GeopfError(Exception):
@@ -233,13 +238,25 @@ class GeopfClient:
     # --- offerings ---
 
     def list_offerings(self, stored_data_id: str) -> list:
-        """Return offerings for a stored_data, including urls and type."""
-        resp = self.session.get(
-            self._url("offerings"),
-            params={"stored_data": stored_data_id, "fields": "urls,type,layer_name,status,open"},
-        )
-        self._raise(resp)
-        return resp.json()
+        """Return all offerings for a stored_data, including urls and type."""
+        offerings = []
+        page = 1
+        while True:
+            resp = self.session.get(
+                self._url("offerings"),
+                params={
+                    "stored_data": stored_data_id,
+                    "fields": "urls,type,layer_name,status,open",
+                    "page": page,
+                },
+            )
+            self._raise(resp)
+            body = resp.json()
+            offerings += body
+            match = CONTENT_RANGE_RE.search(resp.headers.get("Content-Range", ""))
+            if not match or len(offerings) >= int(match["total"]):
+                return offerings
+            page += 1
 
     # --- metadata ---
 

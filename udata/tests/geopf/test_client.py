@@ -206,6 +206,24 @@ class GeopfClientOfferingsTest(PytestOnlyTestCase):
         )
         assert result == offerings
 
+    def test_list_offerings_follows_content_range_pagination(self, rmock):
+        page1 = [{"_id": f"o{i}"} for i in range(10)]
+        page2 = [{"_id": "o10"}]
+        rmock.get(
+            f"{TEST_API_URL}/offerings",
+            [
+                {"json": page1, "headers": {"Content-Range": "0-9/11"}},
+                {"json": page2, "headers": {"Content-Range": "10-10/11"}},
+            ],
+        )
+        result = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_offerings(
+            "sd-1"
+        )
+        assert result == page1 + page2
+        assert rmock.call_count == 2
+        assert rmock.request_history[0].qs["page"] == ["1"]
+        assert rmock.request_history[1].qs["page"] == ["2"]
+
 
 @TEST_GEOPF_CONF
 class GeopfClientMetadataTest(PytestOnlyTestCase):
