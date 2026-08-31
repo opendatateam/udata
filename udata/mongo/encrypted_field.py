@@ -26,7 +26,7 @@ class EncryptedStringField(StringField):
     value.
     """
 
-    def __init__(self, key_config="GEOPF_TOKEN_ENCRYPTION_KEY", **kwargs):
+    def __init__(self, key_config: str, **kwargs):
         self.key_config = key_config
         super().__init__(**kwargs)
 

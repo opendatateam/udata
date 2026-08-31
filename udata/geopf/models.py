@@ -131,8 +131,8 @@ class GeopfToken(db.Document):
     """
 
     user = db.ReferenceField(User, required=True, unique=True, reverse_delete_rule=db.CASCADE)
-    access_token = EncryptedStringField(required=True)
-    refresh_token = EncryptedStringField(required=True)
+    access_token = EncryptedStringField(key_config="GEOPF_TOKEN_ENCRYPTION_KEY", required=True)
+    refresh_token = EncryptedStringField(key_config="GEOPF_TOKEN_ENCRYPTION_KEY", required=True)
     expires_at = db.DateTimeField(required=True)
     created_at = db.DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
