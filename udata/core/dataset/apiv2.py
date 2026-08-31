@@ -22,10 +22,12 @@ from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
     catalog_schema_fields,
     checksum_fields,
+    dataset_geopf_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
     dataset_permissions_fields,
     resource_fields,
+    resource_geopf_fields,
     resource_harvest_fields,
     resource_internal_fields,
     schema_fields,
@@ -75,6 +77,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "archived",
         "quality",
         "harvest",
+        "geopf",
         "internal",
         "contact_points",
         "featured",
@@ -183,6 +186,13 @@ dataset_fields = apiv2.model(
             description="Dataset harvest metadata attributes",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
@@ -283,6 +293,8 @@ apiv2.inherit("GeoJSON", geojson)
 apiv2.inherit("Checksum", checksum_fields)
 apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
 apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
+apiv2.inherit("GeopfDatasetMetadata", dataset_geopf_fields)
+apiv2.inherit("GeopfResourceMetadata", resource_geopf_fields)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
