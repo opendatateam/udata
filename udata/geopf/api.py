@@ -190,6 +190,7 @@ class GeopfPushAPI(ResourceMixin, API):
     @api.marshal_with(geopf_task_fields, code=202)
     @api.response(400, "Unsupported resource format or missing datastore_id")
     @api.response(404, "Resource not found")
+    @api.response(409, "A push is already in progress for this resource")
     @api.response(424, "Not connected to Géoplateforme")
     def post(self, dataset, rid):
         """Push a resource to Géoplateforme, as the current user."""
@@ -202,6 +203,9 @@ class GeopfPushAPI(ResourceMixin, API):
                 400,
                 f"Only {', '.join(sorted(pushable_formats))} resources can be pushed to Géoplateforme",
             )
+
+        if resource_push_metadata(resource).status == "pending":
+            api.abort(409, "A push is already in progress for this resource")
 
         user = current_user._get_current_object()
         try:
