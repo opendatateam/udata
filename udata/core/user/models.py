@@ -447,6 +447,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         ApiToken.objects(user=self, revoked_at=None).update(
             set__revoked_at=datetime.now(timezone.utc)
         )
+        from udata.geopf.auth import revoke_token
+        from udata.geopf.models import GeopfToken
+
+        geopf_token = GeopfToken.objects(user=self).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self
