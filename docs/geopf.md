@@ -51,7 +51,7 @@ If there is no token or the refresh fails, calls raise `GeopfReauthRequired`, su
 Both push and pull follow the same two-level pattern:
 
 - **`geopf` metadata**: a typed `GeopfDatasetMetadata`/`GeopfResourceMetadata` embedded document (`dataset.geopf`/`resource.geopf`, see `udata/geopf/models.py`) written at each lifecycle transition. Persist in MongoDB independently of Celery, so they survive broker restarts and result-backend expiry. The primary surface for the API consumer.
-- **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/`, using the stored `task_id` field as the bridge between the two layers.
+- **Celery results**: the full execution record (return value, exception, traceback, timing) of the task, stored by `ignore_result=False`. Useful for debugging failures. Retrieve via `GET /api/1/workers/tasks/{task_id}/` (admin only), using the stored `task_id` field as the bridge between the two layers. Non-admin callers should rely on the `status`/`error` fields above instead, which are updated by the task itself.
 
 Each flow's specific metadata fields are listed in its own section below.
 
@@ -107,7 +107,7 @@ Set on the original pushed resource by the push pipeline.
 | Field | Values / type | Description |
 |---|---|---|
 | `status` | `pending` \| `done` \| `error` \| `timeout` | Lifecycle state of the push. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `error`. Updated on completion or failure. |
-| `task_id` | Celery task UUID | ID of the Celery task running this push. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `task_id` | Celery task UUID | ID of the Celery task running this push. Written after enqueueing, or by the task itself on CLI runs. |
 | `stored_data_id` | UUID string | Entrepôt stored data ID produced by the pipeline. Used by the pull flow to discover offerings. |
 | `last_synced_at` | datetime | Timestamp of the last successful push. |
 | `error` | string | Error message from the last failed attempt. Only present on `error` or `timeout` status. |
@@ -162,7 +162,7 @@ Triggered explicitly via `POST /api/1/geopf/pull-offerings/<dataset_id>/`, as th
 | Field | Values / type | Description |
 |---|---|---|
 | `status` | `pending` \| `done` \| `error` | Lifecycle state of the pull. Set to `pending` by the API endpoint on `202`, and by the task at startup (CLI runs); both clear `error`. Updated on completion or failure. |
-| `task_id` | Celery task UUID | ID of the Celery task running the pull. Written after enqueueing, or by the task itself on CLI runs. Query via `GET /api/1/workers/tasks/<id>/` for status and traceback. |
+| `task_id` | Celery task UUID | ID of the Celery task running the pull. Written after enqueueing, or by the task itself on CLI runs. |
 | `last_synced_at` | datetime | Timestamp of the last successful pull. |
 | `error` | string | Error message from the last failed pull. Only present on `error` status. |
 
