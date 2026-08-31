@@ -2,13 +2,14 @@ import io
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from udata.geopf.client import (
     GeopfClient,
     GeopfError,
     GeopfTimeoutError,
     _extract_file_identifier,
-    _TimeoutSession,
+    _GeopfSession,
 )
 from udata.tests import PytestOnlyTestCase
 from udata.tests.geopf import (
@@ -337,13 +338,19 @@ class GeopfClientAuthTest(PytestOnlyTestCase):
 
 class TimeoutSessionTest(PytestOnlyTestCase):
     def test_applies_default_timeout(self):
-        session = _TimeoutSession(timeout=42)
+        session = _GeopfSession(timeout=42)
         with patch("requests.Session.request") as mock_request:
             session.get("https://example.com")
         assert mock_request.call_args.kwargs["timeout"] == 42
 
     def test_explicit_timeout_is_not_overridden(self):
-        session = _TimeoutSession(timeout=42)
+        session = _GeopfSession(timeout=42)
         with patch("requests.Session.request") as mock_request:
             session.get("https://example.com", timeout=5)
         assert mock_request.call_args.kwargs["timeout"] == 5
+
+    def test_network_failure_raises_geopf_error(self):
+        session = _GeopfSession(timeout=42)
+        with patch("requests.Session.request", side_effect=requests.exceptions.ConnectionError()):
+            with pytest.raises(GeopfError):
+                session.get("https://example.com")

@@ -51,8 +51,11 @@ class GeopfReauthRequired(GeopfError):
     pass
 
 
-class _TimeoutSession(requests.Session):
-    """A requests.Session with a default per-request timeout."""
+class _GeopfSession(requests.Session):
+    """A requests.Session with a default per-request timeout, raising `GeopfError` for
+    network-level failures (timeout, connection reset, DNS, ...) so callers only ever
+    need to handle one geopf-specific exception type, alongside `_raise`'s handling of
+    HTTP error statuses."""
 
     def __init__(self, timeout: float):
         super().__init__()
@@ -60,7 +63,10 @@ class _TimeoutSession(requests.Session):
 
     def request(self, *args, **kwargs):
         kwargs.setdefault("timeout", self.default_timeout)
-        return super().request(*args, **kwargs)
+        try:
+            return super().request(*args, **kwargs)
+        except requests.RequestException as e:
+            raise GeopfError(f"geopf request failed: {e}") from e
 
 
 class GeopfClient:
@@ -77,7 +83,7 @@ class GeopfClient:
         self.base = current_app.config["GEOPF_API_BASE"]
         self.datastore = datastore_id
         self.poll_timeout = current_app.config["GEOPF_POLL_TIMEOUT"]
-        self.session = _TimeoutSession(timeout=current_app.config["GEOPF_REQUEST_TIMEOUT"])
+        self.session = _GeopfSession(timeout=current_app.config["GEOPF_REQUEST_TIMEOUT"])
         self.session.headers["Authorization"] = f"Bearer {token}"
 
     def _url(self, path: str) -> str:
