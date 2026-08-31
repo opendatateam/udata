@@ -20,12 +20,13 @@ from udata.geopf.models import (
 )
 from udata.geopf.srs import DEFAULT_SRS
 from udata.geopf.tasks import (
-    _DownloadToTempfile,
-    _LocalStorageToTempfile,
+    _copy_to_tempfile,
+    _download_chunks,
     _offering_url,
     _open_resource_file,
     _resource_filename,
     _run_pipeline,
+    _storage_chunks,
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
@@ -67,14 +68,16 @@ class ResourceFilenameTest(PytestOnlyTestCase):
 class DownloadToTempfileTest(PytestOnlyTestCase):
     def test_downloads_within_size_limit(self, rmock):
         rmock.get("https://example.com/data.gpkg", content=b"x" * 1024)
-        with _DownloadToTempfile("https://example.com/data.gpkg") as f:
+        chunks = _download_chunks("https://example.com/data.gpkg")
+        with _copy_to_tempfile(chunks, "subject") as f:
             assert f.read() == b"x" * 1024
 
     @pytest.mark.options(GEOPF_MAX_FILE_SIZE=1024)
     def test_raises_when_size_limit_exceeded(self, rmock):
         rmock.get("https://example.com/data.gpkg", content=b"x" * 2048)
+        chunks = _download_chunks("https://example.com/data.gpkg")
         with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
-            with _DownloadToTempfile("https://example.com/data.gpkg"):
+            with _copy_to_tempfile(chunks, "subject"):
                 pass
 
 
@@ -86,7 +89,8 @@ class LocalStorageToTempfileTest(PytestOnlyTestCase):
         with patch(
             "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 1024)
         ):
-            with _LocalStorageToTempfile("uploads/my-data.gpkg") as f:
+            chunks = _storage_chunks("uploads/my-data.gpkg")
+            with _copy_to_tempfile(chunks, "subject") as f:
                 assert f.read() == b"x" * 1024
                 f.seek(0)
                 assert f.read() == b"x" * 1024
@@ -97,8 +101,9 @@ class LocalStorageToTempfileTest(PytestOnlyTestCase):
         with patch(
             "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 2048)
         ):
+            chunks = _storage_chunks("uploads/my-data.gpkg")
             with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
-                with _LocalStorageToTempfile("uploads/my-data.gpkg"):
+                with _copy_to_tempfile(chunks, "subject"):
                     pass
 
 
