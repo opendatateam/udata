@@ -123,7 +123,7 @@ class GeopfDatasetStatusAPI(API):
         A `status` of `null` means "never run"; otherwise it is one of
         `pending`, `done`, `error` or `timeout`.
         """
-        if not dataset.permissions["read"].can():
+        if not dataset.permissions["edit_resources"].can():
             if not dataset.private and dataset.deleted:
                 api.abort(410, "Dataset has been deleted")
             api.abort(404)
