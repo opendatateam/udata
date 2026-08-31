@@ -299,11 +299,6 @@ class GeopfClientDatastoresTest(PytestOnlyTestCase):
 
 @TEST_GEOPF_CONF
 class GeopfClientAuthTest(PytestOnlyTestCase):
-    def test_no_token_sends_no_authorization_header(self, rmock):
-        rmock.get(f"{TEST_API_URL}/offerings", json=[])
-        GeopfClient(datastore_id=TEST_DATASTORE_ID).list_offerings("sd-1")
-        assert "Authorization" not in rmock.last_request.headers
-
     def test_token_sends_bearer_authorization_header(self, rmock):
         rmock.get(f"{TEST_API_URL}/offerings", json=[])
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_offerings("sd-1")

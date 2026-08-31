@@ -52,7 +52,7 @@ class _TimeoutSession(requests.Session):
 
 
 class GeopfClient:
-    def __init__(self, token: str | None = None, datastore_id: str | None = None):
+    def __init__(self, token: str, datastore_id: str | None = None):
         """A geopf entrepôt API client.
 
         `token` is the acting user's bearer access token: every call here
@@ -66,8 +66,7 @@ class GeopfClient:
         self.datastore = datastore_id
         self.poll_timeout = current_app.config["GEOPF_POLL_TIMEOUT"]
         self.session = _TimeoutSession(timeout=current_app.config["GEOPF_REQUEST_TIMEOUT"])
-        if token:
-            self.session.headers["Authorization"] = f"Bearer {token}"
+        self.session.headers["Authorization"] = f"Bearer {token}"
 
     def _url(self, path: str) -> str:
         if not self.datastore:
