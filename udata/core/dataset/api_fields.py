@@ -114,8 +114,7 @@ resource_geopf_fields = api.model(
         "offering_id": fields.String(
             attribute="offering.id",
             description=(
-                "Géoplateforme offering id, if this resource was created from a geopf "
-                "offering pull"
+                "Géoplateforme offering id, if this resource was created from a geopf offering pull"
             ),
             allow_null=True,
             readonly=True,
