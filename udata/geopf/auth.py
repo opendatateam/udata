@@ -80,24 +80,17 @@ def revoke_token(geopf_token: GeopfToken) -> None:
         log.warning(f"geopf: failed to revoke token for user={geopf_token.user.id}", exc_info=True)
 
 
-def resolve_access_token(user=None, raw_token: str | None = None, min_validity: int = 0) -> str:
+def resolve_access_token(user, min_validity: int = 0) -> str:
     """Return a usable geopf access token for calling the geopf API.
 
-    Pass `raw_token` to bypass storage entirely (ops/debugging, e.g. the CLI's
-    `--token` option). Otherwise `user` is required: looks up their stored
-    `GeopfToken`, refreshing it first if expired, or if it expires within
-    `min_validity` seconds (pass the expected duration of the work ahead so
-    the token outlives it).
+    Looks up the user's stored `GeopfToken`, refreshing it first if expired,
+    or if it expires within `min_validity` seconds (pass the expected
+    duration of the work ahead so the token outlives it).
 
     Raises `GeopfReauthRequired` when there is no
     token or refresh fails, so the caller (API endpoint, task, CLI) can
     surface a "connect to Géoplateforme" prompt instead of a generic error.
     """
-    if raw_token:
-        return raw_token
-    if user is None:
-        raise GeopfReauthRequired("geopf: no user or raw token provided")
-
     geopf_token = GeopfToken.objects(user=user).first()
     if geopf_token is None:
         raise GeopfReauthRequired(f"geopf: no stored token for user={user.id}")

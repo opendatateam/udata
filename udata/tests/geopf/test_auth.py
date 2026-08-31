@@ -14,13 +14,6 @@ from udata.tests.geopf import TEST_GEOPF_CONF, create_geopf_token
 
 @TEST_GEOPF_CONF
 class ResolveAccessTokenTest(PytestOnlyDBTestCase):
-    def test_raw_token_bypasses_storage(self):
-        assert resolve_access_token(raw_token="raw-token") == "raw-token"
-
-    def test_no_user_and_no_raw_token_raises(self):
-        with pytest.raises(GeopfReauthRequired):
-            resolve_access_token()
-
     def test_no_stored_token_raises(self):
         user = UserFactory()
         with pytest.raises(GeopfReauthRequired):
