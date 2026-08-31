@@ -1,5 +1,7 @@
 from xml.sax.saxutils import escape
 
+from udata.rdf import escape_xml_illegal_chars
+
 XML_NS = {
     "gmd": "http://www.isotc211.org/2005/gmd",
     "gco": "http://www.isotc211.org/2005/gco",
@@ -248,4 +250,4 @@ def dataset_to_iso19115(dataset, datastore_id: str | None = None) -> bytes:
         topic_category_block=topic_category_block,
         extent_block=extent_block,
     )
-    return xml.encode("utf-8")
+    return escape_xml_illegal_chars(xml).encode("utf-8")
