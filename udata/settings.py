@@ -65,7 +65,7 @@ class Defaults(object):
     CELERY_TASK_ROUTES = "udata.tasks.router"
 
     CACHE_KEY_PREFIX = "udata-cache"
-    CACHE_TYPE = "flask_caching.backends.redis"
+    CACHE_TYPE = "flask_caching.backends.RedisCache"
 
     # Flask mail settings
 
@@ -707,7 +707,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     HARVESTER_BACKENDS = ["factory"]
-    CACHE_TYPE = "flask_caching.backends.null"
+    CACHE_TYPE = "flask_caching.backends.NullCache"
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
     SERVER_NAME = "local.test"
@@ -749,5 +749,5 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
     )
-    CACHE_TYPE = "flask_caching.backends.null"
+    CACHE_TYPE = "flask_caching.backends.NullCache"
     CACHE_NO_NULL_WARNING = True

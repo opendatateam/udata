@@ -382,9 +382,9 @@ You can see the full options list in
 
 ### CACHE_TYPE
 
-**default**: `'flask_caching.backends.redis'`
+**default**: `'flask_caching.backends.RedisCache'`
 
-The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.memcached`)
+The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.MemcachedCache`)
 
 ### CACHE_KEY_PREFIX
 

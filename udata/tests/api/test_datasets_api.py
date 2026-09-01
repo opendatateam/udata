@@ -3175,8 +3175,16 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_dataset_schemas_api_list_error_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, "set")
+        # Only serve the inner long-term cache key, so the outer @memoize layer
+        # does not short-circuit and the fallback logic is actually exercised.
         mocker.patch.object(
-            cache, "get", return_value=ResourceSchemaMockData.get_mock_data()["schemas"]
+            cache,
+            "get",
+            side_effect=lambda key: (
+                ResourceSchemaMockData.get_mock_data()["schemas"]
+                if key == "schema-catalog-objects"
+                else None
+            ),
         )
 
         # Fill cache
