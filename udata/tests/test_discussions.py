@@ -944,10 +944,9 @@ class DiscussionsTest(APITestCase):
     def test_get_discussion_with_deleted_organization(self):
         """A deleted org ref must not 500 on discussion read or list.
 
-        DATAGOUV-36F0: GET /api/1/discussions/?sort=-created&page=10 with
-        X-Fields data{created,subject,discussion},next_page raised
-        DoesNotExist while dereferencing a missing Organization DBRef on
-        Message.posted_by_organization.
+        Sentry DATAGOUV-36F0: GET /api/1/discussions/<id>/ (and the list
+        endpoint) raised DoesNotExist when Message.posted_by_organization
+        pointed at a missing Organization.
         """
         dataset = DatasetFactory()
         user = UserFactory()
