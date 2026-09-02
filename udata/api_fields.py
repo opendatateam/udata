@@ -367,7 +367,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         else:
 
             def constructor_read(**kwargs):
-                return restx_fields.Nested(nested_fields, **kwargs)
+                # udata Nested: dangling refs → null (DATAGOUV-36F0)
+                return custom_restx_fields.Nested(nested_fields, **kwargs)
 
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String

@@ -944,8 +944,10 @@ class DiscussionsTest(APITestCase):
     def test_get_discussion_with_deleted_organization(self):
         """A deleted org ref must not 500 on discussion read or list.
 
-        Production: GET /api/1/discussions/?sort=-created&page=10 returned 500
-        because one thread still pointed at a removed organization.
+        DATAGOUV-36F0: GET /api/1/discussions/?sort=-created&page=10 with
+        X-Fields data{created,subject,discussion},next_page raised
+        DoesNotExist while dereferencing a missing Organization DBRef on
+        Message.posted_by_organization.
         """
         dataset = DatasetFactory()
         user = UserFactory()
@@ -963,7 +965,6 @@ class DiscussionsTest(APITestCase):
             discussion=[message],
         )
         org.delete()
-        discussion.reload()
 
         response = self.get(url_for("api.discussion", id=discussion.id))
         self.assert200(response)
