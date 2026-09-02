@@ -1,3 +1,5 @@
+from mongoengine.errors import DoesNotExist
+
 from udata.auth import Permission, UserNeed
 from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.permissions import (
@@ -19,9 +21,14 @@ class DiscussionAuthorPermission(Permission):
     def __init__(self, discussion: Discussion):
         needs = []
 
-        if discussion.organization:
-            needs.append(OrganizationAdminNeed(discussion.organization.id))
-            needs.append(OrganizationEditorNeed(discussion.organization.id))
+        try:
+            organization = discussion.organization
+        except DoesNotExist:
+            organization = None
+
+        if organization:
+            needs.append(OrganizationAdminNeed(organization.id))
+            needs.append(OrganizationEditorNeed(organization.id))
         else:
             needs.append(UserNeed(discussion.user.fs_uniquifier))
 
@@ -32,9 +39,14 @@ class DiscussionMessagePermission(Permission):
     def __init__(self, message: Message):
         needs = []
 
-        if message.posted_by_organization:
-            needs.append(OrganizationAdminNeed(message.posted_by_organization.id))
-            needs.append(OrganizationEditorNeed(message.posted_by_organization.id))
+        try:
+            organization = message.posted_by_organization
+        except DoesNotExist:
+            organization = None
+
+        if organization:
+            needs.append(OrganizationAdminNeed(organization.id))
+            needs.append(OrganizationEditorNeed(organization.id))
         else:
             needs.append(UserNeed(message.posted_by.fs_uniquifier))
 

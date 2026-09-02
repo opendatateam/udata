@@ -19,7 +19,7 @@ from flask_restx.fields import Integer as Integer
 from flask_restx.fields import List as List
 from flask_restx.fields import MarshallingError as MarshallingError
 from flask_restx.fields import MinMaxMixin as MinMaxMixin
-from flask_restx.fields import Nested as Nested
+from flask_restx.fields import Nested as RestxNested
 from flask_restx.fields import NumberMixin as NumberMixin
 from flask_restx.fields import Polymorph as Polymorph
 from flask_restx.fields import Raw as Raw
@@ -27,10 +27,32 @@ from flask_restx.fields import String as String
 from flask_restx.fields import StringMixin as StringMixin
 from flask_restx.fields import Url as Url
 from flask_restx.fields import Wildcard as Wildcard
+from mongoengine.errors import DoesNotExist
 
 from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
+
+
+class Nested(RestxNested):
+    """Like flask-restx Nested, but missing DB references serialize as null.
+
+    Accessing a MongoEngine ``ReferenceField`` whose target was deleted raises
+    ``DoesNotExist``. Without this, a single dangling org/user ref turns a list
+    endpoint into a 500.
+    """
+
+    def output(self, key, obj, ordered=False, **kwargs):
+        try:
+            return super().output(key, obj, ordered=ordered, **kwargs)
+        except DoesNotExist:
+            log.warning(
+                "Missing referenced document while marshalling %s.%s",
+                type(obj).__name__,
+                key,
+            )
+            return None
+
 
 # Extract Flask's url_for() reserved arguments dynamically to filter from user-provided query params
 URL_FOR_RESERVED_ARGS = {

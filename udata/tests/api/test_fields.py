@@ -1,6 +1,9 @@
 from datetime import UTC, date, datetime
 
-from udata.api.fields import ISODateTime
+from flask_restx import marshal
+from mongoengine.errors import DoesNotExist
+
+from udata.api.fields import ISODateTime, Nested, String
 from udata.core.dataset.factories import DatasetFactory
 
 from . import APITestCase
@@ -46,3 +49,14 @@ class FieldTest(APITestCase):
 
         result = ISODateTime().format(date_date)
         self.assertEqual(result, date_date.isoformat())
+
+
+class NestedMissingRefTest:
+    def test_missing_reference_serializes_as_null(self):
+        class MissingOrg:
+            @property
+            def organization(self):
+                raise DoesNotExist("gone")
+
+        model = {"organization": Nested({"id": String()}, allow_null=True)}
+        assert marshal(MissingOrg(), model) == {"organization": None}

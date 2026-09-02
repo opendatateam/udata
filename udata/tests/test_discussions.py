@@ -941,6 +941,52 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data["url"], discussion.self_api_url())
         self.assertEqual(data["self_web_url"], discussion.self_web_url())
 
+    def test_get_discussion_with_deleted_organization(self):
+        """A deleted org ref must not 500 on discussion read or list.
+
+        Production: GET /api/1/discussions/?sort=-created&page=10 returned 500
+        because one thread still pointed at a removed organization.
+        """
+        dataset = DatasetFactory()
+        user = UserFactory()
+        org = OrganizationFactory()
+        message = Message(
+            content="hello",
+            posted_by=user,
+            posted_by_organization=org,
+        )
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            organization=org,
+            title="Avancement du projet",
+            discussion=[message],
+        )
+        org.delete()
+        discussion.reload()
+
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        self.assert200(response)
+        data = response.json
+        self.assertIsNone(data["organization"])
+        self.assertEqual(data["user"]["id"], str(user.id))
+        self.assertEqual(data["title"], "Avancement du projet")
+        self.assertIsNone(data["discussion"][0]["posted_by_organization"])
+        self.assertEqual(data["discussion"][0]["posted_by"]["id"], str(user.id))
+        self.assertEqual(data["permissions"]["delete"], False)
+        self.assertEqual(data["permissions"]["edit"], False)
+        self.assertEqual(data["discussion"][0]["permissions"]["delete"], False)
+
+        response = self.get(
+            url_for("api.discussions", sort="-created"),
+            headers={"X-Fields": "data{created,subject,discussion},next_page"},
+        )
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        listed = response.json["data"][0]
+        self.assertEqual(listed["subject"]["id"], str(dataset.id))
+        self.assertIsNone(listed["discussion"][0]["posted_by_organization"])
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_comment_to_discussion(self):
         dataset = Dataset.objects.create(title="Test dataset")
