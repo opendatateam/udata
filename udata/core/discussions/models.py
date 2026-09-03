@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from bson import ObjectId
-from flask import current_app, url_for
+from flask import current_app, g, url_for
 from flask_login import current_user
 from flask_restx.inputs import boolean
 from mongoengine import EmbeddedDocument
@@ -366,7 +366,7 @@ class Discussion(SpamMixin, Linkable, Document):
         from udata.core.dataset.permissions import OwnablePermission
         from udata.core.owned import Owned
 
-        if not current_user or not current_user.is_authenticated:
+        if not current_user or not current_user.is_authenticated or not hasattr(g, "identity"):
             return False
 
         if not isinstance(self.subject, Owned):
