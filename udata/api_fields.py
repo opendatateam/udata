@@ -92,9 +92,10 @@ classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
-    def __init__(self, fields_by_type, **kwargs):
+    def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
+        self.generic_key = generic_key
         # `fields_by_type` may be a callable resolved lazily on first use (and then
         # memoized). This lets generic embedded lists discover their subclasses at
         # marshalling time rather than at class-decoration time, when the subclass
@@ -111,7 +112,7 @@ class GenericField(restx_fields.Raw):
     def format(self, value):
         # Value is one of the generic object
         data = marshal(value, self.fields_by_type[value.__class__.__name__])
-        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        data[self.generic_key] = value.__class__.__name__
         return data
 
 
@@ -372,22 +373,34 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
-        generic_fields = {
-            cls.__name__: convert_db_to_field(
-                f"{key}.{cls.__name__}",
-                # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
-                # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
-                mongoengine.fields.EmbeddedDocumentField(cls),
-                info,
-            )
-            for cls in field.choices
-        }
+
+        def resolve_choice(choice):
+            return db.resolve_model(choice) if isinstance(choice, str) else choice
+
+        def generic_fields():
+            # Choices may reference classes not defined yet at decoration time
+            # (mutually recursive embedded documents like AndFilters/OrFilters),
+            # so resolve them lazily on first marshalling.
+            return {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    info,
+                )
+                for cls in (resolve_choice(choice) for choice in field.choices)
+            }
 
         def constructor_read(**kwargs):
-            return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[0].model for k, v in generic_fields().items()}, **kwargs
+            )
 
         def constructor_write(**kwargs):
-            return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[1].model for k, v in generic_fields().items()}, **kwargs
+            )
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
@@ -1043,6 +1056,28 @@ def patch(obj: _T, request) -> _T:
                         if generic
                         else base_embedded_field
                     )
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
+            elif (
+                value
+                and isinstance(
+                    model_attribute,
+                    mongoengine.fields.ListField,
+                )
+                and isinstance(
+                    model_attribute.field, mongoengine.fields.GenericEmbeddedDocumentField
+                )
+            ):
+                # A list of generic embedded documents (e.g. nested filter groups):
+                # discriminate each item on the generic key and patch it into an
+                # embedded document instance.
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
+
+                objects = []
+                for embedded_value in value:
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = classes_by_names[embedded_value[generic_key]]
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
