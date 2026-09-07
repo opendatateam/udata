@@ -1,5 +1,6 @@
 from copy import copy
 from datetime import UTC, date, datetime, timedelta
+from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import pytest
@@ -23,7 +24,7 @@ from udata.mongo import build_test_config, db, validate_config
 from udata.mongo.datetime_fields import DateField, DateRange, Datetimed
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
-from udata.mongo.slug_fields import SlugField
+from udata.mongo.slug_fields import SlugField, populate_slug
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
 from udata.settings import Defaults
@@ -235,6 +236,27 @@ class SlugFieldTest(PytestOnlyDBTestCase):
         assert obj.slug == "a-slug"
         obj.save()
         assert obj.slug == "a-slug"
+
+    def test_populate_when_slug_is_taken_between_populate_and_insert(self):
+        """SlugField should pick another suffix when a concurrent writer took the computed one"""
+        SlugTester.objects.create(title="A Title")
+
+        computed_slugs = []
+
+        def take_computed_slug(instance, field):
+            slug = populate_slug(instance, field)
+            # Only steal the slug of the first save, not of the steal itself nor of the retry.
+            if not computed_slugs:
+                computed_slugs.append(slug)
+                SlugTester.objects.create(title="A Title")
+            return slug
+
+        with patch("udata.mongo.slug_fields.populate_slug", take_computed_slug):
+            obj = SlugTester.objects.create(title="A Title")
+
+        assert computed_slugs == ["a-title-1"]
+        assert obj.slug == "a-title-2"
+        assert SlugTester.objects.count() == 3
 
     def test_work_accross_inheritance(self):
         """SlugField should ensure uniqueness accross inheritance"""
