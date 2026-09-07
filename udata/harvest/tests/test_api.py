@@ -2,7 +2,8 @@ import logging
 from datetime import UTC, datetime
 
 import pytest
-from flask import url_for
+from bson import ObjectId
+from flask import current_app, url_for
 from mongoengine.connection import get_db
 from mongoengine.context_managers import query_counter
 from pytest_mock import MockerFixture
@@ -14,6 +15,7 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db import migrations
 from udata.harvest.backends import get_enabled_backends
 from udata.models import Member, PeriodicTask
+from udata.routing import HarvestJobConverter, HarvestJobWithoutItemsConverter
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     argvalues,
@@ -922,6 +924,39 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         source.reload()
         assert source.periodic_task is not None
 
+    def test_get_unknown_job(self):
+        """An unknown job ID is a 404, on the job and on its items subresource.
+
+        Regression test: the raw `DoesNotExist` used to bubble up as a 500.
+        """
+        unknown = str(ObjectId())
+
+        assert404(self.get(url_for("api.harvest_job", job=unknown)))
+        assert404(self.get(url_for("api.harvest_job_items", job=unknown)))
+
+    def test_get_job_with_a_malformed_id(self):
+        """A malformed ID designates no resource either: 404, not a validation error."""
+        assert404(self.get(url_for("api.harvest_job", job="not-an-object-id")))
+        assert404(self.get(url_for("api.harvest_job_items", job="not-an-object-id")))
+
+    def test_job_converters_never_load_the_data_blob(self):
+        """The heavy `data` blob is never serialized by the read endpoints, so both
+        converters exclude it from the query — it dominates the document size."""
+        job = HarvestJobFactory(
+            data={"raw": "a very heavy blob"},
+            items=[HarvestItem(remote_id="1"), HarvestItem(remote_id="2")],
+        )
+
+        with_items = HarvestJobConverter(current_app.url_map).to_python(str(job.id))
+        without_items = HarvestJobWithoutItemsConverter(current_app.url_map).to_python(str(job.id))
+
+        # Excluded from the projection: the field falls back to its default.
+        assert with_items.data == {}
+        assert without_items.data == {}
+        # Only the items subresource route loads them.
+        assert len(with_items.items) == 2
+        assert without_items.items == []
+
     def test_get_job_error_details_hidden_from_non_admin(self):
         """Error `details` (stack traces / internal info) must only be exposed to admins.
 
@@ -932,13 +967,13 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
             errors=[HarvestError(message="oops", details="secret stack trace")],
         )
 
-        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        response = self.get(url_for("api.harvest_job", job=job))
         assert200(response)
         assert response.json["errors"][0]["message"] == "oops"
         assert response.json["errors"][0]["details"] is None
 
         self.login(AdminFactory())
-        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        response = self.get(url_for("api.harvest_job", job=job))
         assert200(response)
         assert response.json["errors"][0]["details"] == "secret stack trace"
 
@@ -951,7 +986,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         source = HarvestSourceFactory()
         job = HarvestJobFactory(source=source)
 
-        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        response = self.get(url_for("api.harvest_job", job=job))
         assert200(response)
         assert response.json["source"] == {
             "id": str(source.id),
@@ -967,7 +1002,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
                 HarvestItem(dataset=DatasetFactory(), remote_url="https://my.remote.example.com"),
             ],
         )
-        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        response = self.get(url_for("api.harvest_job", job=job))
         assert200(response)
         items_link = response.json["items"]
         assert items_link["rel"] == "subsection"
@@ -1053,7 +1088,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
             ]
             job = HarvestJobFactory(items=items)
             with query_counter() as counter:
-                response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+                response = self.get(url_for("api.harvest_job", job=job))
                 assert200(response)
                 assert response.json["items"]["total"] == 5
                 assert response.json["items"]["by_type"]["dataset"] == (5 if with_refs else 0)
@@ -1102,7 +1137,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
                 HarvestItem(dataset=DatasetFactory(), remote_url="https://my.remote.example.com"),
             ],
         )
-        response = self.get(url_for("api.harvest_job_items", ident=str(job.id)))
+        response = self.get(url_for("api.harvest_job_items", job=job))
         assert200(response)
         assert response.json["total"] == 3
         assert len(response.json["data"]) == 3
@@ -1150,9 +1185,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
     def test_list_items_paginated(self):
         """Items endpoint paginates with page/page_size"""
         job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
-        response = self.get(
-            url_for("api.harvest_job_items", ident=str(job.id), page=2, page_size=2)
-        )
+        response = self.get(url_for("api.harvest_job_items", job=job, page=2, page_size=2))
         assert200(response)
         assert response.json["total"] == 5
         assert response.json["page"] == 2
@@ -1163,17 +1196,17 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         """Items endpoint exposes next_page/previous_page URLs at the right places"""
         job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
 
-        first = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=1, page_size=2))
+        first = self.get(url_for("api.harvest_job_items", job=job, page=1, page_size=2))
         assert200(first)
         assert first.json["previous_page"] is None
         assert "page=2" in first.json["next_page"]
 
-        middle = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=2, page_size=2))
+        middle = self.get(url_for("api.harvest_job_items", job=job, page=2, page_size=2))
         assert200(middle)
         assert "page=1" in middle.json["previous_page"]
         assert "page=3" in middle.json["next_page"]
 
-        last = self.get(url_for("api.harvest_job_items", ident=str(job.id), page=3, page_size=2))
+        last = self.get(url_for("api.harvest_job_items", job=job, page=3, page_size=2))
         assert200(last)
         assert "page=2" in last.json["previous_page"]
         assert last.json["next_page"] is None
@@ -1182,9 +1215,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         """Requesting a page beyond the last one returns 404 (Pagination aborts
         when a non-first page holds no item)."""
         job = HarvestJobFactory(items=[HarvestItem() for _ in range(5)])
-        response = self.get(
-            url_for("api.harvest_job_items", ident=str(job.id), page=4, page_size=2)
-        )
+        response = self.get(url_for("api.harvest_job_items", job=job, page=4, page_size=2))
         assert404(response)
 
     def test_list_items_filtered_by_status(self):
@@ -1197,19 +1228,19 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
                 HarvestItem(status="skipped"),
             ],
         )
-        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="done"))
+        response = self.get(url_for("api.harvest_job_items", job=job, status="done"))
         assert200(response)
         assert response.json["total"] == 2
         assert {item["status"] for item in response.json["data"]} == {"done"}
 
-        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="failed"))
+        response = self.get(url_for("api.harvest_job_items", job=job, status="failed"))
         assert200(response)
         assert response.json["total"] == 1
 
     def test_list_items_filtered_by_unknown_status(self):
         """Status filter rejects unknown values"""
         job = HarvestJobFactory(items=[HarvestItem()])
-        response = self.get(url_for("api.harvest_job_items", ident=str(job.id), status="bogus"))
+        response = self.get(url_for("api.harvest_job_items", job=job, status="bogus"))
         assert400(response)
 
     def test_get_source_permissions_as_anonymous(self):
