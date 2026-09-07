@@ -112,6 +112,37 @@ requests_parser.add_argument(
 )
 
 
+def resolve_reference(field, specs, allowed_models):
+    """Resolve a client-provided `{"class": …, "id": …}` pair into a document.
+
+    Both parts come straight from the request body: `db.resolve_model` resolves against
+    the whole document registry, so `class` is restricted to the classes this field
+    actually accepts, and `id` has to be an object id — anything else (a dict) reaches
+    MongoDB as a set of operators (`{"$regex": …}`) selecting an arbitrary document,
+    since MongoEngine only rejects those on an `ObjectId` primary key.
+    """
+    if not isinstance(specs, dict):
+        ns.abort(400, errors={field: "Expected an object with `class` and `id` keys"})
+
+    try:
+        model = db.resolve_model(specs)
+    except ValueError as e:
+        ns.abort(400, errors={field: str(e)})
+
+    if model not in allowed_models:
+        expected = ", ".join(sorted(allowed.__name__ for allowed in allowed_models))
+        ns.abort(400, errors={field: "`class` must be one of: {0}".format(expected)})
+
+    object_id = specs.get("id")
+    if not ObjectId.is_valid(object_id):
+        ns.abort(400, errors={field: "`id` must be an identifier"})
+
+    try:
+        return model.objects.get(id=object_id)
+    except model.DoesNotExist:
+        ns.abort(400, errors={field: 'Unknown {0} id "{1}"'.format(field, object_id)})
+
+
 @ns.route("/", endpoint="transfers")
 class TransferRequestsAPI(API):
     @api.doc("list_transfers")
@@ -150,22 +181,11 @@ class TransferRequestsAPI(API):
     def post(self):
         """Initiate transfer request"""
         data = request.json
+        if not isinstance(data, dict):
+            ns.abort(400, "Expected a JSON object")
 
-        subject_model = db.resolve_model(data["subject"])
-        subject_id = data["subject"]["id"]
-        try:
-            subject = subject_model.objects.get(id=subject_id)
-        except subject_model.DoesNotExist:
-            msg = 'Unkown subject id "{0}"'.format(subject_id)
-            ns.abort(400, errors={"subject": msg})
-
-        recipient_model = db.resolve_model(data["recipient"])
-        recipient_id = data["recipient"]["id"]
-        try:
-            recipient = recipient_model.objects.get(id=recipient_id)
-        except recipient_model.DoesNotExist:
-            msg = 'Unkown recipient id "{0}"'.format(recipient_id)
-            ns.abort(400, errors={"recipient": msg})
+        subject = resolve_reference("subject", data.get("subject"), subject_mapping)
+        recipient = resolve_reference("recipient", data.get("recipient"), person_mapping)
 
         comment = data.get("comment")
 

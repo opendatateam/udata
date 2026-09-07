@@ -1,7 +1,7 @@
 from bson import ObjectId
 from flask import url_for
 
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
@@ -230,6 +230,77 @@ class TransferAPITest(APITestCase):
         data = response.json
 
         self.assertIn("recipient", data["errors"])
+
+    def test_400_on_subject_class_outside_transferable_types(self):
+        """`db.resolve_model` resolves any registered document, a `License` included."""
+        self.login()
+        recipient = UserFactory()
+        LicenseFactory(id="other-at")
+        LicenseFactory(id="other-open")
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                # A `StringField` primary key lets the operators through untouched, so
+                # this used to query the licenses and blow up on the second match.
+                "subject": {"class": "License", "id": {"$regex": "^other-"}},
+                "recipient": {"class": "User", "id": str(recipient.id)},
+                "comment": faker.sentence(),
+            },
+        )
+
+        self.assert400(response)
+        self.assertIn("subject", response.json["errors"])
+
+    def test_400_on_recipient_class_outside_persons(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": "Dataset", "id": str(dataset.id)},
+                "recipient": {"class": "Dataset", "id": str(dataset.id)},
+                "comment": faker.sentence(),
+            },
+        )
+
+        self.assert400(response)
+        self.assertIn("recipient", response.json["errors"])
+
+    def test_400_on_mongo_operators_as_subject_id(self):
+        user = self.login()
+        DatasetFactory(owner=user)
+        recipient = UserFactory()
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": "Dataset", "id": {"$ne": None}},
+                "recipient": {"class": "User", "id": str(recipient.id)},
+                "comment": faker.sentence(),
+            },
+        )
+
+        self.assert400(response)
+        self.assertIn("subject", response.json["errors"])
+
+    def test_400_on_malformed_subject_reference(self):
+        self.login()
+        recipient = UserFactory()
+
+        for subject in ("Dataset", {"class": "Dataset"}, {"class": "Dataset", "id": "not-an-id"}):
+            response = self.post(
+                url_for("api.transfers"),
+                {
+                    "subject": subject,
+                    "recipient": {"class": "User", "id": str(recipient.id)},
+                    "comment": faker.sentence(),
+                },
+            )
+
+            self.assert400(response)
+            self.assertIn("subject", response.json["errors"])
 
     def test_cannot_accept_or_refuse_transfer_after_accepting_or_refusing(self):
         user = self.login()
