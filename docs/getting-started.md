@@ -113,7 +113,7 @@ DEBUG = True
 SEND_MAIL = False
 SERVER_NAME = 'dev.local:7000'
 CDATA_BASE_URL = 'http://dev.local:3000'
-CACHE_TYPE = 'flask_caching.backends.null'
+CACHE_TYPE = 'flask_caching.backends.NullCache'
 
 URLS_ALLOW_PRIVATE = True
 URLS_ALLOW_LOCAL = True

@@ -373,7 +373,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_TASK_RESULT_EXPIRES = 86400
 
 # We use Redis as caching backend but in a separate collection
-CACHE_TYPE = 'flask_caching.backends.redis'
+CACHE_TYPE = 'flask_caching.backends.RedisCache'
 CACHE_REDIS_URL = 'redis://localhost:6379/2'
 
 # The identity used to send mails
