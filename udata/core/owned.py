@@ -80,6 +80,11 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
     from udata.auth import current_user
     from udata.models import Organization
 
+    # An explicit null clears the producer, like `check_owner_is_current_user` above:
+    # there is no organization to look up, let alone to check permissions on.
+    if not organization:
+        return
+
     org = Organization.objects(id=organization.id).first()
     if org is None:
         raise FieldValidationError(_("Unknown organization"), field="organization")

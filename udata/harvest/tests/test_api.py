@@ -662,6 +662,18 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         source.reload()
         assert source.validation.state == VALIDATION_PENDING
 
+    def test_reject_source_with_an_empty_comment_fails(self):
+        """An empty comment is no comment: it must be rejected like an absent one"""
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = {"state": VALIDATION_REFUSED, "comment": "  "}
+        response = self.post(url_for("api.validate_harvest_source", source=source), data)
+        assert400(response)
+
+        source.reload()
+        assert source.validation.state == VALIDATION_PENDING
+
     def test_validate_source_is_admin_only(self):
         """It should allow to validate a source if admin"""
         self.login()

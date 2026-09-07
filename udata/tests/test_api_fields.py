@@ -20,7 +20,7 @@ from mongoengine.fields import (
 from werkzeug.exceptions import BadRequest
 
 from udata.api import api
-from udata.api_fields import field, generate_fields, patch, patch_and_save
+from udata.api_fields import field, generate_fields, patch, patch_and_save, required_if
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import License
 from udata.core.organization import constants as org_constants
@@ -90,6 +90,26 @@ class FakeEmbedded(EmbeddedDocument):
     status = field(
         StringField(choices=[("active", "Active"), ("inactive", "Inactive")]),
     )
+
+
+@generate_fields()
+class FakeWithRequiredIf(EmbeddedDocument):
+    """Exercises `required_if`: `comment` is mandatory as soon as `kind` is a request."""
+
+    kind = field(StringField(choices=["request", "invitation"], default="request"))
+    comment = field(StringField(), checks=[required_if(kind="request")])
+
+
+def check_is_set(value: str = "", field: str = "", **_kwargs) -> None:
+    """A plain check (not `always_run`) that rejects the field's own default, so a test
+    can tell whether a creation writing that default still goes through its checks."""
+    if not value:
+        raise FieldValidationError("Value is required", field=field)
+
+
+@generate_fields()
+class FakeWithDefaultRejectingCheck(EmbeddedDocument):
+    kind = field(StringField(), checks=[check_is_set])
 
 
 @generate_fields(
@@ -542,6 +562,51 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         """An explicit null on a choices field must not raise."""
         embedded = patch(FakeEmbedded(), {"status": None})
         assert embedded.status is None
+
+
+class RequiredIfTest(PytestOnlyDBTestCase):
+    def test_absent_field_is_rejected(self) -> None:
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf(), {})
+
+    def test_empty_value_is_rejected(self) -> None:
+        """A blank string is blanked to None by patch(), which on a field already
+        holding None leaves the value unmodified. The check must run all the same,
+        otherwise `{"comment": ""}` is a way to bypass the constraint entirely."""
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithRequiredIf(), {"comment": value})
+
+    def test_value_is_accepted(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"comment": "a reason"}).comment == "a reason"
+
+    def test_not_required_when_the_condition_is_not_met(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"kind": "invitation", "comment": ""}).comment is None
+
+
+class ChecksOnCreationTest(PytestOnlyDBTestCase):
+    """An unchanged value skips its checks so that resending an object as-is stays
+    idempotent. A creation has no previous value to be idempotent with — only a field
+    default — so writing that default must still be validated."""
+
+    def test_default_value_is_checked_on_creation(self) -> None:
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithDefaultRejectingCheck(), {"kind": value})
+
+    def test_valid_value_is_accepted_on_creation(self) -> None:
+        assert patch(FakeWithDefaultRejectingCheck(), {"kind": "a value"}).kind == "a value"
+
+    def test_unchanged_value_is_not_rechecked_on_update(self) -> None:
+        """A check that rejects the value already stored (uniqueness, immutability)
+        must not fire on an update that merely echoes it back."""
+        stored = FakeWithRename.objects.create(label=FORBIDDEN_VALUE)
+        patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+    def test_changed_value_is_still_checked_on_update(self) -> None:
+        stored = FakeWithRename.objects.create(label="a fine label")
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
 
 
 class PatchBlankStringTest(PytestOnlyDBTestCase):

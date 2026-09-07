@@ -640,6 +640,21 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert len(organization.requests) == 0
 
+    def test_request_membership_with_an_empty_comment(self):
+        """An empty comment is no comment: it must be rejected like an absent one,
+        otherwise the request is created and the notification mail crashes on it."""
+        organization = OrganizationFactory()
+        self.login()
+
+        for comment in ["", "   "]:
+            response = self.post(
+                url_for("api.request_membership", org=organization), {"comment": comment}
+            )
+            assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
     def test_request_existing_pending_membership_do_not_duplicate_it(self):
         user = self.login()
         previous_request = MembershipRequest(user=user, comment="previous")
