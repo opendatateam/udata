@@ -7,19 +7,29 @@ class TransferPermission(Permission):
     """Permissions to transfer an object assets"""
 
     def __init__(self, subject):
+        # No need at all when nobody owns the subject: purging an organization only deletes
+        # the organization, and `Owned.organization` nullifies itself, leaving its datasets
+        # behind with neither an owner nor an organization. Such a subject has nobody
+        # entitled to give it away, which is what an empty permission means (sysadmins
+        # excepted, as everywhere else).
+        needs = []
         if subject.organization:
-            need = OrganizationAdminNeed(subject.organization.id)
+            needs.append(OrganizationAdminNeed(subject.organization.id))
         elif subject.owner:
-            need = UserNeed(subject.owner.fs_uniquifier)
-        super(TransferPermission, self).__init__(need)
+            needs.append(UserNeed(subject.owner.fs_uniquifier))
+        super().__init__(*needs)
 
 
 class TransferResponsePermission(Permission):
     """Permissions to transfer an object assets"""
 
     def __init__(self, transfer):
+        # Same as above: `Transfer.recipient` is a choice-less generic reference, so
+        # transfers pointing at something that is neither a user nor an organization can
+        # already sit in the database. Nobody can respond to those.
+        needs = []
         if isinstance(transfer.recipient, Organization):
-            need = OrganizationAdminNeed(transfer.recipient.id)
+            needs.append(OrganizationAdminNeed(transfer.recipient.id))
         elif isinstance(transfer.recipient, User):
-            need = UserNeed(transfer.recipient.fs_uniquifier)
-        super(TransferResponsePermission, self).__init__(need)
+            needs.append(UserNeed(transfer.recipient.fs_uniquifier))
+        super().__init__(*needs)

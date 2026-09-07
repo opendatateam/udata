@@ -5,7 +5,7 @@ from udata.auth import PermissionDenied, login_user
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
@@ -96,6 +96,17 @@ class TransferStartTest(PytestOnlyDBTestCase):
         with pytest.raises(ValueError):
             self.assert_transfer_started(dataset, user, user, comment)
 
+    def test_request_transfer_of_an_orphaned_subject(self):
+        # Purging an organization deletes it and leaves its datasets behind, with the
+        # `organization` reference nullified and no owner to fall back on.
+        dataset = DatasetFactory()
+        assert dataset.owner is None
+        assert dataset.organization is None
+
+        login_user(UserFactory())
+        with pytest.raises(PermissionDenied):
+            request_transfer(dataset, UserFactory(), faker.sentence())
+
     def test_request_transfer_to_same_organization(self):
         user = UserFactory()
         member = Member(user=user, role="admin")
@@ -178,6 +189,17 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
         transfer = TransferFactory(owner=owner, recipient=org, subject=subject)
 
         login_user(editor)
+        with pytest.raises(PermissionDenied):
+            accept_transfer(transfer)
+
+    def test_nobody_can_accept_a_transfer_whose_recipient_is_not_a_person(self):
+        # `Transfer.recipient` is a choice-less generic reference, so the API used to let
+        # any document class through and such transfers may already sit in the database.
+        owner = UserFactory()
+        subject = DatasetFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=LicenseFactory(), subject=subject)
+
+        login_user(owner)
         with pytest.raises(PermissionDenied):
             accept_transfer(transfer)
 
