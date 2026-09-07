@@ -290,15 +290,20 @@ class TransferContactPointsTest(PytestOnlyDBTestCase):
         recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
         contact_point = ContactPointFactory(owner=owner, role="contact")
         subject = DatasetFactory(owner=owner, contact_points=[contact_point])
-        # A legacy contact point the model rejects, as `2024-12-05-contact-point-is-now-a-list`
-        # could leave behind: reachable only by writing straight to the collection.
-        ContactPoint.objects(id=contact_point.id).update(unset__name=True)
+        # A contact point the model rejects: a `contact` reaches nobody without an email nor a
+        # contact form. Reachable only by writing straight to the collection.
+        ContactPoint.objects(id=contact_point.id).update(
+            unset__email=True, unset__contact_form=True
+        )
         transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
 
         login_user(owner)
         with pytest.raises(ValidationError):
             accept_transfer(Transfer.objects.get(id=transfer.id))
 
+        # No copy under the recipient: the transfer failed while carrying the contact point over,
+        # which is the only point where it can fail before being marked accepted.
+        assert ContactPoint.objects(organization=recipient).count() == 0
         transfer.reload()
         assert transfer.status == "pending"
         subject.reload()

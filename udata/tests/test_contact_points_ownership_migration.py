@@ -120,9 +120,11 @@ class ContactPointsOwnershipMigrationTest(PytestOnlyDBTestCase):
         assert contact_points_of(ownerless) == [stranger]
 
     def test_a_document_that_cannot_be_saved_does_not_stop_the_others(self):
-        """A legacy contact point can fail validation; the rest must still be fixed."""
+        """A contact point can fail validation; the rest must still be fixed."""
         broken = ContactPointFactory(organization=OrganizationFactory(), role="contact")
-        ContactPoint.objects(id=broken.id).update(unset__name=True)
+        # A `contact` reaches nobody without an email nor a contact form, so the copy made for
+        # the owner of `doomed` cannot be saved.
+        ContactPoint.objects(id=broken.id).update(unset__email=True, unset__contact_form=True)
         doomed = DatasetFactory(organization=OrganizationFactory())
         point_at(doomed, broken)
 
