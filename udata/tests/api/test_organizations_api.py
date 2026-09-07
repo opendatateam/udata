@@ -23,7 +23,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.i18n import _
-from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
+from udata.models import Follow, Member, MembershipRequest, Organization
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
@@ -1626,28 +1626,6 @@ class OrganizationReusesAPITest(PytestOnlyAPITestCase):
 
         assert200(response)
         assert len(response.json) == len(reuses)
-
-
-class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
-    def test_list_org_discussions(self):
-        """Should list organization discussions"""
-        user = UserFactory()
-        org = OrganizationFactory()
-        reuse = ReuseFactory(organization=org)
-        dataset = DatasetFactory(organization=org)
-        discussions = [
-            Discussion.objects.create(subject=dataset, title="", user=user),
-            Discussion.objects.create(subject=reuse, title="", user=user),
-        ]
-
-        response = self.get(url_for("api.org_discussions", org=org))
-
-        assert200(response)
-        assert len(response.json) == len(discussions)
-
-        discussions_ids = [str(d.id) for d in discussions]
-        for discussion in response.json:
-            assert discussion["id"] in discussions_ids
 
 
 class OrganizationBadgeAPITest(PytestOnlyAPITestCase):
