@@ -78,6 +78,33 @@ class MeAPITest(APITestCase):
         user.reload()
         self.assertEqual(user.avatar.bbox, [10, 10, 40, 40])
 
+    def test_my_avatar_upload_rejects_invalid_bbox(self):
+        """It should reject a bbox that is not four pixel coordinates"""
+        self.login()
+        for bbox in ("1e400,0,1,1", "nan,0,1,1", "a,b,c,d", "10,10,40", "10,10,40,40,40"):
+            with self.subTest(bbox=bbox):
+                response = self.post(
+                    url_for("api.my_avatar"),
+                    {"file": (create_test_image(), "test.png"), "bbox": bbox},
+                    json=False,
+                )
+                self.assert400(response)
+
+    def test_my_avatar_upload_rejects_bbox_outside_of_the_image(self):
+        """It should reject a bbox that does not fit in the uploaded image"""
+        # Pillow pads a crop reaching outside of the image instead of failing: cropping
+        # a 50x50 avatar to 20000x20000 allocates the whole padded surface.
+        self.login()
+        # `create_test_image` is 50x50: an empty and a reversed box are degenerate too.
+        for bbox in ("0,0,20000,20000", "-10,10,40,40", "10,10,10,40", "40,10,10,40"):
+            with self.subTest(bbox=bbox):
+                response = self.post(
+                    url_for("api.my_avatar"),
+                    {"file": (create_test_image(), "test.png"), "bbox": bbox},
+                    json=False,
+                )
+                self.assert400(response)
+
     def test_my_avatar_upload_stores_the_whole_file(self):
         """It should store the complete file, not just what the format check left"""
         # Without optimization and without a max size, flask_storage saves the stream
