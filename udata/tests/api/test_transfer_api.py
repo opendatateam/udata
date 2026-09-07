@@ -253,6 +253,54 @@ class TransferAPITest(APITestCase):
         self.assert400(response)
         self.assertIn("subject", response.json["errors"])
 
+    def test_400_on_subject_class_that_resolves_to_a_single_document(self):
+        """Same hole as above, one step further: the lookup succeeds and the crash moves.
+
+        With an id matching exactly one licence, `objects.get()` returns it and the
+        request reaches `TransferPermission`, which reads `subject.organization` — an
+        attribute a `License` simply does not have. Rejecting the class is the only thing
+        that covers this: a licence is not an `Owned`, so no amount of care inside the
+        permission would help.
+        """
+        self.login()
+        recipient = UserFactory()
+        license = LicenseFactory()
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": "License", "id": license.id},
+                "recipient": {"class": "User", "id": str(recipient.id)},
+                "comment": faker.sentence(),
+            },
+        )
+
+        self.assert400(response)
+        self.assertIn("subject", response.json["errors"])
+
+    def test_403_on_a_subject_nobody_owns(self):
+        """Purging an organization leaves its datasets behind with no owner at all.
+
+        Such a dataset is a perfectly regular `Dataset`, so it goes through the class and
+        id checks untouched and reaches the permission, which finds nobody entitled to
+        give it away. That has to be a refusal, not a crash.
+        """
+        self.login()
+        orphan = DatasetFactory()
+        self.assertIsNone(orphan.owner)
+        self.assertIsNone(orphan.organization)
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": "Dataset", "id": str(orphan.id)},
+                "recipient": {"class": "User", "id": str(UserFactory().id)},
+                "comment": faker.sentence(),
+            },
+        )
+
+        self.assert403(response)
+
     def test_request_topic_transfer(self):
         """Topics are owned like datasets, and transferring one is supported."""
         user = self.login()
