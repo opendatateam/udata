@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime
+from fnmatch import fnmatchcase
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import BaseField, DictField
@@ -11,8 +12,9 @@ ALLOWED_TYPES = (str, int, float, bool, datetime, date, list, dict)
 
 
 class ExtrasField(DictField):
-    def __init__(self, keys_types={}, **kwargs):
+    def __init__(self, keys_types={}, reserved=(), **kwargs):
         self.registered = {}
+        self.reserved = reserved
         for key, dbtype in keys_types.items():
             self.register(key, dbtype)
         super(ExtrasField, self).__init__()
@@ -22,6 +24,15 @@ class ExtrasField(DictField):
         if not issubclass(dbtype, (BaseField, EmbeddedDocument)):
             raise TypeError("ExtrasField can only register MongoEngine fields")
         self.registered[key] = dbtype
+
+    def is_reserved(self, key: str) -> bool:
+        """Whether this key is written by platform services rather than by users.
+
+        Enforced by the write paths that know the caller (forms, apiv2 extras
+        endpoints), not by `validate`, which sees neither the identity nor the
+        previous value.
+        """
+        return any(fnmatchcase(key, pattern) for pattern in self.reserved)
 
     def validate(self, values):
         super(ExtrasField, self).validate(values)
