@@ -75,7 +75,7 @@ def migrate(db):
                 document.save()
             except Exception as error:
                 # A document can fail validation for reasons of its own — a duplicate resource
-                # id, a legacy contact point missing a name. Reporting it and moving on lets the
+                # id, a contact point nobody can reach. Reporting it and moving on lets the
                 # migration complete, where raising would leave it unapplied and replay forever
                 # on the same document.
                 log.warning(f"{model.__name__} #{document.id} could not be fixed: {error}")
