@@ -5,6 +5,7 @@ from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
+from udata.core.topic.models import Topic
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
@@ -13,7 +14,7 @@ from udata.models import Dataset, Reuse, User, db
 from udata.utils import id_or_404
 
 from .actions import accept_transfer, refuse_transfer, request_transfer
-from .models import TRANSFER_STATUS, Transfer
+from .models import TRANSFER_PERSONS, TRANSFER_STATUS, TRANSFERABLE_SUBJECTS, Transfer
 
 RESPONSE_TYPES = ["accept", "refuse"]
 
@@ -53,6 +54,7 @@ subject_mapping = {
     Dataservice: Dataservice.__ref_fields__,
     Dataset: dataset_ref_fields,
     Reuse: Reuse.__ref_fields__,
+    Topic: Topic.__ref_fields__,
 }
 
 transfer_fields = api.model(
@@ -98,7 +100,7 @@ requests_parser.add_argument(
     "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
 )
 requests_parser.add_argument(
-    "subject_type", choices=["Dataset", "Reuse", "Dataservice"], type=str, help="", location="args"
+    "subject_type", choices=TRANSFERABLE_SUBJECTS, type=str, help="", location="args"
 )
 requests_parser.add_argument(
     "recipient", type=str, help="ID of user or organization", location="args"
@@ -112,31 +114,28 @@ requests_parser.add_argument(
 )
 
 
-def resolve_reference(field, specs, allowed_models):
+def resolve_reference(field, specs, choices):
     """Resolve a client-provided `{"class": …, "id": …}` pair into a document.
 
-    Both parts come straight from the request body: `db.resolve_model` resolves against
-    the whole document registry, so `class` is restricted to the classes this field
-    actually accepts, and `id` has to be an object id — anything else (a dict) reaches
-    MongoDB as a set of operators (`{"$regex": …}`) selecting an arbitrary document,
-    since MongoEngine only rejects those on an `ObjectId` primary key.
+    Both parts come straight from the request body, and both are checked before anything
+    reaches MongoDB. `class` is matched against the field's `choices` rather than resolved
+    against the whole document registry, because a generic reference only validates its
+    choices on save — long after the lookup below has run. And `id` has to be an object
+    id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
+    arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
+    a `StringField` one.
     """
     if not isinstance(specs, dict):
         ns.abort(400, errors={field: "Expected an object with `class` and `id` keys"})
 
-    try:
-        model = db.resolve_model(specs)
-    except ValueError as e:
-        ns.abort(400, errors={field: str(e)})
-
-    if model not in allowed_models:
-        expected = ", ".join(sorted(allowed.__name__ for allowed in allowed_models))
-        ns.abort(400, errors={field: "`class` must be one of: {0}".format(expected)})
+    if specs.get("class") not in choices:
+        ns.abort(400, errors={field: "`class` must be one of: {0}".format(", ".join(choices))})
 
     object_id = specs.get("id")
     if not ObjectId.is_valid(object_id):
         ns.abort(400, errors={field: "`id` must be an identifier"})
 
+    model = db.resolve_model(specs)
     try:
         return model.objects.get(id=object_id)
     except model.DoesNotExist:
@@ -184,8 +183,8 @@ class TransferRequestsAPI(API):
         if not isinstance(data, dict):
             ns.abort(400, "Expected a JSON object")
 
-        subject = resolve_reference("subject", data.get("subject"), subject_mapping)
-        recipient = resolve_reference("recipient", data.get("recipient"), person_mapping)
+        subject = resolve_reference("subject", data.get("subject"), TRANSFERABLE_SUBJECTS)
+        recipient = resolve_reference("recipient", data.get("recipient"), TRANSFER_PERSONS)
 
         comment = data.get("comment")
 

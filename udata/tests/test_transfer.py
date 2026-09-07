@@ -193,11 +193,18 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
             accept_transfer(transfer)
 
     def test_nobody_can_accept_a_transfer_whose_recipient_is_not_a_person(self):
-        # `Transfer.recipient` is a choice-less generic reference, so the API used to let
-        # any document class through and such transfers may already sit in the database.
+        # `Transfer.recipient` only got its `choices` once such transfers had already been
+        # created, so the row is written past validation to reproduce a legacy one rather
+        # than a shape the model still accepts.
         owner = UserFactory()
         subject = DatasetFactory(owner=owner)
-        transfer = TransferFactory(owner=owner, recipient=LicenseFactory(), subject=subject)
+        transfer = TransferFactory(owner=owner, recipient=UserFactory(), subject=subject)
+        Transfer.objects(id=transfer.id).update_one(
+            __raw__={
+                "$set": {"recipient": {"_cls": "License", "_ref": LicenseFactory().to_dbref()}}
+            }
+        )
+        transfer.reload()
 
         login_user(owner)
         with pytest.raises(PermissionDenied):

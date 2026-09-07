@@ -4,6 +4,7 @@ from flask import url_for
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 from udata.utils import faker
@@ -251,6 +252,32 @@ class TransferAPITest(APITestCase):
 
         self.assert400(response)
         self.assertIn("subject", response.json["errors"])
+
+    def test_request_topic_transfer(self):
+        """Topics are owned like datasets, and transferring one is supported."""
+        user = self.login()
+        recipient_org = OrganizationFactory()
+        topic = TopicFactory(owner=user)
+
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": "Topic", "id": str(topic.id)},
+                "recipient": {"class": "Organization", "id": str(recipient_org.id)},
+                "comment": faker.sentence(),
+            },
+        )
+        self.assert201(response)
+        self.assertEqual(response.json["subject"]["class"], "Topic")
+        self.assertEqual(response.json["subject"]["id"], str(topic.id))
+
+        # The listing marshals the subject with a `Polymorph`, which raises on a class it
+        # does not know about — so reading the transfer back is a distinct guarantee.
+        response = self.get(url_for("api.transfers", subject=str(topic.id)))
+        self.assert200(response)
+        self.assertEqual(len(response.json), 1)
+        self.assertEqual(response.json[0]["subject"]["name"], topic.name)
+        self.assertEqual(response.json[0]["subject"]["page"], topic.self_web_url())
 
     def test_400_on_recipient_class_outside_persons(self):
         user = self.login()

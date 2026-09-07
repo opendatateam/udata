@@ -19,12 +19,19 @@ TRANSFER_STATUS = {
     "refused": _("Refused"),
 }
 
+# Class names rather than the classes themselves, to keep this module free of imports from
+# every transferable model. These lists are the single source of truth for what a transfer
+# accepts: the API reads them back to reject a class before it queries with it, because a
+# generic reference is only validated on save, long after that lookup ran.
+TRANSFERABLE_SUBJECTS = ["Dataset", "Reuse", "Dataservice", "Topic"]
+TRANSFER_PERSONS = ["User", "Organization"]
+
 
 class Transfer(Document):
     user = ReferenceField("User")
-    owner = GenericReferenceField(required=True)
-    recipient = GenericReferenceField(required=True)
-    subject = GenericReferenceField(required=True)
+    owner = GenericReferenceField(required=True, choices=TRANSFER_PERSONS)
+    recipient = GenericReferenceField(required=True, choices=TRANSFER_PERSONS)
+    subject = GenericReferenceField(required=True, choices=TRANSFERABLE_SUBJECTS)
     comment = StringField()
     status = StringField(choices=list(TRANSFER_STATUS), default="pending")
 
