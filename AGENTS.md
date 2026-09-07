@@ -244,7 +244,7 @@ Key settings for local development:
 - `SERVER_NAME = 'localhost:7000'`
 - `URLS_ALLOW_LOCAL = True`
 - `URLS_ALLOW_PRIVATE = True`
-- `CACHE_TYPE = 'null'`
+- `CACHE_TYPE = 'flask_caching.backends.NullCache'`
 - `FS_ROOT`: Path to file storage directory
 - `HARVESTER_BACKENDS`: List of enabled harvester backends
 
