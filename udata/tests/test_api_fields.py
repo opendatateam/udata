@@ -93,11 +93,15 @@ class FakeEmbedded(EmbeddedDocument):
 
 
 @generate_fields()
-class FakeWithRequiredIf(EmbeddedDocument):
-    """Exercises `required_if`: `comment` is mandatory as soon as `kind` is a request."""
+class FakeWithRequiredIf(Document):
+    """Exercises `required_if`: `comment` is mandatory as soon as `kind` is a request.
+    A Document (not an EmbeddedDocument) so a test can persist one and patch it back
+    as an update, where `_created` is False."""
 
     kind = field(StringField(choices=["request", "invitation"], default="request"))
     comment = field(StringField(), checks=[required_if(kind="request")])
+
+    meta = {"collection": "fake_with_required_if_api_fields"}
 
 
 def check_is_set(value: str = "", field: str = "", **_kwargs) -> None:
@@ -582,6 +586,14 @@ class RequiredIfTest(PytestOnlyDBTestCase):
 
     def test_not_required_when_the_condition_is_not_met(self) -> None:
         assert patch(FakeWithRequiredIf(), {"kind": "invitation", "comment": ""}).comment is None
+
+    def test_unchanged_empty_value_is_rejected_on_update(self) -> None:
+        """What `always_run` buys over the creation case: on a stored object that
+        already breaks the constraint, echoing the offending value back must not be a
+        way through — an update has no `_created` to fall back on."""
+        stored = FakeWithRequiredIf.objects.create(kind="request", comment=None)
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf.objects.get(pk=stored.pk), {"comment": ""})
 
 
 class ChecksOnCreationTest(PytestOnlyDBTestCase):
