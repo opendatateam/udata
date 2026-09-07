@@ -114,32 +114,35 @@ requests_parser.add_argument(
 )
 
 
-def resolve_reference(field, specs, choices):
-    """Resolve a client-provided `{"class": …, "id": …}` pair into a document.
+def resolve_reference(data, field_name, allowed_classes):
+    """Resolve the `{"class": …, "id": …}` reference held by `field_name` into a document.
 
     Both parts come straight from the request body, and both are checked before anything
-    reaches MongoDB. `class` is matched against the field's `choices` rather than resolved
+    reaches MongoDB. `class` is matched against `allowed_classes` rather than resolved
     against the whole document registry, because a generic reference only validates its
     choices on save — long after the lookup below has run. And `id` has to be an object
     id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
     arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
     a `StringField` one.
     """
-    if not isinstance(specs, dict):
-        ns.abort(400, errors={field: "Expected an object with `class` and `id` keys"})
+    reference = data.get(field_name)
+    if not isinstance(reference, dict):
+        ns.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
 
-    if specs.get("class") not in choices:
-        ns.abort(400, errors={field: "`class` must be one of: {0}".format(", ".join(choices))})
+    class_name = reference.get("class")
+    if class_name not in allowed_classes:
+        expected = ", ".join(allowed_classes)
+        ns.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
 
-    object_id = specs.get("id")
+    object_id = reference.get("id")
     if not ObjectId.is_valid(object_id):
-        ns.abort(400, errors={field: "`id` must be an identifier"})
+        ns.abort(400, errors={field_name: "`id` must be an identifier"})
 
-    model = db.resolve_model(specs)
+    model = db.resolve_model(class_name)
     try:
         return model.objects.get(id=object_id)
     except model.DoesNotExist:
-        ns.abort(400, errors={field: 'Unknown {0} id "{1}"'.format(field, object_id)})
+        ns.abort(400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)})
 
 
 @ns.route("/", endpoint="transfers")
@@ -183,8 +186,8 @@ class TransferRequestsAPI(API):
         if not isinstance(data, dict):
             ns.abort(400, "Expected a JSON object")
 
-        subject = resolve_reference("subject", data.get("subject"), TRANSFERABLE_SUBJECTS)
-        recipient = resolve_reference("recipient", data.get("recipient"), TRANSFER_PERSONS)
+        subject = resolve_reference(data, "subject", TRANSFERABLE_SUBJECTS)
+        recipient = resolve_reference(data, "recipient", TRANSFER_PERSONS)
 
         comment = data.get("comment")
 
