@@ -12,6 +12,7 @@ from elasticsearch_dsl import (
     Keyword,
     Text,
     analyzer,
+    char_filter,
     query,
     token_filter,
     tokenizer,
@@ -59,6 +60,22 @@ dgv_analyzer = analyzer(
     filter=["icu_folding", french_elision, french_synonym, french_stemmer, french_stop],
 )
 
+# Normalize "." / "_" to spaces so "data.gouv" and "data gouv" tokenize the same.
+# Used on a subfield so the main french_dgv ranking is unchanged.
+punct_to_space = char_filter(
+    "punct_to_space",
+    type="pattern_replace",
+    pattern=r"[._]+",
+    replacement=" ",
+)
+dgv_analyzer_punct = analyzer(
+    "french_dgv_punct",
+    tokenizer=tokenizer("icu_tokenizer"),
+    char_filter=[punct_to_space],
+    filter=["icu_folding", french_elision, french_synonym, french_stemmer, french_stop],
+)
+punct_field = {"punct": Text(analyzer=dgv_analyzer_punct)}
+
 
 class IndexDocument(Document):
     @classmethod
@@ -94,7 +111,7 @@ class SearchableDataservice(IndexDocument):
     class Index:
         name = "dataservice"
 
-    title = Text(analyzer=dgv_analyzer)
+    title = Text(analyzer=dgv_analyzer, fields={**punct_field})
     created_at = Date()
     metadata_modified_at = Date()
     tags = Keyword(multi=True)
@@ -102,7 +119,7 @@ class SearchableDataservice(IndexDocument):
     badges = Keyword(multi=True)
     organization = Keyword()
     description = Text(analyzer=dgv_analyzer)
-    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
+    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword(), **punct_field})
     organization_with_id = Keyword()
     owner = Keyword()
     views = Float()
@@ -166,7 +183,7 @@ class SearchableOrganization(IndexDocument):
     class Index:
         name = "organization"
 
-    name = Text(analyzer=dgv_analyzer)
+    name = Text(analyzer=dgv_analyzer, fields={**punct_field})
     acronym = Text()
     description = Text(analyzer=dgv_analyzer)
     url = Text()
@@ -184,7 +201,7 @@ class SearchableReuse(IndexDocument):
     class Index:
         name = "reuse"
 
-    title = Text(analyzer=dgv_analyzer)
+    title = Text(analyzer=dgv_analyzer, fields={**punct_field})
     url = Text()
     created_at = Date()
     last_modified = Date()
@@ -201,7 +218,7 @@ class SearchableReuse(IndexDocument):
     badges = Keyword(multi=True)
     organization = Keyword()
     description = Text(analyzer=dgv_analyzer)
-    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
+    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword(), **punct_field})
     organization_with_id = Keyword()
     organization_badges = Keyword(multi=True)
     owner = Keyword()
@@ -212,7 +229,7 @@ class SearchableDataset(IndexDocument):
     class Index:
         name = "dataset"
 
-    title = Text(analyzer=dgv_analyzer)
+    title = Text(analyzer=dgv_analyzer, fields={**punct_field})
     acronym = Text()
     url = Text()
     created_at = Date()
@@ -238,7 +255,7 @@ class SearchableDataset(IndexDocument):
     geozones = Keyword(multi=True)
     description = Text(analyzer=dgv_analyzer)
     organization = Keyword()
-    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
+    organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword(), **punct_field})
     organization_with_id = Keyword()
     organization_badges = Keyword(multi=True)
     owner = Keyword()
@@ -366,7 +383,13 @@ class ElasticClient:
                                 query.MultiMatch(
                                     query=query_text,
                                     type="cross_fields",
-                                    fields=["id^15", "name^7", "acronym^7", "description^4"],
+                                    fields=[
+                                        "id^15",
+                                        "name^7",
+                                        "name.punct^7",
+                                        "acronym^7",
+                                        "description^4",
+                                    ],
                                     operator="and",
                                 )
                             ]
@@ -774,9 +797,11 @@ class ElasticClient:
                                     fields=[
                                         "id^7",
                                         "title^7",
+                                        "title.punct^7",
                                         "acronym^7",
                                         "description^4",
                                         "organization_name^4",
+                                        "organization_name.punct^4",
                                         "resources_ids^4",
                                         "resources_titles^2",
                                     ],
@@ -790,7 +815,12 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=["title", "organization_name"],
+                        fields=[
+                            "title",
+                            "title.punct",
+                            "organization_name",
+                            "organization_name.punct",
+                        ],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
@@ -1174,8 +1204,10 @@ class ElasticClient:
                                     fields=[
                                         "id^7",
                                         "title^7",
+                                        "title.punct^7",
                                         "description^4",
                                         "organization_name^4",
+                                        "organization_name.punct^4",
                                     ],
                                     operator="and",
                                 )
@@ -1187,7 +1219,12 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=["title", "organization_name"],
+                        fields=[
+                            "title",
+                            "title.punct",
+                            "organization_name",
+                            "organization_name.punct",
+                        ],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
@@ -1457,8 +1494,10 @@ class ElasticClient:
                                     fields=[
                                         "id^7",
                                         "title^7",
+                                        "title.punct^7",
                                         "description^4",
                                         "organization_name^4",
+                                        "organization_name.punct^4",
                                         "documentation_content^2",
                                     ],
                                     operator="and",
@@ -1471,7 +1510,13 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=["title", "organization_name", "documentation_content"],
+                        fields=[
+                            "title",
+                            "title.punct",
+                            "organization_name",
+                            "organization_name.punct",
+                            "documentation_content",
+                        ],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
