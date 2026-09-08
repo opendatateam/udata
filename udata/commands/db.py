@@ -11,7 +11,7 @@ import click
 import mongoengine
 from bson import DBRef
 
-from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
+from udata.commands import cli, cyan, echo, exit_with_error, green, magenta, red, white, yellow
 from udata.core.dataset.models import Dataset, Resource
 from udata.db import migrations
 from udata.mongo.document import get_all_models
@@ -82,7 +82,12 @@ def migrate(record, dry_run=False):
                 success = False
             else:
                 format_output(output, True)
-    return success
+
+    if not success:
+        # A failed migration holds back every migration after it, so the deployment that ran
+        # this command has to stop: click discards a callback's return value, only an explicit
+        # exit reaches the shell.
+        exit_with_error("Migrations left unapplied, see above", code=1)
 
 
 @grp.command()
