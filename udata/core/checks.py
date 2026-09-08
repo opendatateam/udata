@@ -13,6 +13,17 @@ def check_no_urls(value, field, **_kwargs):
         raise FieldValidationError(_("URLs not allowed in this field"), field=field)
 
 
+def only_creation(_value, is_update, field, **_kwargs):
+    from udata.auth import admin_permission, current_user
+
+    # Super-admins can modify only creation fields
+    if current_user.is_authenticated and admin_permission:
+        return
+
+    if is_update:
+        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
+
+
 def check_is_email(value, field, **_kwargs):
     if value:
         try:

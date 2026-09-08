@@ -22,9 +22,10 @@ from mongoengine.signals import post_save
 from udata import uris
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.core.checks import only_creation
 from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
-from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
+from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document

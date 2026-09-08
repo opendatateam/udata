@@ -387,6 +387,18 @@ class UserAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(User.objects(email=data["email"]).count(), 0)
 
+    def test_user_api_create_with_an_invalid_email(self):
+        """It should raise a 400 when the email is malformed"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": "not-an-email",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+
     def test_user_api_create_without_a_required_field(self):
         """It should raise a 400 when a required field is missing"""
         self.login(AdminFactory())
@@ -419,6 +431,18 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertFalse(response.json["active"])
+
+    def test_user_api_update_email_as_admin(self):
+        """A sysadmin still moves an address by hand, for the support cases the
+        `/change-email` flow cannot serve (a mailbox the user lost access to)"""
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data["email"] = "new.address@example.org"
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.email, "new.address@example.org")
 
     def test_user_api_update_with_website(self):
         """It should raise a 400"""
