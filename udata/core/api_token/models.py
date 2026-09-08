@@ -12,6 +12,8 @@ from udata.models import db
 TOKEN_BYTE_LENGTH = 48
 PREFIX_DISPLAY_LENGTH = 8
 MAX_USER_AGENTS = 20
+MAX_ERRORS = 20
+MAX_ERROR_BODY_LENGTH = 1000
 
 
 def parse_future_datetime(value):
@@ -31,6 +33,37 @@ def parse_future_datetime(value):
 def _hash_token(plaintext):
     key = current_app.config["API_TOKEN_SECRET"].encode()
     return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
+
+
+@generate_fields()
+class ApiTokenError(db.EmbeddedDocument):
+    """Store an error response returned to a token."""
+
+    created_at = field(
+        db.DateTimeField(default=lambda: datetime.now(timezone.utc), required=True),
+        readonly=True,
+        description="When the error was returned",
+    )
+    status = field(
+        db.IntField(required=True),
+        readonly=True,
+        description="The HTTP status code of the response",
+    )
+    method = field(
+        db.StringField(required=True),
+        readonly=True,
+        description="The HTTP method of the request",
+    )
+    path = field(
+        db.StringField(required=True),
+        readonly=True,
+        description="The path of the request, query string included",
+    )
+    body = field(
+        db.StringField(),
+        readonly=True,
+        description="The response body returned to the client",
+    )
 
 
 @generate_fields()
@@ -78,6 +111,11 @@ class ApiToken(db.Document):
     expires_at = field(
         db.DateTimeField(),
         description="When this token expires",
+    )
+    errors = field(
+        db.ListField(db.EmbeddedDocumentField(ApiTokenError)),
+        readonly=True,
+        description=f"The last {MAX_ERRORS} error responses returned to this token, oldest first",
     )
 
     meta = {
@@ -133,6 +171,20 @@ class ApiToken(db.Document):
     def revoke(self):
         self.revoked_at = datetime.now(timezone.utc)
         self.save()
+
+    def record_error(self, status, method, path, body):
+        """Keep the last error responses returned to this token.
+
+        API clients calling us from a batch have nobody reading the response body:
+        without this, an occasional rejection is only visible in their own logs, if
+        they log it at all.
+        """
+        error = ApiTokenError(
+            status=status, method=method, path=path, body=body[:MAX_ERROR_BODY_LENGTH]
+        )
+        type(self).objects(id=self.id).update_one(
+            __raw__={"$push": {"errors": {"$each": [error.to_mongo()], "$slice": -MAX_ERRORS}}}
+        )
 
     def update_usage(self, user_agent=None):
         update_kwargs = {"set__last_used_at": datetime.now(timezone.utc)}
