@@ -5,6 +5,7 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.core.checks import only_creation
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
@@ -51,17 +52,6 @@ def ownership_filter(owner: Organization | User) -> dict:
         "organization": owner if is_organization else None,
         "owner": None if is_organization else owner,
     }
-
-
-def only_creation(_value, is_update, field, **_kwargs):
-    from udata.auth import admin_permission, current_user
-
-    # Super-admins can modify only creation fields
-    if current_user.is_authenticated and admin_permission:
-        return
-
-    if is_update:
-        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
 
 
 def check_owner_is_current_user(owner, **_kwargs):

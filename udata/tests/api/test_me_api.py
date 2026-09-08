@@ -198,6 +198,18 @@ class MeAPITest(APITestCase):
         self.assert400(response)
         assert "email" in response.json["errors"]
 
+    def test_update_profile_cannot_change_email(self):
+        """A new address is only granted by the `/change-email` confirmation flow"""
+        self.login()
+        previous_email = self.user.email
+        data = self.user.to_dict()
+        data["email"] = "someone.else@example.org"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+        self.user.reload()
+        self.assertEqual(self.user.email, previous_email)
+
     def test_update_profile_ignores_roles_and_active(self):
         """A non-admin must not grant themselves roles or toggle active via /me"""
         self.login()
