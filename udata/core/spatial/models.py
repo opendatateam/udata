@@ -50,11 +50,19 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     code = StringField(required=True)
     level = StringField(required=True)
     uri = StringField()
+    # Hierarchy rebuilt upstream from INSEE subdivisions (see the geozones DAG).
+    # `parents`: closest containing zones (e.g. department + EPCI of a commune).
+    # `ancestors`: every containing zone, transitively (up to `country:fr`).
+    # Both hold geozone ids; indexed so children/descendants are a reverse lookup.
+    parents = ListField(StringField())
+    ancestors = ListField(StringField())
 
     meta = {
         "indexes": [
             "name",
             ("level", "code"),
+            "parents",
+            "ancestors",
         ],
         "queryset_class": GeoZoneQuerySet,
     }
