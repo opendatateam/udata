@@ -66,6 +66,7 @@ def init_app(app):
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
+        ExtendedVerifyForm,
     )
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
@@ -96,6 +97,7 @@ def init_app(app):
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,
+        verify_form=ExtendedVerifyForm,
         password_util_cls=UdataPasswordUtil,
         mail_util_cls=mail_util_cls,
     )
