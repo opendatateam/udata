@@ -84,6 +84,7 @@ org_role_fields = api.model(
     {
         "id": fields.String(description="The role identifier"),
         "label": fields.String(description="The role label"),
+        "description": fields.String(description="What the role allows, for display in the UI"),
     },
 )
 

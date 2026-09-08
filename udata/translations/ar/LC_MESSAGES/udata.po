@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-09-08 16:32+0200\n"
+"POT-Creation-Date: 2026-09-08 16:33+0200\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
@@ -1081,43 +1081,55 @@ msgstr "أنشأ منظمة"
 msgid "updated an organization"
 msgstr "قام بتحديث منظمة"
 
-#: udata/core/organization/constants.py:4
+#: udata/core/organization/constants.py:13
 msgid "Administrator"
 msgstr ""
 
-#: udata/core/organization/constants.py:5
+#: udata/core/organization/constants.py:14
+msgid "Can manage the organization, its members and all its content."
+msgstr ""
+
+#: udata/core/organization/constants.py:17
 msgid "Editor"
 msgstr "الناشر"
 
-#: udata/core/organization/constants.py:6
+#: udata/core/organization/constants.py:18
+msgid "Can create and edit all the content of the organization."
+msgstr ""
+
+#: udata/core/organization/constants.py:21
 msgid "Partial editor"
 msgstr ""
 
-#: udata/core/organization/constants.py:12 udata/features/transfer/models.py:17
+#: udata/core/organization/constants.py:22
+msgid "Can create content and edit only some of the content."
+msgstr ""
+
+#: udata/core/organization/constants.py:29 udata/features/transfer/models.py:17
 #: udata/harvest/models.py:53 udata/harvest/models.py:65
 #: udata/harvest/models.py:146
 msgid "Pending"
 msgstr "معلق"
 
-#: udata/core/organization/constants.py:13 udata/features/transfer/models.py:18
+#: udata/core/organization/constants.py:30 udata/features/transfer/models.py:18
 #: udata/harvest/models.py:147
 msgid "Accepted"
 msgstr "مقبول"
 
-#: udata/core/organization/constants.py:14 udata/features/transfer/models.py:19
+#: udata/core/organization/constants.py:31 udata/features/transfer/models.py:19
 #: udata/harvest/models.py:148
 msgid "Refused"
 msgstr "مرفوض"
 
-#: udata/core/organization/constants.py:15
+#: udata/core/organization/constants.py:32
 msgid "Canceled"
 msgstr ""
 
-#: udata/core/organization/constants.py:19
+#: udata/core/organization/constants.py:36
 msgid "Request"
 msgstr ""
 
-#: udata/core/organization/constants.py:20
+#: udata/core/organization/constants.py:37
 msgid "Invitation"
 msgstr ""
 
@@ -1267,17 +1279,17 @@ msgid "You have been invited to join an organization"
 msgstr ""
 
 #: udata/core/organization/models.py:76
-#: udata/tests/api/test_organizations_api.py:327
+#: udata/tests/api/test_organizations_api.py:345
 msgid "A siret number is made of 14 digits"
 msgstr ""
 
 #: udata/core/organization/models.py:86
-#: udata/tests/api/test_organizations_api.py:339
+#: udata/tests/api/test_organizations_api.py:357
 msgid "A siret number is only made of digits"
 msgstr ""
 
 #: udata/core/organization/models.py:88
-#: udata/tests/api/test_organizations_api.py:333
+#: udata/tests/api/test_organizations_api.py:351
 msgid "Invalid Siret number"
 msgstr ""
 
