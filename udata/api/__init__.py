@@ -135,6 +135,7 @@ class UDataApi(Api):
                 if not login_user(api_token.user, False):
                     self.abort(401, "Inactive user")
                 api_token.update_usage(request.headers.get("User-Agent"))
+                g.api_token = api_token
             else:
                 check_credentials()
             return func(*args, **kwargs)
@@ -254,6 +255,21 @@ def extract_name_from_path(path):
     else:  # This is a collection.
         name = "{category}".format(category=infos[0].title())
     return safe_unicode(name)
+
+
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
+def record_api_token_error(response):
+    """Store on the token every error returned to an API key holder."""
+    api_token = g.get("api_token")
+    if api_token is not None and response.status_code >= 400:
+        api_token.record_error(
+            status=response.status_code,
+            method=request.method,
+            path=request.full_path,
+            body=response.get_data(as_text=True),
+        )
+    return response
 
 
 @apiv1_blueprint.after_request
