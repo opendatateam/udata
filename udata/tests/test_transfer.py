@@ -11,6 +11,7 @@ from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
 )
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
@@ -18,7 +19,7 @@ from udata.core.user.metrics import (
 from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
-from udata.features.transfer.models import Transfer
+from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
 from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
@@ -404,6 +405,31 @@ class TransferRequestNotificationTest(DBTestCase):
         assert notification.details.transfer_recipient == recipient
         assert notification.details.transfer_subject == dataset
         assert_equal_dates(notification.created_at, transfer.created)
+
+    def test_notification_created_for_every_transferable_subject(self):
+        """A notification describes a transfer, so it must accept every transferable class.
+
+        `on_transfer_created` swallows and logs its exceptions, so a subject the details
+        refuse costs the recipient its notification without failing the transfer — the
+        absence of the notification is the only observable symptom.
+        """
+        owner = UserFactory()
+        subjects = {
+            "Dataset": DatasetFactory(owner=owner),
+            "Reuse": ReuseFactory(owner=owner),
+            "Dataservice": DataserviceFactory(owner=owner),
+            "Topic": TopicFactory(owner=owner),
+        }
+        assert sorted(subjects) == sorted(TRANSFERABLE_SUBJECTS)
+
+        login_user(owner)
+        for class_name, subject in subjects.items():
+            recipient = UserFactory()
+            request_transfer(subject, recipient, faker.sentence())
+
+            notifications = Notification.objects(user=recipient)
+            assert len(notifications) == 1, f"no notification for a {class_name} transfer"
+            assert notifications[0].details.transfer_subject == subject
 
     def test_notification_created_for_org_admins_only(self):
         """Notifications are created for all admin users of recipient org, not editors"""
