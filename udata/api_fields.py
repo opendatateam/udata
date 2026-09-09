@@ -95,6 +95,9 @@ class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
+        # Key under which the concrete class name is emitted on output. Comes from
+        # the field's kwargs `generic_key`, so it matches whatever the model
+        # declared — the write path reads the same key in `patch()`.
         self.generic_key = generic_key
         # `fields_by_type` may be a callable resolved lazily on first use (and then
         # memoized). This lets generic embedded lists discover their subclasses at
