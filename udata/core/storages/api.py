@@ -176,6 +176,27 @@ def handle_upload(storage, prefix=None):
     return infos
 
 
+def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
+    """Parse a crop box given by the client as `left,upper,right,lower` pixel coordinates"""
+    coordinates = raw.split(",")
+    if len(coordinates) != 4:
+        api.abort(400, "Invalid bounding box")
+    try:
+        # `float` accepts values that `int` then refuses, such as `nan` or `1e400`.
+        left, upper, right, lower = (int(float(coordinate)) for coordinate in coordinates)
+    except (ValueError, OverflowError):
+        api.abort(400, "Invalid bounding box")
+
+    width, height = image_size
+    # Pillow crops outside of the image instead of failing, padding the result: a box a
+    # few digits wider than the source is enough to allocate hundreds of megabytes, then
+    # to raise a decompression bomb error once past its pixel limit.
+    if not (0 <= left < right <= width and 0 <= upper < lower <= height):
+        api.abort(400, "Bounding box outside of the image")
+
+    return [left, upper, right, lower]
+
+
 def parse_uploaded_image(field):
     """Parse an uploaded image and save into a ImageField()"""
     args = image_parser.parse_args()
@@ -185,21 +206,21 @@ def parse_uploaded_image(field):
     # (an SVG announced as `image/png` for instance): decode the file to know what
     # it really is, otherwise Pillow raises further down and the request 500s.
     try:
-        image_format = Image.open(image).format
+        uploaded = Image.open(image)
     except UnidentifiedImageError:
-        image_format = None
+        api.abort(400, "Unsupported image format")
     except Image.DecompressionBombError:
         # A valid image whose header announces more pixels than Pillow accepts to decode.
         # A few dozen bytes are enough to declare a huge size, so this must be refused
         # here: every other decoding (resize, optimize, thumbnails) would raise too.
         api.abort(400, "Image is too large")
+    if uploaded.format not in IMAGES_FORMATS:
+        api.abort(400, "Unsupported image format")
+
+    bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
+
     # `Image.open` left the cursor right after the header it read. `field.save` may store
     # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
     # would silently truncate the stored file.
     image.seek(0)
-    if image_format not in IMAGES_FORMATS:
-        api.abort(400, "Unsupported image format")
-    bbox = args.get("bbox", None)
-    if bbox:
-        bbox = [int(float(c)) for c in bbox.split(",")]
     field.save(image, bbox=bbox)
