@@ -20,6 +20,7 @@ from udata.core.topic.factories import ReuseFactory, TopicElementFactory, TopicF
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert410
+from udata.utils import faker
 
 from . import APITestCase
 
@@ -703,6 +704,83 @@ class DataserviceAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataservice.objects.count(), 1)
         self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
+
+
+class DataserviceSuggestAPITest(APITestCase):
+    def test_suggest_dataservices_api(self):
+        """It should suggest dataservices sorted by followers"""
+        for i in range(3):
+            DataserviceFactory(
+                title="arealtestprefix-{0}".format(i) if i % 2 else faker.word(),
+                metrics={"followers": i},
+            )
+        max_follower_dataservice = DataserviceFactory(
+            title="arealtestprefix-4", metrics={"followers": 10}
+        )
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        assert200(response)
+
+        assert len(response.json) <= 5
+        assert len(response.json) > 1
+
+        for suggestion in response.json:
+            assert "id" in suggestion
+            assert "slug" in suggestion
+            assert "title" in suggestion
+            assert "acronym" in suggestion
+            assert "page" in suggestion
+            assert "test" in suggestion["title"]
+        assert response.json[0]["id"] == str(max_follower_dataservice.id)
+
+    def test_suggest_dataservices_api_size(self):
+        """It should respect the size parameter"""
+        DataserviceFactory.create_batch(4, title="arealtestprefix")
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=2))
+        assert200(response)
+        assert len(response.json) == 2
+
+    def test_suggest_dataservices_api_acronym(self):
+        """It should suggest dataservices matching the acronym"""
+        dataservice = DataserviceFactory(title="Something else", acronym="ARTP")
+        DataserviceFactory(title="Another one", acronym="XYZ")
+
+        response = self.get(url_for("api.suggest_dataservices", q="artp", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(dataservice.id)
+        assert response.json[0]["acronym"] == "ARTP"
+
+    def test_suggest_dataservices_api_hidden(self):
+        """It should not suggest archived, deleted or private dataservices"""
+        visible = DataserviceFactory(title="arealtestprefix-visible")
+        DataserviceFactory(title="arealtestprefix-archived", archived_at=datetime.now(UTC))
+        DataserviceFactory(title="arealtestprefix-deleted", deleted_at=datetime.now(UTC))
+        DataserviceFactory(title="arealtestprefix-private", private=True)
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(visible.id)
+
+    def test_suggest_dataservices_api_case_insensitive(self):
+        """It should suggest dataservices regardless of case"""
+        dataservice = DataserviceFactory(title="ARealTestPrefix")
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(dataservice.id)
+        assert response.json[0]["page"] == dataservice.self_web_url()
+
+    def test_suggest_dataservices_api_no_match(self):
+        """It should not provide dataservice suggestion if no match"""
+        DataserviceFactory.create_batch(3)
+
+        response = self.get(url_for("api.suggest_dataservices", q="xxxxxx", size=5))
+        assert200(response)
+        assert len(response.json) == 0
 
 
 class DataservicesFeedAPItest(APITestCase):
