@@ -668,6 +668,32 @@ class Defaults(object):
     ###########################################################################
     METRICS_API = None
 
+    # Géoplateforme (geopf) integration
+    ###########################################################################
+    GEOPF_API_BASE = "https://data.geopf.fr/api"
+    # Base URL of the cartes.gouv.fr dashboard, used to build fiche URLs.
+    GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"
+    # Resource formats eligible for push. Only gpkg is actually processed today
+    # (see udata/geopf/srs.py), so adding a format here without SRS-detection
+    # support for it would just fail at upload time.
+    GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
+    # Maximum size (bytes) of a resource file materialized to disk for a push,
+    # whether downloaded from a remote URL or copied from local storage.
+    GEOPF_MAX_FILE_SIZE = 1_000_000_000  # 1 GB
+    # Per-request timeout (seconds) for calls to the geopf API.
+    GEOPF_REQUEST_TIMEOUT = 120
+    # Max duration (seconds) of an upload-checks or processing poll loop.
+    GEOPF_POLL_TIMEOUT = 1800
+    # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
+    GEOPF_OAUTH_CLIENT_ID = None
+    GEOPF_OAUTH_CLIENT_SECRET = None
+    GEOPF_OAUTH_OPENID_CONF_URL = (
+        "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"
+    )
+    GEOPF_OAUTH_SCOPE = "openid"
+    # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest.
+    GEOPF_TOKEN_ENCRYPTION_KEY = None
+
     # Format families for search filtering
     ###########################################################################
     TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "csv.gz"})
