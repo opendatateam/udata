@@ -43,20 +43,6 @@ def list_sources(owner=None, deleted=False):
     return list(sources)
 
 
-def get_job(ident, *, with_items=True):
-    """Get an harvest job given its ID.
-
-    The heavy `data` blob is never serialized by the read endpoints, so it's
-    always excluded. `with_items=False` additionally drops the embedded items,
-    for routes that expose them only as a counters link and never load or
-    dereference them.
-    """
-    qs = HarvestJob.objects.exclude("data")
-    if not with_items:
-        qs = qs.exclude("items")
-    return qs.get(id=ident)
-
-
 def validate_source(source: HarvestSource, comment=None):
     """Validate a source for automatic harvesting"""
     source.validation.on = datetime.now(UTC)

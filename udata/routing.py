@@ -14,7 +14,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.core.visualizations.models import Chart
 from udata.features.notifications.models import Notification
-from udata.harvest.models import HarvestSource
+from udata.harvest.models import HarvestJob, HarvestSource
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url, homepage_url
 
@@ -138,6 +138,23 @@ class HarvestSourceConverter(ModelConverter):
     model = HarvestSource
 
 
+class HarvestJobConverter(ModelConverter):
+    model = HarvestJob
+
+    def get_excludes(self):
+        # The heavy `data` blob is never serialized by the read endpoints.
+        return ["data"]
+
+
+class HarvestJobWithoutItemsConverter(ModelConverter):
+    model = HarvestJob
+
+    def get_excludes(self):
+        # For routes exposing the items as a counters link only: they never
+        # load nor dereference them.
+        return ["data", "items"]
+
+
 class CommunityResourceConverter(ModelConverter):
     model = models.CommunityResource
 
@@ -253,6 +270,8 @@ def init_app(app):
     app.url_map.converters["dataset_without_resources"] = DatasetWithoutResourcesConverter
     app.url_map.converters["dataservice"] = DataserviceConverter
     app.url_map.converters["harvest_source"] = HarvestSourceConverter
+    app.url_map.converters["harvest_job"] = HarvestJobConverter
+    app.url_map.converters["harvest_job_without_items"] = HarvestJobWithoutItemsConverter
     app.url_map.converters["crid"] = CommunityResourceConverter
     app.url_map.converters["org"] = OrganizationConverter
     app.url_map.converters["reuse"] = ReuseConverter

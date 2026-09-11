@@ -413,7 +413,7 @@ class HarvestJob(Document):
     items = field(
         ListField(EmbeddedDocumentField(HarvestItem)),
         readonly=True,
-        href=lambda o: url_for("api.harvest_job_items", ident=o.id),
+        href=lambda o: url_for("api.harvest_job_items", job=o.id),
         href_total=lambda o: o.items_total,
         href_extra=lambda o: {
             "by_status": o.items_by_status,
