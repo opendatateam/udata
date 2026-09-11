@@ -5,12 +5,13 @@ from udata.auth import PermissionDenied, login_user
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
 )
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
@@ -18,7 +19,7 @@ from udata.core.user.metrics import (
 from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
-from udata.features.transfer.models import Transfer
+from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
 from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
@@ -95,6 +96,17 @@ class TransferStartTest(PytestOnlyDBTestCase):
         login_user(user)
         with pytest.raises(ValueError):
             self.assert_transfer_started(dataset, user, user, comment)
+
+    def test_request_transfer_of_an_orphaned_subject(self):
+        # Purging an organization deletes it and leaves its datasets behind, with the
+        # `organization` reference nullified and no owner to fall back on.
+        dataset = DatasetFactory()
+        assert dataset.owner is None
+        assert dataset.organization is None
+
+        login_user(UserFactory())
+        with pytest.raises(PermissionDenied):
+            request_transfer(dataset, UserFactory(), faker.sentence())
 
     def test_request_transfer_to_same_organization(self):
         user = UserFactory()
@@ -178,6 +190,24 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
         transfer = TransferFactory(owner=owner, recipient=org, subject=subject)
 
         login_user(editor)
+        with pytest.raises(PermissionDenied):
+            accept_transfer(transfer)
+
+    def test_nobody_can_accept_a_transfer_whose_recipient_is_not_a_person(self):
+        # `Transfer.recipient` only got its `choices` once such transfers had already been
+        # created, so the row is written past validation to reproduce a legacy one rather
+        # than a shape the model still accepts.
+        owner = UserFactory()
+        subject = DatasetFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=UserFactory(), subject=subject)
+        Transfer.objects(id=transfer.id).update_one(
+            __raw__={
+                "$set": {"recipient": {"_cls": "License", "_ref": LicenseFactory().to_dbref()}}
+            }
+        )
+        transfer.reload()
+
+        login_user(owner)
         with pytest.raises(PermissionDenied):
             accept_transfer(transfer)
 
@@ -375,6 +405,31 @@ class TransferRequestNotificationTest(DBTestCase):
         assert notification.details.transfer_recipient == recipient
         assert notification.details.transfer_subject == dataset
         assert_equal_dates(notification.created_at, transfer.created)
+
+    def test_notification_created_for_every_transferable_subject(self):
+        """A notification describes a transfer, so it must accept every transferable class.
+
+        `on_transfer_created` swallows and logs its exceptions, so a subject the details
+        refuse costs the recipient its notification without failing the transfer — the
+        absence of the notification is the only observable symptom.
+        """
+        owner = UserFactory()
+        subjects = {
+            "Dataset": DatasetFactory(owner=owner),
+            "Reuse": ReuseFactory(owner=owner),
+            "Dataservice": DataserviceFactory(owner=owner),
+            "Topic": TopicFactory(owner=owner),
+        }
+        assert sorted(subjects) == sorted(TRANSFERABLE_SUBJECTS)
+
+        login_user(owner)
+        for class_name, subject in subjects.items():
+            recipient = UserFactory()
+            request_transfer(subject, recipient, faker.sentence())
+
+            notifications = Notification.objects(user=recipient)
+            assert len(notifications) == 1, f"no notification for a {class_name} transfer"
+            assert notifications[0].details.transfer_subject == subject
 
     def test_notification_created_for_org_admins_only(self):
         """Notifications are created for all admin users of recipient org, not editors"""

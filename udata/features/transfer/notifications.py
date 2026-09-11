@@ -5,35 +5,37 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import GenericReferenceField
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import Dataset
 from udata.core.organization.models import Organization
-from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
 from udata.models import Transfer
+
+from .models import TRANSFER_PERSONS, TRANSFERABLE_SUBJECTS
 
 log = logging.getLogger(__name__)
 
 
 @generate_fields()
 class TransferRequestNotificationDetails(EmbeddedDocument):
+    # Same choices as `Transfer` itself: a notification describes a transfer, so anything
+    # transferable must be notifiable. Listing them again here silently dropped the
+    # notification of every transfer of a class added on one side only.
     transfer_owner = field(
-        GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=TRANSFER_PERSONS, required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_recipient = field(
-        GenericReferenceField(choices=(User, Organization), required=True),
+        GenericReferenceField(choices=TRANSFER_PERSONS, required=True),
         readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
     )
     transfer_subject = field(
-        GenericReferenceField(choices=(Dataset, Dataservice, Reuse), required=True),
+        GenericReferenceField(choices=TRANSFERABLE_SUBJECTS, required=True),
         readonly=True,
         auditable=False,
         allow_null=True,

@@ -5,6 +5,7 @@ from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
+from udata.core.topic.models import Topic
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
@@ -13,7 +14,7 @@ from udata.models import Dataset, Reuse, User, db
 from udata.utils import id_or_404
 
 from .actions import accept_transfer, refuse_transfer, request_transfer
-from .models import TRANSFER_STATUS, Transfer
+from .models import TRANSFER_PERSONS, TRANSFER_STATUS, TRANSFERABLE_SUBJECTS, Transfer
 
 RESPONSE_TYPES = ["accept", "refuse"]
 
@@ -53,6 +54,7 @@ subject_mapping = {
     Dataservice: Dataservice.__ref_fields__,
     Dataset: dataset_ref_fields,
     Reuse: Reuse.__ref_fields__,
+    Topic: Topic.__ref_fields__,
 }
 
 transfer_fields = api.model(
@@ -98,7 +100,7 @@ requests_parser.add_argument(
     "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
 )
 requests_parser.add_argument(
-    "subject_type", choices=["Dataset", "Reuse", "Dataservice"], type=str, help="", location="args"
+    "subject_type", choices=TRANSFERABLE_SUBJECTS, type=str, help="", location="args"
 )
 requests_parser.add_argument(
     "recipient", type=str, help="ID of user or organization", location="args"
@@ -110,6 +112,37 @@ requests_parser.add_argument(
     help="ID of user or organization",
     location="args",
 )
+
+
+def resolve_reference(data, field_name, allowed_classes):
+    """Resolve the `{"class": …, "id": …}` reference held by `field_name` into a document.
+
+    Both parts come straight from the request body, and both are checked before anything
+    reaches MongoDB. `class` is matched against `allowed_classes` rather than resolved
+    against the whole document registry, because a generic reference only validates its
+    choices on save — long after the lookup below has run. And `id` has to be an object
+    id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
+    arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
+    a `StringField` one.
+    """
+    reference = data.get(field_name)
+    if not isinstance(reference, dict):
+        ns.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
+
+    class_name = reference.get("class")
+    if class_name not in allowed_classes:
+        expected = ", ".join(allowed_classes)
+        ns.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+
+    object_id = reference.get("id")
+    if not ObjectId.is_valid(object_id):
+        ns.abort(400, errors={field_name: "`id` must be an identifier"})
+
+    model = db.resolve_model(class_name)
+    try:
+        return model.objects.get(id=object_id)
+    except model.DoesNotExist:
+        ns.abort(400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)})
 
 
 @ns.route("/", endpoint="transfers")
@@ -150,22 +183,11 @@ class TransferRequestsAPI(API):
     def post(self):
         """Initiate transfer request"""
         data = request.json
+        if not isinstance(data, dict):
+            ns.abort(400, "Expected a JSON object")
 
-        subject_model = db.resolve_model(data["subject"])
-        subject_id = data["subject"]["id"]
-        try:
-            subject = subject_model.objects.get(id=subject_id)
-        except subject_model.DoesNotExist:
-            msg = 'Unkown subject id "{0}"'.format(subject_id)
-            ns.abort(400, errors={"subject": msg})
-
-        recipient_model = db.resolve_model(data["recipient"])
-        recipient_id = data["recipient"]["id"]
-        try:
-            recipient = recipient_model.objects.get(id=recipient_id)
-        except recipient_model.DoesNotExist:
-            msg = 'Unkown recipient id "{0}"'.format(recipient_id)
-            ns.abort(400, errors={"recipient": msg})
+        subject = resolve_reference(data, "subject", TRANSFERABLE_SUBJECTS)
+        recipient = resolve_reference(data, "recipient", TRANSFER_PERSONS)
 
         comment = data.get("comment")
 
