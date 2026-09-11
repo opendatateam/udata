@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.7.1 (2026-09-11)
+
+- fix: merge the contact points the empty value normalization made identical ([#3940](https://github.com/opendatateam/udata/pull/3940))
+- fix: reject invalid or out-of-bounds image crop boxes instead of 500ing ([#3925](https://github.com/opendatateam/udata/pull/3925))
+- fix: return a 404 instead of a 500 for an unknown harvest job ([#3926](https://github.com/opendatateam/udata/pull/3926))
+
+
 ## 17.7.0 (2026-09-09)
 
 - **chore!: upgrade flask-storage to 2.0.1 ([#3920](https://github.com/opendatateam/udata/pull/3920))**
