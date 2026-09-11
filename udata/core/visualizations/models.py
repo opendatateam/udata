@@ -71,20 +71,10 @@ class Filter(EmbeddedDocument):
     value = field(StringField())
 
 
-class NestedFilterField(GenericEmbeddedDocumentField):
-    """Generic embedded field for filter groups, defaulting elements stored
-    without a `_cls` (before nested filter groups existed) to `Filter`."""
-
-    def to_python(self, value):
-        if isinstance(value, dict) and "_cls" not in value:
-            value = {**value, "_cls": "Filter"}
-        return super().to_python(value)
-
-
 @generate_fields()
 class OrFilters(EmbeddedDocument):
     filters = field(
-        ListField(NestedFilterField(choices=[Filter, "AndFilters"])),
+        ListField(GenericEmbeddedDocumentField(choices=[Filter, "AndFilters"])),
         generic_key="_cls",
     )
 
@@ -92,7 +82,7 @@ class OrFilters(EmbeddedDocument):
 @generate_fields()
 class AndFilters(EmbeddedDocument):
     filters = field(
-        ListField(NestedFilterField(choices=[Filter, OrFilters])),
+        ListField(GenericEmbeddedDocumentField(choices=[Filter, OrFilters])),
         generic_key="_cls",
     )
 

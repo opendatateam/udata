@@ -176,50 +176,48 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
     def test_visualization_api_create_nested_group_filters(self):
         """AndFilters can contain OrFilters groups and vice versa"""
         user = self.login()
-        filters = AndFilters(
-            filters=[
-                FilterFactory(),
-                OrFilters(filters=[FilterFactory(), FilterFactory()]),
-            ]
-        )
-        chart = ChartFactory.build(owner=user, series__0__filters=filters)
-        chart.owner = str(user.id)
-        response = self.post(
-            url_for("api.visualizations"),
-            chart.to_dict(),
-        )
-        assert response.status_code == 201
 
-        visualization = Chart.objects.first()
-        stored = visualization.series[0].filters
-        assert isinstance(stored, AndFilters)
-        assert isinstance(stored.filters[0], Filter)
-        assert isinstance(stored.filters[1], OrFilters)
-        assert len(stored.filters[1].filters) == 2
+        def check_nested(filters, outer_type, inner_type):
+            chart = ChartFactory.build(owner=user, series__0__filters=filters)
+            chart.owner = str(user.id)
+            response = self.post(
+                url_for("api.visualizations"),
+                chart.to_dict(),
+            )
+            assert response.status_code == 201
 
-        response = self.get(url_for("api.visualization", visualization=visualization))
-        assert response.status_code == 200
-        filters_data = response.json["series"][0]["filters"]
-        assert filters_data["filters"][1]["_cls"] == "OrFilters"
+            visualization = Chart.objects.get(title=chart.title)
+            stored = visualization.series[0].filters
+            assert isinstance(stored, outer_type)
+            assert isinstance(stored.filters[0], Filter)
+            assert isinstance(stored.filters[1], inner_type)
+            assert len(stored.filters[1].filters) == 2
 
-    def test_legacy_and_filters_without_cls_still_loads(self):
-        """Charts stored before OrFilters existed have no _cls on AndFilters elements"""
-        chart = ChartFactory()
-        Chart._get_collection().update_one(
-            {"_id": chart.id},
-            {
-                "$set": {
-                    "series.0.filters": {
-                        "_cls": "AndFilters",
-                        "filters": [{"column": "a", "condition": "exact", "value": "1"}],
-                    }
-                }
-            },
+            response = self.get(url_for("api.visualization", visualization=visualization))
+            assert response.status_code == 200
+            filters_data = response.json["series"][0]["filters"]
+            assert filters_data["filters"][1]["_cls"] == inner_type.__name__
+
+        check_nested(
+            AndFilters(
+                filters=[
+                    FilterFactory(),
+                    OrFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            AndFilters,
+            OrFilters,
         )
-        loaded = Chart.objects.get(id=chart.id)
-        assert isinstance(loaded.series[0].filters, AndFilters)
-        assert isinstance(loaded.series[0].filters.filters[0], Filter)
-        assert loaded.series[0].filters.filters[0].column == "a"
+        check_nested(
+            OrFilters(
+                filters=[
+                    FilterFactory(),
+                    AndFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            OrFilters,
+            AndFilters,
+        )
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
