@@ -1,5 +1,10 @@
 # Changelog
 
+## 17.7.2 (2026-09-11)
+
+- fix: MAAF XML parser ([#3943](https://github.com/opendatateam/udata/pull/3943))
+
+
 ## 17.7.1 (2026-09-11)
 
 - fix: merge the contact points the empty value normalization made identical ([#3940](https://github.com/opendatateam/udata/pull/3940))
