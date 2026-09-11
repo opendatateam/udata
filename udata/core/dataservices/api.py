@@ -120,9 +120,9 @@ class DataserviceSuggestAPI(API):
     def get(self):
         """Dataservices suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
-        dataservices = Dataservice.objects(
-            archived_at=None, deleted_at=None, private__ne=True
-        ).filter(Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"]))
+        dataservices = Dataservice.objects.visible().filter(
+            Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"])
+        )
         return [
             {
                 "id": dataservice.id,

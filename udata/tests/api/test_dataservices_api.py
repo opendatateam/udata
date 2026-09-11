@@ -20,7 +20,6 @@ from udata.core.topic.factories import ReuseFactory, TopicElementFactory, TopicF
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert410
-from udata.utils import faker
 
 from . import APITestCase
 
@@ -709,29 +708,24 @@ class DataserviceAPITest(APITestCase):
 class DataserviceSuggestAPITest(APITestCase):
     def test_suggest_dataservices_api(self):
         """It should suggest dataservices sorted by followers"""
-        for i in range(3):
-            DataserviceFactory(
-                title="arealtestprefix-{0}".format(i) if i % 2 else faker.word(),
-                metrics={"followers": i},
-            )
-        max_follower_dataservice = DataserviceFactory(
-            title="arealtestprefix-4", metrics={"followers": 10}
-        )
+        low = DataserviceFactory(title="Test API low", metrics={"followers": 1})
+        high = DataserviceFactory(title="Test API high", metrics={"followers": 10})
+        DataserviceFactory(title="Unrelated", metrics={"followers": 100})
 
-        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        response = self.get(url_for("api.suggest_dataservices", q="test api", size=5))
         assert200(response)
 
-        assert len(response.json) <= 5
-        assert len(response.json) > 1
-
-        for suggestion in response.json:
-            assert "id" in suggestion
-            assert "slug" in suggestion
-            assert "title" in suggestion
-            assert "acronym" in suggestion
-            assert "page" in suggestion
-            assert "test" in suggestion["title"]
-        assert response.json[0]["id"] == str(max_follower_dataservice.id)
+        assert [suggestion["id"] for suggestion in response.json] == [
+            str(high.id),
+            str(low.id),
+        ]
+        assert response.json[0] == {
+            "id": str(high.id),
+            "title": high.title,
+            "acronym": high.acronym,
+            "slug": high.slug,
+            "page": high.self_web_url(),
+        }
 
     def test_suggest_dataservices_api_size(self):
         """It should respect the size parameter"""
