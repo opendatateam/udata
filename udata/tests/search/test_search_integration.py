@@ -65,6 +65,25 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "Données spectaculaires sur les transports" in titles
 
+    def test_dataset_punctuation_search(self):
+        """Dots vs spaces in titles should match in both directions."""
+        DatasetFactory(title="Catalogue data.gouv.fr")
+        DatasetFactory(title="Portail data gouv")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+
+        response = self.get("/api/2/datasets/search/?q=data.gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+
     def test_dataset_filter_by_format_family(self):
         """Test filtering datasets by format_family."""
         csv_resource = ResourceFactory(format="csv")
