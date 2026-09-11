@@ -4,8 +4,8 @@ This migration sets `_cls` to "Filter" on the elements of chart filter groups
 
 Those lists used to be plain `EmbeddedDocumentListField(Filter)` and so were
 stored without a `_cls` key. Now that they are generic (they can hold Filter
-or the other group class), elements missing `_cls` default to Filter on read
-(see NestedFilterField) but are never rewritten until the document is saved.
+or the other group class), elements missing `_cls` cannot be told apart from
+groups on read and are never rewritten until the document is saved.
 """
 
 import logging

@@ -1,6 +1,6 @@
 from mongoengine.connection import get_db
 
-from udata.core.visualizations.factories import ChartFactory
+from udata.core.visualizations.factories import ChartFactory, FilterFactory
 from udata.core.visualizations.models import AndFilters, Chart
 from udata.db import migrations
 from udata.tests.api import PytestOnlyDBTestCase
@@ -32,9 +32,7 @@ class BackfillFilterClsMigrationTest(PytestOnlyDBTestCase):
         assert [f["_cls"] for f in group["filters"]] == ["Filter", "Filter"]
 
     def test_elements_already_having_cls_are_left_alone(self):
-        chart = ChartFactory(
-            series__0__filters=AndFilters(filters=[{"column": "a", "condition": "exact", "value": "1"}])
-        )
+        chart = ChartFactory(series__0__filters=AndFilters(filters=[FilterFactory()]))
 
         migrate()
 
