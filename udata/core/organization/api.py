@@ -760,19 +760,6 @@ class OrgReusesAPI(API):
         return list(qs)
 
 
-@ns.route("/<org:org>/discussions/", endpoint="org_discussions")
-class OrgDiscussionsAPI(API):
-    @api.doc("list_organization_discussions")
-    @api.marshal_list_with(Discussion.__read_fields__)
-    def get(self, org):
-        """List organization discussions"""
-        reuses = Reuse.objects(organization=org).only("id")
-        datasets = Dataset.objects(organization=org).only("id")
-        subjects = list(reuses) + list(datasets)
-        qs = Discussion.objects(subject__in=subjects).order_by("-created")
-        return list(qs)
-
-
 @ns.route("/roles/", endpoint="org_roles")
 class OrgRolesAPI(API):
     @api.doc("org_roles")
