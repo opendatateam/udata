@@ -9,6 +9,7 @@ from mongoengine.fields import (
     EmbeddedDocumentListField,
     FloatField,
     GenericEmbeddedDocumentField,
+    ListField,
     StringField,
     UUIDField,
 )
@@ -71,8 +72,25 @@ class Filter(EmbeddedDocument):
 
 
 @generate_fields()
+class OrFilters(EmbeddedDocument):
+    filters = field(
+        ListField(GenericEmbeddedDocumentField(choices=[Filter, "AndFilters"])),
+        generic_key="_cls",
+    )
+
+
+@generate_fields()
 class AndFilters(EmbeddedDocument):
-    filters = field(EmbeddedDocumentListField(Filter))
+    filters = field(
+        ListField(GenericEmbeddedDocumentField(choices=[Filter, OrFilters])),
+        generic_key="_cls",
+    )
+
+
+# The two group classes reference each other; now that both are defined, replace
+# the string reference in OrFilters' choices with the concrete class so MongoEngine
+# validation and (de)serialization can use it.
+OrFilters._fields["filters"].field.choices = [Filter, AndFilters]
 
 
 @generate_fields()
@@ -86,7 +104,7 @@ class DataSeries(EmbeddedDocument):
     column_x_name_override = field(StringField())
 
     filters = field(
-        GenericEmbeddedDocumentField(choices=[AndFilters, Filter], allow_null=True),
+        GenericEmbeddedDocumentField(choices=[AndFilters, OrFilters, Filter], allow_null=True),
         generic=True,
         generic_key="_cls",
     )
