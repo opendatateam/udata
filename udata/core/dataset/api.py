@@ -674,6 +674,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         "upload_dataset_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         """Upload a file related to a given resource on a given dataset"""
@@ -701,6 +702,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         "upload_community_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""

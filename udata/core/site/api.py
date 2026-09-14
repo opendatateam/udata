@@ -26,6 +26,8 @@ from udata.utils import multi_to_dict
 from .models import Site, current_site
 from .rdf import build_catalog
 
+dataset_search_parser = DatasetSearch.as_request_parser(store_missing=False)
+
 
 @api.route("/site/", endpoint="site")
 class SiteAPI(API):
@@ -91,13 +93,13 @@ class SiteRdfCatalogFormat(API):
 
 @api.route("/site/datasets.csv", endpoint="site_datasets_csv")
 class SiteDatasetsCsv(API):
+    @api.expect(dataset_search_parser)
     def get(self):
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "dataset" in exported_models:
             return redirect(get_export_url("dataset"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         adapter = csv.get_adapter(Dataset)
@@ -106,13 +108,13 @@ class SiteDatasetsCsv(API):
 
 @api.route("/site/resources.csv", endpoint="site_datasets_resources_csv")
 class SiteResourcesCsv(API):
+    @api.expect(dataset_search_parser)
     def get(self):
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "resource" in exported_models:
             return redirect(get_export_url("resource"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         return csv.stream(ResourcesCsvAdapter(datasets), "resources")
