@@ -1,7 +1,14 @@
 import geojson
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
-from mongoengine.fields import IntField, ListField, MultiPolygonField, ReferenceField, StringField
+from mongoengine.fields import (
+    FloatField,
+    IntField,
+    ListField,
+    MultiPolygonField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -50,6 +57,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     code = StringField(required=True)
     level = StringField(required=True)
     uri = StringField()
+    bbox = ListField(FloatField())
 
     meta = {
         "indexes": [
@@ -134,6 +142,22 @@ def get_spatial_admin_levels():
 
 
 admin_levels = LocalProxy(get_spatial_admin_levels)
+
+
+GEOZONE_BBOXES_CACHE_KEY = "geozone-bboxes"
+
+
+# cache is invalidated explicitely by `load-geozones-bboxes` cmd
+@cache.cached(timeout=-1, key_prefix=GEOZONE_BBOXES_CACHE_KEY)
+def get_zone_bboxes():
+    # `bbox` defaults to `[]` when never set, hence the `bbox__size=4` filter
+    return {
+        zone.id: zone.bbox
+        for zone in GeoZone.objects(bbox__exists=True, bbox__size=4).only("id", "bbox")
+    }
+
+
+zone_bboxes = LocalProxy(get_zone_bboxes)
 
 
 @generate_fields()
