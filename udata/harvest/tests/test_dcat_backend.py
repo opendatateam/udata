@@ -1201,6 +1201,23 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
                 ("Odema", "odema@cerdd.org", None, "publisher"),
             }
 
+    def test_dataservice_serves_dataset_from_another_record(self, rmock):
+        """Each CSW record is parsed as its own graph, so a dataservice never shares a graph
+        with the datasets it serves: only the URI of the `dcat:servesDataset` node links them."""
+
+        url = mock_csw(rmock, "dataservice-serves-dataset.xml", path="geonetwork/srv/fre/csw")
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
+
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(
             rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"

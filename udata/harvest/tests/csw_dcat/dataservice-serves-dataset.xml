@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2">
+  <csw:SearchStatus timestamp="2026-09-14T10:00:00.000000Z" />
+  <csw:SearchResults numberOfRecordsMatched="2" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:dct="http://purl.org/dc/terms/">
+      <dcat:Dataset rdf:about="https://example.org/datasets/1">
+        <dct:title>Dataset 1</dct:title>
+        <dct:identifier>https://example.org/datasets/1</dct:identifier>
+        <dct:description>Dataset 1 description</dct:description>
+      </dcat:Dataset>
+    </rdf:RDF>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:dct="http://purl.org/dc/terms/">
+      <dcat:DataService rdf:about="https://example.org/api/">
+        <dct:title>An API</dct:title>
+        <dct:identifier>https://example.org/api/</dct:identifier>
+        <dcat:endpointURL rdf:resource="https://example.org/api/" />
+        <!-- The served dataset is a separate CSW record, hence a separate graph: only the
+             node URI is available here, GeoDCAT-AP writes no dct:identifier on it. -->
+        <dcat:servesDataset>
+          <dcat:Dataset rdf:about="https://example.org/datasets/1" />
+        </dcat:servesDataset>
+      </dcat:DataService>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>
