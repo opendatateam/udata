@@ -12,6 +12,7 @@ from flask import url_for
 from udata.api import API, api
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
+from udata.core.api_token.models import MAX_ERRORS, ApiToken
 from udata.core.user.factories import UserFactory
 from udata.forms import Form, fields, validators
 from udata.tests.api import PytestOnlyAPITestCase
@@ -157,8 +158,6 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_deleted_user(self):
         """Should raise a HTTP 401 if the user is deleted"""
-        from udata.core.api_token.models import ApiToken
-
         user = UserFactory()
         token, plaintext = ApiToken.generate(user)
         user.mark_as_deleted()
@@ -178,6 +177,54 @@ class APIAuthTest(PytestOnlyAPITestCase):
         for field in "required", "email", "choices":
             assert field in response.json["errors"]
             assert isinstance(response.json["errors"][field], list)
+
+    def test_error_recorded_on_api_token(self):
+        """Should keep the error response on the token that made the request"""
+        token, plaintext = ApiToken.generate(UserFactory())
+
+        response = self.put(
+            url_for("api.fake"), {"email": "wrong"}, headers={"X-API-KEY": plaintext}
+        )
+
+        assert400(response)
+        token.reload()
+        assert len(token.errors) == 1
+        error = token.errors[0]
+        assert error.status == 400
+        assert error.method == "PUT"
+        assert error.path == url_for("api.fake") + "?"
+        assert "email" in error.body
+
+    def test_success_not_recorded_on_api_token(self):
+        """Should only keep errors on the token"""
+        token, plaintext = ApiToken.generate(UserFactory())
+
+        response = self.put(
+            url_for("api.fake"),
+            {"required": "value", "email": "coucou@cmoi.fr", "choices": "first"},
+            headers={"X-API-KEY": plaintext},
+        )
+
+        assert200(response)
+        token.reload()
+        assert token.errors == []
+
+    def test_recorded_errors_are_capped(self):
+        """Should only keep the last errors on the token"""
+        token, plaintext = ApiToken.generate(UserFactory())
+
+        for index in range(MAX_ERRORS + 2):
+            response = self.put(
+                url_for("api.fake", index=index),
+                {"email": "wrong"},
+                headers={"X-API-KEY": plaintext},
+            )
+            assert400(response)
+
+        token.reload()
+        assert len(token.errors) == MAX_ERRORS
+        assert token.errors[0].path.endswith("?index=2")
+        assert token.errors[-1].path.endswith(f"?index={MAX_ERRORS + 1}")
 
     def test_no_validation_error(self):
         """Should pass if no validation error"""
