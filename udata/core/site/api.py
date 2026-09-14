@@ -26,6 +26,9 @@ from udata.utils import multi_to_dict
 from .models import Site, current_site
 from .rdf import build_catalog
 
+# Left undeclared (no `@api.expect`): this parser describes the Elasticsearch filters while the
+# CSV endpoints below filter through `DatasetApiParser.parse_filters`, so publishing it would
+# document filters that do nothing and omit filters that work.
 dataset_search_parser = DatasetSearch.as_request_parser(store_missing=False)
 
 
@@ -93,7 +96,6 @@ class SiteRdfCatalogFormat(API):
 
 @api.route("/site/datasets.csv", endpoint="site_datasets_csv")
 class SiteDatasetsCsv(API):
-    @api.expect(dataset_search_parser)
     def get(self):
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
@@ -108,7 +110,6 @@ class SiteDatasetsCsv(API):
 
 @api.route("/site/resources.csv", endpoint="site_datasets_resources_csv")
 class SiteResourcesCsv(API):
-    @api.expect(dataset_search_parser)
     def get(self):
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
