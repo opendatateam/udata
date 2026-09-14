@@ -60,16 +60,39 @@ def dataservice_from_rdf(
         contact_point for role in roles for contact_point in role
     ] or dataservice.contact_points
 
+    harvested_datasets = [dataset for dataset in all_datasets if dataset is not None]
+
     for dataset_node in d.objects(DCAT.servesDataset):
+        # This node references a dataset, it does not define it: the definition lives in
+        # another graph — always so for CSW, where each record is parsed as its own graph —
+        # and sometimes in another catalog entirely, in which case nothing can be attached.
+        # GeoDCAT-AP writes the reference either as a `DCT.identifier` or, when the source
+        # identifier is a URL, as the node URI alone.
         id = dataset_node.value(DCT.identifier)
-        dataset = next(
-            (d for d in all_datasets if d is not None and d.harvest.remote_id == id), None
+        uri = (
+            dataset_node.identifier.toPython()
+            if isinstance(dataset_node.identifier, URIRef)
+            else None
         )
 
-        if dataset is None:
+        dataset = next(
+            (
+                dataset
+                for dataset in harvested_datasets
+                if (id is not None and dataset.harvest.remote_id == id)
+                or (uri is not None and dataset.harvest.uri == uri)
+            ),
+            None,
+        )
+
+        if dataset is None and id is not None:
             # We try with `endswith` because Europe XSLT have problems with IDs. Sometimes they are prefixed with the domain of the catalog, sometimes not.
             dataset = next(
-                (d for d in all_datasets if d is not None and d.harvest.remote_id.endswith(id)),
+                (
+                    dataset
+                    for dataset in harvested_datasets
+                    if dataset.harvest.remote_id.endswith(id)
+                ),
                 None,
             )
 
