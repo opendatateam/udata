@@ -10,6 +10,7 @@ from flask_security.forms import (
     LoginForm,
     RegisterFormV2,
     ResetPasswordForm,
+    VerifyForm,
 )
 
 from udata.core.captchetat import bearer_token
@@ -100,6 +101,19 @@ class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
             return False
 
         return True
+
+
+class ExtendedVerifyForm(VerifyForm):
+    def validate(self, **kwargs):
+        if not self.user.password:
+            # Accounts created through ProConnect never got a password, and passlib
+            # raises on a null hash. Answer before flask-security compares against it.
+            self.password.errors = [
+                _("This account has no password, confirm your identity with ProConnect.")
+            ]
+            return False
+
+        return super().validate(**kwargs)
 
 
 class ChangeEmailForm(Form):

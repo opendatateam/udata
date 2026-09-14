@@ -377,6 +377,20 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     def page(self, *args, **kwargs):
         return self.self_web_url(*args, **kwargs)
 
+    @field(
+        description=(
+            "Whether this account has a password. Null unless the caller is the user "
+            "themselves or a sysadmin."
+        )
+    )
+    def has_password(self) -> bool:
+        # Accounts created through ProConnect have none: the front-end needs this to
+        # know that neither the change-password form nor the password reauthentication
+        # form applies to them.
+        if not current_user_is_admin_or_self():
+            return None
+        return bool(self.password)
+
     @classmethod
     def get(cls, id_or_slug):
         obj = cls.objects(slug=id_or_slug).first()
