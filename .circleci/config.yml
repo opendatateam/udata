@@ -27,6 +27,12 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
+      # MinIO images are no longer published on Docker Hub, quay.io is the only registry left
+      - image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+        environment:
+          MINIO_ROOT_USER: udata
+          MINIO_ROOT_PASSWORD: udata-secret
+        command: ["server", "/data"]
       - image: elasticsearch:<< parameters.elasticsearch-version >>
         environment:
           discovery.type: single-node
@@ -42,6 +48,10 @@ jobs:
     environment:
       BASH_ENV: /root/.bashrc
       UDATA_TEST_SEARCH_INTEGRATION: "1"
+      UDATA_TEST_S3_INTEGRATION: "1"
+      UDATA_TEST_S3_ENDPOINT: "http://localhost:9000"
+      UDATA_TEST_S3_ACCESS_KEY: "udata"
+      UDATA_TEST_S3_SECRET_KEY: "udata-secret"
     steps:
       - checkout
       - run:
@@ -92,6 +102,19 @@ jobs:
             echo "Elasticsearch failed to start"
             exit 1
       - run:
+          name: Wait for MinIO
+          command: |
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:9000/minio/health/live > /dev/null; then
+                echo "MinIO is ready"
+                exit 0
+              fi
+              echo "Waiting for MinIO... ($i/30)"
+              sleep 1
+            done
+            echo "MinIO failed to start"
+            exit 1
+      - run:
           name: Initialize Elasticsearch indices
           command: |
             echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
@@ -101,7 +124,12 @@ jobs:
           name: Run tests
           command: |
             mkdir -p reports/python
-            uv run inv test --report --ci
+            # Redirect stdin from /dev/null to avoid an invoke v3 crash:
+            # handle_stdin thread calls tcgetpgrp(stdin) which fails with
+            # ENOTTY on CircleCI when stdin is a TTY-flagged char device
+            # but the inv process isn't the session leader. /dev/null is
+            # not a TTY, so invoke's isatty() check short-circuits cleanly.
+            uv run inv test --report --ci < /dev/null
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -129,7 +157,7 @@ jobs:
       - run:
           name: Build a distributable package as a wheel release
           command: |
-            uv run inv pydist
+            uv run inv pydist < /dev/null
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -147,7 +175,7 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
-            uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            uv publish dist/*.whl  # use UV_PUBLISH_TOKEN
 
   trigger-gitlab-pipeline:
     docker:

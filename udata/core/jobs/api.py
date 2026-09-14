@@ -81,6 +81,7 @@ task_fields = api.model(
 
 @ns.route("/jobs/", endpoint="jobs")
 class JobsAPI(API):
+    @api.secure(admin_permission)
     @api.doc(id="list_jobs")
     @api.marshal_list_with(job_fields)
     def get(self):
@@ -110,6 +111,7 @@ class JobAPI(API):
             api.abort(404)
         return task
 
+    @api.secure(admin_permission)
     @api.marshal_with(job_fields)
     def get(self, id):
         """Fetch a single scheduled job"""
@@ -141,6 +143,7 @@ class JobAPI(API):
 
 @ns.route("/tasks/<string:id>/", endpoint="task")
 class TaskAPI(API):
+    @api.secure(admin_permission)
     @api.marshal_with(task_fields)
     def get(self, id):
         """Get a tasks status given its ID"""
@@ -161,6 +164,7 @@ class TaskAPI(API):
 
 @ns.route("/jobs/schedulables/", endpoint="schedulable_jobs")
 class JobsReferenceAPI(API):
+    @api.secure(admin_permission)
     @api.doc(model=[str])
     def get(self):
         """List all schedulable jobs"""

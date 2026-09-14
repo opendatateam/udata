@@ -54,7 +54,7 @@ class UserDeletedTopicElement(TopicRelatedActivity, Activity):
 
 
 @Topic.on_create.connect
-def on_user_created_topic(topic):
+def on_user_created_topic(topic, **kwargs):
     if current_user and current_user.is_authenticated:
         UserCreatedTopic.emit(topic, topic.organization)
 
@@ -67,7 +67,7 @@ def on_user_updated_topic(topic, **kwargs):
 
 
 @TopicElement.on_create.connect
-def on_user_created_topic_element(topic_element):
+def on_user_created_topic_element(topic_element, **kwargs):
     if current_user and current_user.is_authenticated and topic_element.topic:
         extras = {"element_id": str(topic_element.id)}
         UserCreatedTopicElement.emit(
@@ -86,7 +86,7 @@ def on_user_updated_topic_element(topic_element, **kwargs):
 
 
 @TopicElement.on_delete.connect
-def on_user_deleted_topic_element(topic_element):
+def on_user_deleted_topic_element(topic_element, **kwargs):
     try:
         topic = topic_element.topic
     except DoesNotExist:

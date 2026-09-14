@@ -7,9 +7,11 @@ from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 from flask import current_app, url_for
 from netaddr import AddrFormatError, IPAddress
 
+from udata.http import ssrf_policy_for
 from udata.i18n import _
 from udata.mail import get_mail_campaign_dict
 from udata.settings import Defaults
+from udata.ssrf import BlockedCategory, blocked_reason
 
 URL_REGEX = re.compile(
     r"^"
@@ -172,16 +174,22 @@ def validate(
     if hostname and resolve:
         ips_to_check += resolve_hostname(hostname, retry=URL_RESOLVE_HOSTNAME_RETRY_COUNT)
 
+    # Deciding which IPs are reachable is delegated to udata.ssrf, the module
+    # that also enforces it at connect time. Validating here is only about
+    # telling the user early: a hostname may not resolve (or may resolve to
+    # something else) by the time udata actually fetches the URL, so this can
+    # never be the security boundary — see udata.ssrf's module docstring.
+    policy = ssrf_policy_for(local=local, private=private, schemes=schemes)
+
     for ip in ips_to_check:
-        if ip.is_multicast():
-            error(url, _("{0} is a multicast IP").format(ip))
         if not ip.is_loopback() and ip.is_hostmask() or ip.is_netmask():
             error(url, _("{0} is a mask IP").format(ip))
-        if not local and ip.is_loopback():
+        reason = blocked_reason(str(ip), policy)
+        if reason is BlockedCategory.MULTICAST:
+            error(url, _("{0} is a multicast IP").format(ip))
+        elif reason is BlockedCategory.LOOPBACK:
             error(url, _("is a local URL"))
-        if not private and (
-            ip.is_link_local() or ip.is_ipv4_private_use() or ip.is_ipv6_unique_local()
-        ):
+        elif reason is not None:
             error(url, _("is a private URL"))
 
     return url

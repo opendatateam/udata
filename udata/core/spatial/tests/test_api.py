@@ -4,6 +4,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import (
+    SAMPLE_GEOM,
     GeoLevelFactory,
     GeoZoneFactory,
     SpatialCoverageFactory,
@@ -11,7 +12,6 @@ from udata.core.spatial.factories import (
 from udata.core.spatial.models import spatial_granularities
 from udata.core.spatial.tasks import compute_geozones_metrics
 from udata.tests.api import APITestCase
-from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.helpers import create_geozones_fixtures
 from udata.utils import faker
 
@@ -54,6 +54,12 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties["code"], zone.code)
             self.assertEqual(properties["level"], zone.level)
             self.assertEqual(properties["uri"], zone.uri)
+
+    def test_zones_api_unknown_id(self):
+        zone = GeoZoneFactory()
+
+        response = self.get(url_for("api.zones", ids=[zone.id, "unknown"]))
+        self.assert404(response)
 
     def test_suggest_zones_on_name(self):
         """It should suggest zones based on its name"""

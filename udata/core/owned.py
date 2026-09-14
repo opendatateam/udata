@@ -5,8 +5,8 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.core.checks import only_creation
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 from udata.mongo.errors import FieldValidationError
@@ -30,7 +30,7 @@ class OwnedQuerySet(UDataQuerySet):
         if user.sysadmin:
             return self()
 
-        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owners = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
@@ -39,15 +39,19 @@ class OwnedQuerySet(UDataQuerySet):
         return self(visible_query | owned_qs._query_obj)
 
 
-def only_creation(_value, is_update, field, **_kwargs):
-    from udata.auth import admin_permission, current_user
+def ownership_filter(owner: Organization | User) -> dict:
+    """The ownership fields of `owner`, whichever kind of owner it is.
 
-    # Super-admins can modify only creation fields
-    if current_user.is_authenticated and admin_permission:
-        return
-
-    if is_update:
-        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
+    Both fields are always set: an owner owns through one of them and, just as importantly,
+    not through the other. A filter naming only one would also match documents whose other
+    field points at somebody else — an inconsistent state nothing forbids, since `Owned.clean`
+    only clears a field an object is moving away from.
+    """
+    is_organization = isinstance(owner, Organization)
+    return {
+        "organization": owner if is_organization else None,
+        "owner": None if is_organization else owner,
+    }
 
 
 def check_owner_is_current_user(owner, **_kwargs):
@@ -66,11 +70,16 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
     from udata.auth import current_user
     from udata.models import Organization
 
+    # An explicit null clears the producer, like `check_owner_is_current_user` above:
+    # there is no organization to look up, let alone to check permissions on.
+    if not organization:
+        return
+
     org = Organization.objects(id=organization.id).first()
     if org is None:
         raise FieldValidationError(_("Unknown organization"), field="organization")
 
-    if current_user.is_authenticated and org and not org.permissions["private"].can():
+    if current_user.is_authenticated and not org.permissions["private"].can():
         raise FieldValidationError(
             _("Permission denied for this organization"), field="organization"
         )
@@ -83,7 +92,6 @@ class Owned(object):
 
     owner = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
         checks=[check_owner_is_current_user, only_creation],
         allow_null=True,
@@ -91,7 +99,6 @@ class Owned(object):
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
-        nested_fields=Organization.__ref_fields__,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,

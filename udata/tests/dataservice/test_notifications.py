@@ -45,13 +45,19 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
 
     def test_dataservice_deletion_cleans_notifications(self):
         owner = UserFactory()
+        other_user = UserFactory()
         dataset = DatasetFactory(owner=owner)
         dataservice = DataserviceFactory(datasets=[dataset])
         notification = Notification.objects(user=owner).first()
         assert notification is not None
+
+        # Create an unrelated notification that should not be cleaned up
+        Notification(user=other_user).save()
+
         dataservice.deleted_at = datetime.now(UTC)
         dataservice.save()
         assert Notification.objects(id=notification.id).count() == 0
+        assert Notification.objects(user=other_user).count() == 1
 
     def test_dataservice_creation_no_notifications_when_no_datasets(self):
         """No notifications are created when dataservice has no datasets"""
@@ -83,6 +89,7 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         """All notifications for a dataservice are cleaned up on deletion"""
         owner1 = UserFactory()
         owner2 = UserFactory()
+        other_user = UserFactory()
         dataset1 = DatasetFactory(owner=owner1)
         dataset2 = DatasetFactory(owner=owner2)
         dataservice = DataserviceFactory(datasets=[dataset1, dataset2])
@@ -90,9 +97,14 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         # Should have 2 notifications (one for each dataset owner)
         assert Notification.objects.count() == 2
 
+        # Create an unrelated notification that should not be cleaned up
+        Notification(user=other_user).save()
+        assert Notification.objects.count() == 3
+
         # Delete the dataservice
         dataservice.deleted_at = datetime.now(UTC)
         dataservice.save()
 
-        # All notifications should be cleaned up
-        assert Notification.objects.count() == 0
+        # Only the unrelated notification should remain
+        assert Notification.objects.count() == 1
+        assert Notification.objects(user=other_user).count() == 1

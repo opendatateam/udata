@@ -25,11 +25,11 @@ import mongoengine
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
-from flask_restx.inputs import boolean
+from flask_restx.inputs import boolean, positive
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
-from udata.api import API, api, errors
+from udata.api import API, add_pagination_arguments, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.core import storages
@@ -37,13 +37,13 @@ from udata.core.access_type.constants import AccessType
 from udata.core.badges import api as badges_api
 from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
+from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
@@ -90,6 +90,12 @@ DEFAULT_SORTING = "-created_at_internal"
 SUGGEST_SORTING = "-metrics.followers"
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. `owner` and `organization` (from `Owned`)
+# and `access_type` (from `WithAccessType`) are declared in both places and must be
+# kept in sync, or a filter silently works on one path only; the others have no
+# `filterable=` counterpart yet. Meant to disappear once the callers use
+# `Dataset.apply_sort_filters()`.
 class DatasetApiParser(ModelApiParser):
     sorts = {
         "title": "title",
@@ -235,20 +241,30 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["dataservice"]):
                 api.abort(400, "Dataservice arg must be an identifier")
             try:
-                dataservice = Dataservice.objects.get(id=args["dataservice"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources).
+                dataservice = (
+                    Dataservice.objects(id=args["dataservice"])
+                    .only("datasets")
+                    .no_dereference()
+                    .get()
+                )
             except Dataservice.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in dataservice.datasets])
         if args.get("reuse"):
             if not ObjectId.is_valid(args["reuse"]):
                 api.abort(400, "Reuse arg must be an identifier")
             try:
-                reuse = Reuse.objects.get(id=args["reuse"])
+                # no_dereference: we only need the referenced ObjectIds, not the full
+                # Dataset documents (dereferencing would load their embedded resources,
+                # which can be megabytes for a dataset with thousands of resources).
+                reuse = Reuse.objects(id=args["reuse"]).only("datasets").no_dereference().get()
             except Reuse.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in reuse.datasets])
+                datasets = datasets.filter(id__in=[ref.id for ref in reuse.datasets])
         if args.get("archived") is not None:
             if current_user.is_anonymous:
                 abort(401)
@@ -280,12 +296,7 @@ community_parser = api.parser()
 community_parser.add_argument(
     "sort", type=str, default="-created_at_internal", location="args", help="The sorting attribute"
 )
-community_parser.add_argument(
-    "page", type=int, default=1, location="args", help="The page to fetch"
-)
-community_parser.add_argument(
-    "page_size", type=int, default=20, location="args", help="The page size to fetch"
-)
+add_pagination_arguments(community_parser)
 community_parser.add_argument(
     "organization",
     type=str,
@@ -304,7 +315,7 @@ common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 # Build catalog_parser from DatasetApiParser parser with a default page_size of 100
 catalog_parser = DatasetApiParser().parser
 catalog_parser.replace_argument(
-    "page_size", type=int, location="args", default=100, help="The page size"
+    "page_size", type=positive, location="args", default=100, help="The page size"
 )
 
 
@@ -599,10 +610,7 @@ class UploadMixin(object):
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
         infos["title"] = os.path.basename(infos["filename"])
-        checksum_type = next(
-            checksum_type for checksum_type in CHECKSUM_TYPES if checksum_type in infos
-        )
-        infos["checksum"] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
+        infos["checksum"] = Checksum(type=CHECKSUM_TYPE, value=infos.pop(CHECKSUM_TYPE))
         infos["filesize"] = infos.pop("size")
         del infos["filename"]
         return infos
@@ -666,6 +674,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         "upload_dataset_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         """Upload a file related to a given resource on a given dataset"""
@@ -693,6 +702,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         "upload_community_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""
@@ -737,11 +747,9 @@ class ResourceAPI(ResourceMixin, API):
         ):
             abort(400, "Cannot modify filetype after creation")
 
-        # ensure API client does not override url on self-hosted resources
-        if resource.filetype == "file":
-            form._fields.get("url").data = resource.url
-
         # populate_obj populates existing resource object with the content of the form.
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.now(UTC)
@@ -749,9 +757,14 @@ class ResourceAPI(ResourceMixin, API):
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
         # Will be fixed when we switch to the new API Fields.
-        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+        body = request.get_json()
+        if "schema" in body and form._fields.get("schema").data is None:
             resource.schema = None
-        if "checksum" in request.get_json() and form._fields.get("checksum").data is None:
+        if (
+            resource.filetype != "file"
+            and "checksum" in body
+            and form._fields.get("checksum").data is None
+        ):
             resource.checksum = None
 
         dataset.update_resource(resource)
@@ -782,7 +795,9 @@ class CommunityResourcesAPI(API):
             community_resources = community_resources(dataset=args["dataset"])
         if args["organization"]:
             community_resources = community_resources(organization=args["organization"])
-        return community_resources.order_by(args["sort"]).paginate(args["page"], args["page_size"])
+        return community_resources.order_by(args["sort"], "id").paginate(
+            args["page"], args["page_size"]
+        )
 
     @api.secure
     @api.doc("create_community_resource", responses={400: "Validation error"})
@@ -821,8 +836,8 @@ class CommunityResourceAPI(API):
         """Update a given community resource"""
         community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
-        if community.filetype == "file":
-            form._fields.get("url").data = community.url
+        # Server-computed fields (url, checksum, filesize…) of hosted resources are
+        # protected from client override in BaseResourceForm.populate_obj.
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()

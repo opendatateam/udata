@@ -163,6 +163,22 @@ class TransferAPITest(APITestCase):
         data = response.json
         self.assertEqual(len(data), 0)
 
+    def test_400_on_malformed_subject_filter(self):
+        self.login()
+
+        response = self.get(url_for("api.transfers", subject="not-an-object-id"))
+
+        self.assert400(response)
+        self.assertIn("`subject`", response.json["message"])
+
+    def test_400_on_malformed_recipient_filter(self):
+        self.login()
+
+        response = self.get(url_for("api.transfers", recipient="not-an-object-id"))
+
+        self.assert400(response)
+        self.assertIn("`recipient`", response.json["message"])
+
     def test_400_on_bad_subject(self):
         self.login()
         recipient = UserFactory()

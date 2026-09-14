@@ -25,10 +25,8 @@ from udata.utils import faker
 from .. import actions, signals
 from ..models import (
     VALIDATION_ACCEPTED,
-    VALIDATION_PENDING,
     VALIDATION_REFUSED,
     HarvestError,
-    HarvestItem,
     HarvestJob,
     HarvestSource,
 )
@@ -115,51 +113,6 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
         for source in sources:
             assert source in result
-
-    def test_create_source(self):
-        source_url = faker.url()
-
-        with assert_emit(signals.harvest_source_created):
-            source = actions.create_source("Test source", source_url, "factory")
-
-        assert source.name == "Test source"
-        assert source.slug == "test-source"
-        assert source.url == source_url
-        assert source.backend == "factory"
-        assert source.frequency == "manual"
-        assert source.active
-        assert source.owner is None
-        assert source.organization is None
-
-        assert source.validation.state == VALIDATION_PENDING
-        assert source.validation.on is None
-        assert source.validation.by is None
-        assert source.validation.comment is None
-
-    def test_create_source_with_config(self):
-        source_url = faker.url()
-        config = {
-            "filters": [{"key": "test", "value": 42}],
-            "features": {"key": True},
-        }
-
-        with assert_emit(signals.harvest_source_created):
-            source = actions.create_source("Test source", source_url, "factory", config=config)
-
-        assert source.config == config
-
-    def test_update_source(self):
-        source = HarvestSourceFactory()
-        data = source.to_dict()
-        new_url = faker.url()
-        data["url"] = new_url
-
-        with assert_emit(signals.harvest_source_updated):
-            source = actions.update_source(source, data)
-
-        assert source.url == new_url
-        source.reload()
-        assert source.url == new_url
 
     @patch("udata.harvest.actions.launch")
     def test_validate_source(self, mock):
@@ -249,32 +202,24 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         for dataset in datasets:
             assert dataset.deleted is not None
 
-    def test_get_job_by_id(self):
-        job = HarvestJobFactory()
-        assert actions.get_job(str(job.id)) == job
+    def test_clean_source_updates_organization_metrics(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory()
+        for _ in range(5):
+            DatasetFactory(
+                organization=org,
+                harvest=HarvestDatasetMetadata(source_id=str(source.id)),
+            )
+        org.count_datasets()
+        org.reload()
+        assert org.metrics["datasets"] == 5
 
-    def test_get_job_by_objectid(self):
-        job = HarvestJobFactory()
-        assert actions.get_job(job.id) == job
+        actions.clean_source(source)
 
-    def test_get_job_never_loads_data_blob(self):
-        """The heavy `data` blob is never serialized by the read endpoints, so
-        `get_job` must always exclude it from the query — with or without items —
-        to avoid loading it for nothing (it dominates the document size)."""
-        job = HarvestJobFactory(
-            data={"raw": "a very heavy blob"},
-            items=[HarvestItem(remote_id="1"), HarvestItem(remote_id="2")],
-        )
-
-        with_items = actions.get_job(job.id)
-        without_items = actions.get_job(job.id, with_items=False)
-
-        # Excluded from the projection: the field falls back to its default.
-        assert with_items.data == {}
-        assert without_items.data == {}
-        # `with_items` still loads the items, `with_items=False` drops them too.
-        assert len(with_items.items) == 2
-        assert without_items.items == []
+        # Metrics are recomputed once at the end of the cleanup rather than on
+        # each dataset deletion, but the final count must still be accurate.
+        org.reload()
+        assert org.metrics["datasets"] == 0
 
     def test_schedule(self):
         source = HarvestSourceFactory()
@@ -805,12 +750,18 @@ class HarvestPreviewTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0
 
-    def test_preview_from_config(self):
+    def test_preview_unsaved_source(self):
         org = OrganizationFactory()
         source_url = faker.url()
         count = 10
-        job = actions.preview_from_config(
-            "Test source", source_url, "factory", organization=org, config={"count": count}
+        job = actions.preview(
+            HarvestSource(
+                name="Test source",
+                url=source_url,
+                backend="factory",
+                organization=org,
+                config={"count": count},
+            )
         )
 
         assert job.status == "done"

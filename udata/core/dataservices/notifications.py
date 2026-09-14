@@ -33,7 +33,7 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
 
 
 @Dataservice.on_create.connect
-def on_dataservice_created(dataservice):
+def on_dataservice_created(dataservice, **kwargs):
     """Create notifications when a dataservice is created"""
     from udata.features.notifications.models import Notification
 
@@ -60,3 +60,16 @@ def cleanup_dataservice_notifications(dataservice, **kwargs):
         Notification.objects(details__dataservice=dataservice).delete()
     except Exception as e:
         log.error(f"Error cleaning up notifications for deleted dataservice {dataservice.id}: {e}")
+
+
+@Dataset.on_delete.connect
+def cleanup_dataservice_and_reuse_dataset_notifications(dataset, **kwargs):
+    """Clean up dataservice and reuse notifications when a referenced dataset is deleted"""
+    from udata.features.notifications.models import Notification
+
+    try:
+        Notification.objects(details__dataset=dataset).delete()
+    except Exception as e:
+        log.error(
+            f"Error cleaning up dataservice and reuse notifications for deleted dataset {dataset.id}: {e}"
+        )

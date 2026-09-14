@@ -5,7 +5,6 @@ from mongoengine.signals import post_save
 
 from udata.api_fields import field, generate_fields
 from udata.core.owned import Owned
-from udata.core.user.api_fields import user_ref_fields
 from udata.mongo import db
 
 from .constants import ASSIGNABLE_OBJECT_TYPES
@@ -15,7 +14,6 @@ from .constants import ASSIGNABLE_OBJECT_TYPES
 class Assignment(db.Document):
     user = field(
         db.ReferenceField("User", required=True, reverse_delete_rule=CASCADE),
-        nested_fields=user_ref_fields,
     )
     organization = field(
         db.ReferenceField("Organization", required=True),
@@ -60,6 +58,6 @@ post_save.connect(_auto_assign_on_create)
 
 
 @Owned.on_owner_change.connect
-def clean_assignments_on_owner_change(document, previous):
+def clean_assignments_on_owner_change(document, previous, **kwargs):
     """Remove all assignments for an object when its ownership changes (e.g. transfer)."""
     Assignment.objects(subject=document).delete()

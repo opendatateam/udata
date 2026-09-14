@@ -1,13 +1,16 @@
 from datetime import UTC, datetime
 
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
 from udata.features.transfer.factories import TransferFactory
+from udata.harvest.actions import delete_source, purge_sources
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.tests.api import PytestOnlyDBTestCase
@@ -72,9 +75,10 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
 
     def test_harvest_source_notification_cleanup_on_source_delete(self):
         """Test that notifications are cleaned up when a harvest source is deleted."""
-        # Create admin user and harvest source
-        admin = AdminFactory()
+        # The source is created first: creating one notifies every existing sysadmin,
+        # which would add a notification on top of the one this test creates.
         source = HarvestSourceFactory()
+        admin = AdminFactory()
 
         # Create a notification for this harvest source
         notification = Notification(
@@ -87,8 +91,6 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 1
 
         # Delete the harvest source
-        from udata.harvest.actions import delete_source
-
         delete_source(source)
 
         # Verify notification is cleaned up (via signal)
@@ -96,11 +98,10 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
 
     def test_harvest_source_notification_cleanup_on_source_purge(self):
         """Test that notifications are cleaned up when a harvest source is purged."""
-        # Create admin user and harvest source
-        from udata.core.user.factories import AdminFactory
-
-        admin = AdminFactory()
+        # The source is created first: creating one notifies every existing sysadmin,
+        # which would add a notification on top of the one this test creates.
         source = HarvestSourceFactory()
+        admin = AdminFactory()
 
         # Create a notification for this harvest source
         notification = Notification(
@@ -113,8 +114,6 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 1
 
         # Mark source as deleted and purge it
-        from udata.harvest.actions import delete_source, purge_sources
-
         delete_source(source)
         purge_sources()
 
@@ -231,5 +230,39 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         assert Notification.objects.first().details.discussion == discussion
 
         discussion.remove_message(message2.id)
+
+        assert Notification.objects.count() == 0
+
+    def test_reuse_notification_cleanup_on_dataset_delete(self):
+        """Test that reuse notifications are cleaned up when a referenced dataset is deleted."""
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        ReuseFactory(datasets=[dataset])
+
+        assert Notification.objects.count() == 1
+        notification = Notification.objects.first()
+        assert isinstance(notification.details, ReuseCreatedNotificationDetails)
+        assert notification.details.dataset == dataset
+
+        # Soft-delete the dataset; this should trigger cleanup of the notification.
+        dataset.deleted = datetime.now(UTC)
+        dataset.save()
+
+        assert Notification.objects.count() == 0
+
+    def test_dataservice_notification_cleanup_on_dataset_delete(self):
+        """Test that dataservice notifications are cleaned up when a referenced dataset is deleted."""
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        DataserviceFactory(datasets=[dataset])
+
+        assert Notification.objects.count() == 1
+        notification = Notification.objects.first()
+        assert isinstance(notification.details, DataserviceCreatedNotificationDetails)
+        assert notification.details.dataset == dataset
+
+        # Soft-delete the dataset; this should trigger cleanup of the notification.
+        dataset.deleted = datetime.now(UTC)
+        dataset.save()
 
         assert Notification.objects.count() == 0

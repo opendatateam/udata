@@ -4,8 +4,11 @@ from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine import Q
 
-from udata.api import api
+from udata.api import add_pagination_arguments, api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.models import Reuse
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.models import TopicElement
 
@@ -13,16 +16,7 @@ from udata.core.topic.models import TopicElement
 class TopicElementsParser(ModelApiParser):
     def __init__(self):
         super().__init__()
-        self.parser.add_argument(
-            "page", type=int, default=1, location="args", help="The page to fetch"
-        )
-        self.parser.add_argument(
-            "page_size",
-            type=int,
-            default=DEFAULT_PAGE_SIZE,
-            location="args",
-            help="The page size to fetch",
-        )
+        add_pagination_arguments(self.parser, page_size=DEFAULT_PAGE_SIZE)
         self.parser.add_argument(
             "class",
             type=str,
@@ -70,6 +64,18 @@ class TopicApiParser(ModelApiParser):
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("owner", type=str, location="args")
         self.parser.add_argument("featured", type=boolean, location="args")
+        self.parser.add_argument(
+            "dataset", type=str, location="args", help="A dataset id to filter topics containing it"
+        )
+        self.parser.add_argument(
+            "reuse", type=str, location="args", help="A reuse id to filter topics containing it"
+        )
+        self.parser.add_argument(
+            "dataservice",
+            type=str,
+            location="args",
+            help="A dataservice id to filter topics containing it",
+        )
 
     @staticmethod
     def parse_filters(topics, args):
@@ -113,4 +119,28 @@ class TopicApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             topics = topics.filter(owner=args["owner"])
+
+        # Nested element objects filters
+        for arg in ("dataset", "reuse", "dataservice"):
+            if args.get(arg) and not ObjectId.is_valid(args[arg]):
+                api.abort(400, f"{arg} arg must be an identifier")
+        if args.get("dataset"):
+            try:
+                dataset = Dataset.objects.get(id=args["dataset"])
+            except Dataset.DoesNotExist:
+                return topics.none()
+            topics = topics.for_element(dataset)
+        if args.get("reuse"):
+            try:
+                reuse = Reuse.objects.get(id=args["reuse"])
+            except Reuse.DoesNotExist:
+                return topics.none()
+            topics = topics.for_element(reuse)
+        if args.get("dataservice"):
+            try:
+                dataservice = Dataservice.objects.get(id=args["dataservice"])
+            except Dataservice.DoesNotExist:
+                return topics.none()
+            topics = topics.for_element(dataservice)
+
         return topics

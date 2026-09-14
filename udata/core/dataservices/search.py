@@ -6,11 +6,11 @@ from bson.objectid import ObjectId
 from flask_restx.inputs import boolean
 
 from udata.api import api
-from udata.api.parsers import ModelApiParser
 from udata.core.access_type.constants import AccessType
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
 from udata.core.topic.models import Topic, TopicElement
+from udata.http import ssrf_session
 from udata.models import Dataservice, Organization
 from udata.search import (
     BoolFilter,
@@ -24,58 +24,49 @@ from udata.utils import raise_if_redirect, to_iso_datetime
 from udata_search_service.consumers import DataserviceConsumer
 from udata_search_service.services import DataserviceService
 
-# Maximum size in bytes for fetched documentation content (100 KB should be enough for a swagger)
-MAX_DOCUMENTATION_SIZE = 100 * 1024
+# Maximum size in bytes for fetched documentation content. Sized for large
+# swaggers like API Entreprise (~2.2 MB).
+MAX_DOCUMENTATION_SIZE = 3 * 1024 * 1024
 
 __all__ = ("DataserviceSearch",)
 
 DEFAULT_SORTING = "-created_at"
 
 
-class DataserviceApiParser(ModelApiParser):
-    sorts = {
-        "created": "created_at",
-    }
-
-    def __init__(self):
-        super().__init__()
-        self.parser.add_argument("tag", type=str, location="args")
-        self.parser.add_argument("organization", type=str, location="args")
-        self.parser.add_argument("is_restricted", type=bool, location="args")
-        self.parser.add_argument("access_type", type=str, choices=list(AccessType), location="args")
-        self.parser.add_argument("featured", type=bool, location="args")
-
-    @staticmethod
-    def parse_filters(dataservices, args):
-        if args.get("q"):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            dataservices = dataservices.search_text(phrase_query)
-        if args.get("tag"):
-            dataservices = dataservices.filter(tags=args["tag"])
-        if args.get("organization"):
-            if not ObjectId.is_valid(args["organization"]):
-                api.abort(400, "Organization arg must be an identifier")
-            dataservices = dataservices.filter(organization=args["organization"])
-        if "is_restricted" in args:
-            warnings.warn(
-                "`is_restricted` parameter is deprecated. Use `access_type` instead.",
-                category=DeprecationWarning,
-                stacklevel=2,
-            )
-            dataservices = dataservices.filter(
-                access_type__in=[AccessType.RESTRICTED]
-                if boolean(args["is_restricted"])
-                else [AccessType.OPEN, AccessType.OPEN_WITH_ACCOUNT]
-            )
-        if args.get("access_type"):
-            dataservices = dataservices.filter(access_type=args["access_type"])
-        if args.get("featured"):
-            dataservices = dataservices.filter(featured=args["featured"])
-        return dataservices
+# Duplicates by hand the filters declared with `filterable=` on the Dataservice
+# model: both lists must be kept in sync, or a filter silently works on one path
+# only. Meant to disappear once `mongo_search` and the RDF catalogs use
+# `Dataservice.apply_sort_filters()`, which derives its filters from the model.
+def parse_dataservice_filters(dataservices, args):
+    if args.get("q"):
+        # Following code splits the 'q' argument by spaces to surround
+        # every word in it with quotes before rebuild it.
+        # This allows the search_text method to tokenise with an AND
+        # between tokens whereas an OR is used without it.
+        phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+        dataservices = dataservices.search_text(phrase_query)
+    if args.get("tag"):
+        dataservices = dataservices.filter(tags__all=args["tag"])
+    if args.get("organization"):
+        if not ObjectId.is_valid(args["organization"]):
+            api.abort(400, "Organization arg must be an identifier")
+        dataservices = dataservices.filter(organization=args["organization"])
+    if "is_restricted" in args:
+        warnings.warn(
+            "`is_restricted` parameter is deprecated. Use `access_type` instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        dataservices = dataservices.filter(
+            access_type__in=[AccessType.RESTRICTED]
+            if boolean(args["is_restricted"])
+            else [AccessType.OPEN, AccessType.OPEN_WITH_ACCOUNT]
+        )
+    if args.get("access_type"):
+        dataservices = dataservices.filter(access_type=args["access_type"])
+    if args.get("featured"):
+        dataservices = dataservices.filter(featured=args["featured"])
+    return dataservices
 
 
 @register
@@ -114,7 +105,9 @@ class DataserviceSearch(ModelSearchAdapter):
         try:
             timeout = 10
             headers = {"User-Agent": "udata-search-service/1.0"}
-            response = requests.get(
+            # machine_documentation_url is user-supplied: fetch it through the
+            # SSRF-guarded session, which validates the resolved IP at connect time.
+            response = ssrf_session().get(
                 url, timeout=timeout, stream=True, headers=headers, allow_redirects=False
             )
             response.raise_for_status()
@@ -146,7 +139,7 @@ class DataserviceSearch(ModelSearchAdapter):
     @classmethod
     def mongo_search(cls, args):
         dataservices = Dataservice.objects.visible()
-        dataservices = DataserviceApiParser.parse_filters(dataservices, args)
+        dataservices = parse_dataservice_filters(dataservices, args)
 
         sort = (
             cls.parse_sort(args["sort"])

@@ -1,7 +1,11 @@
+import struct
+import zlib
 from datetime import UTC, datetime, timedelta, timezone
+from io import BytesIO
 
 from flask import url_for
 
+from udata.core import storages
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -11,7 +15,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, User
-from udata.tests.helpers import capture_mails
+from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
 from . import APITestCase
@@ -44,6 +48,137 @@ class MeAPITest(APITestCase):
         response = self.get(url_for("api.me"))
         self.assert401(response)
 
+    def test_my_avatar_upload(self):
+        """It should upload an avatar directly into the avatars storage"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(user.avatar)
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_my_avatar_upload_with_crop(self):
+        """It should upload a cropped avatar using the bbox parameter"""
+        user = self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (create_test_image(), "test.png"), "bbox": "10,10,40,40"},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertEqual(user.avatar.bbox, [10, 10, 40, 40])
+
+    def test_my_avatar_upload_rejects_invalid_bbox(self):
+        """It should reject a bbox that is not four pixel coordinates"""
+        self.login()
+        for bbox in ("1e400,0,1,1", "nan,0,1,1", "a,b,c,d", "10,10,40", "10,10,40,40,40"):
+            with self.subTest(bbox=bbox):
+                response = self.post(
+                    url_for("api.my_avatar"),
+                    {"file": (create_test_image(), "test.png"), "bbox": bbox},
+                    json=False,
+                )
+                self.assert400(response)
+
+    def test_my_avatar_upload_rejects_bbox_outside_of_the_image(self):
+        """It should reject a bbox that does not fit in the uploaded image"""
+        # Pillow pads a crop reaching outside of the image instead of failing: cropping
+        # a 50x50 avatar to 20000x20000 allocates the whole padded surface.
+        self.login()
+        # `create_test_image` is 50x50: an empty and a reversed box are degenerate too.
+        for bbox in ("0,0,20000,20000", "-10,10,40,40", "10,10,10,40", "40,10,10,40"):
+            with self.subTest(bbox=bbox):
+                response = self.post(
+                    url_for("api.my_avatar"),
+                    {"file": (create_test_image(), "test.png"), "bbox": bbox},
+                    json=False,
+                )
+                self.assert400(response)
+
+    def test_my_avatar_upload_stores_the_whole_file(self):
+        """It should store the complete file, not just what the format check left"""
+        # Without optimization and without a max size, flask_storage saves the stream
+        # from wherever its cursor is: any byte consumed by the format check would be
+        # missing from the stored avatar.
+        self.app.config["FS_IMAGES_OPTIMIZE"] = False
+        user = self.login()
+        image = create_test_image()
+        expected_size = len(image.getvalue())
+
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (image, "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+
+        user.reload()
+        self.assertEqual(len(storages.avatars.read(user.avatar.filename)), expected_size)
+
+    def test_my_avatar_upload_rejects_non_image(self):
+        """It should reject a non-image file"""
+        self.login()
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
+
+    def test_my_avatar_upload_rejects_lying_mimetype(self):
+        """It should reject a file whose content does not match its declared mimetype"""
+        self.login()
+        svg = b'<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"/></svg>'
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(svg), "logo.svg", "image/png")},
+            json=False,
+        )
+        self.assert400(response)
+
+    def test_my_avatar_upload_rejects_decompression_bomb(self):
+        """It should reject a valid image announcing more pixels than Pillow decodes"""
+        self.login()
+
+        def chunk(chunk_type, data):
+            return (
+                struct.pack(">I", len(data))
+                + chunk_type
+                + data
+                + struct.pack(">I", zlib.crc32(chunk_type + data))
+            )
+
+        # A 69 bytes PNG announcing 20000x20000 pixels: `Image.open` refuses it right
+        # after reading the header, before any decoding.
+        bomb = (
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", 20000, 20000, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(b"\x00" * 100))
+            + chunk(b"IEND", b"")
+        )
+        response = self.post(
+            url_for("api.my_avatar"),
+            {"file": (BytesIO(bomb), "bomb.png")},
+            json=False,
+        )
+        self.assert400(response)
+
+    def test_my_avatar_upload_without_file(self):
+        """It should reject an upload without any file"""
+        self.login()
+        response = self.post(url_for("api.my_avatar"), {}, json=False)
+        self.assert400(response)
+
     def test_update_profile(self):
         """It should update my profile from the API"""
         self.login()
@@ -57,6 +192,65 @@ class MeAPITest(APITestCase):
         self.user.reload()
         self.assertEqual(self.user.about, "new about")
         self.assertTrue(self.user.active)
+
+    def test_update_profile_rejects_urls_in_name(self):
+        """It should reject URLs embedded in first_name/last_name"""
+        self.login()
+        data = self.user.to_dict()
+        data["first_name"] = "John http://dumdum.fr"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "first_name" in response.json["errors"]
+
+        data = self.user.to_dict()
+        data["last_name"] = "Doe https://etalab.studio"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "last_name" in response.json["errors"]
+
+    def test_get_profile_exposes_creation_date_as_since(self):
+        """`since` should expose the registration date (created_at), not null"""
+        self.login()
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+        self.assertIsNotNone(response.json["since"])
+        self.assertEqual(response.json["since"], self.user.created_at.isoformat())
+
+    def test_update_profile_rejects_invalid_email(self):
+        """It should reject a malformed email"""
+        self.login()
+        data = self.user.to_dict()
+        data["email"] = "not-an-email"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+
+    def test_update_profile_cannot_change_email(self):
+        """A new address is only granted by the `/change-email` confirmation flow"""
+        self.login()
+        previous_email = self.user.email
+        data = self.user.to_dict()
+        data["email"] = "someone.else@example.org"
+        response = self.put(url_for("api.me"), data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+        self.user.reload()
+        self.assertEqual(self.user.email, previous_email)
+
+    def test_update_profile_ignores_roles_and_active(self):
+        """A non-admin must not grant themselves roles or toggle active via /me"""
+        self.login()
+        self.assertEqual(self.user.roles, [])
+        self.assertTrue(self.user.active)
+        data = self.user.to_dict()
+        data["roles"] = ["admin"]
+        data["active"] = False
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertEqual(self.user.roles, [])
+        self.assertTrue(self.user.active)
+        self.assertFalse(self.user.sysadmin)
 
     def test_my_metrics(self):
         self.login()

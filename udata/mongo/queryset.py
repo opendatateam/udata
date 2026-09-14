@@ -87,7 +87,12 @@ class UDataQuerySet(BaseQuerySet):
         return document, created
 
     def generic_in(self, **kwargs):
-        """Bypass buggy GenericReferenceField querying issue"""
+        """Bypass buggy GenericReferenceField querying issue
+
+        Ids are expected to be valid: callers reject malformed ones where the
+        request is parsed, so anything unusable reaching here is a bug of ours and
+        must surface as a 500 rather than as a client error.
+        """
         query = {}
         for key, value in kwargs.items():
             if not value:
@@ -103,10 +108,45 @@ class UDataQuerySet(BaseQuerySet):
                     query["{0}._ref".format(key)] = {"$in": value}
                 elif all(isinstance(v, ObjectId) for v in value):
                     query["{0}._ref.$id".format(key)] = {"$in": value}
+                else:
+                    raise TypeError(f"`{key}` expects a list of string, ObjectId or DBRef")
             elif isinstance(value, ObjectId):
                 query["{0}._ref.$id".format(key)] = value
             elif isinstance(value, str):
                 query["{0}._ref.$id".format(key)] = ObjectId(value)
             else:
-                self.error("expect a list of string, ObjectId or DBRef")
+                raise TypeError(f"`{key}` expects a string, ObjectId or DBRef")
         return self(__raw__=query)
+
+
+def paginate_embedded_list(
+    document_cls, document_id, field, embedded_cls, *, page, page_size, condition=None
+):
+    """Filter and slice an embedded-document ``ListField`` server-side via an
+    aggregation, so a document with a huge list isn't fully loaded just to serve
+    a single page.
+
+    ``condition`` is an optional aggregation boolean expression over the
+    ``$$item`` variable (e.g. ``{"$eq": ["$$item.type", "main"]}``). Returns a
+    ``(items, total)`` tuple where ``items`` are rebuilt ``embedded_cls``
+    instances and ``total`` is the count after filtering.
+    """
+    source = f"${field}"
+    filtered = (
+        {"$filter": {"input": source, "as": "item", "cond": condition}} if condition else source
+    )
+    offset = page_size * (page - 1) if page > 1 else 0
+    pipeline = [
+        {"$match": {"_id": document_id}},
+        {"$project": {"items": filtered}},
+        {
+            "$project": {
+                "total": {"$size": "$items"},
+                "data": {"$slice": ["$items", offset, page_size]},
+            }
+        },
+    ]
+    result = next(document_cls.objects.aggregate(*pipeline), None)
+    if not result:
+        return [], 0
+    return [embedded_cls._from_son(item) for item in result["data"]], result["total"]

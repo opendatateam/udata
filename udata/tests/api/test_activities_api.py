@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from flask import url_for
 from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
@@ -11,6 +13,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.core.user.models import User
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert400
 
@@ -147,3 +150,51 @@ class ActivityAPITest(APITestCase):
         response = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == 1
+
+    def test_activity_api_list_with_deleted_actor(self) -> None:
+        """It should not crash when an activity actor has been deleted."""
+        actor = UserFactory()
+        FakeDatasetActivity.objects.create(actor=actor, related_to=DatasetFactory())
+
+        actor.deleted = datetime.now(UTC)
+        actor.save()
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+
+    def test_activity_api_list_with_deleted_organization(self) -> None:
+        """It should not crash when an activity organization has been deleted."""
+        org = OrganizationFactory()
+        FakeDatasetActivity.objects.create(
+            actor=UserFactory(), related_to=DatasetFactory(), organization=org
+        )
+
+        org.deleted = datetime.now(UTC)
+        org.save()
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+
+    def test_activity_api_list_with_dangling_related_to(self) -> None:
+        """It should not crash when an activity references a deleted object."""
+        dataset = DatasetFactory()
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset)
+
+        # Simulate a manual/document purge that leaves the activity with a DBRef.
+        Dataset._get_collection().delete_one({"_id": dataset.id})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+    def test_activity_api_list_with_dangling_actor(self) -> None:
+        """It should not crash when an activity actor has been hard-deleted."""
+        actor = UserFactory()
+        FakeDatasetActivity.objects.create(actor=actor, related_to=DatasetFactory())
+
+        # Simulate a manual hard-delete of the user leaving a dangling DBRef in the activity.
+        User._get_collection().delete_one({"_id": actor.id})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0

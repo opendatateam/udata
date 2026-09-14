@@ -13,6 +13,7 @@ MODULES = (
     "followers",
     "topic",
     "post",
+    "sitemap",
 )
 
 

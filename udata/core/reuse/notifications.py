@@ -33,7 +33,7 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
 
 
 @Reuse.on_create.connect
-def on_reuse_created(reuse):
+def on_reuse_created(reuse, **kwargs):
     """Create notifications when a reuse is created"""
     from udata.features.notifications.models import Notification
 

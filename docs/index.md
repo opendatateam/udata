@@ -1,4 +1,4 @@
-**Customizable and skinnable social platform dedicated to (open)data.**
+**Customizable social platform dedicated to (open)data.**
 
 Welcome to the official documentation of udata. 
 
@@ -6,11 +6,14 @@ The documentation is organized into different guides, depending on your profile.
 
 ## I want to launch the project to play with it locally
 
-See [quickstart](quickstart.md)
+See [getting started](getting-started.md). udata is a Python backend: running it locally
+means running the API, with or without [cdata](https://github.com/datagouv/cdata),
+the separate frontend used by data.gouv.fr.
 
 ## I’m a regular developer of the platform
 
-Start with [getting started](getting-started.md).
+Start with [getting started](getting-started.md), then head to
+[advanced development environment](development-environment.md).
 
 ## I want to deploy an instance on production servers
 

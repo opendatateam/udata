@@ -2,32 +2,13 @@ import pytest
 
 from udata.tasks import celery, job, task
 from udata.tests import PytestOnlyTestCase
+from udata.tests.helpers import argvalues
 from udata.utils import unique_string
-
-TASKS = [
-    ({}, "default", None),
-    ({"queue": "low"}, "low", "low.{name}"),
-    ({"queue": "low", "routing_key": "key"}, "low", "key"),
-    ({"routing_key": "key"}, None, "key"),
-    ({"route": "low.topic"}, "low", "low.topic"),
-    ({"route": "low.topic", "queue": "q"}, "low", "low.topic"),
-    ({"route": "low.topic", "routing_key": "rk"}, "low", "low.topic"),
-]
-
-JOBS = [
-    ({}, "low", "low.{name}"),
-    ({"queue": "high"}, "high", "high.{name}"),
-    ({"queue": "high", "routing_key": "key"}, "high", "key"),
-    ({"routing_key": "key"}, "low", "key"),
-    ({"route": "high.topic"}, "high", "high.topic"),
-    ({"route": "high.topic", "queue": "q"}, "high", "high.topic"),
-    ({"route": "high.topic", "routing_key": "rk"}, "high", "high.topic"),
-]
 
 
 def idify(params):
     """Proper param display for easier debugging"""
-    return [", ".join("=".join(tup) for tup in row[0].items()) or "none" for row in params]
+    return ", ".join(f"{k}={v}" for k, v in params[0].items()) or "none"
 
 
 def fake_task(*args, **kwargs):
@@ -60,10 +41,34 @@ class TasksRoutingTest(PytestOnlyTestCase):
 
         return assertion
 
-    @pytest.mark.parametrize("kwargs,queue,key", TASKS, ids=idify(TASKS))
+    @pytest.mark.parametrize(
+        "kwargs, queue, key",
+        argvalues(
+            ({}, "default", None),
+            ({"queue": "low"}, "low", "low.{name}"),
+            ({"queue": "low", "routing_key": "key"}, "low", "key"),
+            ({"routing_key": "key"}, None, "key"),
+            ({"route": "low.topic"}, "low", "low.topic"),
+            ({"route": "low.topic", "queue": "q"}, "low", "low.topic"),
+            ({"route": "low.topic", "routing_key": "rk"}, "low", "low.topic"),
+            ids=idify,
+        ),
+    )
     def test_tasks_routing(self, route_to, kwargs, queue, key):
         route_to(task, [], kwargs, queue, key)
 
-    @pytest.mark.parametrize("kwargs,queue,key", JOBS, ids=idify(JOBS))
+    @pytest.mark.parametrize(
+        "kwargs, queue, key",
+        argvalues(
+            ({}, "low", "low.{name}"),
+            ({"queue": "high"}, "high", "high.{name}"),
+            ({"queue": "high", "routing_key": "key"}, "high", "key"),
+            ({"routing_key": "key"}, "low", "key"),
+            ({"route": "high.topic"}, "high", "high.topic"),
+            ({"route": "high.topic", "queue": "q"}, "high", "high.topic"),
+            ({"route": "high.topic", "routing_key": "rk"}, "high", "high.topic"),
+            ids=idify,
+        ),
+    )
     def test_job_routing(self, route_to, kwargs, queue, key):
         route_to(job, [unique_string()], kwargs, queue, key)

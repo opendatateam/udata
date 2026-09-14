@@ -92,6 +92,7 @@ def update(
                         dataservice.metrics.clear()
                     dataservice.count_discussions()
                     dataservice.count_followers()
+                    dataservice.count_reuses()
                 except Exception as e:
                     log.info(f"Error during update: {e}")
                     continue
