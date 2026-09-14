@@ -1,5 +1,7 @@
 import logging
 import traceback
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
@@ -253,46 +255,16 @@ class BaseBackend(object):
 
         return self.job
 
-    def process_dataset(self, remote_id: str, **kwargs):
-        log.debug(f"Processing dataset {remote_id}…")
+    @contextmanager
+    def catch_item_failures(self, item: HarvestItem) -> Iterator[None]:
+        """Classify a failure of `item` and report it.
 
-        # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = self.add_item(
-            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
-        )
-
-        log_catcher = LogCatcher()
-
+        The log level is the routing: Sentry's logging integration turns `log.exception`
+        into an event, while `warning` and below stay breadcrumbs. A failing remote
+        therefore belongs to the harvest report; only udata bugs go to Sentry.
+        """
         try:
-            if not remote_id:
-                raise HarvestSkipException("missing identifier")
-
-            current_app.logger.addHandler(log_catcher)
-            dataset = self.inner_process_dataset(item, **kwargs)
-            if dataset.harvest:
-                item.remote_url = dataset.harvest.remote_url
-
-            # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
-
-            self.ensure_unique_remote_id(item)
-
-            dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
-            dataset.archived = None
-
-            # TODO: Apply editable mappings
-
-            if self.dryrun:
-                dataset.validate()
-                # A preview never saves, so the dataset would keep no pk and could not
-                # be referenced by a dataservice harvested in the same run. Give it the
-                # client-side id that save() would have generated so cross-references
-                # between previewed objects stay valid and distinct.
-                if dataset.pk is None:
-                    dataset.id = ObjectId()
-            else:
-                dataset.save()
-            item.dataset = dataset
-            item.status = "done"
+            yield
         except HarvestSkipException as e:
             item.status = "skipped"
 
@@ -307,13 +279,60 @@ class BaseBackend(object):
             item.status = "failed"
 
             log.warning(f"Request error while processing {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
+            # `requests` describes the failure, not the call site: a backend issuing several
+            # requests per item needs the traceback to tell which one failed.
+            item.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
         except Exception as e:
             item.status = "failed"
             log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
 
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            item.errors.append(error)
+            item.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
+
+    def process_dataset(self, remote_id: str, **kwargs):
+        log.debug(f"Processing dataset {remote_id}…")
+
+        # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
+        item = self.add_item(
+            HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
+        )
+
+        log_catcher = LogCatcher()
+
+        try:
+            with self.catch_item_failures(item):
+                if not remote_id:
+                    raise HarvestSkipException("missing identifier")
+
+                current_app.logger.addHandler(log_catcher)
+                dataset = self.inner_process_dataset(item, **kwargs)
+                if dataset.harvest:
+                    item.remote_url = dataset.harvest.remote_url
+
+                # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
+
+                self.ensure_unique_remote_id(item)
+
+                dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
+                dataset.archived = None
+
+                # TODO: Apply editable mappings
+
+                if self.dryrun:
+                    dataset.validate()
+                    # A preview never saves, so the dataset would keep no pk and could not
+                    # be referenced by a dataservice harvested in the same run. Give it the
+                    # client-side id that save() would have generated so cross-references
+                    # between previewed objects stay valid and distinct.
+                    if dataset.pk is None:
+                        dataset.id = ObjectId()
+                else:
+                    dataset.save()
+                item.dataset = dataset
+                item.status = "done"
         finally:
             current_app.logger.removeHandler(log_catcher)
             item.ended = datetime.now(UTC)
@@ -335,52 +354,40 @@ class BaseBackend(object):
             HarvestItem(status="started", started=datetime.now(UTC), remote_id=remote_id)
         )
 
+        log_catcher = LogCatcher()
+
         try:
-            if not remote_id:
-                raise HarvestSkipException("missing identifier")
+            with self.catch_item_failures(item):
+                if not remote_id:
+                    raise HarvestSkipException("missing identifier")
 
-            dataservice = self.inner_process_dataservice(item, **kwargs)
-            if dataservice.harvest:
-                item.remote_url = dataservice.harvest.remote_url
+                current_app.logger.addHandler(log_catcher)
+                dataservice = self.inner_process_dataservice(item, **kwargs)
+                if dataservice.harvest:
+                    item.remote_url = dataservice.harvest.remote_url
 
-            self.ensure_unique_remote_id(item)
+                self.ensure_unique_remote_id(item)
 
-            dataservice.harvest = self.update_dataservice_harvest_info(
-                dataservice.harvest, remote_id
-            )
-            dataservice.archived_at = None
+                dataservice.harvest = self.update_dataservice_harvest_info(
+                    dataservice.harvest, remote_id
+                )
+                dataservice.archived_at = None
 
-            # TODO: Apply editable mappings
+                # TODO: Apply editable mappings
 
-            if self.dryrun:
-                dataservice.validate()
-            else:
-                dataservice.save()
-            item.dataservice = dataservice
-            item.status = "done"
-        except HarvestSkipException as e:
-            item.status = "skipped"
-
-            log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except (HarvestValidationError, MongoValidationError) as e:
-            item.status = "failed"
-
-            log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except requests.exceptions.RequestException as e:
-            item.status = "failed"
-
-            log.warning(f"Request error while processing {item.remote_id} : {safe_unicode(e)}")
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except Exception as e:
-            item.status = "failed"
-            log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
-
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            item.errors.append(error)
+                if self.dryrun:
+                    dataservice.validate()
+                else:
+                    dataservice.save()
+                item.dataservice = dataservice
+                item.status = "done"
         finally:
+            current_app.logger.removeHandler(log_catcher)
             item.ended = datetime.now(UTC)
+            item.logs = [
+                HarvestLog(level=record.levelname, message=record.getMessage())
+                for record in log_catcher.records
+            ]
             self.save_job()
 
     def ensure_unique_remote_id(self, item):

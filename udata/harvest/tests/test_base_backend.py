@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
 
@@ -18,7 +19,7 @@ from udata.harvest.models import HarvestItem
 from udata.models import Dataset
 from udata.ssrf import BlockedAddressError
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.helpers import assert_equal_dates
+from udata.tests.helpers import argvalues, assert_equal_dates
 from udata.utils import faker
 
 from ..backends import (
@@ -34,6 +35,11 @@ from .factories import HarvestSourceFactory
 
 class Unknown:
     pass
+
+
+log = logging.getLogger(__name__)
+
+ITEM_LOG_MESSAGE = "Something worth reporting happened while processing this item"
 
 
 def gen_remote_IDs(num: int, prefix: str = "") -> list[str]:
@@ -129,6 +135,20 @@ class FailingItemBackend(FakeBackend):
 
     def inner_process_dataservice(self, item: HarvestItem):
         raise self.exception
+
+
+class LoggingItemBackend(FakeBackend):
+    """A backend logging while processing an item."""
+
+    name = "logging-item-backend"
+
+    def inner_process_dataset(self, item: HarvestItem):
+        log.info(ITEM_LOG_MESSAGE)
+        return super().inner_process_dataset(item)
+
+    def inner_process_dataservice(self, item: HarvestItem):
+        log.info(ITEM_LOG_MESSAGE)
+        return super().inner_process_dataservice(item)
 
 
 class InvalidResourceBackend(FakeBackend):
@@ -704,8 +724,46 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 assert getattr(backend1.source, owner_param).page() in item.errors[0].message
 
 
+class HarvestItemLogsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
+    def test_logs_emitted_while_processing_are_reported_on_the_item(self, config_key):
+        backend = LoggingItemBackend(HarvestSourceFactory(config={config_key: ["fake-1"]}))
+
+        job = backend.harvest()
+
+        assert job.items[0].status == "done"
+        assert ITEM_LOG_MESSAGE in [entry.message for entry in job.items[0].logs]
+
+
 class HarvestErrorReportingTest(PytestOnlyDBTestCase):
     """A failing remote belongs to the harvest report; only udata bugs go to Sentry."""
+
+    @pytest.mark.parametrize(
+        "exception",
+        argvalues(
+            (requests.exceptions.ConnectTimeout("Connection timed out"), "timeout"),
+            (
+                requests.exceptions.ConnectionError(
+                    "Failed to resolve 'example.com' (Name resolution failed)"
+                ),
+                "resolution",
+            ),
+            (requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"), "certificate"),
+        ),
+    )
+    def test_job_connection_error_is_not_sent_to_sentry(self, rmock, harvest_logs, exception):
+        url = "https://remote.example.com/catalog"
+        rmock.get(url, exc=exception)
+        source = HarvestSourceFactory(url=url)
+
+        job = FetchingBackend(source).harvest()
+
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert str(exception) in job.errors[0].message
+        harvest_logs.warning.assert_called_once()
+        assert "request error" in harvest_logs.warning.call_args[0][0].lower()
+        harvest_logs.assert_not_sent_to_sentry()
 
     @pytest.mark.parametrize("status_code", [403, 404, 502, 504])
     def test_job_http_error_is_not_sent_to_sentry(self, rmock, harvest_logs, status_code):
@@ -768,6 +826,8 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
 
         assert job.items[0].status == "failed"
         assert "403 Client Error" in job.items[0].errors[0].message
+        # The message names the failure, only the traceback names the failing call.
+        assert "inner_process_" in job.items[0].errors[0].details
         harvest_logs.warning.assert_called_once()
         harvest_logs.assert_not_sent_to_sentry()
 
