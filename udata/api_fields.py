@@ -73,7 +73,7 @@ def required_if(**conditions):
                     field=field,
                 )
 
-    check.run_even_if_missing = True
+    check.always_run = True
     return check
 
 
@@ -1081,20 +1081,28 @@ def patch(obj: _T, request) -> _T:
                         message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
                     )
 
-            # Run checks if value is modified.
-            # We run checks here (before setattr) to compare old vs new value.
-            checks = info.get("checks", [])
-            if is_value_modified(getattr(obj, key), value):
-                for check in checks:
+            # An unchanged value normally skips its checks, so that resending an object
+            # as-is stays idempotent: `only_creation` must not reject a PUT that echoes
+            # back the owner it was given, nor `check_url_does_not_exists` a reuse that
+            # keeps its own URL. Two cases have no such old value to be idempotent with:
+            #  - a creation, where the "old" value is just the field default. Writing the
+            #    default is still a caller-supplied value and must be validated.
+            #  - an `always_run` check, which validates the resulting state rather than
+            #    the write itself, and so cannot be escaped by leaving a field out or by
+            #    resending it unchanged.
+            modified = is_value_modified(getattr(obj, key), value)
+            for check in info.get("checks", []):
+                if obj._created or modified or getattr(check, "always_run", False):
                     # Pass the API key so error messages match the payload the caller sent.
                     run_check(check, value, api_key, obj, data)
 
             setattr(obj, key, value)
 
-    # Run checks marked with `run_even_if_missing` on fields not in request.
-    # Some checks (like `required_if`) need to run even when their field is absent
-    # from the request, because they validate cross-field constraints based on
-    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    # Run `always_run` checks on fields absent from the request (the ones present
+    # already ran in the loop above). Some checks (like `required_if`) validate a
+    # cross-field constraint on the resulting object rather than on the value being
+    # written (e.g. "page_id is required if body_type is blocs"), so leaving the
+    # field out of the payload must not be a way to escape them.
     for key, _, info in get_fields(obj.__class__):
         api_key = info.get("rename") or key
         if api_key in data:
@@ -1103,7 +1111,7 @@ def patch(obj: _T, request) -> _T:
         value = getattr(obj, key, None)
 
         for check in checks:
-            if not getattr(check, "run_even_if_missing", False):
+            if not getattr(check, "always_run", False):
                 continue
             run_check(check, value, api_key, obj, data)
 
