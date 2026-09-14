@@ -1203,7 +1203,11 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
     def test_dataservice_serves_dataset_from_another_record(self, rmock):
         """Each CSW record is parsed as its own graph, so a dataservice never shares a graph
-        with the datasets it serves: only the URI of the `dcat:servesDataset` node links them."""
+        with the datasets it serves: only the URI of the `dcat:servesDataset` node links them.
+
+        The second served dataset reproduces what data.ofb.fr returns for
+        https://id.eaufrance.fr/meta/ODP_WFS: a reference to another catalog, which used to
+        raise `TypeError: endswith first arg must be str` and fail the whole dataservice."""
 
         url = mock_csw(rmock, "dataservice-serves-dataset.xml", path="geonetwork/srv/fre/csw")
         source = HarvestSourceFactory(

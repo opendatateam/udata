@@ -63,9 +63,10 @@ def dataservice_from_rdf(
     harvested_datasets = [dataset for dataset in all_datasets if dataset is not None]
 
     for dataset_node in d.objects(DCAT.servesDataset):
-        # The served dataset is usually harvested from another graph than this one — always so
-        # for CSW, where each record is its own graph — so this node only holds a reference to
-        # it. GeoDCAT-AP writes that reference either as a `DCT.identifier` or, when the source
+        # This node references a dataset, it does not define it: the definition lives in
+        # another graph — always so for CSW, where each record is parsed as its own graph —
+        # and sometimes in another catalog entirely, in which case nothing can be attached.
+        # GeoDCAT-AP writes the reference either as a `DCT.identifier` or, when the source
         # identifier is a URL, as the node URI alone.
         id = dataset_node.value(DCT.identifier)
         uri = (

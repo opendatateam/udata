@@ -19,6 +19,11 @@
         <dcat:servesDataset>
           <dcat:Dataset rdf:about="https://example.org/datasets/1" />
         </dcat:servesDataset>
+        <!-- Same shape, but pointing at another catalog. This is what data.ofb.fr serves for
+             https://id.eaufrance.fr/meta/ODP_WFS: nothing can be attached, and that is fine. -->
+        <dcat:servesDataset>
+          <dcat:Dataset rdf:about="https://another-catalog.example.org/csw?request=GetRecordById&amp;id=ebef2115" />
+        </dcat:servesDataset>
       </dcat:DataService>
     </rdf:RDF>
   </csw:SearchResults>
