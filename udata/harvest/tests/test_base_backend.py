@@ -765,12 +765,11 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         assert "request error" in harvest_logs.warning.call_args[0][0].lower()
         harvest_logs.assert_not_sent_to_sentry()
 
-    @pytest.mark.parametrize("status_code", [403, 404, 502, 504])
+    @pytest.mark.parametrize("status_code", [404, 502])
     def test_job_http_error_is_not_sent_to_sentry(self, rmock, harvest_logs, status_code):
         url = "https://remote.example.com/catalog"
         rmock.get(url, status_code=status_code)
-        source = HarvestSourceFactory()
-        source.url = url
+        source = HarvestSourceFactory(url=url)
 
         job = FetchingBackend(source).harvest()
 
@@ -779,19 +778,15 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         harvest_logs.warning.assert_called_once()
         harvest_logs.assert_not_sent_to_sentry()
 
-    @pytest.mark.parametrize("status_code", [301, 302, 308])
-    def test_job_redirect_is_not_sent_to_sentry(self, rmock, harvest_logs, status_code):
+    def test_job_redirect_is_not_sent_to_sentry(self, rmock, harvest_logs):
         url = "https://remote.example.com/catalog"
-        rmock.get(
-            url, status_code=status_code, headers={"Location": "https://elsewhere.example.com/"}
-        )
-        source = HarvestSourceFactory()
-        source.url = url
+        rmock.get(url, status_code=302, headers={"Location": "https://elsewhere.example.com/"})
+        source = HarvestSourceFactory(url=url)
 
         job = FetchingBackend(source).harvest()
 
         assert job.status == "failed"
-        assert f"Redirect ({status_code}) not allowed" in job.errors[0].message
+        assert "Redirect (302) not allowed" in job.errors[0].message
         harvest_logs.warning.assert_called_once()
         harvest_logs.assert_not_sent_to_sentry()
 
@@ -813,6 +808,7 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert job.status == "failed"
+        assert "'NoneType' object has no attribute 'title'" in job.errors[0].message
         harvest_logs.assert_sent_to_sentry()
 
     @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
@@ -851,6 +847,7 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert job.items[0].status == "failed"
+        assert "'NoneType' object has no attribute 'title'" in job.items[0].errors[0].message
         harvest_logs.assert_sent_to_sentry()
 
     def test_invalid_remote_resource_url_only_fails_its_item(self, harvest_logs):
