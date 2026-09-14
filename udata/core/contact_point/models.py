@@ -44,7 +44,19 @@ class ContactPoint(Document, Owned):
     contact_form = field(URLField())
     role = field(StringField(required=True, choices=list(CONTACT_ROLES)))
 
-    meta = {"queryset_class": OwnedQuerySet}
+    # A contact point is shared by all the objects of its owner, so the same one is never
+    # written twice. Every writer looks it up before creating it; the index is what makes
+    # that hold for all of them at once, including a bulk rewrite that would make two of
+    # them identical.
+    meta = {
+        "queryset_class": OwnedQuerySet,
+        "indexes": [
+            {
+                "fields": ["name", "email", "contact_form", "role", "owner", "organization"],
+                "unique": True,
+            }
+        ],
+    }
 
     def validate(self, clean=True):
         # The name is optional, but a contact point holding nothing but a role names nobody
