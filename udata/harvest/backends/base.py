@@ -6,6 +6,7 @@ from uuid import UUID
 import requests
 from bson import ObjectId
 from flask import current_app, g
+from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
@@ -216,17 +217,19 @@ class BaseBackend(object):
                 self.job.status += "-errors"
 
         except HarvestValidationError as e:
-            log.exception(
-                f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
+            log.warning(
+                f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
             )
 
             self.job.status = "failed"
 
             error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+        # A remote that is down, times out, redirects or answers 4xx/5xx is not a udata bug:
+        # it belongs to the harvest report, not to Sentry.
+        except requests.exceptions.RequestException as e:
             log.warning(
-                f'Harvesting connection error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
+                f'Harvesting request error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
             )
 
             self.job.status = "failed"
@@ -295,10 +298,15 @@ class BaseBackend(object):
 
             log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
-        except HarvestValidationError as e:
+        except (HarvestValidationError, MongoValidationError) as e:
             item.status = "failed"
 
             log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except requests.exceptions.RequestException as e:
+            item.status = "failed"
+
+            log.warning(f"Request error while processing {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             item.status = "failed"
@@ -355,10 +363,15 @@ class BaseBackend(object):
 
             log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
-        except HarvestValidationError as e:
+        except (HarvestValidationError, MongoValidationError) as e:
             item.status = "failed"
 
             log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except requests.exceptions.RequestException as e:
+            item.status = "failed"
+
+            log.warning(f"Request error while processing {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             item.status = "failed"

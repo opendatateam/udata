@@ -1000,6 +1000,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
     )
     def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
         """Connection exceptions should be logged as warning, not sent to Sentry."""
+        # Companion cases (HTTP status, redirects, item failures) live in
+        # test_base_backend.py::HarvestErrorReportingTest.
         url = TEST_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
         rmock.get(url, exc=exception)
 
@@ -1016,7 +1018,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.errors) == 1
         assert str(exception) in job.errors[0].message
         mock_warning.assert_called_once()
-        assert "connection error" in mock_warning.call_args[0][0].lower()
+        assert "request error" in mock_warning.call_args[0][0].lower()
         mock_exception.assert_not_called()
 
     def test_preview_does_not_create_contact_points(self, rmock):
