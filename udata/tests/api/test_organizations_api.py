@@ -97,6 +97,24 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.org_roles"))
         assert200(response)
 
+        assert response.json == [
+            {
+                "id": "admin",
+                "label": "Administrateur",
+                "description": "Peut gérer l'organisation, les membres et tous les contenus.",
+            },
+            {
+                "id": "editor",
+                "label": "Éditeur",
+                "description": "Peut créer et modifier tous les contenus de l'organisation.",
+            },
+            {
+                "id": "partial_editor",
+                "label": "Éditeur partiel",
+                "description": "Peut créer des contenus et modifier seulement certains contenus.",
+            },
+        ]
+
     def test_organization_api_get(self):
         """It should fetch an organization from the API"""
         organization = OrganizationFactory()
