@@ -44,7 +44,8 @@ services:
           "
 
     storage:
-        image: minio/minio
+        # MinIO images are no longer published on Docker Hub, quay.io is the only registry left
+        image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
         volumes:
           - storage-data:/data
         expose:
