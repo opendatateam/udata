@@ -206,6 +206,24 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_dataservices_serving_datasets_referenced_by_uri(self, rmock):
+        """A `dcat:servesDataset` node can reference a dataset by URI only, without any
+        `dcterms:identifier` (this is what GeoDCAT-AP emits). The dataset is then harvested
+        from another page, and only its URI can link the two."""
+
+        url = mock_dcat_pagination(rmock, "catalog.xml", "serves-dataset-by-uri-{page}.xml")
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        # The dataset harvested from the first page is attached, the one outside of the
+        # catalog is simply ignored.
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
+
     def test_harvest_datasetseries(self, rmock):
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
 
