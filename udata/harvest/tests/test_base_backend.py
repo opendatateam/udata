@@ -1,15 +1,17 @@
+import logging
 from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
 import requests
+from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset import tasks
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
@@ -17,7 +19,7 @@ from udata.harvest.models import HarvestItem
 from udata.models import Dataset
 from udata.ssrf import BlockedAddressError
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.helpers import assert_equal_dates
+from udata.tests.helpers import argvalues, assert_equal_dates
 from udata.utils import faker
 
 from ..backends import (
@@ -27,12 +29,17 @@ from ..backends import (
     HarvestFilter,
     get_all_backends,
 )
-from ..exceptions import HarvestException
+from ..exceptions import HarvestException, HarvestValidationError
 from .factories import HarvestSourceFactory
 
 
 class Unknown:
     pass
+
+
+log = logging.getLogger(__name__)
+
+ITEM_LOG_MESSAGE = "Something worth reporting happened while processing this item"
 
 
 def gen_remote_IDs(num: int, prefix: str = "") -> list[str]:
@@ -104,7 +111,82 @@ class FetchingBackend(FakeBackend):
     name = "fetching-backend"
 
     def inner_harvest(self):
-        self.get(self.source.url)
+        self.get(self.source.url).raise_for_status()
+
+
+class FailingBackend(FakeBackend):
+    """A backend whose harvest raises a configured exception."""
+
+    name = "failing-backend"
+    exception: Exception
+
+    def inner_harvest(self):
+        raise self.exception
+
+
+class FailingItemBackend(FakeBackend):
+    """A backend whose item processing raises a configured exception."""
+
+    name = "failing-item-backend"
+    exception: Exception
+
+    def inner_process_dataset(self, item: HarvestItem):
+        raise self.exception
+
+    def inner_process_dataservice(self, item: HarvestItem):
+        raise self.exception
+
+
+class LoggingItemBackend(FakeBackend):
+    """A backend logging while processing an item."""
+
+    name = "logging-item-backend"
+
+    def inner_process_dataset(self, item: HarvestItem):
+        log.info(ITEM_LOG_MESSAGE)
+        return super().inner_process_dataset(item)
+
+    def inner_process_dataservice(self, item: HarvestItem):
+        log.info(ITEM_LOG_MESSAGE)
+        return super().inner_process_dataservice(item)
+
+
+class InvalidResourceBackend(FakeBackend):
+    """A backend harvesting a resource URL the Dataset model refuses."""
+
+    name = "invalid-resource-backend"
+
+    def inner_process_dataset(self, item: HarvestItem):
+        dataset = super().inner_process_dataset(item)
+        # A Windows UNC path where an URL is expected, as met on a real catalog.
+        dataset.resources = [
+            ResourceFactory(url="//diffuweb.example.com\\OpenData\\dictionnaire.xlsx")
+        ]
+        return dataset
+
+
+class HarvestLogs:
+    """Captures the log level the backend reported a failure with.
+
+    Sentry's logging integration turns `log.exception` into an event, while
+    `log.warning` and below stay breadcrumbs: the level *is* the routing.
+    """
+
+    def __init__(self, mocker):
+        self.info = mocker.patch("udata.harvest.backends.base.log.info")
+        self.warning = mocker.patch("udata.harvest.backends.base.log.warning")
+        self.exception = mocker.patch("udata.harvest.backends.base.log.exception")
+
+    def assert_not_sent_to_sentry(self):
+        self.exception.assert_not_called()
+
+    def assert_sent_to_sentry(self):
+        self.exception.assert_called_once()
+
+
+@pytest.fixture
+def harvest_logs(mocker):
+    return HarvestLogs(mocker)
 
 
 class HarvestFilterTest:
@@ -640,6 +722,145 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             else:
                 assert item.status == "failed"
                 assert getattr(backend1.source, owner_param).page() in item.errors[0].message
+
+
+class HarvestItemLogsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
+    def test_logs_emitted_while_processing_are_reported_on_the_item(self, config_key):
+        backend = LoggingItemBackend(HarvestSourceFactory(config={config_key: ["fake-1"]}))
+
+        job = backend.harvest()
+
+        assert job.items[0].status == "done"
+        assert ITEM_LOG_MESSAGE in [entry.message for entry in job.items[0].logs]
+
+
+class HarvestErrorReportingTest(PytestOnlyDBTestCase):
+    """A failing remote belongs to the harvest report; only udata bugs go to Sentry."""
+
+    @pytest.mark.parametrize(
+        "exception",
+        argvalues(
+            (requests.exceptions.ConnectTimeout("Connection timed out"), "timeout"),
+            (
+                requests.exceptions.ConnectionError(
+                    "Failed to resolve 'example.com' (Name resolution failed)"
+                ),
+                "resolution",
+            ),
+            (requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"), "certificate"),
+        ),
+    )
+    def test_job_connection_error_is_not_sent_to_sentry(self, rmock, harvest_logs, exception):
+        url = "https://remote.example.com/catalog"
+        rmock.get(url, exc=exception)
+        source = HarvestSourceFactory(url=url)
+
+        job = FetchingBackend(source).harvest()
+
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert str(exception) in job.errors[0].message
+        harvest_logs.warning.assert_called_once()
+        assert "request error" in harvest_logs.warning.call_args[0][0].lower()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    @pytest.mark.parametrize("status_code", [404, 502])
+    def test_job_http_error_is_not_sent_to_sentry(self, rmock, harvest_logs, status_code):
+        url = "https://remote.example.com/catalog"
+        rmock.get(url, status_code=status_code)
+        source = HarvestSourceFactory(url=url)
+
+        job = FetchingBackend(source).harvest()
+
+        assert job.status == "failed"
+        assert str(status_code) in job.errors[0].message
+        harvest_logs.warning.assert_called_once()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    def test_job_redirect_is_not_sent_to_sentry(self, rmock, harvest_logs):
+        url = "https://remote.example.com/catalog"
+        rmock.get(url, status_code=302, headers={"Location": "https://elsewhere.example.com/"})
+        source = HarvestSourceFactory(url=url)
+
+        job = FetchingBackend(source).harvest()
+
+        assert job.status == "failed"
+        assert "Redirect (302) not allowed" in job.errors[0].message
+        harvest_logs.warning.assert_called_once()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    def test_job_validation_error_is_not_sent_to_sentry(self, harvest_logs):
+        backend = FailingBackend(HarvestSourceFactory())
+        backend.exception = HarvestValidationError("Descriptor declares a DTD")
+
+        job = backend.harvest()
+
+        assert job.status == "failed"
+        assert "DTD" in job.errors[0].message
+        harvest_logs.warning.assert_called_once()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    def test_job_unexpected_error_is_sent_to_sentry(self, harvest_logs):
+        backend = FailingBackend(HarvestSourceFactory())
+        backend.exception = AttributeError("'NoneType' object has no attribute 'title'")
+
+        job = backend.harvest()
+
+        assert job.status == "failed"
+        assert "'NoneType' object has no attribute 'title'" in job.errors[0].message
+        harvest_logs.assert_sent_to_sentry()
+
+    @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
+    def test_item_http_error_is_not_sent_to_sentry(self, harvest_logs, config_key):
+        backend = FailingItemBackend(HarvestSourceFactory(config={config_key: ["fake-1"]}))
+        backend.exception = requests.exceptions.HTTPError(
+            "403 Client Error: Forbidden for url: https://remote.example.com/package_show"
+        )
+
+        job = backend.harvest()
+
+        assert job.items[0].status == "failed"
+        assert "403 Client Error" in job.items[0].errors[0].message
+        # The message names the failure, only the traceback names the failing call.
+        assert "inner_process_" in job.items[0].errors[0].details
+        harvest_logs.warning.assert_called_once()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
+    def test_item_validation_error_is_not_sent_to_sentry(self, harvest_logs, config_key):
+        backend = FailingItemBackend(HarvestSourceFactory(config={config_key: ["fake-1"]}))
+        backend.exception = MongoValidationError("URL invalide", field_name="resources")
+
+        job = backend.harvest()
+
+        assert job.items[0].status == "failed"
+        assert "URL invalide" in job.items[0].errors[0].message
+        harvest_logs.info.assert_called_once()
+        harvest_logs.assert_not_sent_to_sentry()
+
+    @pytest.mark.parametrize("config_key", ["dataset_remote_ids", "dataservice_remote_ids"])
+    def test_item_unexpected_error_is_sent_to_sentry(self, harvest_logs, config_key):
+        backend = FailingItemBackend(HarvestSourceFactory(config={config_key: ["fake-1"]}))
+        backend.exception = AttributeError("'NoneType' object has no attribute 'title'")
+
+        job = backend.harvest()
+
+        assert job.items[0].status == "failed"
+        assert "'NoneType' object has no attribute 'title'" in job.items[0].errors[0].message
+        harvest_logs.assert_sent_to_sentry()
+
+    def test_invalid_remote_resource_url_only_fails_its_item(self, harvest_logs):
+        backend = InvalidResourceBackend(
+            HarvestSourceFactory(config={"dataset_remote_ids": ["fake-1", "fake-2"]})
+        )
+
+        job = backend.harvest()
+
+        assert job.status == "done-errors"
+        assert [item.status for item in job.items] == ["failed", "failed"]
+        assert "resources" in job.items[0].errors[0].message
+        harvest_logs.assert_not_sent_to_sentry()
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
