@@ -1,13 +1,13 @@
 import factory
 
-from udata.core.dataservices.models import Dataservice, HarvestMetadata
+from udata.core.dataservices.models import Dataservice, HarvestDataserviceMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.factories import ModelFactory
 
 
 class HarvestMetadataFactory(ModelFactory):
     class Meta:
-        model = HarvestMetadata
+        model = HarvestDataserviceMetadata
 
     backend = "csw-dcat"
     domain = "data.gouv.fr"
