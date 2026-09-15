@@ -1,5 +1,20 @@
 # Changelog
 
+## 17.8.0 (2026-09-15)
+
+- chore(CI): remove trigger gitlab ([#3951](https://github.com/opendatateam/udata/pull/3951))
+- feat: add or to chart filters ([#3938](https://github.com/opendatateam/udata/pull/3938))
+- feat: expose a description for each organization role ([#3937](https://github.com/opendatateam/udata/pull/3937))
+- fix: 500 on discussions listing when the subject is a post ([#3945](https://github.com/opendatateam/udata/pull/3945))
+- fix: add contact point unique index ([#3942](https://github.com/opendatateam/udata/pull/3942))
+- fix: dataservice serves dataset by uri ([#3949](https://github.com/opendatateam/udata/pull/3949))
+- fix: document the request payloads and https scheme missing from the OpenAPI specs ([#3946](https://github.com/opendatateam/udata/pull/3946))
+- fix(edito): make the title optional on list blocs ([#3941](https://github.com/opendatateam/udata/pull/3941))
+- fix: keep harvest purge cursors alive while archiving ([#3944](https://github.com/opendatateam/udata/pull/3944))
+- fix: pull MinIO image from quay.io, it is gone from Docker Hub ([#3947](https://github.com/opendatateam/udata/pull/3947))
+- fix: run field checks on creation even when the value equals the field default ([#3929](https://github.com/opendatateam/udata/pull/3929))
+
+
 ## 17.7.2 (2026-09-11)
 
 - fix: MAAF XML parser ([#3943](https://github.com/opendatateam/udata/pull/3943))
