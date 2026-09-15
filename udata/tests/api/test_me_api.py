@@ -14,7 +14,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
-from udata.models import Discussion, Follow, Member, User
+from udata.models import Follow, Member, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -366,56 +366,6 @@ class MeAPITest(APITestCase):
         response = self.get(url_for("api.my_org_reuses", q="foô"))
         self.assert200(response)
         self.assertEqual(len(response.json), len(reuses) + len(org_reuses))
-
-    def test_my_org_discussions(self):
-        user = self.login()
-        member = Member(user=user, role="editor")
-        organization = OrganizationFactory(members=[member])
-        reuse = ReuseFactory(owner=user)
-        org_reuse = ReuseFactory(organization=organization)
-        dataset = DatasetFactory(owner=user)
-        org_dataset = DatasetFactory(organization=organization)
-
-        discussions = [
-            Discussion.objects.create(subject=dataset, title="", user=user),
-            Discussion.objects.create(subject=org_dataset, title="", user=user),
-            Discussion.objects.create(subject=reuse, title="", user=user),
-            Discussion.objects.create(subject=org_reuse, title="", user=user),
-        ]
-
-        # Should not be listed
-        Discussion.objects.create(subject=DatasetFactory(), title="", user=user)
-        Discussion.objects.create(subject=ReuseFactory(), title="", user=user)
-
-        response = self.get(url_for("api.my_org_discussions"))
-        self.assert200(response)
-        self.assertEqual(len(response.json), len(discussions))
-
-    def test_my_org_discussions_with_search(self):
-        user = self.login()
-        member = Member(user=user, role="editor")
-        organization = OrganizationFactory(members=[member])
-        reuse = ReuseFactory(owner=user)
-        org_reuse = ReuseFactory(organization=organization)
-        dataset = DatasetFactory(owner=user)
-        org_dataset = DatasetFactory(organization=organization)
-
-        discussions = [
-            Discussion.objects.create(subject=dataset, title="foô", user=user),
-            Discussion.objects.create(subject=org_reuse, title="foô", user=user),
-        ]
-
-        # Should not be listed.
-        (Discussion.objects.create(subject=reuse, title="", user=user),)
-        (Discussion.objects.create(subject=org_dataset, title="", user=user),)
-
-        # Should really not be listed.
-        Discussion.objects.create(subject=DatasetFactory(), title="foô", user=user)
-        Discussion.objects.create(subject=ReuseFactory(), title="foô", user=user)
-
-        response = self.get(url_for("api.my_org_discussions", q="foô"))
-        self.assert200(response)
-        self.assertEqual(len(response.json), len(discussions))
 
     def test_my_reuses_401(self):
         response = self.get(url_for("api.my_reuses"))
