@@ -281,6 +281,7 @@ class DatasetsResourcesCsvAPI(API):
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
+    @api.expect(catalog_parser)
     def get(self, org):
         _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
@@ -347,6 +348,7 @@ contact_point_parser = ContactPoint.__index_parser__
 @ns.route("/<org:org>/contacts/", endpoint="org_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_organization_contact_point")
+    @api.expect(contact_point_parser)
     @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, org):
         """List all organization contact points"""
@@ -779,4 +781,7 @@ class OrgRolesAPI(API):
     @api.marshal_list_with(org_role_fields)
     def get(self):
         """List all possible organization roles"""
-        return [{"id": key, "label": value} for (key, value) in ORG_ROLES.items()]
+        return [
+            {"id": key, "label": role.label, "description": role.description}
+            for (key, role) in ORG_ROLES.items()
+        ]

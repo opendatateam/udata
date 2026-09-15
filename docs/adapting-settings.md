@@ -48,18 +48,6 @@ The app refuses to start without it.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### THEME
-
-**default**: `None`
-
-The enabled theme name. Note: With the separation of frontend into cdata, themes are now handled separately. This setting may be used for legacy compatibility.
-
-### TEMPLATE_CACHE_DURATION
-
-**default**: `5`
-
-The duration used for templates' cache, in minutes.
-
 ### ALLOWED_RESOURCES_EXTENSIONS
 
 **default**:
@@ -330,12 +318,6 @@ The full option list is available in
 
 The OAuth2 token duration.
 
-### OAUTH2_PROVIDER_ERROR_ENDPOINT
-
-**default**: `'oauth.oauth_error'`
-
-The OAuth2 error page. Do not modify unless you know what you are doing.
-
 ## Flask-Security options
 
 ### SECURITY_PASSWORD_LENGTH_MIN
@@ -400,9 +382,9 @@ You can see the full options list in
 
 ### CACHE_TYPE
 
-**default**: `'flask_caching.backends.redis'`
+**default**: `'flask_caching.backends.RedisCache'`
 
-The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.memcached`)
+The cache type, which can be adjusted to your needs (_ex:_ `flask_caching.backends.NullCache`, `flask_caching.backends.MemcachedCache`)
 
 ### CACHE_KEY_PREFIX
 
@@ -414,16 +396,6 @@ It also allows you to use the same backend with different instances.
 ## Flask-FS options
 
 udata use Flask-FS as storage abstraction.
-
-## Flask-CDN options
-
-See [Flask-CDN README](https://github.com/libwilliam/flask-cdn#flask-cdn-options) for detailed options.
-
-### CDN_DOMAIN
-
-**default**: `None`
-
-Set this to a domain name. If defined, udata will serve its static assets from this domain.
 
 ## Avatars/identicon configuration
 
@@ -583,9 +555,6 @@ SERVER_NAME = 'www.data.dev'
 DEFAULT_LANGUAGE = 'fr'
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'data.dev'
-SITE_URL = 'www.data.dev'
-
-DEBUG_TOOLBAR = True
 
 FS_PREFIX = '/s'
 FS_ROOT = '/srv/http/www.data.dev/fs'

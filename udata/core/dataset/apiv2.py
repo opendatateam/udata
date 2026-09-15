@@ -8,6 +8,7 @@ from flask_restx import marshal
 
 from udata import search
 from udata.api import API, add_pagination_arguments, apiv2, fields
+from udata.auth import admin_permission
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
@@ -345,6 +346,21 @@ class DatasetAPI(API):
         return dataset
 
 
+def check_extras_are_writable(extras_field, keys) -> None:
+    """Reject a payload carrying a platform-reserved extra, never ignore it.
+
+    These endpoints write exactly the keys they are given — a partial merge for the
+    PUTs, a list of keys to drop for the DELETEs — so every key is an explicit write
+    intent. Silently dropping one would answer 200/204 to a caller whose write was
+    discarded, unlike the form path where a full-object update echoes what it read.
+    """
+    if admin_permission.can():
+        return
+    reserved = [key for key in keys if extras_field.is_reserved(key)]
+    if reserved:
+        apiv2.abort(400, f"Extras keys reserved to platform services: {', '.join(reserved)}")
+
+
 @ns.route("/<dataset:dataset>/extras/", endpoint="dataset_extras", doc=common_doc)
 @apiv2.response(400, "Wrong payload format, dict expected")
 @apiv2.response(400, "Wrong payload format, list expected")
@@ -370,6 +386,7 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
+        check_extras_are_writable(Dataset.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             dataset.extras.pop(key, None)
@@ -393,9 +410,12 @@ class DatasetExtrasAPI(API):
         data = request.json
         if not isinstance(data, list):
             apiv2.abort(400, "Wrong payload format, list expected")
+        if not all(isinstance(key, str) for key in data):
+            apiv2.abort(400, "Wrong payload format, extras keys must be strings")
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
+        check_extras_are_writable(Dataset.extras, data)
         for key in data:
             try:
                 del dataset.extras[key]
@@ -564,6 +584,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
+        check_extras_are_writable(Resource.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             resource.extras.pop(key, None)
@@ -580,10 +601,13 @@ class ResourceExtrasAPI(ResourceMixin, API):
         data = request.json
         if not isinstance(data, list):
             apiv2.abort(400, "Wrong payload format, list expected")
+        if not all(isinstance(key, str) for key in data):
+            apiv2.abort(400, "Wrong payload format, extras keys must be strings")
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
+        check_extras_are_writable(Resource.extras, data)
         try:
             for key in data:
                 del resource.extras[key]

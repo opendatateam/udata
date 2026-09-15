@@ -139,6 +139,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
             email="hello@its.me",
             contact_form="https://data.support.com",
             role="contact",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -198,6 +199,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         contact = ContactPointFactory(
             name="Publisher Contact",
             role="publisher",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -316,6 +318,14 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
         contact_rdf = service.value(DCAT.contactPoint)
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+
+    def test_ogc_lookalike_format_is_not_an_access_service(self):
+        resource = ResourceFactory(format="wmsc", url="https://example.org/wmsc/")
+        dataset = DatasetFactory(resources=[resource])
+
+        r = resource_to_rdf(resource, dataset)
+
+        assert r.value(DCAT.accessService) is None
 
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")

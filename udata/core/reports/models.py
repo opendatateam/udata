@@ -4,7 +4,7 @@ from bson import DBRef
 from flask import url_for
 from flask_login import current_user
 from flask_restx import inputs
-from mongoengine import DO_NOTHING, NULLIFY, Q, signals
+from mongoengine import NULLIFY, Q, signals
 from mongoengine.fields import (
     DateTimeField,
     DictField,
@@ -71,9 +71,7 @@ class Report(Document[ReportQuerySet]):
 
     # Here we use the lazy version of `GenericReferenceField` because we could point to a
     # non existant model (if it was deleted we want to keep the report data).
-    subject = field(
-        GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING, choices=REPORTABLE_MODELS)
-    )
+    subject = field(GenericLazyReferenceField(choices=REPORTABLE_MODELS, required=True))
 
     subject_deleted_at = field(
         DateTimeField(),

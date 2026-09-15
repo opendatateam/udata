@@ -25,7 +25,7 @@ from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
-from udata.core.checks import check_is_email, check_no_urls
+from udata.core.checks import check_is_email, check_no_urls, only_creation
 from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
@@ -132,7 +132,12 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     email = field(
         StringField(max_length=255, required=True, unique=True),
         attribute=_email_for_admin_or_self,
-        checks=[check_is_email],
+        # The address is an identity: `Organization.create_invitation` resolves one into
+        # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
+        # the `/change-email` flow carries that proof over, by mailing a token to the new
+        # address. A plain `PUT` would let anyone claim an address they cannot read, while
+        # `confirmed_at` keeps saying it was verified.
+        checks=[check_is_email, only_creation],
     )
     password = StringField()
     # Admin-only writable, handled manually in the admin endpoints.

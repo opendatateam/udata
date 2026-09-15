@@ -26,6 +26,11 @@ from udata.utils import multi_to_dict
 from .models import Site, current_site
 from .rdf import build_catalog
 
+# Left undeclared (no `@api.expect`): this parser describes the Elasticsearch filters while the
+# CSV endpoints below filter through `DatasetApiParser.parse_filters`, so publishing it would
+# document filters that do nothing and omit filters that work.
+dataset_search_parser = DatasetSearch.as_request_parser(store_missing=False)
+
 
 @api.route("/site/", endpoint="site")
 class SiteAPI(API):
@@ -96,8 +101,7 @@ class SiteDatasetsCsv(API):
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "dataset" in exported_models:
             return redirect(get_export_url("dataset"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         adapter = csv.get_adapter(Dataset)
@@ -111,8 +115,7 @@ class SiteResourcesCsv(API):
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "resource" in exported_models:
             return redirect(get_export_url("resource"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         return csv.stream(ResourcesCsvAdapter(datasets), "resources")

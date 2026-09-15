@@ -304,24 +304,22 @@ class JobsAPI(API):
         return qs.paginate(args["page"], args["page_size"])
 
 
-@ns.route("/job/<string:ident>/", endpoint="harvest_job")
+@ns.route("/job/<harvest_job_without_items:job>/", endpoint="harvest_job")
 class JobAPI(API):
     @api.doc("get_harvest_job")
     @api.marshal_with(HarvestJob.__read_fields__)
-    def get(self, ident):
+    def get(self, job: HarvestJob):
         """Get a single job given an ID"""
-        # Items are exposed as a counters link only, so don't load them.
-        return actions.get_job(ident, with_items=False)
+        return job
 
 
-@ns.route("/job/<string:ident>/items/", endpoint="harvest_job_items")
+@ns.route("/job/<harvest_job:job>/items/", endpoint="harvest_job_items")
 class JobItemsAPI(API):
     @api.doc("list_harvest_job_items")
     @api.expect(HarvestItem.__index_parser__)
     @api.marshal_with(HarvestItem.__page_fields__)
-    def get(self, ident):
+    def get(self, job: HarvestJob):
         """List the items of a given harvest job (paginated)"""
-        job = actions.get_job(ident)
         args = HarvestItem.__index_parser__.parse_args()
         # Items are embedded documents on the job, so the auto-generated
         # apply_sort_filters (which calls queryset.filter) does not apply here.

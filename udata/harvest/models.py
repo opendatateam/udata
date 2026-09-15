@@ -249,11 +249,11 @@ def check_config_matches_backend(_value, data, obj, **_kwargs):
             )
 
 
-# Both must run even when their field is absent from the payload: an update can
-# change the backend without resending the config (and the other way around),
-# and a stored backend that is no longer enabled must keep being rejected.
-check_backend_is_enabled.run_even_if_missing = True
-check_config_matches_backend.run_even_if_missing = True
+# Both must run whatever the payload does with their field: an update can change the
+# backend without resending the config (and the other way around), and a stored backend
+# that is no longer enabled must keep being rejected.
+check_backend_is_enabled.always_run = True
+check_config_matches_backend.always_run = True
 
 
 @generate_fields(searchable=True)
@@ -414,7 +414,7 @@ class HarvestJob(Document):
     items = field(
         ListField(EmbeddedDocumentField(HarvestItem)),
         readonly=True,
-        href=lambda o: url_for("api.harvest_job_items", ident=o.id),
+        href=lambda o: url_for("api.harvest_job_items", job=o.id),
         href_total=lambda o: o.items_total,
         href_extra=lambda o: {
             "by_status": o.items_by_status,

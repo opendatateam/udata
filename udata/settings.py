@@ -65,7 +65,7 @@ class Defaults(object):
     CELERY_TASK_ROUTES = "udata.tasks.router"
 
     CACHE_KEY_PREFIX = "udata-cache"
-    CACHE_TYPE = "flask_caching.backends.redis"
+    CACHE_TYPE = "flask_caching.backends.RedisCache"
 
     # Flask mail settings
 
@@ -200,7 +200,6 @@ class Defaults(object):
     SITE_KEYWORDS = ["opendata", "udata"]
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
-    SITE_GITHUB_URL = "https://github.com/etalab/udata"
 
     TERMS_OF_USE_URL = None
     TERMS_OF_USE_DELETION_ARTICLE = None
@@ -209,7 +208,6 @@ class Defaults(object):
     DATASET_HIDDEN_BADGES = []
 
     HARVESTER_BACKENDS = []
-    THEME = None
 
     STATIC_DIRS = []
 
@@ -218,7 +216,6 @@ class Defaults(object):
     API_TOKEN_SECRET = ""
 
     # OAuth 2 settings
-    OAUTH2_PROVIDER_ERROR_ENDPOINT = "oauth.oauth_error"
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,
@@ -317,9 +314,6 @@ class Defaults(object):
     #         {"value": "notspecified"}])
     # ]
     LICENSE_GROUPS = None
-
-    # Cache duration for templates.
-    TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
@@ -563,13 +557,6 @@ class Defaults(object):
     # List of allowed TLDs.
     URLS_ALLOWED_TLDS = tld_set
 
-    # Flask-CDN options
-    # See: https://github.com/libwilliam/flask-cdn#flask-cdn-options
-    # If this value is defined, toggle static assets on external domain
-    CDN_DOMAIN = None
-    # Don't check timestamp on assets (and avoid error on missing assets)
-    CDN_TIMESTAMP = False
-
     # Export CSVs of model objects as resources of a dataset
     ########################################################
     EXPORT_CSV_MODELS = (
@@ -720,9 +707,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     HARVESTER_BACKENDS = ["factory"]
-    TEST_WITH_THEME = False
-    THEME = "testing"
-    CACHE_TYPE = "flask_caching.backends.null"
+    CACHE_TYPE = "flask_caching.backends.NullCache"
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
     SERVER_NAME = "local.test"
@@ -764,5 +749,5 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
     )
-    CACHE_TYPE = "flask_caching.backends.null"
+    CACHE_TYPE = "flask_caching.backends.NullCache"
     CACHE_NO_NULL_WARNING = True

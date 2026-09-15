@@ -46,6 +46,16 @@ You can also give a user administrative privileges with:
 $ udata user set-admin <email>
 ```
 
+### Asking a user to rotate its password
+
+The user model provides a `password_rotation_demanded` field, a `DateTimeField` set to `None`
+by default. Once set to a date, the next login attempt of that user fails with an error asking
+it to change its password.
+
+When the user does so through the password recovery mechanism, `password_rotation_demanded` is
+reset to `None` and `password_rotation_performed` is set to the date of the change, for
+tracking purposes.
+
 ## Purge data flagged as deleted
 
 When users delete some data in udata,
@@ -90,16 +100,16 @@ You can list available jobs with:
 
 ```shell
 $ udata job list
-log-test
-purge-organizations
-purge-datasets
-bump-metrics
-purge-reuses
-error-test
-harvest
-send-frequency-reminder
-crawl-resources
 count-tags
+delete-expired-notifications
+export-csv
+harvest
+purge-datasets
+purge-organizations
+purge-reuses
+update-badges
+update-metrics
+…
 ```
 
 You can launch a job with:
@@ -208,7 +218,7 @@ $ udata worker status --munin -q default
 $ udata worker status --munin-config -q default
 ```
 
-[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata
+[munin-plugin]: https://github.com/datagouv/munin-plugins/tree/master/udata
 
 
 ## Cache

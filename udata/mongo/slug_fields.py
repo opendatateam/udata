@@ -126,6 +126,30 @@ class SlugFollow(UDataDocument):
     }
 
 
+def conflicting_slug_fields(instance, error):
+    """
+    The slug fields whose unique index rejected a save with the given NotUniqueError.
+
+    MongoEngine replaces pymongo's DuplicateKeyError by its own exception, but Python
+    keeps the original as the exception context, and it names the offending index keys.
+    """
+    duplicate_key_error = error.__cause__ or error.__context__
+    key_pattern = (getattr(duplicate_key_error, "details", None) or {}).get("keyPattern") or {}
+    return [
+        field
+        for field in instance._fields.values()
+        if isinstance(field, SlugField) and field.populate_from and field.db_field in key_pattern
+    ]
+
+
+def reset_slug(instance, field):
+    """
+    Reset a slug to the plain slugified source value, dropping any uniqueness suffix,
+    so that the next `populate_slug` looks for a free suffix again.
+    """
+    setattr(instance, field.db_field, field.slugify(getattr(instance, field.populate_from)))
+
+
 def populate_slug(instance, field):
     """
     Populate a slug field if needed.

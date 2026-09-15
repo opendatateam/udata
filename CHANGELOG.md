@@ -1,5 +1,70 @@
 # Changelog
 
+## 17.8.0 (2026-09-15)
+
+- chore(CI): remove trigger gitlab ([#3951](https://github.com/opendatateam/udata/pull/3951))
+- feat: add or to chart filters ([#3938](https://github.com/opendatateam/udata/pull/3938))
+- feat: expose a description for each organization role ([#3937](https://github.com/opendatateam/udata/pull/3937))
+- fix: 500 on discussions listing when the subject is a post ([#3945](https://github.com/opendatateam/udata/pull/3945))
+- fix: add contact point unique index ([#3942](https://github.com/opendatateam/udata/pull/3942))
+- fix: dataservice serves dataset by uri ([#3949](https://github.com/opendatateam/udata/pull/3949))
+- fix: document the request payloads and https scheme missing from the OpenAPI specs ([#3946](https://github.com/opendatateam/udata/pull/3946))
+- fix(edito): make the title optional on list blocs ([#3941](https://github.com/opendatateam/udata/pull/3941))
+- fix: keep harvest purge cursors alive while archiving ([#3944](https://github.com/opendatateam/udata/pull/3944))
+- fix: pull MinIO image from quay.io, it is gone from Docker Hub ([#3947](https://github.com/opendatateam/udata/pull/3947))
+- fix: run field checks on creation even when the value equals the field default ([#3929](https://github.com/opendatateam/udata/pull/3929))
+
+
+## 17.7.2 (2026-09-11)
+
+- fix: MAAF XML parser ([#3943](https://github.com/opendatateam/udata/pull/3943))
+
+
+## 17.7.1 (2026-09-11)
+
+- fix: merge the contact points the empty value normalization made identical ([#3940](https://github.com/opendatateam/udata/pull/3940))
+- fix: reject invalid or out-of-bounds image crop boxes instead of 500ing ([#3925](https://github.com/opendatateam/udata/pull/3925))
+- fix: return a 404 instead of a 500 for an unknown harvest job ([#3926](https://github.com/opendatateam/udata/pull/3926))
+
+
+## 17.7.0 (2026-09-09)
+
+- **chore!: upgrade flask-storage to 2.0.1 ([#3920](https://github.com/opendatateam/udata/pull/3920))**
+- chore(deps): update dependency faker to >=40.38, <40.39 ([#3916](https://github.com/opendatateam/udata/pull/3916))
+- chore: remove unused flask-cdn dependency and its CDN settings ([#3909](https://github.com/opendatateam/udata/pull/3909))
+- chore: support Flask-Caching 2.5.0 ([#3921](https://github.com/opendatateam/udata/pull/3921))
+- docs: drop the dead Docker install path and fix the local setup instructions ([#3919](https://github.com/opendatateam/udata/pull/3919))
+- fix(discussion): fix integrity on organization reference ([#3923](https://github.com/opendatateam/udata/pull/3923))
+- fix: enforce contact point ownership on the model and carry them over on transfer ([#3905](https://github.com/opendatateam/udata/pull/3905))
+- fix: handle HEAD requests on the OAuth authorize endpoint ([#3917](https://github.com/opendatateam/udata/pull/3917))
+- fix: incorrect use of str.strip instead of str.removeprefix ([#3915](https://github.com/opendatateam/udata/pull/3915))
+- fix: make db migrate exit with an error when a migration fails ([#3934](https://github.com/opendatateam/udata/pull/3934))
+- fix: make the contact point name optional instead of an empty string ([#3914](https://github.com/opendatateam/udata/pull/3914))
+- fix: reject email updates outside the /change-email confirmation flow ([#3931](https://github.com/opendatateam/udata/pull/3931))
+- fix: reject mongo operators and out-of-choices classes in API references instead of querying with them ([#3912](https://github.com/opendatateam/udata/pull/3912))
+- fix: remote id backfill crashing on datasets without a resources field ([#3933](https://github.com/opendatateam/udata/pull/3933))
+- fix: require a subject on reports instead of crashing while marshalling a subject-less one ([#3911](https://github.com/opendatateam/udata/pull/3911))
+- fix: reserved extras and url validation ([#3918](https://github.com/opendatateam/udata/pull/3918))
+- fix: retry save when a concurrent writer takes the computed slug ([#3928](https://github.com/opendatateam/udata/pull/3928))
+- fix: return 400 instead of 500 on malformed ids in filters and oauth client_id ([#3906](https://github.com/opendatateam/udata/pull/3906))
+- fix(spatial): return 404 instead of 500 for unknown zone ids ([#3903](https://github.com/opendatateam/udata/pull/3903))
+- fix: tests relying on the contact point name being required ([#3924](https://github.com/opendatateam/udata/pull/3924))
+- fix: validate uploaded image content instead of the client-declared mimetype ([#3910](https://github.com/opendatateam/udata/pull/3910))
+
+
+## 17.6.0 (2026-08-20)
+
+- chore: bump flask-storage to 2.0.0 to stream uploads to their storage ([#3907](https://github.com/opendatateam/udata/pull/3907))
+- fix: derive upload metadata from the stream instead of the storage backend ([#3896](https://github.com/opendatateam/udata/pull/3896))
+- fix: stream chunked uploads to their storage instead of buffering them ([#3895](https://github.com/opendatateam/udata/pull/3895))
+
+
+## 17.5.0 (2026-08-19)
+
+- feat(topics): add lookup by element id/class ([#3898](https://github.com/opendatateam/udata/pull/3898))
+- fix(harvest): stop adopting CKAN remote ids as resource ids ([#3904](https://github.com/opendatateam/udata/pull/3904))
+
+
 ## 17.4.0 (2026-08-17)
 
 - feat: migrate discussion api fields ([#3775](https://github.com/opendatateam/udata/pull/3775))

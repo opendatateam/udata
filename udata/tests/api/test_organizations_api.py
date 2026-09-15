@@ -97,6 +97,24 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.org_roles"))
         assert200(response)
 
+        assert response.json == [
+            {
+                "id": "admin",
+                "label": "Administrateur",
+                "description": "Peut gérer l'organisation, les membres et tous les contenus.",
+            },
+            {
+                "id": "editor",
+                "label": "Éditeur",
+                "description": "Peut créer et modifier tous les contenus de l'organisation.",
+            },
+            {
+                "id": "partial_editor",
+                "label": "Éditeur partiel",
+                "description": "Peut créer des contenus et modifier seulement certains contenus.",
+            },
+        ]
+
     def test_organization_api_get(self):
         """It should fetch an organization from the API"""
         organization = OrganizationFactory()
@@ -636,6 +654,21 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         response = self.post(url_for("api.request_membership", org=organization), {})
         assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_request_membership_with_an_empty_comment(self):
+        """An empty comment is no comment: it must be rejected like an absent one,
+        otherwise the request is created and the notification mail crashes on it."""
+        organization = OrganizationFactory()
+        self.login()
+
+        for comment in ["", "   "]:
+            response = self.post(
+                url_for("api.request_membership", org=organization), {"comment": comment}
+            )
+            assert400(response)
 
         organization.reload()
         assert len(organization.requests) == 0

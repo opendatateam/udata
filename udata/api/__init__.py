@@ -181,6 +181,19 @@ class UDataApi(Api):
     def page_parser(self) -> RequestParser:
         return add_pagination_arguments(self.parser())
 
+    @property
+    def __schema__(self) -> dict:
+        """Add the `schemes` flask-restx never emits to the generated specifications.
+
+        Swagger 2.0 falls back to the scheme the specifications were served with when
+        `schemes` is missing, but documentation renderers and generated clients default
+        to `http` instead. The API only answers in HTTPS: a plain HTTP call is answered
+        with a redirection, which turns a documented POST into a bodyless GET.
+        """
+        schema = super().__schema__
+        schema["schemes"] = ["https"]
+        return schema
+
 
 api = UDataApi(
     apiv1_blueprint,
