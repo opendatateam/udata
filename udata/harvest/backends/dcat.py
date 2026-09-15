@@ -80,20 +80,18 @@ class DcatBackend(BaseBackend):
     @override
     def inner_harvest(self):
         self.job.data = {"format": self.format}
+        try:
+            for page_graph, page_number in self.walk_paginated_graph(self.source.url):
+                self.process_one_datasets_page(page_graph, page_number)
+                self.graphs.append((page_graph, page_number))
 
-        for page_graph, page_number in self.walk_paginated_graph(self.source.url):
-            self.process_one_datasets_page(page_graph, page_number)
-            self.graphs.append((page_graph, page_number))
-
-        # We do a second pass to have all datasets in memory and attach datasets
-        # to dataservices. It could be better to be one pass of graph walking and
-        # then one pass of attaching datasets to dataservices.
-        for page_graph, page_number in self.graphs:
-            self.process_one_dataservices_page(page_graph, page_number)
-
-    @override
-    def inner_end_job(self):
-        self.store_graphs()
+            # We do a second pass to have all datasets in memory and attach datasets
+            # to dataservices. It could be better to be one pass of graph walking and
+            # then one pass of attaching datasets to dataservices.
+            for page_graph, page_number in self.graphs:
+                self.process_one_dataservices_page(page_graph, page_number)
+        finally:
+            self.store_graphs()
 
     @cached_property
     def format(self) -> str:

@@ -629,6 +629,44 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 assert item.status == "failed"
                 assert getattr(backend1.source, owner_param).page() in item.errors[0].message
 
+    @pytest.mark.parametrize(
+        "max_items, n_dataset, n_dataservice",
+        [(2, 2, 0), (3, 3, 0), (4, 3, 1)],
+    )
+    def test_max_items(self, max_items, n_dataset, n_dataservice):
+        source = HarvestSourceFactory(
+            config={
+                "dataset_remote_ids": gen_remote_IDs(3, "dataset-"),
+                "dataservice_remote_ids": gen_remote_IDs(3, "dataservice-"),
+            }
+        )
+        backend = FakeBackend(source, max_items=max_items)
+
+        job = backend.harvest()
+
+        assert job.status == "done"
+        assert len(job.items) == max_items
+        assert len(job.errors) == 1
+        assert job.errors[0].message.startswith(f"{max_items} max items reached")
+        assert Dataset.objects.count() == n_dataset
+        assert Dataservice.objects.count() == n_dataservice
+
+    def test_max_items_preview(self):
+        source = HarvestSourceFactory(
+            config={
+                "dataset_remote_ids": gen_remote_IDs(3, "dataset-"),
+                "dataservice_remote_ids": gen_remote_IDs(3, "dataservice-"),
+            }
+        )
+        backend = FakeBackend(source, dryrun=True, max_items=2)
+
+        job = backend.harvest()
+
+        assert job.status == "done"
+        assert len(job.items) == 2
+        # we don't log the max_items error in dryrun
+        assert len(job.errors) == 0
+
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
     @pytest.fixture

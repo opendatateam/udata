@@ -31,7 +31,7 @@ class HarvestMetadata(EmbeddedDocument):
         description="Date of last modification as provided by the harvested catalog",
     )
 
-    last_update = field(DateTimeField(), description="The dataset last harvest date")
+    last_update = field(DateTimeField(), description="Date of last harvest")
 
     archived_at = field(DateTimeField())
     archived_reason = field(StringField())

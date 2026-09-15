@@ -136,6 +136,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.tags == ["tag-1", "tag-2"]
         assert len(dataset.resources) == 1
 
+        assert job.data["graphs"] is not None
+
     def test_flat_with_blank_nodes(self, rmock):
         filename = "bnodes.jsonld"
         url = mock_dcat(rmock, filename)
@@ -421,8 +423,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         actions.run(source)
 
+        job = source.get_last_job()
+        assert job.status == "done"
+        assert len(job.items) == 2
+        assert job.data["graphs"] is not None
         assert Dataset.objects.count() == 2
-        assert HarvestJob.objects.first().status == "done"
 
     def test_harvest_spatial(self, rmock):
         filename = "bnodes.xml"

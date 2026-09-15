@@ -641,7 +641,11 @@ class Dataset(
         ),
         auditable=False,
     )
-    harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
+    harvest = field(
+        EmbeddedDocumentField(HarvestDatasetMetadata),
+        readonly=True,
+        auditable=False,
+    )
 
     quality_cached = field(DictField(), auditable=False)
 

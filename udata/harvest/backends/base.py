@@ -223,10 +223,11 @@ class BaseBackend(ABC):
             try:
                 self.inner_harvest()
             except StopHarvest:
-                error = HarvestError(
-                    message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
-                )
-                self.job.errors.append(error)
+                if not self.dryrun:
+                    error = HarvestError(
+                        message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
+                    )
+                    self.job.errors.append(error)
 
             if self.source.autoarchive:
                 self.autoarchive()
@@ -346,14 +347,15 @@ class BaseBackend(ABC):
             current_app.logger.removeHandler(log_catcher)
             self.end_process_item(harvest_item, log_catcher.records)
 
+        if self.max_items and len(self.job.items) >= self.max_items:
+            raise StopHarvest()
+
     def end_process_item(self, harvest_item: HarvestItem, logs: list[logging.LogRecord]):
         harvest_item.ended = datetime.now(UTC)
         harvest_item.logs = [
-            HarvestLog(level=log.levelname, message=log.getMessage()) for log in logs
+            HarvestLog(level=record.levelname, message=record.getMessage()) for record in logs
         ]
         self.save_job()
-        if self.max_items and len(self.job.items) >= self.max_items:
-            raise StopHarvest()
 
     def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:
@@ -381,29 +383,22 @@ class BaseBackend(ABC):
         return harvest_item
 
     def save_job(self):
-        if not self.dryrun:
-            self.job.save()
+        if self.dryrun:
+            return
+        self.job.save()
 
     def end_job(self):
-        self.inner_end_job()
         self.update_harvested_organizations()
         self.job.ended = datetime.now(UTC)
-        if not self.dryrun:
-            self.job.save()
+        self.save_job()
         after_harvest_job.send(self)
         # Clean harvest_activity_user on global context
         if hasattr(g, "harvest_activity_user"):
             delattr(g, "harvest_activity_user")
 
-    def inner_end_job(self):
-        """
-        Called by the driver at the end of a job, right before the job is marked as completed.
-
-        Backend implementations can safely override this method to perform finishing operations.
-        """
-        pass
-
     def update_harvested_organizations(self):
+        if self.dryrun:
+            return
         for org in self.organizations_to_update:
             org.compute_aggregate_metrics = True
             org.count_datasets()

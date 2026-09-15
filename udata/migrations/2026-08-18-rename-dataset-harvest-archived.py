@@ -1,5 +1,5 @@
 """
-Rename Dataset.harvest.archived to Dataset.harvest.archived_at.
+Rename Dataset.harvest.archived to Dataset.harvest.archived_reason.
 """
 
 import logging
