@@ -318,7 +318,6 @@ class BaseBackend(ABC):
             else:
                 item.save()
 
-            # FIXME: consolidate to a single field?
             if isinstance(item, Dataset):
                 harvest_item.dataset = item
             elif isinstance(item, Dataservice):
@@ -433,7 +432,7 @@ class BaseBackend(ABC):
                 HarvestItem(
                     **{
                         "remote_id": str(obj.harvest.remote_id),
-                        key: obj,  # FIXME: consolidate?
+                        key: obj,
                         "status": "archived",
                     }
                 )

@@ -38,7 +38,6 @@ schema_fields = api.model(
     },
 )
 
-# FIXME: do we need this with @generate_fields?
 dataset_harvest_fields = api.model(
     "HarvestDatasetMetadata",
     {
