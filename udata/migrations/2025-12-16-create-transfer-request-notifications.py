@@ -6,6 +6,7 @@ import logging
 
 import click
 
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.features.transfer.models import Transfer
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
@@ -48,7 +49,9 @@ def migrate(db):
                             details__transfer_subject=transfer.subject,
                         ).first()
                         if not existing:
-                            notification = Notification(user=recipient_user)
+                            notification = Notification(
+                                user=recipient_user, type=NotificationType.TRANSFER_REQUESTED
+                            )
                             notification.details = TransferRequestNotificationDetails(
                                 transfer_owner=transfer.owner,
                                 transfer_recipient=recipient,
