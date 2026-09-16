@@ -1010,7 +1010,7 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
             archived_at=datetime.now(UTC),
-            archived="not-on-remote",
+            archived_reason="not-on-remote",
         )
         dataset.harvest = harvest_metadata
         dataset.save()

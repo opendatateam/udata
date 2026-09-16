@@ -119,7 +119,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
-            assert d.harvest.archived is None
+            assert d.harvest.archived_reason is None
 
         # First dataset
         dataset = datasets["1"]
@@ -135,6 +135,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         dataset = datasets["3"]
         assert dataset.tags == ["tag-1", "tag-2"]
         assert len(dataset.resources) == 1
+
+        assert job.data["graphs"] is not None
 
     def test_flat_with_blank_nodes(self, rmock):
         filename = "bnodes.jsonld"
@@ -421,8 +423,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         actions.run(source)
 
+        job = source.get_last_job()
+        assert job.status == "done"
+        assert len(job.items) == 2
+        assert job.data["graphs"] is not None
         assert Dataset.objects.count() == 2
-        assert HarvestJob.objects.first().status == "done"
 
     def test_harvest_spatial(self, rmock):
         filename = "bnodes.xml"

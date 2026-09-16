@@ -591,7 +591,6 @@ class Organization(
             self.metrics["datasets_reuses_by_months"] = get_stock_metrics(
                 Reuse.objects(datasets__in=Dataset.objects(organization=self)).visible()
             )
-
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
@@ -610,9 +609,10 @@ class Organization(
         from udata.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
-        self.metrics["dataservices_by_months"] = get_stock_metrics(
-            Dataservice.objects(organization=self).visible(), date_label="created_at"
-        )
+        if self.compute_aggregate_metrics:
+            self.metrics["dataservices_by_months"] = get_stock_metrics(
+                Dataservice.objects(organization=self).visible(), date_label="created_at"
+            )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

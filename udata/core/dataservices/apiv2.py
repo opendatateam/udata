@@ -1,7 +1,7 @@
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.access_type.models import AccessAudience
-from udata.core.dataservices.models import Dataservice, HarvestMetadata
+from udata.core.dataservices.models import Dataservice, HarvestDataserviceMetadata
 
 from .models import dataservice_permissions_fields
 from .search import DataserviceSearch
@@ -10,7 +10,7 @@ apiv2.inherit("DataservicePermissions", dataservice_permissions_fields)
 apiv2.inherit("DataservicePage", Dataservice.__page_fields__)
 apiv2.inherit("Dataservice (read)", Dataservice.__read_fields__)
 apiv2.inherit("DataserviceReference", Dataservice.__ref_fields__)
-apiv2.inherit("HarvestMetadata (read)", HarvestMetadata.__read_fields__)
+apiv2.inherit("HarvestDataserviceMetadata (read)", HarvestDataserviceMetadata.__read_fields__)
 apiv2.inherit("AccessAudience (read)", AccessAudience.__read_fields__)
 dataservice_search_page_fields = apiv2.model(
     "DataserviceSearchPage", fields.search_pager(Dataservice.__read_fields__)
