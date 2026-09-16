@@ -657,7 +657,7 @@ class Defaults(object):
     ###########################################################################
     DOI_PREFIX = None
     DOI_REPO_USER = None
-    DOI_REPO_PWD = None
+    DOI_REPO_PASSWORD = None
     DOI_PLATFORM_URI = None
 
     # Tabular API Dataservice ID

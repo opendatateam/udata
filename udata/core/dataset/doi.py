@@ -20,13 +20,13 @@ def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str, str]:
     if not (
         current_app.config["DOI_PREFIX"]
         and current_app.config["DOI_REPO_USER"]
-        and current_app.config["DOI_REPO_PWD"]
+        and current_app.config["DOI_REPO_PASSWORD"]
         and current_app.config["DOI_PLATFORM_URI"]
     ):
         raise ValueError("DOI config is not properly set up")
     auth = HTTPBasicAuth(
         current_app.config["DOI_REPO_USER"],
-        current_app.config["DOI_REPO_PWD"],
+        current_app.config["DOI_REPO_PASSWORD"],
     )
     doi = f"{current_app.config['DOI_PREFIX']}/{dataset.id}"
     return auth, current_app.config["DOI_PLATFORM_URI"], doi
@@ -38,53 +38,49 @@ def _doi_metadata(dataset: Dataset) -> dict:
         "titles": [{"title": dataset.title}],
         "publisher": dataset.organization.name,
         "publicationYear": dataset.created_at.strftime("%Y"),
-        "url": dataset.url_for(),
+        # The slug follows the title and can even be taken over by another dataset, so the
+        # DOI records the permalink instead.
+        "url": dataset.url_for(_useId=True),
     }
 
 
-def create_doi(dataset: Dataset) -> str:
-    auth, platform_uri, doi = _doi_request_context(dataset)
-    payload = {
-        "data": {
-            "type": "dois",
-            "attributes": {
-                "event": "publish",
-                "doi": doi,
-                "creators": [{"name": "data.gouv.fr"}],
-                "types": {"resourceTypeGeneral": "Dataset"},
-                **_doi_metadata(dataset),
-            },
-        },
-    }
-    r = requests.post(
-        f"{platform_uri}/dois",
-        headers=DOI_HEADERS,
-        auth=auth,
-        json=payload,
-        timeout=DOI_REQUEST_TIMEOUT,
-    )
-    # We post a deterministic DOI (prefix/dataset.id), so DataCite answers 422
-    # "This DOI has already been taken" when it already exists: treat it as a success
-    # to keep the creation idempotent.
-    if r.status_code not in {201, 422}:
-        r.raise_for_status()
-    return doi
+def _put_doi(auth: HTTPBasicAuth, platform_uri: str, doi: str, attributes: dict) -> str:
+    """Send `attributes` to DataCite.
 
-
-def update_doi(dataset: Dataset) -> str:
-    auth, platform_uri, doi = _doi_request_context(dataset)
-    payload = {
-        "data": {
-            "type": "dois",
-            "attributes": _doi_metadata(dataset),
-        },
-    }
+    PUT upserts, unlike POST which rejects an existing DOI. Since our DOI is deterministic
+    (prefix/dataset.id), minting it again is a normal case rather than an error to catch.
+    """
     r = requests.put(
         f"{platform_uri}/dois/{doi}",
         headers=DOI_HEADERS,
         auth=auth,
-        json=payload,
+        json={"data": {"type": "dois", "attributes": attributes}},
         timeout=DOI_REQUEST_TIMEOUT,
     )
     r.raise_for_status()
     return doi
+
+
+def create_doi(dataset: Dataset) -> str:
+    auth, platform_uri, doi = _doi_request_context(dataset)
+    # Publishing is irreversible and the DOI has to resolve, unlike `update_doi` which must
+    # keep working once the dataset is archived.
+    if dataset.is_hidden:
+        raise ValueError("Can only reference a public dataset")
+    return _put_doi(
+        auth,
+        platform_uri,
+        doi,
+        {
+            "event": "publish",
+            "doi": doi,
+            "creators": [{"name": current_app.config["SITE_TITLE"]}],
+            "types": {"resourceTypeGeneral": "Dataset"},
+            **_doi_metadata(dataset),
+        },
+    )
+
+
+def update_doi(dataset: Dataset) -> str:
+    auth, platform_uri, doi = _doi_request_context(dataset)
+    return _put_doi(auth, platform_uri, doi, _doi_metadata(dataset))
