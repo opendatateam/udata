@@ -13,8 +13,8 @@ DOI_HEADERS = {
 }
 
 
-def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str, str]:
-    """Validate the dataset and DOI config, returning the auth, platform URI and DOI."""
+def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str]:
+    """Validate the dataset and DOI config, returning the auth and platform URI."""
     if not dataset.organization:
         raise ValueError("Can only reference a dataset created by an organization")
     if not (
@@ -28,8 +28,7 @@ def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str, str]:
         current_app.config["DOI_REPO_USER"],
         current_app.config["DOI_REPO_PASSWORD"],
     )
-    doi = f"{current_app.config['DOI_PREFIX']}/{dataset.id}"
-    return auth, current_app.config["DOI_PLATFORM_URI"], doi
+    return auth, current_app.config["DOI_PLATFORM_URI"]
 
 
 def _doi_metadata(dataset: Dataset) -> dict:
@@ -62,11 +61,14 @@ def _put_doi(auth: HTTPBasicAuth, platform_uri: str, doi: str, attributes: dict)
 
 
 def create_doi(dataset: Dataset) -> str:
-    auth, platform_uri, doi = _doi_request_context(dataset)
+    auth, platform_uri = _doi_request_context(dataset)
     # Publishing is irreversible and the DOI has to resolve, unlike `update_doi` which must
     # keep working once the dataset is archived.
     if dataset.is_hidden:
         raise ValueError("Can only reference a public dataset")
+    # The only place a DOI string is built. Everywhere else `dataset.doi` is the truth, so a
+    # change of prefix never makes us write to a DOI we did not mint.
+    doi = f"{current_app.config['DOI_PREFIX']}/{dataset.id}"
     return _put_doi(
         auth,
         platform_uri,
@@ -82,5 +84,7 @@ def create_doi(dataset: Dataset) -> str:
 
 
 def update_doi(dataset: Dataset) -> str:
-    auth, platform_uri, doi = _doi_request_context(dataset)
-    return _put_doi(auth, platform_uri, doi, _doi_metadata(dataset))
+    auth, platform_uri = _doi_request_context(dataset)
+    if not dataset.doi:
+        raise ValueError("Can only update a dataset that has a DOI")
+    return _put_doi(auth, platform_uri, dataset.doi, _doi_metadata(dataset))

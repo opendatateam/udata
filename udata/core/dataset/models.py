@@ -691,6 +691,13 @@ class Dataset(
     )
     deleted = field(DateTimeField(), auditable=False)
     archived = field(DateTimeField())
+    doi = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The DOI minted for this dataset, set by the DOI endpoint. A dataset that "
+        "has one can no longer be deleted, only archived.",
+    )
 
     def __str__(self):
         return self.title or ""

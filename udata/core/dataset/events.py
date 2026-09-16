@@ -5,10 +5,15 @@ from typing import Any
 import requests
 from flask import current_app
 
+from udata.core.dataset.doi import update_doi
 from udata.event.values import EventMessageType
 from udata.models import Dataset
 from udata.tasks import task
 from udata.utils import get_by, to_iso_datetime
+
+# The mutable parts of the DataCite payload. The recorded URL is a permalink and
+# `publicationYear` derives from non-auditable fields, so neither can change here.
+DOI_METADATA_FIELDS = {"title", "organization"}
 
 
 def serialize_resource_for_event(resource):
@@ -67,6 +72,22 @@ def publish(url: str, document: Any, resource_id: str, action: str) -> None:
         headers = {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
     r = method(url, json=payload, headers=headers)
     r.raise_for_status()
+
+
+@task(route="high.dataset")
+def push_doi_metadata(dataset_id: str) -> None:
+    dataset = Dataset.objects(id=dataset_id).first()
+    if dataset and dataset.doi:
+        update_doi(dataset)
+
+
+@Dataset.on_update.connect
+def update_doi_on_metadata_change(dataset, **kwargs) -> None:
+    """Keep DataCite in sync with the metadata it records for an already minted DOI."""
+    if not dataset.doi:
+        return
+    if DOI_METADATA_FIELDS.intersection(kwargs.get("changed_fields", [])):
+        push_doi_metadata.delay(str(dataset.id))
 
 
 @Dataset.on_resource_added.connect
