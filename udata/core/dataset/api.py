@@ -65,6 +65,7 @@ from .api_fields import (
     upload_fields,
 )
 from .constants import RESOURCE_TYPES, UpdateFrequency
+from .doi import create_doi
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -454,12 +455,34 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
+        if dataset.doi:
+            # A DOI is permanent and has to keep resolving, so the dataset page must survive.
+            api.abort(409, "Dataset has a DOI and can only be archived, not deleted")
         send_legal_notice_on_deletion(dataset, args)
 
         dataset.deleted = datetime.now(UTC)
         dataset.last_modified_internal = datetime.now(UTC)
         dataset.save()
         return "", 204
+
+
+@ns.route("/<dataset:dataset>/doi", endpoint="dataset_doi")
+@api.doc(**common_doc)
+class DatasetDoiAPI(API):
+    @api.secure(admin_permission)
+    @api.doc("mint_dataset_doi")
+    @api.response(409, "Dataset already has a DOI")
+    @api.marshal_with(dataset_fields)
+    def post(self, dataset):
+        """Mint a DOI for the dataset and attach it"""
+        if dataset.doi:
+            api.abort(409, "Dataset already has a DOI")
+        try:
+            dataset.doi = create_doi(dataset)
+        except ValueError as e:
+            api.abort(400, str(e))
+        dataset.save()
+        return dataset
 
 
 @ns.route("/<dataset:dataset>/featured/", endpoint="dataset_featured")

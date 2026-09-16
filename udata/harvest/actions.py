@@ -84,7 +84,11 @@ def clean_source(source: HarvestSource):
     for dataset in datasets:
         if dataset.organization:
             organizations.add(dataset.organization)
-        dataset.deleted = datetime.now(UTC)
+        if dataset.doi:
+            # Its DOI has to keep resolving, so this one is archived instead of deleted.
+            dataset.archived = datetime.now(UTC)
+        else:
+            dataset.deleted = datetime.now(UTC)
         dataset.save(signal_kwargs={"ignores": ["metrics"]})
     for org in organizations:
         org.count_datasets()
