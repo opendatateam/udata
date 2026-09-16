@@ -225,6 +225,17 @@ class DoiAPITest(PytestOnlyAPITestCase):
         assert dataset.doi is None
         assert not datacite.dois
 
+    @pytest.mark.parametrize("endpoint", ["api.dataset", "apiv2.dataset"])
+    def test_doi_is_exposed_on_both_apis(self, datacite, endpoint):
+        # The front reads the v2 payload, so a field missing there is a field that does not
+        # exist as far as the citation block is concerned.
+        dataset = DatasetFactory(organization=OrganizationFactory(), doi=f"{PREFIX}/minted")
+
+        response = self.get(url_for(endpoint, dataset=dataset))
+
+        self.assert200(response)
+        assert response.json["doi"] == f"{PREFIX}/minted"
+
     def test_dataset_with_a_doi_cannot_be_deleted(self):
         user = self.login()
         dataset = DatasetFactory(owner=user, doi=f"{PREFIX}/minted")
