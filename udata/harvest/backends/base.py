@@ -362,7 +362,7 @@ class BaseBackend(ABC):
         self.remote_ids.add(harvest_item.remote_id)
 
     def update_harvest_metadata(self, metadata: HarvestMetadata, remote_id: str) -> HarvestMetadata:
-        metadata.backend = self.display_name or "unknown"
+        metadata.backend = self.display_name
         metadata.domain = self.source.domain
         metadata.source_id = str(self.source.id)
         metadata.source_url = str(self.source.url)
