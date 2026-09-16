@@ -31,6 +31,12 @@ def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str]:
     return auth, current_app.config["DOI_PLATFORM_URI"]
 
 
+#: The dataset fields `_doi_metadata` reads and that a user can change. Lives here so that
+#: adding an attribute below is not silently forgotten by the watcher that pushes updates.
+#: `url` is a permalink and `publicationYear` derives from non-auditable fields.
+DOI_METADATA_FIELDS = {"title", "organization"}
+
+
 def _doi_metadata(dataset: Dataset) -> dict:
     """The DOI attributes shared between creation and update."""
     return {

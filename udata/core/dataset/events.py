@@ -5,15 +5,11 @@ from typing import Any
 import requests
 from flask import current_app
 
-from udata.core.dataset.doi import update_doi
+from udata.core.dataset.doi import DOI_METADATA_FIELDS, update_doi
 from udata.event.values import EventMessageType
-from udata.models import Dataset
+from udata.models import Dataset, Organization
 from udata.tasks import task
 from udata.utils import get_by, to_iso_datetime
-
-# The mutable parts of the DataCite payload. The recorded URL is a permalink and
-# `publicationYear` derives from non-auditable fields, so neither can change here.
-DOI_METADATA_FIELDS = {"title", "organization"}
 
 
 def serialize_resource_for_event(resource):
@@ -74,19 +70,37 @@ def publish(url: str, document: Any, resource_id: str, action: str) -> None:
     r.raise_for_status()
 
 
+# These handlers live here rather than next to `create_doi` because `udata.event` is imported
+# by `search.init_app`, hence by every process. `udata.core.dataset.api`, which is what pulls
+# `doi.py` in, is only loaded by `standalone()`: moving them would silence the sync in workers,
+# where the harvester updates datasets in bulk.
 @task(route="high.dataset")
 def push_doi_metadata(dataset_id: str) -> None:
     dataset = Dataset.objects(id=dataset_id).first()
-    if dataset and dataset.doi:
+    # An organization can be dropped after the DOI was minted (transfer to a user, organization
+    # deletion). DataCite then keeps the publisher it was given, which is the one that was true
+    # when the DOI was minted.
+    if dataset and dataset.doi and dataset.organization:
         update_doi(dataset)
 
 
 @Dataset.on_update.connect
 def update_doi_on_metadata_change(dataset, **kwargs) -> None:
     """Keep DataCite in sync with the metadata it records for an already minted DOI."""
-    if not dataset.doi:
+    if dataset.doi and DOI_METADATA_FIELDS.intersection(kwargs.get("changed_fields", [])):
+        push_doi_metadata.delay(str(dataset.id))
+
+
+@Organization.on_update.connect
+def update_doi_on_organization_rename(organization, **kwargs) -> None:
+    """Renaming an organization changes the DataCite publisher of every DOI it produced.
+
+    Saving an organization emits no `Dataset.on_update`, so the dataset watcher above cannot
+    see this one.
+    """
+    if "name" not in kwargs.get("changed_fields", []):
         return
-    if DOI_METADATA_FIELDS.intersection(kwargs.get("changed_fields", [])):
+    for dataset in Dataset.objects(organization=organization, doi__ne=None).only("id"):
         push_doi_metadata.delay(str(dataset.id))
 
 

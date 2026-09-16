@@ -22,9 +22,6 @@ class DataCiteFake:
         """Make every subsequent call answer `status_code`, as an unreachable or upset API would."""
         self._failure = status_code
 
-    def attributes_of(self, doi: str) -> dict:
-        return self.dois[doi]
-
     def handle_put(self, request, context) -> dict:
         if self._failure:
             context.status_code = self._failure
@@ -32,7 +29,7 @@ class DataCiteFake:
 
         doi = request.path.removeprefix("/dois/")
         attributes = request.json()["data"]["attributes"]
-        self.requests.append({"doi": doi, "attributes": attributes})
+        self.requests.append(attributes)
 
         context.status_code = 200 if doi in self.dois else 201
         record = self.dois.setdefault(doi, {"state": "draft"})
