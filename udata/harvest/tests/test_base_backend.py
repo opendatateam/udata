@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import TypeVar
 from urllib.parse import urlparse
 
 import pytest
@@ -13,7 +15,8 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.harvest.models import HarvestItem
+from udata.harvest.exceptions import HarvestSkipException, HarvestValidationError
+from udata.harvest.models import Harvestable, HarvestItem
 from udata.ssrf import BlockedAddressError
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
@@ -34,9 +37,19 @@ class Unknown:
     pass
 
 
-def gen_remote_IDs(num: int, prefix: str = "") -> list[str]:
-    """Generate remote IDs."""
-    return [f"{prefix}fake-{i}" for i in range(num)]
+@dataclass(frozen=True)
+class FakeRecord:
+    item_type: type[Harvestable]
+    remote_id: str | None
+    item_processor_exception: Exception | None = None
+    inner_harvest_exception: Exception | None = None
+
+    @staticmethod
+    def create(item_type: type[Harvestable], num: int) -> list["FakeRecord"]:
+        return [FakeRecord(item_type, f"{item_type.__name__.lower()}-{i}") for i in range(num)]
+
+
+H = TypeVar("H", bound=Harvestable)
 
 
 class FakeBackend(BaseBackend):
@@ -55,32 +68,45 @@ class FakeBackend(BaseBackend):
         HarvestExtraConfig("Test Str", "test_str", str),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fake_records = list[FakeRecord]()
+        self.fake_last_modified: datetime | None = None
+
     @override
     def inner_harvest(self):
-        for remote_id in self.source.config.get("dataset_remote_ids", []):
-            self.process_item(remote_id, self.process_dataset)
+        self._fake_records_by_ids = {
+            r.remote_id: r for r in self.fake_records if r.remote_id is not None
+        }
 
-        for remote_id in self.source.config.get("dataservice_remote_ids", []):
-            self.process_item(remote_id, self.process_dataservice)
+        for record in self.fake_records:
+            if exc := record.inner_harvest_exception:
+                raise exc
+            processor = getattr(self, f"process_{record.item_type.__name__.lower()}")
+            self.process_item(record.remote_id, processor)
 
     def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
-        item = self.get_item(harvest_item.remote_id, Dataset)
         fields = DatasetFactory.as_dict(visible=True).items()
-        self._init_item(item, fields)
-        return item
+        return self._process_item(Dataset, fields, harvest_item.remote_id)
 
     def process_dataservice(self, harvest_item: HarvestItem) -> Dataservice:
-        item = self.get_item(harvest_item.remote_id, Dataservice)
         fields = DataserviceFactory.as_dict().items()
-        self._init_item(item, fields)
+        return self._process_item(Dataservice, fields, harvest_item.remote_id)
+
+    def _process_item(self, item_type: type[H], fields: dict, remote_id: str) -> H:
+        record = self._fake_records_by_ids[remote_id]
+        if exc := record.item_processor_exception:
+            raise exc
+        item = self.get_item(remote_id, item_type)
+        self._mock_item(item, fields)
         return item
 
-    def _init_item(self, item, fields):
+    def _mock_item(self, item, fields):
         for key, value in fields:
             if getattr(item, key) is None:
                 setattr(item, key, value)
-        if self.source.config.get("last_modified"):
-            item.last_modified_internal = self.source.config["last_modified"]
+        if self.fake_last_modified:
+            item.last_modified_internal = self.fake_last_modified
         clazz = type(item).__name__.lower()
         position = len(self.job.items)
         item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
@@ -118,8 +144,9 @@ class HarvestFilterTest:
 class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
 
         before = datetime.now(UTC)
         job = backend.harvest()
@@ -144,7 +171,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert before_naive <= last_modified_naive <= after_naive
             assert dataset.harvest.source_id == str(source.id)
             assert dataset.harvest.domain == source.domain
-            assert dataset.harvest.remote_id.startswith("fake-")
+            assert dataset.harvest.remote_id.startswith("dataset-")
             assert before_naive <= last_update_naive <= after_naive
 
     def test_has_feature_defaults(self):
@@ -251,13 +278,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_item_remote_url(self):
         n = 3
-        source = HarvestSourceFactory(
-            config={
-                "dataset_remote_ids": gen_remote_IDs(n),
-                "dataservice_remote_ids": gen_remote_IDs(n),
-            }
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, n) + FakeRecord.create(Dataservice, n)
 
         job = backend.harvest()
 
@@ -266,8 +289,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_source_id(self):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
 
         job = backend.harvest()
         assert len(job.items) == nb_datasets
@@ -285,12 +309,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             parsed = urlparse(source_url).netloc.split(":")[0]
             assert parsed == dataset.harvest.domain
 
-    def test_dont_overwrite_last_modified(self, mocker):
+    def test_dont_overwrite_last_modified(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory(
-            config={"dataset_remote_ids": gen_remote_IDs(1), "last_modified": last_modified}
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, 1)
+        backend.fake_last_modified = last_modified
 
         backend.harvest()
 
@@ -299,12 +323,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.now(UTC))
 
-    def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
+    def test_dont_overwrite_last_modified_even_if_set_to_same(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory(
-            config={"dataset_remote_ids": gen_remote_IDs(1), "last_modified": last_modified}
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, 1)
+        backend.fake_last_modified = last_modified
 
         backend.harvest()
         backend.harvest()  # Harvest twice to test same last_modified
@@ -317,13 +341,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_autoarchive(self, app):
         nb_datasets = 3
         nb_dataservices = 3
-        source = HarvestSourceFactory(
-            config={
-                "dataset_remote_ids": gen_remote_IDs(nb_datasets, "dataset-"),
-                "dataservice_remote_ids": gen_remote_IDs(nb_dataservices, "dataservice-"),
-            }
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, nb_datasets) + FakeRecord.create(
+            Dataservice, nb_dataservices
+        )
 
         # create a dangling dataset to be archived
         limit = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
@@ -401,13 +423,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        dataset = Dataset.objects.get(**{"harvest__remote_id": "dataset-fake-1"})
+        dataset = Dataset.objects.get(**{"harvest__remote_id": "dataset-1"})
         dataset.archived = datetime.now(UTC)
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
-        dataservice = Dataservice.objects.get(**{"harvest__remote_id": "dataservice-fake-1"})
+        dataservice = Dataservice.objects.get(**{"harvest__remote_id": "dataservice-1"})
         dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_reason = "not-on-remote"
@@ -427,8 +449,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_datasets_get_deleted(self):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
 
         job = backend.harvest()
 
@@ -448,10 +471,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_no_datasets_duplication(self, app):
         duplicated_remote_id_uri = "http://example.com/duplicated_remote_id_uri"
         nb_datasets = 3
-        remote_ids = gen_remote_IDs(nb_datasets)
-        remote_ids.append(duplicated_remote_id_uri)
-        source = HarvestSourceFactory(config={"dataset_remote_ids": remote_ids})
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = FakeRecord.create(Dataset, nb_datasets) + [
+            FakeRecord(Dataset, duplicated_remote_id_uri)
+        ]
 
         # Create a dataset that should be reused by the harvest, which will update it
         # instead of creating a new one, as it has the same remote_id, domain and source_id.
@@ -459,7 +483,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             title="Reused Dataset",
             harvest={
                 "domain": source.domain,
-                "remote_id": "fake-0",  # the FakeBackend harvest should reuse this dataset
+                "remote_id": "dataset-0",  # the FakeBackend harvest should reuse this dataset
                 "source_id": str(source.id),
             },
         )
@@ -482,7 +506,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             title="Duplicated Dataset",
             harvest={
                 "domain": "some-other-domain",
-                "remote_id": "fake-0",  # the "source" harvest above should create another dataset with the same remote_id
+                "remote_id": "dataset-0",  # the "source" harvest above should create another dataset with the same remote_id
                 "source_id": "some-other-source-id",
             },
         )
@@ -495,7 +519,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == nb_datasets + 1 + 3 - 2
         assert (
             # and not 3, data_reused was not duplicated
-            Dataset.objects(harvest__remote_id="fake-0").count() == 2
+            Dataset.objects(harvest__remote_id="dataset-0").count() == 2
         )
         # The dataset not reused wasn't overwritten nor updated by the harvest.
         dataset_not_reused.reload()
@@ -509,32 +533,28 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert dataset_reused_uri.harvest.source_id == str(source.id)
 
     def test_duplicate_remote_ids(self):
-        dataset_remote_ids = [
-            "dataset-id-1",
-            "dataset-id-2",
-            "dataset-id-3",
-            "dataset-id-3",
-            "dataset-id-1",
+        dataset_records = [
+            FakeRecord(Dataset, "dataset-id-1"),
+            FakeRecord(Dataset, "dataset-id-2"),
+            FakeRecord(Dataset, "dataset-id-3"),
+            FakeRecord(Dataset, "dataset-id-3"),
+            FakeRecord(Dataset, "dataset-id-1"),
         ]
-        dataservice_remote_ids = [
-            "dataservice-id-1",
-            "dataservice-id-2",
-            "dataservice-id-2",
+        dataservice_records = [
+            FakeRecord(Dataservice, "dataservice-id-1"),
+            FakeRecord(Dataservice, "dataservice-id-2"),
+            FakeRecord(Dataservice, "dataservice-id-2"),
         ]
-        source = HarvestSourceFactory(
-            config={
-                "dataset_remote_ids": dataset_remote_ids,
-                "dataservice_remote_ids": dataservice_remote_ids,
-            }
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source)
+        backend.fake_records = dataset_records + dataservice_records
 
         job = backend.harvest()
 
         assert job.status == "done-errors"
-        assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
-        assert Dataset.objects.count() == len(set(dataset_remote_ids))
-        assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
+        assert len(job.items) == len(dataset_records) + len(dataservice_records)
+        assert Dataset.objects.count() == len(set(dataset_records))
+        assert Dataservice.objects.count() == len(set(dataservice_records))
         seen = set()
         for job in job.items:
             if job.remote_id not in seen:
@@ -553,16 +573,14 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend1 = FakeBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
-                config={
-                    "dataset_remote_ids": [
-                        "https://data.example.com/catalog/dataset-repeat",
-                        "https://data.example.com/catalog/dataset-unique",
-                    ],
-                    # dataservices don't check on uri remote_id (bug?)
-                },
                 **{owner_param: owner_factory()},
             )
         )
+        backend1.fake_records = [
+            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-repeat"),
+            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-unique"),
+            # dataservices don't check on uri remote_id (bug?)
+        ]
         job1 = backend1.harvest()
         assert job1.status == "done"
         assert len(job1.items) == 2
@@ -570,15 +588,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend2 = FakeBackend(
             HarvestSourceFactory(
                 url="https://other.example.com/catalog",
-                config={
-                    "dataset_remote_ids": [
-                        "https://data.example.com/catalog/dataset-repeat",
-                        "https://other.example.com/catalog/dataset-unique",
-                    ],
-                },
                 **{owner_param: owner_factory()},
             )
         )
+        backend2.fake_records = [
+            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-repeat"),
+            FakeRecord(Dataset, "https://other.example.com/catalog/dataset-unique"),
+        ]
         job2 = backend2.harvest()
         assert job2.status == "done-errors"
         assert len(job2.items) == 2
@@ -598,13 +614,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend1 = FakeBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
-                config={
-                    "dataset_remote_ids": ["dataset-repeat", "dataset-unique-1"],
-                    "dataservice_remote_ids": ["dataservice-repeat", "dataservice-unique-1"],
-                },
                 **{owner_param: owner_factory()},
             )
         )
+        backend1.fake_records = [
+            FakeRecord(Dataset, "dataset-repeat"),
+            FakeRecord(Dataset, "dataset-unique-1"),
+            FakeRecord(Dataservice, "dataservice-repeat"),
+            FakeRecord(Dataservice, "dataservice-unique-1"),
+        ]
         job1 = backend1.harvest()
         assert job1.status == "done"
         assert len(job1.items) == 4
@@ -612,13 +630,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend2 = FakeBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/other-catalog",  # same domain as backend1
-                config={
-                    "dataset_remote_ids": ["dataset-repeat", "dataset-unique-2"],
-                    "dataservice_remote_ids": ["dataservice-repeat", "dataservice-unique-2"],
-                },
                 **{owner_param: owner_factory()},
             )
         )
+        backend2.fake_records = [
+            FakeRecord(Dataset, "dataset-repeat"),
+            FakeRecord(Dataset, "dataset-unique-2"),
+            FakeRecord(Dataservice, "dataservice-repeat"),
+            FakeRecord(Dataservice, "dataservice-unique-2"),
+        ]
         job2 = backend2.harvest()
         assert job2.status == "done-errors"
         assert len(job2.items) == 4
@@ -634,13 +654,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [(2, 2, 0), (3, 3, 0), (4, 3, 1)],
     )
     def test_max_items(self, max_items, n_dataset, n_dataservice):
-        source = HarvestSourceFactory(
-            config={
-                "dataset_remote_ids": gen_remote_IDs(3, "dataset-"),
-                "dataservice_remote_ids": gen_remote_IDs(3, "dataservice-"),
-            }
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source, max_items=max_items)
+        backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
 
         job = backend.harvest()
 
@@ -652,13 +668,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataservice.objects.count() == n_dataservice
 
     def test_max_items_preview(self):
-        source = HarvestSourceFactory(
-            config={
-                "dataset_remote_ids": gen_remote_IDs(3, "dataset-"),
-                "dataservice_remote_ids": gen_remote_IDs(3, "dataservice-"),
-            }
-        )
+        source = HarvestSourceFactory()
         backend = FakeBackend(source, dryrun=True, max_items=2)
+        backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
 
         job = backend.harvest()
 
@@ -666,6 +678,52 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 2
         # we don't log the max_items error in dryrun
         assert len(job.errors) == 0
+
+    @pytest.mark.parametrize(
+        "exception_class",
+        [
+            HarvestValidationError,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            Exception,
+        ],
+    )
+    def test_inner_harvest_exception(self, exception_class):
+        backend = FakeBackend(HarvestSourceFactory())
+        backend.fake_records = [
+            FakeRecord(Dataset, "dataset-ok-1"),
+            FakeRecord(Dataset, "dataset-ko", inner_harvest_exception=exception_class()),
+            FakeRecord(Dataset, "dataset-ok-2"),
+        ]
+
+        job = backend.harvest()
+
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert len(job.items) == 1
+
+    @pytest.mark.parametrize(
+        "exception_class, job_status, item_status",
+        [
+            (HarvestSkipException, "done", "skipped"),
+            (HarvestValidationError, "done-errors", "failed"),
+            (Exception, "done-errors", "failed"),
+        ],
+    )
+    def test_item_processor_exception(self, exception_class, job_status, item_status):
+        backend = FakeBackend(HarvestSourceFactory())
+        backend.fake_records = [
+            FakeRecord(Dataset, "dataset-ok-1"),
+            FakeRecord(Dataset, "dataset-ko", item_processor_exception=exception_class()),
+            FakeRecord(Dataset, "dataset-ok-2"),
+        ]
+
+        job = backend.harvest()
+
+        assert job.status == job_status
+        assert len(job.errors) == 0
+        assert len(job.items) == 3
+        assert job.items[1].status == item_status
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
