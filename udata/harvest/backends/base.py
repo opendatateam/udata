@@ -273,7 +273,6 @@ class BaseBackend(ABC):
         *args: ItemProcessorParams.args,
         **kwargs: ItemProcessorParams.kwargs,
     ):
-        # FIXME: use typing.get_type_hints()["return"] or inspect.signature().return_annotation to get item type?
         log.debug(f"Processing item {remote_id}…")
 
         # TODO: add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
