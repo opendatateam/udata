@@ -56,11 +56,23 @@ class UserRemovedResourceFromDataset(DatasetRelatedActivity, Activity):
     label = _("removed a resource from a dataset")
 
 
+def resource_extras(resource_id, resource_title):
+    """Identify the resource an activity is about.
+
+    The title is copied rather than looked up on read: a removed resource is gone from
+    the dataset, and a renamed one no longer carries the name it had that day.
+    """
+    return {"resource_id": str(resource_id), "resource_title": resource_title}
+
+
 @Dataset.on_resource_added.connect
 def on_user_added_resource_to_dataset(sender, document, **kwargs):
     if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_activity_user"):
         UserAddedResourceToDataset.emit(
-            document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
+            document,
+            document.organization,
+            None,
+            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
         )
 
 
@@ -72,7 +84,7 @@ def on_user_updated_resource(sender, document, **kwargs):
             document,
             document.organization,
             changed_fields,
-            {"resource_id": str(kwargs["resource_id"])},
+            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
         )
 
 
@@ -80,7 +92,10 @@ def on_user_updated_resource(sender, document, **kwargs):
 def on_user_removed_resource_from_dataset(sender, document, **kwargs):
     if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_activity_user"):
         UserRemovedResourceFromDataset.emit(
-            document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
+            document,
+            document.organization,
+            None,
+            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
         )
 
 
