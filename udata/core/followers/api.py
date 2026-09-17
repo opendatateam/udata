@@ -25,7 +25,7 @@ class FollowAPI(API):
     def get(self, id):
         """List all followers for a given object"""
         # Parsed up front so that an out of range page answers 400 before the followed
-        # object is looked up, as it did when this endpoint had its own parser.
+        # object is looked up.
         Follow.__index_parser__.parse_args()
 
         model = None
@@ -33,8 +33,7 @@ class FollowAPI(API):
             model = self.model.objects(slug=id).first()
         model = model or self.model.objects.only("id").get_or_404(id=id_or_404(id))
 
-        qs = Follow.objects(following=model, until=None)
-        return Follow.apply_pagination(Follow.apply_sort_filters(qs))
+        return Follow.apply_pagination(Follow.apply_sort_filters(Follow.objects.followers(model)))
 
     @api.secure
     @api.doc(description=NOTE)
