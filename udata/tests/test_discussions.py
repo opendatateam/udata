@@ -1701,6 +1701,8 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].type, NotificationType.DISCUSSION_COMMENT)
+        # Transitional: still written for the front, which reads it instead of `type`
+        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
         self.assertEqual(notifications[0].details.message_id, new_message.id)
 
     def test_new_discussion_comment_handle_previous_notifications(self):
@@ -1757,6 +1759,8 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user__in=[poster, commenter])
         assert len(notifications) == len(expected_recipients)
         assert notifications[0].type == NotificationType.DISCUSSION_CLOSED
+        # Transitional: still written for the front, which reads it instead of `type`
+        assert notifications[0].details.status == DiscussionStatus.CLOSED
 
     def test_new_discussion_closed_handle_previous_notifications(self):
         owner = UserFactory()

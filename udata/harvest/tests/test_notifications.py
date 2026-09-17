@@ -2,7 +2,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
-from udata.harvest.models import VALIDATION_PENDING
+from udata.harvest.models import VALIDATION_ACCEPTED, VALIDATION_PENDING, VALIDATION_REFUSED
 from udata.harvest.notifications import (
     ValidateHarvesterNotificationDetails,
     validate_harvester_notifications,
@@ -73,6 +73,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.source == source
         assert notifications[0].type == NotificationType.HARVEST_SOURCE_ACCEPTED
+        # Transitional: still written for the front, which reads it instead of `type`
+        assert notifications[0].details.status == VALIDATION_ACCEPTED
 
     def test_validate_source_creates_notification_for_org_admins(self):
         org_admin = UserFactory()
@@ -91,6 +93,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         admin_notifications = Notification.objects(user=org_admin)
         assert admin_notifications.count() == 1
         assert admin_notifications[0].type == NotificationType.HARVEST_SOURCE_ACCEPTED
+        # Transitional: still written for the front, which reads it instead of `type`
+        assert admin_notifications[0].details.status == VALIDATION_ACCEPTED
 
         # Org editor should not receive notification
         member_notifications = Notification.objects(user=org_member)
@@ -107,6 +111,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.source == source
         assert notifications[0].type == NotificationType.HARVEST_SOURCE_REFUSED
+        # Transitional: still written for the front, which reads it instead of `type`
+        assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_refuse_source_creates_notification_for_org_admins(self):
         org_admin = UserFactory()
@@ -118,6 +124,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         notifications = Notification.objects(user=org_admin)
         assert notifications.count() == 1
         assert notifications[0].type == NotificationType.HARVEST_SOURCE_REFUSED
+        # Transitional: still written for the front, which reads it instead of `type`
+        assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_validate_source_handles_existing_pending_notifications(self):
         """Test that existing VALIDATION_PENDING notifications are marked as handled when source is validated"""

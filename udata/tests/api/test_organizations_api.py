@@ -1115,7 +1115,13 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.invite_member", org=organization)
-        self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+        with capture_mails() as mails:
+            self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+
+        # The invitee answers it, so they are the only one to hear about it: the admins
+        # used to get the request mail on this path too.
+        assert len(mails) == 1
+        assert mails[0].recipients == [invited_user.email]
 
         notifications = Notification.objects(user=invited_user)
         assert notifications.count() == 1

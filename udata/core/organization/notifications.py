@@ -24,11 +24,6 @@ BADGE_NOTIFICATION_TYPES = {
     LOCAL_AUTHORITY: NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY,
 }
 
-MEMBERSHIP_REQUEST_NOTIFICATION_TYPES = {
-    "request": NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
-    "invitation": NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-}
-
 BADGE_MAILS = {
     CERTIFIED: mails.badge_added_certified,
     PUBLIC_SERVICE: mails.badge_added_public_service,

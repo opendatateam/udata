@@ -7,10 +7,8 @@ import logging
 import click
 
 from udata.core.organization.models import Organization
-from udata.core.organization.notifications import (
-    MEMBERSHIP_REQUEST_NOTIFICATION_TYPES,
-    MembershipRequestNotificationDetails,
-)
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -45,7 +43,7 @@ def migrate(db):
                         if not existing:
                             notification = Notification(
                                 user=admin_user,
-                                type=MEMBERSHIP_REQUEST_NOTIFICATION_TYPES[request.kind],
+                                type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
                             )
                             notification.details = MembershipRequestNotificationDetails(
                                 request_organization=org, request_user=request.user

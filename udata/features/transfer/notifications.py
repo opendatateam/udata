@@ -60,17 +60,15 @@ class TransferRequested(NotificationEvent):
             return [member.user for member in recipient.by_role("admin")]
         return []
 
-    def _subject(self):
-        return {
+    def via_app(self, recipient):
+        subject = {
             "transfer_owner": self.transfer.owner,
             "transfer_recipient": self.transfer.recipient,
             "transfer_subject": self.transfer.subject,
         }
-
-    def via_app(self, recipient):
-        if self.already_pending(recipient, **self._subject()):
+        if self.already_pending(recipient, **subject):
             return None
-        return TransferRequestNotificationDetails(**self._subject())
+        return TransferRequestNotificationDetails(**subject)
 
 
 @Transfer.on_create.connect
