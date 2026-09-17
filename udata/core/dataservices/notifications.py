@@ -7,9 +7,8 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
-from udata.core.owned import get_responsible_users
+from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
     )
 
 
-class DataserviceCreated(NotificationEvent):
+class DataserviceCreated(DatasetReusedEvent):
     """One event per exposed dataset: each set of dataset owners hears about their own."""
 
     type = NotificationType.DATASERVICE_CREATED
@@ -46,9 +45,6 @@ class DataserviceCreated(NotificationEvent):
     @property
     def occurred_at(self):
         return self.dataservice.created_at
-
-    def recipients(self):
-        return [user for user in get_responsible_users(self.dataset) if user]
 
     def via_app(self, recipient):
         return DataserviceCreatedNotificationDetails(

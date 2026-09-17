@@ -9,7 +9,7 @@ import click
 
 from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import NotificationChannel, NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -37,10 +37,12 @@ def migrate(db):
 
                         recipients = discussion.owner_recipients(sender=last_comment.posted_by)
 
-                        for user in recipients:
+                        for recipient in recipients:
                             notification = Notification(
-                                user=user,
+                                user=recipient.user,
                                 type=NotificationType.DISCUSSION_COMMENT,
+                                reasons=sorted(recipient.reasons),
+                                channels=[NotificationChannel.APP],
                                 details=DiscussionNotificationDetails(
                                     # Superseded by `type`, kept until the front reads it
                                     status=DiscussionStatus.NEW_COMMENT,
@@ -54,10 +56,12 @@ def migrate(db):
                         # Add NEW_DISCUSSION notifications if no reply yet
                         recipients = discussion.owner_recipients(sender=discussion.user)
 
-                        for user in recipients:
+                        for recipient in recipients:
                             notification = Notification(
-                                user=user,
+                                user=recipient.user,
                                 type=NotificationType.DISCUSSION_NEW,
+                                reasons=sorted(recipient.reasons),
+                                channels=[NotificationChannel.APP],
                                 details=DiscussionNotificationDetails(
                                     # Superseded by `type`, kept until the front reads it
                                     status=DiscussionStatus.NEW_DISCUSSION,

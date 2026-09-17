@@ -9,9 +9,8 @@ from udata.core.dataset.models import Dataset
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
-from udata.features.notifications.actions import notifier
-from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.events import NotificationEvent, Recipient
 from udata.models import Transfer
 
 log = logging.getLogger(__name__)
@@ -55,9 +54,14 @@ class TransferRequested(NotificationEvent):
     def recipients(self):
         recipient = self.transfer.recipient
         if isinstance(recipient, User):
-            return [recipient]
+            # No reason to carry: being the person the transfer targets is what the
+            # type already says.
+            return [Recipient(recipient)]
         if isinstance(recipient, Organization):
-            return [member.user for member in recipient.by_role("admin")]
+            return [
+                Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
+                for member in recipient.by_role("admin")
+            ]
         return []
 
     def _subject(self):
@@ -89,36 +93,6 @@ def on_handle_transfer(transfer, **kwargs):
         details__transfer_recipient=transfer.recipient,
         handled_at=None,
     ).mark_handled()
-
-
-@notifier("transfer_request")
-def transfer_request_notifications(user):
-    """Notify user about pending transfer requests"""
-    orgs = [o for o in user.organizations if o.is_member(user)]
-    notifications = []
-
-    qs = Transfer.objects(recipient__in=[user] + orgs, status="pending")
-    # Only fetch required fields for notification serialization
-    # Greatly improve performances and memory usage
-    qs = qs.only("id", "created", "subject")
-
-    # Do not dereference subject (so it's a DBRef)
-    # Also improve performances and memory usage
-    for transfer in qs.no_dereference():
-        notifications.append(
-            (
-                transfer.created,
-                {
-                    "id": transfer.id,
-                    "subject": {
-                        "class": transfer.subject["_cls"].lower(),
-                        "id": transfer.subject["_ref"].id,
-                    },
-                },
-            )
-        )
-
-    return notifications
 
 
 @Transfer.after_delete.connect

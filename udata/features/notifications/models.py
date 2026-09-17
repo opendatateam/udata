@@ -6,6 +6,7 @@ from mongoengine.fields import (
     DateTimeField,
     EnumField,
     GenericEmbeddedDocumentField,
+    ListField,
     ReferenceField,
 )
 
@@ -20,7 +21,12 @@ from udata.core.organization.notifications import (
 )
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.models import User
-from udata.features.notifications.constants import TYPES_REQUIRING_ACTION, NotificationType
+from udata.features.notifications.constants import (
+    TYPES_REQUIRING_ACTION,
+    NotificationChannel,
+    NotificationReason,
+    NotificationType,
+)
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.mongo.datetime_fields import Datetimed
@@ -87,6 +93,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     meta = {
         "ordering": ["-created_at"],
         "queryset_class": NotificationQuerySet,
+        "indexes": [("user", "channels")],
     }
 
     id = field(AutoUUIDField(primary_key=True))
@@ -112,6 +119,35 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     details = field(
         GenericEmbeddedDocumentField(choices=tuple(dict.fromkeys(DETAILS_BY_TYPE.values()))),
         generic=True,
+    )
+    # Why this user was concerned, recorded at dispatch time because it cannot be
+    # recomputed later: roles change, discussions get answered, and the notification
+    # still has to explain itself — both in the bell and in the mail footer, which
+    # offer the matching ways out.
+    reasons = field(
+        ListField(EnumField(NotificationReason)),
+        readonly=True,
+        auditable=False,
+    )
+    # The channels this notification still has to reach the user through. The bell
+    # lists the ones holding APP; the digest job takes the ones holding MAIL and drops
+    # it once the mail is out. Somebody who muted the bell but asked for a weekly
+    # digest gets a MAIL-only row: invisible, but there to be summarized.
+    #
+    # It doubles as the digest cursor — "MAIL is still in there" *is* "not mailed yet",
+    # which makes the job replayable without a date to keep anywhere.
+    #
+    # Defaults to the bell: everything creating a notification outside of `dispatch`
+    # is backfilling one somebody should read, and a migration must not be able to
+    # fail in production over a field it had no opinion about.
+    channels = field(
+        ListField(
+            EnumField(NotificationChannel),
+            required=True,
+            default=lambda: [NotificationChannel.APP],
+        ),
+        readonly=True,
+        auditable=False,
     )
 
     @field(

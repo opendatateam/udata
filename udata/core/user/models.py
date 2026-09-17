@@ -11,6 +11,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    EnumField,
     GenericEmbeddedDocumentField,
     IntField,
     ListField,
@@ -31,6 +32,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
+from udata.features.notifications.constants import MailCadence
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -227,6 +229,10 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
     inactive_deletion_notified_at = DateTimeField()
+
+    # How often this user agrees to be mailed about what concerns them. What concerns
+    # them is decided per subject in `NotificationSetting`; this is only the rhythm.
+    mail_cadence = EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True)
 
     before_save = Signal()
     after_save = Signal()
