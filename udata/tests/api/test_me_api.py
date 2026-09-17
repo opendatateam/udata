@@ -194,6 +194,17 @@ class MeAPITest(APITestCase):
         self.assertEqual(self.user.about, "new about")
         self.assertTrue(self.user.active)
 
+    def test_update_profile_cannot_mark_as_deleted(self):
+        """An account is deleted through `DELETE /me`, which anonymises it and purges
+        what it owns. A patch would only raise the flag, leaving the data behind."""
+        self.login()
+        data = self.user.to_dict()
+        data["deleted"] = "2026-01-01T00:00:00+00:00"
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertIsNone(self.user.deleted)
+
     def test_update_profile_rejects_urls_in_name(self):
         """It should reject URLs embedded in first_name/last_name"""
         self.login()
