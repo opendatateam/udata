@@ -8,11 +8,13 @@ from udata.tasks import get_logger, job, task
 from . import mails
 from .assignment import Assignment
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
-from .models import Organization
+from .models import MembershipRequest, Organization
 from .notifications import (
-    MembershipAcceptedNotificationDetails,
-    MembershipRefusedNotificationDetails,
-    NewBadgeNotificationDetails,
+    BadgeAdded,
+    MembershipAccepted,
+    MembershipInvited,
+    MembershipRefused,
+    MembershipRequested,
 )
 
 log = get_logger(__name__)
@@ -73,8 +75,21 @@ def notify_membership_request(org_id, request_id):
     if request is None:
         return
 
-    recipients = [m.user for m in org.by_role("admin")]
-    mails.new_membership_request(org, request).send(recipients)
+    if request.kind == "invitation":
+        MembershipInvited(org, request).dispatch()
+    else:
+        MembershipRequested(org, request).dispatch()
+
+
+@MembershipRequest.after_create.connect
+def on_new_membership_request(request, **kwargs):
+    """Queued rather than dispatched here: the request is created during an HTTP
+    request, which has no business waiting on SMTP."""
+    org = kwargs.get("org")
+    if org is None:
+        return
+
+    notify_membership_request.delay(str(org.id), str(request.id))
 
 
 @task(route="high.mail")
@@ -86,47 +101,9 @@ def notify_membership_response(org_id, request_id):
         return
 
     if request.status == "accepted":
-        mails.membership_accepted(org).send(request.user)
-        try:
-            notification = Notification(
-                user=request.user,
-                details=MembershipAcceptedNotificationDetails(
-                    organization=org,
-                ),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create membership accepted notification for user {request.user}: {e}"
-            )
+        MembershipAccepted(org, request).dispatch()
     else:
-        mails.membership_refused(org).send(request.user)
-        try:
-            notification = Notification(
-                user=request.user,
-                details=MembershipRefusedNotificationDetails(
-                    organization=org,
-                ),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create membership refused notification for user {request.user}: {e}"
-            )
-
-
-@task(route="high.mail")
-def notify_membership_invitation(org_id, invitation_id):
-    org = Organization.objects.get(pk=org_id)
-    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
-
-    if invitation is None:
-        return
-
-    if invitation.user:
-        mails.membership_invitation(org, invitation, user_exists=True).send(invitation.user)
-    elif invitation.email:
-        mails.membership_invitation(org, invitation, user_exists=False).send(invitation.email)
+        MembershipRefused(org, request).dispatch()
 
 
 @task(route="high.mail")
@@ -157,120 +134,28 @@ def notify_membership_invitation_canceled(org_id, invitation_id):
         mails.membership_invitation_canceled(org).send(invitation.email)
 
 
+# One task per badge kind because `notify_new_badge` registers a signal handler per
+# kind; they all dispatch the same event.
 @notify_new_badge(Organization, CERTIFIED)
 def notify_badge_certified(org_id):
-    """
-    Send an email and create notifications when a `CERTIFIED` badge is added to an `Organization`
-    """
-    org = Organization.objects.get(pk=org_id)
-    recipients = [member.user for member in org.members]
-
-    # Send email notifications
-    mails.badge_added_certified(org).send(recipients)
-
-    # Create in-app notifications
-    for member in org.members:
-        try:
-            notification = Notification(
-                user=member.user,
-                details=NewBadgeNotificationDetails(organization=org, kind=CERTIFIED),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create new badge notification for kind {CERTIFIED} and user {member.user}: {e}"
-            )
+    BadgeAdded(Organization.objects.get(pk=org_id), CERTIFIED).dispatch()
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)
 def notify_badge_public_service(org_id):
-    """
-    Send an email and create notifications when a `PUBLIC_SERVICE` badge is added to an `Organization`
-    """
-    org = Organization.objects.get(pk=org_id)
-    recipients = [member.user for member in org.members]
-
-    # Send email notifications
-    mails.badge_added_public_service(org).send(recipients)
-
-    # Create in-app notifications
-    for member in org.members:
-        try:
-            notification = Notification(
-                user=member.user,
-                details=NewBadgeNotificationDetails(organization=org, kind=PUBLIC_SERVICE),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create new badge notification for kind {PUBLIC_SERVICE} and user {member.user}: {e}"
-            )
+    BadgeAdded(Organization.objects.get(pk=org_id), PUBLIC_SERVICE).dispatch()
 
 
 @notify_new_badge(Organization, COMPANY)
 def notify_badge_company(org_id):
-    """
-    Send an email when a `COMPANY` badge is added to an `Organization`
-    """
-    org = Organization.objects.get(pk=org_id)
-    recipients = [member.user for member in org.members]
-    mails.badge_added_company(org).send(recipients)
-
-    # Create in-app notifications
-    for member in org.members:
-        try:
-            notification = Notification(
-                user=member.user,
-                details=NewBadgeNotificationDetails(organization=org, kind=COMPANY),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create new badge notification for kind {COMPANY} and user {member.user}: {e}"
-            )
+    BadgeAdded(Organization.objects.get(pk=org_id), COMPANY).dispatch()
 
 
 @notify_new_badge(Organization, ASSOCIATION)
 def notify_badge_association(org_id):
-    """
-    Send an email when a `ASSOCIATION` badge is added to an `Organization`
-    """
-    org = Organization.objects.get(pk=org_id)
-    recipients = [member.user for member in org.members]
-    mails.badge_added_association(org).send(recipients)
-
-    # Create in-app notifications
-    for member in org.members:
-        try:
-            notification = Notification(
-                user=member.user,
-                details=NewBadgeNotificationDetails(organization=org, kind=ASSOCIATION),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create new badge notification for kind {ASSOCIATION} and user {member.user}: {e}"
-            )
+    BadgeAdded(Organization.objects.get(pk=org_id), ASSOCIATION).dispatch()
 
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
 def notify_badge_local_authority(org_id):
-    """
-    Send an email when a `LOCAL_AUTHORITY` badge is added to an `Organization`
-    """
-    org = Organization.objects.get(pk=org_id)
-    recipients = [member.user for member in org.members]
-    mails.badge_added_local_authority(org).send(recipients)
-
-    # Create in-app notifications
-    for member in org.members:
-        try:
-            notification = Notification(
-                user=member.user,
-                details=NewBadgeNotificationDetails(organization=org, kind=LOCAL_AUTHORITY),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Failed to create new badge notification for kind {LOCAL_AUTHORITY} and user {member.user}: {e}"
-            )
+    BadgeAdded(Organization.objects.get(pk=org_id), LOCAL_AUTHORITY).dispatch()
