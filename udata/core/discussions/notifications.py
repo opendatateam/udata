@@ -6,11 +6,9 @@ from mongoengine.fields import EnumField, ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions import mails
-from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.core.user.models import User
-from udata.features.notifications.actions import notifier
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.events import NotificationEvent
 
@@ -71,6 +69,14 @@ class DiscussionEvent(NotificationEvent):
 
     def recipients(self):
         return self.discussion.owner_recipients(sender=self.sender)
+
+    def scopes(self):
+        """Muting one thread, one dataset or a whole organization are three grains of
+        the same setting."""
+        scopes = [self.discussion, self.discussion.subject]
+        if getattr(self.discussion.subject, "organization", None):
+            scopes.append(self.discussion.subject.organization)
+        return scopes
 
     def via_app(self, recipient):
         return DiscussionNotificationDetails(
@@ -139,35 +145,6 @@ class DiscussionClosed(DiscussionEvent):
         return mails.discussion_closed(
             self.discussion, self.message, self.discussion.notification_url
         )
-
-
-@notifier("discussion")
-def discussions_notifications(user):
-    """Notify user about open discussions"""
-    notifications = []
-
-    # Only fetch required fields for notification serialization
-    # Greatly improve performances and memory usage
-    qs = discussions_for(user).only("id", "created", "title", "subject")
-
-    # Do not dereference subject (so it's a DBRef)
-    # Also improve performances and memory usage
-    for discussion in qs.no_dereference():
-        notifications.append(
-            (
-                discussion.created,
-                {
-                    "id": discussion.id,
-                    "title": discussion.title,
-                    "subject": {
-                        "id": discussion.subject["_ref"].id,
-                        "type": discussion.subject["_cls"].lower(),
-                    },
-                },
-            )
-        )
-
-    return notifications
 
 
 @on_discussion_deleted.connect

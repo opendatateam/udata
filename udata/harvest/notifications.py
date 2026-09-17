@@ -5,9 +5,8 @@ from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
-from udata.features.notifications.actions import notifier
-from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.events import NotificationEvent, Recipient
 
 from .models import (
     VALIDATION_ACCEPTED,
@@ -71,7 +70,10 @@ class HarvestSourcePending(HarvestSourceEvent):
         admin_role = Role.objects(name="admin").first()
         if admin_role is None:
             return []
-        return list(User.objects(roles=admin_role, active=True))
+        return [
+            Recipient(user, frozenset({NotificationReason.SYSADMIN}))
+            for user in User.objects(roles=admin_role, active=True)
+        ]
 
 
 class HarvestSourceReviewed(HarvestSourceEvent):
@@ -79,9 +81,12 @@ class HarvestSourceReviewed(HarvestSourceEvent):
 
     def recipients(self):
         if self.source.organization:
-            return [member.user for member in self.source.organization.by_role("admin")]
+            return [
+                Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
+                for member in self.source.organization.by_role("admin")
+            ]
         if self.source.owner:
-            return [self.source.owner]
+            return [Recipient(self.source.owner, frozenset({NotificationReason.OWNER}))]
         return []
 
 
@@ -117,33 +122,6 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
 def on_harvest_source_refused(source: HarvestSource, **kwargs):
     _handle_pending_notifications(source)
     HarvestSourceRefused(source).dispatch()
-
-
-@notifier("validate_harvester")
-def validate_harvester_notifications(user):
-    """Notify admins about pending harvester validation"""
-    if not user.sysadmin:
-        return []
-
-    notifications = []
-
-    # Only fetch required fields for notification serialization
-    # Greatly improve performances and memory usage
-    qs = HarvestSource.objects(validation__state=VALIDATION_PENDING)
-    qs = qs.only("id", "created_at", "name")
-
-    for source in qs:
-        notifications.append(
-            (
-                source.created_at,
-                {
-                    "id": source.id,
-                    "name": source.name,
-                },
-            )
-        )
-
-    return notifications
 
 
 @harvest_source_deleted.connect

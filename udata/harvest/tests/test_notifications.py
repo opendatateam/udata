@@ -1,35 +1,16 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import NotificationChannel, NotificationType
 from udata.features.notifications.models import Notification
 from udata.harvest.models import VALIDATION_PENDING
-from udata.harvest.notifications import (
-    ValidateHarvesterNotificationDetails,
-    validate_harvester_notifications,
-)
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.helpers import assert_equal_dates
 
 from .. import actions
 from .factories import HarvestSourceFactory, MockBackendsMixin
 
 
 class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
-    def test_pending_harvester_validations(self):
-        source = HarvestSourceFactory()
-        admin = AdminFactory()
-        user = UserFactory()
-
-        assert len(validate_harvester_notifications(user)) == 0
-
-        notifications = validate_harvester_notifications(admin)
-
-        assert len(notifications) == 1
-        dt, details = notifications[0]
-        assert_equal_dates(dt, source.created_at)
-        assert details["id"] == source.id
-        assert details["name"] == source.name
-
     def test_create_source_creates_notification_for_admins(self):
         admin1 = AdminFactory()
         admin2 = AdminFactory()
@@ -128,6 +109,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=owner,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -162,6 +144,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=owner,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -197,6 +180,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=org_admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -234,6 +218,7 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=org_admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()

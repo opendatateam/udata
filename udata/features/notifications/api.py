@@ -2,6 +2,7 @@ from datetime import datetime
 
 from udata.api import API, api
 from udata.auth import current_user
+from udata.features.notifications.constants import NotificationChannel
 from udata.features.notifications.permissions import EditNotificationPermission
 
 from .models import Notification
@@ -18,7 +19,9 @@ class NotificationsAPI(API):
     def get(self):
         """List all current user pending notifications"""
         user = current_user._get_current_object()
-        notifications = Notification.objects(user=user)
+        # Rows that only carry MAIL belong to somebody who muted the bell and asked for
+        # a digest: they exist to be summarized, not to be shown here.
+        notifications = Notification.objects(user=user, channels=NotificationChannel.APP)
         return Notification.apply_pagination(Notification.apply_sort_filters(notifications))
 
 

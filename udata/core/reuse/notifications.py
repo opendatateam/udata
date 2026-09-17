@@ -6,10 +6,9 @@ from mongoengine.fields import ReferenceField
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
-from udata.core.owned import get_responsible_users
+from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.core.reuse.models import Reuse
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
     )
 
 
-class ReuseCreated(NotificationEvent):
+class ReuseCreated(DatasetReusedEvent):
     """One event per reused dataset: each set of dataset owners hears about their own."""
 
     type = NotificationType.REUSE_CREATED
@@ -46,9 +45,6 @@ class ReuseCreated(NotificationEvent):
     @property
     def occurred_at(self):
         return self.reuse.created_at
-
-    def recipients(self):
-        return [user for user in get_responsible_users(self.dataset) if user]
 
     def via_app(self, recipient):
         return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)

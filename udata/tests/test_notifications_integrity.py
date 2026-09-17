@@ -11,7 +11,7 @@ from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import NotificationChannel, NotificationType
 from udata.features.notifications.models import DETAILS_BY_TYPE, Notification
 from udata.features.transfer.factories import TransferFactory
 from udata.harvest.actions import delete_source, purge_sources
@@ -37,6 +37,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification = Notification(
             user=user,
             type=NotificationType.DISCUSSION_NEW,
+            channels=[NotificationChannel.APP],
             details=DiscussionNotificationDetails(
                 discussion=discussion,
                 message_id=discussion.discussion[0].id,
@@ -88,6 +89,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification = Notification(
             user=admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         notification.save()
@@ -112,6 +114,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification = Notification(
             user=admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
+            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         notification.save()
@@ -141,6 +144,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification1 = Notification(
             user=user1,
             type=NotificationType.DISCUSSION_NEW,
+            channels=[NotificationChannel.APP],
             details=DiscussionNotificationDetails(
                 discussion=discussion1,
                 message_id=discussion1.discussion[0].id,
@@ -151,6 +155,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification2 = Notification(
             user=user2,
             type=NotificationType.DISCUSSION_NEW,
+            channels=[NotificationChannel.APP],
             details=DiscussionNotificationDetails(
                 discussion=discussion2,
                 message_id=discussion2.discussion[0].id,
@@ -225,6 +230,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification = Notification(
             user=user,
             type=NotificationType.DISCUSSION_COMMENT,
+            channels=[NotificationChannel.APP],
             details=DiscussionNotificationDetails(
                 discussion=discussion,
                 message_id=discussion.discussion[1].id,
@@ -264,6 +270,7 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         notification = Notification(
             user=UserFactory(),
             type=NotificationType.DISCUSSION_NEW,
+            channels=[NotificationChannel.APP],
             details=ReuseCreatedNotificationDetails(reuse=ReuseFactory()),
         )
 

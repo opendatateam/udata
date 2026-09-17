@@ -27,6 +27,11 @@ from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
+from udata.features.notifications.constants import (
+    REASON_BY_ORGANIZATION_ROLE,
+    NotificationReason,
+)
+from udata.features.notifications.events import Recipient, merge_recipients
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
@@ -417,18 +422,42 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return message
 
-    def owner_recipients(self, sender=None):
-        """Return the list of users that should be notified about this discussion."""
-        recipients = {m.posted_by.id: m.posted_by for m in self.discussion}
-        if getattr(self.subject, "organization", None):
-            for member in self.subject.organization.members:
-                recipients[member.user.id] = member.user
-        elif getattr(self.subject, "owner", None):
-            recipients[self.subject.owner.id] = self.subject.owner
+    def owner_recipients(self, sender=None) -> list[Recipient]:
+        """Who should hear about this discussion, and on what ground.
 
+        Somebody can qualify twice over — having answered in a thread about a dataset
+        of the organization they administer — and both grounds are kept: the most
+        generous one decides what they get, and an explanation naming only one of them
+        would offer a way out that does not stop anything.
+        """
+        from udata.core.organization.assignment import Assignment
+
+        recipients = [
+            Recipient(message.posted_by, frozenset({NotificationReason.DISCUSSION_PARTICIPANT}))
+            for message in self.discussion
+        ]
+        if getattr(self.subject, "organization", None):
+            # Partial editors are scoped to the objects handed to them: belonging to an
+            # organization whose datasets one cannot even edit is not a reason to hear
+            # about them. Everybody else is concerned by the whole organization.
+            assigned = {
+                assignment.user.id for assignment in Assignment.objects(subject=self.subject)
+            }
+            for member in self.subject.organization.members:
+                reason = REASON_BY_ORGANIZATION_ROLE[member.role]
+                if (
+                    reason is NotificationReason.ORGANIZATION_PARTIAL_EDITOR
+                    and member.user.id not in assigned
+                ):
+                    continue
+                recipients.append(Recipient(member.user, frozenset({reason})))
+        elif getattr(self.subject, "owner", None):
+            recipients.append(Recipient(self.subject.owner, frozenset({NotificationReason.OWNER})))
+
+        merged = merge_recipients(recipients)
         if sender:
-            recipients.pop(sender.id, None)
-        return list(recipients.values())
+            merged = [recipient for recipient in merged if recipient.key != sender.id]
+        return merged
 
     @spam_protected()
     def signal_new(self):

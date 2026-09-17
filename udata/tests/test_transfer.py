@@ -19,7 +19,6 @@ from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.models import Transfer
-from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
@@ -308,52 +307,6 @@ class TransferContactPointsTest(PytestOnlyDBTestCase):
         assert transfer.status == "pending"
         subject.reload()
         assert subject.owner == owner
-
-
-class TransferNotificationsTest(PytestOnlyDBTestCase):
-    def test_pending_transfer_request_for_user(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
-        recipient = UserFactory()
-        comment = faker.sentence()
-        transfers = {}
-
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, recipient, comment)
-            transfers[transfer.id] = transfer
-
-        assert len(transfer_request_notifications(user)) == 0
-
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
-
-    def test_pending_transfer_request_for_org(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
-        recipient = UserFactory()
-        member = Member(user=recipient, role="editor")
-        org = OrganizationFactory(members=[member])
-        comment = faker.sentence()
-        transfers = {}
-
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, org, comment)
-            transfers[transfer.id] = transfer
-
-        assert len(transfer_request_notifications(user)) == 0
-
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
 
 
 class TransferRequestNotificationTest(DBTestCase):
