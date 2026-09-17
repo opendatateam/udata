@@ -131,6 +131,9 @@ class NotificationReason(StrEnum):
     ORGANIZATION_PARTIAL_EDITOR = "organization.partial_editor"
     DISCUSSION_PARTICIPANT = "discussion.participant"
     SYSADMIN = "sysadmin"
+    # Asked for it on this very subject, without being concerned otherwise. The only
+    # way somebody outside an organization can follow a thread or a dataset.
+    EXPLICIT_SUBSCRIBER = "explicit_subscriber"
 
 
 # `Organization.members` holds bare role strings, so the mapping is spelled out here.
@@ -158,4 +161,8 @@ DEFAULT_ENABLED: dict[NotificationReason, bool] = {
     NotificationReason.ORGANIZATION_PARTIAL_EDITOR: True,
     NotificationReason.DISCUSSION_PARTICIPANT: True,
     NotificationReason.SYSADMIN: True,
+    # Silent by default, which is not a contradiction: this reason only exists because
+    # a decision said `True` somewhere, and that decision names a channel. Subscribing
+    # to the bell must not sign one up for the mails too.
+    NotificationReason.EXPLICIT_SUBSCRIBER: False,
 }

@@ -10,11 +10,16 @@ from udata.core.user.models import User
 from udata.features.notifications.constants import (
     CATEGORY_BY_TYPE,
     MailCadence,
+    NotificationCategory,
     NotificationChannel,
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.settings import decisions_for, default_enabled
+from udata.features.notifications.settings import (
+    decisions_for,
+    default_enabled,
+    subscribers_for,
+)
 from udata.mail import MailMessage
 
 log = logging.getLogger(__name__)
@@ -87,6 +92,14 @@ class NotificationEvent:
         """
         return []
 
+    def excluded(self) -> list[User]:
+        """Who must never hear about this event, whatever they subscribed to.
+
+        Typically whoever triggered it: being told about one's own comment is noise,
+        and subscribing to a thread must not undo that.
+        """
+        return []
+
     def via_app(self, recipient: User) -> EmbeddedDocument | None:
         """The payload of the stored notification, or `None` to store nothing.
 
@@ -119,12 +132,13 @@ class NotificationEvent:
     def dispatch(self) -> None:
         from udata.features.notifications.models import Notification
 
-        recipients = self.recipients()
-        decisions = self._decisions(recipients)
+        category = CATEGORY_BY_TYPE.get(self.type)
+        recipients = self._concerned(category)
+        decisions = self._decisions(recipients, category)
         # Only the configurable types can wait. An invitation or a source pending
         # validation is an action to take: holding it for a week would be a bug, not a
         # setting.
-        deferrable = CATEGORY_BY_TYPE.get(self.type) is not None
+        deferrable = category is not None
 
         for recipient in recipients:
             # An in-app notification needs an account to hang on, so an address with no
@@ -171,15 +185,32 @@ class NotificationEvent:
                 except Exception as e:
                     log.error(f"Could not email {recipient.user} about {self.type}: {e}")
 
+    def _concerned(self, category: NotificationCategory | None) -> list[Recipient]:
+        """Everybody this event reaches: those it concerns by itself, plus those who
+        asked to be added, minus whoever it must never reach."""
+        recipients = self.recipients()
+        if category is not None:
+            recipients = [
+                *recipients,
+                *(
+                    Recipient(user, frozenset({NotificationReason.EXPLICIT_SUBSCRIBER}))
+                    for user in subscribers_for(category, self.scopes())
+                ),
+            ]
+
+        excluded = {user.id for user in self.excluded()}
+        return [
+            recipient for recipient in merge_recipients(recipients) if recipient.key not in excluded
+        ]
+
     def _decisions(
-        self, recipients: list[Recipient]
+        self, recipients: list[Recipient], category: NotificationCategory | None
     ) -> dict[NotificationChannel, dict[Any, bool]] | None:
         """What the recipients decided about this event, resolved once for all of them.
 
         `None` when the type carries no category, which is how the types that are not
         offered as a setting stay unconditional.
         """
-        category = CATEGORY_BY_TYPE.get(self.type)
         if category is None:
             return None
 

@@ -91,6 +91,28 @@ def decisions_for(
     return decisions
 
 
+def subscribers_for(category: NotificationCategory, scopes: Sequence[Document]) -> list[User]:
+    """Users who asked to hear about `category` on one of these subjects.
+
+    The other direction of the table: `decisions_for` filters people the event already
+    reaches, this one brings in those it would never have reached. Without it, somebody
+    outside an organization could store a setting that nothing would ever read.
+
+    The global scope is deliberately left out. `scope=None` means "everywhere I am
+    already concerned", not "subscribe me to the whole site".
+    """
+    if not scopes:
+        return []
+
+    scoped = Q(scope=scopes[0])
+    for scope in scopes[1:]:
+        scoped |= Q(scope=scope)
+
+    return list(
+        NotificationSetting.objects(scoped, category=category, enabled=True).distinct("user")
+    )
+
+
 def default_enabled(reasons: Iterable[NotificationReason]) -> bool:
     """Whether somebody concerned for these reasons hears about it by default.
 

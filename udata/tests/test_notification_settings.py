@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from mongoengine import NotUniqueError
 
+import udata.models  # noqa: F401 -- registers every document before the imports below
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.notifications import DatasetReusedEvent
@@ -149,9 +150,92 @@ class PersonaTest(APITestCase):
         assert notifications.count() == 1
         assert notifications.first().details.discussion.subject == assigned
 
+    def test_an_outsider_can_subscribe_to_the_discussions_of_one_dataset(self):
+        """Nobody in particular: not a member, not an owner, never answered. Following
+        a subject has to be enough to be notified of it."""
+        outsider = UserFactory()
+        watched = DatasetFactory(organization=OrganizationFactory())
+        ignored = DatasetFactory(organization=OrganizationFactory())
+        decide(
+            outsider,
+            NotificationCategory.DISCUSSIONS,
+            NotificationChannel.APP,
+            enabled=True,
+            scope=watched,
+        )
+
+        open_discussion(watched)
+        open_discussion(ignored)
+
+        notifications = Notification.objects(user=outsider)
+        assert notifications.count() == 1
+        assert notifications.first().details.discussion.subject == watched
+        assert NotificationReason.EXPLICIT_SUBSCRIBER in notifications.first().reasons
+
+    def test_subscribing_to_the_bell_does_not_sign_up_for_the_mails(self):
+        outsider = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        decide(
+            outsider,
+            NotificationCategory.DISCUSSIONS,
+            NotificationChannel.APP,
+            enabled=True,
+            scope=dataset,
+        )
+
+        with capture_mails() as mails:
+            open_discussion(dataset)
+
+        assert Notification.objects(user=outsider).count() == 1
+        assert [mail for mail in mails if outsider.email in mail.recipients] == []
+
+    def test_a_global_yes_does_not_subscribe_to_the_whole_site(self):
+        """`scope=None` means "everywhere I am already concerned", not "everything"."""
+        outsider = UserFactory()
+        decide(outsider, NotificationCategory.DISCUSSIONS, NotificationChannel.APP, enabled=True)
+
+        open_discussion(DatasetFactory(organization=OrganizationFactory()))
+
+        assert Notification.objects(user=outsider).count() == 0
+
+    def test_subscribing_never_notifies_you_of_your_own_comment(self):
+        author = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        discussion = DiscussionFactory(
+            subject=dataset, user=author, discussion=[MessageDiscussionFactory(posted_by=author)]
+        )
+        decide(
+            author,
+            NotificationCategory.DISCUSSIONS,
+            NotificationChannel.APP,
+            enabled=True,
+            scope=dataset,
+        )
+
+        discussion.signal_new()
+
+        assert Notification.objects(user=author).count() == 0
+
     def test_a_contributor_stops_hearing_about_an_organization_they_left(self):
-        """Marc is a contractor: his notifications end with his access, without him
-        having to undo anything."""
+        """Marc is a contractor: what he gets by virtue of his role ends with his
+        access, without him having to undo anything."""
+        marc = UserFactory()
+        organization = OrganizationFactory(admins=[marc])
+        dataset = DatasetFactory(organization=organization)
+
+        open_discussion(dataset)
+        assert Notification.objects(user=marc).count() == 1
+
+        organization.members = []
+        organization.save()
+        open_discussion(dataset)
+
+        assert NotificationSetting.objects(user=marc).count() == 0
+        assert Notification.objects(user=marc).count() == 1
+
+    def test_an_explicit_subscription_outlives_leaving_the_organization(self):
+        """The other half of the rule above: what somebody asked for is theirs, and
+        does not depend on a role. Discussions are public, so this grants nothing."""
         marc = UserFactory()
         organization = OrganizationFactory(editors=[marc])
         dataset = DatasetFactory(organization=organization)
@@ -164,13 +248,11 @@ class PersonaTest(APITestCase):
         )
 
         open_discussion(dataset)
-        assert Notification.objects(user=marc).count() == 1
-
         organization.members = []
         organization.save()
         open_discussion(dataset)
 
-        assert Notification.objects(user=marc).count() == 1
+        assert Notification.objects(user=marc).count() == 2
 
     def test_a_citizen_mutes_the_thread_they_answered_without_losing_the_others(self):
         """Claire asked one question and does not want the whole conversation, but is

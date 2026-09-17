@@ -68,7 +68,10 @@ class DiscussionEvent(NotificationEvent):
         raise NotImplementedError
 
     def recipients(self):
-        return self.discussion.owner_recipients(sender=self.sender)
+        return self.discussion.owner_recipients()
+
+    def excluded(self):
+        return [self.sender] if self.sender else []
 
     def scopes(self):
         """Muting one thread, one dataset or a whole organization are three grains of
