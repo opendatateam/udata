@@ -1,3 +1,6 @@
+- quand tu édites un jeu de données on t'abonne auto -> toast avec opt-out
+https://www.figma.com/design/FXdvJqrMlsEq0G65qXl27I/%E2%9C%89%EF%B8%8F-Email-et-notifications?node-id=6-16337&t=QyhJTLHP9Lh5dmm0-4
+
 # Favoris et notifications : ce qu'il reste à trancher
 
 Le nouveau système de préférences est en place côté API. Il sait déjà, pour une famille
@@ -23,9 +26,9 @@ lie, et la maquette leur donne déjà deux entrées de menu distinctes, « Favor
 
 Trois façons de les articuler :
 
-1. Le favori notifie. Une seule étoile, un seul geste. Mais on ne peut plus mettre de
-   côté sans être prévenu, ni être prévenu sans mettre en favori.
-2. Deux gestes indépendants. L'étoile pour ranger, un second bouton pour être prévenu.
+1. ~~Le favori notifie. Une seule étoile, un seul geste. Mais on ne peut plus mettre de
+   côté sans être prévenu, ni être prévenu sans mettre en favori.~~
+2. ~~Deux gestes indépendants. L'étoile pour ranger, un second bouton pour être prévenu.~~
 3. Le favori notifie les modifications de l'objet, et un bouton séparé « Suivre les
    discussions » pour ce qui fait du volume.
 
@@ -47,8 +50,8 @@ Ce qui manque : aucun événement « nouvel objet publié » n'existe aujourd'hu
 créer.
 
 Questions :
-- est-ce qu'on notifie aussi quand un objet est dépublié ou supprimé ?
-- est-ce qu'un jeu de données créé en privé puis publié compte comme un nouvel objet ?
+- est-ce qu'on notifie aussi quand un objet est dépublié ou supprimé ? Non
+- est-ce qu'un jeu de données créé en privé puis publié compte comme un nouvel objet ? Oui
 
 ## Mettre un jeu de données en favori
 
@@ -58,26 +61,25 @@ sans doute.
 Questions :
 - est-ce que les modifications de métadonnées sont utiles (titre, description, licence,
   couverture temporelle, fréquence) ? Si oui, lesquelles méritent une notification et
-  lesquelles sont du bruit ?
-- est-ce qu'une ressource supprimée se notifie ?
+  lesquelles sont du bruit ? non
+- est-ce qu'une ressource supprimée se notifie ? oui
 - est-ce qu'un fichier remplacé sans changement de nom compte, même si rien d'autre ne
-  bouge sur la page ?
+  bouge sur la page ? oui
 
 ## Mettre une réutilisation ou une API en favori
 
 On ne voit rien à notifier là-dessus.
 
-Question : est-ce que les modifications de métadonnées seraient utiles ? Si la réponse
-est non, est-ce qu'on garde le bouton sur ces pages ? Il existe aujourd'hui et ne
-produit rien.
+Question : est-ce que les modifications de métadonnées seraient utiles ? non
+Si la réponse est non, est-ce qu'on garde le bouton sur ces pages ? oui
 
 ## Mettre un utilisateur en favori
 
 Ce qu'on pense : ses nouveaux objets.
 
 Questions :
-- est-ce qu'on veut aussi ses discussions ? Pas sûr.
-- est-ce qu'on veut les réutilisations qu'il publie sur les données des autres ?
+- est-ce qu'on veut aussi ses discussions ? non
+- est-ce qu'on veut les réutilisations qu'il publie sur les données des autres ? oui
 
 Le bouton n'existe pas côté front aujourd'hui, seulement dans l'API.
 
@@ -87,11 +89,14 @@ C'est le point le plus ouvert. Mettre en favori un jeu de données populaire et 
 toutes ses discussions, ça peut faire beaucoup, et ce n'est pas forcément ce qu'on
 cherche en cliquant sur l'étoile.
 
-Question : est-ce que mettre un objet en favori doit donner ses discussions, oui ou non ?
+Question : est-ce que mettre un objet en favori doit donner ses discussions, oui ou non ? non
+
+
+abonnement sur toutes les notifications -> création ? ou création et réponses ? juste création pour le moment
 
 Si la réponse est non, le bouton séparé de la troisième option plus haut répond au
 besoin. Côté technique il ne demande rien de nouveau : c'est le même abonnement
-explicite que celui qui vient d'être construit.
+explicite que celui qui vient d'être construit. non
 
 ## Ce qu'il faut construire dans tous les cas
 
