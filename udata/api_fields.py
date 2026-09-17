@@ -339,19 +339,30 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             def constructor_read(**kwargs):
                 return restx_fields.Nested(shared_nested_fields, **kwargs)
         elif field.choices:
-            generic_fields = {}
-            for cls in field.choices:
-                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                generic_fields[cls.__name__] = convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having GenericReferenceField() we'll create fields for each
-                    # of the subclasses with ReferenceField(Organization)…
-                    mongoengine.fields.ReferenceField(cls),
-                    info,
-                )
+
+            def generic_fields():
+                # Choices may name classes not registered yet at decoration time (a model
+                # declared early, such as `Activity`, referencing one declared later), so
+                # resolve them lazily on first marshalling — same as the
+                # `GenericEmbeddedDocumentField` branch below.
+                return {
+                    cls.__name__: convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having GenericReferenceField() we'll create fields for each
+                        # of the subclasses with ReferenceField(Organization)…
+                        mongoengine.fields.ReferenceField(cls),
+                        info,
+                    )
+                    for cls in (
+                        db.resolve_model(choice) if isinstance(choice, str) else choice
+                        for choice in field.choices
+                    )
+                }
 
             def constructor_read(**kwargs):
-                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+                return GenericField(
+                    lambda: {k: v[0].model for k, v in generic_fields().items()}, **kwargs
+                )
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.

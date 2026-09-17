@@ -17,7 +17,7 @@ from mongoengine.signals import post_delete
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.dataset.models import get_resource
 from udata.core.dataset.permissions import OwnablePermission, OwnableReadPermission
 from udata.core.linkable import Linkable
