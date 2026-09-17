@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceField
 from mongoengine.signals import post_save
 
+from udata.api_fields import field, generate_fields
+from udata.core.user.models import User
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
 
@@ -22,10 +24,27 @@ class FollowQuerySet(UDataQuerySet):
         return self(follower=user, following=following, until=None).count() > 0
 
 
+@generate_fields()
 class Follow(Document[FollowQuerySet]):
-    follower = ReferenceField("User", required=True)
+    # Read only: a follow is created and ended through the dedicated POST and DELETE,
+    # which take no body.
+    follower = field(
+        ReferenceField(User, required=True),
+        readonly=True,
+        filterable={
+            "key": "user",
+            "help": "Filter follower by user, it allows to check if a user is following the object",
+        },
+        description="The follower",
+    )
+    # `following` and `until` stay out of the API: the endpoint is always scoped to one
+    # followed object, and an ended follow is never listed.
     following = GenericReferenceField()
-    since = DateTimeField(required=True, default=lambda: datetime.now(UTC))
+    since = field(
+        DateTimeField(required=True, default=lambda: datetime.now(UTC)),
+        readonly=True,
+        description="The date from which the user started following",
+    )
     until = DateTimeField()
 
     meta = {
