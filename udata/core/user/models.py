@@ -220,7 +220,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     tf_primary_method = StringField()
     tf_totp_secret = StringField()
 
-    deleted = DateTimeField()
+    deleted = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        show_as_ref=True,
+        description="The date the account was deleted, null for a live account",
+    )
     ext = MapField(GenericEmbeddedDocumentField())
     extras = ExtrasField()
 
