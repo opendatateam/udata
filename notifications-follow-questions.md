@@ -101,19 +101,24 @@ explicite que celui qui vient d'être construit.
 - [ ] la création d'une réutilisation ou d'une API notifie de manière synchrone
       aujourd'hui, à passer en tâche de fond avant d'y ajouter des abonnés
 - [ ] les notifications sont écrites une par une, et chaque mail ouvre sa propre
-      connexion SMTP. Ça tient pour une organisation, pas pour un objet à plusieurs
-      milliers d'abonnés
+      connexion SMTP. Tenable aux volumes actuels (voir plus bas), à reprendre quand
+      même
 
-## Le chiffre qui manque
+## Le volume réel
 
-On ne sait pas combien de personnes ont réellement mis en favori les objets les plus
-suivis. C'est public et ça se vérifie :
+Mesuré le 17 septembre 2026 sur l'API publique, sur les objets les plus mis en favori :
 
-```
-curl -s "https://www.data.gouv.fr/api/1/datasets/?sort=-followers&page_size=20" \
-  | jq '.data[] | {title, followers: .metrics.followers}'
-```
+| | Record | Suivants |
+|---|---|---|
+| Jeux de données (73 900 au total) | 201 (Sirene) | 138, 95, 80, 72 |
+| Réutilisations | 324 | 258, 217, 213, 169 |
+| Organisations | 662 (Insee) | 429, 375, 359, 299 |
 
-Si le maximum est de quelques centaines, les deux derniers points ci-dessus sont
-théoriques. S'il monte à plusieurs milliers, il faut les traiter avant d'activer quoi que
-ce soit.
+On est donc dans les centaines, pas dans les milliers, et la décroissance est rapide dès
+le deuxième objet. C'est l'ordre de grandeur que le système encaisse déjà aujourd'hui
+pour une organisation à plusieurs centaines de membres.
+
+Ça change la priorité de deux points ci-dessus : grouper les écritures et les envois
+reste souhaitable, mais ce n'est plus un préalable. Passer la création de réutilisation
+et d'API en tâche de fond le reste, en revanche : 201 destinataires servis pendant la
+requête HTTP de celui qui publie, c'est un timeout pour quelqu'un qui n'a rien demandé.
