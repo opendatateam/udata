@@ -323,7 +323,12 @@ class NotificationTablesTest:
         assert sum(len(group) for group in groups) == len(set().union(*groups))
 
     def test_every_reason_declares_a_default(self):
-        assert set(DEFAULT_ENABLED) == set(NotificationReason)
+        """Every reason has to answer for every family: a favourite reports what
+        changed on an object without handing over its discussions, and that only fits
+        if the default is read per category."""
+        assert set(DEFAULT_ENABLED) == {
+            (reason, category) for reason in NotificationReason for category in NotificationCategory
+        }
 
     def test_every_organization_role_maps_to_a_reason(self):
         assert set(REASON_BY_ORGANIZATION_ROLE) == set(ORG_ROLES)
@@ -465,11 +470,12 @@ class ResolutionTest(PytestOnlyDBTestCase):
             {
                 NotificationReason.ORGANIZATION_EDITOR,
                 NotificationReason.DISCUSSION_PARTICIPANT,
-            }
+            },
+            NotificationCategory.DISCUSSIONS,
         )
 
     def test_no_reason_at_all_is_silent(self):
-        assert not default_enabled(frozenset())
+        assert not default_enabled(frozenset(), NotificationCategory.DISCUSSIONS)
 
 
 class DispatchTest(PytestOnlyDBTestCase):

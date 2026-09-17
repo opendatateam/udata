@@ -144,8 +144,10 @@ class NotificationEvent:
             # An in-app notification needs an account to hang on, so an address with no
             # user behind it is reachable by email only.
             is_user = isinstance(recipient.user, User)
-            wants_app = is_user and self._wants(recipient, NotificationChannel.APP, decisions)
-            wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions)
+            wants_app = is_user and self._wants(
+                recipient, NotificationChannel.APP, decisions, category
+            )
+            wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions, category)
 
             deferred = (
                 wants_mail
@@ -221,8 +223,14 @@ class NotificationEvent:
             for channel in NotificationChannel
         }
 
-    def _wants(self, recipient: Recipient, channel: NotificationChannel, decisions) -> bool:
-        if decisions is None:
+    def _wants(
+        self,
+        recipient: Recipient,
+        channel: NotificationChannel,
+        decisions,
+        category: NotificationCategory | None,
+    ) -> bool:
+        if decisions is None or category is None:
             # Either an action to take or the answer to a request this recipient made:
             # neither is something to opt out of.
             return True
@@ -230,7 +238,7 @@ class NotificationEvent:
             # A bare address has no account to hang a setting on.
             return True
         decided = decisions[channel].get(recipient.user.id)
-        return default_enabled(recipient.reasons) if decided is None else decided
+        return default_enabled(recipient.reasons, category) if decided is None else decided
 
     def already_pending(self, recipient: User, **details) -> bool:
         """Whether the recipient still has an unhandled notification about the same

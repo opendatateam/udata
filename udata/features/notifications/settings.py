@@ -113,11 +113,11 @@ def subscribers_for(category: NotificationCategory, scopes: Sequence[Document]) 
     )
 
 
-def default_enabled(reasons: Iterable[NotificationReason]) -> bool:
-    """Whether somebody concerned for these reasons hears about it by default.
+def default_enabled(reasons: Iterable[NotificationReason], category: NotificationCategory) -> bool:
+    """Whether somebody concerned for these reasons hears about this family by default.
 
     The most generous reason wins: being an editor who never opened a dataset does not
     cancel out having taken part in the discussion. This keeps the union of recipients
     the code produced before anybody could set anything.
     """
-    return any(DEFAULT_ENABLED[reason] for reason in reasons)
+    return any(DEFAULT_ENABLED[reason, category] for reason in reasons)

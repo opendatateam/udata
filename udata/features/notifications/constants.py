@@ -143,9 +143,13 @@ REASON_BY_ORGANIZATION_ROLE: dict[str, NotificationReason] = {
     "partial_editor": NotificationReason.ORGANIZATION_PARTIAL_EDITOR,
 }
 
-# What somebody gets before they ever open the settings screen. Identical on every
-# channel on purpose: a role has to stay readable as a single line. Individuals then
-# deviate channel by channel, roles do not.
+# What somebody gets before they ever open the settings screen, per reason and per
+# category. Identical on every channel on purpose: a role has to stay readable as a
+# single line. Individuals then deviate channel by channel, roles do not.
+#
+# The category matters because the same standing does not answer for every family: a
+# favourite is meant to report what changed on the object, not to hand over its
+# discussions, and a reason cannot say that with a single boolean.
 #
 # Editors start silent: they are members of organizations whose datasets they have
 # never touched, and mailing them every discussion of a 400-dataset organization is
@@ -154,15 +158,22 @@ REASON_BY_ORGANIZATION_ROLE: dict[str, NotificationReason] = {
 # Partial editors start loud, which only looks inconsistent: they are never given this
 # reason unless the object was actually assigned to them, so "everything concerning
 # me" is already a short list.
-DEFAULT_ENABLED: dict[NotificationReason, bool] = {
+#
+# Explicit subscribers start silent, which is not a contradiction either: the reason
+# only exists because a decision said `True` somewhere, and that decision names a
+# channel. Subscribing to the bell must not sign one up for the mails too.
+_DEFAULTS_BY_REASON: dict[NotificationReason, bool] = {
     NotificationReason.OWNER: True,
     NotificationReason.ORGANIZATION_ADMIN: True,
     NotificationReason.ORGANIZATION_EDITOR: False,
     NotificationReason.ORGANIZATION_PARTIAL_EDITOR: True,
     NotificationReason.DISCUSSION_PARTICIPANT: True,
     NotificationReason.SYSADMIN: True,
-    # Silent by default, which is not a contradiction: this reason only exists because
-    # a decision said `True` somewhere, and that decision names a channel. Subscribing
-    # to the bell must not sign one up for the mails too.
     NotificationReason.EXPLICIT_SUBSCRIBER: False,
+}
+
+DEFAULT_ENABLED: dict[tuple[NotificationReason, NotificationCategory], bool] = {
+    (reason, category): enabled
+    for reason, enabled in _DEFAULTS_BY_REASON.items()
+    for category in NotificationCategory
 }
