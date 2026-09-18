@@ -175,66 +175,60 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert before_naive <= last_update_naive <= after_naive
 
     def test_has_feature_defaults(self):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-
+        backend = FakeBackend(HarvestSourceFactory())
         assert not backend.has_feature("feature")
         assert backend.has_feature("enabled")
 
     def test_has_feature_defined(self):
-        source = HarvestSourceFactory(
-            config={
-                "features": {
-                    "feature": True,
-                    "enabled": False,
+        backend = FakeBackend(
+            HarvestSourceFactory(
+                config={
+                    "features": {
+                        "feature": True,
+                        "enabled": False,
+                    }
                 }
-            }
+            )
         )
-        backend = FakeBackend(source)
-
         assert backend.has_feature("feature")
         assert not backend.has_feature("enabled")
 
     def test_has_feature_unkown(self):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-
+        backend = FakeBackend(HarvestSourceFactory())
         with pytest.raises(HarvestException):
             backend.has_feature("unknown")
 
     def test_get_filters_empty(self):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-
+        backend = FakeBackend(HarvestSourceFactory())
         assert backend.get_filters() == []
 
     def test_get_filters(self):
-        source = HarvestSourceFactory(
-            config={
-                "filters": [
-                    {"key": "second", "value": ""},
-                    {"key": "first", "value": ""},
-                ]
-            }
+        backend = FakeBackend(
+            HarvestSourceFactory(
+                config={
+                    "filters": [
+                        {"key": "second", "value": ""},
+                        {"key": "first", "value": ""},
+                    ]
+                }
+            )
         )
-        backend = FakeBackend(source)
-
         assert [f["key"] for f in backend.get_filters()] == ["second", "first"]
 
     def test_get_extra_config_not_in_source(self):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
+        backend = FakeBackend(HarvestSourceFactory())
         assert backend.get_extra_config_value("test_str") is None
 
     def test_get_extra_config_value(self):
-        source = HarvestSourceFactory(
-            config={
-                "extra_configs": [
-                    {"key": "test_str", "value": "test"},
-                ]
-            }
+        backend = FakeBackend(
+            HarvestSourceFactory(
+                config={
+                    "extra_configs": [
+                        {"key": "test_str", "value": "test"},
+                    ]
+                }
+            )
         )
-        backend = FakeBackend(source)
         assert backend.get_extra_config_value("test_str") == "test"
 
     @pytest.mark.parametrize("method", ["head", "get", "post"])
@@ -278,8 +272,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_item_remote_url(self):
         n = 3
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
+        backend = FakeBackend(HarvestSourceFactory())
         backend.fake_records = FakeRecord.create(Dataset, n) + FakeRecord.create(Dataservice, n)
 
         job = backend.harvest()
@@ -311,30 +304,24 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_dont_overwrite_last_modified(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
+        backend = FakeBackend(HarvestSourceFactory())
         backend.fake_records = FakeRecord.create(Dataset, 1)
         backend.fake_last_modified = last_modified
 
         backend.harvest()
-
         dataset = Dataset.objects.first()
-
         assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.now(UTC))
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
+        backend = FakeBackend(HarvestSourceFactory())
         backend.fake_records = FakeRecord.create(Dataset, 1)
         backend.fake_last_modified = last_modified
 
         backend.harvest()
         backend.harvest()  # Harvest twice to test same last_modified
-
         dataset = Dataset.objects.first()
-
         assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.now(UTC))
 
@@ -448,22 +435,17 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice.harvest
 
     def test_harvest_datasets_get_deleted(self):
-        nb_datasets = 3
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
+        backend = FakeBackend(HarvestSourceFactory())
+        backend.fake_records = FakeRecord.create(Dataset, 3)
 
         job = backend.harvest()
-
         for item in job.items:
             assert item.dataset is not None
-
         for dataset in Dataset.objects():
             dataset.deleted = "2016-01-01"
             dataset.save()
 
         tasks.purge_datasets()
-
         job.reload()
         for item in job.items:
             assert item.dataset is None
@@ -487,7 +469,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 "source_id": str(source.id),
             },
         )
-
         # Create a dataset that should be reused even though it's a different `source_id` and `domain,
         # because the remote_id is the same and an URI.
         dataset_reused_uri = DatasetFactory(
@@ -499,7 +480,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 "source_id": "some-other-source-id",
             },
         )
-
         # Create a dataset that should not be reused even though it's the same `remote_id`,
         # as it's not an URI, and has a different domain and source id.
         dataset_not_reused = DatasetFactory(
@@ -512,7 +492,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         )
 
         job = backend.harvest()
-
         # 3 (nb_datasets) + 1 (dataset_remote_ids) created by the HarvestSourceFactory
         assert len(job.items) == nb_datasets + 1
         # all datasets : 4 mocks (3 nb_datasets + 1 dataset_remote_ids) + 3 created with DatasetFactory - 2 reused
@@ -545,12 +524,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             FakeRecord(Dataservice, "dataservice-id-2"),
             FakeRecord(Dataservice, "dataservice-id-2"),
         ]
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source)
+        backend = FakeBackend(HarvestSourceFactory())
         backend.fake_records = dataset_records + dataservice_records
 
         job = backend.harvest()
-
         assert job.status == "done-errors"
         assert len(job.items) == len(dataset_records) + len(dataservice_records)
         assert Dataset.objects.count() == len(set(dataset_records))
@@ -581,6 +558,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             FakeRecord(Dataset, "https://data.example.com/catalog/dataset-unique"),
             # dataservices don't check on uri remote_id (bug?)
         ]
+
         job1 = backend1.harvest()
         assert job1.status == "done"
         assert len(job1.items) == 2
@@ -595,6 +573,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             FakeRecord(Dataset, "https://data.example.com/catalog/dataset-repeat"),
             FakeRecord(Dataset, "https://other.example.com/catalog/dataset-unique"),
         ]
+
         job2 = backend2.harvest()
         assert job2.status == "done-errors"
         assert len(job2.items) == 2
@@ -623,6 +602,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             FakeRecord(Dataservice, "dataservice-repeat"),
             FakeRecord(Dataservice, "dataservice-unique-1"),
         ]
+
         job1 = backend1.harvest()
         assert job1.status == "done"
         assert len(job1.items) == 4
@@ -639,6 +619,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             FakeRecord(Dataservice, "dataservice-repeat"),
             FakeRecord(Dataservice, "dataservice-unique-2"),
         ]
+
         job2 = backend2.harvest()
         assert job2.status == "done-errors"
         assert len(job2.items) == 4
@@ -654,12 +635,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [(2, 2, 0), (3, 3, 0), (4, 3, 1)],
     )
     def test_max_items(self, max_items, n_dataset, n_dataservice):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source, max_items=max_items)
+        backend = FakeBackend(HarvestSourceFactory(), max_items=max_items)
         backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
 
         job = backend.harvest()
-
         assert job.status == "done"
         assert len(job.items) == max_items
         assert len(job.errors) == 1
@@ -668,12 +647,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataservice.objects.count() == n_dataservice
 
     def test_max_items_preview(self):
-        source = HarvestSourceFactory()
-        backend = FakeBackend(source, dryrun=True, max_items=2)
+        backend = FakeBackend(HarvestSourceFactory(), dryrun=True, max_items=2)
         backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
 
         job = backend.harvest()
-
         assert job.status == "done"
         assert len(job.items) == 2
         # we don't log the max_items error in dryrun
@@ -697,7 +674,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ]
 
         job = backend.harvest()
-
         assert job.status == "failed"
         assert len(job.errors) == 1
         assert len(job.items) == 1
@@ -719,7 +695,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ]
 
         job = backend.harvest()
-
         assert job.status == job_status
         assert len(job.errors) == 0
         assert len(job.items) == 3
