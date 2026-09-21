@@ -1,14 +1,10 @@
 from datetime import UTC, datetime
 
-from flask import current_app, request
 from flask_security import current_user
 
-from udata import tracking
 from udata.api import API, api
 from udata.models import Follow
 from udata.utils import id_or_404
-
-from .signals import on_new_follow
 
 NOTE = "Returns the number of followers left after the operation"
 
@@ -44,8 +40,6 @@ class FollowAPI(API):
             follower=current_user.id, following=model, until=None
         )
         count = Follow.objects.followers(model).count()
-        if not current_app.config["TESTING"]:
-            tracking.send_signal(on_new_follow, request, current_user)
         return {"followers": count}, 201 if created else 200
 
     @api.secure
