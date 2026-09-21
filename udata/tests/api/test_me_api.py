@@ -3,6 +3,7 @@ import zlib
 from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
 
+import pytest
 from flask import url_for
 
 from udata.core import storages
@@ -207,6 +208,17 @@ class MeAPITest(APITestCase):
         response = self.put(url_for("api.me"), data)
         self.assert400(response)
         assert "last_name" in response.json["errors"]
+
+    @pytest.mark.options(SPAM_ALLOWED_LANGS=["fr"])
+    def test_update_profile_with_a_long_website(self):
+        """The spam check runs on `website`, but a URL has no language to detect."""
+        self.login()
+        data = self.user.to_dict()
+        data["website"] = "https://example.com/organizations/centre-de-la-propriete"
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertEqual(self.user.website, data["website"])
 
     def test_get_profile_exposes_creation_date_as_since(self):
         """`since` should expose the registration date (created_at), not null"""

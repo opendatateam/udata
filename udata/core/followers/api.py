@@ -2,32 +2,9 @@ from datetime import UTC, datetime
 
 from flask_security import current_user
 
-from udata.api import API, add_pagination_arguments, api, fields
-from udata.core.user.models import User
+from udata.api import API, api
 from udata.models import Follow
 from udata.utils import id_or_404
-
-follow_fields = api.model(
-    "Follow",
-    {
-        "id": fields.String(description="The follow object technical ID", readonly=True),
-        "follower": fields.Nested(User.__ref_fields__, description="The follower", readonly=True),
-        "since": fields.ISODateTime(
-            description="The date from which the user started following", readonly=True
-        ),
-    },
-)
-
-follow_page_fields = api.model("FollowPage", fields.pager(follow_fields))
-
-parser = api.parser()
-add_pagination_arguments(parser)
-parser.add_argument(
-    "user",
-    type=str,
-    location="args",
-    help="Filter follower by user, it allows to check if a user is following the object",
-)
 
 NOTE = "Returns the number of followers left after the operation"
 
@@ -39,20 +16,20 @@ class FollowAPI(API):
 
     model = None
 
-    @api.expect(parser)
-    @api.marshal_with(follow_page_fields)
+    @api.expect(Follow.__index_parser__)
+    @api.marshal_with(Follow.__page_fields__)
     def get(self, id):
         """List all followers for a given object"""
-        args = parser.parse_args()
+        # Parsed up front so that an out of range page answers 400 before the followed
+        # object is looked up.
+        Follow.__index_parser__.parse_args()
+
         model = None
         if hasattr(self.model, "slug"):
             model = self.model.objects(slug=id).first()
         model = model or self.model.objects.only("id").get_or_404(id=id_or_404(id))
-        qs = Follow.objects(following=model, until=None)
-        if args["user"]:
-            qs = qs.filter(follower=id_or_404(args["user"]))
 
-        return qs.paginate(args["page"], args["page_size"])
+        return Follow.apply_pagination(Follow.apply_sort_filters(Follow.objects.followers(model)))
 
     @api.secure
     @api.doc(description=NOTE)
