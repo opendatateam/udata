@@ -4,6 +4,7 @@ import pytest
 
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.factories import UserFactory
 from udata.geopf.metadata import SANDBOX_DATASTORE_ID, XML_NS, dataset_to_iso19115
@@ -71,8 +72,9 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         assert result.startswith(b"<?xml")
 
     def test_contact_email_from_contact_points(self):
-        cp = ContactPointFactory(email="geo@example.com")
-        dataset = DatasetFactory(org=True, contact_points=[cp])
+        org = OrganizationFactory()
+        cp = ContactPointFactory(email="geo@example.com", organization=org)
+        dataset = DatasetFactory(organization=org, contact_points=[cp])
         root = _parse(dataset)
         emails = [
             el.text
@@ -87,8 +89,9 @@ class DatasetToIso19115Test(PytestOnlyDBTestCase):
         assert root.find(".//gmd:electronicMailAddress", XML_NS) is None
 
     def test_no_contact_email_when_contact_point_has_no_email(self):
-        cp = ContactPointFactory(email=None)
-        dataset = DatasetFactory(org=True, contact_points=[cp])
+        org = OrganizationFactory()
+        cp = ContactPointFactory(email=None, organization=org)
+        dataset = DatasetFactory(organization=org, contact_points=[cp])
         root = _parse(dataset)
         assert root.find(".//gmd:electronicMailAddress", XML_NS) is None
 
