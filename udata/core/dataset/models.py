@@ -33,7 +33,7 @@ from udata.app import cache
 from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
@@ -395,6 +395,13 @@ class Checksum(EmbeddedDocument):
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
             return super(Checksum, self).to_mongo()
+
+
+# Resource fields the platform maintains on its own: they change on every write and say
+# nothing about what the author edited, so they are kept out of the recorded activity.
+# The equivalent for documents is the `auditable` flag of `field()`, which a plain
+# `EmbeddedDocument` such as `Resource` does not carry.
+RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash")
 
 
 class ResourceMixin(object):
@@ -1097,10 +1104,22 @@ class Dataset(
             set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_added.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
+
+        # Read before the write: this is the only point where the fields the caller
+        # actually touched are known, and the recorded activity reports them.
+        # mongoengine only marks a field as changed when its value really differs, so a
+        # form repopulating every field does not inflate this list.
+        changed_fields = [
+            field
+            for field in resource._get_changed_fields()
+            if field not in RESOURCE_NON_AUDITABLE_FIELDS
+        ]
 
         # Keep the in-memory document consistent with what we persist below, so we
         # don't need a self.reload() afterwards. reload() would re-read and
@@ -1118,7 +1137,13 @@ class Dataset(
             set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_updated.send(
+            self.__class__,
+            document=self,
+            resource_id=resource.id,
+            resource_title=resource.title,
+            changed_fields=changed_fields,
+        )
 
     def update_resource_extras(self, resource):
         """Persist a single resource's extras with a targeted positional update.
@@ -1165,7 +1190,9 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_removed.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     @property
     def community_resources(self):

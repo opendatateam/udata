@@ -22,6 +22,7 @@ from udata.core.access_type.constants import (
     InspireLimitationCategory,
 )
 from udata.core.badges.factories import badge_factory
+from udata.core.dataset.activities import UserUpdatedResource
 from udata.core.dataset.constants import (
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
@@ -2435,6 +2436,35 @@ class DatasetResourceAPITest(APITestCase):
         # Url should NOT have been updated as it is a hosted resource
         self.assertNotEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
+
+    def test_update_records_an_activity_naming_the_resource_and_the_changed_fields(self):
+        """The recorded activity says which resource was touched, and how.
+
+        Going through the endpoint on purpose: the form repopulates every field of the
+        resource, so this is what says the activity reports the edited ones rather than
+        all of them.
+        """
+        resource = ResourceFactory(title="Original title", description="Original description")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "url": resource.url,
+                "filetype": resource.filetype,
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=self.dataset)
+        assert activity.changes == ["title"]
+        assert activity.extras == {
+            "resource_id": str(resource.id),
+            "resource_title": "New title",
+        }
 
     def test_update_remote(self):
         resource = ResourceFactory()
