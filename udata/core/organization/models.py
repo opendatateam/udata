@@ -119,7 +119,7 @@ class Member(EmbeddedDocument):
     @property
     @field(readonly=True)
     def label(self):
-        return ORG_ROLES[self.role]
+        return ORG_ROLES[self.role].label
 
 
 @generate_fields()

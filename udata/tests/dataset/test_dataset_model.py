@@ -933,7 +933,7 @@ class ResourceSchemaTest(PytestOnlyDBTestCase):
 
         # fill cache
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-        ResourceSchema.all()
+        ResourceSchema.all.uncached()
         assert cache_mock_set.called
 
         mocker.patch.object(
@@ -942,7 +942,7 @@ class ResourceSchemaTest(PytestOnlyDBTestCase):
         rmock.get("https://example.com/schemas", status_code=500)
         assert (
             ResourceSchemaMockData.get_all_schemas_from_mock_data(with_datapackage_info=False)
-            == ResourceSchema.all()
+            == ResourceSchema.all.uncached()
         )
         assert rmock.call_count == 2
 

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from bson import ObjectId
-from flask import current_app, url_for
+from flask import current_app, g, url_for
 from flask_login import current_user
 from flask_restx.inputs import boolean
 from mongoengine import EmbeddedDocument
@@ -22,15 +22,15 @@ from mongoengine.signals import post_save
 from udata import uris
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.core.checks import only_creation
 from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
-from udata.core.owned import check_organization_is_valid_for_current_user, only_creation
+from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
-from udata.utils import id_or_404
 
 from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
 from .signals import (
@@ -191,7 +191,7 @@ def filter_by_organization(base_query, filter_value):
     from udata.core.dataset.models import Dataset
     from udata.core.reuse.models import Reuse
 
-    org = Organization.objects.get_or_404(id=id_or_404(filter_value))
+    org = Organization.objects.get_or_404(id=filter_value)
     subjects = (
         list(Reuse.objects(organization=org).only("id"))
         + list(Dataset.objects(organization=org).only("id"))
@@ -225,12 +225,14 @@ def filter_by_closed(base_query, filter_value):
             "key": "for",
             "type": str,
             "is_list": True,
+            "constraints": ["objectid"],
             "query": filter_by_subject,
             "help": "Filter discussions for a given subject",
         },
         {
             "key": "org",
             "type": str,
+            "constraints": ["objectid"],
             "query": filter_by_organization,
             "help": "Filter discussions for a given organization",
         },
@@ -365,7 +367,7 @@ class Discussion(SpamMixin, Linkable, Document):
         from udata.core.dataset.permissions import OwnablePermission
         from udata.core.owned import Owned
 
-        if not current_user or not current_user.is_authenticated:
+        if not current_user or not current_user.is_authenticated or not hasattr(g, "identity"):
             return False
 
         if not isinstance(self.subject, Owned):

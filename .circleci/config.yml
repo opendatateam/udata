@@ -27,7 +27,8 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
-      - image: minio/minio
+      # MinIO images are no longer published on Docker Hub, quay.io is the only registry left
+      - image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
         environment:
           MINIO_ROOT_USER: udata
           MINIO_ROOT_PASSWORD: udata-secret
@@ -176,45 +177,6 @@ jobs:
           command: |
             uv publish dist/*.whl  # use UV_PUBLISH_TOKEN
 
-  trigger-gitlab-pipeline:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Configure the SSH simple-scaffold repository private key
-          command: |
-            mkdir -p ~/.ssh
-            # SCAFFOLD_PRIVATE_KEY is the private key related to the "simple-scaffold" GitLab repository, so that it can be cloned
-            # CircleCI doesn't accept multiple lines in a single environment variable, so the multiline private key must be base64 encoded, and then decoded here
-            echo "$SCAFFOLD_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
-            chmod 600 ~/.ssh/id_ed25519
-            ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
-      - run:
-          name: Configure Git
-          command: |
-            git config --global user.email "root@data.gouv.fr"
-            git config --global user.name "datagouv"
-      - run:
-          name: Clone simple-scaffold repository
-          command: |
-            git clone --quiet --depth 1 $SCAFFOLD_REPO_SSH_URL scaffold
-      - run:
-          name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
-          command: |
-            source release.env
-            cd scaffold
-            # Run the script that triggers the Gitlab CI/CD pipeline.
-            # Must have GITLAB_API_TOKEN set in the environment
-            # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
-            # The script args are, in order:
-            # - udata: the name of the project to deploy (APP_NAME)
-            # - $RELEASE_VERSION: the version to deploy (RELEASE_VERSION)
-            # - << pipeline.parameters.deploy-env >>: the environment to deploy to (ENV)
-            # - "": the deploy variables (VARS)
-            ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION << pipeline.parameters.deploy-env >> ""
-
   create-sentry-release:
     docker:
       - image: cimg/base:stable
@@ -258,19 +220,9 @@ workflows:
               only:
                 - << pipeline.parameters.publish-branch >>
           context: org-global
-      - trigger-gitlab-pipeline:
-          requires:
-            - publish
-          filters:
-            branches:
-              only:
-                - << pipeline.parameters.publish-branch >>
-          context:
-            - org-global
-            - gitlab-trigger
       - create-sentry-release:
           requires:
-            - trigger-gitlab-pipeline
+            - dist
           filters:
             branches:
               only:

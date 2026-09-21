@@ -221,6 +221,11 @@ class URLField(EmptyNone, Field):
     def process_formdata(self, valuelist):
         super(URLField, self).process_formdata(valuelist)
         if self.data:
+            if not isinstance(self.data, str):
+                # A ValueError is what wtforms (and our own extras parsing) catch
+                # to turn a bad input into a validation error; letting the strip
+                # below raise an AttributeError would surface as a 500 instead.
+                raise ValueError(_("Not a valid URL"))
             self.data = self.data.strip()
 
 
@@ -815,15 +820,36 @@ class ExtrasField(Field):
         else:
             return value
 
+    def can_write(self, key) -> bool:
+        return not self.extras.is_reserved(key) or admin_permission.can()
+
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = self.parse(data)
-            else:
+            if not isinstance(data, dict):
                 raise ValueError("Unsupported data type")
         else:
-            self.data = self.parse(self.data or {})
+            data = self.data or {}
+        # Filtering before parsing, because parse() records a type error for every
+        # key it reads: a reserved key carrying a bad value would fail the whole
+        # payload with a 400 naming a key the caller may not write anyway, while
+        # the same key with a valid value is silently dropped.
+        self.data = self.parse({key: value for key, value in data.items() if self.can_write(key)})
+
+    def populate_obj(self, obj, name):
+        """Restore the reserved extras dropped from a non-sysadmin payload.
+
+        An update replaces the whole dict, so a payload that does not echo a stored
+        reserved key would erase it. Unlike the apiv2 extras endpoints, where every
+        key is an explicit write intent and a reserved one is rejected, a full-object
+        update legitimately echoes the extras it just read, hence a silent restore.
+        """
+        stored = getattr(obj, name, None) or {}
+        setattr(
+            obj,
+            name,
+            (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
+        )
 
     def validate(self, form, extra_validators=tuple()):
         if self.process_errors:

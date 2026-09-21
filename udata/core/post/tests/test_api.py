@@ -157,7 +157,7 @@ class PostsAPITest(APITestCase):
         or not, so the comparison would hold without checking anything.
         """
         org = OrganizationFactory()
-        contact_point = ContactPointFactory(role="contact")
+        contact_point = ContactPointFactory(role="contact", organization=org)
         audiences = [
             AccessAudience(role=AccessAudienceType.COMPANY, condition=AccessAudienceCondition.YES)
         ]
@@ -539,6 +539,32 @@ class PostsAPITest(APITestCase):
         assert post.body_type == "blocs"
         assert len(post.blocs) == 1
         assert post.blocs[0].title == "Featured datasets"
+
+    def test_post_api_blocs_title_is_optional(self):
+        """A list bloc nested under a heading that already names it needs no title of its own."""
+        self.login(AdminFactory())
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [
+                {
+                    "class": "AccordionListBloc",
+                    "title": "Comptes de campagne",
+                    "items": [
+                        {
+                            "title": "Comptes de campagne",
+                            "content": [{"class": "DatasetsListBloc", "datasets": []}],
+                        }
+                    ],
+                },
+                {"class": "ReusesListBloc", "title": "  ", "reuses": []},
+            ],
+        }
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        post = Post.objects.first()
+        assert post.blocs[0].items[0].content[0].title is None
+        assert post.blocs[1].title is None
 
     def test_post_api_get_with_blocs(self):
         """It should return blocs directly on the post"""

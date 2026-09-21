@@ -1,3 +1,4 @@
+import hashlib
 import io
 from datetime import UTC, datetime, timedelta
 from os.path import basename
@@ -143,6 +144,39 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
+
+
+class MeasuredStreamTest(PytestOnlyTestCase):
+    """The wrapper a storage reads an upload through."""
+
+    def test_digests_a_content_read_block_by_block(self):
+        # A storage reads by blocks, so the digest and the size are accumulated
+        # over several reads. A payload of a few bytes never takes that path.
+        content = b"0123456789" * 5000
+        stream = utils.MeasuredStream(io.BytesIO(content))
+
+        read = b""
+        while block := stream.read(4096):
+            read += block
+
+        assert read == content
+        assert stream.size == len(content)
+        assert stream.checksum == hashlib.sha1(content).hexdigest()
+
+    def test_digests_a_content_read_in_one_go(self):
+        content = b"0123456789" * 5000
+        stream = utils.MeasuredStream(io.BytesIO(content))
+
+        assert stream.read() == content
+        assert stream.size == len(content)
+        assert stream.checksum == hashlib.sha1(content).hexdigest()
+
+    def test_digests_an_empty_stream(self):
+        stream = utils.MeasuredStream(io.BytesIO(b""))
+
+        assert stream.read() == b""
+        assert stream.size == 0
+        assert stream.checksum == hashlib.sha1(b"").hexdigest()
 
 
 @pytest.mark.usefixtures("instance_path")

@@ -28,6 +28,7 @@ from udata.core.discussions.tasks import (
 from udata.core.linkable import Linkable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
+from udata.core.post.factories import PostFactory
 from udata.core.reports.constants import REASON_AUTO_SPAM, REASON_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
@@ -244,6 +245,27 @@ class DiscussionsTest(APITestCase):
 
         discussion.reload()
         assert discussion.closed_by_organization == org
+
+    def test_close_discussion_on_a_post(self):
+        """A `Post` has no owner in the permission sense, only sysadmins manage it:
+        closing stays open to the discussion author, and to nobody else.
+        """
+        author = UserFactory()
+        post = PostFactory(owner=UserFactory())
+        discussion = DiscussionFactory(
+            subject=post,
+            user=author,
+            discussion=[Message(content="bla bla", posted_by=author)],
+        )
+
+        self.login(post.owner)
+        self.assert403(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
+
+        self.login(author)
+        self.assert200(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
+
+        discussion.reload()
+        assert discussion.closed is not None
 
     def test_write_endpoints_reject_a_non_object_payload(self):
         """A JSON body decoding to anything but an object must be a 400, not a 500."""
@@ -615,6 +637,31 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(open_discussions + closed_discussions))
 
+    def test_list_discussions_on_every_subject_class(self):
+        """Marshalling `permissions.close` reads the subject's ownership, which a `Post`
+        has no notion of: a single discussion on one used to 500 the whole listing.
+        """
+        factories = {
+            "Dataset": DatasetFactory,
+            "Dataservice": DataserviceFactory,
+            "Post": PostFactory,
+            "Reuse": ReuseFactory,
+            "Topic": TopicFactory,
+        }
+        assert set(factories) == set(DISCUSSION_SUBJECTS)
+
+        user = UserFactory()
+        for subject_factory in factories.values():
+            DiscussionFactory(
+                subject=subject_factory(),
+                user=user,
+                discussion=[Message(content=faker.sentence(), posted_by=user)],
+            )
+
+        response = self.get(url_for("api.discussions"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(DISCUSSION_SUBJECTS))
+
     def test_list_discussions_closed_filter(self):
         dataset = Dataset.objects.create(title="Test dataset")
         open_discussions = []
@@ -675,6 +722,39 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(len(response.json["data"]), len(discussions))
+
+    def test_list_discussions_for_malformed_subject(self):
+        kwargs = {"for": "dataset:6853c089b3ed5781f6adfdf7"}
+        response = self.get(url_for("api.discussions", **kwargs))
+        self.assert400(response)
+        self.assertIn("`for`", response.json["message"])
+
+    def test_list_discussions_for_one_malformed_subject(self):
+        """`for` accepts several values, and every one of them is checked."""
+        dataset = DatasetFactory()
+
+        kwargs = {"for": [str(dataset.id), "dataset:6853c089b3ed5781f6adfdf7"]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert400(response)
+        self.assertIn("`for`", response.json["message"])
+
+    def test_list_discussions_for_several_subjects(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        discussion_for_dataset = DiscussionFactory(subject=dataset, user=user)
+        discussion_for_reuse = DiscussionFactory(subject=reuse, user=user)
+        DiscussionFactory(subject=DatasetFactory(), user=user)
+
+        kwargs = {"for": [str(dataset.id), str(reuse.id)]}
+        response = self.get(url_for("api.discussions", **kwargs))
+
+        self.assert200(response)
+        self.assertEqual(
+            {discussion["id"] for discussion in response.json["data"]},
+            {str(discussion_for_dataset.id), str(discussion_for_reuse.id)},
+        )
 
     def test_list_discussions_search(self):
         user = self.login()
@@ -760,8 +840,13 @@ class DiscussionsTest(APITestCase):
                 return
         self.fail(f"id {id_} not in {json_data}")
 
-    def test_list_discussions_org_does_not_exist(self) -> None:
+    def test_list_discussions_org_malformed(self) -> None:
         response: TestResponse = self.get(url_for("api.discussions", org="bad org id"))
+        self.assert400(response)
+        self.assertIn("`org`", response.json["message"])
+
+    def test_list_discussions_org_does_not_exist(self) -> None:
+        response: TestResponse = self.get(url_for("api.discussions", org=str(ObjectId())))
         self.assert404(response)
 
     def test_list_discussions_org(self) -> None:

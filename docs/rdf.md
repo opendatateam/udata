@@ -8,7 +8,8 @@ It uses the [Data Catalog Vocabulary][dcat] (or [DCAT][]) as base vocabulary.
 udata exposes instance metadata through different RDF endpoints
 and tries to follow some best practices.
 
-*All relative URLs are relative to the udata instance root*
+*All relative URLs are relative to the API root of the udata instance,
+ie. `https://www.data.gouv.fr/api/1/`*
 
 ### Content Negotiation
 
@@ -17,7 +18,7 @@ The following formats are supported (default in bold):
 | Format             | Extension        | MIME type                                 |
 |--------------------|------------------|-------------------------------------------|
 | [RDF/XML][rdf-xml] | **xml**, rdf     | **application/rdf+xml**, application/xml  |
-| [Turtle][]         | **ttl**          | **text/turle**, application/x-turtle      |
+| [Turtle][]         | **ttl**          | **text/turtle**, application/x-turtle     |
 | [Notation3][n3]    | **n3**           | **text/n3**                               |
 | [JSON-LD][]        | **jsonld**, json | **application/ld+json**, application/json |
 | [N-Triples][]      | **nt**           | **application/n-triples**                 |
@@ -25,20 +26,20 @@ The following formats are supported (default in bold):
 
 Each endpoint is available through a generic URL which performs content negotiation
 and redirects to a set of format specific URLs.
-The default format is JSON-LD.
+The default format is RDF/XML.
 
 
 ### Organization
 
 Organizations are available through the following URL:
 
-    /organization/{id}/catalog
+    /organizations/{id}/catalog
 
-where `id` is the organization's identifier on the udata instance.
+where `id` is the organization's identifier or slug on the udata instance.
 
 This URL performs content negotiation and redirects to:
 
-    /organization/{id}/catalog.{format}
+    /organizations/{id}/catalog.{format}
 
 It is exposed as a [DCAT Catalog][dcat-catalog] and a [Hydra Collection][hydra-collection]
 This allows pagination through the `hydra:PartialCollectionView` class.
@@ -50,22 +51,15 @@ The organization's catalog embeds the organization's datasets.
 
 Datasets are available through the following URL:
 
-    /dataset/{id}/rdf
+    /datasets/{id}/rdf
 
-where `id` is the dataset's identifier on the udata instance.
+where `id` is the dataset's identifier or slug on the udata instance.
 
 This URL performs content negotiation and redirects to:
 
-    /dataset/{id}/rdf.{format}
+    /datasets/{id}/rdf.{format}
 
-The dataset pages serves as an identifier and performs content negotiation too,
-so the following URLs will all redirect to the same RDF endpoint:
-
-    /dataset/{id}
-    /dataset/{slug}
-    /{lang}/dataset/{id}
-    /{lang}/dataset/{slug}
-
+Dataservices expose the same pair of endpoints under `/dataservices/{id}/rdf`.
 
 A Dataset is exposed as a [DCAT Dataset][dcat-dataset],
 a Resource as [DCAT Distribution][dcat-distribution]
@@ -113,33 +107,14 @@ and fields are mapped according to:
 
 The site catalog is exposed through:
 
-    /catalog
+    /site/catalog
 
 and performs content negotiation to
 
-    /catalog.{format}
+    /site/catalog.{format}
 
 It is exposed as a [DCAT Catalog][dcat-catalog] and a [Hydra Collection][hydra-collection]
 This allows pagination through the `hydra:PartialCollectionView` class.
-
-
-### Dataportal
-
-There is a work in progress [Dataportal specification][dataportal] but as many sites
-already use this formalism,
-the catalog is also available (as a redirect) on the following URL:
-
-    /data.{format}
-
-where format is one of the supported format extensions.
-
-### JSON-LD context
-
-To reduce payload and increase human readbility,
-udata exposes a JSON-LD context and uses it in its serialization.
-This context is available on:
-
-    /context.jsonld
 
 ## Harvester
 
@@ -176,7 +151,6 @@ The used namespaces are:
 [trig]: https://www.w3.org/TR/trig/
 [json-ld]: https://json-ld.org/
 [dcat]: https://www.w3.org/TR/vocab-dcat/
-[dataportal]: http://spec.dataportals.org/
 [dcat-dataset]: https://www.w3.org/TR/vocab-dcat/#Class:_Dataset
 [dcat-catalog]: https://www.w3.org/TR/vocab-dcat/#Class:_Catalog
 [dcat-distribution]: https://www.w3.org/TR/vocab-dcat/#Class:_Distribution
