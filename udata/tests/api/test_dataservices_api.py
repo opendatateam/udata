@@ -705,6 +705,78 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
+class DataserviceSuggestAPITest(APITestCase):
+    def test_suggest_dataservices_api(self):
+        """It should suggest dataservices sorted by followers"""
+        low = DataserviceFactory(title="Test API low", metrics={"followers": 1})
+        high = DataserviceFactory(title="Test API high", metrics={"followers": 10})
+        DataserviceFactory(title="Unrelated", metrics={"followers": 100})
+
+        response = self.get(url_for("api.suggest_dataservices", q="test api", size=5))
+        assert200(response)
+
+        assert [suggestion["id"] for suggestion in response.json] == [
+            str(high.id),
+            str(low.id),
+        ]
+        assert response.json[0] == {
+            "id": str(high.id),
+            "title": high.title,
+            "acronym": high.acronym,
+            "slug": high.slug,
+            "page": high.self_web_url(),
+        }
+
+    def test_suggest_dataservices_api_size(self):
+        """It should respect the size parameter"""
+        DataserviceFactory.create_batch(4, title="arealtestprefix")
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=2))
+        assert200(response)
+        assert len(response.json) == 2
+
+    def test_suggest_dataservices_api_acronym(self):
+        """It should suggest dataservices matching the acronym"""
+        dataservice = DataserviceFactory(title="Something else", acronym="ARTP")
+        DataserviceFactory(title="Another one", acronym="XYZ")
+
+        response = self.get(url_for("api.suggest_dataservices", q="artp", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(dataservice.id)
+        assert response.json[0]["acronym"] == "ARTP"
+
+    def test_suggest_dataservices_api_hidden(self):
+        """It should not suggest archived, deleted or private dataservices"""
+        visible = DataserviceFactory(title="arealtestprefix-visible")
+        DataserviceFactory(title="arealtestprefix-archived", archived_at=datetime.now(UTC))
+        DataserviceFactory(title="arealtestprefix-deleted", deleted_at=datetime.now(UTC))
+        DataserviceFactory(title="arealtestprefix-private", private=True)
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(visible.id)
+
+    def test_suggest_dataservices_api_case_insensitive(self):
+        """It should suggest dataservices regardless of case"""
+        dataservice = DataserviceFactory(title="ARealTestPrefix")
+
+        response = self.get(url_for("api.suggest_dataservices", q="arealtestpref", size=5))
+        assert200(response)
+        assert len(response.json) == 1
+        assert response.json[0]["id"] == str(dataservice.id)
+        assert response.json[0]["page"] == dataservice.self_web_url()
+
+    def test_suggest_dataservices_api_no_match(self):
+        """It should not provide dataservice suggestion if no match"""
+        DataserviceFactory.create_batch(3)
+
+        response = self.get(url_for("api.suggest_dataservices", q="xxxxxx", size=5))
+        assert200(response)
+        assert len(response.json) == 0
+
+
 class DataservicesFeedAPItest(APITestCase):
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
