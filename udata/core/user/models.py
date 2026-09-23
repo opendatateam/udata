@@ -26,7 +26,6 @@ from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
 from udata.core.checks import check_is_email, check_no_urls, only_creation
-from udata.core.followers.models import Follow
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
@@ -220,7 +219,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     tf_primary_method = StringField()
     tf_totp_secret = StringField()
 
-    deleted = DateTimeField()
+    deleted = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        show_as_ref=True,
+        description="The date the account was deleted, null for a live account",
+    )
     ext = MapField(GenericEmbeddedDocumentField())
     extras = ExtrasField()
 
@@ -470,6 +475,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                     if message.posted_by == self:
                         message.content = "DELETED"
                 discussion.save()
+        from udata.models import Follow  # Circular imports.
+
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
         # Remove related notifications

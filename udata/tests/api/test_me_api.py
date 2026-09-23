@@ -3,6 +3,7 @@ import zlib
 from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
 
+import pytest
 from flask import url_for
 
 from udata.core import storages
@@ -193,6 +194,17 @@ class MeAPITest(APITestCase):
         self.assertEqual(self.user.about, "new about")
         self.assertTrue(self.user.active)
 
+    def test_update_profile_cannot_mark_as_deleted(self):
+        """An account is deleted through `DELETE /me`, which anonymises it and purges
+        what it owns. A patch would only raise the flag, leaving the data behind."""
+        self.login()
+        data = self.user.to_dict()
+        data["deleted"] = "2026-01-01T00:00:00+00:00"
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertIsNone(self.user.deleted)
+
     def test_update_profile_rejects_urls_in_name(self):
         """It should reject URLs embedded in first_name/last_name"""
         self.login()
@@ -207,6 +219,17 @@ class MeAPITest(APITestCase):
         response = self.put(url_for("api.me"), data)
         self.assert400(response)
         assert "last_name" in response.json["errors"]
+
+    @pytest.mark.options(SPAM_ALLOWED_LANGS=["fr"])
+    def test_update_profile_with_a_long_website(self):
+        """The spam check runs on `website`, but a URL has no language to detect."""
+        self.login()
+        data = self.user.to_dict()
+        data["website"] = "https://example.com/organizations/centre-de-la-propriete"
+        response = self.put(url_for("api.me"), data)
+        self.assert200(response)
+        self.user.reload()
+        self.assertEqual(self.user.website, data["website"])
 
     def test_get_profile_exposes_creation_date_as_since(self):
         """`since` should expose the registration date (created_at), not null"""

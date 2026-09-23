@@ -1,3 +1,6 @@
+from datetime import UTC
+
+from bson import ObjectId
 from flask import url_for
 from mongoengine.fields import StringField
 
@@ -76,6 +79,73 @@ class FollowAPITest(APITestCase):
         following = Follow.objects.is_following(other_user, to_follow)
 
         self.assertFalse(following)
+
+    def test_follow_list_payload_shape(self):
+        """Pins the serialized page, key by key.
+
+        Nothing else asserts the shape of this endpoint, and it is served by the same
+        `FollowAPI.get` for datasets, reuses, dataservices, organizations and users.
+        """
+        user = self.login()
+        to_follow = FakeModel.objects.create()
+        follow = Follow.objects.create(follower=user, following=to_follow)
+        # Mongo stores milliseconds, so read back the value that is actually serialized.
+        follow.reload()
+
+        response = self.get(url_for("api.follow_fake", id=to_follow.id))
+
+        self.assert200(response)
+        assert response.json == {
+            "data": [
+                {
+                    "id": str(follow.id),
+                    "follower": {
+                        "id": str(user.id),
+                        "class": "User",
+                        "slug": user.slug,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "avatar": None,
+                        "avatar_thumbnail": None,
+                        "page": user.self_web_url(),
+                        "uri": user.self_api_url(),
+                    },
+                    "since": follow.since.replace(tzinfo=UTC).isoformat(),
+                }
+            ],
+            "next_page": None,
+            "page": 1,
+            "page_size": 20,
+            "previous_page": None,
+            "total": 1,
+        }
+
+    def test_follow_list_with_bogus_user(self):
+        """An unparseable `user` is a 400.
+
+        It used to be a 404, from the `id_or_404` this endpoint applied by hand. A
+        malformed query parameter is a bad request, and that is what every other
+        filter of the API answers.
+        """
+        self.login()
+        to_follow = FakeModel.objects.create()
+
+        response = self.get(url_for("api.follow_fake", id=to_follow.id, user="foobar"))
+        self.assertStatus(response, 400)
+
+    def test_follow_list_with_bogus_page(self):
+        """An out of range page is a 400."""
+        self.login()
+        to_follow = FakeModel.objects.create()
+
+        response = self.get(url_for("api.follow_fake", id=to_follow.id, page=0))
+        self.assertStatus(response, 400)
+
+    def test_follow_list_on_unknown_object(self):
+        self.login()
+
+        response = self.get(url_for("api.follow_fake", id=ObjectId()))
+        self.assert404(response)
 
     def test_follow(self):
         """It should follow on POST"""
