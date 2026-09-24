@@ -15,6 +15,7 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataservicesListBloc,
     DatasetsListBloc,
+    ExploreBloc,
     ReusesListBloc,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -611,6 +612,34 @@ class PostsAPITest(APITestCase):
         assert "id" in dataservice_json
         assert "title" in dataservice_json
         assert "datasets" not in dataservice_json
+
+    def test_post_api_create_with_explore_bloc(self):
+        """It should create a post with an ExploreBloc referencing a resource"""
+        dataset = DatasetFactory(visible=True)
+        resource_id = dataset.resources[0].id
+        self.login(AdminFactory())
+        data = {
+            "name": "Test explore post",
+            "body_type": "blocs",
+            "blocs": [
+                {
+                    "class": "ExploreBloc",
+                    "title": "Explore the data",
+                    "resource_id": str(resource_id),
+                }
+            ],
+        }
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        post = Post.objects.first()
+        assert len(post.blocs) == 1
+        assert isinstance(post.blocs[0], ExploreBloc)
+        assert post.blocs[0].resource_id == resource_id
+
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        assert response.json["blocs"][0]["class"] == "ExploreBloc"
+        assert response.json["blocs"][0]["resource_id"] == str(resource_id)
 
     def test_post_api_filter_by_kind(self):
         """It should filter posts by kind"""
