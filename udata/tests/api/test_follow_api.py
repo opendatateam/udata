@@ -107,6 +107,7 @@ class FollowAPITest(APITestCase):
                         "last_name": user.last_name,
                         "avatar": None,
                         "avatar_thumbnail": None,
+                        "deleted": None,
                         "page": user.self_web_url(),
                         "uri": user.self_api_url(),
                     },
