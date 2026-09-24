@@ -2,6 +2,7 @@ import logging
 
 from flask_restx.reqparse import RequestParser
 
+from udata.api import add_pagination_arguments
 from udata.search.query import SearchQuery
 
 log = logging.getLogger(__name__)
@@ -51,12 +52,7 @@ class ModelSearchAdapter:
             store_missing=store_missing,
         )
         if paginate:
-            parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(parser)
         return parser
 
     @classmethod

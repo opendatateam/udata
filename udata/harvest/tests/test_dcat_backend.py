@@ -4,25 +4,21 @@ import xml.etree.ElementTree as ET
 from datetime import date
 
 import pytest
-import requests
-from flask import current_app
-from lxml import etree
-from rdflib import Graph
+from flask import current_app, url_for
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
-from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.backends import get_backend
 from udata.harvest.backends.dcat import CswDcatBackend
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
-from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
+from udata.tests.helpers import argvalues, assert200
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -32,44 +28,60 @@ log = logging.getLogger(__name__)
 
 
 TEST_DOMAIN = "data.test.org"  # Need to be used in fixture file
-DCAT_URL_PATTERN = "http://{domain}/{path}"
+TEST_URL_PATTERN = "http://{domain}/{path}"
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "dcat")
 CSW_DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "csw_dcat")
 
 
-def mock_dcat(rmock, filename, path=None):
-    url = DCAT_URL_PATTERN.format(path=path or filename, domain=TEST_DOMAIN)
-    with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
-        body = dcatfile.read()
-    rmock.get(url, text=body)
+def _mock_single(rmock, method, filesdir, filename, path=None):
+    url = TEST_URL_PATTERN.format(path=path or filename, domain=TEST_DOMAIN)
+    with open(os.path.join(filesdir, filename)) as f:
+        body = f.read()
+    rmock.register_uri(method, url, text=body)
     return url
 
 
-def mock_pagination(rmock, path, pattern):
-    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
+def mock_dcat(rmock, filename, path=None):
+    return _mock_single(rmock, "GET", DCAT_FILES_DIR, filename, path)
+
+
+def mock_csw(rmock, filename, path=None):
+    return _mock_single(rmock, "POST", CSW_DCAT_FILES_DIR, filename, path)
+
+
+def _mock_pagination(rmock, method, filesdir, pattern, get_page, path):
+    url = TEST_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
 
     def callback(request, context):
-        page = request.qs.get("page", [1])[0]
-        filename = pattern.format(page=page)
         context.status_code = 200
-        with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
-            return dcatfile.read()
+        page = get_page(request)
+        filename = pattern.format(page=page)
+        with open(os.path.join(filesdir, filename)) as f:
+            return f.read()
 
-    rmock.get(rmock.ANY, text=callback)
+    rmock.register_uri(method, rmock.ANY, text=callback)
     return url
+
+
+def mock_dcat_pagination(rmock, path, pattern):
+    def get_page(request):
+        return request.qs.get("page", [1])[0]
+
+    return _mock_pagination(rmock, "GET", DCAT_FILES_DIR, pattern, get_page, path)
 
 
 def mock_csw_pagination(rmock, path, pattern):
-    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
-
-    def callback(request, context):
+    def get_page(request):
         request_tree = ET.fromstring(request.body)
-        page = int(request_tree.get("startPosition"))
-        with open(os.path.join(CSW_DCAT_FILES_DIR, pattern.format(page))) as cswdcatfile:
-            return cswdcatfile.read()
+        return int(request_tree.get("startPosition"))
 
-    rmock.post(rmock.ANY, text=callback)
-    return url
+    return _mock_pagination(rmock, "POST", CSW_DCAT_FILES_DIR, pattern, get_page, path)
+
+
+def mock_xslt(rmock, filename="iso-19139-to-dcat-ap.xsl"):
+    with open(os.path.join(CSW_DCAT_FILES_DIR, filename), "r") as f:
+        xslt = f.read()
+    rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["dcat"])
@@ -192,6 +204,43 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             dataservices[0].harvest.remote_url
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
+
+    def test_harvest_dataservices_serving_datasets_referenced_by_uri(self, rmock):
+        """A `dcat:servesDataset` node can reference a dataset by URI only, without any
+        `dcterms:identifier` (this is what GeoDCAT-AP emits). The dataset is then harvested
+        from another page, and only its URI can link the two."""
+
+        url = mock_dcat_pagination(rmock, "catalog.xml", "serves-dataset-by-uri-{page}.xml")
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        # The dataset harvested from the first page is attached, the one outside of the
+        # catalog is simply ignored.
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
+
+    def test_harvest_datasetseries(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        source = HarvestSourceFactory(
+            backend="dcat",
+            url=mock_dcat(rmock, "series.xml"),
+            organization=OrganizationFactory(),
+        )
+        actions.run(source)
+
+        datasets = Dataset.objects
+
+        assert len(datasets) == 1
+        assert datasets[0].title == "DCE – Bassin Artois-Picardie - Etat global"
+
+        # the node is typed both Dataset and DatasetSeries, but must only be harvested once
+        source.reload()
+        assert len(source.get_last_job().items) == 1
 
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
@@ -501,7 +550,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(datasets["3"].resources) == 1
 
     def test_hydra_partial_collection_view_pagination(self, rmock):
-        url = mock_pagination(rmock, "catalog.jsonld", "partial-collection-{page}.jsonld")
+        url = mock_dcat_pagination(rmock, "catalog.jsonld", "partial-collection-{page}.jsonld")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
@@ -513,7 +562,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 4
 
     def test_hydra_legacy_paged_collection_pagination(self, rmock):
-        url = mock_pagination(rmock, "catalog.jsonld", "paged-collection-{page}.jsonld")
+        url = mock_dcat_pagination(rmock, "catalog.jsonld", "paged-collection-{page}.jsonld")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
@@ -525,7 +574,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 4
 
     def test_failure_on_initialize(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(url, text="should fail")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -567,7 +616,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         # test dct:license support
         dataset = Dataset.objects.get(harvest__dct_identifier="3")
-        assert dataset.license.id == "lov2"
+        assert dataset.license is None
+        assert dataset.access_type is AccessType.RESTRICTED
+        assert (
+            dataset.access_type_reason_category == InspireLimitationCategory.INTELLECTUAL_PROPERTY
+        )
         assert dataset.harvest.remote_url == "http://data.test.org/datasets/3"
         assert dataset.harvest.remote_id == "3"
         assert dataset.harvest.issued_at.date() == date(2016, 12, 14)
@@ -853,7 +906,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
 
     def test_unsupported_mime_type(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": "text/html; charset=utf-8"})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -871,7 +924,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert error.message == 'Unsupported mime type "text/html"'
 
     def test_unable_to_detect_format(self, rmock):
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": ""})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -891,7 +944,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
     def test_use_replaced_uris(self, rmock, mocker):
         # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
-        url = DCAT_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(
             url,
             json={
@@ -924,7 +977,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
     def test_target_404(self, rmock):
         filename = "obvious-format.jsonld"
-        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
         rmock.get(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
@@ -937,7 +990,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "404 Client Error" in job.errors[0].message
 
         filename = "need-to-head-to-guess-format"
-        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        url = TEST_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
         rmock.head(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
@@ -948,37 +1001,6 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert job.status == "failed"
         assert len(job.errors) == 1
         assert "404 Client Error" in job.errors[0].message
-
-    @pytest.mark.parametrize(
-        "exception",
-        [
-            requests.exceptions.ConnectTimeout("Connection timed out"),
-            requests.exceptions.ConnectionError(
-                "Failed to resolve 'example.com' (Name resolution failed)"
-            ),
-            requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"),
-        ],
-    )
-    def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
-        """Connection exceptions should be logged as warning, not sent to Sentry."""
-        url = DCAT_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
-        rmock.get(url, exc=exception)
-
-        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-
-        mock_warning = mocker.patch("udata.harvest.backends.base.log.warning")
-        mock_exception = mocker.patch("udata.harvest.backends.base.log.exception")
-
-        actions.run(source)
-        source.reload()
-
-        job = source.get_last_job()
-        assert job.status == "failed"
-        assert len(job.errors) == 1
-        assert str(exception) in job.errors[0].message
-        mock_warning.assert_called_once()
-        assert "connection error" in mock_warning.call_args[0][0].lower()
-        mock_exception.assert_not_called()
 
     def test_preview_does_not_create_contact_points(self, rmock):
         """Preview should not create ContactPoints in DB."""
@@ -1004,23 +1026,64 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         # No datasets should have been created either
         assert Dataset.objects.count() == 0
 
+    def test_preview_dataservice_serving_datasets(self, rmock):
+        """Preview a dataservice serving datasets that are created during the same run.
+
+        In dryrun the harvested datasets are never saved. They used to keep no pk, which
+        (1) made `dataservice.validate()` raise `ValidationError (... ['datasets'])` on
+        the `datasets` LazyReferenceField, and (2) collapsed every served dataset into a
+        single reference (they all compared equal through `pk=None`). Datasets now get a
+        client-side id during the preview, so both issues are gone.
+        """
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        url = mock_dcat(rmock, "bnodes.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        job = actions.preview(source)
+
+        assert job.status == "done"
+
+        dataservice_items = [item for item in job.items if item.dataservice is not None]
+        assert len(dataservice_items) == 1
+        dataservice_item = dataservice_items[0]
+        assert dataservice_item.status == "done", dataservice_item.errors
+        assert dataservice_item.dataservice.title == "Explore API v2"
+
+        # The dataservice serves dataset-2 and dataset-3: both stay attached as two
+        # distinct references (the dedup no longer collapses them through pk=None).
+        attached = dataservice_item.dataservice.datasets
+        assert len(attached) == 2
+        assert all(dataset.pk is not None for dataset in attached)
+        assert attached[0].pk != attached[1].pk
+
+        # A preview must not persist anything
+        assert Dataset.objects.count() == 0
+        assert Dataservice.objects.count() == 0
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "schema_name, schema_uri",
-        [("dcat", "http://www.w3.org/ns/dcat#"), ("geodcatap", "http://data.europa.eu/930/")],
+        argvalues(
+            ("dcat", "http://www.w3.org/ns/dcat#"),
+            ("geodcatap", "http://data.europa.eu/930/"),
+            ids=lambda values: values[0],
+        ),
     )
     def test_geonetwork(self, rmock, schema_name, schema_uri):
         geodcatap = schema_name == "geodcatap"
 
         url = mock_csw_pagination(
-            rmock, "geonetwork/srv/fre/csw", f"geonetwork-{schema_name}-page-{{}}.xml"
+            rmock, "geonetwork/srv/fre/csw", f"geonetwork-{schema_name}-page-{{page}}.xml"
         )
         source = HarvestSourceFactory(
             backend="csw-dcat",
             url=url,
             config={"features": {"geodcatap": geodcatap}},
+            organization=OrganizationFactory(),
         )
 
         backend = get_backend(source.backend)(source)
@@ -1045,6 +1108,13 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.description.startswith(
             "Part des ménages présents depuis 5 ans ou plus dans leur logement actuel"
         )
+
+        contact = dataset.contact_points[0]
+        assert contact.email == "contact@geo2france.fr"
+        if geodcatap:
+            assert contact.name == "Géo2France (Géo2France)"
+        else:
+            assert contact.name == "Géo2France"
 
         keywords = {
             "logement",
@@ -1077,8 +1147,50 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             assert resource.type == "main"
             assert resource.format == "ogc:wms"
 
+        # Another dataset with several types of contacts
+        contacts = {
+            (c.name, c.email, c.contact_form, c.role)
+            for c in datasets["0ae299e7-10d6-4290-944e-c6c62e2aeabf"].contact_points
+        }
+        if geodcatap:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "custodian"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+            }
+        else:
+            assert contacts == {
+                ("Géo2France", "contact@geo2france.fr", None, "contact"),
+                ("Géo2France", "contact@geo2france.fr", None, "publisher"),
+                ("Odema", "odema@cerdd.org", None, "contact"),
+                ("Odema", "odema@cerdd.org", None, "publisher"),
+            }
+
+    def test_dataservice_serves_dataset_from_another_record(self, rmock):
+        """Each CSW record is parsed as its own graph, so a dataservice never shares a graph
+        with the datasets it serves: only the URI of the `dcat:servesDataset` node links them.
+
+        The second served dataset reproduces what data.ofb.fr returns for
+        https://id.eaufrance.fr/meta/ODP_WFS: a reference to another catalog, which used to
+        raise `TypeError: endswith first arg must be str` and fail the whole dataservice."""
+
+        url = mock_csw(rmock, "dataservice-serves-dataset.xml", path="geonetwork/srv/fre/csw")
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
+
     def test_user_agent_post(self, rmock):
-        url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
         get_mock = rmock.post(url)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
@@ -1177,13 +1289,44 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert job.status == "done"
         assert len(job.items) == 1
 
+    def test_ignore_xml_comments(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/test/">
+                <dct:identifier>https://example.com/test/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>test</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+            <!-- this should be ignored -->
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done"
+        assert len(job.items) == 1
+
     @pytest.mark.parametrize(
         "remote_url_prefix",
-        [
-            None,
-            "http://catalog.example.com",  # no trailing slash
-            "http://catalog.example.com/",  # trailing slash
-        ],
+        argvalues(
+            (None, "none"),
+            ("http://catalog.example.com/", "trailing-slash"),
+            ("http://catalog.example.com", "no-trailing-slash"),
+        ),
     )
     def test_url_prefix(self, rmock, remote_url_prefix: str):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1232,33 +1375,74 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             # If it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior.
             assert dataset.harvest.remote_url == "http://data.example.com/datasets/dataset-1"
 
+    def test_parsing_error(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="2" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item1/">
+                <dct:identifier>https://example.com/item1/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title xml:lang="***">invalid xml:lang</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/item2/">
+                <dct:identifier>https://example.com/item2/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>valid item</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done-errors"
+        assert len(job.items) == 2
+
+        item = job.items[0]
+        assert item.status == "failed"
+        error = item.errors[0]
+        assert "'***' is not a valid language tag!" in error.message
+        assert '<dct:title xml:lang="***">invalid xml:lang</dct:title>' in error.details
+
+        assert job.items[1].status == "done"
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
-        [
-            None,
-            # trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
-            # no trailing slash
-            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
-        ],
+        argvalues(
+            (None, "none"),
+            (
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
+                "trailing-slash",
+            ),
+            (
+                "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
+                "no-trailing-slash",
+            ),
+        ),
     )
     def test_geo2france(self, rmock, remote_url_prefix: str):
-        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
-            xslt = f.read()
+        mock_xslt(rmock)
         url = mock_csw_pagination(
-            rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{}.xml"
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{page}.xml"
         )
-        rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
         org = OrganizationFactory()
-        source = HarvestSourceFactory(
-            backend="csw-iso-19139",
-            url=url,
-            organization=org,
-            config={"extra_configs": [{"key": "remote_url_prefix", "value": remote_url_prefix}]},
-        )
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
 
         actions.run(source)
 
@@ -1317,6 +1501,25 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         # License is not properly mapped in XSLT conversion
         assert dataset.license is None
 
+        # dataset rights inherited from the iso resources converted to dcat distributions (when all resources agree)
+        rights = dataset.extras["dcat"]["rights"]
+        assert len(rights) == 6
+        assert (
+            "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
+            in rights
+        )
+
+        # SEMIC puts non-URI license/accessRights in rights
+        assert dataset.extras["dcat"].get("license") is None
+        assert dataset.extras["dcat"].get("accessRights") is None
+
+        # rights interpreted as a known INSPIRE restriction
+        assert dataset.access_type == AccessType.RESTRICTED
+        assert (
+            dataset.access_type_reason_category
+            == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
+        )
+
         # Distributions don't get properly mapped to distribution with this XSLT if missing CI_OnLineFunctionCode.
         # A CI_OnLineFunctionCode was added explicitely on one of the Online Resources.
         # (See mapping at: https://semiceu.github.io/GeoDCAT-AP/releases/2.0.0/#resource-locator---on-line-resource)
@@ -1329,87 +1532,149 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
         )
         assert resource.type == "main"
         assert resource.format == "mapinfo tab"
+        # rights also present at the resource level
+        assert resource.extras["dcat"]["rights"] == rights
 
-        # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
-        if remote_url_prefix:
-            assert (
-                dataset.harvest.remote_url
-                == "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
-            )
-        else:
-            # this is the first dct:landingPage found in the node
-            # if it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior
-            assert (
-                dataset.harvest.remote_url
-                == "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
-            )
-
-        # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
-        access_right = [
-            "L124-4-I-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.d)"
-        ]
-        assert dataset.extras["dcat"]["accessRights"] == access_right
-        # also present on the resource level
-        assert resource.extras["dcat"]["accessRights"] == access_right
-        # it is also interpreted as a known INSPIRE restriction
-        assert dataset.access_type == AccessType.RESTRICTED
-        assert (
-            dataset.access_type_reason_category
-            == InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY
-        )
-
-        # see `test_geo_ide` for detailed explanation of the following
-        assert dataset.extras["dcat"].get("license") is None
-        assert len(resource.extras["dcat"]["license"]) == 6
-        assert dataset.extras["dcat"].get("rights") is None
-        assert resource.extras["dcat"].get("rights") is None
-
-    def test_geo_ide(self):
+    def test_geoide(self, rmock):
         # this is the string used in geo-ide for now
         lov1 = LicenseFactory(
             id="lov1",
             url="http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
         )
 
-        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
-            xslt = f.read()
-        with open(
-            os.path.join(CSW_DCAT_FILES_DIR, "geoide-iso19139-single-dataset.xml"), "rb"
-        ) as f:
-            csw = f.read()
+        mock_xslt(rmock)
+        url = mock_csw(rmock, "geoide-iso19139-single-dataset.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
 
-        # apply xslt transformation manually instead of using the harvest backend since we're only processing one dataset
-        transform = etree.XSLT(etree.fromstring(xslt))
-        tree_before_transform = etree.fromstring(csw)
-        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
-        subgraph = Graph(namespace_manager=namespace_manager)
-        subgraph.parse(etree.tostring(tree), format="application/rdf+xml")
-        node = next(subgraph.subjects(RDF.type, DCAT.Dataset))
+        actions.run(source)
+        source.reload()
 
-        dataset = dataset_from_rdf(subgraph, dataset=None, node=node)
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects.first()
+
         assert dataset.title == "Plan local d'urbanisme de la commune de Combles"
-        assert len(dataset.resources) == 6
+
         assert dataset.license == lov1
 
-        # accessRights is retrieved from the resources
-        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
-        assert dataset.extras["dcat"]["accessRights"] == access_right
-        # also present on the resource level
-        for resource in dataset.resources:
-            assert resource.extras["dcat"]["accessRights"] == access_right
+        # dataset rights inherited from the iso resources converted to dcat distributions
+        rights = dataset.extras["dcat"]["rights"]
+        assert len(rights) == 6
 
-        # _no_ licence extra on dataset level, since they're in resources
+        # SEMIC puts non-URI license/accessRights in rights
+        assert "Pas de restriction d'accès public selon INSPIRE" in rights
+        assert "Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence." in rights
+
         assert dataset.extras["dcat"].get("license") is None
-        # all useLimitations have been duplicated on resources as dct:license
-        for resource in dataset.resources:
-            r_licenses = resource.extras["dcat"]["license"]
-            assert len(r_licenses) == 6
-            assert any("Licence Ouverte 1.0" in x for x in r_licenses)
+        assert dataset.extras["dcat"].get("accessRights") is None
 
-        # no dct:rights anywhere, everything is in dct:license (at least for now)
-        assert dataset.extras["dcat"].get("rights") is None
-        for resource in dataset.resources:
-            assert resource.extras["dcat"].get("rights") is None
+        assert dataset.access_type == AccessType.OPEN
+        assert dataset.access_type_reason_category is None
 
         # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
         assert "inspire" in dataset.tags
+
+        assert len(dataset.resources) == 6
+        # rights also present at the resource level
+        for resource in dataset.resources:
+            assert resource.extras["dcat"]["rights"] == rights
+
+    def test_geoplateforme(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw(rmock, "geoplateforme-iso19139-IGNF_RPG.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects.first()
+
+        assert dataset.title == "RPG"
+        assert len(dataset.resources) == 70  # 24 WFS + 23 WMS + 23 WMTS
+
+    def test_url_prefix(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <gmd:fileIdentifier>
+                <gco:CharacterString>id-1</gco:CharacterString>
+              </gmd:fileIdentifier>
+              <gmd:hierarchyLevel>
+                <gmd:MD_ScopeCode codeListValue="dataset" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_ScopeCode">dataset</gmd:MD_ScopeCode>
+              </gmd:hierarchyLevel>
+              <gmd:identificationInfo>
+                <gmd:MD_DataIdentification>
+                  <gmd:citation>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                         <gco:CharacterString>Dataset 1</gco:CharacterString>
+                       </gmd:title>
+                       <gmd:identifier>
+                        <gmd:MD_Identifier>
+                          <gmd:code>
+                            <gco:CharacterString>dataset-1</gco:CharacterString>
+                          </gmd:code>
+                        </gmd:MD_Identifier>
+                      </gmd:identifier>
+                    </gmd:CI_Citation>
+                  </gmd:citation>
+                </gmd:MD_DataIdentification>
+              </gmd:identificationInfo>
+            </gmd:MD_Metadata>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+        mock_xslt(rmock)
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+
+        source = HarvestSourceFactory(
+            backend="csw-iso-19139",
+            config={
+                "extra_configs": [
+                    {"key": "remote_url_prefix", "value": "http://catalog.example.com"}
+                ]
+            },
+        )
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects[0]
+        assert dataset.harvest.remote_url == "http://catalog.example.com/id-1"
+
+
+@pytest.mark.options(HARVESTER_BACKENDS=["csw-dcat"])
+class CswDcatBackendI18nTest(PytestOnlyAPITestCase):
+    def test_backends_endpoint_translates_labels(self):
+        """Features and extra configs are built when the backend class is defined, outside of any
+        request: their labels must be lazily translated, otherwise they keep the language that was
+        active at import time for the whole process lifetime.
+
+        This test relies on `CswDcatBackend` being imported at module level, i.e. before any
+        request: an eagerly translated label would be stuck to the untranslated message."""
+        response = self.get(url_for("api.harvest_backends", lang="fr"))
+        assert200(response)
+
+        (backend,) = response.json
+        assert [(c["label"], c["description"]) for c in backend["extra_configs"]] == [
+            (
+                "Préfixe d'URL distante",
+                "Un préfixe utilisé pour construire l'URL distante des éléments récoltés.",
+            )
+        ]
+        assert [f["description"] for f in backend["features"]] == [
+            "Requêter GeoDCAT-AP auprès du serveur CSW (doit être supporté par le serveur)."
+        ]

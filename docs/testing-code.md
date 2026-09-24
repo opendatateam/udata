@@ -1,31 +1,32 @@
 # Testing your code
 
-There are three complementary ways of testing your work: unit tests for the backend,
-unit tests for the frontend and integration tests.
-
-## Backend unit tests
-
-The easiest way is to run Python tests with [Pytest](https://docs.pytest.org/en/stable/):
+udata is a Python backend, so its test suite is a [Pytest](https://docs.pytest.org/en/stable/)
+suite. Run it all with:
 
 ```shell
-$ pytest
+$ uv run pytest
 ```
 
 You can launch a unique test too:
 
 ```shell
-$ pytest udata/tests/api/test_me_api.py -k test_get_profile
+$ uv run pytest udata/tests/api/test_me_api.py -k test_get_profile
 ```
 
 To launch tests with coverage report:
 
 ```shell
-$ uv sync
-$ inv cover
+$ uv run inv cover
 ```
 
-With pip (requires pip 25.1+):
-```shell
-$ pip install --group dev -e .
-$ inv cover
-```
+If you installed with `pip` instead, activate the virtualenv (`source .venv/bin/activate`) and
+drop the `uv run` prefix.
+
+## End-to-end tests
+
+The web interface lives in [cdata][], which runs its own Playwright suite against a real udata
+started from this repository. A change here that alters the API can break it: see
+[cdata's CI workflow][cdata-ci] for the exact setup it expects.
+
+[cdata]: https://github.com/datagouv/cdata
+[cdata-ci]: https://github.com/datagouv/cdata/blob/main/.github/workflows/ci.yml

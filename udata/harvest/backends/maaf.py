@@ -9,12 +9,14 @@ from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
 from udata.core.dataset.constants import UpdateFrequency
 from udata.harvest.backends import BaseBackend
+from udata.harvest.exceptions import HarvestValidationError
 from udata.harvest.filters import (
     boolean,
     email,
     force_list,
     is_url,
     normalize_string,
+    normalize_tag,
     taglist,
     to_date,
 )
@@ -56,6 +58,14 @@ FREQUENCIES = {
 }
 
 XSD_PATH = os.path.join(os.path.dirname(__file__), "maaf.xsd")
+
+# Descriptors come from a remote, user-supplied URL: entities must never be resolved.
+# Relying on lxml's defaults is not enough, they only block *general* external entities:
+# a parameter entity declared in the internal subset used to be fetched anyway, which is
+# enough to read a local file and smuggle its content back into the document (XXE).
+XML_PARSER = etree.XMLParser(
+    resolve_entities=False, load_dtd=False, no_network=True, huge_tree=False
+)
 
 SSL_COMMENT = """
 Le site exposant les données est protégé par un certificat délivré par
@@ -167,7 +177,7 @@ class MaafBackend(BaseBackend):
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
         dataset.description = metadata["notes"]
         dataset.private = metadata["private"]
-        dataset.tags = sorted(set(metadata["tags"]))
+        dataset.tags = sorted({normalize_tag(t) for t in metadata["tags"] if normalize_tag(t)})
 
         if metadata.get("license_id"):
             dataset.license = License.objects.get(id=metadata["license_id"])
@@ -191,7 +201,7 @@ class MaafBackend(BaseBackend):
                 dataset.spatial.zones = [ZONES[metadata["territorial_coverage_code"]]]
 
         dataset.resources = []
-        cle = get_by(metadata["resources"], "format", "cle")
+        cle = get_by(metadata["resources"], format="cle")
         for row in metadata["resources"]:
             if row["format"] == "cle":
                 continue
@@ -223,7 +233,12 @@ class MaafBackend(BaseBackend):
         return dataset
 
     def parse_xml(self, xml):
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml, parser=XML_PARSER)
+        # MAAF descriptors have no DTD: refuse the ones that do rather than import a descriptor
+        # silently stripped of its optional fields. `extract` drops unresolved entity references,
+        # and the optional fields of `schema` accept the resulting None without complaining.
+        if root.getroottree().docinfo.internalDTD is not None:
+            raise HarvestValidationError("Descriptor declares a DTD, which is not allowed")
         self.xsd.validate(root)
         _, tree = dictize(root)
         return self.validate(tree, schema)
@@ -232,6 +247,6 @@ class MaafBackend(BaseBackend):
     def xsd(self):
         if not getattr(self, "_xsd", None):
             with open(XSD_PATH) as f:
-                doc = etree.parse(f)
+                doc = etree.parse(f, parser=XML_PARSER)
             self._xsd = etree.XMLSchema(doc)
         return self._xsd

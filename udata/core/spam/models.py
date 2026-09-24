@@ -1,5 +1,6 @@
 from flask import current_app
 from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
 
 from .signals import on_new_potential_spam
 
@@ -58,6 +59,8 @@ class SpamMixin(object):
         return False
 
     def spam_report_message(self, breadcrumb):
+        if url := getattr(self, "self_web_url", lambda: None)():
+            return f"Spam potentiel sur [{type(self).__name__}]({url})"
         return f"Spam potentiel sur {type(self).__name__}"
 
     @classmethod
@@ -77,6 +80,28 @@ class SpamMixin(object):
             return
 
         cls._create_spam_report(document, spam_info)
+
+    @staticmethod
+    def _spam_reason_in_text(text):
+        """Return why `text` looks like spam, or None if it doesn't."""
+        for word in SpamMixin.spam_words():
+            if word in text.lower():
+                return f'contains spam words "{word}"'
+
+        if (
+            SpamMixin.allowed_langs()
+            and len(text) > SpamMixin.minimum_string_length_for_lang_check()
+        ):
+            try:
+                lang = detect(text.lower())
+            except LangDetectException:
+                # Nothing to detect a language from: langdetect strips URLs and mails, and
+                # ignores digits and punctuation. A text without a language has no forbidden one.
+                return None
+            if lang not in SpamMixin.allowed_langs():
+                return f'not allowed language "{lang}"'
+
+        return None
 
     @classmethod
     def _detect_spam_in_document(cls, document, is_created, breadcrumb=None):
@@ -104,27 +129,14 @@ class SpamMixin(object):
             if not field_changed:
                 continue
 
-            for word in SpamMixin.spam_words():
-                if word in text.lower():
-                    return {
-                        "spam_model": document,
-                        "text": text,
-                        "breadcrumb": breadcrumb,
-                        "reason": f'contains spam words "{word}"',
-                    }
-
-            if (
-                SpamMixin.allowed_langs()
-                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
-            ):
-                lang = detect(text.lower())
-                if lang not in SpamMixin.allowed_langs():
-                    return {
-                        "spam_model": document,
-                        "text": text,
-                        "breadcrumb": breadcrumb,
-                        "reason": f'not allowed language "{lang}"',
-                    }
+            reason = cls._spam_reason_in_text(text)
+            if reason:
+                return {
+                    "spam_model": document,
+                    "text": text,
+                    "breadcrumb": breadcrumb,
+                    "reason": reason,
+                }
 
         # Check embedded documents
         for embed in document.embeds_to_check_for_spam():
@@ -144,27 +156,14 @@ class SpamMixin(object):
             if not text:
                 continue
 
-            for word in SpamMixin.spam_words():
-                if word in text.lower():
-                    return {
-                        "spam_model": embed,
-                        "text": text,
-                        "breadcrumb": breadcrumb,
-                        "reason": f'contains spam words "{word}"',
-                    }
-
-            if (
-                SpamMixin.allowed_langs()
-                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
-            ):
-                lang = detect(text.lower())
-                if lang not in SpamMixin.allowed_langs():
-                    return {
-                        "spam_model": embed,
-                        "text": text,
-                        "breadcrumb": breadcrumb,
-                        "reason": f'not allowed language "{lang}"',
-                    }
+            reason = cls._spam_reason_in_text(text)
+            if reason:
+                return {
+                    "spam_model": embed,
+                    "text": text,
+                    "breadcrumb": breadcrumb,
+                    "reason": reason,
+                }
 
         return None
 

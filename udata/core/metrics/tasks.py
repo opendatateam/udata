@@ -81,7 +81,10 @@ def update_resources_and_community_resources():
                 },
             )
         else:
-            Dataset.objects(resources__id=data["resource_id"]).update(
+            # Scoped to the dataset the metrics API reports the resource under, so that a
+            # resource id duplicated across datasets cannot spread views to all of them.
+            # `resources__id` only anchors the positional `$` operator on the right entry.
+            Dataset.objects(id=data["dataset_id"], resources__id=data["resource_id"]).update_one(
                 **{"set__resources__$__metrics__views": data["download_resource"]}
             )
 

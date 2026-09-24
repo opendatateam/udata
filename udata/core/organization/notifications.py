@@ -5,7 +5,6 @@ from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.models import MembershipRequest, Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
 
@@ -24,7 +23,6 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
     )
     request_user = field(
         ReferenceField(User),
-        nested_fields=user_ref_fields,
         readonly=True,
         auditable=False,
         allow_null=True,
@@ -155,7 +153,12 @@ def membership_request_notifications(user):
     notifications = []
 
     for org in orgs:
+        # Skip invitations: they are pending_requests too but the admin creates
+        # them and has nothing to handle. Email invitations also have user=None
+        # which would crash the field access below.
         for request in org.pending_requests:
+            if request.kind != "request":
+                continue
             notifications.append(
                 (
                     request.created,

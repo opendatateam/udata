@@ -1,0 +1,1 @@
+IMAGE_MAX_SIZE = 250

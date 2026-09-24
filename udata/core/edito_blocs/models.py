@@ -12,19 +12,14 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
-from udata.mongo.uuid_fields import AutoUUIDField
-
-
-@generate_fields()
-class Bloc(EmbeddedDocument):
-    meta = {"allow_inheritance": True}
-
-    id = field(AutoUUIDField(primary_key=True))
 
 
 class BlocWithTitleMixin:
-    title = field(StringField(required=True))
+    # Optional: a list bloc nested in an accordion item (or following a markdown bloc that
+    # already introduces it) would otherwise repeat the heading right above it.
+    title = field(StringField())
     subtitle = field(StringField())
 
 
@@ -105,10 +100,7 @@ class HeroBloc(Bloc):
 
 
 @generate_fields()
-class MarkdownBloc(Bloc):
-    # Not using BlocWithTitleMixin because title should be optional here
-    title = field(StringField())
-    subtitle = field(StringField())
+class MarkdownBloc(BlocWithTitleMixin, Bloc):
     content = field(
         StringField(required=True),
         markdown=True,
@@ -116,9 +108,7 @@ class MarkdownBloc(Bloc):
 
 
 @generate_fields()
-class ExploreBloc(Bloc):
-    title = field(StringField())
-    subtitle = field(StringField())
+class ExploreBloc(BlocWithTitleMixin, Bloc):
     resource_id = field(UUIDField(required=True, binary=False))
 
 
@@ -152,18 +142,35 @@ SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
 
 def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post and Site."""
+    """Remove references to a deleted object from all blocs in Post, Site and Organization.
+
+    A reference can live both at the top level of a blocs field and nested inside an
+    accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
+    Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
+    two levels are enough.
+    """
+    from udata.core.organization.models import Organization
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
-    Post._get_collection().update_many(
-        {f"blocs.{ref_field}": obj_id},
-        {"$pull": {f"blocs.$[b].{ref_field}": obj_id}},
-        array_filters=[{f"b.{ref_field}": obj_id}],
-    )
-    for blocs_field in SITE_BLOCS_FIELDS:
-        Site._get_collection().update_many(
+    def purge(collection, blocs_field):
+        # Top-level blocs: <blocs_field>[].<ref_field>
+        collection.update_many(
             {f"{blocs_field}.{ref_field}": obj_id},
             {"$pull": {f"{blocs_field}.$[b].{ref_field}": obj_id}},
             array_filters=[{f"b.{ref_field}": obj_id}],
         )
+        # Blocs nested in an accordion: <blocs_field>[].items[].content[].<ref_field>
+        collection.update_many(
+            {f"{blocs_field}.items.content.{ref_field}": obj_id},
+            {"$pull": {f"{blocs_field}.$[b].items.$[].content.$[c].{ref_field}": obj_id}},
+            array_filters=[
+                {f"b.items.content.{ref_field}": obj_id},
+                {f"c.{ref_field}": obj_id},
+            ],
+        )
+
+    purge(Post._get_collection(), "blocs")
+    purge(Organization._get_collection(), "presentation_blocs")
+    for blocs_field in SITE_BLOCS_FIELDS:
+        purge(Site._get_collection(), blocs_field)

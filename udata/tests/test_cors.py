@@ -1,10 +1,14 @@
 from datetime import datetime
 
+import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_status
+
+TRUSTED_ORIGIN = "https://www.data.gouv.fr"
+UNTRUSTED_ORIGIN = "https://evil.example.com"
 
 
 class CorsTest(APITestCase):
@@ -83,3 +87,51 @@ class CorsTest(APITestCase):
             },
         )
         assert_status(response, 204)
+
+    @pytest.mark.options(CDATA_BASE_URL=TRUSTED_ORIGIN + "/", CORS_ALLOWED_ORIGINS=[])
+    def test_cors_credentials_only_for_trusted_origin(self):
+        """An untrusted origin must never get credentials, only anonymous `*`.
+
+        Reflecting an arbitrary origin together with `Allow-Credentials: true`
+        would let any website read a logged-in user's private data using their
+        session cookie.
+        """
+        dataset = DatasetFactory()
+        url = url_for("api.dataset", dataset=dataset.id)
+
+        # Trusted front-end (derived from CDATA_BASE_URL): credentialed access.
+        response = self.get(url, headers={"Origin": TRUSTED_ORIGIN})
+        assert_status(response, 200)
+        assert response.headers["Access-Control-Allow-Origin"] == TRUSTED_ORIGIN
+        assert response.headers["Access-Control-Allow-Credentials"] == "true"
+
+        # Any other origin: anonymous access only, never credentials.
+        response = self.get(url, headers={"Origin": UNTRUSTED_ORIGIN})
+        assert_status(response, 200)
+        assert response.headers["Access-Control-Allow-Origin"] == "*"
+        assert "Access-Control-Allow-Credentials" not in response.headers
+
+    @pytest.mark.options(CDATA_BASE_URL=None, CORS_ALLOWED_ORIGINS=[TRUSTED_ORIGIN])
+    def test_cors_credentials_for_explicit_allowed_origin(self):
+        dataset = DatasetFactory()
+        url = url_for("api.dataset", dataset=dataset.id)
+
+        response = self.get(url, headers={"Origin": TRUSTED_ORIGIN})
+        assert response.headers["Access-Control-Allow-Origin"] == TRUSTED_ORIGIN
+        assert response.headers["Access-Control-Allow-Credentials"] == "true"
+
+    @pytest.mark.options(CDATA_BASE_URL=TRUSTED_ORIGIN + "/", CORS_ALLOWED_ORIGINS=[])
+    def test_cors_preflight_credentials_only_for_trusted_origin(self):
+        dataset = DatasetFactory()
+        url = url_for("api.dataset", dataset=dataset.id)
+        preflight_headers = {"Access-Control-Request-Method": "POST"}
+
+        response = self.options(url, headers={"Origin": TRUSTED_ORIGIN, **preflight_headers})
+        assert_status(response, 204)
+        assert response.headers["Access-Control-Allow-Origin"] == TRUSTED_ORIGIN
+        assert response.headers["Access-Control-Allow-Credentials"] == "true"
+
+        response = self.options(url, headers={"Origin": UNTRUSTED_ORIGIN, **preflight_headers})
+        assert_status(response, 204)
+        assert response.headers["Access-Control-Allow-Origin"] == "*"
+        assert "Access-Control-Allow-Credentials" not in response.headers

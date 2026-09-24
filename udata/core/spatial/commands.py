@@ -99,7 +99,11 @@ def load(geozones_file, levels_file, drop=False):
     """
     log.info("Loading GeoZones levels")
     if levels_file.startswith("http"):
-        json_levels = requests.get(levels_file).json()
+        response = requests.get(levels_file)
+        # Raise on HTTP errors so a transient error page from the remote server
+        # surfaces clearly instead of an opaque JSONDecodeError on the HTML body.
+        response.raise_for_status()
+        json_levels = response.json()
     else:
         with open(levels_file) as f:
             json_levels = json.load(f)
@@ -119,7 +123,9 @@ def load(geozones_file, levels_file, drop=False):
 
     log.info("Loading Zones")
     if geozones_file.startswith("http"):
-        json_geozones = requests.get(geozones_file).json()
+        response = requests.get(geozones_file)
+        response.raise_for_status()
+        json_geozones = response.json()
     else:
         with open(geozones_file) as f:
             json_geozones = json.load(f)

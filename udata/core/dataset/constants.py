@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from decimal import Decimal
 from enum import StrEnum, auto
 
 from flask_babel import LazyString
@@ -130,6 +131,40 @@ UpdateFrequency._LEGACY_FREQUENCIES = {  # type: ignore[misc]
 }
 
 
+class DistanceUom(StrEnum):
+    """
+    Udata distance unit-of-measure (UOM) vocabulary
+    """
+
+    FOOT = auto(), "ft", Decimal("0.3048")
+    METER = auto(), "m", Decimal(1)
+    KILOMETER = auto(), "km", Decimal(1000)
+
+    def __new__(cls, id: str, symbol: str, factor: Decimal):
+        # Set _value_ so the enum value-based lookup depends only on the id field.
+        # See https://docs.python.org/3/howto/enum.html#when-to-use-new-vs-init
+        obj = str.__new__(cls, id)
+        obj._value_ = id
+        obj._symbol = symbol  # type: ignore[misc]
+        obj._factor = factor  # type: ignore[misc]
+        return obj
+
+    @property
+    def id(self) -> str:
+        return self.value
+
+    @property
+    def symbol(self) -> str:
+        return self._symbol  # type: ignore[misc]
+
+    @property
+    def factor(self) -> Decimal:
+        return self._factor  # type: ignore[misc]
+
+    def in_meters(self, value: Decimal | float | int | str) -> Decimal:
+        return Decimal(value) * self.factor
+
+
 DEFAULT_LICENSE = {
     "id": "notspecified",
     "title": "License Not Specified",
@@ -158,7 +193,7 @@ RESOURCE_FILETYPES = OrderedDict(
     ]
 )
 
-OGC_SERVICE_FORMATS = ["wms", "wfs"]
+OGC_SERVICE_FORMATS = ["wfs", "wms", "wmts"]
 
 CHECKSUM_TYPES = ("sha1", "sha2", "sha256", "md5", "crc")
 DEFAULT_CHECKSUM_TYPE = "sha1"

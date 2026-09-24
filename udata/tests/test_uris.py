@@ -100,6 +100,29 @@ LOCAL_IPS = [
 
 LOCAL = LOCAL_HOSTS + LOCAL_IPS
 
+# IPv6 encodings of an IPv4 target. netaddr reports them as ordinary public
+# addresses, so validation accepted them while the connect-time guard refused
+# them: the form said yes and the harvest job failed.
+SMUGGLED_LOCAL_IPS = [
+    "http://[::ffff:7f00:1]",  # IPv4-mapped 127.0.0.1
+    "http://[2002:7f00:1::]",  # 6to4-encoded 127.0.0.1
+    "http://[64:ff9b::7f00:1]",  # NAT64-encoded 127.0.0.1
+]
+
+SMUGGLED_PRIVATE_IPS = [
+    "http://[::ffff:a9fe:a9fe]",  # IPv4-mapped 169.254.169.254, the cloud metadata endpoint
+    "http://[2002:a9fe:a9fe::]",  # 6to4-encoded 169.254.169.254
+    "http://[64:ff9b::a9fe:a9fe]",  # NAT64-encoded 169.254.169.254
+]
+
+# Not globally routable, yet neither RFC1918 nor loopback.
+NOT_GLOBALLY_ROUTABLE_IPS = [
+    "http://100.64.0.1",  # CGNAT (RFC 6598)
+    "http://192.0.2.1",  # TEST-NET-1
+    "http://198.51.100.1",  # TEST-NET-2
+    "http://[fec0::1]",  # site-local (RFC 3879)
+]
+
 HOSTS_RESOLVING_TO_LOOPBACK = [
     "http://localtest.me",
     "http://localtest.me/index.html",
@@ -215,6 +238,24 @@ class UriValidationTest(PytestOnlyTestCase):
     def test_default_should_not_validate_local_hosts(self, url):
         with pytest.raises(uris.ValidationError, match="local URL"):
             uris.validate(url)
+
+    @pytest.mark.parametrize("url", SMUGGLED_LOCAL_IPS)
+    def test_default_should_not_validate_ipv6_encoded_loopback(self, url):
+        with pytest.raises(uris.ValidationError, match="local URL"):
+            uris.validate(url)
+
+    @pytest.mark.parametrize("url", SMUGGLED_PRIVATE_IPS + NOT_GLOBALLY_ROUTABLE_IPS)
+    def test_default_should_not_validate_non_routable_ips(self, url):
+        with pytest.raises(uris.ValidationError, match="private URL"):
+            uris.validate(url)
+
+    @pytest.mark.parametrize("url", SMUGGLED_LOCAL_IPS)
+    def test_local_should_validate_ipv6_encoded_loopback(self, url):
+        assert uris.validate(url, local=True) == url
+
+    @pytest.mark.parametrize("url", SMUGGLED_PRIVATE_IPS + NOT_GLOBALLY_ROUTABLE_IPS)
+    def test_private_should_validate_non_routable_ips(self, url):
+        assert uris.validate(url, private=True) == url
 
     @pytest.mark.parametrize("url", INVALID)
     def test_should_not_validate_bad_urls(self, url):

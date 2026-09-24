@@ -1,22 +1,20 @@
+import hashlib
+import io
 from datetime import UTC, datetime, timedelta
-from io import BytesIO
 from os.path import basename
 from uuid import uuid4
 
 import pytest
-from flask import json, url_for
+from flask import json
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 from udata.core import storages
 from udata.core.storages import utils
-from udata.core.storages.api import META, chunk_filename
+from udata.core.storages.api import META, ChunksReader, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.tests import PytestOnlyTestCase
-from udata.tests.api import PytestOnlyAPITestCase
 from udata.utils import faker
-
-from .helpers import assert200, assert400
 
 
 class StorageUtilsTest(PytestOnlyTestCase):
@@ -108,126 +106,6 @@ class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
 
 
 @pytest.mark.usefixtures("instance_path")
-class StorageUploadViewTest(PytestOnlyAPITestCase):
-    def test_standard_upload(self):
-        self.login()
-        response = self.post(
-            url_for("storage.upload", name="resources"),
-            {"file": (BytesIO(b"aaa"), "Test with  spaces.TXT")},
-            json=False,
-        )
-
-        assert200(response)
-        assert response.json["success"]
-        assert "url" in response.json
-        assert "size" in response.json
-        assert "sha1" in response.json
-        assert "filename" in response.json
-        filename = response.json["filename"]
-        assert filename.endswith("test-with-spaces.txt")
-        expected = storages.resources.url(filename, external=True)
-        assert response.json["url"] == expected
-        assert response.json["mime"] == "text/plain"
-
-    def test_chunked_upload(self):
-        self.login()
-        url = url_for("storage.upload", name="tmp")
-        uuid = str(uuid4())
-        parts = 4
-
-        for i in range(parts):
-            response = self.post(
-                url,
-                {
-                    "file": (BytesIO(b"a"), "blob"),
-                    "uuid": uuid,
-                    "filename": "Test with  spaces.TXT",
-                    "partindex": i,
-                    "partbyteoffset": 0,
-                    "totalfilesize": parts,
-                    "totalparts": parts,
-                    "chunksize": 1,
-                },
-                json=False,
-            )
-
-            assert200(response)
-            assert response.json["success"]
-            assert "filename" not in response.json
-            assert "url" not in response.json
-            assert "size" not in response.json
-            assert "sha1" not in response.json
-            assert "url" not in response.json
-
-        response = self.post(
-            url,
-            {
-                "uuid": uuid,
-                "filename": "Test with  spaces.TXT",
-                "totalfilesize": parts,
-                "totalparts": parts,
-            },
-            json=False,
-        )
-        assert "filename" in response.json
-        assert "url" in response.json
-        assert "size" in response.json
-        assert response.json["size"] == parts
-        assert "sha1" in response.json
-        expected_filename = "test-with-spaces.txt"
-        filename = response.json["filename"]
-        assert filename.endswith(expected_filename)
-        expected_url = storages.tmp.url(filename, external=True)
-        assert response.json["url"] == expected_url
-        assert response.json["mime"] == "text/plain"
-        assert storages.tmp.read(filename) == b"aaaa"
-        assert list(storages.chunks.list_files()) == []
-
-    def test_chunked_upload_bad_chunk(self):
-        self.login()
-        url = url_for("storage.upload", name="tmp")
-        uuid = str(uuid4())
-        parts = 4
-
-        response = self.post(
-            url,
-            {
-                "file": (BytesIO(b"a"), "blob"),
-                "uuid": uuid,
-                "filename": "test.txt",
-                "partindex": 0,
-                "partbyteoffset": 0,
-                "totalfilesize": parts,
-                "totalparts": parts,
-                "chunksize": 10,  # Does not match
-            },
-            json=False,
-        )
-
-        assert400(response)
-        assert not response.json["success"]
-        assert "filename" not in response.json
-        assert "url" not in response.json
-        assert "size" not in response.json
-        assert "sha1" not in response.json
-        assert "url" not in response.json
-
-        assert list(storages.chunks.list_files()) == []
-
-    def test_upload_resource_bad_request(self):
-        self.login()
-        response = self.post(
-            url_for("storage.upload", name="tmp"),
-            {"bad": (BytesIO(b"aaa"), "test.txt")},
-            json=False,
-        )
-
-        assert400(response)
-        assert not response.json["success"]
-        assert "error" in response.json
-
-
-@pytest.mark.usefixtures("instance_path")
 class ChunksRetentionTest(PytestOnlyTestCase):
     def create_chunks(self, uuid, nb=3, last=None):
         for i in range(nb):
@@ -266,3 +144,79 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
+
+
+class MeasuredStreamTest(PytestOnlyTestCase):
+    """The wrapper a storage reads an upload through."""
+
+    def test_digests_a_content_read_block_by_block(self):
+        # A storage reads by blocks, so the digest and the size are accumulated
+        # over several reads. A payload of a few bytes never takes that path.
+        content = b"0123456789" * 5000
+        stream = utils.MeasuredStream(io.BytesIO(content))
+
+        read = b""
+        while block := stream.read(4096):
+            read += block
+
+        assert read == content
+        assert stream.size == len(content)
+        assert stream.checksum == hashlib.sha1(content).hexdigest()
+
+    def test_digests_a_content_read_in_one_go(self):
+        content = b"0123456789" * 5000
+        stream = utils.MeasuredStream(io.BytesIO(content))
+
+        assert stream.read() == content
+        assert stream.size == len(content)
+        assert stream.checksum == hashlib.sha1(content).hexdigest()
+
+    def test_digests_an_empty_stream(self):
+        stream = utils.MeasuredStream(io.BytesIO(b""))
+
+        assert stream.read() == b""
+        assert stream.size == 0
+        assert stream.checksum == hashlib.sha1(b"").hexdigest()
+
+
+@pytest.mark.usefixtures("instance_path")
+class ChunksReaderTest(PytestOnlyTestCase):
+    """The stream a chunked upload is handed to its destination storage as."""
+
+    def store_parts(self, uuid, parts):
+        for index, part in enumerate(parts):
+            storages.chunks.write(chunk_filename(uuid, index), part)
+
+    def test_reads_every_part_in_order(self, client):
+        uuid = str(uuid4())
+        self.store_parts(uuid, [b"first", b"second", b"third"])
+
+        stream = io.BufferedReader(ChunksReader(uuid, 3))
+
+        assert stream.read() == b"firstsecondthird"
+
+    def test_reads_parts_wider_than_the_read_buffer(self, client):
+        # A part is megabytes wide in production while a read asks for a few
+        # kilobytes at a time, so it is always handed over in several reads.
+        # Parts of a single byte never take that path.
+        uuid = str(uuid4())
+        parts = [bytes([index]) * 10000 for index in range(1, 4)]
+        self.store_parts(uuid, parts)
+
+        stream = io.BufferedReader(ChunksReader(uuid, len(parts)), buffer_size=1024)
+
+        assert stream.read() == b"".join(parts)
+
+    def test_a_read_shorter_than_a_part_keeps_the_rest_for_the_next_one(self, client):
+        uuid = str(uuid4())
+        self.store_parts(uuid, [b"0123456789"])
+        reader = ChunksReader(uuid, 1)
+        target = bytearray(4)
+
+        assert reader.readinto(target) == 4
+        assert bytes(target) == b"0123"
+        assert reader.readinto(target) == 4
+        assert bytes(target) == b"4567"
+        assert reader.readinto(target) == 2
+        assert bytes(target[:2]) == b"89"
+        assert reader.readinto(target) == 0

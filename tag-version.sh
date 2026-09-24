@@ -279,10 +279,13 @@ RELEASE_NOTES="$SORTED_COMMITS"
 if [ "$DRY_RUN" = true ]; then
     echo "Would update CHANGELOG.md with:"
     echo "$NEW_ENTRY"
+    echo "Would update publiccode.yml:"
+    echo "  softwareVersion: v$VERSION"
+    echo "  releaseDate: '$DATE'"
     if [ "$EDIT_CHANGELOG" = true ]; then
         echo "Would open \$EDITOR to edit CHANGELOG.md before committing"
     fi
-    echo "Would run: git add CHANGELOG.md"
+    echo "Would run: git add CHANGELOG.md publiccode.yml"
     echo "Would run: git commit -m \"Bump version $VERSION\""
     echo "Would run: git tag -a \"v$VERSION\" -m \"Version $VERSION\""
     echo "Would run: git push origin HEAD v$VERSION"
@@ -305,17 +308,24 @@ fi
 
 echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
 
+# Update publiccode.yml
+sed -e "s/^softwareVersion: .*/softwareVersion: v$VERSION/" \
+    -e "s/^releaseDate: .*/releaseDate: '$DATE'/" \
+    publiccode.yml > publiccode.yml.tmp
+mv publiccode.yml.tmp publiccode.yml
+echo "publiccode.yml updated: softwareVersion=v$VERSION, releaseDate=$DATE"
+
 if [ "$EDIT_CHANGELOG" = true ]; then
     ${EDITOR:-vi} CHANGELOG.md
     # Re-extract release notes from the edited changelog (content between first and second ## headings)
     RELEASE_NOTES=$(sed -n '/^## '"$VERSION"'/,/^## /{/^## /!p}' CHANGELOG.md)
 fi
 
-# Commit the CHANGELOG update
-git add CHANGELOG.md
+# Commit the CHANGELOG and publiccode.yml updates
+git add CHANGELOG.md publiccode.yml
 git commit -m "Bump version $VERSION"
 
-echo "✓ Committed CHANGELOG.md"
+echo "✓ Committed CHANGELOG.md and publiccode.yml"
 
 # Create the git tag
 git tag -a "v$VERSION" -m "Version $VERSION"

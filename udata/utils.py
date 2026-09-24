@@ -4,10 +4,11 @@ import logging
 import math
 import re
 from collections import Counter
+from collections.abc import Hashable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
-from typing import Any, Hashable, overload
+from typing import Any, TypeVar, overload
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -32,12 +33,18 @@ def get_udata_version() -> str:
     return version("udata")
 
 
-def get_by(lst, field, value):
-    """Find an object in a list given a field value"""
+def get(obj, field: str) -> Any | None:
+    """Get a field value regardless of obj type (dict or object)"""
+    if isinstance(obj, dict):
+        return obj.get(field)
+    else:
+        return getattr(obj, field, None)
+
+
+def get_by(lst, **fields: Any) -> Any | None:
+    """Find an object in a list given field(s) value(s)"""
     for row in lst:
-        if (isinstance(row, dict) and row.get(field) == value) or (
-            getattr(row, field, None) == value
-        ):
+        if all(get(row, field) == value for field, value in fields.items()):
             return row
 
 
@@ -507,3 +514,11 @@ def raise_if_redirect(response):
             f"Redirect ({response.status_code}) not allowed: {response.url} -> {response.headers.get('Location')}",
             response=response,
         )
+
+
+T = TypeVar("T", bound=Hashable)
+
+
+def uniquify(collection: Iterable[T]) -> list[T]:
+    """Return a list of unique values from the input collection, preserving order"""
+    return list(dict.fromkeys(collection))

@@ -43,7 +43,7 @@ def serialize_resource_for_event(resource):
 def payload_for_resource(document: Any, resource_id: str | None) -> dict | None:
     if resource_id is None:  # On delete, there is no resource_id, and no need for a payload.
         return None
-    resource: dict = serialize_resource_for_event(get_by(document.resources, "id", resource_id))
+    resource: dict = serialize_resource_for_event(get_by(document.resources, id=resource_id))
     return {
         "resource_id": str(resource_id),
         "dataset_id": str(document.id),

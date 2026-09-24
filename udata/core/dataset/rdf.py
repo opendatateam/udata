@@ -5,7 +5,9 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from collections.abc import Collection
+from datetime import UTC, date, datetime
+from fractions import Fraction
 from itertools import chain
 
 from dateutil.parser import parse as parse_dt
@@ -29,22 +31,27 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    DQV,
     EUFORMAT,
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
     IANAFORMAT,
     OGC,
+    QUDT,
     RDFS,
     SCHEMA,
     SCV,
+    SDMXA,
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
     contact_points_from_rdf,
     contact_points_to_rdf,
     default_lang_value,
+    localname,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -56,9 +63,9 @@ from udata.rdf import (
     url_from_rdf,
     vocabulary_key,
 )
-from udata.utils import get_by, safe_harvest_datetime, safe_unicode
+from udata.utils import get_by, safe_harvest_datetime, safe_unicode, uniquify
 
-from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import OGC_SERVICE_FORMATS, DistanceUom, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -134,6 +141,12 @@ EUFREQ_ID_TO_UDATA = {
 
 # Merge order matters: we want FREQ to win over EUFREQ
 UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
+
+QUDT_TO_UDATA = {
+    QUDT.FT: DistanceUom.FOOT,
+    QUDT.KiloM: DistanceUom.KILOMETER,
+    QUDT.M: DistanceUom.METER,
+}
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -213,8 +226,8 @@ def detect_ogc_service(resource: Resource) -> str | None:
     * a REQUEST=GetCapabilities param in url
     It returns the OGC service type or None
     """
-    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
-        return resource.format.strip("ogc:")
+    if resource.format and (format := resource.format.removeprefix("ogc:")) in OGC_SERVICE_FORMATS:
+        return format
     url = resource.url.lower()
     if "request=getcapabilities" in url and any(
         f"service={format}" in url for format in OGC_SERVICE_FORMATS
@@ -507,9 +520,9 @@ def temporal_from_rdf(period_of_time):
         log.warning("Unable to parse temporal coverage", exc_info=True)
 
 
-def spatial_from_rdf(graph):
+def spatial_from_rdf(resource: RdfResource) -> SpatialCoverage | None:
     geojsons = []
-    for term in graph.objects(DCT.spatial):
+    for term in resource.objects(DCT.spatial):
         try:
             # This may not be official in the norm but some ArcGis return
             # bbox as literal directly in DCT.spatial.
@@ -522,16 +535,19 @@ def spatial_from_rdf(graph):
 
             for object in term.objects():
                 if isinstance(object, Literal):
-                    if (
-                        object.datatype.__str__()
-                        == "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+                    if object.datatype in (
+                        GEOSPARQL.geoJSONLiteral,
+                        IANAFORMAT["application/vnd.geo+json"],  # older
                     ):
                         try:
                             geojson = json.loads(object.toPython())
                         except ValueError as e:
                             log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
                             continue
-                    elif object.datatype.__str__() == "http://www.opengis.net/rdf#wktLiteral":
+                    elif object.datatype in (
+                        GEOSPARQL.wktLiteral,
+                        URIRef("http://www.opengis.net/rdf#wktLiteral"),  # old OGC prefix
+                    ):
                         try:
                             # .upper() si here because geomet doesn't support Polygon but only POLYGON
                             geojson = wkt.loads(object.toPython().strip().upper())
@@ -542,6 +558,7 @@ def spatial_from_rdf(graph):
                         continue
 
                     geojsons.append(geojson)
+
         except Exception as e:
             log.exception(
                 f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True
@@ -589,6 +606,76 @@ def spatial_from_rdf(graph):
     except ValidationError as e:
         log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
+
+
+def spatial_resolution_from_rdf(resource: RdfResource) -> str | None:
+    # Spatial resolution refers to the level of detail of the dataset.
+    #
+    # ISO-19139 (INSPIRE) supports the following two representations:
+    # - Resolution distance [0..n]: `//gmd:MD_Resolution/gmd:distance`.
+    # - Equivalent scale [0..n]: `//gmd:MD_Resolution/gmd:equivalentScale`.
+    #
+    # GeoDCAT-AP supports the above two:
+    # - Distance [0..n]: `dcat:spatialResolutionInMeters`.
+    # - Scale [0..n]: `dqv:hasQualityMeasurement` with `dqv:isMeasurementOf` set to
+    #   `geodcatap:spatialResolutionAsScale`.
+    # plus:
+    # - Other distance units [0..n]: `dqv:isMeasurementOf` set to either:
+    #   - `geodcatap:spatialResolutionAsDistance` (configurable UOM, somewhat redundant with
+    #     `dcat:spatialResolutionInMeters`),
+    #   - `geodcatap:spatialResolutionAsAngularDistance` (angles not in ISO-19139),
+    #   - `geodcatap:spatialResolutionAsVerticalDistance` (?).
+    # - Free text [0..1]: `geodcatap:spatialResolutionAsText`.
+    #
+    # Why the 0..n cardinality?
+    # - INSPIRE TG only provide description for 0..2, with 2 being an interval of bounding values.
+    #   It is not clear if intervals only apply to distance, or to scales as well.
+    # - GeoDCAT-AP doesn't explain cardinality at all.
+    #
+    # We implement the following minimalist heuristic:
+    # - Only support INSPIRE representations (no practical examples for others so far).
+    # - Return an acceptable textual representation instead of a typed object (which would require
+    #   storing a type+value tuple).
+    # - If several representations are present, we pick distance over scale (arbitrary).
+    # - If cardinality > 1, we use the largest value we find. We don't go for the smallest to avoid
+    #   giving a false sense of precision.
+    try:
+        if resolutions_in_meters := [
+            value.toPython()
+            for value in resource.objects(DCAT.spatialResolutionInMeters)
+            if isinstance(value, Literal)
+        ]:
+            resolution = max(resolutions_in_meters)
+            return f"{resolution} {DistanceUom.METER.symbol}"
+
+        if resolutions_as_distance := [
+            (value.toPython(), unit)
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsDistance
+            and (unit := QUDT_TO_UDATA.get(obj.value(SDMXA.unitMeasure).identifier))
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = max(resolutions_as_distance, key=lambda x: x[1].in_meters(x[0]))
+            return f"{resolution[0]} {resolution[1].symbol}"
+
+        if resolutions_as_scale := [
+            value.toPython()
+            for obj in resource.objects(DQV.hasQualityMeasurement)
+            if obj.value(DQV.isMeasurementOf).identifier == GEODCAT.spatialResolutionAsScale
+            and isinstance(value := obj.value(DQV.value), Literal)
+        ]:
+            resolution = min(resolutions_as_scale)
+            # str(Fraction) should look ok as we're only dealing with geographical scales (1/x with
+            # a fairly limited set of "round" denominator values), which hopefully survive the
+            # decimal-to-fraction conversion reasonably well.
+            # max_denominator is picked to be larger than existing scales, but still small enough
+            # that we limit the risk of non-Decimal floats causing crazy fractions:
+            # Fraction(0.00004) would otherwise return 5902958103587057/147573952589676412928
+            # instead of 1/25000.
+            return str(Fraction(resolution).limit_denominator(max_denominator=100_000_000))
+    except Exception:
+        log.warning("Unable to parse spatial resolution", exc_info=True)
+        return
 
 
 def frequency_from_rdf(term) -> UpdateFrequency | None:
@@ -665,7 +752,7 @@ def title_from_rdf(resource: RdfResource, url: str | None = None, format: str | 
             return i18n._("Nameless resource")
 
 
-def access_rights_from_rdf(resource: RdfResource) -> set[str]:
+def access_rights_from_rdf(resource: RdfResource) -> list[str]:
     """
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
@@ -673,7 +760,7 @@ def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.accessRights, unwrap=[RDFS.label, DCT.description])
 
 
-def licenses_from_rdf(resource: RdfResource) -> set[str]:
+def licenses_from_rdf(resource: RdfResource) -> list[str]:
     """
     Extract licences from a RDF distribution.
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
@@ -682,7 +769,7 @@ def licenses_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.license, unwrap=[RDFS.label, DCT.description])
 
 
-def rights_from_rdf(resource: RdfResource) -> set[str]:
+def rights_from_rdf(resource: RdfResource) -> list[str]:
     """
     Extract rights from a RDF distribution.
     Cardinality is 0..n.
@@ -690,7 +777,7 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.rights, unwrap=[RDFS.label, DCT.description])
 
 
-def provenances_from_rdf(resource: RdfResource) -> set[str]:
+def provenances_from_rdf(resource: RdfResource) -> list[str]:
     """
     Extract provenance from a RDF distribution.
     Cardinality is 0..n.
@@ -698,47 +785,54 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.provenance, unwrap=[RDFS.label, DCT.description])
 
 
-def infer_dataset_access_rights(
-    dataset: RdfResource, resources_access_rights: list[set[str]]
-) -> tuple[set[str], AccessType | None, InspireLimitationCategory | None]:
+def inspire_category_from_rights(rights: Collection[str]) -> InspireLimitationCategory | None:
     """
-    Infer the dataset access rights from a RDF dataset or a list of resources access rights.
-    If the dataset does not have access rights and all resources have the same set of access rights return it.
+    Identify INSPIRE access limitation category from a list of rights.
+    When multiple limitations are present, only the first one is returned.
     """
-    dataset_access_rights = access_rights_from_rdf(dataset)
-    if not dataset_access_rights and resources_access_rights:
-        if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
-            dataset_access_rights = resources_access_rights[0]
+    if not current_app.config["INSPIRE_SUPPORT"]:
+        return None
 
-    if current_app.config["INSPIRE_SUPPORT"]:
-        # Try to match access rights to known inspire access rights limitation categories
-        country = current_app.config["DEFAULT_COUNTRY_CODE"]
-        access_right_categories = set(
-            [
-                InspireLimitationCategory.get_category_from_localized_label(access_right, country)
-                for access_right in dataset_access_rights
-            ]
-        )
-        access_right_categories.discard(None)
-        if len(access_right_categories) == 1:
-            return dataset_access_rights, AccessType.RESTRICTED, access_right_categories.pop()
+    country = current_app.config["DEFAULT_COUNTRY_CODE"]
 
-    return dataset_access_rights, None, None
+    for right in rights:
+        category = InspireLimitationCategory.lookup(right, country)
+        if category:
+            return category
+
+    return None
 
 
-def add_dcat_extra(
-    obj: Dataset | Resource, key: str, value: str | set | list
-) -> Dataset | Resource:
-    if type(value) is set:
+def set_dcat_extra(obj: Dataset | Resource, property: URIRef | str, value: str | Collection):
+    key = localname(property) if isinstance(property, URIRef) else property
+    if not isinstance(value, str):
         value = list(value)
     obj.extras["dcat"] = {
         **obj.extras.get("dcat", {}),
         key: value,
     }
-    return obj
 
 
-def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
+def get_dcat_extra(obj: Dataset | Resource, property: URIRef | str) -> str | list | None:
+    key = localname(property) if isinstance(property, URIRef) else property
+    if dcat := obj.extras.get("dcat"):
+        return dcat.get(key)
+
+
+def get_unanimous_dcat_extra(
+    resources: list[Resource], property: URIRef | str
+) -> str | list | None:
+    if not resources:
+        return None
+    key = localname(property) if isinstance(property, URIRef) else property
+    value = get_dcat_extra(resources[0], key)
+    for resource in resources[1:]:
+        if value != get_dcat_extra(resource, key):
+            return None
+    return value
+
+
+def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> Resource | None:
     """
     Map a Resource domain model to a DCAT/RDF graph
     """
@@ -759,19 +853,34 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         log.warning(f"Resource without url: {distrib}")
         return
 
+    format = format_from_rdf(distrib)
+    title = title_from_rdf(distrib, url, format)
+
     if dataset:
-        resource = get_by(dataset.resources, "url", url)
+        fields = {"url": url}
+        if format in OGC_SERVICE_FORMATS:
+            # In ISO-19139/19115-3, GeoNetwork generates per-layer resources for OGC services, all
+            # with the same GetCapabilities URL. So we have to use a composite key to retrieve the
+            # correct resource.
+            # GeoNetwork uses the layer name as title, so it should be stable enough that we can
+            # use it in our composite key. If the layer name changes, it's OK to treat it as a
+            # different resource.
+            # We however don't use the title for other types of resources, because it is more
+            # likely to be editorialized, and therefore change over time while still describing
+            # the same resource.
+            fields["title"] = title
+        resource = get_by(dataset.resources, **fields)
     if not dataset or not resource:
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
 
     resource.filetype = "remote"
-    resource.format = format_from_rdf(distrib)
-    resource.title = title_from_rdf(distrib, url, resource.format)
+    resource.title = title
     resource.url = url
     resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
+    resource.format = format
     resource.mime = mime_from_rdf(distrib)
     schema = schema_from_rdf(distrib)
     if schema:
@@ -779,15 +888,15 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     access_rights = access_rights_from_rdf(distrib)
     if access_rights:
-        add_dcat_extra(resource, "accessRights", access_rights)
+        set_dcat_extra(resource, DCT.accessRights, access_rights)
 
     licenses = licenses_from_rdf(distrib)
     if licenses:
-        add_dcat_extra(resource, "license", licenses)
+        set_dcat_extra(resource, DCT.license, licenses)
 
     rights = rights_from_rdf(distrib)
     if rights:
-        add_dcat_extra(resource, "rights", rights)
+        set_dcat_extra(resource, DCT.rights, rights)
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -813,6 +922,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.issued_at = issued_at
+    resource.harvest.last_update = datetime.now(UTC)
 
     # :FutureHarvestModifiedAt
     resource.harvest.modified_at = safe_harvest_datetime(
@@ -852,8 +962,9 @@ def dataset_from_rdf(
     description = default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
+    owner = dataset.organization or dataset.owner
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataset, dryrun=dryrun)
+        contact_points_from_rdf(d, rdf_entity, role, owner, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataset.contact_points = [  # Flattened list of contact points
@@ -867,6 +978,10 @@ def dataset_from_rdf(
     if spatial_coverage:
         dataset.spatial = spatial_coverage
 
+    spatial_resolution = spatial_resolution_from_rdf(d)
+    if spatial_resolution:
+        set_dcat_extra(dataset, "spatial_resolution", spatial_resolution)
+
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
         dataset.acronym = acronym
@@ -879,42 +994,58 @@ def dataset_from_rdf(
 
     provenances = provenances_from_rdf(d)
     if provenances:
-        add_dcat_extra(dataset, "provenance", provenances)
+        set_dcat_extra(dataset, "provenance", provenances)
 
-    resources_licenses_hints = set()
-    resources_access_rights = []
+    # list of harvested distributions, possibly only a subset of dataset.resources
+    distributions = []
+
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
-        resource_from_rdf(distrib, dataset)
-        resources_access_rights.append(access_rights_from_rdf(distrib))
-        # include both dct:license and dct:rights as licenses hints from resources
-        resources_licenses_hints |= licenses_from_rdf(distrib)
-        resources_licenses_hints |= rights_from_rdf(distrib)
+        resource = resource_from_rdf(distrib, dataset)
+        if resource:
+            distributions.append(resource)
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    access_rights, access_type, access_right_category = infer_dataset_access_rights(
-        d, resources_access_rights
+    # dataset.extras["dcat"]["rights"] is set from (in order, first match wins):
+    # 1. Dataset dct:rights metadata.
+    # 2. Distributions dct:rights metadata, but only if all distributions carry the same metadata.
+    #    This heuristic is needed to "reverse" the ISO-to-DCAT conversion from SEMIC, which moves
+    #    the dataset-level ISO metadata at the distribution level in DCAT.
+    rights = rights_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.rights) or []
+    if rights:
+        set_dcat_extra(dataset, DCT.rights, rights)
+
+    # same heuristic as dataset.extras["dcat"]["rights"] above
+    access_rights = (
+        access_rights_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.accessRights) or []
     )
     if access_rights:
-        add_dcat_extra(dataset, "accessRights", access_rights)
-    if access_type:
-        dataset.access_type = access_type
-    if access_right_category:
-        dataset.access_type_reason_category = access_right_category
+        set_dcat_extra(dataset, DCT.accessRights, access_rights)
 
+    inspire_category = inspire_category_from_rights(access_rights + rights)
+    if inspire_category:
+        dataset.access_type = AccessType.RESTRICTED
+        dataset.access_type_reason_category = inspire_category
+
+    # same heuristic as dataset.extras["dcat"]["rights"] above
+    licenses = licenses_from_rdf(d) or get_unanimous_dcat_extra(distributions, DCT.license) or []
+    if licenses:
+        set_dcat_extra(dataset, DCT.license, licenses)
+
+    # dataset.license is set from (in order, first match wins):
+    # 1. Dataset dct:license.
+    # 2. Dataset dct:rights (SEMIC outputs non-URI licenses as rights).
+    # 3. Distributions dct:license (contrary to dataset.extras["dcat"]["license"], not all
+    #    distributions have to carry the same metadata).
     default_license = dataset.license or License.default()
-    dataset_licenses = licenses_from_rdf(d)
-    if dataset_licenses:
-        add_dcat_extra(dataset, "license", dataset_licenses)
-    dataset_rights = rights_from_rdf(d)
-    if dataset_rights:
-        add_dcat_extra(dataset, "rights", dataset_rights)
+    resources_licenses = uniquify(
+        license
+        for distrib in distributions
+        for license in (get_dcat_extra(distrib, DCT.license) or [])
+    )
     dataset.license = License.guess(
-        *dataset_licenses,
-        *dataset_rights,
-        *resources_licenses_hints,
-        default=default_license,
+        *(licenses + rights + resources_licenses), default=default_license
     )
 
     identifier = rdf_value(d, DCT.identifier)

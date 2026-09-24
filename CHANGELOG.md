@@ -1,5 +1,255 @@
 # Changelog
 
+## 17.8.0 (2026-09-15)
+
+- chore(CI): remove trigger gitlab ([#3951](https://github.com/opendatateam/udata/pull/3951))
+- feat: add or to chart filters ([#3938](https://github.com/opendatateam/udata/pull/3938))
+- feat: expose a description for each organization role ([#3937](https://github.com/opendatateam/udata/pull/3937))
+- fix: 500 on discussions listing when the subject is a post ([#3945](https://github.com/opendatateam/udata/pull/3945))
+- fix: add contact point unique index ([#3942](https://github.com/opendatateam/udata/pull/3942))
+- fix: dataservice serves dataset by uri ([#3949](https://github.com/opendatateam/udata/pull/3949))
+- fix: document the request payloads and https scheme missing from the OpenAPI specs ([#3946](https://github.com/opendatateam/udata/pull/3946))
+- fix(edito): make the title optional on list blocs ([#3941](https://github.com/opendatateam/udata/pull/3941))
+- fix: keep harvest purge cursors alive while archiving ([#3944](https://github.com/opendatateam/udata/pull/3944))
+- fix: pull MinIO image from quay.io, it is gone from Docker Hub ([#3947](https://github.com/opendatateam/udata/pull/3947))
+- fix: run field checks on creation even when the value equals the field default ([#3929](https://github.com/opendatateam/udata/pull/3929))
+
+
+## 17.7.2 (2026-09-11)
+
+- fix: MAAF XML parser ([#3943](https://github.com/opendatateam/udata/pull/3943))
+
+
+## 17.7.1 (2026-09-11)
+
+- fix: merge the contact points the empty value normalization made identical ([#3940](https://github.com/opendatateam/udata/pull/3940))
+- fix: reject invalid or out-of-bounds image crop boxes instead of 500ing ([#3925](https://github.com/opendatateam/udata/pull/3925))
+- fix: return a 404 instead of a 500 for an unknown harvest job ([#3926](https://github.com/opendatateam/udata/pull/3926))
+
+
+## 17.7.0 (2026-09-09)
+
+- **chore!: upgrade flask-storage to 2.0.1 ([#3920](https://github.com/opendatateam/udata/pull/3920))**
+- chore(deps): update dependency faker to >=40.38, <40.39 ([#3916](https://github.com/opendatateam/udata/pull/3916))
+- chore: remove unused flask-cdn dependency and its CDN settings ([#3909](https://github.com/opendatateam/udata/pull/3909))
+- chore: support Flask-Caching 2.5.0 ([#3921](https://github.com/opendatateam/udata/pull/3921))
+- docs: drop the dead Docker install path and fix the local setup instructions ([#3919](https://github.com/opendatateam/udata/pull/3919))
+- fix(discussion): fix integrity on organization reference ([#3923](https://github.com/opendatateam/udata/pull/3923))
+- fix: enforce contact point ownership on the model and carry them over on transfer ([#3905](https://github.com/opendatateam/udata/pull/3905))
+- fix: handle HEAD requests on the OAuth authorize endpoint ([#3917](https://github.com/opendatateam/udata/pull/3917))
+- fix: incorrect use of str.strip instead of str.removeprefix ([#3915](https://github.com/opendatateam/udata/pull/3915))
+- fix: make db migrate exit with an error when a migration fails ([#3934](https://github.com/opendatateam/udata/pull/3934))
+- fix: make the contact point name optional instead of an empty string ([#3914](https://github.com/opendatateam/udata/pull/3914))
+- fix: reject email updates outside the /change-email confirmation flow ([#3931](https://github.com/opendatateam/udata/pull/3931))
+- fix: reject mongo operators and out-of-choices classes in API references instead of querying with them ([#3912](https://github.com/opendatateam/udata/pull/3912))
+- fix: remote id backfill crashing on datasets without a resources field ([#3933](https://github.com/opendatateam/udata/pull/3933))
+- fix: require a subject on reports instead of crashing while marshalling a subject-less one ([#3911](https://github.com/opendatateam/udata/pull/3911))
+- fix: reserved extras and url validation ([#3918](https://github.com/opendatateam/udata/pull/3918))
+- fix: retry save when a concurrent writer takes the computed slug ([#3928](https://github.com/opendatateam/udata/pull/3928))
+- fix: return 400 instead of 500 on malformed ids in filters and oauth client_id ([#3906](https://github.com/opendatateam/udata/pull/3906))
+- fix(spatial): return 404 instead of 500 for unknown zone ids ([#3903](https://github.com/opendatateam/udata/pull/3903))
+- fix: tests relying on the contact point name being required ([#3924](https://github.com/opendatateam/udata/pull/3924))
+- fix: validate uploaded image content instead of the client-declared mimetype ([#3910](https://github.com/opendatateam/udata/pull/3910))
+
+
+## 17.6.0 (2026-08-20)
+
+- chore: bump flask-storage to 2.0.0 to stream uploads to their storage ([#3907](https://github.com/opendatateam/udata/pull/3907))
+- fix: derive upload metadata from the stream instead of the storage backend ([#3896](https://github.com/opendatateam/udata/pull/3896))
+- fix: stream chunked uploads to their storage instead of buffering them ([#3895](https://github.com/opendatateam/udata/pull/3895))
+
+
+## 17.5.0 (2026-08-19)
+
+- feat(topics): add lookup by element id/class ([#3898](https://github.com/opendatateam/udata/pull/3898))
+- fix(harvest): stop adopting CKAN remote ids as resource ids ([#3904](https://github.com/opendatateam/udata/pull/3904))
+
+
+## 17.4.0 (2026-08-17)
+
+- feat: migrate discussion api fields ([#3775](https://github.com/opendatateam/udata/pull/3775))
+- feat: migrate harvest source writes to api fields ([#3900](https://github.com/opendatateam/udata/pull/3900))
+- fix(harvest): handle DCAT contact points more robustly ([#3862](https://github.com/opendatateam/udata/pull/3862))
+
+
+## 17.3.0 (2026-08-12)
+
+- docs: sync adapting-settings with current settings defaults ([#3902](https://github.com/opendatateam/udata/pull/3902))
+- feat(harvest): SEMICeu converter upgrade ([#3832](https://github.com/opendatateam/udata/pull/3832))
+- fix: block resource file replacement in read-only mode ([#3893](https://github.com/opendatateam/udata/pull/3893))
+- fix: return 200 instead of 500 when a nested entry is submitted with an unknown id ([#3891](https://github.com/opendatateam/udata/pull/3891))
+- fix(topics): update Topic.last_modified on element change ([#3897](https://github.com/opendatateam/udata/pull/3897))
+- test: run storage integration tests against a real S3 service ([#3894](https://github.com/opendatateam/udata/pull/3894))
+
+
+## 17.2.0 (2026-08-05)
+
+- feat: migrate users to api fields ([#3777](https://github.com/opendatateam/udata/pull/3777))
+- feat: SSRF hardened http client ([#3877](https://github.com/opendatateam/udata/pull/3877))
+- fix: fall back to the default locale on an invalid lang query parameter ([#3886](https://github.com/opendatateam/udata/pull/3886))
+- fix: infinite recursion on reuse endpoints ([#3892](https://github.com/opendatateam/udata/pull/3892))
+- fix: restrict Discussion.subject to models supporting discussions ([#3884](https://github.com/opendatateam/udata/pull/3884))
+- fix: return 400 instead of 500 on malformed member assignments payload ([#3887](https://github.com/opendatateam/udata/pull/3887))
+- fix: return 404 instead of 500 when updating a non-member ([#3888](https://github.com/opendatateam/udata/pull/3888))
+- refactor(test): extract parametrize_with_ids helper ([#3889](https://github.com/opendatateam/udata/pull/3889))
+
+
+## 17.1.0 (2026-08-03)
+
+- feat(catalog): add dataset and dataservices harvest.last_update ([#3885](https://github.com/opendatateam/udata/pull/3885))
+- feat(sitemap): add task for sitemap generation ([#3830](https://github.com/opendatateam/udata/pull/3830))
+
+
+## 17.0.8 (2026-07-30)
+
+- chore(deps): lock file maintenance ([#3865](https://github.com/opendatateam/udata/pull/3865))
+- chore(deps): update dependency faker to >=40.36, <40.37 ([#3825](https://github.com/opendatateam/udata/pull/3825))
+- chore: remove dead udata/core/jobs/actions.py module ([#3856](https://github.com/opendatateam/udata/pull/3856))
+- docs: update deprecated commands related to dev optional deps ([#3883](https://github.com/opendatateam/udata/pull/3883))
+- fix: error message if failing to download geozones ([#3858](https://github.com/opendatateam/udata/pull/3858))
+- fix: filter with multiple tags ([#3712](https://github.com/opendatateam/udata/pull/3712))
+- perf: improve edito blocs perfs ([#3791](https://github.com/opendatateam/udata/pull/3791))
+- perf: skip reload() in update/add/remove_resource ([#3852](https://github.com/opendatateam/udata/pull/3852))
+- perf: targeted update_one for resource extras instead of full save ([#3851](https://github.com/opendatateam/udata/pull/3851))
+- test: check Saxon can start within a uwsgi worker's address space limit ([#3882](https://github.com/opendatateam/udata/pull/3882))
+
+
+## 17.0.7 (2026-07-27)
+
+- chore: add default access type to dataset & dataservices ([#3879](https://github.com/opendatateam/udata/pull/3879))
+- feat(catalog): add resource harvest.last_update ([#3880](https://github.com/opendatateam/udata/pull/3880))
+- fix: activity derefences ([#3868](https://github.com/opendatateam/udata/pull/3868))
+- fix: lazily translate DCAT harvester labels so they are not frozen at import time ([#3881](https://github.com/opendatateam/udata/pull/3881))
+- fix: never expose unpublished posts through the search and detail endpoints ([#3876](https://github.com/opendatateam/udata/pull/3876))
+- fix: notifications dereferences ([#3867](https://github.com/opendatateam/udata/pull/3867))
+
+
+## 17.0.6 (2026-07-24)
+
+- chore(docker): disable elasticsearch disk threshold ([#3861](https://github.com/opendatateam/udata/pull/3861))
+- chore(jobs): require admin permission for celery jobs api routes ([#3869](https://github.com/opendatateam/udata/pull/3869))
+- ci: redirect inv stdin to /dev/null to bypass invoke v3 tty crash ([#3866](https://github.com/opendatateam/udata/pull/3866))
+- feat(topic): featured property is read only and has dedicated admin permission routes ([#3870](https://github.com/opendatateam/udata/pull/3870))
+- fix: stop leaking membership requests through the public organization API ([#3875](https://github.com/opendatateam/udata/pull/3875))
+- fix(topics): check element is part of Topic ([#3874](https://github.com/opendatateam/udata/pull/3874))
+- test: explicit CSV export config ([#3871](https://github.com/opendatateam/udata/pull/3871))
+
+
+## 17.0.5 (2026-07-22)
+
+- feat(dataservices): compute reuses metric ([#3816](https://github.com/opendatateam/udata/pull/3816))
+- feat(harvest,catalog): sync dataset/dataservice harvest info ([#3864](https://github.com/opendatateam/udata/pull/3864))
+- fix(dataservices): parse swagger and scope to bouquet fiche for search ([#3783](https://github.com/opendatateam/udata/pull/3783))
+
+
+## 17.0.4 (2026-07-06)
+
+- chore(deps): lock file maintenance ([#3850](https://github.com/opendatateam/udata/pull/3850))
+- feat: accept webp as image format ([#3855](https://github.com/opendatateam/udata/pull/3855))
+- fix: removing logo on description update ([#3859](https://github.com/opendatateam/udata/pull/3859))
+
+
+## 17.0.3 (2026-06-29)
+
+- feat: add parsing_table for tabular detection ([#3845](https://github.com/opendatateam/udata/pull/3845))
+- feat(catalog): add spatial geom in dataset catalog  ([#3842](https://github.com/opendatateam/udata/pull/3842))
+- feat: org edito blocs ([#3780](https://github.com/opendatateam/udata/pull/3780))
+- feat: remove tmp file upload ([#3828](https://github.com/opendatateam/udata/pull/3828))
+- fix: paginations with negative page and page_size ([#3847](https://github.com/opendatateam/udata/pull/3847))
+- fix: wiping metrics on metric-api failures ([#3846](https://github.com/opendatateam/udata/pull/3846))
+
+
+## 17.0.2 (2026-06-23)
+
+- chore(CI): use recommended UV_PUBLISH_TOKEN ([#3840](https://github.com/opendatateam/udata/pull/3840))
+- chore(deps): lock file maintenance ([#3820](https://github.com/opendatateam/udata/pull/3820))
+- chore(deps): lock file maintenance ([#3829](https://github.com/opendatateam/udata/pull/3829))
+- chore(harvest): improve CSW request XML compliance ([#3837](https://github.com/opendatateam/udata/pull/3837))
+- chore(harvest): partially revert csw xml update ([#3843](https://github.com/opendatateam/udata/pull/3843))
+- feat: add API v2 for reuses listing ([#3800](https://github.com/opendatateam/udata/pull/3800))
+- feat: add file to charts ([#3809](https://github.com/opendatateam/udata/pull/3809))
+- feat(harvest): harvest spatial resolution ([#3773](https://github.com/opendatateam/udata/pull/3773))
+- fix(perfs): filter datasets by reuse or dataservice ([#3822](https://github.com/opendatateam/udata/pull/3822))
+- fix(perfs): paginate ressources MongoDB side instead of Python ([#3823](https://github.com/opendatateam/udata/pull/3823))
+- fix: protect hosted resource checksum ([#3834](https://github.com/opendatateam/udata/pull/3834))
+- perf: optimize harvest clean command ([#3836](https://github.com/opendatateam/udata/pull/3836))
+- refactor: add missing signal kwargs ([#3835](https://github.com/opendatateam/udata/pull/3835))
+- test: improve ElasticSearch tests stability ([#3841](https://github.com/opendatateam/udata/pull/3841))
+
+
+## 17.0.1 (2026-06-10)
+
+- feat: improve backfill harvest migration ([#3826](https://github.com/opendatateam/udata/pull/3826))
+
+
+## 17.0.0 (2026-06-09)
+
+- **feat!: harvest API refactor ([#3759](https://github.com/opendatateam/udata/pull/3759))**
+- feat: prepare ElasticSearch 8 ([#3714](https://github.com/opendatateam/udata/pull/3714))
+- feat(search): index Topic.elements ([#3811](https://github.com/opendatateam/udata/pull/3811))
+- feat(spam): add web url in message report ([#3821](https://github.com/opendatateam/udata/pull/3821))
+
+
+## 16.6.1 (2026-06-05)
+
+- chore(deps): temporary bcrypt downgrade ([#3814](https://github.com/opendatateam/udata/pull/3814))
+- chore(deps): update dependency faker to >=40.21, <40.22 ([#3806](https://github.com/opendatateam/udata/pull/3806))
+- feat: allow external URL and name for discussions ([#3765](https://github.com/opendatateam/udata/pull/3765))
+- feat(harvest): add resource harvest timestamp ([#3805](https://github.com/opendatateam/udata/pull/3805))
+- fix: dataset deleted in accordion ([#3812](https://github.com/opendatateam/udata/pull/3812))
+- fix(deps): downgrade saxonche to v12 ([#3817](https://github.com/opendatateam/udata/pull/3817))
+- fix(tags): move validation in harvest logic to fix tags unpickling ([#3810](https://github.com/opendatateam/udata/pull/3810))
+- test: add missing tests ([#3813](https://github.com/opendatateam/udata/pull/3813))
+
+
+## 16.6.0 (2026-06-02)
+
+- Add 2FA requirement for sysadmin ([#3642](https://github.com/opendatateam/udata/pull/3642))
+- chore(deps): lock file maintenance ([#3772](https://github.com/opendatateam/udata/pull/3772))
+- chore(deps): lock file maintenance ([#3788](https://github.com/opendatateam/udata/pull/3788))
+- chore(deps): lock file maintenance ([#3803](https://github.com/opendatateam/udata/pull/3803))
+- chore(deps): update dependency faker to >=40.19, <40.20 ([#3786](https://github.com/opendatateam/udata/pull/3786))
+- chore: update publiccode ([#3785](https://github.com/opendatateam/udata/pull/3785))
+- chore: use flask-security instead of flask-security-too ([#3801](https://github.com/opendatateam/udata/pull/3801))
+- Enhance/doc ([#3778](https://github.com/opendatateam/udata/pull/3778))
+- feat(harvest): harvest DCAT DatasetSeries as udata Dataset ([#3797](https://github.com/opendatateam/udata/pull/3797))
+- feat(harvest): report conflicting record ownership ([#3771](https://github.com/opendatateam/udata/pull/3771))
+- feat(harvest): support dct:spatial geoJSONLiteral datatype ([#3790](https://github.com/opendatateam/udata/pull/3790))
+- feat: improve cors ([#3781](https://github.com/opendatateam/udata/pull/3781))
+- Fix/cli ([#3776](https://github.com/opendatateam/udata/pull/3776))
+- fix(deps): update dependency bcrypt to v5 ([#3745](https://github.com/opendatateam/udata/pull/3745))
+- fix(deps): update dependency saxonche to v13 ([#3802](https://github.com/opendatateam/udata/pull/3802))
+- fix(harvest): add missing click argument to delete command ([#3774](https://github.com/opendatateam/udata/pull/3774))
+- fix(harvest): csw-dcat harvester fails on a record parsing error ([#3770](https://github.com/opendatateam/udata/pull/3770))
+- fix(harvest): normalize tag values in TagListField to match harvester input ([#3782](https://github.com/opendatateam/udata/pull/3782))
+- fix: harvest previews bugs ([#3779](https://github.com/opendatateam/udata/pull/3779))
+- fix: lint rdf file ([#3798](https://github.com/opendatateam/udata/pull/3798))
+- fix: tchap problems on spam ([#3807](https://github.com/opendatateam/udata/pull/3807))
+
+
+## 16.5.0 (2026-05-18)
+
+- chore(deps): update dependency faker to >=40.18, <40.19 ([#3769](https://github.com/opendatateam/udata/pull/3769))
+- chore(deps): update dependency faker to v40 ([#3742](https://github.com/opendatateam/udata/pull/3742))
+- chore(deps): update dependency invoke to v3 ([#3744](https://github.com/opendatateam/udata/pull/3744))
+- feat: send notifications for a new reuse and dataservice on one of your datasets ([#3763](https://github.com/opendatateam/udata/pull/3763))
+- feat: upgrade dependencies
+- fix(deps): update dependency importlib-resources to v7 ([#3747](https://github.com/opendatateam/udata/pull/3747))
+- fix: missing last_login_at in org members response ([#3766](https://github.com/opendatateam/udata/pull/3766))
+
+
+## 16.4.0 (2026-05-07)
+
+- feat: ask user password rotation via API ([#3762](https://github.com/opendatateam/udata/pull/3762))
+- feat(harvest): use distribution service protocol as format when available ([#3749](https://github.com/opendatateam/udata/pull/3749))
+- feat: use volumes for all services ([#3761](https://github.com/opendatateam/udata/pull/3761))
+- fix(harvest): csw-* harvesters fail on some XML comments ([#3758](https://github.com/opendatateam/udata/pull/3758))
+- fix(harvest): distributions of separate WFS/WMS/WMTS layers override eachother ([#3752](https://github.com/opendatateam/udata/pull/3752))
+- fix: incorrect mask on topic element ([#3756](https://github.com/opendatateam/udata/pull/3756))
+- fix: membership api with user=None ([#3754](https://github.com/opendatateam/udata/pull/3754))
+- refactor: ping on tchap ([#3750](https://github.com/opendatateam/udata/pull/3750))
+
+
 ## 16.3.0 (2026-04-27)
 
 - chore(config): migrate Renovate config ([#3743](https://github.com/opendatateam/udata/pull/3743))

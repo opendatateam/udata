@@ -1,9 +1,14 @@
+import fnmatch
 import logging
 from datetime import UTC, datetime
+from urllib.parse import urlparse
 
-from flask import url_for
+from bson import ObjectId
+from flask import current_app, g, url_for
 from flask_login import current_user
+from flask_restx.inputs import boolean
 from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
     EmbeddedDocumentField,
@@ -14,13 +19,20 @@ from mongoengine.fields import (
 )
 from mongoengine.signals import post_save
 
+from udata import uris
+from udata.api import api, fields
+from udata.api_fields import field, generate_fields
+from udata.core.checks import only_creation
 from udata.core.linkable import Linkable
+from udata.core.organization.models import Organization
+from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
+from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
 from .signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -32,17 +44,52 @@ from .signals import (
 log = logging.getLogger(__name__)
 
 
+message_permissions_fields = api.model(
+    "DiscussionMessagePermissions",
+    {"delete": fields.Permission(), "edit": fields.Permission()},
+)
+
+discussion_permissions_fields = api.model(
+    "DiscussionPermissions",
+    {"delete": fields.Permission(), "edit": fields.Permission(), "close": fields.Permission()},
+)
+
+
+@generate_fields()
 class Message(SpamMixin, EmbeddedDocument):
     verbose_name = _("message")
 
-    id = AutoUUIDField()
-    content = StringField(required=True)
-    posted_on = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    posted_by = ReferenceField("User")
-    posted_by_organization = ReferenceField("Organization")
-    last_modified_at = DateTimeField()
+    id = field(AutoUUIDField(), readonly=True, description="The message identifier")
+    content = field(
+        StringField(required=True, max_length=COMMENT_SIZE_LIMIT),
+        description="The message body",
+    )
+    posted_on = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        description="The message posting date",
+    )
+    posted_by = field(
+        ReferenceField("User"),
+        readonly=True,
+        allow_null=True,
+        description="The message author",
+    )
+    posted_by_organization = field(
+        ReferenceField("Organization"),
+        readonly=True,
+        allow_null=True,
+        description="The organization to show to users",
+    )
+    last_modified_at = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="The message last edit date",
+    )
 
     @property
+    @field(nested_fields=message_permissions_fields)
     def permissions(self):
         from .permissions import DiscussionMessagePermission
 
@@ -90,20 +137,170 @@ class Message(SpamMixin, EmbeddedDocument):
         return message
 
 
+def is_valid_notification_external_url(url) -> bool:
+    """True if `url` is an http(s) URL whose host is in the allow-list.
+
+    Used both as the write-time validator (via `NotificationExtra`) and the
+    read-time filter (in `Discussion.notification_url`). Keeping a single
+    source of truth means a config change is reflected on both sides.
+    """
+    if not url or not isinstance(url, str):
+        return False
+    try:
+        # Delegate scheme, credentials and well-formedness checks to the
+        # shared URL validator instead of reimplementing them. It also rejects
+        # malformed URLs (no `ValueError` from `urlparse` bubbles up), userinfo
+        # (a `attacker.com\@host` phishing vector) and dangerous schemes such
+        # as `javascript:`. The extra local/private/TLD checks it performs are
+        # safe here: the URL is only ever shown in a mail, never fetched.
+        uris.validate(url, schemes=("http", "https"), credentials=False)
+    except uris.ValidationError:
+        return False
+    host = urlparse(url).hostname or ""
+    allowed = current_app.config.get("DISCUSSION_ALLOWED_EXTERNAL_DOMAINS", [])
+    # `fnmatchcase` keeps the match deterministic across OSes (`fnmatch` is
+    # case-insensitive on Windows). `hostname` is already lowercased by Python.
+    return any(fnmatch.fnmatchcase(host, pattern) for pattern in allowed)
+
+
+def _validate_notification_external_url(value):
+    if not is_valid_notification_external_url(value):
+        raise ValidationError("Invalid or disallowed notification.external_url")
+
+
+class NotificationExtra(EmbeddedDocument):
+    """Typed sub-document of `Discussion.extras["notification"]`.
+
+    `external_url` lets a third-party frontend (e.g. Ecosphères) override the
+    URL pointed to in notification emails; it is validated here against the
+    `DISCUSSION_ALLOWED_EXTERNAL_DOMAINS` allow-list.
+    """
+
+    external_url = StringField(validation=_validate_notification_external_url)
+
+
+def filter_by_subject(base_query, filter_value):
+    return base_query.generic_in(subject=filter_value)
+
+
+def filter_by_organization(base_query, filter_value):
+    # Deferred: `Dataservice` imports `Discussion` at module level, so importing the subject
+    # models here would load `Reuse` — which declares a delete rule on `Dataservice` — before
+    # `Dataservice` itself is registered.
+    from udata.core.dataservices.models import Dataservice
+    from udata.core.dataset.models import Dataset
+    from udata.core.reuse.models import Reuse
+
+    org = Organization.objects.get_or_404(id=filter_value)
+    subjects = (
+        list(Reuse.objects(organization=org).only("id"))
+        + list(Dataset.objects(organization=org).only("id"))
+        + list(Dataservice.objects(organization=org).only("id"))
+    )
+    return base_query(subject__in=subjects)
+
+
+def filter_by_user(base_query, filter_value):
+    return base_query(discussion__posted_by=ObjectId(filter_value))
+
+
+def filter_by_closed(base_query, filter_value):
+    if filter_value:
+        return base_query(closed__ne=None)
+    return base_query(closed=None)
+
+
+@generate_fields(
+    searchable=True,
+    default_sort="-created",
+    additional_sorts=[{"key": "discussion.posted_on", "value": "discussion.posted_on"}],
+    standalone_filters=[
+        {
+            "key": "closed",
+            "type": boolean,
+            "query": filter_by_closed,
+            "help": "Filters discussions on their closed status if specified",
+        },
+        {
+            "key": "for",
+            "type": str,
+            "is_list": True,
+            "constraints": ["objectid"],
+            "query": filter_by_subject,
+            "help": "Filter discussions for a given subject",
+        },
+        {
+            "key": "org",
+            "type": str,
+            "constraints": ["objectid"],
+            "query": filter_by_organization,
+            "help": "Filter discussions for a given organization",
+        },
+        {
+            "key": "user",
+            "type": str,
+            "constraints": ["objectid"],
+            "query": filter_by_user,
+            "help": "Filter discussions created by a user",
+        },
+    ],
+)
 class Discussion(SpamMixin, Linkable, Document):
     verbose_name = _("discussion")
 
-    user = ReferenceField("User")
-    organization = ReferenceField("Organization")
+    user = field(
+        ReferenceField("User"),
+        readonly=True,
+        allow_null=True,
+        description="The discussion author",
+    )
+    organization = field(
+        ReferenceField("Organization"),
+        allow_null=True,
+        description="The organization to publish on behalf of",
+        checks=[check_organization_is_valid_for_current_user, only_creation],
+    )
 
-    subject = GenericReferenceField()
-    title = StringField(required=True)
-    discussion = ListField(EmbeddedDocumentField(Message))
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    closed = DateTimeField()
-    closed_by = ReferenceField("User")
-    closed_by_organization = ReferenceField("Organization")
-    extras = ExtrasField()
+    subject = field(
+        GenericReferenceField(choices=DISCUSSION_SUBJECTS, required=True),
+        nested_fields=api.model_reference,
+        description="The discussion target object",
+    )
+    title = field(StringField(required=True), sortable=True, description="The discussion title")
+    discussion = field(
+        ListField(EmbeddedDocumentField(Message)),
+        readonly=True,
+        description="The list of messages in the discussion",
+    )
+    created = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        sortable=True,
+        description="The discussion creation date",
+    )
+    closed = field(
+        DateTimeField(),
+        readonly=True,
+        sortable=True,
+        allow_null=True,
+        description="The discussion closing date",
+    )
+    closed_by = field(
+        ReferenceField("User"),
+        readonly=True,
+        allow_null=True,
+        description="The user who closed the discussion",
+    )
+    closed_by_organization = field(
+        ReferenceField("Organization"),
+        readonly=True,
+        allow_null=True,
+        description="The organization who closed the discussion",
+    )
+    extras = field(
+        ExtrasField({"notification": NotificationExtra}),
+        description="Extra attributes as key-value pairs",
+    )
 
     meta = {
         "indexes": [
@@ -121,6 +318,7 @@ class Discussion(SpamMixin, Linkable, Document):
     }
 
     @property
+    @field(nested_fields=discussion_permissions_fields)
     def permissions(self):
         from udata.core.discussions.permissions import (
             DiscussionAuthorOrSubjectOwnerPermission,
@@ -169,7 +367,7 @@ class Discussion(SpamMixin, Linkable, Document):
         from udata.core.dataset.permissions import OwnablePermission
         from udata.core.owned import Owned
 
-        if not current_user or not current_user.is_authenticated:
+        if not current_user or not current_user.is_authenticated or not hasattr(g, "identity"):
             return False
 
         if not isinstance(self.subject, Owned):
@@ -183,11 +381,34 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return OwnablePermission(self.subject).can()
 
+    @field(description="The discussion web URL")
     def self_web_url(self, **kwargs):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
 
+    @field(rename="url", description="The discussion API URI")
     def self_api_url(self, **kwargs):
         return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
+
+    @property
+    def notification_url(self):
+        """URL to point to in notification emails.
+
+        Returns the allow-listed `extras.notification.external_url` when present
+        and valid (e.g. a Topic displayed on a third-party platform such as
+        Ecosphères), otherwise the subject's canonical page via `url_for()`.
+
+        Defense in depth: re-validate the stored `external_url` at read-time.
+        Data written before the validator existed, raw DB writes (imports,
+        migrations), or a config change tightening the allow-list could all
+        leave an unsafe URL in storage.
+        """
+        # Raw DB writes (imports, migrations) bypassing mongoengine validation
+        # can leave `notification` set to `None`, hence the `or {}` coercion.
+        notification = (self.extras or {}).get("notification") or {}
+        meta_url = notification.get("external_url")
+        if is_valid_notification_external_url(meta_url):
+            return f"{meta_url}#discussion-{self.id}"
+        return self.url_for()
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"

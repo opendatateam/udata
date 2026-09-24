@@ -41,7 +41,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -73,7 +73,7 @@ def required_if(**conditions):
                     field=field,
                 )
 
-    check.run_even_if_missing = True
+    check.always_run = True
     return check
 
 
@@ -92,16 +92,48 @@ classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
-    def __init__(self, fields_by_type, **kwargs):
+    def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
-        self.fields_by_type = fields_by_type
+        # Key under which the concrete class name is emitted on output. Comes from
+        # the field's kwargs `generic_key`, so it matches whatever the model
+        # declared — the write path reads the same key in `patch()`.
+        self.generic_key = generic_key
+        # `fields_by_type` may be a callable resolved lazily on first use (and then
+        # memoized). This lets generic embedded lists discover their subclasses at
+        # marshalling time rather than at class-decoration time, when the subclass
+        # registry can still be incomplete because of import ordering / cycles
+        # (e.g. `Organization.blocs`, decorated before the `Bloc` subclasses are loaded).
+        self._fields_by_type = fields_by_type
+
+    @property
+    def fields_by_type(self):
+        if callable(self._fields_by_type):
+            self._fields_by_type = self._fields_by_type()
+        return self._fields_by_type
 
     def format(self, value):
         # Value is one of the generic object
         data = marshal(value, self.fields_by_type[value.__class__.__name__])
-        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        data[self.generic_key] = value.__class__.__name__
         return data
+
+
+class PrefetchingList(restx_fields.List):
+    """A list that batch-loads what its items reference before marshalling them.
+
+    Without this, each item dereferences its own references (and theirs) one query at
+    a time while being serialized. The whole list is available here, so a document
+    class can resolve them all at once — see the `prefetch` option of `generate_fields`.
+    """
+
+    def __init__(self, cls_or_instance, prefetch=None, **kwargs):
+        super().__init__(cls_or_instance, **kwargs)
+        self.prefetch = prefetch
+
+    def format(self, value):
+        self.prefetch(value or [])
+        return super().format(value)
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -182,6 +214,11 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         href = info.get("href", None)
         if href:
+            href_extra = info.get("href_extra", None)
+            # `href_total` lets a field provide the total from a stored counter
+            # instead of `len(o[key])`, which would load (and dereference) the
+            # whole list just to count it.
+            href_total = info.get("href_total", None)
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
@@ -189,7 +226,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                         "rel": "subsection",
                         "href": href(o),
                         "type": "GET",
-                        "total": len(o[key]),
+                        "total": href_total(o) if href_total else len(o[key]),
+                        **(href_extra(o) if href_extra else {}),
                     },
                     description="Visit this API link to see the list.",
                     **kwargs,
@@ -202,30 +240,49 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+        # `attribute` says where to read the list on the parent document. Propagating it
+        # to the inner field would make every item look that same attribute up on itself
+        # (and serialize as null), so it stays on the list.
+        nested_info = {
+            **{k: v for k, v in info.items() if k != "attribute"},
+            **inner_info,
+            **info.get("inner_field_info", {}),
+        }
 
         generic = info.get("generic", False)
+        prefetch = None
 
-        allowed_classes = (
-            classes_by_parents[field.field.document_type_obj]
-            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
-            and field.field.document_type_obj in classes_by_parents
-            else set()
-        )
-        if generic and allowed_classes:
-            generic_fields = {
-                cls.__name__: convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
-                    mongoengine.fields.EmbeddedDocumentField(cls),
-                    nested_info,
-                )
-                for cls in allowed_classes
-            }
+        if generic and isinstance(field.field, mongoengine.fields.EmbeddedDocumentField):
+            # Resolve the allowed subclasses lazily (at marshalling time) rather than now.
+            # `classes_by_parents` is populated as each subclass module is imported, and an
+            # import cycle can decorate the parent before its subclasses are registered
+            # (e.g. `Organization.blocs`). Deferring the lookup to the first marshalling —
+            # which happens from the API layer, after every model is loaded — guarantees the
+            # registry is complete, instead of falling back to the bare `{id}` parent model.
+            parent = field.field.document_type_obj
 
-            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
-            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+            def generic_fields():
+                return {
+                    cls.__name__: convert_db_to_field(
+                        f"{key}.{cls.__name__}",
+                        # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        mongoengine.fields.EmbeddedDocumentField(cls),
+                        nested_info,
+                    )
+                    for cls in classes_by_parents.get(parent, set())
+                }
+
+            field_read = GenericField(lambda: {k: v[0].model for k, v in generic_fields().items()})
+            field_write = GenericField(lambda: {k: v[1].model for k, v in generic_fields().items()})
+
+            # The base class may declare a `prefetch` (see `generate_fields`) to batch-load
+            # what its instances reference — e.g. `Bloc` and the datasets/reuses shown by
+            # its cards. Reading it here rather than calling it from each endpoint means it
+            # runs exactly when the list is serialized: a masked-out field is dropped from
+            # the model before `output()` (see `flask_restx.marshalling.marshal`), so it
+            # costs nothing on responses that don't include the list.
+            prefetch = getattr(parent, "__prefetch__", None)
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -233,10 +290,27 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 nested_info,
             )
 
+        # A `ListField(ReferenceField)` may hold dangling `DBRef`s pointing to
+        # deleted documents (e.g. a hard delete that bypassed `reverse_delete_rule`).
+        # MongoEngine leaves them as raw `DBRef`s on access, which crashes nested
+        # marshalling, so we filter them out at read time.
+        inner_is_reference = isinstance(
+            field.field,
+            mongo_fields.ReferenceField | mongo_fields.LazyReferenceField,
+        )
+
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
             # by the `href` code above.
             def constructor_read(**kwargs):
+                if inner_is_reference and "attribute" not in kwargs:
+                    kwargs["attribute"] = lambda obj, _key=key: [
+                        ref
+                        for ref in (getattr(obj, _key, None) or [])
+                        if not isinstance(ref, DBRef)
+                    ]
+                if prefetch is not None:
+                    return PrefetchingList(field_read, prefetch=prefetch, **kwargs)
                 return restx_fields.List(field_read, **kwargs)
 
         # But we want to keep the `constructor_write` to allow changing the list.
@@ -249,7 +323,22 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
-        if field.choices:
+        # Write always takes a reference; so does read unless a branch below overrides it.
+        def constructor(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
+
+        # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
+        # expose read as a `Nested` so X-Fields masks can traverse the reference (e.g.
+        # `element{id}`), which a `Raw`-based GenericField does not allow. It also opts out
+        # of the `constructor` above, which reads `document_type` — an attribute the
+        # resolved document stored here does not have, unlike a `LazyReference`.
+        # `choices` restricts the referenced classes and has no say in either.
+        shared_nested_fields = info.get("nested_fields")
+        if shared_nested_fields is not None:
+
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(shared_nested_fields, **kwargs)
+        elif field.choices:
             generic_fields = {}
             for cls in field.choices:
                 cls = db.resolve_model(cls) if isinstance(cls, str) else cls
@@ -263,13 +352,6 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
             def constructor_read(**kwargs):
                 return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
-
-            def constructor_write(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
-        else:
-
-            def constructor(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
@@ -294,22 +376,34 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
-        generic_fields = {
-            cls.__name__: convert_db_to_field(
-                f"{key}.{cls.__name__}",
-                # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
-                # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
-                mongoengine.fields.EmbeddedDocumentField(cls),
-                info,
-            )
-            for cls in field.choices
-        }
+
+        def resolve_choice(choice):
+            return db.resolve_model(choice) if isinstance(choice, str) else choice
+
+        def generic_fields():
+            # Choices may reference classes not defined yet at decoration time
+            # (mutually recursive embedded documents like AndFilters/OrFilters),
+            # so resolve them lazily on first marshalling.
+            return {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    info,
+                )
+                for cls in (resolve_choice(choice) for choice in field.choices)
+            }
 
         def constructor_read(**kwargs):
-            return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[0].model for k, v in generic_fields().items()}, **kwargs
+            )
 
         def constructor_write(**kwargs):
-            return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[1].model for k, v in generic_fields().items()}, **kwargs
+            )
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
@@ -364,11 +458,18 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
         yield key, field, info
 
         if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-            yield (
-                f"{key}_thumbnail",
-                field,
-                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True, "attribute": key},
-            )
+            thumbnail_info = {
+                **info,
+                **info.get("thumbnail_info", {}),
+                "is_thumbnail": True,
+                "attribute": key,
+            }
+            # `rename` names the image field itself. The thumbnail derives its own API
+            # name from it: inheriting it as-is would give both the same key, and the
+            # thumbnail (yielded last) would silently overwrite the image field.
+            if info.get("rename"):
+                thumbnail_info["rename"] = f"{info['rename']}_thumbnail"
+            yield f"{key}_thumbnail", field, thumbnail_info
 
 
 def save_class_by_parents(cls):
@@ -401,6 +502,7 @@ def generate_fields(**kwargs) -> Callable:
         read_fields: dict = {}
         write_fields: dict = {}
         ref_fields: dict = {}
+        api_key_to_attribute: dict[str, str] = {}
         sortables: list = kwargs.get("additional_sorts", [])
         default_sort: list = kwargs.get("default_sort", None)
 
@@ -463,13 +565,28 @@ def generate_fields(**kwargs) -> Callable:
 
             read, write = convert_db_to_field(key, field, info)
 
+            # `rename` lets a field appear in the API under a different name than its
+            # Python attribute (e.g. `created_at` exposed as `since`).
+            api_key = info.get("rename") or key
+            if api_key != key:
+                # The read field is stored under the renamed API key, so without an
+                # explicit `attribute` flask-restx would resolve the value from a
+                # non-existent `api_key` attribute and always serialize null.
+                if read is not None and read.attribute is None:
+                    read.attribute = key
+                # The reverse mapping only serves `patch()`, which reads it after
+                # finding the key in `__write_fields__` — where a field lands exactly
+                # when `write` is set. Mapping a readonly field would be unreachable.
+                if write is not None:
+                    api_key_to_attribute[api_key] = key
+
             if read:
-                read_fields[key] = read
+                read_fields[api_key] = read
             if write:
-                write_fields[key] = write
+                write_fields[api_key] = write
 
             if read and info.get("show_as_ref", False):
-                ref_fields[key] = read
+                ref_fields[api_key] = read
 
         # The goal of this loop is to fetch all functions (getters) of the class
         # If a function has an `__additional_field_info__` attribute it means
@@ -511,11 +628,15 @@ def generate_fields(**kwargs) -> Callable:
                 def field_constructor(**kwargs):
                     return restx_fields.Nested(nested_fields, **kwargs)
 
-            read_fields[method_name] = field_constructor(
+            # Getters are readonly, so they never reach `__write_fields__` and need no
+            # entry in `api_key_to_attribute`: the rename only applies on the read side.
+            api_method_key = additional_field_info.get("rename") or method_name
+
+            read_fields[api_method_key] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
-                ref_fields[method_name] = read_fields[method_name]
+                ref_fields[api_method_key] = read_fields[api_method_key]
 
         # Masks allow excluding heavy fields from responses (e.g. blocs on list endpoints)
         # without removing them from the model entirely — clients can still request them
@@ -528,6 +649,14 @@ def generate_fields(**kwargs) -> Callable:
         read_mask_exclude: list | None = kwargs.pop("read_mask_exclude", None)
         page_mask_exclude: list | None = kwargs.pop("page_mask_exclude", None)
         page_mask: str | None = kwargs.pop("page_mask", None)
+
+        # A class whose instances reference other documents can declare how to batch-load
+        # them, so a list of such instances doesn't dereference one document at a time
+        # while being marshalled. Set on the base class, it applies to every generic
+        # embedded list built on it (see the `ListField` branch of `convert_db_to_field`).
+        prefetch: Callable | None = kwargs.pop("prefetch", None)
+        if prefetch is not None:
+            cls.__prefetch__ = staticmethod(prefetch)
 
         read_mask = None
         if read_mask_exclude:
@@ -558,12 +687,7 @@ def generate_fields(**kwargs) -> Callable:
         parser: RequestParser = api.parser()
 
         if paginable:
-            parser.add_argument(
-                "page", type=int, location="args", default=1, help="The page to display"
-            )
-            parser.add_argument(
-                "page_size", type=int, location="args", default=20, help="The page size"
-            )
+            add_pagination_arguments(parser)
 
         if sortables:
             choices: list[str] = [sortable["key"] for sortable in sortables] + [
@@ -580,7 +704,7 @@ def generate_fields(**kwargs) -> Callable:
 
         searchable: bool = kwargs.pop("searchable", False)
         if searchable:
-            parser.add_argument("q", type=str, location="args")
+            parser.add_argument("q", type=str, location="args", help="The search query")
 
         for filterable in filterables:
             parser.add_argument(
@@ -589,6 +713,10 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                help=filterable.get("help", None),
+                # A list field accepts the parameter several times, and
+                # `apply_sort_filters` then requires all the values (`__all`).
+                action="append" if filterable.get("is_list") else "store",
             )
 
         cls.__index_parser__ = parser
@@ -624,18 +752,21 @@ def generate_fields(**kwargs) -> Callable:
                 filter = args.get(filterable.get("label", filterable["key"]))
                 if filter is not None:
                     for constraint in filterable.get("constraints", []):
-                        if constraint == "objectid" and not ObjectId.is_valid(
-                            args[filterable["key"]]
-                        ):
-                            api.abort(400, f"`{filterable['key']}` must be an identifier")
+                        if constraint == "objectid":
+                            values = filter if filterable.get("is_list") else [filter]
+                            if not all(ObjectId.is_valid(value) for value in values):
+                                api.abort(400, f"`{filterable['key']}` must be an identifier")
 
                     query = filterable.get("query", None)
                     if query:
                         base_query = filterable["query"](base_query, filter)
                     else:
+                        column = filterable["column"]
+                        if filterable.get("is_list"):
+                            column = f"{column}__all"
                         base_query = base_query.filter(
                             **{
-                                filterable["column"]: filter,
+                                column: filter,
                             }
                         )
 
@@ -651,6 +782,7 @@ def generate_fields(**kwargs) -> Callable:
         cls.apply_sort_filters = apply_sort_filters
         cls.apply_pagination = apply_pagination
         cls.__additional_class_info__ = kwargs
+        cls.__api_key_to_attribute__ = api_key_to_attribute
         return cls
 
     return wrapper
@@ -666,6 +798,7 @@ class _FieldKwargs(TypedDict, total=False):
     auditable: bool | None
     checks: list[Callable] | None
     attribute: str | None
+    rename: str | None
     thumbnail_info: dict[str, Any] | None
     example: str | None
     nested_fields: dict[str, Any] | None
@@ -673,6 +806,8 @@ class _FieldKwargs(TypedDict, total=False):
     size: int | None
     is_thumbnail: bool | None
     href: Callable | None
+    href_extra: Callable | None
+    href_total: Callable | None
     generic: bool | None
     generic_key: str | None
     convert_to: Callable | None
@@ -718,6 +853,7 @@ def field(
     auditable: bool | None = None,
     checks: list[Callable] | None = None,
     attribute: str | None = None,
+    rename: str | None = None,
     thumbnail_info: dict[str, Any] | None = None,
     example: str | None = None,
     nested_fields: dict[str, Any] | None = None,
@@ -725,6 +861,8 @@ def field(
     size: int | None = None,
     is_thumbnail: bool | None = None,
     href: Callable | None = None,
+    href_extra: Callable | None = None,
+    href_total: Callable | None = None,
     generic: bool | None = None,
     generic_key: str | None = None,
     convert_to: Callable | None = None,
@@ -756,6 +894,9 @@ def field(
         auditable: If False, exclude from audit trail
         checks: List of validation functions
         attribute: Custom attribute name for serialization
+        rename: Expose this field under a different name in the API while keeping
+            the original Python attribute name on the model (e.g. expose
+            `created_at` as `since`). Useful to preserve historic API contracts.
         thumbnail_info: Thumbnail configuration dict
         example: Example value for documentation
         nested_fields: RestX model for nested objects
@@ -763,6 +904,11 @@ def field(
         size: Image size for thumbnails
         is_thumbnail: If True, this is a thumbnail field
         href: Function to generate API link
+        href_extra: Function returning extra keys to merge into the href object
+            (e.g. counters by status). Only applies when used together with `href`.
+        href_total: Function returning the list total, used instead of `len(value)`
+            so the (potentially huge / dereferencing) list isn't loaded just to be
+            counted. Only applies when used together with `href`.
         generic: If True, handle generic embedded documents
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX
@@ -819,14 +965,22 @@ def patch(obj: _T, request) -> _T:
     from udata.mongo.engine import db
 
     data = request.json if isinstance(request, Request) else request
+    api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
 
-    for key, value in data.items():
-        field = obj.__write_fields__.get(key)
+    for api_key, value in data.items():
+        field = obj.__write_fields__.get(api_key)
         if field is not None and not field.readonly:
+            key = api_key_to_attribute.get(api_key, api_key)
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+            # A blank string is an absent value, otherwise `required=True` happily
+            # stores a title or a comment made of spaces.
+            if (
+                isinstance(model_attribute, mongo_fields.StringField)
+                and isinstance(value, str)
+                and not value.strip()
+            ):
                 value = None
 
             if hasattr(model_attribute, "from_input"):
@@ -857,6 +1011,19 @@ def patch(obj: _T, request) -> _T:
                     document_type = db.resolve_model(value["class"])
                 except ValueError as e:
                     raise FieldValidationError(message=str(e), field=key)
+                # `resolve_model` resolves against the whole document registry, so
+                # without this the client picks which collection the lookup below
+                # queries — MongoEngine only enforces `choices` at save() time, long
+                # after that query ran. A field without `choices` accepts them all,
+                # by design (e.g. `Transfer.subject`).
+                if (
+                    model_attribute.choices
+                    and document_type._class_name not in model_attribute.choices
+                ):
+                    raise FieldValidationError(
+                        message=f"Value must be one of {model_attribute.choices}",
+                        field=key,
+                    )
                 value = wrap_primary_key(
                     key,
                     model_attribute,
@@ -895,30 +1062,96 @@ def patch(obj: _T, request) -> _T:
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
+            elif (
+                value
+                and isinstance(
+                    model_attribute,
+                    mongoengine.fields.ListField,
+                )
+                and isinstance(
+                    model_attribute.field, mongoengine.fields.GenericEmbeddedDocumentField
+                )
+            ):
+                # A list of generic embedded documents (e.g. nested filter groups):
+                # discriminate each item on the generic key and patch it into an
+                # embedded document instance.
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
 
-            # Run checks if value is modified.
-            # We run checks here (before setattr) to compare old vs new value.
-            checks = info.get("checks", [])
-            if is_value_modified(getattr(obj, key), value):
-                for check in checks:
-                    run_check(check, value, key, obj, data)
+                objects = []
+                for embedded_value in value:
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = classes_by_names[embedded_value[generic_key]]
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
+
+            # Validate `choices` here because patch() never goes through
+            # MongoEngine's validate(): without this, an invalid choice would only
+            # be caught at save() time — and not at all on embedded documents that
+            # we patch but never save (e.g. ValidateSourceAPI builds a
+            # HarvestSourceValidation just to read its `state` and branch). The
+            # ideal would be to call obj.clean()/validate() after patching, but
+            # in udata clean() currently bundles pure validation with stateful
+            # side effects (activity tracking, spam detection, …) that must not
+            # run without an actual save. Same story for regex / max_length /
+            # min_value / max_value / custom `validation` callables: those are
+            # also silently skipped by patch() today and should be reinstated
+            # once clean() is split into a pure-validation half and a stateful
+            # half. Until then, this duplication of MongoEngine's `choices`
+            # logic is the minimal fix for the most common bug class (invalid
+            # enum values silently accepted).
+            # Restricted to StringField on purpose: GenericReferenceField &
+            # ReferenceField also accept `choices` but those constrain the
+            # allowed *document classes*, not the value itself, and are
+            # validated separately at save() time.
+            choices = getattr(model_attribute, "choices", None)
+            if (
+                value is not None
+                and choices
+                and isinstance(model_attribute, mongo_fields.StringField)
+            ):
+                valid_choices = [
+                    choice[0] if isinstance(choice, (list, tuple)) else choice for choice in choices
+                ]
+                if value not in valid_choices:
+                    raise FieldValidationError(
+                        field=key,
+                        message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
+                    )
+
+            # An unchanged value normally skips its checks, so that resending an object
+            # as-is stays idempotent: `only_creation` must not reject a PUT that echoes
+            # back the owner it was given, nor `check_url_does_not_exists` a reuse that
+            # keeps its own URL. Two cases have no such old value to be idempotent with:
+            #  - a creation, where the "old" value is just the field default. Writing the
+            #    default is still a caller-supplied value and must be validated.
+            #  - an `always_run` check, which validates the resulting state rather than
+            #    the write itself, and so cannot be escaped by leaving a field out or by
+            #    resending it unchanged.
+            modified = is_value_modified(getattr(obj, key), value)
+            for check in info.get("checks", []):
+                if obj._created or modified or getattr(check, "always_run", False):
+                    # Pass the API key so error messages match the payload the caller sent.
+                    run_check(check, value, api_key, obj, data)
 
             setattr(obj, key, value)
 
-    # Run checks marked with `run_even_if_missing` on fields not in request.
-    # Some checks (like `required_if`) need to run even when their field is absent
-    # from the request, because they validate cross-field constraints based on
-    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    # Run `always_run` checks on fields absent from the request (the ones present
+    # already ran in the loop above). Some checks (like `required_if`) validate a
+    # cross-field constraint on the resulting object rather than on the value being
+    # written (e.g. "page_id is required if body_type is blocs"), so leaving the
+    # field out of the payload must not be a way to escape them.
     for key, _, info in get_fields(obj.__class__):
-        if key in data:
+        api_key = info.get("rename") or key
+        if api_key in data:
             continue
         checks = info.get("checks", [])
         value = getattr(obj, key, None)
 
         for check in checks:
-            if not getattr(check, "run_even_if_missing", False):
+            if not getattr(check, "always_run", False):
                 continue
-            run_check(check, value, key, obj, data)
+            run_check(check, value, api_key, obj, data)
 
     return obj
 
@@ -959,6 +1192,15 @@ def wrap_primary_key(
 
     if isinstance(value, dict) and "id" in value:
         return wrap_primary_key(field_name, foreign_field, value["id"], document_type)
+
+    # `value` comes straight from the request body and goes straight into the query
+    # below, so anything but a scalar is a set of Mongo operators (`{"$ne": …}`) that
+    # selects an arbitrary document instead of the requested one. MongoEngine catches
+    # them only when the primary key is an `ObjectId`, whose `prepare_query_value`
+    # refuses the dict; on a `StringField` primary key (`License`, `GeoZone`…) the
+    # operators reach the database untouched.
+    if isinstance(value, (dict, list)):
+        raise FieldValidationError(field=field_name, message="Expected a reference id")
 
     document_type = document_type or foreign_field.document_type().__class__
     id_field_name = document_type._meta["id_field"]
@@ -1037,6 +1279,22 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # "key" is the param key in the URL
     if "key" not in filterable:
         filterable["key"] = column
+
+    # For simple list fields (e.g. tags), allow multiple filter values via
+    # action="append" and use __all to match documents containing all values.
+    # Excluded: EmbeddedDocumentListField (filtered on a sub-field like
+    # badges__kind, where __all semantics don't apply).
+    # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
+    # Dataservice.contact_points) — these are filtered by a single ObjectId
+    # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
+    if (
+        isinstance(field, mongo_fields.ListField)
+        and not isinstance(field, mongo_fields.EmbeddedDocumentListField)
+        and not isinstance(
+            field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
+        )
+    ):
+        filterable["is_list"] = True
 
     # If we do a filter on a embed document, get the class info
     # of this document to see if there is a default filter value

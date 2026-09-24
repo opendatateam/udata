@@ -26,11 +26,12 @@ def get_client():
     )
 
 
-def store_bytes(bucket: str, filename: str, bytes: bytes):
+def store_bytes(bucket: str, filename: str, bytes: bytes, **kwargs):
     return get_client().put_object(
         Bucket=bucket,
         Key=filename,
         Body=bytes,
+        **kwargs,
     )
 
 

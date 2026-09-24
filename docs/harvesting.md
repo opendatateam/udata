@@ -86,15 +86,151 @@ optional arguments:
   -?, --help            show this help message and exit
 ```
 
+## Running harvests from the CLI
+
+For local development and debugging, you can drive the full harvest pipeline from the shell.
+The end-to-end flow is:
+
+1. Enable the backend in `udata.cfg` (see [Backends](#backends))
+2. Create a source pointing at a remote catalog
+3. Validate the source
+4. Run the harvest synchronously
+5. Reindex search so harvested datasets become searchable
+
+Backend names are lowercase and match the entry point names registered by each backend module.
+You can list those available in your current install at any time with:
+
+```shell
+udata harvest backends
+```
+
+### Creating a source
+
+```shell
+udata harvest create <backend> <url> <name>
+```
+
+Arguments are positional, in this order: the backend name (lowercase, see above),
+the catalog URL, and the human-readable name.
+
+For example, to harvest the full data.gouv.fr catalog via DCAT:
+
+```shell
+udata harvest create dcat \
+  "https://www.data.gouv.fr/api/1/site/catalog.xml" \
+  "data.gouv.fr"
+```
+
+#### Finding the right URL
+
+The DCAT backend expects a URL that returns RDF (any of RDF/XML, JSON-LD, Turtle, N3, NT, TriG) —
+not an HTML page. Confirm before creating the source:
+
+```shell
+curl -IL -H "Accept: application/rdf+xml" <candidate-url>
+```
+
+The final response should be `200` with a `Content-Type` such as `application/rdf+xml` or
+`application/ld+json`. If you get `text/html`, you're pointing at a frontend route — find the
+underlying catalog endpoint via the portal's content-negotiation redirect.
+
+### Listing and inspecting sources
+
+```shell
+udata harvest sources
+```
+
+The output includes the source name, slug, and backend. The slug is the identifier
+you'll pass to subsequent commands.
+
+### Validating
+
+New sources are created in a pending state and must be validated before they can run:
+
+```shell
+udata harvest validate <slug>
+```
+
+### Running
+
+For development, prefer the synchronous run:
+
+```shell
+udata harvest run <slug>
+```
+
+This processes the harvest in your current shell, surfacing logs and exceptions directly.
+It does not require a Celery worker.
+
+`udata harvest launch <slug>` queues the harvest as a Celery task and returns immediately.
+Use this for scheduled or production scenarios where a worker is running.
+
+### Limiting harvest size
+
+When testing against a large remote catalog (e.g. data.gouv.fr's full catalog of tens of
+thousands of datasets), cap the number of items per run via `udata.cfg`:
+
+```python
+HARVEST_MAX_ITEMS = 50
+```
+
+A small cap is strongly recommended on first runs while you verify the pipeline end-to-end.
+
+### Scoping to an organization
+
+Many udata-based portals expose per-organization catalogs at `/organizations/<slug>/catalog`.
+These are dramatically smaller than the full portal catalog and often more useful for
+development:
+
+```shell
+udata harvest create dcat \
+  "https://www.data.gouv.fr/organizations/etalab/catalog.xml" \
+  "Etalab datasets"
+```
+
+### Making harvested datasets searchable
+
+Datasets are written to MongoDB incrementally as the harvest progresses. You can verify
+they're arriving:
+
+```shell
+curl 'http://dev.local:7000/api/1/datasets/'
+```
+
+However, full-text search uses a separate Elasticsearch index (configured with
+`ELASTICSEARCH_URL`) which is not updated automatically by the harvest. After the harvest
+completes, rebuild the index:
+
+```shell
+udata search index
+```
+
+Once indexed, search queries return results:
+
+```shell
+curl 'http://dev.local:7000/api/1/datasets/?q=transport'
+```
+
 ## Backends
 
-`udata` comes with 3 harvest backends (listed below) but you can implement your own backend.
-In order for `udata` to be able to use any of those backends, they first need to be enabled
-in the `udata.cfg` `HARVESTER_BACKENDS` section, like so:
+`udata` ships with six harvest backends, and you can implement your own. None of them is
+active by default: they must be listed in the `udata.cfg` `HARVESTER_BACKENDS` setting, where
+`*` acts as a glob:
 
 ```cfg
-HARVESTER_BACKENDS = ['dcat', 'csw*']
+HARVESTER_BACKENDS = ['dcat', 'csw*', 'ckan']
 ```
+
+| Name              | Harvests                                             |
+|-------------------|------------------------------------------------------|
+| `dcat`            | any [DCAT][] endpoint — the recommended one          |
+| `csw-dcat`        | a CSW catalog service, returning DCAT records        |
+| `csw-iso-19139`   | a CSW catalog service, returning ISO 19139 records   |
+| `ckan`            | a CKAN portal, through its API                       |
+| `dkan`            | a DKAN portal, through its API                       |
+| `maaf`            | the french Ministry of Agriculture custom format     |
+
+`udata harvest backends` lists the ones currently enabled on your instance.
 
 ### DCAT
 
@@ -165,13 +301,8 @@ If none matches, no license is set on the dataset.
 
 ### CKAN
 
-This backend harvests CKAN repositories/portals through their API
-and [is available as a udata extension](https://github.com/opendatateam/udata-ckan).
-
-### OpenDataSoft
-
-This backend harvests OpenDataSoft repositories/portals through their API (v1)
-and [is available as a udata extension](https://github.com/opendatateam/udata-ods).
+This backend harvests CKAN repositories/portals through their API. It is bundled with udata,
+along with its `dkan` variant — enable them with `HARVESTER_BACKENDS = ['ckan', 'dkan']`.
 
 ### Custom
 

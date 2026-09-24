@@ -17,6 +17,7 @@ TEST_LIST = [
     {"name": "aaa", "other": "bbb"},
     {"name": "bbb", "another": "ddd"},
     {"name": "ccc", "other": "bbb"},
+    {"name": "ccc", "other": "ccc"},
 ]
 
 
@@ -28,23 +29,27 @@ class ObjDict(object):
 class GetByFieldTest:
     def test_find_dict(self):
         """get_by() should find a dictionnary in list"""
-        result = get_by(TEST_LIST, "name", "bbb")
+        result = get_by(TEST_LIST, name="bbb")
         assert result == {"name": "bbb", "another": "ddd"}
 
     def test_find_object(self):
         """get_by() should find an object in list"""
         obj_lst = [ObjDict(d) for d in TEST_LIST]
-        result = get_by(obj_lst, "name", "bbb")
+        result = get_by(obj_lst, name="bbb")
         assert result.name == "bbb"
         assert result.another == "ddd"
 
+    def test_find_multiple(self):
+        result = get_by(TEST_LIST, name="ccc", other="ccc")
+        assert result == {"name": "ccc", "other": "ccc"}
+
     def test_not_found(self):
         """get_by() should return None if not found"""
-        assert get_by(TEST_LIST, "name", "not-found") is None
+        assert get_by(TEST_LIST, name="not-found") is None
 
     def test_attribute_not_found(self):
         """get_by() should not fail if an object don't have the given attr"""
-        assert get_by(TEST_LIST, "inexistant", "value") is None
+        assert get_by(TEST_LIST, inexistant="value") is None
 
 
 class DateRangeTest:

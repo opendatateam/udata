@@ -27,6 +27,7 @@ from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
 from udata.search import reindex
 from udata.tasks import as_task_param
+from udata.uris import cdata_url
 
 __all__ = ("Topic", "TopicElement")
 
@@ -41,7 +42,20 @@ def check_title_or_element_required(value, obj, data, **_kwargs):
         )
 
 
-check_title_or_element_required.run_even_if_missing = True
+check_title_or_element_required.always_run = True
+
+
+class TopicQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(private__ne=True)
+
+    def hidden(self):
+        return self(private=True)
+
+    def for_element(self, element):
+        """Filter topics containing the given element (Dataset, Dataservice...)."""
+        topic_ids = TopicElement.objects(element=element).no_dereference().distinct("topic")
+        return self(id__in=topic_ids)
 
 
 @generate_fields()
@@ -54,6 +68,8 @@ class TopicElement(Auditable, Document):
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
     element = field(
+        # If modifying choices list below , also look at core/topic/parsers.py's
+        # parse_filters for filtering support
         GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
         nested_fields=api.model_reference,
         allow_null=True,
@@ -66,7 +82,12 @@ class TopicElement(Auditable, Document):
         "indexes": [
             {
                 "fields": ["$title", "$description"],
-            }
+            },
+            # Used to reverse-lookup the topics an element belongs to.
+            "element",
+            # Used by Topic.elements and the per-topic element count (incl. the
+            # API's HATEOAS "elements" link), so it stays indexed even on huge topics.
+            "topic",
         ],
         "auto_create_index_on_save": True,
     }
@@ -83,6 +104,8 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
+        if document.topic:
+            document.topic.save()
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -90,6 +113,8 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
+            if document.topic:
+                document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
@@ -97,7 +122,9 @@ class TopicElement(Auditable, Document):
 
 
 @generate_fields()
-class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
+class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
+    verbose_name = _("collection")
+
     name = field(StringField(required=True), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -111,7 +138,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
     tags = field(ListField(StringField()))
     color = field(IntField())
 
-    featured = field(BooleanField(default=False), auditable=False)
+    featured = field(BooleanField(default=False), readonly=True, auditable=False)
     private = field(BooleanField())
     extras = field(ExtrasField(), auditable=False)
 
@@ -132,7 +159,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
         + Owned.meta["indexes"],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
-        "queryset_class": OwnedQuerySet,
+        "queryset_class": TopicQuerySet,
     }
 
     after_save = Signal()
@@ -171,8 +198,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
         )
 
     def self_web_url(self, **kwargs):
-        # Useful for Discussions to call self_web_url on their `subject`
-        return None
+        return cdata_url(f"/topics/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(

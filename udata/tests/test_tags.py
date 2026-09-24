@@ -1,14 +1,17 @@
 import logging
+import pickle
 from io import StringIO
 
 import pytest
 from flask import url_for
+from mongoengine.errors import ValidationError
 
 from udata.core import csv
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
+from udata.mongo.taglist_field import TagListField
 from udata.tags import normalize, slug, tags_list
 from udata.tests import PytestOnlyTestCase
 from udata.tests.helpers import assert200
@@ -105,3 +108,46 @@ class TagsUtilsTest(PytestOnlyTestCase):
         assert normalize("aaa") == "aaa"
         assert normalize("aaaaaaaaaaa") == "aaaaaaaaaa"
         assert normalize("aAa a") == "aaa-a"
+
+
+class TagListFieldCleanTest(PytestOnlyTestCase):
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_clean_slugify_and_deduplicate_values(self):
+        assert TagListField().clean(["valid", "", "   ", "--", "&", "df", "a"]) == [
+            "",
+            "a",
+            "df",
+            "valid",
+        ]
+        assert TagListField().clean(["Open Data", "Élégant", "open-data"]) == [
+            "elegant",
+            "open-data",
+        ]
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_validate_fails_with_invalid_tags(self):
+        dataset = DatasetFactory.build(tags=["valid"])
+        dataset.tags = ["valid", "", "   ", "--", "df", "Open Data"]
+        with pytest.raises(ValidationError):
+            dataset.validate()
+
+
+class TagListFieldCleanNoAppTest:
+    """
+    This test runs in a context where Flask app isn't loaded, ex in celery unpickling.
+    """
+
+    def test_taglist_field_deserialization_no_error(self):
+        """Regression test: TagListField deserialization should not raise errors.
+
+        This ensures the original bug (TypeError from LocalProxy during unpickling)
+        is fixed by verifying clean() doesn't call normalize() during to_python().
+        """
+        field = TagListField()
+        pickled = pickle.dumps(field)
+        unpickled_field = pickle.loads(pickled)
+
+        # Should not raise any error during unpickling
+        assert unpickled_field is not None
+        # Test that clean works without calling normalize
+        assert unpickled_field.clean(["test", "Test"]) == ["test"]

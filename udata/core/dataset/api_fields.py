@@ -5,7 +5,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.organization.models import Organization
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 
 from .constants import (
     CHECKSUM_TYPES,
@@ -56,7 +56,9 @@ dataset_harvest_fields = api.model(
             description="The dataset remote id on the source portal", allow_null=True
         ),
         "domain": fields.String(description="The harvested domain", allow_null=True),
-        "last_update": fields.ISODateTime(description="The last harvest date", allow_null=True),
+        "last_update": fields.ISODateTime(
+            description="The dataset last harvest date", allow_null=True
+        ),
         "remote_url": fields.String(description="The dataset remote url", allow_null=True),
         "uri": fields.String(description="The dataset harveted uri", allow_null=True),
         "dct_identifier": fields.String(
@@ -79,6 +81,9 @@ resource_harvest_fields = api.model(
             description="The resource harvest last modification date",
             allow_null=True,
             readonly=True,
+        ),
+        "last_update": fields.ISODateTime(
+            description="The resource last harvest date", allow_null=True, readonly=True
         ),
         "uri": fields.String(description="The resource harvest uri", allow_null=True),
     },
@@ -240,7 +245,7 @@ community_resource_fields = api.inherit(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "permissions": fields.Nested(community_resource_permissions_fields),
     },
@@ -389,7 +394,7 @@ dataset_fields = api.model(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"

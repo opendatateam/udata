@@ -88,8 +88,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "tag", clean_string)
         assertHasArgument(parser, "other", clean_string)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
     def test_as_request_parser_bool_filter(self):
         parser = FakeSearchWithBool.as_request_parser()
@@ -100,8 +100,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "q", str)
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "boolean", inputs.boolean)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
     def test_as_request_parser_temporal_coverage_facet(self):
         parser = FakeSearchWithCoverage.as_request_parser()
@@ -113,8 +113,8 @@ class SearchAdaptorTest:
         assertHasArgument(parser, "q", str)
         assertHasArgument(parser, "sort", str)
         assertHasArgument(parser, "coverage", filter.validate_parameter)
-        assertHasArgument(parser, "page", int)
-        assertHasArgument(parser, "page_size", int)
+        assertHasArgument(parser, "page", inputs.positive)
+        assertHasArgument(parser, "page_size", inputs.positive)
 
 
 class ConfigureIndicesTest:
@@ -591,3 +591,10 @@ class DataserviceSearchAdapterTest(APITestCase):
 
         assert "producer_type" in serialized
         assert serialized["producer_type"] == [USER]
+
+    def test_fetch_documentation_content_of_a_private_address_returns_none(self):
+        """BlockedAddressError is neither a RequestException nor an OSError, so it
+        would escape serialize() and abort the whole indexing run. URLField keeps
+        a private address out of the stored value, but not out of what the host
+        resolves to at fetch time — hence the guard, and hence this test."""
+        assert DataserviceSearch.fetch_documentation_content("http://10.0.0.1/doc") is None

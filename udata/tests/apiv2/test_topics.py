@@ -1,4 +1,5 @@
 import pytest
+from bson import ObjectId
 from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -7,11 +8,12 @@ from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
 from udata.core.topic.factories import (
+    TopicElementDataserviceFactory,
     TopicElementDatasetFactory,
     TopicElementFactory,
     TopicElementReuseFactory,
@@ -19,10 +21,9 @@ from udata.core.topic.factories import (
     TopicWithElementsFactory,
 )
 from udata.core.topic.models import Topic, TopicElement
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
-from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.helpers import create_geozones_fixtures
 
 
@@ -420,6 +421,92 @@ class TopicsListAPITest(APITestCase):
         assert response.status_code == 400
 
 
+class TopicsListFilterByElementAPITest(APITestCase):
+    def test_filter_by_dataset(self):
+        dataset = DatasetFactory()
+        other_dataset = DatasetFactory()
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset)
+        other_topic = TopicFactory()
+        TopicElementDatasetFactory(topic=other_topic, element=other_dataset)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_dataservice(self):
+        dataservice = DataserviceFactory()
+        topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=topic, element=dataservice)
+        unrelated_topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=unrelated_topic, element=DataserviceFactory())
+
+        response = self.get(url_for("apiv2.topics_list", dataservice=dataservice.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_reuse(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", reuse=reuse.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_dataset_excludes_private_topics(self):
+        dataset = DatasetFactory()
+        private_topic = TopicFactory(private=True)
+        TopicElementDatasetFactory(topic=private_topic, element=dataset)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_invalid_dataset_id_returns_400(self):
+        response = self.get(url_for("apiv2.topics_list", dataset="not-an-id"))
+        assert response.status_code == 400
+
+    def test_filter_by_unknown_dataset_returns_empty(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=DatasetFactory().id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_nonexistent_dataset_still_validates_other_args(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse="not-an-id"))
+        assert response.status_code == 400
+
+    def test_filter_by_nonexistent_dataset_with_valid_reuse_returns_empty(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse=reuse.id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_dataset_and_reuse_combined(self):
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        topic_both = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_both, element=dataset)
+        TopicElementReuseFactory(topic=topic_both, element=reuse)
+        topic_dataset_only = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_dataset_only, element=dataset)
+        topic_reuse_only = TopicFactory()
+        TopicElementReuseFactory(topic=topic_reuse_only, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id, reuse=reuse.id))
+        assert response.status_code == 200
+        assert [t["id"] for t in response.json["data"]] == [str(topic_both.id)]
+
+
 class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
         """It should update a topic from the API"""
@@ -584,6 +671,84 @@ class TopicAPITest(APITestCase):
         self.assertIn("uri", data)
         self.assertTrue(data["uri"].startswith("http"))
 
+    def test_featured_is_readonly_on_create(self):
+        """It should ignore featured when creating a topic (readonly)"""
+        self.login()
+        data = TopicWithElementsFactory.as_payload()
+        data["featured"] = True
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        topic = Topic.objects.first()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_is_readonly_on_update(self):
+        """It should ignore featured when updating a topic (readonly)"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner, featured=False)
+        data = {"featured": True}
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
+    def test_featured_admin_post_requires_authentication(self):
+        """It should require authentication to feature a topic"""
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is False
+
+    def test_featured_admin_post_requires_admin(self):
+        """It should require admin to feature a topic"""
+        self.login()
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is False
+
+    def test_featured_admin_post_as_admin(self):
+        """It should allow admin to feature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=False)
+        response = self.post(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is True
+        assert response.json["featured"] is True
+
+    def test_featured_admin_delete_requires_authentication(self):
+        """It should require authentication to unfeature a topic"""
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert401(response)
+        topic.reload()
+        assert topic.featured is True
+
+    def test_featured_admin_delete_requires_admin(self):
+        """It should require admin to unfeature a topic"""
+        self.login()
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert403(response)
+        assert "message" in response.json
+        topic.reload()
+        assert topic.featured is True
+
+    def test_featured_admin_delete_as_admin(self):
+        """It should allow admin to unfeature a topic"""
+        self.login(AdminFactory())
+        topic = TopicFactory(featured=True)
+        response = self.delete(url_for("apiv2.topic_featured", topic=topic))
+        self.assert200(response)
+        topic.reload()
+        assert topic.featured is False
+        assert response.json["featured"] is False
+
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
@@ -609,6 +774,27 @@ class TopicElementsAPITest(APITestCase):
         ]
         no_elt = next(_elt for _elt in data if not _elt["element"])
         assert no_elt["element"] is None
+
+    def test_elements_list_with_nested_x_fields_mask(self):
+        """X-Fields mask should be able to traverse the `element` nested reference.
+
+        Regression test for https://github.com/opendatateam/udata/issues/3755:
+        requesting `data{id,element{id}}` returned a 400 "Mask is inconsistent
+        with model" because the GenericReferenceField was exposed as a Raw field
+        instead of a Nested model.
+        """
+        topic = TopicFactory()
+        dataset_elt = TopicElementDatasetFactory(topic=topic)
+
+        response = self.get(
+            url_for("apiv2.topic_elements", topic=topic),
+            headers={"X-Fields": "data{id,element{id}},next_page"},
+        )
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(dataset_elt.id)
+        assert data[0]["element"] == {"id": str(dataset_elt.element.id)}
 
     def test_elements_list_pagination(self):
         topic = TopicFactory()
@@ -862,6 +1048,34 @@ class TopicElementsAPITest(APITestCase):
             "A topic element must have a title or an element."
         )
 
+    def test_add_element_with_explicitly_empty_fields(self):
+        """Spelling the fields out as empty must be rejected just like omitting them:
+        every value then equals its own default, which is not a reason to skip a check."""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic), [{"title": "", "element": None}]
+        )
+        assert response.status_code == 400
+        assert response.json["errors"][0]["element"][0] == _(
+            "A topic element must have a title or an element."
+        )
+        assert TopicElement.objects(topic=topic).count() == 0
+
+    def test_add_element_ignores_arbitrary_topic_in_payload(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"title": "should stay in the URL topic", "topic": str(other_topic.id)}],
+        )
+        assert response.status_code == 201
+
+        assert TopicElement.objects(topic=topic).count() == 1
+        assert TopicElement.objects(topic=other_topic).count() == 0
+
     def test_add_datasets_perm(self):
         user = UserFactory()
         topic = TopicFactory(owner=user)
@@ -983,6 +1197,20 @@ class TopicElementAPITest(APITestCase):
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 403
 
+    def test_delete_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicWithElementsFactory(owner=UserFactory())
+        other_element = other_topic.elements[0]
+
+        response = self.delete(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id)
+        )
+        assert response.status_code == 404
+
+        other_topic.reload()
+        assert other_element.id in (elt.id for elt in other_topic.elements)
+
     def test_update_element(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
@@ -1034,3 +1262,34 @@ class TopicElementAPITest(APITestCase):
         assert element.tags == ["baz"]
         assert element.extras == {"foo": "bar"}
         assert element.element is None
+
+    def test_update_element_cross_topic_forbidden(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=UserFactory())
+        other_element = TopicElementFactory(topic=other_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=other_element.id),
+            {"title": "modified title"},
+        )
+        assert response.status_code == 404
+
+        other_element.reload()
+        assert other_element.title == "original title"
+
+    def test_update_element_cannot_move_to_own_topic(self):
+        owner = self.login()
+        own_topic = TopicFactory(owner=owner)
+        other_topic = TopicFactory(owner=owner)
+        own_element = TopicElementFactory(topic=own_topic, title="original title")
+
+        response = self.put(
+            url_for("apiv2.topic_element", topic=own_topic, element_id=own_element.id),
+            {"title": "modified title", "topic": str(other_topic.id)},
+        )
+        assert response.status_code == 200
+
+        own_element.reload()
+        assert own_element.title == "modified title"
+        assert own_element.topic.id == own_topic.id

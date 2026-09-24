@@ -1,0 +1,2627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse
+  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2025-11-26T00:00:00.000000Z" />
+  <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+    <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:geonet="http://www.fao.org/geonetwork" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="IGNF_RPG" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd">
+      <gmd:fileIdentifier>
+        <gco:CharacterString>IGNF_RPG</gco:CharacterString>
+      </gmd:fileIdentifier>
+      <gmd:language xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="fre">Français</gmd:LanguageCode>
+      </gmd:language>
+      <gmd:characterSet xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" />
+      </gmd:characterSet>
+      <gmd:hierarchyLevel xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="series" />
+      </gmd:hierarchyLevel>
+      <gmd:hierarchyLevelName xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gco:CharacterString>Produit</gco:CharacterString>
+      </gmd:hierarchyLevelName>
+      <gmd:contact xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:CI_ResponsibleParty>
+          <gmd:organisationName>
+            <gco:CharacterString>Institut national de l'information géographique et forestière (IGN-F)</gco:CharacterString>
+            <!-- Ne pas modifier -->
+          </gmd:organisationName>
+          <gmd:contactInfo>
+            <gmd:CI_Contact>
+              <gmd:address>
+                <gmd:CI_Address>
+                  <gmd:deliveryPoint>
+                    <gco:CharacterString>IGN - Support utilisateurs</gco:CharacterString>
+                  </gmd:deliveryPoint>
+                  <gmd:deliveryPoint>
+                    <gco:CharacterString>73 avenue de Paris</gco:CharacterString>
+                  </gmd:deliveryPoint>
+                  <gmd:city>
+                    <gco:CharacterString>SAINT-MANDÉ CÉDEX</gco:CharacterString>
+                  </gmd:city>
+                  <gmd:postalCode>
+                    <gco:CharacterString>94165</gco:CharacterString>
+                  </gmd:postalCode>
+                  <gmd:country>
+                    <gco:CharacterString>FRANCE</gco:CharacterString>
+                  </gmd:country>
+                  <gmd:electronicMailAddress>
+                    <gco:CharacterString>contact.geoservices@ign.fr</gco:CharacterString>
+                  </gmd:electronicMailAddress>
+                </gmd:CI_Address>
+              </gmd:address>
+              <gmd:contactInstructions>
+                <gmx:FileName src="https://data.geopf.fr/annexes/ressources/logos/ign.jpg">Logo</gmx:FileName>
+              </gmd:contactInstructions>
+            </gmd:CI_Contact>
+          </gmd:contactInfo>
+          <gmd:role>
+            <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" />
+          </gmd:role>
+        </gmd:CI_ResponsibleParty>
+      </gmd:contact>
+      <gmd:dateStamp xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gco:DateTime>2025-11-25T10:18:24.969095Z</gco:DateTime>
+      </gmd:dateStamp>
+      <gmd:metadataStandardName xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gco:CharacterString>ISO 19115</gco:CharacterString>
+      </gmd:metadataStandardName>
+      <gmd:metadataStandardVersion xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gco:CharacterString>2003 Cor.1:2006</gco:CharacterString>
+      </gmd:metadataStandardVersion>
+      <gmd:spatialRepresentationInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_VectorSpatialRepresentation id="IGNF_RPG.spatialRepresentationInfo_1">
+          <gmd:topologyLevel>
+            <gmd:MD_TopologyLevelCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly" />
+          </gmd:topologyLevel>
+        </gmd:MD_VectorSpatialRepresentation>
+      </gmd:spatialRepresentationInfo>
+      <gmd:referenceSystemInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ReferenceSystem>
+          <gmd:referenceSystemIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gmx:Anchor xlink:href="http://www.opengis.net/def/crs/EPSG/0/2154">EPSG:2154</gmx:Anchor>
+              </gmd:code>
+              <gmd:codeSpace>
+                <gco:CharacterString>urn:ogc:def:crs:IGNF:1.1</gco:CharacterString>
+              </gmd:codeSpace>
+            </gmd:RS_Identifier>
+          </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+      </gmd:referenceSystemInfo>
+      <gmd:referenceSystemInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ReferenceSystem>
+          <gmd:referenceSystemIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gmx:Anchor xlink:href="http://www.opengis.net/def/crs/EPSG/0/2972">EPSG:2972</gmx:Anchor>
+              </gmd:code>
+              <gmd:codeSpace>
+                <gco:CharacterString>urn:ogc:def:crs:IGNF:1.1</gco:CharacterString>
+              </gmd:codeSpace>
+            </gmd:RS_Identifier>
+          </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+      </gmd:referenceSystemInfo>
+      <gmd:referenceSystemInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ReferenceSystem>
+          <gmd:referenceSystemIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gmx:Anchor xlink:href="http://www.opengis.net/def/crs/EPSG/0/2975">EPSG:2975</gmx:Anchor>
+              </gmd:code>
+              <gmd:codeSpace>
+                <gco:CharacterString>urn:ogc:def:crs:IGNF:1.1</gco:CharacterString>
+              </gmd:codeSpace>
+            </gmd:RS_Identifier>
+          </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+      </gmd:referenceSystemInfo>
+      <gmd:referenceSystemInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ReferenceSystem>
+          <gmd:referenceSystemIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gmx:Anchor xlink:href="http://www.opengis.net/def/crs/EPSG/0/4471">EPSG:4471</gmx:Anchor>
+              </gmd:code>
+              <gmd:codeSpace>
+                <gco:CharacterString>urn:ogc:def:crs:IGNF:1.1</gco:CharacterString>
+              </gmd:codeSpace>
+            </gmd:RS_Identifier>
+          </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+      </gmd:referenceSystemInfo>
+      <gmd:referenceSystemInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_ReferenceSystem>
+          <gmd:referenceSystemIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gmx:Anchor xlink:href="http://www.opengis.net/def/crs/EPSG/0/5490">EPSG:5490</gmx:Anchor>
+              </gmd:code>
+              <gmd:codeSpace>
+                <gco:CharacterString>urn:ogc:def:crs:IGNF:1.1</gco:CharacterString>
+              </gmd:codeSpace>
+            </gmd:RS_Identifier>
+          </gmd:referenceSystemIdentifier>
+        </gmd:MD_ReferenceSystem>
+      </gmd:referenceSystemInfo>
+      <gmd:identificationInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_DataIdentification>
+          <!-- ======================================================================================================== -->
+          <!-- Partie citation (titres, dates, identifier de ressource unique, liens externes) -->
+          <gmd:citation>
+            <gmd:CI_Citation>
+              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+              <!-- titres -->
+              <!-- titre qui apparaitra sur la page. Toujours commencer par une majuscule, indiquer ® après le nom des produits concernés (lesquels sont écrits totalement en majuscules), limité à 250 caractères -->
+              <gmd:title>
+                <gco:CharacterString>RPG</gco:CharacterString>
+              </gmd:title>
+              <!-- Titre "alternatif" : premet de retrouver la page plus facilement dans la recherche catalogue ? -->
+              <gmd:alternateTitle>
+                <gco:CharacterString>Registre Parcellaire Graphique</gco:CharacterString>
+              </gmd:alternateTitle>
+              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+              <!-- Dates :
+  		Il faut au minimum une date (création, révision et/ou publication)
+  		+
+  		une éventuelle étendue temporelle : ça devra alors être indiqué en dehors du bloc <gmd:citation> dans le bloc <gmd:extent> (cf. plus bas) -->
+              <!-- Date de révision de la ressource (si on ne met pas le bloc alors la date de révision sera égale à la date de création : "Mis à jour le ..." en haut de la page ?) bloc à tester -->
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2007-01-01</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2025-01-01</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" />
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+              <!-- version de la donnée ou du jeu de données (une seule version possible) -->
+              <gmd:edition>
+                <gco:CharacterString>3.0</gco:CharacterString>
+              </gmd:edition>
+              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+              <!-- identifiant de ressource unique -->
+              <gmd:identifier>
+                <gmd:MD_Identifier id="IGNF_RPG.identifier">
+                  <gmd:code>
+                    <gco:CharacterString>IGNF_RPG</gco:CharacterString>
+                  </gmd:code>
+                </gmd:MD_Identifier>
+              </gmd:identifier>
+              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+              <!-- doublon avec la partie MD_Distribution ??? -->
+            </gmd:CI_Citation>
+          </gmd:citation>
+          <!-- ======================================================================================================== -->
+          <!-- Contenu descriptif de la donnée/résumé qui apparait en haut de la page -->
+          <!-- Peu de mise en forme est possible, et doit être fait en markdown :
+  		 italique : entourer d'un underscore _exemple_
+  		 gras : entourer de deux étoiles **exemple**
+  		 liste à puces : ajouter un tirer devant la ligne. exemple :
+  		 - France RELIEF Nuages de points
+           - France RELIEF MNT
+  		 liste ordonnée : ajouter le chiffre et un point devant la ligne. exemple :
+  		 1. France RELIEF Nuages de points
+           2. France RELIEF MNT
+  		 précision : pour mettre un élément de liste en gras/italique, il faut placer */_ après la puce/chiffre. exemple :
+  		 1. **France RELIEF Nuages de points**
+           - _France RELIEF MNT_
+  		 Titre : ajouter trois dièse devant : ###Exemple
+  		 hyperlien : rien à faire, juste écrire l'adresse url telle quelle
+  		 hyperlien avec nom alternatif : écrire le lien entre paranthèses et indiquer entre crochets le titre alternatif devant. exemple :
+           Cliquez [ici](https://exemple.com)
+  		 case à cocher cochée/décochée : simplement écrire [ ] ou [x]
+  		 incorporer une image : écrire écrire le lien vers l'image entre paranthèses et ![montitre] devant. exemple :
+  		 ![Ceci est une image de grenouille](https://urlimage.com)
+  		 tableaux : cf. ci-dessous, l'alignement se fait par la présence/absence des ":". exemple (REMPLACER les _ par des tirets -) :
+  		 | Titre 1       |     Titre 2     |        Titre 3 |
+           | :____________ | :____________: | ____________: |
+           | Colonne       |     Colonne     |        Colonne |
+           | Alignée à     |   Alignée au    |      Alignée à |
+           | Gauche        |     Centre      |         Droite | -->
+          <gmd:abstract>
+            <gco:CharacterString>Le Registre Parcellaire Graphique (RPG) est le système d’information géographique permettant l’identification de parcelles agricoles. C’est l’outil de référence pour l’instruction et le contrôle des aides PAC.
+
+  Le RPG permet de connaître la localisation et certaines caractéristiques des parcelles des exploitants agricoles ayant déposé une déclaration en vue d’une aide de la PAC (Politique Agricole Commune).
+
+  Avant l’édition 2024, les données RPG contenaient exclusivement les données graphiques des parcelles agricoles (RPG PARCELLES), associées à la culture principale de la parcelle concernée.
+
+  A partir de l’édition 2024 le RPG évolue vers une offre complète de 8 bases de données.
+  - RPG Parcelles – Parcelles agricoles constatées
+  - RPG Ilots - Ilots anonymes
+  - RPG PAC - Parcelles agricoles catégorisées
+  - RPG PP - Prairies permanentes
+  - RPG SNA - Surfaces non agricoles
+  - RPG ZDH - Zones de densité homogène
+  - RPG IAE - Parcelles éligibles IAE
+  - RPG BIO - Parcelles constatées BIO
+
+  **Caractéristiques principales de chacune des bases de données** :
+
+  **RPG Parcelles - Parcelles agricoles constatées**
+  Représentation des parcelles agricoles déclarées dans le cadre de la Politique Agricole Commune par les exploitants par type de cultures. Ces données fournissent des informations détaillées sur l’occupation du sol et les structures foncières et elles correspondent à l’ensemble des limites de parcelles agricoles déclarées l’année N, dans leur situation connue et arrêtée au 1er janvier de l’année N+1.
+
+  **RPG Ilots - Ilots anonymes**
+  Ensemble de parcelles culturales contiguës exploitées par un même agriculteur, portant une ou plusieurs cultures délimitées par des éléments facilement repérables et permanents (route, chemin, ruisseau, mur, haie, …) ou par d'autres exploitations. Il est obligatoirement et entièrement recouvert par une ou plusieurs parcelles.Ensemble de parcelles culturales contiguës exploitées par un même agriculteur, portant une ou plusieurs cultures délimitées par des éléments facilement repérables et permanents (route, chemin, ruisseau, mur, haie, …) ou par d'autres exploitations.
+
+  **RPG PAC -Parcelles agricoles catégorisées**
+  Représentation des parcelles agricoles constatées dans le cadre de la Politique Agricole Commune par les exploitants classées en quatre grandes catégories selon leur code culture : terres arables (TA), cultures permanentes (CP), prairies permanentes (PP) et surfaces boisées (SB).
+
+  **RPG PP - Prairies permanentes**
+  Produit dérivé des parcelles agricoles qui correspond aux surfaces herbagères implantées depuis plus de cinq ans, qui ne font pas partie d’une rotation de cultures
+
+  **RPG SNA - Surfaces non agricoles**
+  Décrit les éléments topographiques non agricoles situés dans le paysage, à proximité ou à l’intérieur des parcelles agricoles ayant fait l’objet d’une demande d’aide de la Politique Agricole Commune (PAC). Ces données sont saisies initialement dans un buffer d’environ 20 m autour des parcelles agricoles. La représentation est indicative, pouvant présenter des incomplétudes ou des approximations. Les types d’éléments représentés sont décrits dans le descriptif de contenu du produit RPG. On y retrouve des arbres, haies, bosquets, broussailles, forêts, murs, routes et bâtiments notamment.
+
+  **RPG ZDH - Zones de densité homogène**
+  Elles décrivent et localisent des surfaces situées sur des prairies permanentes où la végétation et d’autres éléments naturels non agricoles (affleurements rocheux, zones de sol nu, etc.) sont présents. Chaque ZDH est caractérisée par une tranche de densité (ou classe de prorata) reflétant le niveau d’admissibilité de la surface concernée aux aides de la Politique Agricole Commune (PAC), en fonction du potentiel de ressources fourragères disponibles
+
+  **IAE - Parcelles éligibles IAE**
+  Surfaces agricoles valorisées comme Infrastructures Agro-Environnementales (IAE). Il s’agit d’éléments naturels ou semi-naturels situés sur ou en bordure de parcelles agricoles (haies, bandes enherbées, bosquets, mares, etc.). Elles contribuent à la préservation de la biodiversité, à la qualité des sols et de l’eau, et à l’atteinte des objectifs environnementaux de la PAC.
+
+  **RPG BIO - Parcelles constatées BIO**
+  Parcelles agricoles déclarées en agriculture biologique et en conversion par les exploitants dans le cadre de la PAC.
+
+  **Limites principales de chaque base de données** :
+  Seules les surfaces déclarées par les exploitants demandeurs d’aides PAC sont couvertes ; les évolutions d’une année à l’autre dépendent des pratiques culturales et des règles d’éligibilité aux aides
+
+  **Utilisations recommandées** :
+
+  - Outil de référence pour l’instruction et le contrôle des aides.
+  - Évaluation de l’admissibilité des prairies permanentes aux aides PAC.
+  - Suivi des zones de végétation hétérogène et des ressources fourragères, suivi et analyse des éléments non agricoles influençant l’activité agricole.
+  - Appui aux politiques publiques (PAC, environnement, biodiversité…).
+  - Études paysagères et environnementales.
+
+  **Production** :
+
+  Cette donnée est mise à disposition grâce à la coordination de trois acteurs :
+
+  - l’Agence de services et de paiement (ASP), qui les gère et pilote le programme
+  - L’Institut national de l’information géographique et forestière (IGN), qui les produit et les diffuse
+  - et le Ministère de l’agriculture et de la souveraineté alimentaire (MASA) qui s’assure quant à lui de la conformité règlementaire de cette diffusion et fixe les règles de diffusion des données dans l'instruction technique DGPE/SDGP/2022-106.
+
+  **Couverture** : France entière</gco:CharacterString>
+          </gmd:abstract>
+          <!-- ======================================================================================================== -->
+          <!-- Objectif de la donnée : -->
+          <gmd:purpose>
+            <gco:CharacterString>Les données RPG sont organisées autour des parcelles déclarées l’année N, dans leur situation connue et arrêtée au 1er janvier de l’année N+1.</gco:CharacterString>
+          </gmd:purpose>
+          <!-- ======================================================================================================== -->
+          <!-- Indique si la mise à jour de la donnée est continue (onGoing) ou terminée (completed). À indiquer à la fois dans la balise et dans l'argument de la balise-->
+          <gmd:status>
+            <gmd:MD_ProgressCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing" />
+          </gmd:status>
+          <!-- ======================================================================================================== -->
+          <!-- bloc en doublon à supprimer ? -->
+          <gmd:pointOfContact>
+            <gmd:CI_ResponsibleParty>
+              <gmd:organisationName>
+                <gco:CharacterString>Institut national de l'information géographique et forestière (IGN-F)</gco:CharacterString>
+              </gmd:organisationName>
+              <gmd:contactInfo>
+                <gmd:CI_Contact>
+                  <gmd:address>
+                    <gmd:CI_Address>
+                      <gmd:deliveryPoint>
+                        <gco:CharacterString>IGN - Support utilisateurs</gco:CharacterString>
+                      </gmd:deliveryPoint>
+                      <gmd:deliveryPoint>
+                        <gco:CharacterString>73 avenue de Paris</gco:CharacterString>
+                      </gmd:deliveryPoint>
+                      <gmd:city>
+                        <gco:CharacterString>SAINT-MANDÉ CÉDEX</gco:CharacterString>
+                      </gmd:city>
+                      <gmd:postalCode>
+                        <gco:CharacterString>94165</gco:CharacterString>
+                      </gmd:postalCode>
+                      <gmd:country>
+                        <gco:CharacterString>FRANCE</gco:CharacterString>
+                      </gmd:country>
+                      <gmd:electronicMailAddress>
+                        <gco:CharacterString>contact.geoservices@ign.fr</gco:CharacterString>
+                      </gmd:electronicMailAddress>
+                    </gmd:CI_Address>
+                  </gmd:address>
+                  <gmd:contactInstructions>
+                    <gmx:FileName src="https://data.geopf.fr/annexes/ressources/logos/ign.jpg">Logo</gmx:FileName>
+                  </gmd:contactInstructions>
+                </gmd:CI_Contact>
+              </gmd:contactInfo>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" />
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:pointOfContact>
+          <!-- ======================================================================================================== -->
+          <!-- Infos sur la maintenance de la ressource -->
+          <gmd:resourceMaintenance>
+            <gmd:MD_MaintenanceInformation id="IGNF_RPG.resourceMaintenance_1">
+              <!-- Fréquence de mise à jour de la donnée :
+  			   - continual (continue)
+    			   - daily (quotidienne)
+  			   - weekly (hebdomadaire)
+     			   - fortnightly (bi-mensuelle)
+  			   - monthly (mensuelle)
+  			   - quaterly (trimestrielle)
+  			   - biannually (bi-annuelle)
+  			   - annualy (annuelle)
+     			   - irregular (irrégulière)
+  			   - asNeeded (?)
+  			   - notPlanned (pas de mise à jour prévue)
+  			   - unknown (inconnue)
+  			   . À indiquer à la fois dans la balise et dans l'argument de la balise. -->
+              <gmd:maintenanceAndUpdateFrequency>
+                <gmd:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="annually" />
+              </gmd:maintenanceAndUpdateFrequency>
+              <gmd:maintenanceNote>
+                <gco:CharacterString>Chaque année, une nouvelle édition du RPG est produite</gco:CharacterString>
+              </gmd:maintenanceNote>
+            </gmd:MD_MaintenanceInformation>
+          </gmd:resourceMaintenance>
+          <!-- ======================================================================================================== -->
+          <!-- miniature de la couche qui apparait en haut à droite au-dessus du contact, et dans la liste du catalogue (renvoyer vers comment stocker une image sur la GPF) -->
+          <gmd:graphicOverview>
+            <gmd:MD_BrowseGraphic>
+              <gmd:fileName>
+                <gco:CharacterString>https://data.geopf.fr/annexes/ressources/metadata/thumbnail/vignette-rpg.jpg</gco:CharacterString>
+              </gmd:fileName>
+              <gmd:fileDescription>
+                <gco:CharacterString>Aperçu</gco:CharacterString>
+                <!-- laisser par défaut : -->
+              </gmd:fileDescription>
+              <gmd:fileType>
+                <gco:CharacterString>image/jpeg</gco:CharacterString>
+                <!-- laisser par défaut : -->
+              </gmd:fileType>
+            </gmd:MD_BrowseGraphic>
+          </gmd:graphicOverview>
+          <!-- ======================================================================================================== -->
+          <!-- mots-clefs (les topicCategories se retrouvent plus loin dans le xml) -->
+          <!-- Thème(s) INSPIRE obligatoire(s) :
+  		- basé sur le thesaurus GEMET thèmes - INSPIRE (https://www.eionet.europa.eu/gemet/fr/inspire-themes/)
+  		- prendre le mot en français dans la liste à condition d'avoir spécifié la langue fr au début du xml :
+  			- Adresses
+  			- Altitude
+  			- Bâtiments
+  			- Caractéristiques géographiques météorologiques
+  			- Caractéristiques géographiques océanographiques
+  			- Conditions atmosphériques
+  			- Dénominations géographiques
+  			- Géologie
+  			- Habitats et biotopes
+  			- Hydrographie
+  			- Installations agricoles et aquacoles
+  			- Installations de suivi environnemental
+  			- Lieux de production et sites industriels
+  			- Occupation des terres
+  			- Ortho-imagerie
+  			- Parcelles cadastrales
+  			- Référentiels de coordonnées
+  			- Régions biogéographiques
+  			- Régions maritimes
+  			- Répartition de la population — démographie
+  			- Répartition des espèces
+  			- Réseaux de transport
+  			- Ressources minérales
+  			- Santé et sécurité des personnes
+  			- Services d'utilité publique et services publics
+  			- Sites protégés
+  			- Sols
+  			- Sources d'énergie
+  			- Systèmes de maillage géographique
+  			- Unités administratives
+  			- Unités statistiques
+  			- Usage des sols
+  			- Zones à risque naturel
+  			- Zones de gestion, de restriction ou de réglementation et unités de déclaration
+  		-->
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gco:CharacterString>Occupation des terres</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>Parcelles cadastrales</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>Usage des sols</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>Installations agricoles et aquacoles</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>Common Agricultural Policy</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/theme/lc">Land cover</gmx:Anchor>
+              </gmd:keyword>
+              <gmd:thesaurusName>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:date>
+                    <!-- date de publication du thesaurus GEMET - INSPIRE : laisser 2008-06-01 par défaut -->
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date>2008-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                </gmd:CI_Citation>
+              </gmd:thesaurusName>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialScope/national">National</gmx:Anchor>
+              </gmd:keyword>
+              <gmd:thesaurusName>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialScope">INSPIRE Spatial Scope</gmx:Anchor>
+                  </gmd:title>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <!-- date de publication du thesaurus Spatial Scope - INSPIRE : laisser 2019-05-22 par défaut -->
+                        <gco:Date>2019-05-22</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                </gmd:CI_Citation>
+              </gmd:thesaurusName>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gmx:Anchor xlink:href="http://publications.europa.eu/resource/authority/bna/c_ac64a52d">Géospatiales</gmx:Anchor>
+              </gmd:keyword>
+              <gmd:thesaurusName>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gmx:Anchor xlink:href="http://data.europa.eu/bna/c_ac64a52d">High-value dataset categories</gmx:Anchor>
+                  </gmd:title>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <!-- date de publication du thesaurus HVD : laisser 2023-09-27 par défaut -->
+                        <gco:Date>2023-09-27</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                </gmd:CI_Citation>
+              </gmd:thesaurusName>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gco:CharacterString>hvd</gco:CharacterString>
+              </gmd:keyword>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gco:CharacterString>Géospatiales</gco:CharacterString>
+              </gmd:keyword>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gco:CharacterString>agriculture</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>cultures</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>données ouvertes</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>ilots</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>parcelles</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>rpg</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>zdh</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>prairies permanentes</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>ressources fourragères</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>pac</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>occupation du sol</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>paysages</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>biodiversité</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>sna</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>infrastructures agro-environnementales</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>écorégime</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>bcae</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gco:CharacterString>occupation du sol</gco:CharacterString>
+              </gmd:keyword>
+              <gmd:type>
+                <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" />
+              </gmd:type>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <gmd:descriptiveKeywords>
+            <gmd:MD_Keywords>
+              <gmd:keyword>
+                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/IACSData/lpis">LPIS</gmx:Anchor>
+              </gmd:keyword>
+              <gmd:keyword>
+                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/IACSData/iacs">IACS</gmx:Anchor>
+              </gmd:keyword>
+              <gmd:thesaurusName>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/IACSData">IACS Data</gmx:Anchor>
+                  </gmd:title>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date>2021-06-08</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                </gmd:CI_Citation>
+              </gmd:thesaurusName>
+            </gmd:MD_Keywords>
+          </gmd:descriptiveKeywords>
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+          <!-- Emprise obligatoire :
+  		- basé sur le thesaurus Spatial Scope - INSPIRE (https://inspire.ec.europa.eu/metadata-codelist/SpatialScope)
+  		- prendre le mot en français dans la liste à condition d'avoir spécifié la langue fr au début du xml :
+  			- Mondial
+  			- Européen
+  			- National
+  			- Régional
+  			- Local
+  		- dans l'argument de la balise (url) écrire le code équivalent en anglais et en minuscule :
+  			- global
+  			- european
+  			- national
+  			- regional
+  			- local
+  		-->
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+          <!-- Mots-clefs HVD (High Value Data) obligatoires si concerné :
+  		 - basé sur le thesaurus HDV (http://publications.europa.eu/resource/authority/bna/asd487ae75)
+  		 voir https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/#c2 pour infos
+  		 - en français si langue fr définie au début du xml et dans l'argument de la balise mettre le code associé :
+  		    - Géospatiales (c_ac64a52d)
+  		    - Observation de la terre et environnement (c_dd313021)
+  		    - Météorologiques (c_164e0bf5)
+  		    - Statistiques (c_e1da4e07)
+  		    - Entreprises et propriété d'entreprises (c_a9135398)
+  		    - Mobilité (c_b79e35eb)
+  		 - Pour les données IGNF, la liste des données hvd et les mots-clefs associés a été arrêtée avec le MTE :
+  		    - BD Forêt® :
+  				- Observation de la terre et environnement (c_dd313021)
+  			- BD ORTHO® :
+  				- Observation de la terre et environnement (c_dd313021)
+  			- BD TOPO® :
+  				- Observation de la terre et environnement (c_dd313021)
+  				- Géospatiales (c_ac64a52d)
+  				- Mobilité (c_b79e35eb)
+  			- OCS GE :
+  				- Observation de la terre et environnement (c_dd313021)
+  			- Parcellaire Express (PCI) :
+  				- Géospatiales (c_ac64a52d)
+  			- RPG :
+  				- Observation de la terre et environnement (c_dd313021)
+  			- Référentiel à grande échelle (RGE) :
+  				- Mobilité (c_b79e35eb)
+  			- RPG :
+  				- Géospatiales (c_ac64a52d)
+  		 - Dans un bloc de mot-clef libre à part, ajouter "hvd"
+  		 -->
+          <!-- mot-clef "High-value dataset" obligatoire si concerné pour dire que la donnée est HVD -->
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+          <!-- mots-clefs thématiques obligatoires
+  		 (à venir : thésaurus IGNF pour renseigner ces mots-clefs)
+           <gmd:descriptiveKeywords>
+              <gmd:MD_Keywords>
+                 <gmd:keyword>
+                    <gco:CharacterString>Occupation du sol</gco:CharacterString>
+                 </gmd:keyword>
+                 <gmd:keyword>
+                    <gco:CharacterString>Tourisme</gco:CharacterString>
+                 </gmd:keyword>
+                 <gmd:type>
+                    <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+                 </gmd:type>
+              </gmd:MD_Keywords>
+           </gmd:descriptiveKeywords>
+  		 -->
+          <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+          <!-- mots-clefs libres facultatifs :
+  			 - mots-clefs libres
+  			 - doivent être écrits en minuscules (même la première lettre)
+  			 - mettre les accents et les apostrophes
+  			 - doivent être écrits au pluriel
+  			 - écrits en français
+  			 - 5-15 environ (pas de limite mais éviter d'en mettre trop)
+  		 -->
+          <!-- ======================================================================================================== -->
+          <!-- Description des usages de la donnée -->
+          <gmd:resourceSpecificUsage>
+            <gmd:MD_Usage id="IGNF_RPG.resourceSpecificUsage_1">
+              <!-- nom de l'usage et sa valeur, dupliquer les bloc si plusieurs usages ? -->
+              <gmd:specificUsage>
+                <gco:CharacterString>Échelles d'affichage</gco:CharacterString>
+              </gmd:specificUsage>
+              <gmd:userDeterminedLimitations>
+                <gco:CharacterString>Échelle de l'ordre du 1 : 5 000.</gco:CharacterString>
+              </gmd:userDeterminedLimitations>
+              <!-- Informations sur le responsable de la donnée (dupliquer tout le bloc si plusieurs personnes à indiquer ? -->
+              <gmd:userContactInfo>
+                <gmd:CI_ResponsibleParty>
+                  <gmd:organisationName>
+                    <gco:CharacterString>Institut national de l'information géographique et forestière (IGN-F)</gco:CharacterString>
+                    <!-- organisme producteur -->
+                  </gmd:organisationName>
+                  <gmd:contactInfo>
+                    <!-- Contacts Info utiles ? -->
+                    <gmd:CI_Contact>
+                      <gmd:address>
+                        <gmd:CI_Address>
+                          <gmd:deliveryPoint>
+                            <gco:CharacterString>IGN - Support utilisateurs</gco:CharacterString>
+                          </gmd:deliveryPoint>
+                          <gmd:deliveryPoint>
+                            <gco:CharacterString>73 avenue de Paris</gco:CharacterString>
+                          </gmd:deliveryPoint>
+                          <gmd:city>
+                            <gco:CharacterString>SAINT-MANDÉ CÉDEX</gco:CharacterString>
+                          </gmd:city>
+                          <gmd:postalCode>
+                            <gco:CharacterString>94165</gco:CharacterString>
+                          </gmd:postalCode>
+                          <gmd:country>
+                            <gco:CharacterString>FRANCE</gco:CharacterString>
+                          </gmd:country>
+                          <gmd:electronicMailAddress>
+                            <gco:CharacterString>contact.geoservices@ign.fr</gco:CharacterString>
+                          </gmd:electronicMailAddress>
+                        </gmd:CI_Address>
+                      </gmd:address>
+                      <gmd:contactInstructions>
+                        <gmx:FileName src="https://data.geopf.fr/annexes/ressources/logos/ign.jpg">Logo</gmx:FileName>
+                      </gmd:contactInstructions>
+                    </gmd:CI_Contact>
+                  </gmd:contactInfo>
+                  <gmd:role>
+                    <!-- à indiquer dans la balise et dans l'argument -->
+                    <!-- 5 valeurs possibles :
+  						- custodian (gestionnaire : celui responsable de la gestion et de la mise à jour de la donnée.) => valeur par défaut
+  						- author (celui qui a complété la donnée. Il en détient les droits moraux.)
+  						- pointOfContact (celui à contacter pour recevoir la donnée)
+  						- owner (celui qui est propriétaire de la donnée et qui en détient les droits patrimoniaux
+  						- distributor/resourceProvider ? (fournisseur : qui délivre physiquement la donnée)-->
+                    <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="custodian" />
+                  </gmd:role>
+                </gmd:CI_ResponsibleParty>
+              </gmd:userContactInfo>
+            </gmd:MD_Usage>
+          </gmd:resourceSpecificUsage>
+          <!-- ======================================================================================================== -->
+          <!-- Contraintes légales, techniques ou de sécurité d'accès et d'usage de la ressource -->
+          <!-- Répondre aux questions et ne garder que les blocs correspondants -->
+          <!-- Jeu de données avec une limitation d'accès public ? -->
+          <!-- non (et pas de licence même ouverte) : -->
+          <gmd:resourceConstraints>
+            <gmd:MD_LegalConstraints>
+              <gmd:accessConstraints>
+                <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions" />
+              </gmd:accessConstraints>
+              <gmd:otherConstraints>
+                <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">Pas de restriction d'accès public selon INSPIRE</gmx:Anchor>
+              </gmd:otherConstraints>
+            </gmd:MD_LegalConstraints>
+          </gmd:resourceConstraints>
+          <gmd:resourceConstraints>
+            <gmd:MD_LegalConstraints>
+              <gmd:useConstraints>
+                <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="license" />
+              </gmd:useConstraints>
+            </gmd:MD_LegalConstraints>
+          </gmd:resourceConstraints>
+          <gmd:resourceConstraints>
+            <gmd:MD_LegalConstraints>
+              <gmd:useConstraints>
+                <gmd:MD_RestrictionCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions" />
+              </gmd:useConstraints>
+              <gmd:otherConstraints>
+                <gmx:Anchor xlink:href="https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf">Licence Ouverte / Open License (compatible ODC-BY, CC-BY 2.0)</gmx:Anchor>
+              </gmd:otherConstraints>
+            </gmd:MD_LegalConstraints>
+          </gmd:resourceConstraints>
+          <!-- ======================================================================================================== -->
+          <!-- type de représentation géographique. à renseigner dans la balise et dans l'argument :
+  		 - vector (vecteur)
+  		 - grid (grille/raster)
+  		 - textTable (texte/tableau)
+  		 - tin (réseau TIN - triangulated irregular network) -->
+          <gmd:spatialRepresentationType>
+            <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" />
+          </gmd:spatialRepresentationType>
+          <!-- ======================================================================================================== -->
+          <!-- Résolution optimale de la donnée spatiale (n'apparait pas sur la page)
+  		 - en échelle pour les vecteurs, en distance (tailel des pixels) pour les rasters.
+  		 - Pour indiquer un intervalle d'échelle il faut mettre deux blocs <gmd:spatialResolution>
+  		 - Il est possible de mettre à la fois un bloc pour la résolution en distance et un/des bloc(s) pour la résolution en échelle -->
+          <!-- exemple d'intervalle 5000-25000 pour vecteur : -->
+          <gmd:spatialResolution>
+            <gmd:MD_Resolution>
+              <gmd:equivalentScale>
+                <gmd:MD_RepresentativeFraction id="IGNF_RPG.spatialResolution_1">
+                  <gmd:denominator>
+                    <gco:Integer>5000</gco:Integer>
+                  </gmd:denominator>
+                </gmd:MD_RepresentativeFraction>
+              </gmd:equivalentScale>
+            </gmd:MD_Resolution>
+          </gmd:spatialResolution>
+          <!-- ======================================================================================================== -->
+          <!-- doublon avec langage défini en début de xml ? -->
+          <gmd:language>
+            <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="fre">Français</gmd:LanguageCode>
+          </gmd:language>
+          <!-- ======================================================================================================== -->
+          <!-- TopicCategories obligatoires :
+  		 - Faire un bloc par topicCategory
+  		 - Il faut prendre dans la liste les codes EN ISO19115 (entre parenthèses leur signification) :
+  			 - biota (Habitats et biotopes)
+  			 - boundaries (Limites)
+  			 - climatologyMeteorologyAtmosphere (Climatologie/Métérologie/Atmosphère)
+  			 - economy (Économie)
+  			 - elevation (Altitude)
+  			 - environment (Environnement)
+  			 - farming (Agriculture)
+  			 - geoscientificInformation (Informations géoscientifiques)
+  			 - health (Santé)
+  			 - imageryBaseMapsEarthCover (Imagerie/Cartes de base/Occupation des terres)
+  			 - inlandWaters (Eaux intérieures)
+  			 - location (Localisation)
+  			 - oceans (Océans)
+  			 - planningCadastre (Planification/Cadastre)
+  			 - society (Société)
+  			 - structure (Structures)
+  			 - transportation (Transport)
+  			 - utilitiesCommunication (Services d'utilité publique/Communications)
+  		 -->
+          <gmd:topicCategory>
+            <gmd:MD_TopicCategoryCode>farming</gmd:MD_TopicCategoryCode>
+          </gmd:topicCategory>
+          <!-- ======================================================================================================== -->
+          <!-- Emprises spatiale(s) et temporelle de la donnée
+  		 Il	est possible d'avoir plusieurs blocs extent (ex : un pour la Métropole et un pour la Guyanne) -->
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>France métropolitaine</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>-5.15</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>9.57</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>41.32</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>51.10</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>FXX</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>Guadeloupe|Saint-Martin|Saint-Barthélemy</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>-63.15</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>-60.99</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>15.82</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>18.13</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>WWW</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>Guyane</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>-54.61</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>-51.61</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>2.10</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>5.76</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>GUF</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>Martinique</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>-61.24</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>-60.80</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>14.38</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>14.89</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>MTQ</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>Mayotte</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>45.01</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>45.31</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>-13.02</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>-12.63</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>MYT</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>La Réunion</gco:CharacterString>
+              </gmd:description>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicBoundingBox>
+                  <gmd:westBoundLongitude>
+                    <gco:Decimal>55.21</gco:Decimal>
+                  </gmd:westBoundLongitude>
+                  <gmd:eastBoundLongitude>
+                    <gco:Decimal>55.85</gco:Decimal>
+                  </gmd:eastBoundLongitude>
+                  <gmd:southBoundLatitude>
+                    <gco:Decimal>-21.40</gco:Decimal>
+                  </gmd:southBoundLatitude>
+                  <gmd:northBoundLatitude>
+                    <gco:Decimal>-20.86</gco:Decimal>
+                  </gmd:northBoundLatitude>
+                </gmd:EX_GeographicBoundingBox>
+              </gmd:geographicElement>
+              <gmd:geographicElement>
+                <gmd:EX_GeographicDescription>
+                  <gmd:geographicIdentifier>
+                    <gmd:MD_Identifier>
+                      <gmd:authority>
+                        <gmd:CI_Citation>
+                          <gmd:title>
+                            <gco:CharacterString>ISO 3166 alpha 3</gco:CharacterString>
+                          </gmd:title>
+                          <gmd:date>
+                            <gmd:CI_Date>
+                              <gmd:date>
+                                <gco:Date>1974</gco:Date>
+                              </gmd:date>
+                              <gmd:dateType>
+                                <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                              </gmd:dateType>
+                            </gmd:CI_Date>
+                          </gmd:date>
+                        </gmd:CI_Citation>
+                      </gmd:authority>
+                      <gmd:code>
+                        <gco:CharacterString>REU</gco:CharacterString>
+                      </gmd:code>
+                    </gmd:MD_Identifier>
+                  </gmd:geographicIdentifier>
+                </gmd:EX_GeographicDescription>
+              </gmd:geographicElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <!-- emprise temporelle : -->
+          <gmd:extent>
+            <gmd:EX_Extent>
+              <gmd:description>
+                <gco:CharacterString>Dates de publication</gco:CharacterString>
+                <!-- description textuelle libre de l'emprise (mais sur la page sera de toute façon indiqué "Étendue temporelle")-->
+              </gmd:description>
+              <gmd:temporalElement>
+                <gmd:EX_TemporalExtent>
+                  <gmd:extent>
+                    <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" gml:id="d4055029e1733">
+                      <gml32:beginPosition xmlns:gml="http://www.opengis.net/gml">2007-01-01</gml32:beginPosition>
+                      <gml32:endPosition xmlns:gml="http://www.opengis.net/gml">2025-01-01</gml32:endPosition>
+                    </gml:TimePeriod>
+                  </gmd:extent>
+                </gmd:EX_TemporalExtent>
+              </gmd:temporalElement>
+            </gmd:EX_Extent>
+          </gmd:extent>
+          <!-- ======================================================================================================== -->
+        </gmd:MD_DataIdentification>
+      </gmd:identificationInfo>
+      <gmd:contentInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2" />
+      <gmd:distributionInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_Distribution>
+          <!-- ======================================================================================================== -->
+          <!-- Encodage(s) de la ressource (format d'enregistrement) : dupliquer les blocs si besoin
+  		 formats possibles :
+  		 - SHP (shp)
+  		 - MIF/MID ()
+  		 - DXF ()
+  		 - DWG ()
+  		 - GeoTIFF ()
+  		 - PostGreSQL ()
+  		 - GPKG (GeoPackage)
+  		 - ... -->
+          <!-- format TIFF : -->
+          <gmd:distributionFormat>
+            <gmd:MD_Format id="IGNF_RPG.distributionFormat.GeoPackage">
+              <gmd:name>
+                <gco:CharacterString>GPKG</gco:CharacterString>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>1.0</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributionFormat>
+          <!-- format flux WMTS : -->
+          <gmd:distributionFormat>
+            <gmd:MD_Format id="IGNF_RPG.distributionFormat.wmts">
+              <gmd:name>
+                <gco:CharacterString>WMTS</gco:CharacterString>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>1.0.0</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributionFormat>
+          <!-- format flux WMS : -->
+          <gmd:distributionFormat>
+            <gmd:MD_Format id="IGNF_RPG.distributionFormat.wms">
+              <gmd:name>
+                <gco:CharacterString>WMS</gco:CharacterString>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>1.3.0</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributionFormat>
+          <!-- format flux WFS : -->
+          <gmd:distributionFormat>
+            <gmd:MD_Format id="IGNF_RPG.distributionFormat.wfs">
+              <gmd:name>
+                <gco:CharacterString>WFS</gco:CharacterString>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>2.0.0</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributionFormat>
+          <!-- ======================================================================================================== -->
+          <!-- Détail du distributeur (IGNF pour les données IGNF) -->
+          <gmd:distributor>
+            <gmd:MD_Distributor id="IGNF_RPG.distributor.IGN-F">
+              <gmd:distributorContact>
+                <gmd:CI_ResponsibleParty>
+                  <gmd:organisationName>
+                    <gco:CharacterString>Institut national de l'information géographique et forestière (IGN-F)</gco:CharacterString>
+                  </gmd:organisationName>
+                  <gmd:contactInfo>
+                    <gmd:CI_Contact>
+                      <gmd:address>
+                        <gmd:CI_Address>
+                          <gmd:deliveryPoint>
+                            <gco:CharacterString>IGN - Support utilisateurs</gco:CharacterString>
+                          </gmd:deliveryPoint>
+                          <gmd:deliveryPoint>
+                            <gco:CharacterString>73 avenue de Paris</gco:CharacterString>
+                          </gmd:deliveryPoint>
+                          <gmd:city>
+                            <gco:CharacterString>SAINT-MANDÉ CÉDEX</gco:CharacterString>
+                          </gmd:city>
+                          <gmd:postalCode>
+                            <gco:CharacterString>94165</gco:CharacterString>
+                          </gmd:postalCode>
+                          <gmd:country>
+                            <gco:CharacterString>FRANCE</gco:CharacterString>
+                          </gmd:country>
+                          <gmd:electronicMailAddress>
+                            <gco:CharacterString>contact.geoservices@ign.fr</gco:CharacterString>
+                          </gmd:electronicMailAddress>
+                        </gmd:CI_Address>
+                      </gmd:address>
+                      <gmd:contactInstructions>
+                        <gmx:FileName src="https://data.geopf.fr/annexes/ressources/logos/ign.jpg">Logo</gmx:FileName>
+                      </gmd:contactInstructions>
+                    </gmd:CI_Contact>
+                  </gmd:contactInfo>
+                  <gmd:role>
+                    <gmd:CI_RoleCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode" codeListValue="distributor" />
+                  </gmd:role>
+                </gmd:CI_ResponsibleParty>
+              </gmd:distributorContact>
+            </gmd:MD_Distributor>
+          </gmd:distributor>
+          <!-- ======================================================================================================== -->
+          <!-- Liens de téléchargement des ressources
+  		 mettre les liens de téléchargement direct vers la ressource
+  		 ou l'url du getCapabalities (dans ce cas il faut également préciser le protocole et le profil d'application:
+  		 exemples de protocoles possibles (remplacer les _ par des - car les doubles - ne passent pas en commentaires) :
+  			- OGC:WMS-1.3.0
+  			- OGC:WMS-1.0.0-http-get-capabilities
+  			- WWW:LINK-1.0-http__atom
+  			- WWW:DOWNLOAD-1.0-ftp__download
+  			- WWW:DOWNLOAD-1.0-http__download
+  			- OGC Web Feature Service
+  		 exemples de valeurs possibles pour le profil d'application (remplir la balise et l'argument dans la balise) :
+  			- view (Service de consultation)
+  			- download (Service de téléchargement)
+  		-->
+          <!-- liens onLine groupés dans un seul bloc -->
+          <gmd:transferOptions>
+            <gmd:MD_DigitalTransferOptions>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/telechargement/resource/RPG</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">WWW:DOWNLOAD-1.0-http--download</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description gco:nilReason="missing">
+                    <gco:CharacterString />
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/DC_DL_RPG_3-0.pdf</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>RPG version 3.0 - Descriptif de contenu et de livraison</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/DC_DL_RPG_2-1.pdf</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>RPG version 2.1 - Descriptif de contenu et de livraison</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/DC_DL_RPG_1-0.pdf</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>RPG version 1.0 - Descriptif de contenu et de livraison</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/SE_RPG.pdf</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>RPG - Suivi des évolutions</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/Projets_carto_RPG_2-1.zip</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>RPG - Projets cartographiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/Projets_carto.pdf</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>Projets cartographiques pour les produits vecteur - Manuel utilisateur</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/REF_CULTURES_2023.csv</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>Table référentielle historisée des cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/REF_CULTURES_DEROBEES_2023.csv</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>Table référentielle des cultures dérobées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/annexes/ressources/documentation/REF_CULTURES_GROUPES_CULTURES_2023.csv</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:description>
+                    <gco:CharacterString>Table référentielle des cultures et des groupes de cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r/wms?service=wms&amp;version=1.3.0&amp;request=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE.LATEST</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG Dernière édition</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles agricoles constatées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r/wms?service=wms&amp;version=1.3.0&amp;request=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-AGRICOLES-CATEGORISEES_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles catégorisées en terre arables, cultures permanentes, prairies permanentes et surfaces boisées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r/wms?service=wms&amp;version=1.3.0&amp;request=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-ELIGIBLES-IAE</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles éligibles aux IAE</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r/wms?service=wms&amp;version=1.3.0&amp;request=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PRAIRIES-PERMANENTES_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Prairies Permanentes</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r/wms?service=wms&amp;version=1.3.0&amp;request=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_ZONES-DENSITE-HOMOGENE_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Zones de Densité Homogène (ZDH)</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2023</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2023</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2022</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2022</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2021</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2021</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2020</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2020</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2019</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2019</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2018</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2018</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2017</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2017</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2016</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2016</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2015</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2015</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2014</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2014</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2013</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2013</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2012</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2012</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2011</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2011</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2010</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2010</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2009</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2009</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2008</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2008</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wms-r?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2007</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2007</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE.LATEST</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG Dernière édition</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles agricoles constatées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-AGRICOLES-CATEGORISEES_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles catégorisées en terre arables, cultures permanentes, prairies permanentes et surfaces boisées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-ELIGIBLES-IAE</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles éligibles aux IAE</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PRAIRIES-PERMANENTES_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Prairies Permanentes</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_ZONES-DENSITE-HOMOGENE_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Zones de Densité Homogène (ZDH)</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2023</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2023</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2022</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2022</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2021</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2021</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2020</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2020</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2019</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2019</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2018</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2018</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2017</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2017</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2016</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2016</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2015</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2015</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2014</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2014</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2013</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2013</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2012</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2012</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2011</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2011</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2010</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2010</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2009</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2009</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2008</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2008</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wmts?SERVICE=WMTS&amp;VERSION=1.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WMTS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>LANDUSE.AGRICULTURE2007</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2007</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.LATEST:codes_cultures</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG Dernière édition codes cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.LATEST:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG Dernière édition parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2024:codes_cultures</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 codes cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-AGRICOLES-CATEGORISEES_2024:parcelles_agricole_categorisees_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles catégorisées en terre arables, cultures permanentes, prairies permanentes et surfaces boisées</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2024:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PARCELLES-ELIGIBLES-IAE:parcelles_eligibles_iae_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Parcelles éligibles aux IAE</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_PRAIRIES-PERMANENTES_2024:prairies_permanentes_2024</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Prairies Permanentes</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>IGNF_RPG_ZONES-DENSITE-HOMOGENE_2024:surfaces_2024_zdh_20250621</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2024 Zones de Densité Homogène (ZDH)</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2023:codes_cultures</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2023 codes cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2023:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2023 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2022:codes_cultures</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2022 codes cultures</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2022:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2022 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2021:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2021 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2020:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2020 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2019:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2019 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2018:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2018 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2017:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2017 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2016:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2016 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2015:parcelles_graphiques</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2015 parcelles graphiques</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2014:rpg_2014</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2014</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2013:rpg_2013</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2013</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2012:rpg_2012</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2012</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2011:rpg_2011</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2011</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.geopf.fr/wfs/ows?SERVICE=WFS&amp;VERSION=2.0.0&amp;REQUEST=GetCapabilities</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:protocol>
+                    <gmx:MimeFileType type="">OGC:WFS</gmx:MimeFileType>
+                  </gmd:protocol>
+                  <gmd:name>
+                    <gco:CharacterString>RPG.2010:rpg_2010</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>RPG 2010</gco:CharacterString>
+                  </gmd:description>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+            </gmd:MD_DigitalTransferOptions>
+          </gmd:transferOptions>
+        </gmd:MD_Distribution>
+      </gmd:distributionInfo>
+      <gmd:dataQualityInfo xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:DQ_DataQuality>
+          <!-- ======================================================================================================== -->
+          <!-- Rappel du type de données :
+  		 - series (donnée)
+  		 - dataset (jeu de données)
+  		 (le scope n'existe pas pour les services) -->
+          <gmd:scope>
+            <gmd:DQ_Scope>
+              <gmd:level>
+                <gmd:MD_ScopeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode" codeListValue="series" />
+              </gmd:level>
+            </gmd:DQ_Scope>
+          </gmd:scope>
+          <!-- ======================================================================================================== -->
+          <!-- référence des règles de mise en oeuvre, laisser par défaut -->
+          <gmd:report>
+            <gmd:DQ_DomainConsistency>
+              <gmd:nameOfMeasure>
+                <gco:CharacterString>Value domain conformance</gco:CharacterString>
+              </gmd:nameOfMeasure>
+              <gmd:result>
+                <gmd:DQ_ConformanceResult>
+                  <gmd:specification>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                        <gco:CharacterString>Commission Regulation (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</gco:CharacterString>
+                      </gmd:title>
+                      <gmd:date>
+                        <gmd:CI_Date>
+                          <gmd:date>
+                            <gco:Date>2010-12-08</gco:Date>
+                          </gmd:date>
+                          <gmd:dateType>
+                            <gmd:CI_DateTypeCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" />
+                          </gmd:dateType>
+                        </gmd:CI_Date>
+                      </gmd:date>
+                    </gmd:CI_Citation>
+                  </gmd:specification>
+                  <gmd:explanation>
+                    <gco:CharacterString>Dataset is conformant to the Inspire data specification.</gco:CharacterString>
+                  </gmd:explanation>
+                  <gmd:pass>
+                    <gco:Boolean>true</gco:Boolean>
+                  </gmd:pass>
+                </gmd:DQ_ConformanceResult>
+              </gmd:result>
+            </gmd:DQ_DomainConsistency>
+          </gmd:report>
+          <!-- ======================================================================================================== -->
+          <!-- Généalogie de la donnée -->
+          <gmd:lineage>
+            <gmd:LI_Lineage>
+              <gmd:statement>
+                <gco:CharacterString>A partir de 2015, la structure du produit RPG évolue, ce qui engendre le passage à une version 2.0 contenant désormais les îlots anonymisés et les parcelles elles-mêmes. Les informations sur les cultures sont redescendues au niveau de la parcelle par rapport à la version 1.0. L'information sur les structures foncières rattachées aux îlots disparaît dans la version 2.0.
+
+  À partir du RPG 2017, de nouveaux codes cultures sont introduits.
+
+  À partir de 2022, seules les parcelles sont diffusées. La disparition des îlots entraîne le passage à une version 2.1.</gco:CharacterString>
+                <!-- Production initiale : -->
+              </gmd:statement>
+              <!-- description complet de l'historique -->
+              <gmd:source>
+                <gmd:LI_Source>
+                  <gmd:description>
+                    <gco:CharacterString>Les données sémantiques du RPG proviennent des informations saisies par les exploitants agricoles lors de leurs demandes de subventions. Elles dont ensuite traitées et anonymisées par l'ASP, avant d'être mises en forme pour la diffusion par l'IGN.</gco:CharacterString>
+                  </gmd:description>
+                </gmd:LI_Source>
+              </gmd:source>
+            </gmd:LI_Lineage>
+          </gmd:lineage>
+        </gmd:DQ_DataQuality>
+      </gmd:dataQualityInfo>
+      <gmd:metadataConstraints xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:gml32="http://www.opengis.net/gml/3.2">
+        <gmd:MD_SecurityConstraints>
+          <gmd:useLimitation>
+            <gco:CharacterString>Aucune contrainte</gco:CharacterString>
+          </gmd:useLimitation>
+          <!-- code de restriction éventuelle sur la métadonnée :
+  		 - unclassified (pas de contrainte)
+  		 - restricted (restreint)
+  		 - confidential (partagé uniquement avec des personnes spécifiques désignées)
+  		 - secret (ne doit pas être partagé en dehors du groupe de personnes d'origine)
+  		 - topSecret (de la plus haute confidentialité)
+  		 à renseigner dans la balise et dans l'argument de la balise -->
+          <gmd:classification>
+            <gmd:MD_ClassificationCode codeList="http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode" codeListValue="unclassified" />
+          </gmd:classification>
+        </gmd:MD_SecurityConstraints>
+      </gmd:metadataConstraints>
+    </gmd:MD_Metadata>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>

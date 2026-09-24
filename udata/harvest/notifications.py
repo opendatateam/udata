@@ -8,7 +8,6 @@ from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.actions import notifier
 
-from .api import source_fields
 from .models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -31,7 +30,7 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
     source = field(
         ReferenceField(HarvestSource),
         readonly=True,
-        nested_fields=source_fields,
+        nested_fields=HarvestSource.__read_fields__,
         auditable=False,
         allow_null=True,
         filterable={},

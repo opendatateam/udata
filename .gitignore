@@ -71,6 +71,7 @@ Procfile
 
 # Python package managers
 .python-version
+.tool-versions
 
 # Ruff
 .ruff_cache

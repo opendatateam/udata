@@ -1,28 +1,41 @@
 import logging
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from datetime import UTC, datetime
+from typing import NamedTuple
 from urllib.parse import urlparse
 
+from flask import url_for
 from mongoengine import CASCADE, NULLIFY, EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
     DictField,
     EmbeddedDocumentField,
+    IntField,
     ListField,
     ReferenceField,
     StringField,
 )
+from mongoengine.signals import post_save
 from werkzeug.utils import cached_property
 
+from udata.api import fields
+from udata.api_fields import field, generate_fields, required_if
+from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.slug_fields import SlugField
+from udata.mongo.url_field import URLField
+
+from .api_fields import source_permissions_fields
+from .signals import harvest_source_created
 
 log = logging.getLogger(__name__)
 
@@ -63,34 +76,66 @@ DEFAULT_HARVEST_JOB_STATUS = "pending"
 DEFAULT_HARVEST_ITEM_STATUS = "pending"
 
 
+@generate_fields()
 class HarvestError(EmbeddedDocument):
     """Store harvesting errors"""
 
-    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    message = StringField()
-    details = StringField()
-
-
-class HarvestLog(EmbeddedDocument):
-    level = StringField()
-    message = StringField()
-
-
-class HarvestItem(EmbeddedDocument):
-    remote_id = StringField()
-    remote_url = StringField()
-    dataset = ReferenceField(Dataset)
-    dataservice = ReferenceField(Dataservice)
-    status = StringField(
-        choices=list(HARVEST_ITEM_STATUS), default=DEFAULT_HARVEST_ITEM_STATUS, required=True
+    created_at = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        description="The error creation date",
     )
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    started = DateTimeField()
-    ended = DateTimeField()
-    errors = ListField(EmbeddedDocumentField(HarvestError))
-    logs = ListField(EmbeddedDocumentField(HarvestLog), default=[])
-    args = ListField(StringField())
-    kwargs = DictField()
+    message = field(StringField(), description="The error short message")
+    details = field(
+        StringField(),
+        readonly=True,
+        attribute=lambda o: o.details if admin_permission.can() else None,
+        description="Optional details (only for super-admins)",
+    )
+
+
+@generate_fields()
+class HarvestLog(EmbeddedDocument):
+    level = field(StringField(required=True))
+    message = field(StringField(required=True))
+
+
+@generate_fields()
+class HarvestItem(EmbeddedDocument):
+    remote_id = field(StringField(), description="The item remote ID to process")
+    remote_url = field(StringField(), description="The item remote url (if available)")
+    dataset = field(
+        ReferenceField(Dataset),
+        nested_fields=dataset_ref_fields,
+        description="The processed dataset",
+        allow_null=True,
+    )
+    dataservice = field(
+        ReferenceField(Dataservice), description="The processed dataservice", allow_null=True
+    )
+    status = field(
+        StringField(
+            choices=list(HARVEST_ITEM_STATUS),
+            default=DEFAULT_HARVEST_ITEM_STATUS,
+            required=True,
+        ),
+        description="The item status",
+        filterable={},
+    )
+    created = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        description="The item creation date",
+    )
+    started = field(DateTimeField(), description="The item start date")
+    ended = field(DateTimeField(), description="The item end date")
+    errors = field(ListField(EmbeddedDocumentField(HarvestError)), description="The item errors")
+    logs = field(
+        ListField(EmbeddedDocumentField(HarvestLog), default=[]),
+        description="The item logs",
+    )
+    args = field(ListField(StringField()), description="The item positional arguments")
+    kwargs = field(DictField(), description="The item keyword arguments")
 
 
 VALIDATION_ACCEPTED = "accepted"
@@ -104,13 +149,30 @@ VALIDATION_STATES = {
 }
 
 
+@generate_fields()
 class HarvestSourceValidation(EmbeddedDocument):
     """Store harvest source validation details"""
 
-    state = StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING, required=True)
-    by = ReferenceField("User")
-    on = DateTimeField()
-    comment = StringField()
+    state = field(
+        StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING, required=True),
+        description="Is it validated or not",
+    )
+    by = field(
+        ReferenceField("User"),
+        readonly=True,
+        allow_null=True,
+        description="Who performed the validation",
+    )
+    on = field(
+        DateTimeField(),
+        readonly=True,
+        description="Date on which validation was performed",
+    )
+    comment = field(
+        StringField(),
+        description="A comment about the validation. Required on rejection",
+        checks=[required_if(state=VALIDATION_REFUSED)],
+    )
 
 
 class HarvestSourceQuerySet(OwnedQuerySet):
@@ -118,23 +180,133 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
+# `udata.harvest.backends` imports this module, so the two checks below resolve
+# it lazily at call time rather than at import time.
+def check_backend_is_enabled(value, field, **_kwargs):
+    from .backends import get_enabled_backends
+
+    # An empty backend is what `required` on the field is for.
+    if not value:
+        return
+    if value not in get_enabled_backends():
+        raise FieldValidationError(f'Unknown backend "{value}"', field=field)
+
+
+class ConfigSection(NamedTuple):
+    """A list of `config` entries validated against specs declared by the backend."""
+
+    key: str
+    specs: list
+    label: str
+
+
+def check_config_matches_backend(_value, data, obj, **_kwargs):
+    """Validate `config` against the specs declared by the selected backend.
+
+    Registered on both `backend` and `config` because either one changing can
+    invalidate the pair, and a check only runs for the field that was modified.
+    """
+    from .backends import get_enabled_backends
+
+    backend = get_enabled_backends().get(data.get("backend", obj.backend))
+    config = data.get("config", obj.config)
+    if backend is None or not config:
+        return
+    if not isinstance(config, dict):
+        raise FieldValidationError("The configuration should be an object", field="config")
+
+    for section in (
+        ConfigSection("filters", backend.filters, "filter"),
+        ConfigSection("extra_configs", backend.extra_configs, "extra config"),
+    ):
+        for entry in config.get(section.key) or []:
+            if not isinstance(entry, dict) or not ("key" in entry and "value" in entry):
+                raise FieldValidationError(
+                    "A field should have both key and value properties", field="config"
+                )
+            specs = next((f for f in section.specs if f.key == entry["key"]), None)
+            if not specs:
+                raise FieldValidationError(
+                    f'Unknown {section.label} key "{entry["key"]}" for "{backend.name}" backend',
+                    field="config",
+                )
+            if not isinstance(entry["value"], specs.type):
+                raise FieldValidationError(
+                    f'"{specs.key}" {section.label} should be of type "{specs.type.__name__}"',
+                    field="config",
+                )
+
+    features = config.get("features") or {}
+    if not isinstance(features, dict):
+        raise FieldValidationError("Features should be an object", field="config")
+    for key, enabled in features.items():
+        if not isinstance(enabled, bool):
+            raise FieldValidationError("A feature should be a boolean", field="config")
+        if not any(f.key == key for f in backend.features):
+            raise FieldValidationError(
+                f'Unknown feature "{key}" for "{backend.name}" backend', field="config"
+            )
+
+
+# Both must run whatever the payload does with their field: an update can change the
+# backend without resending the config (and the other way around), and a stored backend
+# that is no longer enabled must keep being rejected.
+check_backend_is_enabled.always_run = True
+check_config_matches_backend.always_run = True
+
+
+@generate_fields(searchable=True)
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
-    name = StringField(max_length=255)
-    slug = SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True)
-    description = StringField()
-    url = StringField(required=True)
-    backend = StringField(required=True)
-    config = DictField()
+    name = field(
+        StringField(max_length=255, required=True),
+        description="The source display name",
+    )
+    slug = field(
+        SlugField(
+            max_length=255,
+            required=True,
+            unique=True,
+            populate_from="name",
+            update=True,
+            follow=True,
+        ),
+        readonly=True,
+        description="The source permalink string",
+    )
+    description = field(StringField(), markdown=True, description="The source description")
+    url = field(URLField(required=True), description="The source base URL")
+    backend = field(
+        StringField(required=True),
+        checks=[check_backend_is_enabled, check_config_matches_backend],
+        description="The source backend",
+    )
+    config = field(
+        DictField(),
+        checks=[check_config_matches_backend],
+        description="The configuration as key-value pairs",
+    )
     periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=NULLIFY)
-    created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    created_at = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        description="The source creation date",
+    )
     frequency = StringField(
         choices=list(HARVEST_FREQUENCIES), default=DEFAULT_HARVEST_FREQUENCY, required=True
     )
-    active = BooleanField(default=True)
-    autoarchive = BooleanField(default=True)
-    validation = EmbeddedDocumentField(HarvestSourceValidation, default=HarvestSourceValidation)
-
-    deleted = DateTimeField()
+    active = field(BooleanField(default=True), description="Is this source active")
+    autoarchive = field(
+        BooleanField(default=True),
+        description=(
+            "If enabled, datasets not present on the remote source will be automatically archived"
+        ),
+    )
+    validation = field(
+        EmbeddedDocumentField(HarvestSourceValidation, default=HarvestSourceValidation),
+        readonly=True,
+        description="Has the source been validated",
+    )
+    deleted = field(DateTimeField(), readonly=True, description="The source deletion date")
 
     @property
     def domain(self):
@@ -152,15 +324,35 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
             qs = qs.no_dereference()
         return qs.order_by("-created").first()
 
+    # last_job is registered on __read_fields__ after HarvestJob is defined below
+    # (circular reference between HarvestSource and HarvestJob)
     @cached_property
     def last_job(self):
         return self.get_last_job(reduced=True)
 
     @property
+    @field(
+        description="The source schedule (interval or cron expression)",
+        readonly=True,
+    )
     def schedule(self):
         if not self.periodic_task:
-            return
+            return None
         return self.periodic_task.schedule_display
+
+    @property
+    @field(nested_fields=source_permissions_fields, readonly=True)
+    def permissions(self):
+        from .permissions import HarvestSourceAdminPermission, HarvestSourcePermission
+
+        return {
+            "edit": HarvestSourceAdminPermission(self),
+            "delete": HarvestSourceAdminPermission(self),
+            "run": HarvestSourceAdminPermission(self),
+            "preview": HarvestSourcePermission(self),
+            "validate": admin_permission,
+            "schedule": admin_permission,
+        }
 
     meta = {
         "indexes": [
@@ -178,38 +370,68 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         "queryset_class": HarvestSourceQuerySet,
     }
 
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        if kwargs.get("created"):
+            harvest_source_created.send(document)
+
     def __str__(self):
         return self.name or ""
 
-    @property
-    def permissions(self):
-        from udata.auth import admin_permission
 
-        from .permissions import HarvestSourceAdminPermission, HarvestSourcePermission
-
-        return {
-            "edit": HarvestSourceAdminPermission(self),
-            "delete": HarvestSourceAdminPermission(self),
-            "run": HarvestSourceAdminPermission(self),
-            "preview": HarvestSourcePermission(self),
-            "validate": admin_permission,
-            "schedule": admin_permission,
-        }
+post_save.connect(HarvestSource.post_save, sender=HarvestSource)
 
 
+@generate_fields()
 class HarvestJob(Document):
     """Keep track of harvestings"""
 
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    started = DateTimeField()
-    ended = DateTimeField()
-    status = StringField(
-        choices=list(HARVEST_JOB_STATUS), default=DEFAULT_HARVEST_JOB_STATUS, required=True
+    created = field(
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        readonly=True,
+        description="The job creation date",
     )
-    errors = ListField(EmbeddedDocumentField(HarvestError))
-    items = ListField(EmbeddedDocumentField(HarvestItem))
-    source = ReferenceField(HarvestSource, reverse_delete_rule=CASCADE)
+    started = field(DateTimeField(), readonly=True, description="The job start date")
+    ended = field(DateTimeField(), readonly=True, description="The job end date")
+    status = field(
+        StringField(
+            choices=list(HARVEST_JOB_STATUS),
+            default=DEFAULT_HARVEST_JOB_STATUS,
+            required=True,
+        ),
+        readonly=True,
+        description="The job status",
+    )
+    errors = field(
+        ListField(EmbeddedDocumentField(HarvestError)),
+        readonly=True,
+        description="The job initialization errors",
+    )
+    # Items are exposed as a paginated subresource link with status/type counters
+    # (read from the stored `items_by_*` below), to avoid loading thousands of
+    # dereferenced items for every job in a list.
+    items = field(
+        ListField(EmbeddedDocumentField(HarvestItem)),
+        readonly=True,
+        href=lambda o: url_for("api.harvest_job_items", job=o.id),
+        href_total=lambda o: o.items_total,
+        href_extra=lambda o: {
+            "by_status": o.items_by_status,
+            "by_type": o.items_by_type,
+        },
+    )
+    source = field(
+        ReferenceField(HarvestSource, reverse_delete_rule=CASCADE),
+        readonly=True,
+        description="The source owning the job",
+    )
     data = DictField()
+    # Item counters, recomputed on every save (see `clean`) so the `items` link
+    # exposes total/by_status/by_type without loading or dereferencing items at
+    # read time. Plain fields: internal storage, not part of the API fields.
+    items_total = IntField(default=0)
+    items_by_status = DictField()
+    items_by_type = DictField()
 
     meta = {
         "indexes": [
@@ -221,6 +443,29 @@ class HarvestJob(Document):
         ],
         "ordering": ["-created"],
     }
+
+    def clean(self):
+        # Read the raw reference via `_data` rather than `item.dataset` /
+        # `item.dataservice` so counting set references never dereferences each
+        # one from Mongo (which is exactly what these counters exist to avoid).
+        self.items_total = len(self.items)
+        status_counts = Counter(item.status for item in self.items)
+        self.items_by_status = {status: status_counts[status] for status in HARVEST_ITEM_STATUS}
+        type_counts = Counter(
+            key for item in self.items for key in ("dataset", "dataservice") if item._data.get(key)
+        )
+        self.items_by_type = {
+            "dataset": type_counts["dataset"],
+            "dataservice": type_counts["dataservice"],
+        }
+
+
+HarvestSource.__read_fields__["last_job"] = fields.Nested(
+    HarvestJob.__read_fields__,
+    description="The last job for this source",
+    allow_null=True,
+    readonly=True,
+)
 
 
 def archive_harvested_dataset(dataset, reason, dryrun=False):

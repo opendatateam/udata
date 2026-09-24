@@ -139,4 +139,4 @@ class Auditable(object):
             if changed_fields:
                 cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
-            cls.on_delete.send(document)
+            cls.on_delete.send(document, **kwargs)

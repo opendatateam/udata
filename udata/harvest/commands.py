@@ -4,9 +4,10 @@ import click
 
 from udata.commands import KO, OK, cli, green, red
 from udata.harvest.backends import get_all_backends, is_backend_enabled
-from udata.models import Dataset
+from udata.models import Dataset, Organization, User
 
 from . import actions
+from .models import HarvestSource
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +28,13 @@ def grp():
 def create(name, url, backend, frequency=None, owner=None, org=None):
     """Create a new harvest source"""
     log.info('Creating a new Harvest source "%s"', name)
-    source = actions.create_source(
-        name, url, backend, frequency=frequency, owner=owner, organization=org
+    source = HarvestSource.objects.create(
+        name=name,
+        url=url,
+        backend=backend,
+        frequency=frequency,
+        owner=User.get(owner) if owner else None,
+        organization=Organization.get(org) if org else None,
     )
     log.info(
         """Created a new Harvest source:
@@ -51,6 +57,7 @@ def validate(identifier):
 
 
 @grp.command()
+@click.argument("identifier")
 def delete(identifier):
     """Delete a harvest source"""
     log.info('Deleting source "%s"', identifier)
@@ -76,7 +83,7 @@ def sources(scheduled=False):
         sources = [s for s in sources if s.periodic_task]
     if sources:
         for source in sources:
-            msg = "{source.name} ({source.backend}): {cron}"
+            msg = "{source.name} [{source.slug}] ({source.backend}): {cron}"
             if source.periodic_task:
                 cron = source.periodic_task.schedule_display
             else:

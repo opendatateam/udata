@@ -4,6 +4,7 @@ from udata.core.organization.permissions import (
     OrganizationAdminNeed,
     OrganizationEditorNeed,
 )
+from udata.core.owned import Owned
 
 from .models import Discussion, Message
 
@@ -12,7 +13,14 @@ from .models import Discussion, Message
 # I simulate a class constructor with a function to keep the same API than other permissions
 # but use the `.union()` of two permission under the hood.
 def DiscussionAuthorOrSubjectOwnerPermission(discussion: Discussion):
-    return OwnablePermission(discussion.subject).union(DiscussionAuthorPermission(discussion))
+    author_permission = DiscussionAuthorPermission(discussion)
+
+    # A `Post` is a valid discussion subject but is not `Owned`: it has no `organization`,
+    # and only sysadmins may edit it — which `Permission` already grants on every permission.
+    if not isinstance(discussion.subject, Owned):
+        return author_permission
+
+    return OwnablePermission(discussion.subject).union(author_permission)
 
 
 class DiscussionAuthorPermission(Permission):

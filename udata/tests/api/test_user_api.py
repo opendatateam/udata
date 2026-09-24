@@ -1,3 +1,6 @@
+from datetime import UTC, datetime
+from io import BytesIO
+
 from flask import url_for
 
 from udata.core import storages
@@ -7,7 +10,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.models import Notification
-from udata.models import Discussion, Follow, Member, MembershipRequest
+from udata.models import Discussion, Follow, Member, MembershipRequest, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -259,6 +262,26 @@ class UserAPITest(APITestCase):
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
 
+    def test_embedded_user_exposes_deletion(self):
+        """A deleted user is only ever served embedded, so the reference carries the state.
+
+        The anonymised `first_name`, `last_name` and `slug` are not a reliable signal:
+        a live user named "Deleted Dupont" gets the slug `deleted-dupont`.
+        """
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        assert response.json["owner"]["deleted"] is None
+
+        owner.mark_as_deleted(notify=False)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        owner.reload()
+        assert response.json["owner"]["deleted"] == owner.deleted.replace(tzinfo=UTC).isoformat()
+
     def test_get_inactive_user(self):
         """It should raise a 410"""
         user = UserFactory(active=False)
@@ -279,12 +302,60 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.user_avatar", user=user))
         self.assert403(response)
 
+    def test_change_avatar_user_as_admin(self):
+        """An admin should upload an avatar for a given user"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+        self.assertTrue(response.json["success"])
+
+        user.reload()
+        self.assertTrue(user.avatar)
+        self.assertIn(user.avatar.filename, storages.avatars)
+        self.assertIn(user.avatar.original, storages.avatars)
+
+    def test_change_avatar_user_rejects_non_image(self):
+        """It should reject a non-image file"""
+        user = UserFactory(active=True)
+        self.login(AdminFactory())
+        response = self.post(
+            url_for("api.user_avatar", user=user),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        self.assert400(response)
+
     def test_get_inactive_user_with_an_admin(self):
         """It should get a user"""
         user = UserFactory(active=False)
         self.login(AdminFactory())
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
+
+    def test_get_user_hides_email_from_a_third_party(self):
+        """A third party gets no email at all, not even an obfuscated one"""
+        user = UserFactory(email="john@example.org")
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+        self.login(UserFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+    def test_get_user_exposes_email_to_an_admin(self):
+        """A sysadmin still gets the full email"""
+        user = UserFactory(email="john@example.org")
+        self.login(AdminFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertEqual(response.json["email"], "john@example.org")
 
     def test_user_api_create_as_admin(self):
         """It should create a user"""
@@ -308,6 +379,69 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert403(response)
 
+    def test_user_api_create_with_roles_and_active(self):
+        """An admin should be able to set roles and active when creating a user"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["admin"],
+            "active": False,
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert201(response)
+        self.assertEqual(response.json["roles"], ["admin"])
+        self.assertFalse(response.json["active"])
+
+    def test_user_api_create_with_a_non_boolean_active(self):
+        """A string must not be coerced into a boolean: "false" would enable the account"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "active": "false",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_with_an_invalid_email(self):
+        """It should raise a 400 when the email is malformed"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": "not-an-email",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+
+    def test_user_api_create_without_a_required_field(self):
+        """It should raise a 400 when a required field is missing"""
+        self.login(AdminFactory())
+        data = {
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_with_a_non_existing_role(self):
+        """It should raise a 400 when creating a user with an unknown role"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["non_existing_role"],
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
@@ -317,6 +451,18 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertFalse(response.json["active"])
+
+    def test_user_api_update_email_as_admin(self):
+        """A sysadmin still moves an address by hand, for the support cases the
+        `/change-email` flow cannot serve (a mailbox the user lost access to)"""
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data["email"] = "new.address@example.org"
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.email, "new.address@example.org")
 
     def test_user_api_update_with_website(self):
         """It should raise a 400"""
@@ -347,6 +493,23 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertEqual(response.json["roles"], ["admin"])
+        # Assert on the stored user, not only on the marshalled response: the role name
+        # has to be resolved into a `Role` reference for the grant to survive the save.
+        user.reload()
+        self.assertTrue(user.sysadmin)
+
+    def test_user_api_update_removing_roles(self):
+        """An admin should be able to demote a user with an empty roles list"""
+        self.login(AdminFactory())
+        user = AdminFactory()
+        self.assertTrue(user.sysadmin)
+        data = user.to_dict()
+        data["roles"] = []
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.roles, [])
+        self.assertFalse(user.sysadmin)
 
     def test_user_api_update_with_a_non_existing_role(self):
         """It should raise a 400"""
@@ -424,6 +587,7 @@ class UserAPITest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user_to_delete),
@@ -436,6 +600,114 @@ class UserAPITest(APITestCase):
         assert Discussion.objects(id=discussion_only_user.id).first() is None
         discussion_with_other.reload()
         assert discussion_with_other.discussion[1].content == "DELETED"
+
+    def test_rotate_password_as_admin(self):
+        """A sysadmin can request a password rotation for any user."""
+        self.login(AdminFactory())
+        user = UserFactory()
+        previous_uniquifier = user.fs_uniquifier
+
+        response = self.post(url_for("api.rotate_user_password", user=user))
+        self.assert204(response)
+
+        user.reload()
+        assert user.password_rotation_demanded is not None
+        # The uniquifier must change to invalidate any active session
+        assert user.fs_uniquifier != previous_uniquifier
+
+    def test_rotate_password_as_non_admin(self):
+        """A non-admin user cannot rotate another user's password."""
+        self.login()
+        target = UserFactory()
+
+        response = self.post(url_for("api.rotate_user_password", user=target))
+        self.assert403(response)
+
+        target.reload()
+        assert target.password_rotation_demanded is None
+
+    def test_rotate_password_unauthenticated(self):
+        """An unauthenticated request cannot rotate a password."""
+        target = UserFactory()
+
+        response = self.post(url_for("api.rotate_user_password", user=target))
+        self.assert401(response)
+
+        target.reload()
+        assert target.password_rotation_demanded is None
+
+    def test_password_rotation_fields_visible_to_admin(self):
+        """The password rotation fields are exposed to sysadmins."""
+        self.login(AdminFactory())
+        rotation_demanded = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        rotation_performed = datetime(2025, 1, 16, 11, 0, 0, tzinfo=UTC)
+        user = UserFactory(
+            password_rotation_demanded=rotation_demanded,
+            password_rotation_performed=rotation_performed,
+        )
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is not None
+        assert response.json["password_rotation_performed"] is not None
+
+    def test_password_rotation_fields_hidden_from_non_admin(self):
+        """The password rotation fields are not exposed to non-admins."""
+        self.login()
+        user = UserFactory(
+            password_rotation_demanded=datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
+        )
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is None
+        assert response.json["password_rotation_performed"] is None
+
+    def test_password_rotation_fields_visible_on_me(self):
+        """The password rotation fields are exposed on the /me endpoint for the user themselves."""
+        rotation_demanded = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(password_rotation_demanded=rotation_demanded)
+        self.login(user)
+
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+
+        assert response.json["password_rotation_demanded"] is not None
+
+    def test_last_login_at_visible_to_admin(self):
+        """The last_login_at field is exposed to sysadmins."""
+        self.login(AdminFactory())
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is not None
+
+    def test_last_login_at_hidden_from_non_admin(self):
+        """The last_login_at field is not exposed to non-admins, even on their own user page."""
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+        self.login(user)
+
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is None
+
+    def test_last_login_at_visible_on_me(self):
+        """The last_login_at field is exposed on the /me endpoint for the user themselves."""
+        last_login = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
+        user = UserFactory(current_login_at=last_login)
+        self.login(user)
+
+        response = self.get(url_for("api.me"))
+        self.assert200(response)
+
+        assert response.json["last_login_at"] is not None
 
     def test_contact_points(self):
         user = AdminFactory()

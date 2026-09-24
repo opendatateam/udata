@@ -23,7 +23,7 @@ from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
-from udata.core.contact_point.models import ContactPoint
+from udata.core.contact_point.models import ContactPoint, validate_contact_points_ownership
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
@@ -137,10 +137,14 @@ class HarvestMetadata(EmbeddedDocument):
     )
 
     created_at = field(
-        DateTimeField(), description="Date of the creation as provided by the harvested catalog"
+        DateTimeField(), description="Date of creation as provided by the harvested catalog"
     )
     issued_at = field(
-        DateTimeField(), description="Release date as provided by the harvested catalog"
+        DateTimeField(), description="Date of release as provided by the harvested catalog"
+    )
+    modified_at = field(
+        DateTimeField(),
+        description="Date of last modification as provided by the harvested catalog",
     )
     last_update = field(DateTimeField(), description="Date of the last harvesting")
     archived_at = field(DateTimeField())
@@ -201,6 +205,7 @@ class Dataservice(
             "$title",
             "metrics.followers",
             "metrics.views",
+            "metadata_modified_at",
         ]
         + Owned.meta["indexes"],
         "queryset_class": DataserviceQuerySet,
@@ -222,6 +227,10 @@ class Dataservice(
 
     def __str__(self):
         return self.title or ""
+
+    def validate(self, clean=True):
+        super().validate(clean=clean)
+        validate_contact_points_ownership(self)
 
     title = field(
         StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
@@ -357,6 +366,7 @@ class Dataservice(
         "discussions_open",
         "followers",
         "followers_by_months",
+        "reuses",
         "views",
     ]
 
@@ -392,6 +402,16 @@ class Dataservice(
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.metrics["followers_by_months"] = get_stock_metrics(
             Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_reuses(self):
+        from udata.models import Reuse
+
+        # Not using visible() here because it excludes reuses without datasets,
+        # but a reuse can legitimately reference only a dataservice.
+        self.metrics["reuses"] = (
+            Reuse.objects(dataservices=self).filter(private__ne=True, deleted=None).count()
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 

@@ -1,10 +1,10 @@
+from bson import ObjectId
 from flask import abort, request
 
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
@@ -45,7 +45,7 @@ transfer_response_fields = api.model(
 )
 
 person_mapping = {
-    User: user_ref_fields,
+    User: User.__ref_fields__,
     Organization: Organization.__ref_fields__,
 }
 
@@ -60,7 +60,7 @@ transfer_fields = api.model(
     {
         "id": fields.String(readonly=True, description="The transfer unique identifier"),
         "user": fields.Nested(
-            user_ref_fields,
+            User.__ref_fields__,
             description="The user who requested the transfer",
             readonly=True,
             allow_null=True,
@@ -98,7 +98,11 @@ requests_parser.add_argument(
     "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
 )
 requests_parser.add_argument(
-    "subject_type", choices=["Dataset", "Reuse", "Dataservice"], type=str, help="", location="args"
+    "subject_type",
+    choices=["Dataset", "Reuse", "Dataservice"],
+    type=str,
+    help="Type of the transferred object",
+    location="args",
 )
 requests_parser.add_argument(
     "recipient", type=str, help="ID of user or organization", location="args"
@@ -106,8 +110,8 @@ requests_parser.add_argument(
 requests_parser.add_argument(
     "status",
     type=str,
-    choices=TRANSFER_STATUS.keys(),
-    help="ID of user or organization",
+    choices=list(TRANSFER_STATUS),
+    help="Status of the transfer request",
     location="args",
 )
 
@@ -115,16 +119,21 @@ requests_parser.add_argument(
 @ns.route("/", endpoint="transfers")
 class TransferRequestsAPI(API):
     @api.doc("list_transfers")
+    @api.expect(requests_parser)
     @api.marshal_list_with(transfer_fields)
     def get(self):
         args = requests_parser.parse_args()
 
         transfers = Transfer.objects
         if args["subject"]:
+            if not ObjectId.is_valid(args["subject"]):
+                api.abort(400, "`subject` must be an identifier")
             transfers = transfers.generic_in(subject=args["subject"])
         if args["subject_type"]:
             transfers = transfers.filter(__raw__={"subject._cls": args["subject_type"]})
         if args["recipient"]:
+            if not ObjectId.is_valid(args["recipient"]):
+                api.abort(400, "`recipient` must be an identifier")
             transfers = transfers.generic_in(recipient=args["recipient"])
         if args["status"]:
             transfers = transfers.filter(status=args["status"])

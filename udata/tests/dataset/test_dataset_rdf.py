@@ -1,18 +1,18 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import FOAF, ORG, RDF, RDFS, XSD
+from rdflib.namespace import FOAF, RDF, RDFS, XSD, Namespace
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -21,23 +21,31 @@ from udata.core.dataset.models import (
     HarvestResourceMetadata,
     License,
     Resource,
+    SpatialCoverage,
 )
 from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
     FREQ_TERM_TO_UDATA,
     access_right_to_rdf,
+    access_rights_from_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
     format_from_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
-    infer_dataset_access_rights,
+    get_dcat_extra,
+    get_unanimous_dcat_extra,
+    inspire_category_from_rights,
     license_to_rdf,
     licenses_from_rdf,
     provenances_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
+    rights_from_rdf,
     rights_to_rdf,
+    set_dcat_extra,
+    spatial_from_rdf,
+    spatial_resolution_from_rdf,
     temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -48,11 +56,16 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    DQV,
     EUFREQ,
     FREQ,
     GEODCAT,
+    GEOSPARQL,
     HVD_LEGISLATION,
+    LOCN,
+    QUDT,
     SCHEMA,
+    SDMXA,
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
@@ -60,9 +73,10 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
     remote_url_from_rdf,
+    slugify_tag,
 )
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
-from udata.tests.helpers import assert200, assert_redirects
+from udata.tests.helpers import argvalues, assert200, assert_redirects
 from udata.utils import faker
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
@@ -88,6 +102,14 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
    </rdf:Description>
 </rdf:RDF>
 """
+
+
+def _to_geojson(coords):
+    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+
+
+def _to_wkt(coords):
+    return f"""Polygon(({", ".join([f"{x} {y}" for x, y in coords])}))"""
 
 
 class DatasetToRdfTest(PytestOnlyAPITestCase):
@@ -117,6 +139,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
             email="hello@its.me",
             contact_form="https://data.support.com",
             role="contact",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -169,13 +192,14 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
         assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
         assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-        assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
+        assert contact_rdf.value(VCARD.hasURL).identifier == URIRef("https://data.support.com")
 
     def test_dataset_with_publisher_contact_point(self, app):
         org = OrganizationFactory(name="organization")
         contact = ContactPointFactory(
             name="Publisher Contact",
             role="publisher",
+            organization=org,
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -294,6 +318,14 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
 
         contact_rdf = service.value(DCAT.contactPoint)
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+
+    def test_ogc_lookalike_format_is_not_an_access_service(self):
+        resource = ResourceFactory(format="wmsc", url="https://example.org/wmsc/")
+        dataset = DatasetFactory(resources=[resource])
+
+        r = resource_to_rdf(resource, dataset)
+
+        assert r.value(DCAT.accessService) is None
 
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
@@ -476,6 +508,10 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         tags = faker.tags(nb=3)
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
+        contact_name = faker.sentence(2)
+        contact_email = faker.email()
+        publisher_name = faker.sentence(2)
+        publisher_email = faker.email()
         g.set((node, RDF.type, DCAT.Dataset))
         g.set((node, DCT.identifier, Literal(id)))
         g.set((node, DCT.title, Literal(title)))
@@ -489,8 +525,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.set((pot, DCAT.endDate, Literal(end)))
         for tag in tags:
             g.add((node, DCAT.keyword, Literal(tag)))
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Individual))
+        g.add((contact, VCARD.fn, Literal(contact_name)))
+        g.add((contact, VCARD.hasEmail, Literal(contact_email)))
+        g.add((node, DCAT.contactPoint, contact))
+        publisher = BNode()
+        g.add((publisher, RDF.type, VCARD.Organization))
+        g.add((publisher, VCARD.fn, Literal(publisher_name)))
+        g.add((publisher, VCARD.hasEmail, Literal(publisher_email)))
+        g.add((node, DCT.publisher, publisher))
 
-        dataset = dataset_from_rdf(g)
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
         dataset.validate()
 
         assert isinstance(dataset, Dataset)
@@ -498,10 +548,16 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert dataset.acronym == acronym
         assert dataset.description == description
         assert dataset.frequency == UpdateFrequency.DAILY
-        assert set(dataset.tags) == set(tags)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags}
+
         assert isinstance(dataset.temporal_coverage, DateRange)
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
+
+        contacts = {c.role: (c.name, c.email) for c in dataset.contact_points}
+        assert len(contacts) == 2
+        assert contacts["contact"] == (contact_name, contact_email)
+        assert contacts["publisher"] == (publisher_name, publisher_email)
 
         assert dataset.harvest.dct_identifier == id
         assert dataset.harvest.uri == uri
@@ -555,224 +611,6 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
 
-    def test_contact_point_individual_vcard(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        contact = BNode()
-        g.add((contact, RDF.type, VCARD.Individual))
-        g.add((contact, VCARD.fn, Literal("foo")))
-        g.add((contact, VCARD.email, Literal("foo@example.com")))
-        g.add((node, DCAT.contactPoint, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "contact"
-        assert dataset.contact_points[0].name == "foo"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_individual_foaf(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        contact = BNode()
-        contact_name = Literal("foo")
-        contact_email = Literal("foo@example.com")
-        g.add((contact, RDF.type, FOAF.Person))
-        g.add((contact, FOAF.name, contact_name))
-        g.add((contact, FOAF.mbox, contact_email))
-        g.add((node, DCT.creator, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_vcard(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        contact = BNode()
-        g.add((contact, RDF.type, VCARD.Organization))
-        g.add((contact, VCARD.fn, Literal("foo")))
-        g.add((contact, VCARD.email, Literal("foo@example.com")))
-        g.add((node, DCAT.contactPoint, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "contact"
-        assert dataset.contact_points[0].name == "foo"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_foaf(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        contact = BNode()
-        g.add((contact, RDF.type, FOAF.Organization))
-        g.add((contact, FOAF.name, Literal("foo")))
-        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
-        g.add((node, DCT.creator, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_member_vcard(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        contact = BNode()
-        g.add((contact, RDF.type, VCARD.Organization))
-        g.add((contact, VCARD.fn, Literal("foo")))
-        g.add((contact, VCARD["organization-name"], Literal("bar")))
-        g.add((contact, VCARD.email, Literal("foo@example.com")))
-        g.add((node, DCAT.contactPoint, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "contact"
-        assert dataset.contact_points[0].name == "foo (bar)"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_member_foaf_both_mails(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        org = BNode()
-        g.add((org, RDF.type, FOAF.Organization))
-        g.add((org, FOAF.name, Literal("bar")))
-        g.add((org, FOAF.mbox, Literal("bar@example.com")))
-        contact = BNode()
-        g.add((contact, RDF.type, FOAF.Person))
-        g.add((contact, FOAF.name, Literal("foo")))
-        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
-        g.add((contact, ORG.memberOf, org))
-        g.add((node, DCT.creator, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo (bar)"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_member_foaf_no_org_mail(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        org = BNode()
-        g.add((org, RDF.type, FOAF.Organization))
-        g.add((org, FOAF.name, Literal("bar")))
-        # no organization email
-        contact = BNode()
-        g.add((contact, RDF.type, FOAF.Person))
-        g.add((contact, FOAF.name, Literal("foo")))
-        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
-        g.add((contact, ORG.memberOf, org))
-        g.add((node, DCT.creator, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo (bar)"
-        assert dataset.contact_points[0].email == "foo@example.com"
-
-    def test_contact_point_organization_member_foaf_no_agent_mail(self):
-        g = Graph()
-        node = URIRef("https://test.org/dataset")
-        g.set((node, RDF.type, DCAT.Dataset))
-        g.set((node, DCT.identifier, Literal(faker.uuid4())))
-        g.set((node, DCT.title, Literal(faker.sentence())))
-
-        org = BNode()
-        g.add((org, RDF.type, FOAF.Organization))
-        g.add((org, FOAF.name, Literal("bar")))
-        g.add((org, FOAF.mbox, Literal("bar@example.com")))
-        contact = BNode()
-        g.add((contact, RDF.type, FOAF.Person))
-        g.add((contact, FOAF.name, Literal("foo")))
-        # no agent email
-        g.add((contact, ORG.memberOf, org))
-        g.add((node, DCT.creator, contact))
-
-        # Dataset needs an owner/organization for contact_points_from_rdf() to work
-        d = DatasetFactory.build()
-        d.organization = OrganizationFactory(name="organization")
-
-        dataset = dataset_from_rdf(g, d)
-        dataset.validate()
-
-        assert len(dataset.contact_points) == 1
-        assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "foo (bar)"
-        assert dataset.contact_points[0].email == "bar@example.com"
-
     def test_theme_and_tags(self):
         node = BNode()
         g = Graph()
@@ -790,7 +628,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         dataset.validate()
 
         assert isinstance(dataset, Dataset)
-        assert set(dataset.tags) == set(tags + themes)
+        assert set(dataset.tags) == {slugify_tag(t) for t in tags + themes}
 
     def test_keyword_as_uriref(self):
         """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
@@ -807,6 +645,28 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert "literal-tag" in dataset.tags
+
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
+    def test_dirty_keyword_does_not_abort_validation(self, app):
+        """Regression test: a dirty dcat:keyword (punctuation-only, too short or
+        too long) must be normalized away instead of aborting the whole document.
+
+        Harvesters set keywords by attribute (`dataset.tags = themes_from_rdf(d)`),
+        which bypasses TagListField.clean(). Before the fix, a single bad keyword
+        raised at the Mongo-level validator, losing the dataset and its resources.
+        """
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        for keyword in ["valid-tag", "&", "df", "waytoolongkeyword"]:
+            g.add((node, DCAT.keyword, Literal(keyword)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()  # Must not raise.
+
+        assert set(dataset.tags) == {"valid-tag", "waytoolong"}
 
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None
@@ -899,6 +759,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.checksum.value == sha1
         assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
+        assert resource.harvest.last_update - datetime.now(UTC) < timedelta(seconds=1)
         assert resource.format == "csv"
 
     def test_resource_future_modified_at(self):
@@ -1057,6 +918,48 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(resource, Resource)
         assert resource.title == new_title
         assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_and_title(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(existing_resource.title)))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id == existing_resource.id
+
+    def test_match_existing_ogc_resource_by_url_only(self):
+        dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
+        existing_resource = dataset.resources[1]
+
+        g = Graph()
+        distrib = BNode()
+        g.add((distrib, RDF.type, DCAT.Distribution))
+        g.add((distrib, DCT.title, Literal(faker.sentence())))
+        g.add((distrib, DCAT.accessURL, Literal(existing_resource.url)))
+        service = BNode()
+        g.add((service, RDF.type, DCAT.DataService))
+        g.add((service, DCT.conformsTo, URIRef("http://www.opengeospatial.org/standards/wfs")))
+        g.add((distrib, DCAT.accessService, service))
+
+        resource = resource_from_rdf(g, dataset)
+        resource.validate()
+
+        assert isinstance(resource, Resource)
+        assert resource.format in OGC_SERVICE_FORMATS
+        assert resource.id != existing_resource.id
 
     def test_can_extract_from_rdf_resource(self):
         node = BNode()
@@ -1350,6 +1253,338 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert temporal_from_rdf(g.resource(node)) is None
         assert temporal_from_rdf(Literal("unparseable")) is None
 
+    @pytest.mark.parametrize(
+        "node_type, geom_type, datatype, serialize",
+        argvalues(
+            (
+                DCT.Location,
+                DCAT.bbox,
+                GEOSPARQL.geoJSONLiteral,
+                _to_geojson,
+                "bbox-geojson",
+            ),
+            (  # replaced by GEOSPARQL.geoJSONLiteral
+                DCT.Location,
+                DCAT.bbox,
+                "https://www.iana.org/assignments/media-types/application/vnd.geo+json",
+                _to_geojson,
+                "bbox-geojson-deprecated",
+            ),
+            (
+                DCT.Location,
+                DCAT.bbox,
+                GEOSPARQL.wktLiteral,
+                _to_wkt,
+                "bbox-wkt",
+            ),
+            (
+                DCT.Location,
+                LOCN.geometry,
+                GEOSPARQL.geoJSONLiteral,
+                _to_geojson,
+                "geometry-geojson",
+            ),
+            (
+                DCT.Location,
+                LOCN.geometry,
+                GEOSPARQL.wktLiteral,
+                _to_wkt,
+                "geometry-wkt",
+            ),
+            (  # old GeoNetwork dcat exposition
+                Namespace("http://www.opengis.net/rdf#").Polygon,
+                LOCN.geometry,
+                "http://www.opengis.net/rdf#wktLiteral",
+                _to_wkt,
+                "polygon-geometry",
+            ),
+            (  # old GeoNetwork dcat exposition
+                Namespace("http://www.opengis.net/rdf#").Polygon,
+                GEOSPARQL.asWKT,
+                "http://www.opengis.net/rdf#wktLiteral",
+                _to_wkt,
+                "polygon-aswkt",
+            ),
+        ),
+    )
+    def test_parse_spatial_geometry(self, node_type, geom_type, datatype, serialize):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        spatial = BNode()
+        g.add((spatial, RDF.type, node_type))
+        g.add((spatial, geom_type, Literal(serialize(coords), datatype=datatype)))
+        g.add((dataset, DCT.spatial, spatial))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
+
+    def test_parse_spatial_geometry_redundant(self):
+        """
+        The same coordinates should only occur once in the result, even if they are represented
+        multiple times (in different formats) in the input.
+        """
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        coords = [
+            [-5.27136, 51.04675],
+            [8.44351, 51.04675],
+            [8.44351, 41.90351],
+            [-5.27136, 41.90351],
+            [-5.27136, 51.04675],
+        ]
+
+        for geom_type in [DCAT.bbox, LOCN.geometry]:
+            for geom_coords in [
+                Literal(_to_geojson(coords), datatype=GEOSPARQL.geoJSONLiteral),
+                Literal(_to_wkt(coords), datatype=GEOSPARQL.wktLiteral),
+            ]:
+                geom = BNode()
+                g.add((geom, RDF.type, DCT.Location))
+                g.add((geom, geom_type, geom_coords))
+                g.add((dataset, DCT.spatial, geom))
+
+        assert spatial_from_rdf(g.resource(dataset)) == SpatialCoverage(
+            geom={"type": "MultiPolygon", "coordinates": [[coords]]}
+        )
+
+    @pytest.mark.parametrize(
+        "value, datatype",
+        [
+            ("50.0", None),
+            ("50.0", XSD.string),
+            ("50.0", XSD.decimal),
+            ("50.0", XSD.double),
+            ("50", XSD.integer),
+        ],
+    )
+    def test_parse_spatial_resolution_in_meters_datatype(self, value, datatype):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(value, datatype=datatype)))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"{value} m"
+
+    def test_parse_spatial_resolution_in_meters_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("49.0", datatype=XSD.decimal)))
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("51.0", datatype=XSD.decimal)))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "51.0 m"
+
+    @pytest.mark.parametrize(
+        "value, datatype",
+        [
+            ("50.0", None),
+            ("50.0", XSD.string),
+            ("50.0", XSD.decimal),
+            ("50.0", XSD.double),
+            ("50", XSD.integer),
+        ],
+    )
+    def test_parse_spatial_resolution_as_distance_datatype(self, value, datatype):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal(value, datatype=datatype)))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"{value} m"
+
+    @pytest.mark.parametrize("uom, uom_str", [(QUDT.FT, "ft"), (QUDT.KiloM, "km"), (QUDT.M, "m")])
+    def test_parse_spatial_resolution_as_distance_uom(self, uom, uom_str):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((qm, SDMXA.unitMeasure, uom))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == f"50.0 {uom_str}"
+
+    def test_parse_spatial_resolution_as_distance_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm1 = BNode()
+        g.add((qm1, RDF.type, DQV.QualityMeasurement))
+        g.add((qm1, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm1, DQV.value, Literal("200.0", datatype=XSD.decimal)))
+        g.add((qm1, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm1))
+
+        qm2 = BNode()
+        g.add((qm2, RDF.type, DQV.QualityMeasurement))
+        g.add((qm2, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm2, DQV.value, Literal("1.0", datatype=XSD.decimal)))
+        g.add((qm2, SDMXA.unitMeasure, QUDT.KiloM))
+        g.add((dataset, DQV.hasQualityMeasurement, qm2))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 km"
+
+    def test_parse_spatial_resolution_as_distance_missing_kind(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_distance_missing_unit(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, DQV.value, Literal("50.0", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_distance_missing_value(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsDistance))
+        g.add((qm, SDMXA.unitMeasure, QUDT.M))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    @pytest.mark.parametrize(
+        "value, datatype, expected",
+        [
+            ("0.00004", None, "1/25000"),
+            ("0.00004", XSD.string, "1/25000"),
+            ("0.00004", XSD.decimal, "1/25000"),
+            ("0.00004", XSD.double, "1/25000"),
+            ("1", XSD.integer, "1"),  # unlikely here, but test it anyway
+        ],
+    )
+    def test_parse_spatial_resolution_as_scale_datatype(self, value, datatype, expected):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal(value, datatype=datatype)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == expected
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            ("0.001", "1/1000"),
+            ("0.0005", "1/2000"),
+            ("0.0002", "1/5000"),
+            ("0.0001", "1/10000"),
+            ("0.00004", "1/25000"),
+            ("0.00002", "1/50000"),
+            ("0.0000125", "1/80000"),
+            ("0.00001", "1/100000"),
+            ("0.000005", "1/200000"),
+            ("0.000004", "1/250000"),
+            ("0.000002", "1/500000"),
+            ("0.000001", "1/1000000"),
+            ("0.0000001", "1/10000000"),
+        ],
+    )
+    def test_parse_spatial_resolution_as_scale_common_scales(self, value, expected):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal(value, datatype=XSD.double)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == expected
+
+    def test_parse_spatial_resolution_as_scale_interval(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm1 = BNode()
+        g.add((qm1, RDF.type, DQV.QualityMeasurement))
+        g.add((qm1, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm1, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm1))
+
+        qm2 = BNode()
+        g.add((qm2, RDF.type, DQV.QualityMeasurement))
+        g.add((qm2, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm2, DQV.value, Literal("0.00002", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm2))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1/50000"
+
+    def test_parse_spatial_resolution_as_scale_missing_kind(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_as_scale_missing_value(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        assert spatial_resolution_from_rdf(g.resource(dataset)) is None
+
+    def test_parse_spatial_resolution_conflicting(self):
+        g = Graph()
+        dataset = URIRef("http://example.org/dataset")
+
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal("1.0", datatype=XSD.decimal)))
+
+        qm = BNode()
+        g.add((qm, RDF.type, DQV.QualityMeasurement))
+        g.add((qm, DQV.isMeasurementOf, GEODCAT.spatialResolutionAsScale))
+        g.add((qm, DQV.value, Literal("0.00004", datatype=XSD.decimal)))
+        g.add((dataset, DQV.hasQualityMeasurement, qm))
+
+        # distance always win (arbitrary)
+        assert spatial_resolution_from_rdf(g.resource(dataset)) == "1.0 m"
+
     def test_unicode(self):
         g = Graph()
         title = "ééé"
@@ -1597,153 +1832,7 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         )
 
 
-class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
-    @pytest.mark.parametrize(
-        "xml, expected_licenses",
-        [
-            pytest.param(
-                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_licenses, id=id
-            )
-            for id, xml_fragment, expected_licenses in [
-                (
-                    "uriref",
-                    """
-                    <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
-                    """,
-                    {"https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"},
-                ),
-                (
-                    "value",
-                    """
-                    <dct:license>License from value</dct:license>
-                    """,
-                    {"License from value"},
-                ),
-                (
-                    "label",
-                    """
-                    <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License from label</rdfs:label>
-                       </rdf:Description>
-                    </dct:license>
-                    """,
-                    {"License from label"},
-                ),
-                (
-                    "uriref-precedence",
-                    """
-                    <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
-                       No conditions apply to access and use.
-                    </dct:license>
-                    """,
-                    {
-                        "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
-                    },
-                ),
-                (
-                    "resource",
-                    """
-                       <dct:license rdf:resource="http://example.org/custom-license"/>
-                    </rdf:Description>
-                    <rdf:Description rdf:about="http://example.org/custom-license">
-                       <rdfs:label>License from resource</rdfs:label>
-                       <dct:description>A license specific to our organization</dct:description>
-                    """,
-                    {"License from resource"},
-                ),
-                (
-                    "multiple",
-                    """
-                    <dct:license>License 1</dct:license>
-                    <dct:license>
-                       <rdf:Description>
-                          <rdfs:label>License 2</rdfs:label>
-                       </rdf:Description>
-                    </dct:license>
-                    """,
-                    {"License 1", "License 2"},
-                ),
-            ]
-        ],
-    )
-    def test_licenses_from_rdf(self, xml: str, expected_licenses: set[str]):
-        graph = Graph()
-        graph.parse(data=xml, format="xml")
-        dataset = graph.resource(URIRef("http://example.org/dataset"))
-        licenses = licenses_from_rdf(dataset)
-        assert licenses == expected_licenses
-
-    def test_access_rights_from_rdf(self, app):
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Pas de restriction d'accès public selon INSPIRE")))
-
-        dataset = g.resource(node)
-        resources_access_rights = [{"resource rights 1"}, {"resource rights 2"}]
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Pas de restriction d'accès public selon INSPIRE"}
-        assert access_type is None
-        assert inspire_category is None
-
-    def test_with_inspire_support_enabled_matches_category(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
-        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
-
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add(
-            (
-                node,
-                DCT.accessRights,
-                Literal(
-                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-                ),
-            )
-        )
-
-        dataset = g.resource(node)
-        resources_access_rights = []
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {
-            "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
-        }
-        assert access_type == AccessType.RESTRICTED
-        assert inspire_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
-
-    def test_with_inspire_support_enabled_no_match(self, app):
-        app.config["INSPIRE_SUPPORT"] = True
-        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
-
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Test dataset")))
-        g.add((node, DCT.accessRights, Literal("Some unknown rights")))
-
-        dataset = g.resource(node)
-        resources_access_rights = []
-
-        access_rights, access_type, inspire_category = infer_dataset_access_rights(
-            dataset, resources_access_rights
-        )
-
-        assert access_rights == {"Some unknown rights"}
-        assert access_type is None
-        assert inspire_category is None
-
+class DatasetToRdfUtilsTest(PytestOnlyDBTestCase):
     def test_rights_to_rdf_with_license_with_url_and_access_type_open(self, app):
         dataset = DatasetFactory(
             license=LicenseFactory(title="the license title", url="https://example.com/license"),
@@ -1794,16 +1883,330 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         assert rights[0].identifier == URIRef(InspireLimitationCategory.PUBLIC_AUTHORITIES.url)
         assert access_right and access_right.identifier == URIRef(AccessType.RESTRICTED.url)
 
+
+class RdfToDatasetUtilsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize(
+        "xml, expected_licenses",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    """,
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
+                    "uri",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    """,
+                    ["https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"],
+                    "uri_strict",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+                    </dct:license>
+                    <dct:license>
+                      <dct:LicenseDocument rdf:about="http://creativecommons.org/licenses/by-sa/3.0/"/>
+                    </dct:license>
+                    """,
+                    [
+                        "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+                        "http://creativecommons.org/licenses/by-sa/3.0/",
+                    ],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:license>License from value</dct:license>
+                    """,
+                    ["License from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:license>
+                      <rdf:Description>
+                        <rdfs:label>License from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:license>
+                    """,
+                    ["License from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:license rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">
+                      License from value
+                    </dct:license>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+                    ],
+                    "lenient_uri_wins",
+                ),
+                (
+                    """
+                       <dct:license rdf:resource="http://example.org/custom-license"/>
+                    </rdf:Description>
+                    <rdf:Description rdf:about="http://example.org/custom-license">
+                       <rdfs:label>License from resource</rdfs:label>
+                       <dct:description>A license specific to our organization</dct:description>
+                    """,
+                    ["License from resource"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_license_from_rdf(self, xml: str, expected_licenses: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        licenses = licenses_from_rdf(dataset)
+        assert licenses == expected_licenses
+
+    @pytest.mark.parametrize(
+        "xml, expected_access_rights",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "uri",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement rdf:about="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"/>
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "uri_strict",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights from statement</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from statement"],
+                    "text",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 1</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    <dct:accessRights>
+                      <dct:RightsStatement>
+                        <dct:description>Access rights 2</dct:description>
+                      </dct:RightsStatement>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights 1", "Access rights 2"],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:accessRights>Access rights from value</dct:accessRights>
+                    """,
+                    ["Access rights from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">
+                      Access rights from value
+                    </dct:accessRights>
+                    """,
+                    [
+                        "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations"
+                    ],
+                    "lenient_uri_wins",
+                ),
+                (
+                    """
+                    <dct:accessRights>
+                      <rdf:Description>
+                        <dct:description>Access rights from description</dct:description>
+                        <rdfs:label>Access rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:accessRights>
+                    """,
+                    ["Access rights from label"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_access_rights_from_rdf(self, xml: str, expected_access_rights: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        access_rights = access_rights_from_rdf(dataset)
+        assert access_rights == expected_access_rights
+
+    @pytest.mark.parametrize(
+        "xml, expected_rights",
+        [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights from statement</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights from statement"],
+                    "text",
+                ),
+                (
+                    """
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 1</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    <dct:rights>
+                      <rdf:RightsStatement>
+                        <dct:description>Rights 2</dct:description>
+                      </rdf:RightsStatement>
+                    </dct:rights>
+                    """,
+                    ["Rights 1", "Rights 2"],
+                    "multiple",
+                ),
+                # degenerate cases
+                (
+                    """
+                    <dct:rights>Rights from value</dct:rights>
+                    """,
+                    ["Rights from value"],
+                    "lenient_value",
+                ),
+                (
+                    """
+                    <dct:rights>
+                       <rdf:Description>
+                          <rdfs:label>Rights from label</rdfs:label>
+                       </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                    "lenient_label",
+                ),
+                (
+                    """
+                    <dct:rights>
+                      <rdf:Description>
+                        <dct:description>Rights from description</dct:description>
+                        <rdfs:label>Rights from label</rdfs:label>
+                      </rdf:Description>
+                    </dct:rights>
+                    """,
+                    ["Rights from label"],
+                    "lenient_label_wins",
+                ),
+            ]
+        ],
+    )
+    def test_rights_from_rdf(self, xml: str, expected_rights: list[str]):
+        graph = Graph()
+        graph.parse(data=xml, format="xml")
+        dataset = graph.resource(URIRef("http://example.org/dataset"))
+        rights = rights_from_rdf(dataset)
+        assert rights == expected_rights
+
+    @pytest.mark.parametrize(
+        "inspire_support, input_strings, expected_category",
+        argvalues(
+            (
+                True,
+                [
+                    "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b"
+                ],
+                InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                "single_inspire_restriction",
+            ),
+            (
+                True,
+                [
+                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)",
+                    "L124-5-II-2 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.c)",
+                ],
+                InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                "multiple_inspire_restrictions",
+            ),
+            (
+                True,
+                ["Pas de restriction d'accès public selon INSPIRE"],
+                None,
+                "inspire_no_restriction",
+            ),
+            (
+                True,
+                ["Some unknown rights"],
+                None,
+                "unknown_rights",
+            ),
+            (
+                # don't detect a valid restriction when INSPIRE_SUPPORT is disabled
+                False,
+                [
+                    "L124-5-II-1 du code de l'environnement (Directive 2007/2/CE (INSPIRE), Article 13.1.b)"
+                ],
+                None,
+                "inspire_off",
+            ),
+        ),
+    )
+    def test_inspire_category(self, app, inspire_support, input_strings, expected_category):
+        app.config["INSPIRE_SUPPORT"] = inspire_support
+        app.config["DEFAULT_COUNTRY_CODE"] = "fr"
+
+        category = inspire_category_from_rights(input_strings)
+
+        assert category is expected_category
+
     @pytest.mark.parametrize(
         "xml, expected_provenances",
         [
-            pytest.param(
-                XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_provenances, id=id
-            )
-            for id, xml_fragment, expected_provenances in [
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
                 # Old DCAT* specs
                 (
-                    "label",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -1811,11 +2214,11 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from label"},
+                    ["Provenance from label"],
+                    "label",
                 ),
                 # New DCAT* specs
                 (
-                    "description",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -1823,10 +2226,10 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Provenance from description"},
+                    ["Provenance from description"],
+                    "description",
                 ),
                 (
-                    "multiple",
                     """
                     <dct:provenance>
                        <dct:ProvenanceStatement>
@@ -1839,30 +2242,31 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                        </dct:ProvenanceStatement>
                     </dct:provenance>
                     """,
-                    {"Statement 1", "Statement 2"},
+                    ["Statement 1", "Statement 2"],
+                    "multiple",
                 ),
                 # Supported theoretical(?) cases
                 (
-                    "value",
                     """
                     <dct:provenance>Provenance from value</dct:provenance>
                     """,
-                    {"Provenance from value"},
+                    ["Provenance from value"],
+                    "value",
                 ),
                 (
-                    "resource",
                     """
                        <dct:provenance rdf:resource="http://example.org/provenance"/>
                     </rdf:Description>
                     <rdf:Description rdf:about="http://example.org/provenance">
                        <dct:description>Provenance from separate resource</dct:description>
                     """,
-                    {"Provenance from separate resource"},
+                    ["Provenance from separate resource"],
+                    "resource",
                 ),
             ]
         ],
     )
-    def test_provenances_from_rdf(self, xml: str, expected_provenances: set[str]):
+    def test_provenances_from_rdf(self, xml: str, expected_provenances: list[str]):
         graph = Graph()
         graph.parse(data=xml, format="xml")
         dataset = graph.resource(URIRef("http://example.org/dataset"))
@@ -1872,11 +2276,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "xml, expected_format",
         [
-            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=xml_fragment), expected_format, id=id)
-            for id, xml_fragment, expected_format in [
-                # DCAT* and GeoDCAT-AP for distributions other than services
-                (
-                    "dct:format",
+            pytest.param(XML_RDF_TEMPLATE.format(xml_fragment=t[0]), t[1], id=t[2])
+            for t in [
+                (  # DCAT* and GeoDCAT-AP for distributions other than services
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -1889,10 +2291,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "zip",
+                    "dct:format",
                 ),
-                # DCAT* and older GeoDCAT-AP for service distributions
-                (
-                    "dct:conformsTo",
+                (  # DCAT* and older GeoDCAT-AP for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -1912,10 +2313,9 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wms",
+                    "dct:conformsTo",
                 ),
-                # GeoDCAT-AP 3+ for service distributions
-                (
-                    "geodcatap:serviceProtocol",
+                (  # GeoDCAT-AP 3+ for service distributions
                     """
                     <dcat:distribution>
                        <dcat:Distribution>
@@ -1938,6 +2338,7 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
                     </dcat:distribution>
                     """,
                     "wfs",
+                    "geodcatap:serviceProtocol",
                 ),
             ]
         ],
@@ -1949,3 +2350,88 @@ class DatasetFromRdfUtilsTest(PytestOnlyDBTestCase):
         resource = graph.resource(distribution)
         format = format_from_rdf(resource)
         assert format == expected_format
+
+
+class DcatHelpersTest:
+    def test_set_dcat_extra(self):
+        dataset = Dataset()
+
+        # assign
+        set_dcat_extra(dataset, "foo", "aa")
+        assert dataset.extras["dcat"]["foo"] == "aa"
+
+        # override
+        set_dcat_extra(dataset, "foo", "bb")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+
+        # extend
+        set_dcat_extra(dataset, "bar", "cc")
+        assert dataset.extras["dcat"]["foo"] == "bb"
+        assert dataset.extras["dcat"]["bar"] == "cc"
+
+        # list type
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert dataset.extras["dcat"]["foo"] == ["aa", "bb"]
+        set_dcat_extra(dataset, "foo", ["aa"])
+        assert dataset.extras["dcat"]["foo"] == ["aa"]  # != "aa"
+
+        # set type
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = dataset.extras["dcat"]["foo"]
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # uriref
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert dataset.extras["dcat"]["accessRights"] == "xx"
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert dataset.extras["dcat"]["foo"] == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert dataset.extras["dcat"]["foo"] == []
+
+    def test_get_dcat_extra(self):
+        dataset = Dataset()
+
+        # missing
+        assert get_dcat_extra(dataset, "missing") is None
+
+        # str
+        set_dcat_extra(dataset, DCT.accessRights, "xx")
+        assert get_dcat_extra(dataset, DCT.accessRights) == "xx"
+        assert get_dcat_extra(dataset, "accessRights") == "xx"
+
+        # list
+        set_dcat_extra(dataset, "foo", ["aa", "bb"])
+        assert get_dcat_extra(dataset, "foo") == ["aa", "bb"]
+
+        # set
+        set_dcat_extra(dataset, "foo", {"aa", "bb"})
+        val = get_dcat_extra(dataset, "foo")
+        assert isinstance(val, list)
+        assert sorted(val) == ["aa", "bb"]
+
+        # empty
+        set_dcat_extra(dataset, "foo", "")
+        assert get_dcat_extra(dataset, "foo") == ""
+        set_dcat_extra(dataset, "foo", [])
+        assert get_dcat_extra(dataset, "foo") == []
+
+    def test_get_unanimous_dcat_extra(self):
+        r1 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r2 = Resource(extras={"dcat": {"accessRights": "aa"}})
+        r3 = Resource(extras={"dcat": {"accessRights": "bb"}})
+        r4 = Resource(extras={"dcat": {}})
+        r5 = Resource()
+
+        assert get_unanimous_dcat_extra([r1, r2], "accessRights") == "aa"
+        assert get_unanimous_dcat_extra([r1, r2], DCT.accessRights) == "aa"
+
+        assert get_unanimous_dcat_extra([r1, r3], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r4], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r5], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r4, r5], DCT.accessRights) is None
+
+        assert get_unanimous_dcat_extra([], DCT.accessRights) is None
+        assert get_unanimous_dcat_extra([r1, r2], "foo") is None
