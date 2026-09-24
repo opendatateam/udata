@@ -93,8 +93,9 @@ def push_resource_to_geopf(
         )
         return
 
+    # The CLI's raw `access_token` path may have no user, hence no notification email
+    user = User.objects.get(id=user_id) if user_id or not access_token else None
     if not access_token:
-        user = User.objects.get(id=user_id)
         try:
             # The token must outlive the pipeline: up to one full poll for
             # checks plus one for processing.
@@ -118,7 +119,9 @@ def push_resource_to_geopf(
 
     client = GeopfClient(token=access_token, datastore_id=datastore_id)
     try:
-        _run_pipeline(dataset, resource, datastore_id, client)
+        _run_pipeline(
+            dataset, resource, datastore_id, client, notify_email=user.email if user else None
+        )
     except GeopfTimeoutError as e:
         log.exception("geopf: pipeline timed out dataset=%s resource=%s", dataset_id, resource_id)
         set_resource_push_metadata(dataset, resource, status="timeout", error=str(e))
@@ -133,7 +136,9 @@ def push_resource_to_geopf(
     set_dataset_push_metadata(dataset, datastore_id=datastore_id)
 
 
-def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
+def _run_pipeline(
+    dataset, resource, datastore_id: str, client, notify_email: str | None = None
+) -> None:
     datasheet_name = str(dataset.id)
     # Prefixed with "_" because geopf rejects stored data names starting with
     # a digit, and a Mongo ObjectId can start with one.
@@ -181,7 +186,13 @@ def _run_pipeline(dataset, resource, datastore_id: str, client) -> None:
 
         client.tag_entity("uploads", upload_id, datasheet_name)
 
-        exec_id = client.launch_processing(upload_id, stored_data_name, srs=srs)
+        exec_id = client.launch_processing(
+            upload_id,
+            stored_data_name,
+            srs=srs,
+            notify_email=notify_email,
+            entity_url=fiche_url(datastore_id, datasheet_name),
+        )
         log.info(
             "geopf: launched processing execution=%s dataset=%s resource=%s",
             exec_id,

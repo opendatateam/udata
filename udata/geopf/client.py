@@ -178,14 +178,29 @@ class GeopfClient:
         )
 
     def launch_processing(
-        self, upload_id: str, stored_data_name: str, srs: str = DEFAULT_SRS
+        self,
+        upload_id: str,
+        stored_data_name: str,
+        srs: str = DEFAULT_SRS,
+        *,
+        notify_email: str | None = None,
+        entity_url: str | None = None,
     ) -> str:
+        """Create and launch the vector integration execution. Returns its id.
+
+        If `notify_email` is set, geopf emails that address when the execution
+        ends, with `entity_url` as the associated link.
+        """
         payload = {
             "processing": self._find_vector_processing_id(),
             "inputs": {"upload": [upload_id]},
             "output": {"stored_data": {"name": stored_data_name}},
             "parameters": {"srs": srs},
         }
+        if notify_email:
+            payload["callback"] = {"type": "email", "to_address": [notify_email]}
+            if entity_url:
+                payload["callback"]["entity_url"] = entity_url
         resp = self.session.post(self._url("processings/executions"), json=payload)
         self._raise(resp)
         exec_id = resp.json()["_id"]

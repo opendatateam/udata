@@ -27,6 +27,7 @@ from udata.geopf.tasks import (
     _resource_filename,
     _run_pipeline,
     _storage_chunks,
+    fiche_url,
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
@@ -332,7 +333,11 @@ class RunPipelineTest(PytestOnlyDBTestCase):
             name=f"_{resource.id}", description=dataset.title, srs=DEFAULT_SRS
         )
         client.launch_processing.assert_called_once_with(
-            "upload-1", f"_{resource.id}", srs=DEFAULT_SRS
+            "upload-1",
+            f"_{resource.id}",
+            srs=DEFAULT_SRS,
+            notify_email=None,
+            entity_url=fiche_url("ds-1", str(dataset.id)),
         )
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)
@@ -582,3 +587,32 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
         mock_resolve.assert_called_once()
         assert mock_resolve.call_args.kwargs["user"].id == user.id
         mock_pull.assert_called_once_with(dataset, "resolved-token")
+
+    def test_user_id_passes_user_email_for_notification(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+        user = UserFactory()
+
+        with patch("udata.geopf.tasks.resolve_access_token", return_value="resolved-token"):
+            with patch("udata.geopf.tasks.GeopfClient"):
+                with patch("udata.geopf.tasks._run_pipeline") as mock_pipeline:
+                    push_resource_to_geopf.apply(
+                        args=[str(dataset.id), resource_id],
+                        kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
+                    )
+
+        assert mock_pipeline.call_args.kwargs["notify_email"] == user.email
+
+    def test_raw_access_token_without_user_sends_no_notification(self):
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(resources=[resource])
+        resource_id = str(dataset.resources[0].id)
+
+        with patch("udata.geopf.tasks._run_pipeline") as mock_pipeline:
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
+            )
+
+        assert mock_pipeline.call_args.kwargs["notify_email"] is None

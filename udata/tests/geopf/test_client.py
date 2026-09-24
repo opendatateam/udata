@@ -138,6 +138,46 @@ class GeopfClientProcessingTest(PytestOnlyTestCase):
         )
         assert "fields=input_types%2coutput_types" in processings_request.query
 
+    def _mock_launch(self, rmock):
+        rmock.get(
+            f"{TEST_API_URL}/processings",
+            json=[
+                {
+                    "_id": "proc-vector",
+                    "input_types": {"upload": ["VECTOR"]},
+                    "output_type": {"stored_data": "VECTOR-DB"},
+                }
+            ],
+        )
+        rmock.post(f"{TEST_API_URL}/processings/executions", json={"_id": "exec-1"})
+        rmock.post(f"{TEST_API_URL}/processings/executions/exec-1/launch", json={})
+
+    def _executions_payload(self, rmock) -> dict:
+        return next(
+            r for r in rmock.request_history if r.url.endswith("/processings/executions")
+        ).json()
+
+    def test_launch_processing_sets_email_callback(self, rmock):
+        self._mock_launch(rmock)
+        GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).launch_processing(
+            "u1",
+            "stored-name",
+            notify_email="user@example.org",
+            entity_url="https://cartes.example.org/fiche",
+        )
+        assert self._executions_payload(rmock)["callback"] == {
+            "type": "email",
+            "to_address": ["user@example.org"],
+            "entity_url": "https://cartes.example.org/fiche",
+        }
+
+    def test_launch_processing_without_email_has_no_callback(self, rmock):
+        self._mock_launch(rmock)
+        GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).launch_processing(
+            "u1", "stored-name", entity_url="https://cartes.example.org/fiche"
+        )
+        assert "callback" not in self._executions_payload(rmock)
+
     def test_launch_processing_raises_when_no_matching_processing(self, rmock):
         rmock.get(
             f"{TEST_API_URL}/processings",
