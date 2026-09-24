@@ -208,13 +208,23 @@ class NamingTest(PytestOnlyDBTestCase):
 
         assert resolve_datasheet_name(dataset).startswith("Ancien titre (")
 
-    def test_stored_data_name_is_resource_title(self):
-        resource = ResourceFactory.build(title="Opérations programmées")
-        assert _stored_data_name(resource) == "Opérations programmées"
+    def test_stored_data_name_is_resource_title_slug_with_id(self):
+        resource = ResourceFactory.build(title="Opérations programmées : l’été.gpkg")
+        assert _stored_data_name(resource) == (
+            f"operations_programmees_lete_gpkg_{str(resource.id)[:6]}"
+        )
 
     def test_stored_data_name_prefixes_leading_digit(self):
         resource = ResourceFactory.build(title="20260610-operations-programmees.gpkg")
-        assert _stored_data_name(resource) == "_20260610-operations-programmees.gpkg"
+        assert _stored_data_name(resource) == (
+            f"_20260610_operations_programmees_gpkg_{str(resource.id)[:6]}"
+        )
+
+    def test_stored_data_name_without_usable_title_is_id(self):
+        resource = ResourceFactory.build(title="«»")
+        name = _stored_data_name(resource)
+        assert name.lstrip("_") == str(resource.id)[:6]
+        assert not name[0].isdigit()
 
     @pytest.mark.options(GEOPF_DASHBOARD_BASE="https://cartes.example.org")
     def test_fiche_url_quotes_datasheet_name(self):
@@ -399,11 +409,11 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client.delete_upload.assert_called_once_with("upload-1")
         client.create_upload.assert_called_once_with(
-            name="Opérations programmées", description=dataset.title, srs=DEFAULT_SRS
+            name=_stored_data_name(resource), description=dataset.title, srs=DEFAULT_SRS
         )
         client.launch_processing.assert_called_once_with(
             "upload-1",
-            "Opérations programmées",
+            _stored_data_name(resource),
             srs=DEFAULT_SRS,
             notify_email=None,
             entity_url=stored_data_details_url(f"Mon jeu de données ({str(dataset.id)[-6:]})"),

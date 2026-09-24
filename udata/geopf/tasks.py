@@ -9,6 +9,7 @@ from uuid import UUID
 
 from flask import current_app
 from flask_storage.errors import OperationNotSupported
+from slugify import slugify
 
 from udata.core import storages
 from udata.core.dataset.models import Dataset, Resource
@@ -324,7 +325,14 @@ def _sanitize_datasheet_name(title: str) -> str:
 
 
 def _stored_data_name(resource) -> str:
-    name = resource.title or str(resource.id)
+    """Slug of the resource title, suffixed with a short resource id.
+
+    cartes.gouv.fr suggests service (layer) technical names from this name,
+    which must be unique and match `^[A-Za-z_][A-Za-z0-9_.-]*$`.
+    """
+    short_id = str(resource.id)[:6]
+    slug = slugify(resource.title or "", to_lower=True, separator="_")
+    name = f"{slug}_{short_id}" if slug else short_id
     # geopf rejects stored data names starting with a digit
     return f"_{name}" if name[0].isdigit() else name
 
