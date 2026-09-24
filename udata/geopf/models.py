@@ -32,6 +32,9 @@ class GeopfDatasetPushMetadata(EmbeddedDocument):
     )
     # Internal only, hence not field-wrapped
     metadata_id = StringField()
+    # The geopf `datasheet_name` tag grouping this dataset's entities into one
+    # fiche. Frozen at first push so a later title change can't split the fiche.
+    datasheet_name = StringField()
 
 
 @generate_fields()

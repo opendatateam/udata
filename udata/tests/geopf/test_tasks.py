@@ -27,12 +27,15 @@ from udata.geopf.tasks import (
     _resource_filename,
     _run_pipeline,
     _storage_chunks,
+    _stored_data_name,
     fiche_url,
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
+    resolve_datasheet_name,
     set_dataset_pull_metadata,
     set_resource_push_metadata,
+    stored_data_details_url,
     sync_metadata,
 )
 from udata.tests import PytestOnlyTestCase
@@ -146,7 +149,9 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
 
         assert result == "meta-new"
         client.upload_metadata.assert_called_once()
-        client.tag_entity.assert_called_once_with("metadata", "meta-new", str(dataset.id))
+        client.tag_entity.assert_called_once_with(
+            "metadata", "meta-new", resolve_datasheet_name(dataset)
+        )
         dataset.reload()
         assert dataset.geopf.push.metadata_id == "meta-new"
 
@@ -162,6 +167,68 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         client.update_metadata.assert_called_once()
         client.upload_metadata.assert_not_called()
         client.tag_entity.assert_not_called()
+
+
+class NamingTest(PytestOnlyDBTestCase):
+    def test_datasheet_name_is_dataset_title_with_id_suffix_and_persisted(self):
+        dataset = DatasetFactory(title="Mon jeu de données")
+        expected = f"Mon jeu de données ({str(dataset.id)[-6:]})"
+
+        assert resolve_datasheet_name(dataset) == expected
+        dataset.reload()
+        assert dataset.geopf.push.datasheet_name == expected
+
+    def test_datasheet_name_replaces_characters_cartes_rejects(self):
+        dataset = DatasetFactory(title="Budget 2024/2025 : l’œuvre « complète » ? #1")
+
+        assert resolve_datasheet_name(dataset) == (
+            f"Budget 2024-2025 : l'oeuvre complète 1 ({str(dataset.id)[-6:]})"
+        )
+
+    def test_datasheet_name_truncates_long_title(self):
+        dataset = DatasetFactory(title="a" * 200)
+
+        name = resolve_datasheet_name(dataset)
+
+        assert len(name) == 99
+        assert name.endswith(f"a ({str(dataset.id)[-6:]})")
+
+    def test_datasheet_name_without_usable_title_is_id_suffix(self):
+        dataset = DatasetFactory(title="«»")
+
+        assert resolve_datasheet_name(dataset) == f"({str(dataset.id)[-6:]})"
+
+    def test_datasheet_name_survives_title_change(self):
+        dataset = DatasetFactory(title="Ancien titre")
+        resolve_datasheet_name(dataset)
+
+        dataset.title = "Nouveau titre"
+        dataset.save()
+        dataset.reload()
+
+        assert resolve_datasheet_name(dataset).startswith("Ancien titre (")
+
+    def test_stored_data_name_is_resource_title(self):
+        resource = ResourceFactory.build(title="Opérations programmées")
+        assert _stored_data_name(resource) == "Opérations programmées"
+
+    def test_stored_data_name_prefixes_leading_digit(self):
+        resource = ResourceFactory.build(title="20260610-operations-programmees.gpkg")
+        assert _stored_data_name(resource) == "_20260610-operations-programmees.gpkg"
+
+    @pytest.mark.options(GEOPF_DASHBOARD_BASE="https://cartes.example.org")
+    def test_fiche_url_quotes_datasheet_name(self):
+        assert fiche_url("ds-1", "Mon jeu / données") == (
+            "https://cartes.example.org/tableau-de-bord/entrepots/ds-1/donnees/"
+            "Mon%20jeu%20%2F%20donn%C3%A9es"
+        )
+
+    @pytest.mark.options(GEOPF_DASHBOARD_BASE="https://cartes.example.org")
+    def test_stored_data_details_url_keeps_geopf_placeholders(self):
+        assert stored_data_details_url("Mon jeu (6aa178)") == (
+            "https://cartes.example.org/tableau-de-bord/entrepots/{{ datastore }}/donnees/"
+            "{{ output }}/details?datasheetName=Mon%20jeu%20%286aa178%29"
+        )
 
 
 class MetadataSettersTest(PytestOnlyDBTestCase):
@@ -313,8 +380,10 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 @TEST_GEOPF_CONF
 class RunPipelineTest(PytestOnlyDBTestCase):
     def test_sets_done_status_and_last_synced_at_on_success(self):
-        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
-        dataset = DatasetFactory(resources=[resource])
+        resource = ResourceFactory.build(
+            title="Opérations programmées", format="csv", url="http://files.example.com/f.csv"
+        )
+        dataset = DatasetFactory(title="Mon jeu de données", resources=[resource])
         resource = dataset.resources[0]
 
         client = MagicMock(datastore="ds-1")
@@ -330,14 +399,14 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client.delete_upload.assert_called_once_with("upload-1")
         client.create_upload.assert_called_once_with(
-            name=f"_{resource.id}", description=dataset.title, srs=DEFAULT_SRS
+            name="Opérations programmées", description=dataset.title, srs=DEFAULT_SRS
         )
         client.launch_processing.assert_called_once_with(
             "upload-1",
-            f"_{resource.id}",
+            "Opérations programmées",
             srs=DEFAULT_SRS,
             notify_email=None,
-            entity_url=fiche_url("ds-1", str(dataset.id)),
+            entity_url=stored_data_details_url(f"Mon jeu de données ({str(dataset.id)[-6:]})"),
         )
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)

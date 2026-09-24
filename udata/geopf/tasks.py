@@ -1,9 +1,10 @@
 import contextlib
 import logging
 import os
+import re
 import tempfile
 from datetime import UTC, datetime
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from uuid import UUID
 
 from flask import current_app
@@ -139,10 +140,8 @@ def push_resource_to_geopf(
 def _run_pipeline(
     dataset, resource, datastore_id: str, client, notify_email: str | None = None
 ) -> None:
-    datasheet_name = str(dataset.id)
-    # Prefixed with "_" because geopf rejects stored data names starting with
-    # a digit, and a Mongo ObjectId can start with one.
-    stored_data_name = f"_{resource.id}"
+    datasheet_name = resolve_datasheet_name(dataset)
+    stored_data_name = _stored_data_name(resource)
     filename = _resource_filename(resource)
     dataset_id = dataset.id
     resource_id = resource.id
@@ -191,7 +190,7 @@ def _run_pipeline(
             stored_data_name,
             srs=srs,
             notify_email=notify_email,
-            entity_url=fiche_url(datastore_id, datasheet_name),
+            entity_url=stored_data_details_url(datasheet_name),
         )
         log.info(
             "geopf: launched processing execution=%s dataset=%s resource=%s",
@@ -268,7 +267,66 @@ def _run_pipeline(
 def fiche_url(datastore_id: str, datasheet_name: str) -> str:
     """URL of the datasheet's fiche on the cartes.gouv.fr dashboard."""
     base = current_app.config["GEOPF_DASHBOARD_BASE"]
-    return f"{base}/tableau-de-bord/entrepots/{datastore_id}/donnees/{datasheet_name}"
+    name = quote(datasheet_name, safe="")
+    return f"{base}/tableau-de-bord/entrepots/{datastore_id}/donnees/{name}"
+
+
+def stored_data_details_url(datasheet_name: str) -> str:
+    """cartes.gouv.fr details page of a processing's output stored data.
+
+    Meant for a processing callback's `entity_url`: geopf fills in the
+    `{{ datastore }}` and `{{ output }}` placeholders when sending the email
+    (undocumented, mirrors what cartes.gouv.fr itself sends).
+    """
+    base = current_app.config["GEOPF_DASHBOARD_BASE"]
+    name = quote(datasheet_name, safe="")
+    return (
+        f"{base}/tableau-de-bord/entrepots/{{{{ datastore }}}}/donnees/{{{{ output }}}}"
+        f"/details?datasheetName={name}"
+    )
+
+
+def resolve_datasheet_name(dataset) -> str:
+    """The fiche (`datasheet_name` tag) grouping this dataset's entities on geopf.
+
+    geopf has no fiche object: cartes.gouv.fr groups entities by this tag and
+    also displays it as the fiche's name, so it must be both readable and
+    unique. Hence the dataset title suffixed with a short id, persisted on
+    first use so later pushes keep landing in the same fiche even if the
+    title changes.
+    """
+    push = dataset_push_metadata(dataset)
+    if push.datasheet_name:
+        return push.datasheet_name
+    # The ObjectId's tail (counter), as its head is a timestamp shared by
+    # datasets created around the same time
+    suffix = f"({str(dataset.id)[-6:]})"
+    title = _sanitize_datasheet_name(dataset.title or "")
+    title = title[: DATASHEET_NAME_MAX_LENGTH - len(suffix) - 1].rstrip()
+    name = f"{title} {suffix}" if title else suffix
+    set_dataset_push_metadata(dataset, datasheet_name=name)
+    return name
+
+
+# cartes.gouv.fr's fiche name form limit
+DATASHEET_NAME_MAX_LENGTH = 99
+# Characters cartes.gouv.fr accepts in a fiche name (`regex.datasheet_name` in
+# its frontend, where `\w` is ASCII-only); anything else may break its UI.
+DATASHEET_NAME_FORBIDDEN_RE = re.compile(r"[^A-Za-z0-9_À-ÿ\-.~!$&'()*+,;:@%\s]")
+DATASHEET_NAME_REPLACEMENTS = str.maketrans(
+    {"’": "'", "‘": "'", "/": "-", "\\": "-", "œ": "oe", "Œ": "OE", "æ": "ae", "Æ": "AE"}
+)
+
+
+def _sanitize_datasheet_name(title: str) -> str:
+    name = DATASHEET_NAME_FORBIDDEN_RE.sub(" ", title.translate(DATASHEET_NAME_REPLACEMENTS))
+    return " ".join(name.split())
+
+
+def _stored_data_name(resource) -> str:
+    name = resource.title or str(resource.id)
+    # geopf rejects stored data names starting with a digit
+    return f"_{name}" if name[0].isdigit() else name
 
 
 def _resource_filename(resource) -> str:
@@ -330,7 +388,7 @@ def _download_chunks(url: str):
 
 def sync_metadata(dataset, client) -> str:
     """Create or refresh the ISO 19115 metadata record for a dataset on Géoplateforme."""
-    datasheet_name = str(dataset.id)
+    datasheet_name = resolve_datasheet_name(dataset)
     xml = dataset_to_iso19115(dataset, datastore_id=client.datastore)
     metadata_id = dataset_push_metadata(dataset).metadata_id
     if metadata_id:
