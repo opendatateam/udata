@@ -1,0 +1,214 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Python version used to build and publish the distribution
+  PYTHON_VERSION: "3.11"
+  # Environment reported to Sentry when a release is deployed
+  DEPLOY_ENV: dev
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+        mongo-version: ["7.0.28"]
+        elasticsearch-version: ["7.17.28", "8.19.13"]
+    env:
+      UDATA_TEST_SEARCH_INTEGRATION: "1"
+      UDATA_TEST_S3_INTEGRATION: "1"
+      UDATA_TEST_S3_ENDPOINT: "http://localhost:9000"
+      UDATA_TEST_S3_ACCESS_KEY: "udata"
+      UDATA_TEST_S3_SECRET_KEY: "udata-secret"
+    services:
+      mongo:
+        image: mongo:${{ matrix.mongo-version }}
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Started by hand rather than declared as services: both images need a
+      # custom command, which `services:` cannot override. Started before the
+      # dependency install so Elasticsearch boots while uv syncs.
+      - name: Start Elasticsearch and MinIO
+        run: |
+          docker run -d --name elasticsearch -p 9200:9200 \
+            -e discovery.type=single-node \
+            -e xpack.security.enabled=false \
+            -e action.destructive_requires_name=false \
+            -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
+            elasticsearch:${{ matrix.elasticsearch-version }} \
+            bash -c "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"
+          # MinIO images are no longer published on Docker Hub, quay.io is the only registry left
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=udata \
+            -e MINIO_ROOT_PASSWORD=udata-secret \
+            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z server /data
+
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --frozen
+
+      - name: Lint and format code and sort imports
+        # ruff check --extend-select I . : check linting and imports sorting without fixing (to fix, use --fix)
+        # ruff format --check . : check code formatting without fixing (to fix, remove --check)
+        run: |
+          uv run ruff check --extend-select I .
+          uv run ruff format --check .
+
+      - name: Wait for Elasticsearch
+        run: |
+          for i in $(seq 1 60); do
+            status=$(curl -s http://localhost:9200/_cluster/health 2>/dev/null | jq -r '.status' 2>/dev/null || true)
+            if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
+              echo "Elasticsearch is ready (status: $status)"
+              exit 0
+            fi
+            echo "Waiting for Elasticsearch... ($i/60) - status: $status"
+            sleep 2
+          done
+          echo "Elasticsearch failed to start"
+          docker logs elasticsearch
+          exit 1
+
+      - name: Wait for MinIO
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live > /dev/null; then
+              echo "MinIO is ready"
+              exit 0
+            fi
+            echo "Waiting for MinIO... ($i/30)"
+            sleep 1
+          done
+          echo "MinIO failed to start"
+          docker logs minio
+          exit 1
+
+      - name: Initialize Elasticsearch indices
+        run: |
+          echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
+          echo 'API_TOKEN_SECRET = "ci-secret"' >> udata.cfg
+          uv run udata search init-es
+
+      - name: Run tests
+        run: |
+          mkdir -p reports/python
+          uv run inv test --report --ci
+
+      - name: Store test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reports-py${{ matrix.python-version }}-es${{ matrix.elasticsearch-version }}
+          path: reports/
+
+  dist:
+    needs: python
+    runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.version.outputs.release-version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # setuptools_scm derives the version from the tag history
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen
+          uv pip install setuptools-scm
+
+      - name: Save and show RELEASE_VERSION
+        id: version
+        run: |
+          # derive from setuptools_scm or base version + build number
+          RELEASE_VERSION=$(uv run python -m setuptools_scm)
+
+          echo "release-version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_VERSION is $RELEASE_VERSION"
+
+      - name: Build a distributable package as a wheel release
+        run: uv run inv pydist
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: dist
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+
+      - name: Publish on PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
+        run: uv publish dist/*.whl
+
+  create-sentry-release:
+    # The dev environment is deployed by polling PyPI, so the deploy only
+    # becomes true once the wheel is published
+    needs: [dist, publish]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Sentry release
+        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_URL: https://errors.data.gouv.fr
+          SENTRY_ORG: sentry
+        with:
+          release: ${{ needs.dist.outputs.release-version }}
+          projects: datagouv
+          environment: ${{ env.DEPLOY_ENV }}
+          # Commit association requires the GitHub integration on the Sentry
+          # instance, and defaults to "auto" which would fail without it
+          set_commits: skip
