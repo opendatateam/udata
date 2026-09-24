@@ -17,8 +17,6 @@ permissions:
 env:
   # Python version used to build and publish the distribution
   PYTHON_VERSION: "3.11"
-  # Environment reported to Sentry when a release is deployed
-  DEPLOY_ENV: dev
 
 jobs:
   python:
@@ -124,8 +122,6 @@ jobs:
   dist:
     needs: python
     runs-on: ubuntu-latest
-    outputs:
-      release-version: ${{ steps.version.outputs.release-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -138,18 +134,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: |
-          uv sync --frozen
-          uv pip install setuptools-scm
-
-      - name: Save and show RELEASE_VERSION
-        id: version
-        run: |
-          # derive from setuptools_scm or base version + build number
-          RELEASE_VERSION=$(uv run python -m setuptools_scm)
-
-          echo "release-version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "RELEASE_VERSION is $RELEASE_VERSION"
+        run: uv sync --frozen
 
       - name: Build a distributable package as a wheel release
         run: uv run inv pydist
@@ -175,24 +160,3 @@ jobs:
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
         run: uv publish dist/*.whl
-
-  create-sentry-release:
-    # The dev environment is deployed by polling PyPI, so the deploy only
-    # becomes true once the wheel is published
-    needs: [dist, publish]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Sentry release
-        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_URL: https://errors.data.gouv.fr
-          SENTRY_ORG: sentry
-        with:
-          release: ${{ needs.dist.outputs.release-version }}
-          projects: datagouv
-          environment: ${{ env.DEPLOY_ENV }}
-          # Commit association requires the GitHub integration on the Sentry
-          # instance, and defaults to "auto" which would fail without it
-          set_commits: skip
