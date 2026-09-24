@@ -149,13 +149,13 @@ def beat(ctx, loglevel="info"):
     ctx.run("celery -A udata.worker beat -l %s" % loglevel)
 
 
-@task(clean, i18nc, default=True)
+@task(clean, default=True)
 def dist(ctx):
     """Package for distribution"""
     perform_dist(ctx)
 
 
-@task(i18nc)
+@task
 def pydist(ctx):
     """Perform python packaging (without compiling assets)"""
     perform_dist(ctx)
