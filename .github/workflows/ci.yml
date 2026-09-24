@@ -54,26 +54,39 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+      s3:
+        image: rustfs/rustfs:1.0.0
+        env:
+          RUSTFS_ACCESS_KEY: udata
+          RUSTFS_SECRET_KEY: udata-secret
+        ports:
+          - 9000:9000
+        # The image declares no healthcheck, without one the job would not
+        # wait for the server to be up
+        options: >-
+          --health-cmd "curl -sf http://localhost:9000/health"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+      elasticsearch:
+        image: elasticsearch:${{ matrix.elasticsearch-version }}
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          action.destructive_requires_name: "false"
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        # The analysis-icu plugin is not bundled with the image
+        command: >-
+          bash -c "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -sf 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s'"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # Started by hand rather than declared as services: both images need a
-      # custom command, which `services:` cannot override. Started before the
-      # dependency install so Elasticsearch boots while uv syncs.
-      - name: Start Elasticsearch and MinIO
-        run: |
-          docker run -d --name elasticsearch -p 9200:9200 \
-            -e discovery.type=single-node \
-            -e xpack.security.enabled=false \
-            -e action.destructive_requires_name=false \
-            -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
-            elasticsearch:${{ matrix.elasticsearch-version }} \
-            bash -c "elasticsearch-plugin install --batch analysis-icu && /usr/local/bin/docker-entrypoint.sh eswrapper"
-          # MinIO images are no longer published on Docker Hub, quay.io is the only registry left
-          docker run -d --name minio -p 9000:9000 \
-            -e MINIO_ROOT_USER=udata \
-            -e MINIO_ROOT_PASSWORD=udata-secret \
-            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z server /data
 
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
@@ -89,35 +102,6 @@ jobs:
         run: |
           uv run ruff check --extend-select I .
           uv run ruff format --check .
-
-      - name: Wait for Elasticsearch
-        run: |
-          for i in $(seq 1 60); do
-            status=$(curl -s http://localhost:9200/_cluster/health 2>/dev/null | jq -r '.status' 2>/dev/null || true)
-            if [ "$status" = "green" ] || [ "$status" = "yellow" ]; then
-              echo "Elasticsearch is ready (status: $status)"
-              exit 0
-            fi
-            echo "Waiting for Elasticsearch... ($i/60) - status: $status"
-            sleep 2
-          done
-          echo "Elasticsearch failed to start"
-          docker logs elasticsearch
-          exit 1
-
-      - name: Wait for MinIO
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:9000/minio/health/live > /dev/null; then
-              echo "MinIO is ready"
-              exit 0
-            fi
-            echo "Waiting for MinIO... ($i/30)"
-            sleep 1
-          done
-          echo "MinIO failed to start"
-          docker logs minio
-          exit 1
 
       - name: Initialize Elasticsearch indices
         run: |
