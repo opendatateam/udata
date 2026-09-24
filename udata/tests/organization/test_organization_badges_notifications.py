@@ -9,6 +9,7 @@ from udata.core.organization.constants import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.core.organization.notifications import BADGE_NOTIFICATION_TYPES
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.models import Notification
 from udata.tests.api import PytestOnlyAPITestCase
@@ -48,7 +49,7 @@ class NotifyBadgeTest(PytestOnlyAPITestCase):
         for notification in notifications:
             assert notification.details.organization.id == organization.id
             assert notification.details.organization.name == organization.name
-            assert notification.details.kind == badge_type
+            assert notification.type == BADGE_NOTIFICATION_TYPES[badge_type]
 
     @pytest.mark.parametrize(
         "badge_type", [CERTIFIED, PUBLIC_SERVICE, LOCAL_AUTHORITY, COMPANY, ASSOCIATION]
@@ -72,5 +73,7 @@ class NotifyBadgeTest(PytestOnlyAPITestCase):
         assert notification is not None
         assert notification.details.organization.id == organization.id
         assert notification.details.organization.name == organization.name
+        assert notification.type == BADGE_NOTIFICATION_TYPES[badge_type]
+        # Transitional: still written for the front, which reads it instead of `type`
         assert notification.details.kind == badge_type
         assert notification.user == user

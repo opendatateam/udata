@@ -9,6 +9,7 @@ import click
 
 from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -39,7 +40,9 @@ def migrate(db):
                         for user in recipients:
                             notification = Notification(
                                 user=user,
+                                type=NotificationType.DISCUSSION_COMMENT,
                                 details=DiscussionNotificationDetails(
+                                    # Superseded by `type`, kept until the front reads it
                                     status=DiscussionStatus.NEW_COMMENT,
                                     message_id=str(last_comment.id),
                                     discussion=discussion,
@@ -54,7 +57,9 @@ def migrate(db):
                         for user in recipients:
                             notification = Notification(
                                 user=user,
+                                type=NotificationType.DISCUSSION_NEW,
                                 details=DiscussionNotificationDetails(
+                                    # Superseded by `type`, kept until the front reads it
                                     status=DiscussionStatus.NEW_DISCUSSION,
                                     discussion=discussion,
                                 ),

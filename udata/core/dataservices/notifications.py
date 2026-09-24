@@ -8,6 +8,8 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
 from udata.core.owned import get_responsible_users
+from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
 
@@ -32,23 +34,32 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
     )
 
 
+class DataserviceCreated(NotificationEvent):
+    """One event per exposed dataset: each set of dataset owners hears about their own."""
+
+    type = NotificationType.DATASERVICE_CREATED
+
+    def __init__(self, dataservice: Dataservice, dataset: Dataset):
+        self.dataservice = dataservice
+        self.dataset = dataset
+
+    @property
+    def occurred_at(self):
+        return self.dataservice.created_at
+
+    def recipients(self):
+        return [user for user in get_responsible_users(self.dataset) if user]
+
+    def via_app(self, recipient):
+        return DataserviceCreatedNotificationDetails(
+            dataservice=self.dataservice, dataset=self.dataset
+        )
+
+
 @Dataservice.on_create.connect
 def on_dataservice_created(dataservice, **kwargs):
-    """Create notifications when a dataservice is created"""
-    from udata.features.notifications.models import Notification
-
     for dataset in dataservice.datasets:
-        for owner in get_responsible_users(dataset):
-            if owner:
-                notification = Notification(
-                    user=owner,
-                    details=DataserviceCreatedNotificationDetails(
-                        dataservice=dataservice,
-                        dataset=dataset,
-                    ),
-                )
-                notification.created_at = dataservice.created_at
-                notification.save()
+        DataserviceCreated(dataservice, dataset).dispatch()
 
 
 @Dataservice.on_delete.connect

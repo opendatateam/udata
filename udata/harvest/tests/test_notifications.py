@@ -1,5 +1,6 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.harvest.models import VALIDATION_ACCEPTED, VALIDATION_PENDING, VALIDATION_REFUSED
 from udata.harvest.notifications import (
@@ -41,6 +42,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert admin1_notifications.count() == 1
         assert isinstance(admin1_notifications[0].details, ValidateHarvesterNotificationDetails)
         assert admin1_notifications[0].details.source == source
+        assert admin1_notifications[0].type == NotificationType.HARVEST_SOURCE_PENDING
+        # Transitional: still written for the front, which reads it instead of `type`
         assert admin1_notifications[0].details.status == VALIDATION_PENDING
 
         admin2_notifications = Notification.objects(user=admin2)
@@ -69,6 +72,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.source == source
+        assert notifications[0].type == NotificationType.HARVEST_SOURCE_ACCEPTED
+        # Transitional: still written for the front, which reads it instead of `type`
         assert notifications[0].details.status == VALIDATION_ACCEPTED
 
     def test_validate_source_creates_notification_for_org_admins(self):
@@ -87,6 +92,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Org admin should receive notification
         admin_notifications = Notification.objects(user=org_admin)
         assert admin_notifications.count() == 1
+        assert admin_notifications[0].type == NotificationType.HARVEST_SOURCE_ACCEPTED
+        # Transitional: still written for the front, which reads it instead of `type`
         assert admin_notifications[0].details.status == VALIDATION_ACCEPTED
 
         # Org editor should not receive notification
@@ -103,6 +110,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert notifications.count() == 1
         assert isinstance(notifications[0].details, ValidateHarvesterNotificationDetails)
         assert notifications[0].details.source == source
+        assert notifications[0].type == NotificationType.HARVEST_SOURCE_REFUSED
+        # Transitional: still written for the front, which reads it instead of `type`
         assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_refuse_source_creates_notification_for_org_admins(self):
@@ -114,6 +123,8 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
         notifications = Notification.objects(user=org_admin)
         assert notifications.count() == 1
+        assert notifications[0].type == NotificationType.HARVEST_SOURCE_REFUSED
+        # Transitional: still written for the front, which reads it instead of `type`
         assert notifications[0].details.status == VALIDATION_REFUSED
 
     def test_validate_source_handles_existing_pending_notifications(self):
@@ -124,16 +135,17 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Create a VALIDATION_PENDING notification manually
         pending_notification = Notification(
             user=owner,
-            details=ValidateHarvesterNotificationDetails(
-                source=source,
-                status=VALIDATION_PENDING,
-            ),
+            type=NotificationType.HARVEST_SOURCE_PENDING,
+            details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
 
         # Verify the notification exists and is not handled
         assert Notification.objects(user=owner, handled_at=None).count() == 1
-        assert Notification.objects(user=owner, details__status=VALIDATION_PENDING).count() == 1
+        assert (
+            Notification.objects(user=owner, type=NotificationType.HARVEST_SOURCE_PENDING).count()
+            == 1
+        )
 
         # Validate the source
         actions.validate_source(source)
@@ -141,11 +153,11 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Check that the pending notification is now marked as handled
         handled_notifications = Notification.objects(user=owner, handled_at__exists=True)
         assert handled_notifications.count() == 1
-        assert handled_notifications[0].details.status == VALIDATION_PENDING
+        assert handled_notifications[0].type == NotificationType.HARVEST_SOURCE_PENDING
 
         # Check that a new VALIDATION_ACCEPTED notification was created
         accepted_notifications = Notification.objects(
-            user=owner, details__status=VALIDATION_ACCEPTED
+            user=owner, type=NotificationType.HARVEST_SOURCE_ACCEPTED
         )
         assert accepted_notifications.count() == 1
 
@@ -157,16 +169,17 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Create a VALIDATION_PENDING notification manually
         pending_notification = Notification(
             user=owner,
-            details=ValidateHarvesterNotificationDetails(
-                source=source,
-                status=VALIDATION_PENDING,
-            ),
+            type=NotificationType.HARVEST_SOURCE_PENDING,
+            details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
 
         # Verify the notification exists and is not handled
         assert Notification.objects(user=owner, handled_at=None).count() == 1
-        assert Notification.objects(user=owner, details__status=VALIDATION_PENDING).count() == 1
+        assert (
+            Notification.objects(user=owner, type=NotificationType.HARVEST_SOURCE_PENDING).count()
+            == 1
+        )
 
         # Refuse the source
         actions.reject_source(source, comment="Invalid source")
@@ -174,10 +187,12 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Check that the pending notification is now marked as handled
         handled_notifications = Notification.objects(user=owner, handled_at__exists=True)
         assert handled_notifications.count() == 1
-        assert handled_notifications[0].details.status == VALIDATION_PENDING
+        assert handled_notifications[0].type == NotificationType.HARVEST_SOURCE_PENDING
 
         # Check that a new VALIDATION_REFUSED notification was created
-        refused_notifications = Notification.objects(user=owner, details__status=VALIDATION_REFUSED)
+        refused_notifications = Notification.objects(
+            user=owner, type=NotificationType.HARVEST_SOURCE_REFUSED
+        )
         assert refused_notifications.count() == 1
 
     def test_validate_source_with_org_handles_existing_pending_notifications(self):
@@ -189,16 +204,19 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Create a VALIDATION_PENDING notification manually
         pending_notification = Notification(
             user=org_admin,
-            details=ValidateHarvesterNotificationDetails(
-                source=source,
-                status=VALIDATION_PENDING,
-            ),
+            type=NotificationType.HARVEST_SOURCE_PENDING,
+            details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
 
         # Verify the notification exists and is not handled
         assert Notification.objects(user=org_admin, handled_at=None).count() == 1
-        assert Notification.objects(user=org_admin, details__status=VALIDATION_PENDING).count() == 1
+        assert (
+            Notification.objects(
+                user=org_admin, type=NotificationType.HARVEST_SOURCE_PENDING
+            ).count()
+            == 1
+        )
 
         # Validate the source
         actions.validate_source(source)
@@ -206,11 +224,11 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Check that the pending notification is now marked as handled
         handled_notifications = Notification.objects(user=org_admin, handled_at__exists=True)
         assert handled_notifications.count() == 1
-        assert handled_notifications[0].details.status == VALIDATION_PENDING
+        assert handled_notifications[0].type == NotificationType.HARVEST_SOURCE_PENDING
 
         # Check that a new VALIDATION_ACCEPTED notification was created
         accepted_notifications = Notification.objects(
-            user=org_admin, details__status=VALIDATION_ACCEPTED
+            user=org_admin, type=NotificationType.HARVEST_SOURCE_ACCEPTED
         )
         assert accepted_notifications.count() == 1
 
@@ -223,16 +241,19 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Create a VALIDATION_PENDING notification manually
         pending_notification = Notification(
             user=org_admin,
-            details=ValidateHarvesterNotificationDetails(
-                source=source,
-                status=VALIDATION_PENDING,
-            ),
+            type=NotificationType.HARVEST_SOURCE_PENDING,
+            details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
 
         # Verify the notification exists and is not handled
         assert Notification.objects(user=org_admin, handled_at=None).count() == 1
-        assert Notification.objects(user=org_admin, details__status=VALIDATION_PENDING).count() == 1
+        assert (
+            Notification.objects(
+                user=org_admin, type=NotificationType.HARVEST_SOURCE_PENDING
+            ).count()
+            == 1
+        )
 
         # Refuse the source
         actions.reject_source(source, comment="Invalid source")
@@ -240,10 +261,10 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Check that the pending notification is now marked as handled
         handled_notifications = Notification.objects(user=org_admin, handled_at__exists=True)
         assert handled_notifications.count() == 1
-        assert handled_notifications[0].details.status == VALIDATION_PENDING
+        assert handled_notifications[0].type == NotificationType.HARVEST_SOURCE_PENDING
 
         # Check that a new VALIDATION_REFUSED notification was created
         refused_notifications = Notification.objects(
-            user=org_admin, details__status=VALIDATION_REFUSED
+            user=org_admin, type=NotificationType.HARVEST_SOURCE_REFUSED
         )
         assert refused_notifications.count() == 1

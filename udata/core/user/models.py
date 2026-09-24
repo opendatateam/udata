@@ -562,7 +562,7 @@ post_save.connect(SpamMixin.post_save, sender=User)
 def match_email_invitations(sender, **kwargs):
     """Match pending email invitations when user registers."""
     from udata.core.organization.models import Organization
-    from udata.core.organization.notifications import _create_membership_notification
+    from udata.core.organization.notifications import MembershipInvitationMatched
 
     user = sender
     for org in Organization.objects(
@@ -584,7 +584,7 @@ def match_email_invitations(sender, **kwargs):
         if modified:
             org.save()
             for req in matched_requests:
-                _create_membership_notification(req, org, user)
+                MembershipInvitationMatched(org, req).dispatch()
 
 
 User.on_create.connect(match_email_invitations)

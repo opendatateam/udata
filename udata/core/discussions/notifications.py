@@ -5,10 +5,14 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import EnumField, ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
+from udata.core.discussions import mails
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
+from udata.core.user.models import User
 from udata.features.notifications.actions import notifier
+from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +23,17 @@ class DiscussionStatus(StrEnum):
     CLOSED = auto()
 
 
+# Superseded by `Notification.type`, kept until the front reads the type instead.
+STATUSES_BY_TYPE = {
+    NotificationType.DISCUSSION_NEW: DiscussionStatus.NEW_DISCUSSION,
+    NotificationType.DISCUSSION_COMMENT: DiscussionStatus.NEW_COMMENT,
+    NotificationType.DISCUSSION_CLOSED: DiscussionStatus.CLOSED,
+}
+
+
 @generate_fields()
 class DiscussionNotificationDetails(EmbeddedDocument):
+    # Superseded by `Notification.type`, kept until the front reads the type instead.
     status = field(
         EnumField(DiscussionStatus),
         readonly=True,
@@ -42,6 +55,90 @@ class DiscussionNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
+
+
+class DiscussionEvent(NotificationEvent):
+    """Everyone who took part in the discussion, plus the people responsible for its
+    subject, minus whoever triggered the event."""
+
+    def __init__(self, discussion: Discussion):
+        self.discussion = discussion
+
+    @property
+    def sender(self) -> User:
+        """Whoever triggered the event, and therefore does not need to hear about it."""
+        raise NotImplementedError
+
+    def recipients(self):
+        return self.discussion.owner_recipients(sender=self.sender)
+
+    def via_app(self, recipient):
+        return DiscussionNotificationDetails(
+            discussion=self.discussion,
+            status=STATUSES_BY_TYPE[self.type],
+        )
+
+
+class NewDiscussion(DiscussionEvent):
+    type = NotificationType.DISCUSSION_NEW
+
+    @property
+    def sender(self):
+        return self.discussion.user
+
+    @property
+    def occurred_at(self):
+        return self.discussion.created
+
+    def via_mail(self, recipient):
+        return mails.new_discussion(self.discussion, self.discussion.notification_url)
+
+
+class NewDiscussionComment(DiscussionEvent):
+    type = NotificationType.DISCUSSION_COMMENT
+
+    def __init__(self, discussion: Discussion, message: Message):
+        super().__init__(discussion)
+        self.message = message
+
+    @property
+    def sender(self):
+        return self.message.posted_by
+
+    @property
+    def occurred_at(self):
+        return self.message.posted_on
+
+    def via_app(self, recipient):
+        details = super().via_app(recipient)
+        details.message_id = str(self.message.id)
+        return details
+
+    def via_mail(self, recipient):
+        return mails.new_discussion_comment(
+            self.discussion, self.message, self.discussion.notification_url
+        )
+
+
+class DiscussionClosed(DiscussionEvent):
+    type = NotificationType.DISCUSSION_CLOSED
+
+    def __init__(self, discussion: Discussion, message: Message | None):
+        super().__init__(discussion)
+        self.message = message
+
+    @property
+    def sender(self):
+        return self.discussion.closed_by
+
+    @property
+    def occurred_at(self):
+        return self.discussion.closed
+
+    def via_mail(self, recipient):
+        return mails.discussion_closed(
+            self.discussion, self.message, self.discussion.notification_url
+        )
 
 
 @notifier("discussion")
