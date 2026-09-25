@@ -691,6 +691,13 @@ class Dataset(
     )
     deleted = field(DateTimeField(), auditable=False)
     archived = field(DateTimeField())
+    doi = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The DOI minted for this dataset, set by the DOI endpoint. A dataset that "
+        "has one can no longer be deleted, only archived.",
+    )
 
     def __str__(self):
         return self.title or ""
@@ -786,6 +793,21 @@ class Dataset(
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        if self.doi:
+            # A DOI is permanent and has to keep resolving to a public page. Archiving is the
+            # way out, not deletion nor unpublishing. Enforced here rather than in the delete
+            # endpoint because `deleted` is also written by the dataset form and by the
+            # harvester.
+            if self.deleted:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be deleted, it can only be archived"),
+                    field="deleted",
+                )
+            if self.private:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be made private"), field="private"
+                )
 
         self.last_update = self.compute_last_update()
 

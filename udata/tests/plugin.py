@@ -30,6 +30,19 @@ def rmock():
 
 
 @pytest.fixture
+def datacite(app, rmock):
+    """An in-memory DataCite, wired behind every call to the configured platform."""
+    import re
+
+    from udata.tests.fakes import DataCiteFake
+
+    fake = DataCiteFake()
+    platform_uri = app.config["DOI_PLATFORM_URI"]
+    rmock.put(re.compile(f"^{re.escape(platform_uri)}/dois/"), json=fake.handle_put)
+    return fake
+
+
+@pytest.fixture
 def no_ambient_proxy(monkeypatch):
     """Drop the proxy settings exported by the machine.
 
