@@ -89,6 +89,39 @@ resource_harvest_fields = api.model(
     },
 )
 
+dataset_geopf_fields = api.model(
+    "GeopfDatasetMetadata",
+    {
+        "fiche_url": fields.String(
+            attribute="push.fiche_url",
+            description="Public Géoplateforme fiche (dashboard) url, once pushed",
+            allow_null=True,
+            readonly=True,
+        ),
+    },
+)
+
+resource_geopf_fields = api.model(
+    "GeopfResourceMetadata",
+    {
+        "push_status": fields.String(
+            attribute="push.status",
+            description="Push status to Géoplateforme, if this resource has ever been pushed",
+            enum=["pending", "done", "error", "timeout"],
+            allow_null=True,
+            readonly=True,
+        ),
+        "offering_id": fields.String(
+            attribute="offering.id",
+            description=(
+                "Géoplateforme offering id, if this resource was created from a geopf offering pull"
+            ),
+            allow_null=True,
+            readonly=True,
+        ),
+    },
+)
+
 license_fields = api.model(
     "License",
     {
@@ -166,6 +199,13 @@ resource_fields = api.model(
             allow_null=True,
             readonly=True,
             description="Harvest attributes metadata information",
+            skip_none=True,
+        ),
+        "geopf": fields.Nested(
+            resource_geopf_fields,
+            allow_null=True,
+            readonly=True,
+            description="Géoplateforme sync status metadata",
             skip_none=True,
         ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
@@ -286,6 +326,7 @@ DEFAULT_MASK = ",".join(
         "frequency_date",
         "extras",
         "harvest",
+        "geopf",
         "metrics",
         "organization",
         "owner",
@@ -384,6 +425,13 @@ dataset_fields = api.model(
             readonly=True,
             allow_null=True,
             description="Dataset harvest metadata attributes",
+            skip_none=True,
+        ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
             skip_none=True,
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
