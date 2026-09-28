@@ -2,6 +2,8 @@ import logging
 from datetime import UTC, datetime
 
 from blinker import Signal
+from bson import DBRef, ObjectId
+from bson.son import SON
 from flask import g
 from mongoengine import Q
 from mongoengine.base import TopLevelDocumentMetaclass
@@ -36,6 +38,20 @@ _registered_activities = {}
 # `HarvestSource` and `ApiToken` live in modules that import the activity machinery
 # back, and a `GenericReferenceField` resolves the names from the document registry.
 ACTOR_TYPES = ("User", "HarvestSource", "ApiToken")
+
+
+class ActorField(GenericReferenceField):
+    """Also read the actors stored before `actor` became a generic reference.
+
+    It was a `ReferenceField("User")`, stored as a bare user id. The migration rewrites
+    them, but the ones it has not reached yet and the ones written by workers still on
+    the previous code stay in that format.
+    """
+
+    def to_python(self, value):
+        if isinstance(value, ObjectId):
+            return SON((("_cls", "User"), ("_ref", DBRef(User._get_collection_name(), value))))
+        return value
 
 
 class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
@@ -123,7 +139,7 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
     # Every field is read-only: activities are emitted by signals, never written through
     # the API.
     actor = field(
-        GenericReferenceField(choices=ACTOR_TYPES, required=True),
+        ActorField(choices=ACTOR_TYPES, required=True),
         readonly=True,
         description="Who performed the action",
     )

@@ -147,6 +147,21 @@ class ActivityAPITest(APITestCase):
             "class": "HarvestSource",
         }
 
+    def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
+        """An actor still stored in the pre-generic-reference format is read as a user.
+
+        Those are left by workers on the previous code, and by the ones the migration
+        has not reached yet: they must not break the whole page.
+        """
+        user = UserFactory()
+        activity = FakeDatasetActivity.objects.create(actor=user, related_to=DatasetFactory())
+        Activity._get_collection().update_one({"_id": activity.id}, {"$set": {"actor": user.id}})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"]["id"] == str(user.id)
+        assert response.json["data"][0]["actor"]["class"] == "User"
+
     def test_activity_api_list_filtered_by_unknown_user(self) -> None:
         """An id matching no user matches no activity."""
         FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
