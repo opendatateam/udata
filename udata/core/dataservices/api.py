@@ -35,7 +35,11 @@ dataservice_suggestion_fields = api.model(
         "title": fields.String(description="The dataservice title", readonly=True),
         "acronym": fields.String(description="An optional dataservice acronym", readonly=True),
         "slug": fields.String(description="The dataservice permalink string", readonly=True),
-        "page": fields.String(description="The dataservice web page URL", readonly=True),
+        "page": fields.String(
+            description="The dataservice web page URL",
+            attribute=lambda d: d.self_web_url(),
+            readonly=True,
+        ),
     },
 )
 
@@ -123,16 +127,7 @@ class DataserviceSuggestAPI(API):
         dataservices = Dataservice.objects.visible().filter(
             Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"])
         )
-        return [
-            {
-                "id": dataservice.id,
-                "title": dataservice.title,
-                "acronym": dataservice.acronym,
-                "slug": dataservice.slug,
-                "page": dataservice.self_web_url(),
-            }
-            for dataservice in dataservices.order_by(SUGGEST_SORTING).limit(args["size"])
-        ]
+        return list(dataservices.order_by(SUGGEST_SORTING).limit(args["size"]))
 
 
 dataservice_delete_parser = add_send_legal_notice_argument(api.parser())
