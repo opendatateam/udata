@@ -43,20 +43,6 @@ def list_sources(owner=None, deleted=False):
     return list(sources)
 
 
-def get_job(ident, *, with_items=True):
-    """Get an harvest job given its ID.
-
-    The heavy `data` blob is never serialized by the read endpoints, so it's
-    always excluded. `with_items=False` additionally drops the embedded items,
-    for routes that expose them only as a counters link and never load or
-    dereference them.
-    """
-    qs = HarvestJob.objects.exclude("data")
-    if not with_items:
-        qs = qs.exclude("items")
-    return qs.get(id=ident)
-
-
 def validate_source(source: HarvestSource, comment=None):
     """Validate a source for automatic harvesting"""
     source.validation.on = datetime.now(UTC)
@@ -107,15 +93,22 @@ def clean_source(source: HarvestSource):
 
 def purge_sources():
     """Permanently remove sources flagged as deleted"""
-    sources = HarvestSource.objects(deleted__exists=True)
+    # Archiving saves each object one by one (signals, reindexing…), so a source with many
+    # datasets keeps its cursors idle way past the 10 minutes MongoDB waits before killing
+    # them: without `timeout(False)` the whole job dies on a `CursorNotFound`.
+    sources = HarvestSource.objects(deleted__exists=True).no_cache().timeout(False)
     count = sources.count()
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
-        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        datasets = (
+            Dataset.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
+        )
         for dataset in datasets:
             archive_harvested_dataset(dataset, reason="harvester-deleted", dryrun=False)
-        dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
+        dataservices = (
+            Dataservice.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
+        )
         for dataservice in dataservices:
             archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
 
@@ -136,8 +129,11 @@ def purge_jobs():
     retention = current_app.config["HARVEST_JOBS_RETENTION_DAYS"]
     expiration = datetime.now(UTC) - timedelta(days=retention)
 
-    jobs_with_external_files = HarvestJob.objects(
-        data__filename__exists=True, created__lt=expiration
+    # One remote deletion per job, so the same cursor timeout as in `purge_sources` applies here.
+    jobs_with_external_files = (
+        HarvestJob.objects(data__filename__exists=True, created__lt=expiration)
+        .no_cache()
+        .timeout(False)
     )
     for job in jobs_with_external_files:
         bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")

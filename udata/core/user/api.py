@@ -522,6 +522,7 @@ contact_point_parser = ContactPoint.__index_parser__
 @ns.route("/<user:user>/contacts/", endpoint="user_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_user_contact_point")
+    @api.expect(contact_point_parser)
     @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, user):
         """List all user contact points"""

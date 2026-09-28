@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+>
+  <dcat:Catalog rdf:about="http://data.test.org/">
+    <dcterms:title>Sample DCAT Catalog</dcterms:title>
+    <dcat:service>
+      <dcat:DataService rdf:about="http://data.test.org/api/">
+        <dcterms:title>An API</dcterms:title>
+        <dcterms:identifier>http://data.test.org/api/</dcterms:identifier>
+        <dcat:endpointURL rdf:resource="http://data.test.org/api/" />
+        <!-- GeoDCAT-AP references a served dataset by URI only. This one is harvested from
+             the previous page, so its dcterms:identifier is absent from this graph. -->
+        <dcat:servesDataset>
+          <dcat:Dataset rdf:about="http://data.test.org/datasets/1" />
+        </dcat:servesDataset>
+        <!-- Same, but the dataset lives outside of this catalog: nothing to attach. -->
+        <dcat:servesDataset>
+          <dcat:Dataset rdf:about="http://elsewhere.example.org/datasets/42" />
+        </dcat:servesDataset>
+      </dcat:DataService>
+    </dcat:service>
+  </dcat:Catalog>
+</rdf:RDF>

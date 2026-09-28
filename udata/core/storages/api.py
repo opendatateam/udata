@@ -29,18 +29,59 @@ chunk_status_fields = api.model("UploadStatus", {"success": fields.Boolean, "err
 
 
 image_parser = api.parser()
-image_parser.add_argument("file", type=FileStorage, location="files", required=True)
-image_parser.add_argument("bbox", type=str, location="form")
+image_parser.add_argument(
+    "file", type=FileStorage, location="files", required=True, help="The image to upload"
+)
+image_parser.add_argument(
+    "bbox",
+    type=str,
+    location="form",
+    help="An optional crop box, as `left,upper,right,lower` pixel coordinates",
+)
 
 
 upload_parser = api.parser()
-upload_parser.add_argument("file", type=FileStorage, location="files")
-upload_parser.add_argument("uuid", type=str, location="form")
-upload_parser.add_argument("filename", type=str, location="form")
-upload_parser.add_argument("partindex", type=int, location="form")
-upload_parser.add_argument("partbyteoffset", type=int, location="form")
-upload_parser.add_argument("totalparts", type=int, location="form")
-upload_parser.add_argument("chunksize", type=int, location="form")
+upload_parser.add_argument(
+    "file",
+    type=FileStorage,
+    location="files",
+    help="The file to upload, or the part to upload when the file is sent in chunks. "
+    "Only the request assembling a chunked upload omits it.",
+)
+upload_parser.add_argument(
+    "uuid",
+    type=str,
+    location="form",
+    help="Chunked uploads only: an identifier chosen by the client, shared by every "
+    "request of the same upload",
+)
+upload_parser.add_argument(
+    "filename",
+    type=str,
+    location="form",
+    help="Chunked uploads only: the name of the assembled file. A single-request upload "
+    "takes it from the uploaded file itself.",
+)
+upload_parser.add_argument(
+    "partindex",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the zero-based index of the part being sent",
+)
+upload_parser.add_argument(
+    "totalparts",
+    type=int,
+    location="form",
+    help="The number of parts the file is split into. Above 1, the upload is chunked: "
+    "send each part, then a last request without `file` to assemble them.",
+)
+upload_parser.add_argument(
+    "chunksize",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the size in bytes of the part being sent, checked "
+    "against the received one",
+)
 
 
 class UploadStatus(Exception):
@@ -176,6 +217,27 @@ def handle_upload(storage, prefix=None):
     return infos
 
 
+def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
+    """Parse a crop box given by the client as `left,upper,right,lower` pixel coordinates"""
+    coordinates = raw.split(",")
+    if len(coordinates) != 4:
+        api.abort(400, "Invalid bounding box")
+    try:
+        # `float` accepts values that `int` then refuses, such as `nan` or `1e400`.
+        left, upper, right, lower = (int(float(coordinate)) for coordinate in coordinates)
+    except (ValueError, OverflowError):
+        api.abort(400, "Invalid bounding box")
+
+    width, height = image_size
+    # Pillow crops outside of the image instead of failing, padding the result: a box a
+    # few digits wider than the source is enough to allocate hundreds of megabytes, then
+    # to raise a decompression bomb error once past its pixel limit.
+    if not (0 <= left < right <= width and 0 <= upper < lower <= height):
+        api.abort(400, "Bounding box outside of the image")
+
+    return [left, upper, right, lower]
+
+
 def parse_uploaded_image(field):
     """Parse an uploaded image and save into a ImageField()"""
     args = image_parser.parse_args()
@@ -185,21 +247,21 @@ def parse_uploaded_image(field):
     # (an SVG announced as `image/png` for instance): decode the file to know what
     # it really is, otherwise Pillow raises further down and the request 500s.
     try:
-        image_format = Image.open(image).format
+        uploaded = Image.open(image)
     except UnidentifiedImageError:
-        image_format = None
+        api.abort(400, "Unsupported image format")
     except Image.DecompressionBombError:
         # A valid image whose header announces more pixels than Pillow accepts to decode.
         # A few dozen bytes are enough to declare a huge size, so this must be refused
         # here: every other decoding (resize, optimize, thumbnails) would raise too.
         api.abort(400, "Image is too large")
+    if uploaded.format not in IMAGES_FORMATS:
+        api.abort(400, "Unsupported image format")
+
+    bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
+
     # `Image.open` left the cursor right after the header it read. `field.save` may store
     # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
     # would silently truncate the stored file.
     image.seek(0)
-    if image_format not in IMAGES_FORMATS:
-        api.abort(400, "Unsupported image format")
-    bbox = args.get("bbox", None)
-    if bbox:
-        bbox = [int(float(c)) for c in bbox.split(",")]
     field.save(image, bbox=bbox)

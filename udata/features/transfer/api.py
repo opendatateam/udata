@@ -100,7 +100,11 @@ requests_parser.add_argument(
     "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
 )
 requests_parser.add_argument(
-    "subject_type", choices=TRANSFERABLE_SUBJECTS, type=str, help="", location="args"
+    "subject_type",
+    choices=TRANSFERABLE_SUBJECTS,
+    type=str,
+    help="Type of the transferred object",
+    location="args",
 )
 requests_parser.add_argument(
     "recipient", type=str, help="ID of user or organization", location="args"
@@ -108,8 +112,8 @@ requests_parser.add_argument(
 requests_parser.add_argument(
     "status",
     type=str,
-    choices=TRANSFER_STATUS.keys(),
-    help="ID of user or organization",
+    choices=list(TRANSFER_STATUS),
+    help="Status of the transfer request",
     location="args",
 )
 
@@ -148,6 +152,7 @@ def resolve_reference(data, field_name, allowed_classes):
 @ns.route("/", endpoint="transfers")
 class TransferRequestsAPI(API):
     @api.doc("list_transfers")
+    @api.expect(requests_parser)
     @api.marshal_list_with(transfer_fields)
     def get(self):
         args = requests_parser.parse_args()

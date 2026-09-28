@@ -5,6 +5,7 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.core.checks import only_creation
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
@@ -53,17 +54,6 @@ def ownership_filter(owner: Organization | User) -> dict:
     }
 
 
-def only_creation(_value, is_update, field, **_kwargs):
-    from udata.auth import admin_permission, current_user
-
-    # Super-admins can modify only creation fields
-    if current_user.is_authenticated and admin_permission:
-        return
-
-    if is_update:
-        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
-
-
 def check_owner_is_current_user(owner, **_kwargs):
     from udata.auth import admin_permission, current_user
 
@@ -79,6 +69,11 @@ def check_owner_is_current_user(owner, **_kwargs):
 def check_organization_is_valid_for_current_user(organization, **_kwargs):
     from udata.auth import current_user
     from udata.models import Organization
+
+    # An explicit null clears the producer, like `check_owner_is_current_user` above:
+    # there is no organization to look up, let alone to check permissions on.
+    if not organization:
+        return
 
     org = Organization.objects(id=organization.id).first()
     if org is None:

@@ -51,7 +51,10 @@ def backfill_remote_ids(db):
     left = 0
     for dataset in db.dataset.find({"harvest.backend": {"$in": CKAN_BACKENDS}}, {"resources": 1}):
         updates = {}
-        for index, resource in enumerate(dataset["resources"]):
+        # MongoEngine `$unset`s a list field when a save() brings it back to its empty default,
+        # so a dataset whose resources were all removed has no `resources` field at all, and a
+        # projection does not conjure one.
+        for index, resource in enumerate(dataset.get("resources") or []):
             harvest = resource.get("harvest")
             if not isinstance(harvest, dict):
                 # Only enrich harvest metadata that already exist. A resource without any was
