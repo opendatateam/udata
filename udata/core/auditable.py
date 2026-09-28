@@ -16,10 +16,8 @@ class Auditable(object):
     """
 
     def clean(self, **kwargs):
+        """Fetch the original values of the changed fields before the new ones overwrite them."""
         super().clean()
-        """
-        Fetch original document changed fields values before the new one erase it.
-        """
         changed_fields = self._get_changed_fields()
         if changed_fields:
             try:
