@@ -7,6 +7,7 @@ import pytest
 import requests
 from bson import ObjectId
 from flask import current_app
+from flask_login import login_user
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 from mongoengine.errors import ValidationError
@@ -509,7 +510,6 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
     def test_dataset_activities(self, app, mocker):
         # A user must be authenticated for activities to be emitted
-        from flask_login import login_user
 
         user = UserFactory()
 
@@ -559,7 +559,6 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         Copied rather than looked up on read: a removed resource is gone from the
         dataset, and a renamed one no longer carries the name it had back then.
         """
-        from flask_login import login_user
 
         user = UserFactory()
         with app.test_request_context():
@@ -590,7 +589,6 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
     def test_resource_update_activity_ignores_platform_maintained_fields(self, app):
         """`last_modified_internal` is rewritten on every update: it is not an edit."""
-        from flask_login import login_user
 
         user = UserFactory()
         with app.test_request_context():
