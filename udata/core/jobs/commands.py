@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from udata.commands import cli, echo, exit_with_error, white
+from udata.commands import cli, echo, exit_with_error, red, white
 from udata.tasks import celery, schedulables
 
 from .models import PeriodicTask
@@ -115,9 +115,8 @@ def unschedule(name, params):
     Ex:
         udata job unschedule my-job arg1 arg2 key1=value key2=value
     """
-    if name not in celery.tasks:
-        exit_with_error("Job %s not found", name)
-
+    # No check against `celery.tasks`: a job removed from the code must still be unschedulable,
+    # otherwise the beat keeps sending it to workers that discard it.
     args = [p for p in params if "=" not in p]
     kwargs = dict(p.split("=") for p in params if "=" in p)
     label = "Job {0}".format(job_label(name, args, kwargs))
@@ -136,12 +135,14 @@ def unschedule(name, params):
 def scheduled():
     """
     List scheduled jobs.
+
+    Jobs whose task no longer exists are flagged: they should be unscheduled.
     """
-    for job in sorted(schedulables(), key=lambda s: s.name):
-        for task in PeriodicTask.objects(task=job.name):
-            label = job_label(task.task, task.args, task.kwargs)
-            echo(
-                SCHEDULE_LINE.format(
-                    name=white(task.name), label=label, schedule=task.schedule_display
-                )
-            )
+    for task in PeriodicTask.objects.order_by("task"):
+        label = job_label(task.task, task.args, task.kwargs)
+        line = SCHEDULE_LINE.format(
+            name=white(task.name), label=label, schedule=task.schedule_display
+        )
+        if task.task not in celery.tasks:
+            line += " " + red("(unknown job)")
+        echo(line)

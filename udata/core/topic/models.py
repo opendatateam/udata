@@ -42,7 +42,7 @@ def check_title_or_element_required(value, obj, data, **_kwargs):
         )
 
 
-check_title_or_element_required.run_even_if_missing = True
+check_title_or_element_required.always_run = True
 
 
 class TopicQuerySet(OwnedQuerySet):

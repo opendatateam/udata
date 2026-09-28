@@ -7,7 +7,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.core.visualizations.factories import ChartFactory, FilterFactory
-from udata.core.visualizations.models import AndFilters, Chart
+from udata.core.visualizations.models import AndFilters, Chart, Filter, OrFilters
 from udata.tests.helpers import create_test_image
 
 from . import PytestOnlyAPITestCase
@@ -148,6 +148,76 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
         assert visualization.series[0].filters == filters
+
+    def test_visualization_api_create_or_filter(self):
+        """It should create a visualization with an OrFilters group"""
+        user = self.login()
+        filters = OrFilters(filters=[FilterFactory(), FilterFactory()])
+        chart = ChartFactory.build(owner=user, series__0__filters=filters)
+        chart.owner = str(user.id)
+        response = self.post(
+            url_for("api.visualizations"),
+            chart.to_dict(),
+        )
+        assert response.status_code == 201
+        assert Chart.objects.count() == 1
+
+        visualization = Chart.objects.first()
+        assert visualization.series[0].filters == filters
+
+        # GET should serialize the nested filter fields, not return empty dicts
+        response = self.get(url_for("api.visualization", visualization=visualization))
+        assert response.status_code == 200
+        filters_data = response.json["series"][0]["filters"]
+        assert filters_data["_cls"] == "OrFilters"
+        assert len(filters_data["filters"]) == 2
+        assert filters_data["filters"][0]["column"] == filters.filters[0].column
+
+    def test_visualization_api_create_nested_group_filters(self):
+        """AndFilters can contain OrFilters groups and vice versa"""
+        user = self.login()
+
+        def check_nested(filters, outer_type, inner_type):
+            chart = ChartFactory.build(owner=user, series__0__filters=filters)
+            chart.owner = str(user.id)
+            response = self.post(
+                url_for("api.visualizations"),
+                chart.to_dict(),
+            )
+            assert response.status_code == 201
+
+            visualization = Chart.objects.get(title=chart.title)
+            stored = visualization.series[0].filters
+            assert isinstance(stored, outer_type)
+            assert isinstance(stored.filters[0], Filter)
+            assert isinstance(stored.filters[1], inner_type)
+            assert len(stored.filters[1].filters) == 2
+
+            response = self.get(url_for("api.visualization", visualization=visualization))
+            assert response.status_code == 200
+            filters_data = response.json["series"][0]["filters"]
+            assert filters_data["filters"][1]["_cls"] == inner_type.__name__
+
+        check_nested(
+            AndFilters(
+                filters=[
+                    FilterFactory(),
+                    OrFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            AndFilters,
+            OrFilters,
+        )
+        check_nested(
+            OrFilters(
+                filters=[
+                    FilterFactory(),
+                    AndFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            OrFilters,
+            AndFilters,
+        )
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""

@@ -59,6 +59,21 @@ def harvest(organization):
 
 
 class DuplicateContactPointsMigrationTest(PytestOnlyDBTestCase):
+    @pytest.fixture(autouse=True)
+    def without_the_unique_index(self):
+        """The duplicates this migration removes are the reason the unique index on
+        `ContactPoint` cannot exist yet: the index is deployed once they are gone, never
+        before. Dropping it here sets up the state the migration actually runs in, rather
+        than a state the index makes unreachable.
+
+        Restored at the end: the test database keeps its indexes from one test to the next.
+        """
+        collection = ContactPoint._get_collection()
+        collection.drop_indexes()
+        yield
+        collection.delete_many({})
+        ContactPoint.ensure_indexes()
+
     def test_a_null_field_and_an_absent_one_are_the_same_duplicate(self):
         """The shape found in production: the contact point normalized by
         `2026-08-21-clean-nameless-contact-points` has no name at all, the one harvested

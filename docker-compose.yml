@@ -44,18 +44,19 @@ services:
           "
 
     storage:
-        image: minio/minio
+        image: rustfs/rustfs:1.0.0
         volumes:
-          - storage-data:/data
+          # Not the `storage-data` volume left by MinIO: it is owned by root and
+          # RustFS, which runs unprivileged, fails to start on it
+          - rustfs-data:/data
         expose:
           - "9000"
         ports:
           - "9000:9000"
           - "9001:9001"
         environment:
-          MINIO_ROOT_USER: udata
-          MINIO_ROOT_PASSWORD: udata-secret
-        command: server /data --console-address ":9001"
+          RUSTFS_ACCESS_KEY: udata
+          RUSTFS_SECRET_KEY: udata-secret
 
     mailpit:
         image: axllent/mailpit
@@ -70,4 +71,4 @@ volumes:
     db-data:
     broker-data:
     search-data:
-    storage-data:
+    rustfs-data:

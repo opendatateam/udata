@@ -11,7 +11,9 @@ from udata.core.reuse.models import Reuse
 
 
 class BlocWithTitleMixin:
-    title = field(StringField(required=True))
+    # Optional: a list bloc nested in an accordion item (or following a markdown bloc that
+    # already introduces it) would otherwise repeat the heading right above it.
+    title = field(StringField())
     subtitle = field(StringField())
 
 
@@ -92,10 +94,7 @@ class HeroBloc(Bloc):
 
 
 @generate_fields()
-class MarkdownBloc(Bloc):
-    # Not using BlocWithTitleMixin because title should be optional here
-    title = field(StringField())
-    subtitle = field(StringField())
+class MarkdownBloc(BlocWithTitleMixin, Bloc):
     content = field(
         StringField(required=True),
         markdown=True,

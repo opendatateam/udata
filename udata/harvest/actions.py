@@ -93,15 +93,22 @@ def clean_source(source: HarvestSource):
 
 def purge_sources():
     """Permanently remove sources flagged as deleted"""
-    sources = HarvestSource.objects(deleted__exists=True)
+    # Archiving saves each object one by one (signals, reindexing…), so a source with many
+    # datasets keeps its cursors idle way past the 10 minutes MongoDB waits before killing
+    # them: without `timeout(False)` the whole job dies on a `CursorNotFound`.
+    sources = HarvestSource.objects(deleted__exists=True).no_cache().timeout(False)
     count = sources.count()
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
-        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        datasets = (
+            Dataset.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
+        )
         for dataset in datasets:
             archive_harvested_dataset(dataset, reason="harvester-deleted", dryrun=False)
-        dataservices = Dataservice.objects.filter(harvest__source_id=str(source.id))
+        dataservices = (
+            Dataservice.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
+        )
         for dataservice in dataservices:
             archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
 
@@ -122,8 +129,11 @@ def purge_jobs():
     retention = current_app.config["HARVEST_JOBS_RETENTION_DAYS"]
     expiration = datetime.now(UTC) - timedelta(days=retention)
 
-    jobs_with_external_files = HarvestJob.objects(
-        data__filename__exists=True, created__lt=expiration
+    # One remote deletion per job, so the same cursor timeout as in `purge_sources` applies here.
+    jobs_with_external_files = (
+        HarvestJob.objects(data__filename__exists=True, created__lt=expiration)
+        .no_cache()
+        .timeout(False)
     )
     for job in jobs_with_external_files:
         bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")

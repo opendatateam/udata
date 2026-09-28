@@ -28,6 +28,7 @@ from udata.core.discussions.tasks import (
 from udata.core.linkable import Linkable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
+from udata.core.post.factories import PostFactory
 from udata.core.reports.constants import REASON_AUTO_SPAM, REASON_SPAM
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
@@ -244,6 +245,27 @@ class DiscussionsTest(APITestCase):
 
         discussion.reload()
         assert discussion.closed_by_organization == org
+
+    def test_close_discussion_on_a_post(self):
+        """A `Post` has no owner in the permission sense, only sysadmins manage it:
+        closing stays open to the discussion author, and to nobody else.
+        """
+        author = UserFactory()
+        post = PostFactory(owner=UserFactory())
+        discussion = DiscussionFactory(
+            subject=post,
+            user=author,
+            discussion=[Message(content="bla bla", posted_by=author)],
+        )
+
+        self.login(post.owner)
+        self.assert403(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
+
+        self.login(author)
+        self.assert200(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
+
+        discussion.reload()
+        assert discussion.closed is not None
 
     def test_write_endpoints_reject_a_non_object_payload(self):
         """A JSON body decoding to anything but an object must be a 400, not a 500."""
@@ -614,6 +636,31 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(len(response.json["data"]), len(open_discussions + closed_discussions))
+
+    def test_list_discussions_on_every_subject_class(self):
+        """Marshalling `permissions.close` reads the subject's ownership, which a `Post`
+        has no notion of: a single discussion on one used to 500 the whole listing.
+        """
+        factories = {
+            "Dataset": DatasetFactory,
+            "Dataservice": DataserviceFactory,
+            "Post": PostFactory,
+            "Reuse": ReuseFactory,
+            "Topic": TopicFactory,
+        }
+        assert set(factories) == set(DISCUSSION_SUBJECTS)
+
+        user = UserFactory()
+        for subject_factory in factories.values():
+            DiscussionFactory(
+                subject=subject_factory(),
+                user=user,
+                discussion=[Message(content=faker.sentence(), posted_by=user)],
+            )
+
+        response = self.get(url_for("api.discussions"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(DISCUSSION_SUBJECTS))
 
     def test_list_discussions_closed_filter(self):
         dataset = Dataset.objects.create(title="Test dataset")

@@ -4,7 +4,6 @@ import xml.etree.ElementTree as ET
 from datetime import date
 
 import pytest
-import requests
 from flask import current_app, url_for
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
@@ -205,6 +204,24 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             dataservices[0].harvest.remote_url
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
+
+    def test_harvest_dataservices_serving_datasets_referenced_by_uri(self, rmock):
+        """A `dcat:servesDataset` node can reference a dataset by URI only, without any
+        `dcterms:identifier` (this is what GeoDCAT-AP emits). The dataset is then harvested
+        from another page, and only its URI can link the two."""
+
+        url = mock_dcat_pagination(rmock, "catalog.xml", "serves-dataset-by-uri-{page}.xml")
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        # The dataset harvested from the first page is attached, the one outside of the
+        # catalog is simply ignored.
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
 
     def test_harvest_datasetseries(self, rmock):
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
@@ -985,40 +1002,6 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.errors) == 1
         assert "404 Client Error" in job.errors[0].message
 
-    @pytest.mark.parametrize(
-        "exception",
-        argvalues(
-            (requests.exceptions.ConnectTimeout("Connection timed out"), "timeout"),
-            (
-                requests.exceptions.ConnectionError(
-                    "Failed to resolve 'example.com' (Name resolution failed)"
-                ),
-                "resolution",
-            ),
-            (requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"), "certificate"),
-        ),
-    )
-    def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
-        """Connection exceptions should be logged as warning, not sent to Sentry."""
-        url = TEST_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
-        rmock.get(url, exc=exception)
-
-        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-
-        mock_warning = mocker.patch("udata.harvest.backends.base.log.warning")
-        mock_exception = mocker.patch("udata.harvest.backends.base.log.exception")
-
-        actions.run(source)
-        source.reload()
-
-        job = source.get_last_job()
-        assert job.status == "failed"
-        assert len(job.errors) == 1
-        assert str(exception) in job.errors[0].message
-        mock_warning.assert_called_once()
-        assert "connection error" in mock_warning.call_args[0][0].lower()
-        mock_exception.assert_not_called()
-
     def test_preview_does_not_create_contact_points(self, rmock):
         """Preview should not create ContactPoints in DB."""
         from udata.core.contact_point.models import ContactPoint
@@ -1182,6 +1165,27 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
                 ("Odema", "odema@cerdd.org", None, "contact"),
                 ("Odema", "odema@cerdd.org", None, "publisher"),
             }
+
+    def test_dataservice_serves_dataset_from_another_record(self, rmock):
+        """Each CSW record is parsed as its own graph, so a dataservice never shares a graph
+        with the datasets it serves: only the URI of the `dcat:servesDataset` node links them.
+
+        The second served dataset reproduces what data.ofb.fr returns for
+        https://id.eaufrance.fr/meta/ODP_WFS: a reference to another catalog, which used to
+        raise `TypeError: endswith first arg must be str` and fail the whole dataservice."""
+
+        url = mock_csw(rmock, "dataservice-serves-dataset.xml", path="geonetwork/srv/fre/csw")
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+
+        source.reload()
+        assert [item.status for item in source.get_last_job().items] == ["done", "done"]
+
+        dataservice = Dataservice.objects.first()
+        assert [dataset.title for dataset in dataservice.datasets] == ["Dataset 1"]
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(

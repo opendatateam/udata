@@ -29,18 +29,59 @@ chunk_status_fields = api.model("UploadStatus", {"success": fields.Boolean, "err
 
 
 image_parser = api.parser()
-image_parser.add_argument("file", type=FileStorage, location="files", required=True)
-image_parser.add_argument("bbox", type=str, location="form")
+image_parser.add_argument(
+    "file", type=FileStorage, location="files", required=True, help="The image to upload"
+)
+image_parser.add_argument(
+    "bbox",
+    type=str,
+    location="form",
+    help="An optional crop box, as `left,upper,right,lower` pixel coordinates",
+)
 
 
 upload_parser = api.parser()
-upload_parser.add_argument("file", type=FileStorage, location="files")
-upload_parser.add_argument("uuid", type=str, location="form")
-upload_parser.add_argument("filename", type=str, location="form")
-upload_parser.add_argument("partindex", type=int, location="form")
-upload_parser.add_argument("partbyteoffset", type=int, location="form")
-upload_parser.add_argument("totalparts", type=int, location="form")
-upload_parser.add_argument("chunksize", type=int, location="form")
+upload_parser.add_argument(
+    "file",
+    type=FileStorage,
+    location="files",
+    help="The file to upload, or the part to upload when the file is sent in chunks. "
+    "Only the request assembling a chunked upload omits it.",
+)
+upload_parser.add_argument(
+    "uuid",
+    type=str,
+    location="form",
+    help="Chunked uploads only: an identifier chosen by the client, shared by every "
+    "request of the same upload",
+)
+upload_parser.add_argument(
+    "filename",
+    type=str,
+    location="form",
+    help="Chunked uploads only: the name of the assembled file. A single-request upload "
+    "takes it from the uploaded file itself.",
+)
+upload_parser.add_argument(
+    "partindex",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the zero-based index of the part being sent",
+)
+upload_parser.add_argument(
+    "totalparts",
+    type=int,
+    location="form",
+    help="The number of parts the file is split into. Above 1, the upload is chunked: "
+    "send each part, then a last request without `file` to assemble them.",
+)
+upload_parser.add_argument(
+    "chunksize",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the size in bytes of the part being sent, checked "
+    "against the received one",
+)
 
 
 class UploadStatus(Exception):

@@ -1048,6 +1048,20 @@ class TopicElementsAPITest(APITestCase):
             "A topic element must have a title or an element."
         )
 
+    def test_add_element_with_explicitly_empty_fields(self):
+        """Spelling the fields out as empty must be rejected just like omitting them:
+        every value then equals its own default, which is not a reason to skip a check."""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic), [{"title": "", "element": None}]
+        )
+        assert response.status_code == 400
+        assert response.json["errors"][0]["element"][0] == _(
+            "A topic element must have a title or an element."
+        )
+        assert TopicElement.objects(topic=topic).count() == 0
+
     def test_add_element_ignores_arbitrary_topic_in_payload(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)

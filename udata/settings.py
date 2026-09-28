@@ -363,14 +363,6 @@ class Defaults(object):
     # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
     INSPIRE_SUPPORT = True
 
-    # Ignore some endpoint from API tracking
-    # By default ignore the 3 most called APIs
-    TRACKING_BLACKLIST = [
-        "api.notifications",
-        "api.check_dataset_resource",
-        "api.avatar",
-    ]
-
     DELETE_ME = True
 
     # Optimize uploaded images
