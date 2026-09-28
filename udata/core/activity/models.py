@@ -118,13 +118,6 @@ def filter_by_keys(base_query, values):
             "help": "Filter activities for that particular organization",
         },
         {
-            "key": "related_to",
-            "type": str,
-            "constraints": ["objectid"],
-            "query": lambda base_query, value: base_query.filter(related_to=value),
-            "help": "Filter activities for that particular object id (ex : reuse, dataset, etc.)",
-        },
-        {
             "key": "key",
             "type": str,
             "is_list": True,
@@ -155,6 +148,9 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
     related_to = field(
         ReferenceField(DomainModel, required=True),
         readonly=True,
+        filterable={
+            "help": "Filter activities for that particular object id (ex : reuse, dataset, etc.)",
+        },
         description="The activity target name",
     )
     created_at = field(
