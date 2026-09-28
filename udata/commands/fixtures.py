@@ -28,6 +28,7 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataservicesListBloc,
     DatasetsListBloc,
+    ExploreBloc,
     HeroBloc,
     LinkInBloc,
     LinksListBloc,
@@ -131,6 +132,7 @@ BLOC_CLASSES = {
     "LinksListBloc": LinksListBloc,
     "HeroBloc": HeroBloc,
     "MarkdownBloc": MarkdownBloc,
+    "ExploreBloc": ExploreBloc,
     "AccordionListBloc": AccordionListBloc,
 }
 

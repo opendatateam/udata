@@ -1,3 +1,5 @@
+import uuid
+
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
@@ -12,8 +14,10 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import get_dataset_by_resource_id
 from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
+from udata.mongo.errors import FieldValidationError
 
 
 class BlocWithTitleMixin:
@@ -107,12 +111,24 @@ class MarkdownBloc(BlocWithTitleMixin, Bloc):
     )
 
 
+def check_resource_exists(resource_id, field, **_kwargs):
+    try:
+        resource_id = uuid.UUID(str(resource_id))
+    except ValueError:
+        raise FieldValidationError(field=field, message=f"'{resource_id}' is not a valid UUID")
+    if not get_dataset_by_resource_id(resource_id):
+        raise FieldValidationError(field=field, message=f"Unknown resource '{resource_id}'")
+
+
 @generate_fields()
 class ExploreBloc(BlocWithTitleMixin, Bloc):
-    resource_id = field(UUIDField(required=True, binary=False))
+    resource_id = field(
+        UUIDField(required=True, binary=False),
+        checks=[check_resource_exists],
+    )
 
 
-BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc")
+BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc", "ExploreBloc")
 
 
 def check_no_recursive_blocs(blocs, **kwargs):

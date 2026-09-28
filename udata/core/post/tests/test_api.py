@@ -1,5 +1,6 @@
 from io import BytesIO
 from unittest import mock
+from uuid import uuid4
 
 from flask import url_for
 from mongoengine.context_managers import query_counter
@@ -522,6 +523,7 @@ class PostsAPITest(APITestCase):
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""
         datasets = DatasetFactory.create_batch(2)
+        resource_id = DatasetFactory(visible=True).resources[0].id
         self.login(AdminFactory())
         data = {
             "name": "Test blocs post",
@@ -531,15 +533,31 @@ class PostsAPITest(APITestCase):
                     "class": "DatasetsListBloc",
                     "title": "Featured datasets",
                     "datasets": [str(d.id) for d in datasets],
-                }
+                },
+                {"class": "ExploreBloc", "resource_id": str(resource_id)},
             ],
         }
         response = self.post(url_for("api.posts"), data)
         assert201(response)
         post = Post.objects.first()
         assert post.body_type == "blocs"
-        assert len(post.blocs) == 1
+        assert len(post.blocs) == 2
         assert post.blocs[0].title == "Featured datasets"
+        assert isinstance(post.blocs[1], ExploreBloc)
+        assert post.blocs[1].resource_id == resource_id
+
+    def test_post_api_create_with_explore_bloc_unknown_resource(self):
+        """An ExploreBloc must point to an existing resource"""
+        self.login(AdminFactory())
+        for resource_id in (str(uuid4()), "not-a-uuid"):
+            data = {
+                "name": "Test explore post",
+                "body_type": "blocs",
+                "blocs": [{"class": "ExploreBloc", "resource_id": resource_id}],
+            }
+            response = self.post(url_for("api.posts"), data)
+            assert400(response)
+        assert Post.objects.count() == 0
 
     def test_post_api_blocs_title_is_optional(self):
         """A list bloc nested under a heading that already names it needs no title of its own."""
@@ -612,34 +630,6 @@ class PostsAPITest(APITestCase):
         assert "id" in dataservice_json
         assert "title" in dataservice_json
         assert "datasets" not in dataservice_json
-
-    def test_post_api_create_with_explore_bloc(self):
-        """It should create a post with an ExploreBloc referencing a resource"""
-        dataset = DatasetFactory(visible=True)
-        resource_id = dataset.resources[0].id
-        self.login(AdminFactory())
-        data = {
-            "name": "Test explore post",
-            "body_type": "blocs",
-            "blocs": [
-                {
-                    "class": "ExploreBloc",
-                    "title": "Explore the data",
-                    "resource_id": str(resource_id),
-                }
-            ],
-        }
-        response = self.post(url_for("api.posts"), data)
-        assert201(response)
-        post = Post.objects.first()
-        assert len(post.blocs) == 1
-        assert isinstance(post.blocs[0], ExploreBloc)
-        assert post.blocs[0].resource_id == resource_id
-
-        response = self.get(url_for("api.post", post=post))
-        assert200(response)
-        assert response.json["blocs"][0]["class"] == "ExploreBloc"
-        assert response.json["blocs"][0]["resource_id"] == str(resource_id)
 
     def test_post_api_filter_by_kind(self):
         """It should filter posts by kind"""
