@@ -44,7 +44,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       redis:
-        image: redis:alpine
+        image: redis:alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
         ports:
           - 6379:6379
         options: >-
@@ -53,7 +53,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       s3:
-        image: rustfs/rustfs:1.0.0
+        image: rustfs/rustfs:1.0.0@sha256:8cc9801755448b71a786705ce76692c77e14936cccd87cf2fc31842e58f4d1ff
         env:
           RUSTFS_ACCESS_KEY: udata
           RUSTFS_SECRET_KEY: udata-secret
