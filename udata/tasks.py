@@ -162,6 +162,7 @@ def init_app(app):
     import udata.core.tags.tasks  # noqa
     import udata.core.activity.tasks  # noqa
     import udata.core.dataservices.tasks  # noqa
+    import udata.core.dataset.doi  # noqa
     import udata.core.dataset.tasks  # noqa
     import udata.core.dataset.transport  # noqa
     import udata.core.dataset.recommendations  # noqa
