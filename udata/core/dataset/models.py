@@ -796,8 +796,8 @@ class Dataset(
 
         if self.doi:
             # A DOI is permanent and has to keep resolving to a public page. Archiving is the
-            # way out, not deletion nor unpublishing. Enforced here rather than in the delete
-            # endpoint because `deleted` is also written by the dataset form and by the
+            # way out, not deletion nor unpublishing. Enforced here, and not only in the delete
+            # endpoint, because `deleted` is also written by the dataset form and by the
             # harvester.
             if self.deleted:
                 raise FieldValidationError(
