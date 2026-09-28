@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 
 import pytest
 import requests
+from mongoengine import pre_save
+from pytest_mock import MockerFixture
 from typing_extensions import override
 from voluptuous import Schema
 
@@ -15,13 +17,15 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.harvest import HarvestMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.exceptions import HarvestSkipException, HarvestValidationError
-from udata.harvest.models import Harvestable, HarvestItem
+from udata.harvest.models import Harvestable, HarvestItem, HarvestJob
+from udata.harvest.signals import after_harvest_job, before_harvest_job
 from udata.ssrf import BlockedAddressError
 from udata.tests.api import PytestOnlyDBTestCase
-from udata.tests.helpers import assert_equal_dates
+from udata.tests.helpers import argvalues, assert_equal_dates
 from udata.utils import faker
 
 from ..backends import (
@@ -75,17 +79,20 @@ class MockFetchingBackend(MockBackend):
         self.get(self.source.url)
 
 
+@dataclass(frozen=True)
 class MockItem(ABC):
+    identifier: str | None
+
     @abstractmethod
     def process(self, backend: MockBackend): ...
 
 
+@dataclass(frozen=True)
 class MockHarvestError(MockItem):
-    def __init__(self, exception: Exception):
-        self.exception = exception
+    exception: type[Exception]
 
     def process(self, backend: MockBackend) -> Never:
-        raise self.exception
+        raise self.exception(f"mock harvest error for {self.identifier}")
 
 
 H = TypeVar("H", bound=Harvestable)
@@ -93,8 +100,6 @@ H = TypeVar("H", bound=Harvestable)
 
 @dataclass(frozen=True)
 class MockRecord(MockItem, Generic[H]):
-    remote_id: str
-
     @classmethod
     def create(cls, num: int) -> list[Self]:
         return [cls(f"{cls.__name__.removeprefix('Mock').lower()}-{i}") for i in range(num)]
@@ -103,23 +108,20 @@ class MockRecord(MockItem, Generic[H]):
     def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> H: ...
 
     def process(self, backend: MockBackend):
-        backend.process_item(self.remote_id, self.item_processor, backend)
+        backend.process_item(self.identifier, self.item_processor, backend)
 
-    def mock_item(self, item: H, fields: dict, backend: MockBackend):
+    def mock_item(self, item: H, fields: dict):
         for key, value in fields.items():
             if getattr(item, key) is None:
                 setattr(item, key, value)
-        clazz = type(item).__name__.lower()
-        assert backend.job is not None
-        position = len(backend.job.items)
-        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-{position}"
+        item.harvest.remote_url = f"http://www.example.com/records/{self.identifier}"
 
 
 @dataclass(frozen=True)
 class MockDataset(MockRecord[Dataset]):
     def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Dataset:
         item = backend.get_item(harvest_item.remote_id, Dataset)
-        self.mock_item(item, DatasetFactory.as_dict(visible=True), backend)
+        self.mock_item(item, DatasetFactory.as_dict(visible=True))
         if backend.mock_last_modified:
             item.last_modified_internal = backend.mock_last_modified
         return item
@@ -129,16 +131,16 @@ class MockDataset(MockRecord[Dataset]):
 class MockDataservice(MockRecord[Dataservice]):
     def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Dataservice:
         item = backend.get_item(harvest_item.remote_id, Dataservice)
-        self.mock_item(item, DataserviceFactory.as_dict(), backend)
+        self.mock_item(item, DataserviceFactory.as_dict())
         return item
 
 
 @dataclass(frozen=True)
 class MockRecordError(MockRecord):
-    exception: Exception
+    exception: type[Exception]
 
     def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Never:
-        raise self.exception
+        raise self.exception(f"mock record error for {self.identifier}")
 
 
 class HarvestFilterTest:
@@ -651,23 +653,99 @@ class BaseBackendTest(PytestOnlyDBTestCase):
                 assert getattr(backend1.source, owner_param).page() in item.errors[0].message
 
     @pytest.mark.parametrize(
-        "max_items, n_dataset, n_dataservice",
-        [(2, 2, 0), (3, 3, 0), (4, 3, 1)],
+        "error, job_status",
+        argvalues(
+            (None, "done"),
+            (MockHarvestError("harvest-validation-error", HarvestValidationError), "failed"),
+            (
+                MockHarvestError("harvest-connection-error", requests.exceptions.ConnectionError),
+                "failed",
+            ),
+            (MockHarvestError("harvest-timeout-error", requests.exceptions.Timeout), "failed"),
+            (MockHarvestError("harvest-generic-error", Exception), "failed"),
+            (MockRecordError("record-skip-error", HarvestSkipException), "done"),
+            (MockRecordError("record-validation-error", HarvestValidationError), "done-errors"),
+            (MockRecordError("record-generic-error", Exception), "done-errors"),
+            ids=lambda t: t[0].identifier if t[0] else "success",
+        ),
     )
-    def test_max_items(self, max_items, n_dataset, n_dataservice):
+    @pytest.mark.parametrize("dryrun", [False, True], ids=["liverun", "dryrun"])
+    def test_harvest_loop(self, error, job_status, dryrun, mocker: MockerFixture):
+        liverun = not dryrun
+
+        nb_datasets = 3
+        nb_dataservices = 2
+        record_errors = [error] if isinstance(error, MockRecordError) else []
+        harvest_errors = (
+            [error, MockDataset("never-processed")] if isinstance(error, MockHarvestError) else []
+        )
+
+        org = OrganizationFactory()
+        backend = MockBackend(HarvestSourceFactory(organization=org), dryrun=dryrun)
+        backend.mock_items = [
+            *record_errors,  # at the beginning to check processing continues
+            *MockDataset.create(nb_datasets),
+            *MockDataservice.create(nb_dataservices),
+            *harvest_errors,  # at the end to check *.objects.count() > 0
+        ]
+
+        signals = {
+            signal: signal.connect(mocker.Mock(name=signal.name), weak=False)
+            for signal in [before_harvest_job, after_harvest_job, pre_save]
+        }
+
+        try:
+            job = backend.harvest()
+
+            assert job.status == job_status
+
+            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
+            assert job.started == approx_date
+            assert job.ended == approx_date
+            assert job.started < job.ended
+
+            assert len(job.items) == nb_datasets + nb_dataservices + len(record_errors)
+
+            assert len(job.errors) == (1 if harvest_errors else 0)
+            if harvest_errors:
+                assert job.errors[0].message == f"mock harvest error for {error.identifier}"
+
+            # mongo objects
+            assert Dataset.objects.count() == (nb_datasets if liverun else 0)
+            assert Dataservice.objects.count() == (nb_dataservices if liverun else 0)
+
+            # gated metrics (behind Organization.compute_aggregate_metrics)
+            for metric in ["datasets_by_months", "dataservices_by_months"]:
+                assert (metric in org.metrics) is (True if liverun else False)
+
+            # signals
+            signals[before_harvest_job].assert_called_with(backend)
+            signals[after_harvest_job].assert_called_with(backend)
+            if liverun:
+                signals[pre_save].assert_called_with(HarvestJob, document=job)
+            else:
+                signals[pre_save].assert_not_called()
+        finally:
+            for signal, receiver in signals.items():
+                signal.disconnect(receiver)
+
+    @pytest.mark.parametrize("max_items", [2, 3, 4])
+    def test_harvest_max_items(self, max_items):
+        n = 3
+        assert max_items <= 2 * n
         backend = MockBackend(HarvestSourceFactory(), max_items=max_items)
-        backend.mock_items = MockDataset.create(3) + MockDataservice.create(3)
+        backend.mock_items = MockDataset.create(n) + MockDataservice.create(n)
 
         job = backend.harvest()
         assert job.status == "done"
         assert len(job.items) == max_items
         assert len(job.errors) == 1
         assert job.errors[0].message.startswith(f"{max_items} max items reached")
-        assert Dataset.objects.count() == n_dataset
-        assert Dataservice.objects.count() == n_dataservice
+        assert Dataset.objects.count() == min(n, max_items)
+        assert Dataservice.objects.count() == max(min(n, max_items - n), 0)
 
-    def test_max_items_preview(self):
-        backend = MockBackend(HarvestSourceFactory(), dryrun=True, max_items=2)
+    def test_harvest_max_items_preview(self):
+        backend = MockBackend(HarvestSourceFactory(), max_items=2, dryrun=True)
         backend.mock_items = MockDataset.create(3) + MockDataservice.create(3)
 
         job = backend.harvest()
@@ -678,47 +756,210 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize(
         "exception_class",
-        [
-            HarvestValidationError,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.Timeout,
-            Exception,
-        ],
+        [HarvestSkipException, HarvestValidationError, Exception],
     )
-    def test_inner_harvest_exception(self, exception_class):
-        backend = MockBackend(HarvestSourceFactory())
+    def test_harvest_max_items_with_failure(self, exception_class):
+        backend = MockBackend(HarvestSourceFactory(), max_items=2)
         backend.mock_items = [
             MockDataset("dataset-ok-1"),
-            MockHarvestError(exception_class("boom")),
-            MockDataset("dataset-ok-2"),
+            MockRecordError("dataset-ko", exception_class),
+            MockDataset("dataset-ok-2"),  # not processed
         ]
 
         job = backend.harvest()
-        assert job.status == "failed"
+        assert len(job.items) == 2
         assert len(job.errors) == 1
-        assert len(job.items) == 1
+        assert Dataset.objects.count() == 1
 
     @pytest.mark.parametrize(
-        "exception_class, job_status, item_status",
-        [
-            (HarvestSkipException, "done", "skipped"),
-            (HarvestValidationError, "done-errors", "failed"),
-            (Exception, "done-errors", "failed"),
-        ],
+        "record, item_status",
+        argvalues(
+            (MockDataset("dataset"), "done"),
+            (MockDataservice("dataservice"), "done"),
+            (MockDataset(None), "skipped"),
+            (MockRecordError("skip-error", HarvestSkipException), "skipped"),
+            (MockRecordError("validation-error", HarvestValidationError), "failed"),
+            (MockRecordError("generic-error", Exception), "failed"),
+            ids=lambda t: t[0].identifier or "missing-id",
+        ),
     )
-    def test_item_processor_exception(self, exception_class, job_status, item_status):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            MockDataset("dataset-ok-1"),
-            MockRecordError("dataset-ko", exception_class("boom")),
-            MockDataset("dataset-ok-2"),
-        ]
+    @pytest.mark.parametrize("dryrun", [False, True], ids=["liverun", "dryrun"])
+    def test_process_item(self, record, item_status, dryrun, mocker: MockerFixture):
+        liverun = not dryrun
+        record_error = item_status != "done"
 
-        job = backend.harvest()
-        assert job.status == job_status
-        assert len(job.errors) == 0
-        assert len(job.items) == 3
-        assert job.items[1].status == item_status
+        org = OrganizationFactory()
+        backend = MockBackend(HarvestSourceFactory(organization=org), dryrun=dryrun)
+        backend.job = HarvestJob()
+        backend.remote_ids = set()
+
+        signals = {
+            signal: signal.connect(mocker.Mock(name=signal.name), weak=False)
+            for signal in [pre_save]
+        }
+
+        try:
+            record.process(backend)  # calls backend.process_item()
+
+            assert len(backend.job.items) == 1
+            harvest_item = backend.job.items[0]
+            assert isinstance(harvest_item, HarvestItem)
+
+            assert harvest_item.remote_id == record.identifier
+            assert harvest_item.status == item_status
+
+            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
+            assert harvest_item.started == approx_date
+            assert harvest_item.ended == approx_date
+            assert harvest_item.started < harvest_item.ended
+
+            assert len(harvest_item.errors) == (1 if record_error else 0)
+            if record_error:
+                assert harvest_item.errors[0].message == (
+                    f"mock record error for {record.identifier}"
+                    if record.identifier
+                    else "missing identifier"
+                )
+
+            # nothing more to test for error cases
+            if record_error:
+                return
+
+            assert harvest_item.remote_url.endswith(record.identifier)
+
+            # harvested item
+            if isinstance(record, MockDataset):
+                item = harvest_item.dataset
+                item_type = Dataset
+            elif isinstance(record, MockDataservice):
+                item = harvest_item.dataservice
+                item_type = Dataservice
+            else:
+                assert False, "inconsistent test"
+
+            assert isinstance(item, item_type)
+            assert item.pk is not None
+            assert item.archived_at is None
+            assert item.harvest is not None  # further tested in test_update_harvest_metadata
+
+            # mongo objects
+            assert item_type.objects.count() == (1 if liverun else 0)
+
+            # gated metrics
+            assert org.compute_aggregate_metrics is False
+            assert org in backend.organizations_to_update
+
+            # signals
+            if liverun:
+                signals[pre_save].assert_any_call(type(item), document=item)
+                signals[pre_save].assert_any_call(HarvestJob, document=backend.job)
+            else:
+                signals[pre_save].assert_not_called()
+        finally:
+            for signal, receiver in signals.items():
+                signal.disconnect(receiver)
+
+    def test_process_item_archived(self):
+        backend = MockBackend(HarvestSourceFactory())
+        backend.job = HarvestJob()
+        backend.remote_ids = set()
+
+        dataset = DatasetFactory(
+            archived=datetime.now(UTC),
+            harvest={
+                "source_id": str(backend.source.id),
+                "remote_id": "archived-dataset",
+                "archived_at": datetime.now(UTC),
+                "archived_reason": "not-on-remote",
+            },
+        )
+        assert dataset.archived_at is not None
+
+        MockDataset(dataset.harvest.remote_id).process(backend)  # calls backend.process_item()
+
+        item = backend.job.items[0].dataset
+        assert item == dataset
+        assert item.archived_at is None
+
+    @pytest.mark.parametrize(
+        "owner_field, owner_factory",
+        argvalues(
+            [
+                (None, None),
+                ("organization", OrganizationFactory),
+                ("owner", UserFactory),
+            ],
+            ids=lambda t: str(t[0]),
+        ),
+    )
+    def test_get_item_new(self, owner_field, owner_factory):
+        owner = owner_factory() if owner_field else None
+        backend = MockBackend(HarvestSourceFactory(**({owner_field: owner} if owner else {})))
+
+        item = backend.get_item("new", Dataset)
+        assert isinstance(item, Dataset)
+        assert item.id is None  # newly instantiated item (not saved => no mongo-generated id)
+        if owner:
+            assert getattr(item, owner_field) is owner
+        assert item.harvest is not None
+
+    @pytest.mark.parametrize(
+        "match_field, match_value",
+        argvalues(
+            [
+                ("domain", lambda s: s.domain),
+                ("source_id", lambda s: str(s.id)),
+            ],
+            ids=lambda t: str(t[0]),
+        ),
+    )
+    def test_get_item_existing(self, match_field, match_value):
+        source = HarvestSourceFactory()
+        last_update = datetime(2026, 1, 1)
+        dataset = DatasetFactory(
+            harvest={
+                "remote_id": "dataset",
+                "last_update": last_update,
+                **{match_field: match_value(source)},
+            }
+        )
+        backend = MockBackend(source)
+
+        # same source/domain + correct type => existing item
+        item = backend.get_item(dataset.harvest.remote_id, Dataset)
+        assert isinstance(item, Dataset)
+        assert item.id == dataset.id
+        # get_item shouldn't override harvest info
+        assert item.harvest.last_update == last_update
+
+        # same source/domain + wrong type => new item
+        item = backend.get_item(dataset.harvest.remote_id, Dataservice)
+        assert item.id is None  # newly instantiated dataservice
+
+        # different source/domain => new item
+        backend2 = MockBackend(HarvestSourceFactory())
+        item = backend2.get_item(dataset.harvest.remote_id, Dataset)
+        assert item.id is None  # newly instantiated dataset
+
+    def test_update_harvest_metadata(self):
+        source = HarvestSourceFactory()
+        backend = MockBackend(source)
+
+        metadata = HarvestMetadata()
+        m = backend.update_harvest_metadata(metadata, "test")
+
+        assert m is metadata
+        assert m.backend == backend.display_name
+        assert m.domain == source.domain
+        assert m.source_id == str(source.id)
+        assert m.source_url == source.url
+        assert m.remote_id == "test"
+        assert m.remote_url is None  # not set by update_harvest_metadata()
+        assert m.created_at is None  # not set by update_harvest_metadata()
+        assert m.modified_at is None  # not set by update_harvest_metadata()
+        assert m.last_update == pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
+        assert m.archived_at is None  # set but None
+        assert m.archived_reason is None  # set but None
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
