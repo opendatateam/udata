@@ -282,6 +282,18 @@ class DoiSyncTest(PytestOnlyDBTestCase):
 
         assert datacite.dois[dataset.doi]["publisher"] == "A brand new name"
 
+    def test_organization_change_other_than_name_does_not_push_metadata(self, datacite):
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+        dataset.doi = create_doi(dataset)
+        dataset.save()
+        pushes = len(datacite.requests)
+
+        organization.description = "A brand new description"
+        organization.save()
+
+        assert len(datacite.requests) == pushes
+
     def test_organization_change_pushes_metadata(self, datacite):
         dataset = DatasetFactory(organization=OrganizationFactory())
         dataset.doi = create_doi(dataset)
@@ -314,8 +326,8 @@ class DoiSyncTest(PytestOnlyDBTestCase):
         assert not datacite.dois
 
     def test_purge_keeps_datasets_with_a_doi(self):
-        # `clean()` forbids this state, so it can only come from data predating the rule.
-        # Written straight to Mongo to check the purge skips it anyway.
+        # `clean()` only sees the document in memory: a delete saved while the DOI is being
+        # minted still ends up deleted with a DOI. Written straight to Mongo to build that state.
         kept = DatasetFactory(organization=OrganizationFactory(), doi=f"{PREFIX}/minted")
         Dataset.objects(id=kept.id).update(deleted=datetime.now(UTC))
         purged = DatasetFactory(organization=OrganizationFactory(), deleted=datetime.now(UTC))

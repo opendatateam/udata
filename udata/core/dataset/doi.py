@@ -5,13 +5,10 @@ from requests.auth import HTTPBasicAuth
 from udata.models import Dataset, Organization
 from udata.tasks import task
 
-# DataCite calls would hang forever without a timeout, like every other HTTP call in udata.
+# DataCite calls would hang forever without a timeout.
 DOI_REQUEST_TIMEOUT = 10
 
-DOI_HEADERS = {
-    "accept": "application/vnd.api+json",
-    "content-type": "application/json",
-}
+DOI_HEADERS = {"accept": "application/vnd.api+json"}
 
 
 def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str]:

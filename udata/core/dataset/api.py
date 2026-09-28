@@ -477,10 +477,7 @@ class DatasetDoiAPI(API):
         """Mint a DOI for the dataset and attach it"""
         if dataset.doi:
             api.abort(409, "Dataset already has a DOI")
-        try:
-            dataset.doi = create_doi(dataset)
-        except ValueError as e:
-            api.abort(400, str(e))
+        dataset.doi = create_doi(dataset)
         dataset.save()
         return dataset
 

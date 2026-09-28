@@ -1,7 +1,10 @@
 import os
+import re
 from uuid import uuid4
 
 import pytest
+
+from udata.tests.fakes import DataCiteFake
 
 # The storages the resources migration is about. The others keep their own
 # tests on the local backend.
@@ -32,10 +35,6 @@ def rmock():
 @pytest.fixture
 def datacite(app, rmock):
     """An in-memory DataCite, wired behind every call to the configured platform."""
-    import re
-
-    from udata.tests.fakes import DataCiteFake
-
     fake = DataCiteFake()
     platform_uri = app.config["DOI_PLATFORM_URI"]
     rmock.put(re.compile(f"^{re.escape(platform_uri)}/dois/"), json=fake.handle_put)
