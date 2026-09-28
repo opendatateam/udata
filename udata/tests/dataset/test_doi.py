@@ -373,4 +373,22 @@ class DoiSyncTest(PytestOnlyDBTestCase):
         deleted.reload()
         assert kept.deleted is None
         assert kept.archived is not None
+        # Recorded as a harvest archival, otherwise the auto-archive archives it again later.
+        assert kept.harvest.archived == "harvester-cleaned"
+        assert kept.harvest.archived_at == kept.archived
         assert deleted.deleted is not None
+
+    def test_harvest_cleaning_keeps_the_archival_date_of_archived_datasets(self):
+        source = HarvestSourceFactory()
+        archived_at = datetime(2020, 3, 1, tzinfo=UTC)
+        kept = DatasetFactory(
+            organization=OrganizationFactory(),
+            doi=f"{PREFIX}/minted",
+            archived=archived_at,
+            harvest=HarvestDatasetMetadata(source_id=str(source.id)),
+        )
+
+        clean_source(source)
+
+        kept.reload()
+        assert kept.archived == archived_at.replace(tzinfo=None)
