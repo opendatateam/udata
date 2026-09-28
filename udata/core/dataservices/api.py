@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 
-import mongoengine
 from bson import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, redirect, request, url_for
 from flask_login import current_user
 from mongoengine import Q
+from mongoengine.errors import ValidationError
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
@@ -54,7 +54,7 @@ class DataservicesAPI(API):
     def get(self):
         """List or search all dataservices"""
         query = Dataservice.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived_at=None, deleted_at=None)
+            current_user, Q(private__ne=True, archived_at=None, deleted_at=None)
         )
 
         return Dataservice.apply_pagination(Dataservice.apply_sort_filters(query))
@@ -242,7 +242,7 @@ class DataserviceDatasetsAPI(API):
         try:
             datasets = Dataset.objects.filter(id__in=[d["id"] for d in data]).only("id")
             diff = set(d.id for d in datasets) - set(d.id for d in dataservice.datasets)
-        except mongoengine.errors.ValidationError:
+        except ValidationError:
             api.abort(400, "Malformed object id(s) in request")
 
         if diff:
