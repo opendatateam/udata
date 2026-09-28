@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Generic, Never, Self, TypeVar
@@ -38,71 +39,6 @@ class Unknown:
     pass
 
 
-H = TypeVar("H", bound=Harvestable)
-
-
-class MockItem(ABC):
-    @abstractmethod
-    def process(self, backend: BaseBackend): ...
-
-
-class MockHarvestError(MockItem):
-    def __init__(self, exception: Exception):
-        self.exception = exception
-
-    def process(self, backend: BaseBackend):
-        raise self.exception
-
-
-@dataclass(frozen=True)
-class MockRecord(MockItem, Generic[H]):
-    remote_id: str
-
-    @classmethod
-    def create(cls, num: int) -> list[Self]:
-        return [cls(f"{cls.__name__.removeprefix('Mock').lower()}-{i}") for i in range(num)]
-
-    @abstractmethod
-    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> H: ...
-
-    def process(self, backend: BaseBackend):
-        backend.process_item(self.remote_id, self.item_processor, backend)
-
-    def mock_item(self, item: H, fields: dict, backend: BaseBackend):
-        for key, value in fields.items():
-            if getattr(item, key) is None:
-                setattr(item, key, value)
-        if backend.mock_last_modified:
-            item.last_modified_internal = backend.mock_last_modified
-        clazz = type(item).__name__.lower()
-        position = len(backend.job.items)
-        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
-
-
-@dataclass(frozen=True)
-class MockDataset(MockRecord[Dataset]):
-    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Dataset:
-        item = backend.get_item(harvest_item.remote_id, Dataset)
-        self.mock_item(item, DatasetFactory.as_dict(visible=True), backend)
-        return item
-
-
-@dataclass(frozen=True)
-class MockDataservice(MockRecord[Dataservice]):
-    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Dataservice:
-        item = backend.get_item(harvest_item.remote_id, Dataservice)
-        self.mock_item(item, DataserviceFactory.as_dict(), backend)
-        return item
-
-
-@dataclass(frozen=True)
-class MockRecordError(MockRecord):
-    exception: Exception
-
-    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Never:
-        raise self.exception
-
-
 class MockBackend(BaseBackend):
     name = "mock-backend"
     display_name = "Mock Backend"
@@ -121,7 +57,7 @@ class MockBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mock_items = list[MockItem]()
+        self.mock_items: Sequence["MockItem"] = []
         self.mock_last_modified: datetime | None = None
 
     @override
@@ -137,6 +73,72 @@ class MockFetchingBackend(MockBackend):
 
     def inner_harvest(self):
         self.get(self.source.url)
+
+
+class MockItem(ABC):
+    @abstractmethod
+    def process(self, backend: MockBackend): ...
+
+
+class MockHarvestError(MockItem):
+    def __init__(self, exception: Exception):
+        self.exception = exception
+
+    def process(self, backend: MockBackend) -> Never:
+        raise self.exception
+
+
+H = TypeVar("H", bound=Harvestable)
+
+
+@dataclass(frozen=True)
+class MockRecord(MockItem, Generic[H]):
+    remote_id: str
+
+    @classmethod
+    def create(cls, num: int) -> list[Self]:
+        return [cls(f"{cls.__name__.removeprefix('Mock').lower()}-{i}") for i in range(num)]
+
+    @abstractmethod
+    def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> H: ...
+
+    def process(self, backend: MockBackend):
+        backend.process_item(self.remote_id, self.item_processor, backend)
+
+    def mock_item(self, item: H, fields: dict, backend: MockBackend):
+        for key, value in fields.items():
+            if getattr(item, key) is None:
+                setattr(item, key, value)
+        clazz = type(item).__name__.lower()
+        assert backend.job is not None
+        position = len(backend.job.items)
+        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-{position}"
+
+
+@dataclass(frozen=True)
+class MockDataset(MockRecord[Dataset]):
+    def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Dataset:
+        item = backend.get_item(harvest_item.remote_id, Dataset)
+        self.mock_item(item, DatasetFactory.as_dict(visible=True), backend)
+        if backend.mock_last_modified:
+            item.last_modified_internal = backend.mock_last_modified
+        return item
+
+
+@dataclass(frozen=True)
+class MockDataservice(MockRecord[Dataservice]):
+    def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Dataservice:
+        item = backend.get_item(harvest_item.remote_id, Dataservice)
+        self.mock_item(item, DataserviceFactory.as_dict(), backend)
+        return item
+
+
+@dataclass(frozen=True)
+class MockRecordError(MockRecord):
+    exception: Exception
+
+    def item_processor(self, harvest_item: HarvestItem, backend: MockBackend) -> Never:
+        raise self.exception
 
 
 class HarvestFilterTest:
