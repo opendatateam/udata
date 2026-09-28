@@ -1,10 +1,11 @@
 from datetime import UTC, datetime
 
-import mongoengine
 from bson import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, redirect, request, url_for
 from flask_login import current_user
+from mongoengine import Q
+from mongoengine.errors import ValidationError
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
@@ -25,6 +26,23 @@ ns = api.namespace("dataservices", "Dataservices related operations (beta)")
 
 common_doc = {"params": {"dataservice": "The dataservice ID or slug"}}
 
+SUGGEST_SORTING = "-metrics.followers"
+
+dataservice_suggestion_fields = api.model(
+    "DataserviceSuggestion",
+    {
+        "id": fields.String(description="The dataservice identifier", readonly=True),
+        "title": fields.String(description="The dataservice title", readonly=True),
+        "acronym": fields.String(description="An optional dataservice acronym", readonly=True),
+        "slug": fields.String(description="The dataservice permalink string", readonly=True),
+        "page": fields.String(
+            description="The dataservice web page URL",
+            attribute=lambda d: d.self_web_url(),
+            readonly=True,
+        ),
+    },
+)
+
 
 @ns.route("/", endpoint="dataservices")
 class DataservicesAPI(API):
@@ -36,7 +54,7 @@ class DataservicesAPI(API):
     def get(self):
         """List or search all dataservices"""
         query = Dataservice.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived_at=None, deleted_at=None)
+            current_user, Q(private__ne=True, archived_at=None, deleted_at=None)
         )
 
         return Dataservice.apply_pagination(Dataservice.apply_sort_filters(query))
@@ -87,6 +105,29 @@ class DataservicesAtomFeedAPI(API):
         response = make_response(feed.writeString("utf-8"))
         response.headers["Content-Type"] = "application/atom+xml"
         return response
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    "q", help="The string to autocomplete/suggest", location="args", required=True
+)
+suggest_parser.add_argument(
+    "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
+)
+
+
+@ns.route("/suggest/", endpoint="suggest_dataservices")
+class DataserviceSuggestAPI(API):
+    @api.doc("suggest_dataservices")
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(dataservice_suggestion_fields)
+    def get(self):
+        """Dataservices suggest endpoint using mongoDB contains"""
+        args = suggest_parser.parse_args()
+        dataservices = Dataservice.objects.visible().filter(
+            Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"])
+        )
+        return list(dataservices.order_by(SUGGEST_SORTING).limit(args["size"]))
 
 
 dataservice_delete_parser = add_send_legal_notice_argument(api.parser())
@@ -201,7 +242,7 @@ class DataserviceDatasetsAPI(API):
         try:
             datasets = Dataset.objects.filter(id__in=[d["id"] for d in data]).only("id")
             diff = set(d.id for d in datasets) - set(d.id for d in dataservice.datasets)
-        except mongoengine.errors.ValidationError:
+        except ValidationError:
             api.abort(400, "Malformed object id(s) in request")
 
         if diff:
