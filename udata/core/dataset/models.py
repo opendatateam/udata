@@ -397,11 +397,12 @@ class Checksum(EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
-# Resource fields the platform maintains on its own: they change on every write and say
-# nothing about what the author edited, so they are kept out of the recorded activity.
+# Resource fields the platform maintains on its own: they say nothing about what the
+# author edited, so they are kept out of the recorded activity. `fs_filename` is the
+# storage key of a hosted file, already reflected by `url` when a new file is uploaded.
 # The equivalent for documents is the `auditable` flag of `field()`, which a plain
 # `EmbeddedDocument` such as `Resource` does not carry.
-RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash")
+RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
 
 
 class ResourceMixin(object):

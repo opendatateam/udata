@@ -2684,6 +2684,23 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
 
+    def test_file_update_records_the_new_file_metadata_as_changed(self):
+        """Re-uploading reports what describes the new file, not its storage key."""
+        resource = ResourceFactory(format="csv", mime="text/csv")
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert sorted(activity.changes) == sorted(
+            ["title", "url", "checksum", "filesize", "mime", "format"]
+        )
+
     def test_file_update_old_file_deletion(self):
         """It should update a resource's file and delete the old one"""
         resource = ResourceFactory()
