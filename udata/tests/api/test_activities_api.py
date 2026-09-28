@@ -8,6 +8,7 @@ from werkzeug.test import TestResponse
 from udata.core.activity.models import Activity
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.organization.activities import UserCreatedOrganization
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
@@ -99,6 +100,22 @@ class ActivityAPITest(APITestCase):
         """It should return a 400 error if the `organization` parameter isn't a valid ObjectId."""
         response: TestResponse = self.get(url_for("api.activity", organization="foobar"))
         assert400(response)
+
+    def test_activity_api_list_filtered_by_organization(self) -> None:
+        """It returns what an organization did and what was done to it, nothing else."""
+        org = OrganizationFactory()
+        done_by = FakeDatasetActivity.objects.create(
+            actor=UserFactory(), related_to=DatasetFactory(), organization=org
+        )
+        done_to = UserCreatedOrganization.objects.create(actor=UserFactory(), related_to=org)
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity", organization=org.id))
+        assert200(response)
+        assert {activity["id"] for activity in response.json["data"]} == {
+            str(done_by.id),
+            str(done_to.id),
+        }
 
     def test_activity_api_list_filtered_by_related_to(self) -> None:
         """It should only return activities that correspond to the `related_to` parameter."""
