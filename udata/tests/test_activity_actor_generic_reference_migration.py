@@ -32,7 +32,9 @@ class ActivityActorGenericReferenceMigrationTest(PytestOnlyDBTestCase):
             "_cls": "User",
             "_ref": DBRef("user", user.id),
         }
-        assert Activity.objects.get(id=activity.id).actor == user
+        # A query compares the stored sub-document key by key, in order, as the `user`
+        # filter of the API does: reading `actor` back would not catch a wrong order.
+        assert Activity.objects(actor=user).count() == 1
 
     def test_already_converted_actors_are_left_alone(self):
         user = UserFactory()
