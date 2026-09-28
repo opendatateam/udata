@@ -5,7 +5,7 @@ from udata.auth import PermissionDenied, login_user
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory, LicenseFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
@@ -190,24 +190,6 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
         transfer = TransferFactory(owner=owner, recipient=org, subject=subject)
 
         login_user(editor)
-        with pytest.raises(PermissionDenied):
-            accept_transfer(transfer)
-
-    def test_nobody_can_accept_a_transfer_whose_recipient_is_not_a_person(self):
-        # `Transfer.recipient` only got its `choices` once such transfers had already been
-        # created, so the row is written past validation to reproduce a legacy one rather
-        # than a shape the model still accepts.
-        owner = UserFactory()
-        subject = DatasetFactory(owner=owner)
-        transfer = TransferFactory(owner=owner, recipient=UserFactory(), subject=subject)
-        Transfer.objects(id=transfer.id).update_one(
-            __raw__={
-                "$set": {"recipient": {"_cls": "License", "_ref": LicenseFactory().to_dbref()}}
-            }
-        )
-        transfer.reload()
-
-        login_user(owner)
         with pytest.raises(PermissionDenied):
             accept_transfer(transfer)
 

@@ -1,6 +1,6 @@
 from udata.auth import Permission, UserNeed
 from udata.core.organization.permissions import OrganizationAdminNeed
-from udata.models import Organization, User
+from udata.models import Organization
 
 
 class TransferPermission(Permission):
@@ -24,12 +24,8 @@ class TransferResponsePermission(Permission):
     """Permissions to transfer an object assets"""
 
     def __init__(self, transfer):
-        # Same as above: `Transfer.recipient` is a choice-less generic reference, so
-        # transfers pointing at something that is neither a user nor an organization can
-        # already sit in the database. Nobody can respond to those.
-        needs = []
         if isinstance(transfer.recipient, Organization):
-            needs.append(OrganizationAdminNeed(transfer.recipient.id))
-        elif isinstance(transfer.recipient, User):
-            needs.append(UserNeed(transfer.recipient.fs_uniquifier))
-        super().__init__(*needs)
+            need = OrganizationAdminNeed(transfer.recipient.id)
+        else:
+            need = UserNeed(transfer.recipient.fs_uniquifier)
+        super().__init__(need)
