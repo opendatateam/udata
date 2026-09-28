@@ -2,7 +2,6 @@ from flask import current_app, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
-    get_within_delta,
     hash_data,
     login_user,
     logout_user,
@@ -58,7 +57,7 @@ def send_change_email_confirmation_instructions(user, new_email):
 
 def confirm_change_email_token_status(token):
     expired, invalid, token_data = check_and_get_token_status(
-        token, "confirm", get_within_delta("CONFIRM_EMAIL_WITHIN")
+        token, "confirm", current_app.config["SECURITY_CONFIRM_EMAIL_WITHIN"]
     )
     new_email = None
     user = None
@@ -78,19 +77,14 @@ def confirm_change_email(token):
     expired, invalid, user, new_email = confirm_change_email_token_status(token)
 
     flash = None
-    flash_data = None
     if expired:
         send_change_email_confirmation_instructions(user, new_email)
         flash = "change_email_expired"
-        flash_data = {
-            "email_within": _security.confirm_email_within,
-            "new_email": new_email,
-        }
     elif not user or invalid:
         flash = "change_email_invalid"
 
     if flash:
-        return redirect(homepage_url(flash=flash, flash_data=flash_data))
+        return redirect(homepage_url(flash=flash))
 
     # Check if the new email is already taken by another user
     existing_user = _datastore.find_user(email=new_email)
