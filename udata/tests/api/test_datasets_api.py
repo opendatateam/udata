@@ -2466,6 +2466,31 @@ class DatasetResourceAPITest(APITestCase):
             "resource_title": "New title",
         }
 
+    def test_update_activity_ignores_stale_hosted_file_metadata(self):
+        """A client resending stale metadata of a hosted file does not show it as edited.
+
+        Those fields are kept server-side (#2544), so the activity must not report them.
+        """
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "filetype": resource.filetype,
+                "url": "https://stale.example.org/old.csv",
+                "checksum": {"type": "sha1", "value": "stale-checksum"},
+                "filesize": resource.filesize + 1,
+                "mime": "application/stale",
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert activity.changes == ["title"]
+
     def test_update_remote(self):
         resource = ResourceFactory()
         resource.filetype = "remote"
