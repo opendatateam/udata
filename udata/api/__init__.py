@@ -1,5 +1,4 @@
 import logging
-import urllib.parse
 from functools import wraps
 
 import mongoengine
@@ -19,14 +18,11 @@ from flask_restx.inputs import positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
-from udata import tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
-from udata.utils import safe_unicode
 
 from . import fields
-from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
@@ -246,40 +242,6 @@ def set_api_language():
             log.warning("Ignoring unknown `lang` query parameter: %r", lang)
             lang = None
     g.lang_code = lang or get_locale()
-
-
-def extract_name_from_path(path):
-    """Return a readable name from a URL path.
-
-    Useful to log requests on Piwik with categories tree structure.
-    See: http://piwik.org/faq/how-to/#faq_62
-    """
-    base_path, query_string = path.split("?")
-    infos = base_path.strip("/").split("/")[2:]  # Removes api/version.
-    if (
-        base_path == "/api/1/" or base_path == "/api/2/"
-    ):  # The API root endpoint redirects to swagger doc.
-        return safe_unicode("apidoc")
-    if len(infos) > 1:  # This is an object.
-        name = "{category} / {name}".format(
-            category=infos[0].title(), name=infos[1].replace("-", " ").title()
-        )
-    else:  # This is a collection.
-        name = "{category}".format(category=infos[0].title())
-    return safe_unicode(name)
-
-
-@apiv1_blueprint.after_request
-@apiv2_blueprint.after_request
-def collect_stats(response):
-    action_name = extract_name_from_path(request.full_path)
-    blacklist = current_app.config.get("TRACKING_BLACKLIST", [])
-    if not current_app.config["TESTING"] and request.endpoint not in blacklist:
-        extras = {
-            "action_name": urllib.parse.quote(action_name),
-        }
-        tracking.send_signal(on_api_call, request, current_user, **extras)
-    return response
 
 
 default_error = api.model("Error", {"message": fields.String})
