@@ -262,6 +262,26 @@ class UserAPITest(APITestCase):
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
 
+    def test_embedded_user_exposes_deletion(self):
+        """A deleted user is only ever served embedded, so the reference carries the state.
+
+        The anonymised `first_name`, `last_name` and `slug` are not a reliable signal:
+        a live user named "Deleted Dupont" gets the slug `deleted-dupont`.
+        """
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        assert response.json["owner"]["deleted"] is None
+
+        owner.mark_as_deleted(notify=False)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        owner.reload()
+        assert response.json["owner"]["deleted"] == owner.deleted.replace(tzinfo=UTC).isoformat()
+
     def test_get_inactive_user(self):
         """It should raise a 410"""
         user = UserFactory(active=False)
