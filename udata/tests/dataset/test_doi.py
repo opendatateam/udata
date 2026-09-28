@@ -282,6 +282,16 @@ class DoiSyncTest(PytestOnlyDBTestCase):
 
         assert datacite.dois[dataset.doi]["publisher"] == "A brand new name"
 
+    def test_organization_change_pushes_metadata(self, datacite):
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        dataset.doi = create_doi(dataset)
+        dataset.save()
+
+        dataset.organization = OrganizationFactory(name="Another publisher")
+        dataset.save()
+
+        assert datacite.dois[dataset.doi]["publisher"] == "Another publisher"
+
     def test_losing_the_organization_does_not_break_the_sync(self, datacite):
         dataset = DatasetFactory(organization=OrganizationFactory())
         dataset.doi = create_doi(dataset)
