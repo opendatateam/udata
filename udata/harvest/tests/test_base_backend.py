@@ -761,9 +761,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_harvest_max_items_with_failure(self, exception_class):
         backend = MockBackend(HarvestSourceFactory(), max_items=2)
         backend.mock_items = [
-            MockDataset("dataset-ok-1"),
+            MockDataset("dataset-ok"),
             MockRecordError("dataset-ko", exception_class),
-            MockDataset("dataset-ok-2"),  # not processed
+            MockDataset("dataset-ignored"),  # not processed
         ]
 
         job = backend.harvest()
