@@ -1,6 +1,7 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import TypeVar
+from typing import Generic, Never, Self, TypeVar
 from urllib.parse import urlparse
 
 import pytest
@@ -37,24 +38,74 @@ class Unknown:
     pass
 
 
-@dataclass(frozen=True)
-class FakeRecord:
-    item_type: type[Harvestable]
-    remote_id: str | None
-    item_processor_exception: Exception | None = None
-    inner_harvest_exception: Exception | None = None
-
-    @staticmethod
-    def create(item_type: type[Harvestable], num: int) -> list["FakeRecord"]:
-        return [FakeRecord(item_type, f"{item_type.__name__.lower()}-{i}") for i in range(num)]
-
-
 H = TypeVar("H", bound=Harvestable)
 
 
-class FakeBackend(BaseBackend):
-    name = "fake-backend"
-    display_name = "Fake Backend"
+class MockItem(ABC):
+    @abstractmethod
+    def process(self, backend: BaseBackend): ...
+
+
+class MockHarvestError(MockItem):
+    def __init__(self, exception: Exception):
+        self.exception = exception
+
+    def process(self, backend: BaseBackend):
+        raise self.exception
+
+
+@dataclass(frozen=True)
+class MockRecord(MockItem, Generic[H]):
+    remote_id: str
+
+    @classmethod
+    def create(cls, num: int) -> list[Self]:
+        return [cls(f"{cls.__name__.removeprefix('Mock').lower()}-{i}") for i in range(num)]
+
+    @abstractmethod
+    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> H: ...
+
+    def process(self, backend: BaseBackend):
+        backend.process_item(self.remote_id, self.item_processor, backend)
+
+    def mock_item(self, item: H, fields: dict, backend: BaseBackend):
+        for key, value in fields.items():
+            if getattr(item, key) is None:
+                setattr(item, key, value)
+        if backend.mock_last_modified:
+            item.last_modified_internal = backend.mock_last_modified
+        clazz = type(item).__name__.lower()
+        position = len(backend.job.items)
+        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
+
+
+@dataclass(frozen=True)
+class MockDataset(MockRecord[Dataset]):
+    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Dataset:
+        item = backend.get_item(harvest_item.remote_id, Dataset)
+        self.mock_item(item, DatasetFactory.as_dict(visible=True), backend)
+        return item
+
+
+@dataclass(frozen=True)
+class MockDataservice(MockRecord[Dataservice]):
+    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Dataservice:
+        item = backend.get_item(harvest_item.remote_id, Dataservice)
+        self.mock_item(item, DataserviceFactory.as_dict(), backend)
+        return item
+
+
+@dataclass(frozen=True)
+class MockRecordError(MockRecord):
+    exception: Exception
+
+    def item_processor(self, harvest_item: HarvestItem, backend: BaseBackend) -> Never:
+        raise self.exception
+
+
+class MockBackend(BaseBackend):
+    name = "mock-backend"
+    display_name = "Mock Backend"
     filters = (
         HarvestFilter("First filter", "first", str),
         HarvestFilter("Second filter", "second", str),
@@ -70,52 +121,19 @@ class FakeBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fake_records = list[FakeRecord]()
-        self.fake_last_modified: datetime | None = None
+        self.mock_items = list[MockItem]()
+        self.mock_last_modified: datetime | None = None
 
     @override
     def inner_harvest(self):
-        self._fake_records_by_ids = {
-            r.remote_id: r for r in self.fake_records if r.remote_id is not None
-        }
-
-        for record in self.fake_records:
-            if exc := record.inner_harvest_exception:
-                raise exc
-            processor = getattr(self, f"process_{record.item_type.__name__.lower()}")
-            self.process_item(record.remote_id, processor)
-
-    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
-        fields = DatasetFactory.as_dict(visible=True).items()
-        return self._process_item(Dataset, fields, harvest_item.remote_id)
-
-    def process_dataservice(self, harvest_item: HarvestItem) -> Dataservice:
-        fields = DataserviceFactory.as_dict().items()
-        return self._process_item(Dataservice, fields, harvest_item.remote_id)
-
-    def _process_item(self, item_type: type[H], fields: dict, remote_id: str) -> H:
-        record = self._fake_records_by_ids[remote_id]
-        if exc := record.item_processor_exception:
-            raise exc
-        item = self.get_item(remote_id, item_type)
-        self._mock_item(item, fields)
-        return item
-
-    def _mock_item(self, item, fields):
-        for key, value in fields:
-            if getattr(item, key) is None:
-                setattr(item, key, value)
-        if self.fake_last_modified:
-            item.last_modified_internal = self.fake_last_modified
-        clazz = type(item).__name__.lower()
-        position = len(self.job.items)
-        item.harvest.remote_url = f"http://www.example.com/records/{clazz}-url-{position}"
+        for item in self.mock_items:
+            item.process(self)
 
 
-class FetchingBackend(FakeBackend):
+class MockFetchingBackend(MockBackend):
     """A backend that really goes over the network, to exercise the HTTP layer."""
 
-    name = "fetching-backend"
+    name = "mock-fetching-backend"
 
     def inner_harvest(self):
         self.get(self.source.url)
@@ -145,8 +163,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
+        backend = MockBackend(source)
+        backend.mock_items = MockDataset.create(nb_datasets)
 
         before = datetime.now(UTC)
         job = backend.harvest()
@@ -175,12 +193,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert before_naive <= last_update_naive <= after_naive
 
     def test_has_feature_defaults(self):
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         assert not backend.has_feature("feature")
         assert backend.has_feature("enabled")
 
     def test_has_feature_defined(self):
-        backend = FakeBackend(
+        backend = MockBackend(
             HarvestSourceFactory(
                 config={
                     "features": {
@@ -194,16 +212,16 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert not backend.has_feature("enabled")
 
     def test_has_feature_unkown(self):
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         with pytest.raises(HarvestException):
             backend.has_feature("unknown")
 
     def test_get_filters_empty(self):
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         assert backend.get_filters() == []
 
     def test_get_filters(self):
-        backend = FakeBackend(
+        backend = MockBackend(
             HarvestSourceFactory(
                 config={
                     "filters": [
@@ -216,11 +234,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert [f["key"] for f in backend.get_filters()] == ["second", "first"]
 
     def test_get_extra_config_not_in_source(self):
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         assert backend.get_extra_config_value("test_str") is None
 
     def test_get_extra_config_value(self):
-        backend = FakeBackend(
+        backend = MockBackend(
             HarvestSourceFactory(
                 config={
                     "extra_configs": [
@@ -233,7 +251,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     @pytest.mark.parametrize("method", ["head", "get", "post"])
     def test_disallows_redirect(self, rmock, method):
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         url = "https://www.url.with.redirect.com/"
         getattr(rmock, method)(url, status_code=302)
         with pytest.raises(requests.exceptions.HTTPError):
@@ -247,7 +265,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         # Deliberately no rmock: requests_mock substitutes the session adapter,
         # which is precisely the guard under test. Nothing needs to listen on the
         # address either — it is rejected before connect().
-        backend = FakeBackend(HarvestSourceFactory())
+        backend = MockBackend(HarvestSourceFactory())
         url = "http://10.0.0.1/catalog"
         with pytest.raises(BlockedAddressError, match="private"):
             if method == "post":
@@ -265,15 +283,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         # — a source whose URL only reaches a forbidden address at fetch time.
         source.url = "http://10.0.0.1/catalog"
 
-        job = FetchingBackend(source).harvest()
+        job = MockFetchingBackend(source).harvest()
 
         assert job.status == "failed"
         assert "10.0.0.1" in job.errors[0].message
 
     def test_harvest_item_remote_url(self):
         n = 3
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = FakeRecord.create(Dataset, n) + FakeRecord.create(Dataservice, n)
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = MockDataset.create(n) + MockDataservice.create(n)
 
         job = backend.harvest()
 
@@ -283,8 +301,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_harvest_source_id(self):
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-        backend.fake_records = FakeRecord.create(Dataset, nb_datasets)
+        backend = MockBackend(source)
+        backend.mock_items = MockDataset.create(nb_datasets)
 
         job = backend.harvest()
         assert len(job.items) == nb_datasets
@@ -304,9 +322,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_dont_overwrite_last_modified(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = FakeRecord.create(Dataset, 1)
-        backend.fake_last_modified = last_modified
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = MockDataset.create(1)
+        backend.mock_last_modified = last_modified
 
         backend.harvest()
         dataset = Dataset.objects.first()
@@ -315,9 +333,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = FakeRecord.create(Dataset, 1)
-        backend.fake_last_modified = last_modified
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = MockDataset.create(1)
+        backend.mock_last_modified = last_modified
 
         backend.harvest()
         backend.harvest()  # Harvest twice to test same last_modified
@@ -329,9 +347,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         nb_datasets = 3
         nb_dataservices = 3
         source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-        backend.fake_records = FakeRecord.create(Dataset, nb_datasets) + FakeRecord.create(
-            Dataservice, nb_dataservices
+        backend = MockBackend(source)
+        backend.mock_items = MockDataset.create(nb_datasets) + MockDataservice.create(
+            nb_dataservices
         )
 
         # create a dangling dataset to be archived
@@ -435,8 +453,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice.harvest
 
     def test_harvest_datasets_get_deleted(self):
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = FakeRecord.create(Dataset, 3)
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = MockDataset.create(3)
 
         job = backend.harvest()
         for item in job.items:
@@ -454,9 +472,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         duplicated_remote_id_uri = "http://example.com/duplicated_remote_id_uri"
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = FakeBackend(source)
-        backend.fake_records = FakeRecord.create(Dataset, nb_datasets) + [
-            FakeRecord(Dataset, duplicated_remote_id_uri)
+        backend = MockBackend(source)
+        backend.mock_items = MockDataset.create(nb_datasets) + [
+            MockDataset(duplicated_remote_id_uri)
         ]
 
         # Create a dataset that should be reused by the harvest, which will update it
@@ -465,7 +483,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             title="Reused Dataset",
             harvest={
                 "domain": source.domain,
-                "remote_id": "dataset-0",  # the FakeBackend harvest should reuse this dataset
+                "remote_id": "dataset-0",  # the MockBackend harvest should reuse this dataset
                 "source_id": str(source.id),
             },
         )
@@ -475,7 +493,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             title="Reused Dataset with URI",
             harvest={
                 "domain": "some-other-domain",
-                # the FakeBackend harvest above should reuse this dataset with the same remote_id URI
+                # the MockBackend harvest above should reuse this dataset with the same remote_id URI
                 "remote_id": duplicated_remote_id_uri,
                 "source_id": "some-other-source-id",
             },
@@ -513,19 +531,19 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_duplicate_remote_ids(self):
         dataset_records = [
-            FakeRecord(Dataset, "dataset-id-1"),
-            FakeRecord(Dataset, "dataset-id-2"),
-            FakeRecord(Dataset, "dataset-id-3"),
-            FakeRecord(Dataset, "dataset-id-3"),
-            FakeRecord(Dataset, "dataset-id-1"),
+            MockDataset("dataset-1"),
+            MockDataset("dataset-2"),
+            MockDataset("dataset-3"),
+            MockDataset("dataset-3"),
+            MockDataset("dataset-1"),
         ]
         dataservice_records = [
-            FakeRecord(Dataservice, "dataservice-id-1"),
-            FakeRecord(Dataservice, "dataservice-id-2"),
-            FakeRecord(Dataservice, "dataservice-id-2"),
+            MockDataservice("dataservice-1"),
+            MockDataservice("dataservice-2"),
+            MockDataservice("dataservice-2"),
         ]
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = dataset_records + dataservice_records
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = dataset_records + dataservice_records
 
         job = backend.harvest()
         assert job.status == "done-errors"
@@ -547,15 +565,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [("organization", OrganizationFactory), ("owner", UserFactory)],
     )
     def test_unique_ownership_same_uri_remote_id(self, owner_param, owner_factory):
-        backend1 = FakeBackend(
+        backend1 = MockBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
                 **{owner_param: owner_factory()},
             )
         )
-        backend1.fake_records = [
-            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-repeat"),
-            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-unique"),
+        backend1.mock_items = [
+            MockDataset("https://data.example.com/catalog/dataset-repeat"),
+            MockDataset("https://data.example.com/catalog/dataset-unique"),
             # dataservices don't check on uri remote_id (bug?)
         ]
 
@@ -563,15 +581,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert job1.status == "done"
         assert len(job1.items) == 2
 
-        backend2 = FakeBackend(
+        backend2 = MockBackend(
             HarvestSourceFactory(
                 url="https://other.example.com/catalog",
                 **{owner_param: owner_factory()},
             )
         )
-        backend2.fake_records = [
-            FakeRecord(Dataset, "https://data.example.com/catalog/dataset-repeat"),
-            FakeRecord(Dataset, "https://other.example.com/catalog/dataset-unique"),
+        backend2.mock_items = [
+            MockDataset("https://data.example.com/catalog/dataset-repeat"),
+            MockDataset("https://other.example.com/catalog/dataset-unique"),
         ]
 
         job2 = backend2.harvest()
@@ -590,34 +608,34 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [("organization", OrganizationFactory), ("owner", UserFactory)],
     )
     def test_unique_ownership_same_domain(self, owner_param, owner_factory):
-        backend1 = FakeBackend(
+        backend1 = MockBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
                 **{owner_param: owner_factory()},
             )
         )
-        backend1.fake_records = [
-            FakeRecord(Dataset, "dataset-repeat"),
-            FakeRecord(Dataset, "dataset-unique-1"),
-            FakeRecord(Dataservice, "dataservice-repeat"),
-            FakeRecord(Dataservice, "dataservice-unique-1"),
+        backend1.mock_items = [
+            MockDataset("dataset-repeat"),
+            MockDataset("dataset-unique-1"),
+            MockDataservice("dataservice-repeat"),
+            MockDataservice("dataservice-unique-1"),
         ]
 
         job1 = backend1.harvest()
         assert job1.status == "done"
         assert len(job1.items) == 4
 
-        backend2 = FakeBackend(
+        backend2 = MockBackend(
             HarvestSourceFactory(
                 url="https://data.example.com/other-catalog",  # same domain as backend1
                 **{owner_param: owner_factory()},
             )
         )
-        backend2.fake_records = [
-            FakeRecord(Dataset, "dataset-repeat"),
-            FakeRecord(Dataset, "dataset-unique-2"),
-            FakeRecord(Dataservice, "dataservice-repeat"),
-            FakeRecord(Dataservice, "dataservice-unique-2"),
+        backend2.mock_items = [
+            MockDataset("dataset-repeat"),
+            MockDataset("dataset-unique-2"),
+            MockDataservice("dataservice-repeat"),
+            MockDataservice("dataservice-unique-2"),
         ]
 
         job2 = backend2.harvest()
@@ -635,8 +653,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [(2, 2, 0), (3, 3, 0), (4, 3, 1)],
     )
     def test_max_items(self, max_items, n_dataset, n_dataservice):
-        backend = FakeBackend(HarvestSourceFactory(), max_items=max_items)
-        backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
+        backend = MockBackend(HarvestSourceFactory(), max_items=max_items)
+        backend.mock_items = MockDataset.create(3) + MockDataservice.create(3)
 
         job = backend.harvest()
         assert job.status == "done"
@@ -647,8 +665,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataservice.objects.count() == n_dataservice
 
     def test_max_items_preview(self):
-        backend = FakeBackend(HarvestSourceFactory(), dryrun=True, max_items=2)
-        backend.fake_records = FakeRecord.create(Dataset, 3) + FakeRecord.create(Dataservice, 3)
+        backend = MockBackend(HarvestSourceFactory(), dryrun=True, max_items=2)
+        backend.mock_items = MockDataset.create(3) + MockDataservice.create(3)
 
         job = backend.harvest()
         assert job.status == "done"
@@ -666,11 +684,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ],
     )
     def test_inner_harvest_exception(self, exception_class):
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = [
-            FakeRecord(Dataset, "dataset-ok-1"),
-            FakeRecord(Dataset, "dataset-ko", inner_harvest_exception=exception_class()),
-            FakeRecord(Dataset, "dataset-ok-2"),
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = [
+            MockDataset("dataset-ok-1"),
+            MockHarvestError(exception_class("boom")),
+            MockDataset("dataset-ok-2"),
         ]
 
         job = backend.harvest()
@@ -687,11 +705,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ],
     )
     def test_item_processor_exception(self, exception_class, job_status, item_status):
-        backend = FakeBackend(HarvestSourceFactory())
-        backend.fake_records = [
-            FakeRecord(Dataset, "dataset-ok-1"),
-            FakeRecord(Dataset, "dataset-ko", item_processor_exception=exception_class()),
-            FakeRecord(Dataset, "dataset-ok-2"),
+        backend = MockBackend(HarvestSourceFactory())
+        backend.mock_items = [
+            MockDataset("dataset-ok-1"),
+            MockRecordError("dataset-ko", exception_class("boom")),
+            MockDataset("dataset-ok-2"),
         ]
 
         job = backend.harvest()
@@ -704,7 +722,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
     @pytest.fixture
     def validate(self):
-        return FakeBackend(HarvestSourceFactory()).validate
+        return MockBackend(HarvestSourceFactory()).validate
 
     def test_valid_data(self, validate):
         schema = Schema({"key": str})
