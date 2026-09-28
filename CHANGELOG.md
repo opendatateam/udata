@@ -1,5 +1,20 @@
 # Changelog
 
+## 17.9.0 (2026-09-28)
+
+- chore: build and compile translations on build ([#3966](https://github.com/opendatateam/udata/pull/3966))
+- chore: pin flask security to <5.9.0 ([#3967](https://github.com/opendatateam/udata/pull/3967))
+- ci: remove the Sentry release job ([#3964](https://github.com/opendatateam/udata/pull/3964))
+- ci: replace MinIO with RustFS for S3 tests ([#3965](https://github.com/opendatateam/udata/pull/3965))
+- ci: replace the CircleCI pipeline with GitHub Actions ([#3954](https://github.com/opendatateam/udata/pull/3954))
+- feat: expose the deletion date on embedded user references ([#3960](https://github.com/opendatateam/udata/pull/3960))
+- feat: harvest remote errors out of sentry ([#3948](https://github.com/opendatateam/udata/pull/3948))
+- fix: 500 on save when a spam-checked field has no detectable language ([#3953](https://github.com/opendatateam/udata/pull/3953))
+- fix: pin the deleted field now exposed on embedded user references in the follow payload test ([#3961](https://github.com/opendatateam/udata/pull/3961))
+- fix: remove dead Piwik tracking crashing on URLs with several question marks ([#3952](https://github.com/opendatateam/udata/pull/3952))
+- refactor: migrate followers to the api_fields system ([#3959](https://github.com/opendatateam/udata/pull/3959))
+
+
 ## 17.8.0 (2026-09-15)
 
 - chore(CI): remove trigger gitlab ([#3951](https://github.com/opendatateam/udata/pull/3951))
