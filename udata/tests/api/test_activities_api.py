@@ -75,6 +75,7 @@ class ActivityAPITest(APITestCase):
                 "last_name": actor.last_name,
                 "avatar": None,
                 "avatar_thumbnail": None,
+                "deleted": None,
                 "page": actor.self_web_url(),
                 "uri": actor.self_api_url(),
             },
