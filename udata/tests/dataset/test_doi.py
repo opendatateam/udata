@@ -94,13 +94,12 @@ class DoiTest(PytestOnlyDBTestCase):
         dataset.doi = create_doi(dataset)
 
         dataset.title = "A brand new title"
-        doi = update_doi(dataset)
+        update_doi(dataset)
 
-        assert doi == f"{PREFIX}/{dataset.id}"
         # The update lands on the DOI that was minted, and only pushes mutable metadata.
-        assert list(datacite.dois) == [doi]
-        assert datacite.dois[doi]["titles"] == [{"title": "A brand new title"}]
-        assert datacite.dois[doi]["state"] == "findable"
+        assert list(datacite.dois) == [dataset.doi]
+        assert datacite.dois[dataset.doi]["titles"] == [{"title": "A brand new title"}]
+        assert datacite.dois[dataset.doi]["state"] == "findable"
         pushed = datacite.requests[-1]
         assert set(pushed) == {"titles", "publisher", "publicationYear", "url"}
 
@@ -144,9 +143,9 @@ class DoiTest(PytestOnlyDBTestCase):
         dataset.doi = create_doi(dataset)
 
         dataset.archived = datetime.now(UTC)
-        doi = update_doi(dataset)
+        update_doi(dataset)
 
-        assert datacite.dois[doi]["state"] == "findable"
+        assert datacite.dois[dataset.doi]["state"] == "findable"
 
 
 @pytest.mark.options(

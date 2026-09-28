@@ -11,8 +11,7 @@ DOI_REQUEST_TIMEOUT = 10
 DOI_HEADERS = {"accept": "application/vnd.api+json"}
 
 
-def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str]:
-    """Validate the dataset and DOI config, returning the auth and platform URI."""
+def _check_doi_request(dataset: Dataset) -> None:
     if not dataset.organization:
         raise ValueError("Can only reference a dataset created by an organization")
     if not (
@@ -22,11 +21,6 @@ def _doi_request_context(dataset: Dataset) -> tuple[HTTPBasicAuth, str]:
         and current_app.config["DOI_PLATFORM_URI"]
     ):
         raise ValueError("DOI config is not properly set up")
-    auth = HTTPBasicAuth(
-        current_app.config["DOI_REPO_USER"],
-        current_app.config["DOI_REPO_PASSWORD"],
-    )
-    return auth, current_app.config["DOI_PLATFORM_URI"]
 
 
 #: The dataset fields `_doi_metadata` reads and that a user can change. Lives here so that
@@ -47,25 +41,26 @@ def _doi_metadata(dataset: Dataset) -> dict:
     }
 
 
-def _put_doi(auth: HTTPBasicAuth, platform_uri: str, doi: str, attributes: dict) -> str:
+def _put_doi(doi: str, attributes: dict) -> None:
     """Send `attributes` to DataCite.
 
     PUT upserts, unlike POST which rejects an existing DOI. Since our DOI is deterministic
     (prefix/dataset.id), minting it again is a normal case rather than an error to catch.
     """
     r = requests.put(
-        f"{platform_uri}/dois/{doi}",
+        f"{current_app.config['DOI_PLATFORM_URI']}/dois/{doi}",
         headers=DOI_HEADERS,
-        auth=auth,
+        auth=HTTPBasicAuth(
+            current_app.config["DOI_REPO_USER"], current_app.config["DOI_REPO_PASSWORD"]
+        ),
         json={"data": {"type": "dois", "attributes": attributes}},
         timeout=DOI_REQUEST_TIMEOUT,
     )
     r.raise_for_status()
-    return doi
 
 
 def create_doi(dataset: Dataset) -> str:
-    auth, platform_uri = _doi_request_context(dataset)
+    _check_doi_request(dataset)
     # Publishing is irreversible and the DOI has to resolve, unlike `update_doi` which must
     # keep working once the dataset is archived.
     if dataset.is_hidden:
@@ -73,9 +68,7 @@ def create_doi(dataset: Dataset) -> str:
     # The only place a DOI string is built. Everywhere else `dataset.doi` is the truth, so a
     # change of prefix never makes us write to a DOI we did not mint.
     doi = f"{current_app.config['DOI_PREFIX']}/{dataset.id}"
-    return _put_doi(
-        auth,
-        platform_uri,
+    _put_doi(
         doi,
         {
             "event": "publish",
@@ -85,13 +78,14 @@ def create_doi(dataset: Dataset) -> str:
             **_doi_metadata(dataset),
         },
     )
+    return doi
 
 
-def update_doi(dataset: Dataset) -> str:
-    auth, platform_uri = _doi_request_context(dataset)
+def update_doi(dataset: Dataset) -> None:
+    _check_doi_request(dataset)
     if not dataset.doi:
         raise ValueError("Can only update a dataset that has a DOI")
-    return _put_doi(auth, platform_uri, dataset.doi, _doi_metadata(dataset))
+    _put_doi(dataset.doi, _doi_metadata(dataset))
 
 
 @task(route="high.dataset")
