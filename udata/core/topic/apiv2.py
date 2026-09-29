@@ -233,8 +233,6 @@ class TopicElementsAPI(API):
         for element in elements:
             element.save()
 
-        topic.save()
-
         return elements, 201
 
     @apiv2.secure

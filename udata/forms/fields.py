@@ -221,6 +221,11 @@ class URLField(EmptyNone, Field):
     def process_formdata(self, valuelist):
         super(URLField, self).process_formdata(valuelist)
         if self.data:
+            if not isinstance(self.data, str):
+                # A ValueError is what wtforms (and our own extras parsing) catch
+                # to turn a bad input into a validation error; letting the strip
+                # below raise an AttributeError would surface as a 500 instead.
+                raise ValueError(_("Not a valid URL"))
             self.data = self.data.strip()
 
 
@@ -543,7 +548,8 @@ class NestedModelList(fields.FieldList):
 
     def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        self.initial_data = data
+        # `data` is `unset_value` when the form is built without an instance
+        self.initial_data = data or []
         self.is_list_data = formdata and self.name in formdata
         self.is_dict_data = formdata and any(k.startswith(self.prefix) for k in formdata)
         self.has_data = self.is_list_data or self.is_dict_data
@@ -596,17 +602,29 @@ class NestedModelList(fields.FieldList):
             idkey = basekey.format("id")
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
+            data = None
             if hasattr(self.nested_model, "id") and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
                 data = get_by(self.initial_data, id=id)
+                if data is not None:
+                    initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
 
-                initial = flatten_json(self.nested_form, data.to_mongo(), prefix)
-
-                for key, value in initial.items():
-                    if key not in formdata:
-                        formdata[key] = value
-            else:
-                data = None
+                    for key, value in initial.items():
+                        if key not in formdata:
+                            formdata[key] = value
+                else:
+                    try:
+                        self.nested_model.id.validate(id)
+                    except MongoValidationError:
+                        # Keep the malformed id so the nested form rejects the whole payload
+                        pass
+                    else:
+                        # The id is well-formed but matches no existing entry, e.g. a client
+                        # sending back an entry deleted in the meantime. Drop it so the entry
+                        # is created with a server-generated id: resource ids are resolved
+                        # globally by `/datasets/r/<id>`, so honouring a client-chosen one
+                        # would let anyone squat another dataset's permalink.
+                        del formdata[idkey]
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 
@@ -687,8 +705,7 @@ class CurrentUserField(ModelFieldMixin, Field):
 
     def pre_validate(self, form):
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
-            and form.instance
+            form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
             and not admin_permission
@@ -718,8 +735,9 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
+        # Some forms (like DiscussionCommentForm) are not model forms
         if (
-            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
@@ -802,15 +820,36 @@ class ExtrasField(Field):
         else:
             return value
 
+    def can_write(self, key) -> bool:
+        return not self.extras.is_reserved(key) or admin_permission.can()
+
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = self.parse(data)
-            else:
+            if not isinstance(data, dict):
                 raise ValueError("Unsupported data type")
         else:
-            self.data = self.parse(self.data or {})
+            data = self.data or {}
+        # Filtering before parsing, because parse() records a type error for every
+        # key it reads: a reserved key carrying a bad value would fail the whole
+        # payload with a 400 naming a key the caller may not write anyway, while
+        # the same key with a valid value is silently dropped.
+        self.data = self.parse({key: value for key, value in data.items() if self.can_write(key)})
+
+    def populate_obj(self, obj, name):
+        """Restore the reserved extras dropped from a non-sysadmin payload.
+
+        An update replaces the whole dict, so a payload that does not echo a stored
+        reserved key would erase it. Unlike the apiv2 extras endpoints, where every
+        key is an explicit write intent and a reserved one is rejected, a full-object
+        update legitimately echoes the extras it just read, hence a silent restore.
+        """
+        stored = getattr(obj, name, None) or {}
+        setattr(
+            obj,
+            name,
+            (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
+        )
 
     def validate(self, form, extra_validators=tuple()):
         if self.process_errors:
@@ -826,13 +865,3 @@ class ExtrasField(Field):
             self.errors = None
 
         return not bool(self.errors)
-
-
-class DictField(Field):
-    def process_formdata(self, valuelist):
-        if valuelist:
-            data = valuelist[0]
-            if isinstance(data, dict):
-                self.data = data
-            else:
-                raise ValueError("Unsupported data type")

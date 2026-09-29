@@ -19,8 +19,10 @@ from mongoengine.fields import (
 )
 from werkzeug.exceptions import BadRequest
 
-from udata.api_fields import field, generate_fields, patch, patch_and_save
+from udata.api import api
+from udata.api_fields import field, generate_fields, patch, patch_and_save, required_if
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import License
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
@@ -88,6 +90,30 @@ class FakeEmbedded(EmbeddedDocument):
     status = field(
         StringField(choices=[("active", "Active"), ("inactive", "Inactive")]),
     )
+
+
+@generate_fields()
+class FakeWithRequiredIf(Document):
+    """Exercises `required_if`: `comment` is mandatory as soon as `kind` is a request.
+    A Document (not an EmbeddedDocument) so a test can persist one and patch it back
+    as an update, where `_created` is False."""
+
+    kind = field(StringField(choices=["request", "invitation"], default="request"))
+    comment = field(StringField(), checks=[required_if(kind="request")])
+
+    meta = {"collection": "fake_with_required_if_api_fields"}
+
+
+def check_is_set(value: str = "", field: str = "", **_kwargs) -> None:
+    """A plain check (not `always_run`) that rejects the field's own default, so a test
+    can tell whether a creation writing that default still goes through its checks."""
+    if not value:
+        raise FieldValidationError("Value is required", field=field)
+
+
+@generate_fields()
+class FakeWithDefaultRejectingCheck(EmbeddedDocument):
+    kind = field(StringField(), checks=[check_is_set])
 
 
 @generate_fields(
@@ -281,6 +307,24 @@ class FakeWithUntypedList(Document):
     things = field(ListField())
 
     meta = {"collection": "fake_with_untyped_list_api_fields"}
+
+
+@generate_fields()
+class FakeWithGenericReference(Document):
+    """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
+
+    A `GenericReferenceField` stores a resolved document, which the default
+    `LazyReference` model cannot serialize (it reads `document_type`, an attribute only
+    a `LazyReference` has). `nested_fields` is what lets the caller opt out of it, and
+    it must be honoured whether or not `choices` constrains the allowed classes.
+    """
+
+    subject = field(
+        mongoengine.fields.GenericReferenceField(),
+        nested_fields=api.model_reference,
+    )
+
+    meta = {"collection": "fake_with_generic_reference_api_fields"}
 
 
 @generate_fields()
@@ -534,6 +578,71 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         assert embedded.status is None
 
 
+class RequiredIfTest(PytestOnlyDBTestCase):
+    def test_absent_field_is_rejected(self) -> None:
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf(), {})
+
+    def test_empty_value_is_rejected(self) -> None:
+        """A blank string is blanked to None by patch(), which on a field already
+        holding None leaves the value unmodified. The check must run all the same,
+        otherwise `{"comment": ""}` is a way to bypass the constraint entirely."""
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithRequiredIf(), {"comment": value})
+
+    def test_value_is_accepted(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"comment": "a reason"}).comment == "a reason"
+
+    def test_not_required_when_the_condition_is_not_met(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"kind": "invitation", "comment": ""}).comment is None
+
+    def test_unchanged_empty_value_is_rejected_on_update(self) -> None:
+        """What `always_run` buys over the creation case: on a stored object that
+        already breaks the constraint, echoing the offending value back must not be a
+        way through — an update has no `_created` to fall back on."""
+        stored = FakeWithRequiredIf.objects.create(kind="request", comment=None)
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf.objects.get(pk=stored.pk), {"comment": ""})
+
+
+class ChecksOnCreationTest(PytestOnlyDBTestCase):
+    """An unchanged value skips its checks so that resending an object as-is stays
+    idempotent. A creation has no previous value to be idempotent with — only a field
+    default — so writing that default must still be validated."""
+
+    def test_default_value_is_checked_on_creation(self) -> None:
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithDefaultRejectingCheck(), {"kind": value})
+
+    def test_valid_value_is_accepted_on_creation(self) -> None:
+        assert patch(FakeWithDefaultRejectingCheck(), {"kind": "a value"}).kind == "a value"
+
+    def test_unchanged_value_is_not_rechecked_on_update(self) -> None:
+        """A check that rejects the value already stored (uniqueness, immutability)
+        must not fire on an update that merely echoes it back."""
+        stored = FakeWithRename.objects.create(label=FORBIDDEN_VALUE)
+        patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+    def test_changed_value_is_still_checked_on_update(self) -> None:
+        stored = FakeWithRename.objects.create(label="a fine label")
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+
+class PatchBlankStringTest(PytestOnlyDBTestCase):
+    def test_blank_string_is_stored_as_none(self) -> None:
+        """A string field only made of whitespace holds no value, so `required=True`
+        rejects it at save() instead of storing spaces."""
+        for value in ["", "   ", "\n\t "]:
+            assert patch(Fake(), {"title": value}).title is None
+
+    def test_surrounding_whitespace_is_kept(self) -> None:
+        """Only fully blank strings are emptied: the value itself is never trimmed."""
+        assert patch(Fake(), {"title": "  a title  "}).title == "  a title  "
+
+
 class HrefFieldTest(PytestOnlyDBTestCase):
     def test_href_total_and_extra(self, app) -> None:
         """`href_total` provides the link total (instead of len(value)) and
@@ -553,6 +662,40 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class GenericReferenceFieldTest(PytestOnlyDBTestCase):
+    def test_nested_fields_is_honoured_without_choices(self, app) -> None:
+        """`choices` restricts the referenced classes, `nested_fields` describes how the
+        reference is serialized: the two are independent. Reading a reference through the
+        default `LazyReference` model raises on the resolved document a
+        `GenericReferenceField` stores, so ignoring `nested_fields` here is a 500."""
+        organization = OrganizationFactory()
+        obj = FakeWithGenericReference(subject=organization)
+
+        with app.test_request_context("/"):
+            subject = marshal(obj, FakeWithGenericReference.__read_fields__)["subject"]
+
+        assert subject == {"class": "Organization", "id": str(organization.id)}
+
+    def test_write_field_takes_a_class_and_id_reference(self) -> None:
+        """Writing stays keyed on `{class, id}` whatever the read model is."""
+        organization = OrganizationFactory()
+        obj = patch(
+            FakeWithGenericReference(),
+            {"subject": {"class": "Organization", "id": str(organization.id)}},
+        )
+        assert obj.subject == organization
+
+    @pytest.mark.parametrize("operators", [{"$where": "return true"}, {"$ne": "nope"}, {"$gt": ""}])
+    def test_write_field_rejects_mongo_operators_as_id(self, operators: dict) -> None:
+        """An id made of Mongo operators would select an arbitrary document instead of
+        the requested one. MongoEngine catches it on an `ObjectId` primary key, but
+        `License.id` is a `StringField`, so the operators would reach the database."""
+        License(id="fr-lo", title="Licence Ouverte").save()
+
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithGenericReference(), {"subject": {"class": "License", "id": operators}})
 
 
 class RenameFieldTest(PytestOnlyDBTestCase):

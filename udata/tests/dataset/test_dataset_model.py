@@ -1,3 +1,5 @@
+import gc
+import logging
 from datetime import UTC, date, datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -633,6 +635,28 @@ class ResourceModelTest(PytestOnlyDBTestCase):
             resource.title = "New title"
             resource.save(signal_kwargs={"ignores": ["post_save"]})
 
+    def test_dataset_fallback_ignores_ambiguous_id(self, caplog):
+        """A resource whose id is duplicated across datasets has no resolvable dataset
+
+        Once the weak reference to the parent dataset is collected, the only way back is
+        a global lookup on the resource id, which nothing makes unique across datasets.
+        Answering an arbitrary dataset would make `save()` write to that other dataset,
+        silently dropping the change made here.
+        """
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        dataset = DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        resource = dataset.resources[0]
+        del dataset
+        gc.collect()
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert resource.dataset is None
+        assert str(shared_id) in caplog.text
+
+        with pytest.raises(RuntimeError):
+            resource.save()
+
 
 class LicenseModelTest(PytestOnlyDBTestCase):
     @pytest.fixture(autouse=True)
@@ -909,7 +933,7 @@ class ResourceSchemaTest(PytestOnlyDBTestCase):
 
         # fill cache
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-        ResourceSchema.all()
+        ResourceSchema.all.uncached()
         assert cache_mock_set.called
 
         mocker.patch.object(
@@ -918,7 +942,7 @@ class ResourceSchemaTest(PytestOnlyDBTestCase):
         rmock.get("https://example.com/schemas", status_code=500)
         assert (
             ResourceSchemaMockData.get_all_schemas_from_mock_data(with_datapackage_info=False)
-            == ResourceSchema.all()
+            == ResourceSchema.all.uncached()
         )
         assert rmock.call_count == 2
 

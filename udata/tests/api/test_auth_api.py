@@ -193,6 +193,24 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json == {"success": True}
 
+    def test_authorization_head(self, oauth):
+        """Should answer HEAD requests, which Flask routes alongside GET"""
+        self.login()
+
+        response = self.client.head(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                redirect_uri=oauth.default_redirect_uri,
+                code_challenge=create_s256_code_challenge(generate_token(48)),
+                code_challenge_method="S256",
+            )
+        )
+
+        assert200(response)
+        assert response.data == b""
+
     def test_authorization_decline(self, oauth):
         """Should redirect to the redirect_uri on authorization denied"""
         self.login()
@@ -319,6 +337,50 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert_status(response, 400)
         assert "error" in response.json
         assert "Redirect URI" in response.json["error_description"]
+
+    @pytest.mark.parametrize(
+        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", "6853c089b3ed5781f6adfdf7"]
+    )
+    def test_authorization_unusable_client_id(self, client_id):
+        """Whether it parses as an ObjectId or not, a `client_id` we have no
+        client for gets the OAuth error response — so the consent screen shows
+        its error state instead of prompting for an undefined app. The response
+        keeps authlib's headers, since its body reflects the client's `state`."""
+        self.login()
+
+        response = self.get(url_for("oauth.authorize", response_type="code", client_id=client_id))
+
+        assert400(response)
+        assert response.json["error"] == "invalid_client"
+        assert response.headers["Cache-Control"] == "no-store"
+
+    @pytest.mark.parametrize(
+        "client_id", ["", "x", "dataset:6853c089b3ed5781f6adfdf7", "6853c089b3ed5781f6adfdf7"]
+    )
+    def test_client_info_unusable_client_id(self, client_id):
+        """Same for the endpoint the consent screen actually calls."""
+        self.login()
+
+        response = self.get(url_for("oauth.client_info", response_type="code", client_id=client_id))
+
+        assert400(response)
+        assert response.json["error"] == "invalid_client"
+        assert response.headers["Cache-Control"] == "no-store"
+
+    def test_token_malformed_client_id(self):
+        """A malformed `client_id` is an unknown client, not a server error."""
+        response = self.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": "whatever",
+                "client_id": "x",
+            },
+            json=False,
+        )
+
+        assert400(response)
+        assert response.json["error"] == "invalid_client"
 
     def test_authorization_grant_token(self, oauth):
         self.login()

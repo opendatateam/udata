@@ -4,6 +4,7 @@ from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import CONTACT_ROLES
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.core.user.factories import AdminFactory
 from udata.i18n import gettext as _
 from udata.models import ContactPoint
 from udata.tests.api import APITestCase
@@ -137,6 +138,23 @@ class ContactPointAPITest(APITestCase):
         )
         assert ContactPoint.objects.count() == 0
 
+    def test_contact_point_api_create_without_a_name(self):
+        self.login()
+        data = {"email": faker.email(), "role": "creator"}
+        response = self.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.first().name is None
+
+    def test_contact_point_missing_every_information(self):
+        self.login()
+        data = {"role": "creator"}
+        response = self.post(url_for("api.contact_points"), data=data)
+        assert400(response)
+        assert response.json["message"] == _(
+            "A contact point requires a name, an email or a contact form"
+        )
+        assert ContactPoint.objects.count() == 0
+
     def test_contact_point_missing_role(self):
         self.login()
         data = {"name": faker.word(), "email": faker.email()}
@@ -181,6 +199,20 @@ class ContactPointAPITest(APITestCase):
 
         contact_point_a.reload()
         assert contact_point_a.email == "a@example.org"
+
+    def test_contact_point_api_update_owner_as_sysadmin(self):
+        """Sysadmins bypass `only_creation`, but a contact point still never moves."""
+        self.login(AdminFactory())
+        org = OrganizationFactory()
+        contact_point = ContactPointFactory(organization=org)
+
+        data = contact_point.to_dict()
+        data["organization"] = str(OrganizationFactory().id)
+        response = self.put(url_for("api.contact_point", contact_point=contact_point), data)
+
+        assert400(response)
+        contact_point.reload()
+        assert contact_point.organization == org
 
     def test_contact_point_api_update_forbidden(self):
         self.login()

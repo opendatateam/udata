@@ -38,6 +38,7 @@ from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
+    validate_contact_points_ownership,
 )
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
@@ -148,6 +149,12 @@ class HarvestResourceMetadata(EmbeddedDocument):
     last_update = DateTimeField()
     uri = StringField()
     dct_identifier = StringField()
+
+    # How a backend recognizes an already harvested resource across runs, for the backends
+    # whose remote gives its resources an id. Only has to be unique inside its dataset,
+    # unlike `Resource.id` which is resolved platform-wide by the `/datasets/r/<id>`
+    # permalink.
+    remote_id = StringField()
 
 
 @generate_fields()
@@ -408,7 +415,26 @@ class ResourceMixin(object):
             "check:available": BooleanField,
             "check:status": IntField,
             "check:date": DateTimeField,
-        }
+            # These extras hold URLs the frontend renders as download links or
+            # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
+            # datafairOrigin as previews). Typing them rejects the dangerous
+            # schemes (javascript:, data:) at the model level, on every write
+            # path, guarding against stored XSS.
+            "analysis:parsing:parquet_url": URLField,
+            "analysis:parsing:geojson_url": URLField,
+            "analysis:parsing:pmtiles_url": URLField,
+            "apidocUrl": URLField,
+            "datafairOrigin": URLField,
+        },
+        # Written by the platform services on resources (hydra analysis and
+        # availability checks, validata, DCAT harvesting, CSV exports), and trusted
+        # as-is by the frontend: letting users write them enables stored XSS (e.g. a
+        # `javascript:` value in `analysis:parsing:*_url`, rendered as a download
+        # link) and forged "platform-generated" metadata. `csv-export:model` is not
+        # rendered but resolves which resource the export job overwrites, so a forged
+        # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
+        # writable, hence their URL type above.
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
@@ -544,7 +570,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
                 "Weakly referenced object for resource.dataset no longer exists, "
                 "using a poor performance query instead."
             )
-            return Dataset.objects(resources__id=self.id).first()
+            return get_dataset_by_resource_id(self.id)
 
     def save(self, *args, **kwargs):
         if not self.dataset:
@@ -614,7 +640,22 @@ class Dataset(
     schema = field(EmbeddedDocumentField(Schema))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
-    extras = field(ExtrasField(), auditable=False)
+    # datafairOrigin can live on the dataset too (the frontend reads it from the
+    # resource or its dataset) and feeds an <iframe> src, so validate it as a URL
+    # here as well. transport:url is reserved below, but it is rendered as a plain
+    # anchor by the frontend just like the analysis URLs, so it gets the same
+    # model-level scheme check rather than relying on its producer.
+    # See Resource.extras for the rationale.
+    # The reserved patterns differ from the resource ones: transport, the
+    # recommendations job and the DCAT harvester write on the dataset, while hydra
+    # and validata write on its resources.
+    extras = field(
+        ExtrasField(
+            {"datafairOrigin": URLField, "transport:url": URLField},
+            reserved=("transport:*", "recommendations*", "dcat"),
+        ),
+        auditable=False,
+    )
     harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)
@@ -735,6 +776,10 @@ class Dataset(
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
+
+    def validate(self, clean=True):
+        super().validate(clean=clean)
+        validate_contact_points_ownership(self)
 
     def clean(self):
         super(Dataset, self).clean()
@@ -1312,9 +1357,25 @@ class ResourceSchema(object):
         return None
 
 
+def get_dataset_by_resource_id(id):
+    """Fetch the dataset holding a resource, given the resource UUID
+
+    Resource ids are resolved globally (see the `/datasets/r/<id>` permalink), but nothing
+    enforces their uniqueness across datasets. An ambiguous id resolves to nothing rather
+    than letting an arbitrary dataset answer for another one's resource.
+    """
+    datasets = list(Dataset.objects(resources__id=id).limit(2))
+    if len(datasets) > 1:
+        # Corrupted data that no API path should be able to produce: report it instead of
+        # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
+        log.error(f"Resource #{id} is duplicated across several datasets")
+        return None
+    return datasets[0] if datasets else None
+
+
 def get_resource(id):
     """Fetch a resource given its UUID"""
-    dataset = Dataset.objects(resources__id=id).first()
+    dataset = get_dataset_by_resource_id(id)
     if dataset:
         return get_by(dataset.resources, id=id)
     else:

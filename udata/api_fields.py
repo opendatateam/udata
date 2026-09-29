@@ -73,7 +73,7 @@ def required_if(**conditions):
                     field=field,
                 )
 
-    check.run_even_if_missing = True
+    check.always_run = True
     return check
 
 
@@ -92,9 +92,13 @@ classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
-    def __init__(self, fields_by_type, **kwargs):
+    def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
         super(GenericField, self).__init__(**kwargs)
         self.default = None
+        # Key under which the concrete class name is emitted on output. Comes from
+        # the field's kwargs `generic_key`, so it matches whatever the model
+        # declared — the write path reads the same key in `patch()`.
+        self.generic_key = generic_key
         # `fields_by_type` may be a callable resolved lazily on first use (and then
         # memoized). This lets generic embedded lists discover their subclasses at
         # marshalling time rather than at class-decoration time, when the subclass
@@ -111,7 +115,7 @@ class GenericField(restx_fields.Raw):
     def format(self, value):
         # Value is one of the generic object
         data = marshal(value, self.fields_by_type[value.__class__.__name__])
-        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        data[self.generic_key] = value.__class__.__name__
         return data
 
 
@@ -323,40 +327,35 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             return restx_fields.Nested(lazy_reference, **kwargs)
 
     elif isinstance(field, mongo_fields.GenericReferenceField):
-        if field.choices:
-            # When the user supplies a single shared `nested_fields` model (e.g.
-            # `api.model_reference`), expose it as a `Nested` so X-Fields masks can
-            # traverse the reference (e.g. `element{id}`). Without this, the field
-            # is exposed as a `Raw`-based GenericField and any nested mask fails
-            # with "Mask is inconsistent with model".
-            shared_nested_fields = info.get("nested_fields")
-            if shared_nested_fields is not None:
+        # Write always takes a reference; so does read unless a branch below overrides it.
+        def constructor(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
 
-                def constructor_read(**kwargs):
-                    return restx_fields.Nested(shared_nested_fields, **kwargs)
-            else:
-                generic_fields = {}
-                for cls in field.choices:
-                    cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                    generic_fields[cls.__name__] = convert_db_to_field(
-                        f"{key}.{cls.__name__}",
-                        # Instead of having GenericReferenceField() we'll create fields for each
-                        # of the subclasses with ReferenceField(Organization)…
-                        mongoengine.fields.ReferenceField(cls),
-                        info,
-                    )
+        # When the user supplies a shared `nested_fields` model (e.g. `api.model_reference`),
+        # expose read as a `Nested` so X-Fields masks can traverse the reference (e.g.
+        # `element{id}`), which a `Raw`-based GenericField does not allow. It also opts out
+        # of the `constructor` above, which reads `document_type` — an attribute the
+        # resolved document stored here does not have, unlike a `LazyReference`.
+        # `choices` restricts the referenced classes and has no say in either.
+        shared_nested_fields = info.get("nested_fields")
+        if shared_nested_fields is not None:
 
-                def constructor_read(**kwargs):
-                    return GenericField(
-                        {k: v[0].model for k, v in generic_fields.items()}, **kwargs
-                    )
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(shared_nested_fields, **kwargs)
+        elif field.choices:
+            generic_fields = {}
+            for cls in field.choices:
+                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
+                generic_fields[cls.__name__] = convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericReferenceField() we'll create fields for each
+                    # of the subclasses with ReferenceField(Organization)…
+                    mongoengine.fields.ReferenceField(cls),
+                    info,
+                )
 
-            def constructor_write(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
-        else:
-
-            def constructor(**kwargs):
-                return restx_fields.Nested(lazy_reference, **kwargs)
+            def constructor_read(**kwargs):
+                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
@@ -381,22 +380,34 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
-        generic_fields = {
-            cls.__name__: convert_db_to_field(
-                f"{key}.{cls.__name__}",
-                # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
-                # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
-                mongoengine.fields.EmbeddedDocumentField(cls),
-                info,
-            )
-            for cls in field.choices
-        }
+
+        def resolve_choice(choice):
+            return db.resolve_model(choice) if isinstance(choice, str) else choice
+
+        def generic_fields():
+            # Choices may reference classes not defined yet at decoration time
+            # (mutually recursive embedded documents like AndFilters/OrFilters),
+            # so resolve them lazily on first marshalling.
+            return {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    info,
+                )
+                for cls in (resolve_choice(choice) for choice in field.choices)
+            }
 
         def constructor_read(**kwargs):
-            return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[0].model for k, v in generic_fields().items()}, **kwargs
+            )
 
         def constructor_write(**kwargs):
-            return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
+            return GenericField(
+                lambda: {k: v[1].model for k, v in generic_fields().items()}, **kwargs
+            )
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
@@ -697,7 +708,7 @@ def generate_fields(**kwargs) -> Callable:
 
         searchable: bool = kwargs.pop("searchable", False)
         if searchable:
-            parser.add_argument("q", type=str, location="args")
+            parser.add_argument("q", type=str, location="args", help="The search query")
 
         for filterable in filterables:
             parser.add_argument(
@@ -706,6 +717,7 @@ def generate_fields(**kwargs) -> Callable:
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
+                help=filterable.get("help", None),
                 # A list field accepts the parameter several times, and
                 # `apply_sort_filters` then requires all the values (`__all`).
                 action="append" if filterable.get("is_list") else "store",
@@ -744,10 +756,10 @@ def generate_fields(**kwargs) -> Callable:
                 filter = args.get(filterable.get("label", filterable["key"]))
                 if filter is not None:
                     for constraint in filterable.get("constraints", []):
-                        if constraint == "objectid" and not ObjectId.is_valid(
-                            args[filterable["key"]]
-                        ):
-                            api.abort(400, f"`{filterable['key']}` must be an identifier")
+                        if constraint == "objectid":
+                            values = filter if filterable.get("is_list") else [filter]
+                            if not all(ObjectId.is_valid(value) for value in values):
+                                api.abort(400, f"`{filterable['key']}` must be an identifier")
 
                     query = filterable.get("query", None)
                     if query:
@@ -971,7 +983,13 @@ def patch(obj: _T, request) -> _T:
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+            # A blank string is an absent value, otherwise `required=True` happily
+            # stores a title or a comment made of spaces.
+            if (
+                isinstance(model_attribute, mongo_fields.StringField)
+                and isinstance(value, str)
+                and not value.strip()
+            ):
                 value = None
 
             if hasattr(model_attribute, "from_input"):
@@ -1002,6 +1020,19 @@ def patch(obj: _T, request) -> _T:
                     document_type = db.resolve_model(value["class"])
                 except ValueError as e:
                     raise FieldValidationError(message=str(e), field=key)
+                # `resolve_model` resolves against the whole document registry, so
+                # without this the client picks which collection the lookup below
+                # queries — MongoEngine only enforces `choices` at save() time, long
+                # after that query ran. A field without `choices` accepts them all,
+                # by design (e.g. `Transfer.subject`).
+                if (
+                    model_attribute.choices
+                    and document_type._class_name not in model_attribute.choices
+                ):
+                    raise FieldValidationError(
+                        message=f"Value must be one of {model_attribute.choices}",
+                        field=key,
+                    )
                 value = wrap_primary_key(
                     key,
                     model_attribute,
@@ -1040,6 +1071,28 @@ def patch(obj: _T, request) -> _T:
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
+            elif (
+                value
+                and isinstance(
+                    model_attribute,
+                    mongoengine.fields.ListField,
+                )
+                and isinstance(
+                    model_attribute.field, mongoengine.fields.GenericEmbeddedDocumentField
+                )
+            ):
+                # A list of generic embedded documents (e.g. nested filter groups):
+                # discriminate each item on the generic key and patch it into an
+                # embedded document instance.
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
+
+                objects = []
+                for embedded_value in value:
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = classes_by_names[embedded_value[generic_key]]
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
 
             # Validate `choices` here because patch() never goes through
             # MongoEngine's validate(): without this, an invalid choice would only
@@ -1075,20 +1128,28 @@ def patch(obj: _T, request) -> _T:
                         message=f"'{value}' is not a valid choice. Valid choices: {valid_choices}",
                     )
 
-            # Run checks if value is modified.
-            # We run checks here (before setattr) to compare old vs new value.
-            checks = info.get("checks", [])
-            if is_value_modified(getattr(obj, key), value):
-                for check in checks:
+            # An unchanged value normally skips its checks, so that resending an object
+            # as-is stays idempotent: `only_creation` must not reject a PUT that echoes
+            # back the owner it was given, nor `check_url_does_not_exists` a reuse that
+            # keeps its own URL. Two cases have no such old value to be idempotent with:
+            #  - a creation, where the "old" value is just the field default. Writing the
+            #    default is still a caller-supplied value and must be validated.
+            #  - an `always_run` check, which validates the resulting state rather than
+            #    the write itself, and so cannot be escaped by leaving a field out or by
+            #    resending it unchanged.
+            modified = is_value_modified(getattr(obj, key), value)
+            for check in info.get("checks", []):
+                if obj._created or modified or getattr(check, "always_run", False):
                     # Pass the API key so error messages match the payload the caller sent.
                     run_check(check, value, api_key, obj, data)
 
             setattr(obj, key, value)
 
-    # Run checks marked with `run_even_if_missing` on fields not in request.
-    # Some checks (like `required_if`) need to run even when their field is absent
-    # from the request, because they validate cross-field constraints based on
-    # other fields in the request (e.g. "page_id is required if body_type is blocs").
+    # Run `always_run` checks on fields absent from the request (the ones present
+    # already ran in the loop above). Some checks (like `required_if`) validate a
+    # cross-field constraint on the resulting object rather than on the value being
+    # written (e.g. "page_id is required if body_type is blocs"), so leaving the
+    # field out of the payload must not be a way to escape them.
     for key, _, info in get_fields(obj.__class__):
         api_key = info.get("rename") or key
         if api_key in data:
@@ -1097,7 +1158,7 @@ def patch(obj: _T, request) -> _T:
         value = getattr(obj, key, None)
 
         for check in checks:
-            if not getattr(check, "run_even_if_missing", False):
+            if not getattr(check, "always_run", False):
                 continue
             run_check(check, value, api_key, obj, data)
 
@@ -1140,6 +1201,15 @@ def wrap_primary_key(
 
     if isinstance(value, dict) and "id" in value:
         return wrap_primary_key(field_name, foreign_field, value["id"], document_type)
+
+    # `value` comes straight from the request body and goes straight into the query
+    # below, so anything but a scalar is a set of Mongo operators (`{"$ne": …}`) that
+    # selects an arbitrary document instead of the requested one. MongoEngine catches
+    # them only when the primary key is an `ObjectId`, whose `prepare_query_value`
+    # refuses the dict; on a `StringField` primary key (`License`, `GeoZone`…) the
+    # operators reach the database untouched.
+    if isinstance(value, (dict, list)):
+        raise FieldValidationError(field=field_name, message="Expected a reference id")
 
     document_type = document_type or foreign_field.document_type().__class__
     id_field_name = document_type._meta["id_field"]
@@ -1226,7 +1296,6 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     # Excluded: ListField(ReferenceField) (e.g. Reuse.datasets,
     # Dataservice.contact_points) — these are filtered by a single ObjectId
     # and nobody needs multi-ID filtering (?dataset=id1&dataset=id2) today.
-    # Supporting it would also require updating the ObjectId validation above.
     if (
         isinstance(field, mongo_fields.ListField)
         and not isinstance(field, mongo_fields.EmbeddedDocumentListField)

@@ -5,7 +5,7 @@
   "baseBranchPatterns": [
     "main"
   ],
-  "enabledManagers": ["pep621"],
+  "enabledManagers": ["pep621", "github-actions"],
   "pep621": {
     "managerFilePatterns": [
       "/pyproject.toml/"

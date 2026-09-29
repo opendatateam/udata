@@ -1,12 +1,21 @@
+from typing import TYPE_CHECKING
+
 from mongoengine.errors import ValidationError
 from mongoengine.fields import StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.checks import check_is_email, check_no_urls
-from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.organization.models import Organization
+from udata.core.owned import Owned, OwnedQuerySet, ownership_filter
+from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.url_field import URLField
+
+if TYPE_CHECKING:
+    from udata.core.dataservices.models import Dataservice
+    from udata.core.dataset.models import Dataset
 
 __all__ = ("ContactPoint",)
 
@@ -30,16 +39,80 @@ MASK_FIELDS = ("id", "name", "email", "contact_form", "role")
 
 @generate_fields(page_mask=",".join(MASK_FIELDS))
 class ContactPoint(Document, Owned):
-    name = field(StringField(max_length=255, required=True), checks=[check_no_urls])
+    name = field(StringField(max_length=255), checks=[check_no_urls])
     email = field(StringField(max_length=255), checks=[check_is_email])
     contact_form = field(URLField())
     role = field(StringField(required=True, choices=list(CONTACT_ROLES)))
 
-    meta = {"queryset_class": OwnedQuerySet}
+    # A contact point is shared by all the objects of its owner, so the same one is never
+    # written twice. Every writer looks it up before creating it; the index is what makes
+    # that hold for all of them at once, including a bulk rewrite that would make two of
+    # them identical.
+    meta = {
+        "queryset_class": OwnedQuerySet,
+        "indexes": [
+            {
+                "fields": ["name", "email", "contact_form", "role", "owner", "organization"],
+                "unique": True,
+            }
+        ],
+    }
 
     def validate(self, clean=True):
+        # The name is optional, but a contact point holding nothing but a role names nobody
+        # and reaches nobody.
+        if not self.name and not self.email and not self.contact_form:
+            raise ValidationError(_("A contact point requires a name, an email or a contact form"))
         if self.role == "contact" and not self.email and not self.contact_form:
             raise ValidationError(
                 _("At least an email or a contact form is required for a contact point")
             )
+        # `only_creation` says the same but lets sysadmins through, and a contact point that
+        # moves leaves the objects referencing it pointing at somebody else's, which they
+        # now reject: they could never be saved again. `for_owner` is the way to move.
+        moved = {"owner", "organization"} & set(self._get_changed_fields())
+        if moved and not self._created:
+            raise FieldValidationError(
+                _("A contact point cannot change owner."),
+                field="organization" if "organization" in moved else "owner",
+            )
         return super().validate(clean=clean)
+
+    def for_owner(self, owner: Organization | User) -> "ContactPoint":
+        """The same contact point, owned by `owner`, created if it does not exist yet.
+
+        Contact points are never moved from one owner to another: a single one is shared
+        by all the objects of its owner, so moving it would silently change the contact
+        of the objects that stayed behind.
+        """
+        contact_point, _created = ContactPoint.objects.get_or_create(
+            name=self.name,
+            email=self.email,
+            contact_form=self.contact_form,
+            role=self.role,
+            **ownership_filter(owner),
+        )
+        return contact_point
+
+
+def validate_contact_points_ownership(document: "Dataset | Dataservice") -> None:
+    """Check that the contact points of `document` belong to whoever owns it.
+
+    Enforced on the model rather than on the API layer because ownership also changes
+    through transfers and harvesting, and neither goes through a form or through `patch()`.
+    Call it from `validate()` and after `Owned.clean` has run: errors raised from `clean()`
+    are re-wrapped by mongoengine under `__all__`, losing the field this one is about, and
+    ownership is ambiguous until `Owned.clean` clears the field the object is moving away
+    from.
+    """
+    for contact_point in document.contact_points:
+        if (
+            contact_point.organization != document.organization
+            or contact_point.owner != document.owner
+        ):
+            raise FieldValidationError(
+                _("Contact point {id} does not belong to the owner of this object").format(
+                    id=contact_point.id
+                ),
+                field="contact_points",
+            )

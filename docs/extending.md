@@ -11,9 +11,14 @@ there may already be some details you can easily customize with a simple setting
 
 Entrypoints are modules or classes loaded by udata to extends its features.
 
+An entrypoint is loaded as soon as the package declaring it is installed in the same
+environment as udata. There is nothing to enable in the configuration.
+
 ### I18N (`udata.i18n`)
 
-Plugins can expose a translation directory with the `udata.i18n` entrypoint.
+Plugins can expose a translation directory with the `udata.i18n` entrypoint. The module it
+points at is used as the translation directory, and the entrypoint name as the domain — see
+[adding-translations](adding-translations.md) to set them up.
 
 ### Harvesters (`udata.harvesters`)
 
@@ -31,16 +36,6 @@ A module entrypoint for generic plugins. They just have to expose a `init_app(ap
 and can perform any manual initialization.
 
 Use this entrypoint if you want to perform something not handled by previous entrypoints.
-
-### Default settings
-
-Any registered plugin may also expose some default settings in a `settings` module (ie. `my_plugin.settings`). They will be automatically discovered and registered.
-
-### Translations
-
-Any registered plugin may also expose translations in its root module `translations` directory.
-They will be automatically discovered and loaded if the plugin is enabled.
-Take a look at [adding-translations](adding-translations.md) to set up translations.
 
 ## Contributing
 

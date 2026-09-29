@@ -16,7 +16,7 @@ from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
-from udata.models import GeoZone, License, Resource, SpatialCoverage
+from udata.models import Dataset, GeoZone, License, Resource, SpatialCoverage
 from udata.mongo.datetime_fields import DateRange
 from udata.utils import daterange_end, daterange_start, get_by
 
@@ -27,6 +27,30 @@ log = logging.getLogger(__name__)
 
 # dkan is a dummy value for dkan that does not provide resource_type
 ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
+
+
+def find_resource(dataset: Dataset, remote_id: str) -> Resource | None:
+    """The resource a previous run created for this remote one, if any.
+
+    Until this backend stopped adopting the remote id as `Resource.id`, that id *was* the
+    remote one. A migration copies it into `harvest.remote_id` where the harvest metadata
+    survived, but resources harvested before udata stored any have nothing to copy it into,
+    and no dataset has it before the migration runs. Their id is the only link left.
+    """
+    # `get_by` cannot look into `harvest`: it reads a single top-level attribute.
+    resource = next(
+        (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id), None
+    )
+    if resource:
+        return resource
+    try:
+        # A remote id is an opaque string, but when it is a UUID the portal may spell it in
+        # any case or without dashes: comparing `UUID` compares the value, as the code that
+        # adopted those ids did.
+        adopted_id = UUID(remote_id)
+    except ValueError:
+        return None
+    return get_by(dataset.resources, id=adopted_id)
 
 
 class CkanBackend(BaseBackend):
@@ -261,13 +285,10 @@ class CkanBackend(BaseBackend):
         for res in data["resources"]:
             if res["resource_type"] not in ALLOWED_RESOURCE_TYPES:
                 continue
-            try:
-                resource = get_by(dataset.resources, id=UUID(res["id"]))
-            except Exception:
-                log.error("Unable to parse resource ID %s", res["id"])
-                continue
+            remote_id = res["id"]
+            resource = find_resource(dataset, remote_id)
             if not resource:
-                resource = Resource(id=res["id"])
+                resource = Resource()
                 dataset.resources.append(resource)
             if not resource.harvest:
                 resource.harvest = HarvestResourceMetadata()
@@ -278,6 +299,7 @@ class CkanBackend(BaseBackend):
             resource.format = res.get("format")
             resource.mime = res.get("mimetype")
             resource.hash = res.get("hash")
+            resource.harvest.remote_id = remote_id
             resource.harvest.issued_at = res["created"]
             resource.harvest.modified_at = res["last_modified"]
             resource.harvest.last_update = datetime.now(UTC)

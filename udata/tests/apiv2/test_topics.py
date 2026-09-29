@@ -1,4 +1,5 @@
 import pytest
+from bson import ObjectId
 from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -12,6 +13,7 @@ from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
 from udata.core.topic.factories import (
+    TopicElementDataserviceFactory,
     TopicElementDatasetFactory,
     TopicElementFactory,
     TopicElementReuseFactory,
@@ -417,6 +419,92 @@ class TopicsListAPITest(APITestCase):
         self.login()
         response = self.post(url_for("apiv2.topics_list"), [{"not": "a topic"}])
         assert response.status_code == 400
+
+
+class TopicsListFilterByElementAPITest(APITestCase):
+    def test_filter_by_dataset(self):
+        dataset = DatasetFactory()
+        other_dataset = DatasetFactory()
+        topic = TopicFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset)
+        other_topic = TopicFactory()
+        TopicElementDatasetFactory(topic=other_topic, element=other_dataset)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_dataservice(self):
+        dataservice = DataserviceFactory()
+        topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=topic, element=dataservice)
+        unrelated_topic = TopicFactory()
+        TopicElementDataserviceFactory(topic=unrelated_topic, element=DataserviceFactory())
+
+        response = self.get(url_for("apiv2.topics_list", dataservice=dataservice.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_reuse(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", reuse=reuse.id))
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(topic.id)
+
+    def test_filter_by_dataset_excludes_private_topics(self):
+        dataset = DatasetFactory()
+        private_topic = TopicFactory(private=True)
+        TopicElementDatasetFactory(topic=private_topic, element=dataset)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_invalid_dataset_id_returns_400(self):
+        response = self.get(url_for("apiv2.topics_list", dataset="not-an-id"))
+        assert response.status_code == 400
+
+    def test_filter_by_unknown_dataset_returns_empty(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=DatasetFactory().id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_nonexistent_dataset_still_validates_other_args(self):
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse="not-an-id"))
+        assert response.status_code == 400
+
+    def test_filter_by_nonexistent_dataset_with_valid_reuse_returns_empty(self):
+        reuse = ReuseFactory()
+        topic = TopicFactory()
+        TopicElementReuseFactory(topic=topic, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=ObjectId(), reuse=reuse.id))
+        assert response.status_code == 200
+        assert response.json["data"] == []
+
+    def test_filter_by_dataset_and_reuse_combined(self):
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        topic_both = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_both, element=dataset)
+        TopicElementReuseFactory(topic=topic_both, element=reuse)
+        topic_dataset_only = TopicFactory()
+        TopicElementDatasetFactory(topic=topic_dataset_only, element=dataset)
+        topic_reuse_only = TopicFactory()
+        TopicElementReuseFactory(topic=topic_reuse_only, element=reuse)
+
+        response = self.get(url_for("apiv2.topics_list", dataset=dataset.id, reuse=reuse.id))
+        assert response.status_code == 200
+        assert [t["id"] for t in response.json["data"]] == [str(topic_both.id)]
 
 
 class TopicAPITest(APITestCase):
@@ -959,6 +1047,20 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["errors"][0]["element"][0] == _(
             "A topic element must have a title or an element."
         )
+
+    def test_add_element_with_explicitly_empty_fields(self):
+        """Spelling the fields out as empty must be rejected just like omitting them:
+        every value then equals its own default, which is not a reason to skip a check."""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic), [{"title": "", "element": None}]
+        )
+        assert response.status_code == 400
+        assert response.json["errors"][0]["element"][0] == _(
+            "A topic element must have a title or an element."
+        )
+        assert TopicElement.objects(topic=topic).count() == 0
 
     def test_add_element_ignores_arbitrary_topic_in_payload(self):
         owner = self.login()

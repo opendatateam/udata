@@ -42,7 +42,7 @@ def check_title_or_element_required(value, obj, data, **_kwargs):
         )
 
 
-check_title_or_element_required.run_even_if_missing = True
+check_title_or_element_required.always_run = True
 
 
 class TopicQuerySet(OwnedQuerySet):
@@ -51,6 +51,11 @@ class TopicQuerySet(OwnedQuerySet):
 
     def hidden(self):
         return self(private=True)
+
+    def for_element(self, element):
+        """Filter topics containing the given element (Dataset, Dataservice...)."""
+        topic_ids = TopicElement.objects(element=element).no_dereference().distinct("topic")
+        return self(id__in=topic_ids)
 
 
 @generate_fields()
@@ -63,6 +68,8 @@ class TopicElement(Auditable, Document):
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
     element = field(
+        # If modifying choices list below , also look at core/topic/parsers.py's
+        # parse_filters for filtering support
         GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
         nested_fields=api.model_reference,
         allow_null=True,
@@ -75,7 +82,12 @@ class TopicElement(Auditable, Document):
         "indexes": [
             {
                 "fields": ["$title", "$description"],
-            }
+            },
+            # Used to reverse-lookup the topics an element belongs to.
+            "element",
+            # Used by Topic.elements and the per-topic element count (incl. the
+            # API's HATEOAS "elements" link), so it stays indexed even on huge topics.
+            "topic",
         ],
         "auto_create_index_on_save": True,
     }
@@ -93,7 +105,7 @@ class TopicElement(Auditable, Document):
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
         if document.topic:
-            reindex.delay(*as_task_param(document.topic))
+            document.topic.save()
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -102,7 +114,7 @@ class TopicElement(Auditable, Document):
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
             if document.topic:
-                reindex.delay(*as_task_param(document.topic))
+                document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass

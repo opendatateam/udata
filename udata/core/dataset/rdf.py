@@ -226,8 +226,8 @@ def detect_ogc_service(resource: Resource) -> str | None:
     * a REQUEST=GetCapabilities param in url
     It returns the OGC service type or None
     """
-    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
-        return resource.format.strip("ogc:")
+    if resource.format and (format := resource.format.removeprefix("ogc:")) in OGC_SERVICE_FORMATS:
+        return format
     url = resource.url.lower()
     if "request=getcapabilities" in url and any(
         f"service={format}" in url for format in OGC_SERVICE_FORMATS
@@ -962,8 +962,9 @@ def dataset_from_rdf(
     description = default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
+    owner = dataset.organization or dataset.owner
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataset, dryrun=dryrun)
+        contact_points_from_rdf(d, rdf_entity, role, owner, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataset.contact_points = [  # Flattened list of contact points

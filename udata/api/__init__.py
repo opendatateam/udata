@@ -1,5 +1,4 @@
 import logging
-import urllib.parse
 from functools import wraps
 
 import mongoengine
@@ -19,14 +18,11 @@ from flask_restx.inputs import positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
-from udata import tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
-from udata.utils import safe_unicode
 
 from . import fields
-from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
@@ -141,6 +137,20 @@ class UDataApi(Api):
 
         return wrapper
 
+    def json_payload(self) -> dict:
+        """Return the request body as a dict, rejecting any other JSON shape.
+
+        A JSON body can decode to a string, a number or a list, none of which the
+        handlers can consume: without this check they raise an `AttributeError` and
+        the client gets a 500 instead of a 400.
+        """
+        data = request.json
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            self.abort(400, errors={"request": "expecting a JSON object"})
+        return data
+
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
         if "application/json" not in request.headers.get("Content-Type", ""):
@@ -166,6 +176,19 @@ class UDataApi(Api):
 
     def page_parser(self) -> RequestParser:
         return add_pagination_arguments(self.parser())
+
+    @property
+    def __schema__(self) -> dict:
+        """Add the `schemes` flask-restx never emits to the generated specifications.
+
+        Swagger 2.0 falls back to the scheme the specifications were served with when
+        `schemes` is missing, but documentation renderers and generated clients default
+        to `http` instead. The API only answers in HTTPS: a plain HTTP call is answered
+        with a redirection, which turns a documented POST into a bodyless GET.
+        """
+        schema = super().__schema__
+        schema["schemes"] = ["https"]
+        return schema
 
 
 api = UDataApi(
@@ -219,40 +242,6 @@ def set_api_language():
             log.warning("Ignoring unknown `lang` query parameter: %r", lang)
             lang = None
     g.lang_code = lang or get_locale()
-
-
-def extract_name_from_path(path):
-    """Return a readable name from a URL path.
-
-    Useful to log requests on Piwik with categories tree structure.
-    See: http://piwik.org/faq/how-to/#faq_62
-    """
-    base_path, query_string = path.split("?")
-    infos = base_path.strip("/").split("/")[2:]  # Removes api/version.
-    if (
-        base_path == "/api/1/" or base_path == "/api/2/"
-    ):  # The API root endpoint redirects to swagger doc.
-        return safe_unicode("apidoc")
-    if len(infos) > 1:  # This is an object.
-        name = "{category} / {name}".format(
-            category=infos[0].title(), name=infos[1].replace("-", " ").title()
-        )
-    else:  # This is a collection.
-        name = "{category}".format(category=infos[0].title())
-    return safe_unicode(name)
-
-
-@apiv1_blueprint.after_request
-@apiv2_blueprint.after_request
-def collect_stats(response):
-    action_name = extract_name_from_path(request.full_path)
-    blacklist = current_app.config.get("TRACKING_BLACKLIST", [])
-    if not current_app.config["TESTING"] and request.endpoint not in blacklist:
-        extras = {
-            "action_name": urllib.parse.quote(action_name),
-        }
-        tracking.send_signal(on_api_call, request, current_user, **extras)
-    return response
 
 
 default_error = api.model("Error", {"message": fields.String})

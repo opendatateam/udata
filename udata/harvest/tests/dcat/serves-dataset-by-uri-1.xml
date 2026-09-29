@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:hydra="http://www.w3.org/ns/hydra/core#"
+>
+  <dcat:Catalog rdf:about="http://data.test.org/">
+    <dcterms:title>Sample DCAT Catalog</dcterms:title>
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://data.test.org/datasets/1">
+        <dcterms:title>Dataset 1</dcterms:title>
+        <dcterms:identifier>1</dcterms:identifier>
+        <dcterms:description>Dataset 1 description</dcterms:description>
+      </dcat:Dataset>
+    </dcat:dataset>
+  </dcat:Catalog>
+  <hydra:PartialCollectionView rdf:about="http://data.test.org/catalog.xml?page=1">
+    <hydra:next rdf:resource="http://data.test.org/catalog.xml?page=2"/>
+  </hydra:PartialCollectionView>
+</rdf:RDF>

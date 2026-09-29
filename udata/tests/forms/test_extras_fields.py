@@ -183,6 +183,7 @@ class ExtrasFieldTest(PytestOnlyTestCase):
             (StringField, 42),
             (FloatField, "xxxx"),
             (URLField, "not-an-url"),
+            (URLField, 42),
             (UUIDField, "not-a-uuid"),
             ids=lambda t: t[0].__name__,
         ),
@@ -197,3 +198,28 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         form.validate()
         assert "extras" in form.errors
         assert "my:extra" in form.errors["extras"]
+
+    @pytest.mark.parametrize(
+        "key, reserved",
+        (
+            ("analysis:parsing:parquet_url", True),
+            ("analysis:", True),
+            ("analysis", False),
+            ("recommendations", True),
+            ("recommendations:sources", True),
+            ("recommendations_note", True),
+            ("dcat", True),
+            ("dcatIdentifier", False),
+            ("custom:key", False),
+        ),
+    )
+    def test_reserved_patterns_are_globs(self, key, reserved):
+        """`dcat` is an exact key while `analysis:*` and `recommendations*` are namespaces.
+
+        The three shapes coexist in the dataset and resource registries, and a
+        stray `*` is the kind of typo that silently freezes user keys: `dcat*`
+        would swallow `dcatIdentifier`, which the DCAT harvester does not own.
+        """
+        field = ExtrasField(reserved=("analysis:*", "recommendations*", "dcat"))
+
+        assert field.is_reserved(key) is reserved

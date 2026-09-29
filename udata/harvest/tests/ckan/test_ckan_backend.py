@@ -3,6 +3,7 @@ import random
 from datetime import date, datetime, timedelta
 
 import pytest
+from mongoengine.connection import get_db
 
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.organization.factories import OrganizationFactory
@@ -42,7 +43,7 @@ def ckan_package(data):
     result_data.update(data)
 
     for res in result_data.get("resources", []):
-        res["id"] = faker.uuid4()
+        res.setdefault("id", faker.uuid4())
         res["resource_type"] = res.get("resource_type", "file")
         res["created"] = res.get("created", faker.date())
         res["last_modified"] = res.get("last_modified", faker.date())
@@ -149,6 +150,29 @@ def minimal(resource_data):
         "resources": [resource_data],
     }
     return data, {"resource_url": resource_data["url"]}
+
+
+@pytest.fixture
+def two_resources(resource_data):
+    other = dict(resource_data, id=faker.uuid4(), name=faker.word(), url=faker.unique_url())
+    return {
+        "name": faker.unique_string(),
+        "title": faker.sentence(),
+        "notes": faker.paragraph(),
+        "resources": [resource_data, other],
+    }
+
+
+@pytest.fixture
+def non_uuid_resource_id(resource_data):
+    resource_data["id"] = "42"
+    data = {
+        "name": faker.unique_string(),
+        "title": faker.sentence(),
+        "notes": faker.paragraph(),
+        "resources": [resource_data],
+    }
+    return data
 
 
 @pytest.fixture
@@ -486,6 +510,104 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset = dataset_for(result)
         assert dataset.harvest.remote_url == data["url"]
         assert dataset.harvest.ckan_source is None
+
+    @pytest.mark.ckan_data("minimal")
+    def test_resource_id_is_not_the_remote_id(self, result):
+        """Resource ids are resolved platform-wide by `/datasets/r/<id>`, so a remote one
+        cannot be adopted: two datasets harvested from the same portal would share it."""
+        remote_id = result["result"]["resources"][0]["id"]
+
+        resource = dataset_for(result).resources[0]
+        assert resource.harvest.remote_id == remote_id
+        assert str(resource.id) != remote_id
+
+    @pytest.mark.ckan_data("minimal")
+    def test_reharvesting_updates_the_same_resource(self, source, result):
+        dataset = dataset_for(result)
+        resource_id = dataset.resources[0].id
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert dataset.resources[0].id == resource_id
+
+    @pytest.mark.ckan_data("two_resources")
+    def test_reharvesting_correlates_on_the_remote_id_not_the_position(
+        self, source, result, ckan, rmock
+    ):
+        dataset = dataset_for(result)
+        ids = {r.harvest.remote_id: r.id for r in dataset.resources}
+        assert len(ids) == 2
+
+        result["result"]["resources"].reverse()
+        rmock.get(
+            ckan.PACKAGE_SHOW_URL,
+            json=result,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 2
+        assert {r.harvest.remote_id: r.id for r in dataset.resources} == ids
+
+    @pytest.mark.ckan_data("minimal")
+    def test_resource_id_is_matched_on_the_uuid_value_not_its_spelling(self, source, result):
+        """A portal may write the same id in another case, as it always could."""
+        remote_id = result["result"]["resources"][0]["id"]
+        dataset = dataset_for(result)
+        get_db().dataset.update_one(
+            {"_id": dataset.id},
+            {"$set": {"resources.0._id": remote_id}, "$unset": {"resources.0.harvest": ""}},
+        )
+        result["result"]["resources"][0]["id"] = remote_id.upper()
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert str(dataset.resources[0].id) == remote_id
+
+    @pytest.mark.ckan_data("minimal")
+    def test_resource_harvested_before_remote_ids_is_recognized(self, source, result):
+        """The shape every resource had before this backend stopped adopting the remote id.
+        The migration copies that id into `harvest.remote_id`, but only where the harvest
+        metadata survived — and not at all until it runs.
+        """
+        remote_id = result["result"]["resources"][0]["id"]
+        dataset = dataset_for(result)
+        get_db().dataset.update_one(
+            {"_id": dataset.id},
+            {"$set": {"resources.0._id": remote_id}, "$unset": {"resources.0.harvest": ""}},
+        )
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert str(dataset.resources[0].id) == remote_id
+        assert dataset.resources[0].harvest.remote_id == remote_id
+
+    @pytest.mark.ckan_data("non_uuid_resource_id")
+    def test_non_uuid_remote_id_is_harvested(self, result):
+        """Remote ids are opaque strings: DKAN portals number their resources."""
+        resource = dataset_for(result).resources[0]
+        assert resource.harvest.remote_id == "42"
+
+    @pytest.mark.ckan_data("non_uuid_resource_id")
+    def test_reharvesting_a_non_uuid_remote_id_does_not_duplicate(self, source, result):
+        """Those resources were dropped until now, so they are all created on the first run
+        and have to be recognized on the second one like any other."""
+        dataset = dataset_for(result)
+        resource_id = dataset.resources[0].id
+
+        actions.run(source)
+
+        dataset.reload()
+        assert len(dataset.resources) == 1
+        assert dataset.resources[0].id == resource_id
 
     @pytest.mark.ckan_data("ckan_url_is_a_string")
     def test_ckan_url_is_string(self, ckan, data, result):

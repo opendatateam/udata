@@ -36,6 +36,7 @@ from udata.core.edito_blocs.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
+from udata.core.owned import ownership_filter
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
@@ -92,6 +93,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "preview_url",
         "permissions",
     ],
+    # The owner is not the exported one: it is whoever owns the object being imported.
+    "contact_point": ["organization", "owner"],
     "discussion": ["subject", "url", "self_web_url", "class", "permissions", "spam"],
     "discussion_message": ["permissions", "spam"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
@@ -312,15 +315,15 @@ def get_or_create_user(data):
     return get_or_create(data, "user", User, UserFactory)
 
 
-def get_or_create_contact_point(data):
+def get_or_create_contact_point(data, owner):
     obj = ContactPoint.objects(id=data["id"]).first()
-    if not obj:
-        if not data.get("role"):
-            data["role"] = (
-                "contact" if (data.get("email") or data.get("contact_form")) else "creator"
-            )
-        obj = ContactPointFactory(**data)
-    return obj
+    if obj:
+        # A contact point exported from one owner can be referenced by objects of another.
+        return obj.for_owner(owner)
+    data = remove_unwanted_keys(data, "contact_point")
+    if not data.get("role"):
+        data["role"] = "contact" if (data.get("email") or data.get("contact_form")) else "creator"
+    return ContactPointFactory(**data, **ownership_filter(owner))
 
 
 @cli.command()
@@ -351,10 +354,11 @@ def import_fixtures(source):
             user = UserFactory()
             dataset = fixture["dataset"]
             dataset = remove_unwanted_keys(dataset, "dataset")
-            contact_points = []
-            for contact_point in dataset.get("contact_points") or []:
-                contact_points.append(get_or_create_contact_point(contact_point))
-            dataset["contact_points"] = contact_points
+            # The exported ownership is dropped rather than listed in UNWANTED_KEYS, which is
+            # applied at export time, while `organization` is still needed to build the fixture.
+            dataset.pop("organization", None)
+            dataset.pop("owner", None)
+            # The owner comes first: contact points belong to whoever owns the dataset.
             if fixture.get("organization"):
                 organization = fixture["organization"]
                 organization["members"] = [
@@ -362,10 +366,14 @@ def import_fixtures(source):
                     for member in organization["members"]
                 ]
                 fixture["organization"] = organization
-                org = get_or_create_organization(fixture)
-                dataset = DatasetFactory(**dataset, organization=org)
+                owner = get_or_create_organization(fixture)
             else:
-                dataset = DatasetFactory(**dataset, owner=user)
+                owner = user
+            dataset["contact_points"] = [
+                get_or_create_contact_point(contact_point, owner)
+                for contact_point in dataset.get("contact_points") or []
+            ]
+            dataset = DatasetFactory(**dataset, **ownership_filter(owner))
             for resource in fixture["resources"]:
                 resource = remove_unwanted_keys(resource, "resource")
                 res = ResourceFactory(**resource)
@@ -394,12 +402,17 @@ def import_fixtures(source):
                 DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
-                contact_points = []
-                for contact_point in dataservice.get("contact_points") or []:
-                    contact_points.append(get_or_create_contact_point(contact_point))
-                dataservice["contact_points"] = contact_points
-                dataservice["organization"] = get_or_create_organization(dataservice)
-                DataserviceFactory(**dataservice, datasets=[dataset])
+                # An exported dataservice without an organization belongs to the fixture
+                # user, like the dataset above: a contact point needs an owner to belong to.
+                dataservice_owner = get_or_create_organization(dataservice) or user
+                dataservice.pop("organization", None)
+                dataservice["contact_points"] = [
+                    get_or_create_contact_point(contact_point, dataservice_owner)
+                    for contact_point in dataservice.get("contact_points") or []
+                ]
+                DataserviceFactory(
+                    **dataservice, datasets=[dataset], **ownership_filter(dataservice_owner)
+                )
 
     # Import posts
     for post_data in json_fixtures.get("posts", []):

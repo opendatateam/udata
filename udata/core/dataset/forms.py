@@ -163,23 +163,6 @@ def unmarshal_frequency(form, field):
     field.data = UpdateFrequency(field.data)
 
 
-def validate_contact_point(form, field):
-    """Validates contact point with dataset's org or owner"""
-    from udata.models import ContactPoint
-
-    for contact_point in field.data or []:
-        if form.organization.data:
-            contact_point = ContactPoint.objects(
-                id=contact_point.id, organization=form.organization.data
-            ).first()
-        elif form.owner.data:
-            contact_point = ContactPoint.objects(id=contact_point.id, owner=form.owner.data).first()
-        if not contact_point:
-            raise validators.ValidationError(
-                _("Wrong contact point id or contact point ownership mismatch")
-            )
-
-
 class AccessAudienceForm(ModelForm):
     model_class = AccessAudience
 
@@ -250,7 +233,7 @@ class DatasetForm(ModelForm):
     organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
-    contact_points = fields.ContactPointListField(validators=[validate_contact_point])
+    contact_points = fields.ContactPointListField()
 
 
 class ResourcesListForm(ModelForm):

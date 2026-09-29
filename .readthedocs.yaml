@@ -13,9 +13,9 @@ build:
 mkdocs:
   configuration: mkdocs.yml
 
-# Optionally declare the Python requirements required to build your docs
+# MkDocs itself is installed by Read the Docs. The package is installed for the
+# `mkdocs.yml` config to resolve, no extra is needed: the docs are plain markdown.
 python:
   install:
   - method: pip
     path: .
-    extra_requirements: ["doc"]
