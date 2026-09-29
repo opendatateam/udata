@@ -3,16 +3,11 @@ This migration removes the `celerybeat-mongo` keys that `PeriodicTask` no longer
 
 `PeriodicTask` used to inherit from `celerybeatmongo.models.PeriodicTask`, a
 `DynamicDocument` carrying a handful of fields udata never wrote (`queue`, `expires`, …),
-plus `last_run_id`, which had no reader left. It is now a plain, strict `Document`:
-any leftover key would make MongoEngine raise `FieldDoesNotExist` on load.
-
-The embedded `_cls` keys matter for a different reason: the beat no longer goes through
-MongoEngine, it reads the collection in raw pymongo and calls `crontab(**doc["crontab"])`
-(`celery_mongobeat/beat.py:175`). An extra `_cls` key there raises a `TypeError` that
-`reload_schedule` swallows, silently dropping the job from the schedule.
+plus `last_run_id` and `total_run_count`, which had no reader left. It is now a plain,
+strict `Document`: any leftover key would make MongoEngine raise `FieldDoesNotExist` on load.
 
 The top-level `_cls` is deliberately kept: MongoEngine tolerates it on load and never
-queries on it now that the class no longer allows inheritance, and the beat ignores it.
+queries on it now that the class no longer allows inheritance.
 """
 
 import logging
@@ -32,9 +27,9 @@ LEGACY_FIELDS = [
     "date_changed",
     # Written by the old scheduler, read by an admin frontend removed years ago.
     "last_run_id",
+    "total_run_count",
     # `Interval` and `Crontab` allowed inheritance, so MongoEngine stored a `_cls` inside
-    # each of them. The beat splats the crontab into `celery.schedules.crontab()`, which
-    # rejects the unknown keyword.
+    # each of them, naming classes that no longer exist.
     "crontab._cls",
     "interval._cls",
 ]

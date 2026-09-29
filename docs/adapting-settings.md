@@ -283,11 +283,8 @@ An optional alternative mongo database used for testing.
 
 ## Celery options
 
-By default, udata is configured to use Redis as Celery backend and a MongoDB scheduler.
-
-The scheduler stores its schedule in the `schedules` collection, which udata also maps with
-the `PeriodicTask` model to expose it on the API. Changing the collection name therefore
-requires changing `PeriodicTask.meta["collection"]` too.
+By default, udata is configured to use Redis as Celery backend and a scheduler running the
+jobs managed through the API (`PeriodicTask`).
 
 The defaults are:
 
@@ -300,8 +297,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_BEAT_SCHEDULER = 'celery_mongobeat.beat.MongoScheduler'
-CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
+CELERY_BEAT_SCHEDULER = 'udata.core.jobs.scheduler.Scheduler'
 ```
 
 Authentication is supported on Redis:

@@ -256,19 +256,6 @@ wheels = [
 ]
 
 [[package]]
-name = "celery-mongobeat"
-version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "celery" },
-    { name = "pymongo" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/79/c6/79b9029b760555da9b0d1aeadef5e7600b1c1063655f28c29cbb36d050e2/celery_mongobeat-0.2.0.tar.gz", hash = "sha256:d5dfa195c75accfddca6b173945a8e8e401162374e15b800218c07a1233d2100", size = 31338, upload-time = "2026-02-17T15:39:14.78Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/20/d01dd3380cf1103ab0fbcbe0a74cc852c6bba632435f5efa1c74ccd9b73e/celery_mongobeat-0.2.0-py3-none-any.whl", hash = "sha256:8fe17a55fe88a4b71f9edd0332f154698236b890c85fa9dffac0c52f3c46dee1", size = 22024, upload-time = "2026-02-17T15:39:13.624Z" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.6.17"
 source = { registry = "https://pypi.org/simple" }
@@ -2459,7 +2446,6 @@ dependencies = [
     { name = "boto3" },
     { name = "botocore" },
     { name = "celery" },
-    { name = "celery-mongobeat" },
     { name = "click" },
     { name = "elasticsearch" },
     { name = "elasticsearch-dsl" },
@@ -2553,7 +2539,6 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.26.102,<2.0.0" },
     { name = "botocore", specifier = ">=1.29.165,<2.0.0" },
     { name = "celery", specifier = ">=5.4.0,<6.0.0" },
-    { name = "celery-mongobeat", specifier = ">=0.2.0,<1.0.0" },
     { name = "click", specifier = ">=8.1.8,<9.0.0" },
     { name = "elasticsearch", specifier = ">=7.17.0,<8.0.0" },
     { name = "elasticsearch-dsl", specifier = ">=7.4.0,<8.0.0" },

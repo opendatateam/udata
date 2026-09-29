@@ -1,6 +1,5 @@
 import logging
 from importlib.metadata import entry_points
-from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
@@ -124,19 +123,8 @@ def schedulables():
     return [task for task in celery.tasks.values() if task.schedulable]
 
 
-def default_scheduler_config(url):
-    parsed_url = urlparse(url)
-    default_url = "{0}://{1}".format(*parsed_url)
-    return parsed_url.path[1:], default_url
-
-
 def init_app(app):
     celery.main = app.import_name
-
-    db, url = default_scheduler_config(app.config["MONGODB_HOST"])
-
-    app.config.setdefault("CELERY_MONGODB_SCHEDULER_DB", db)
-    app.config.setdefault("CELERY_MONGODB_SCHEDULER_URL", url)
 
     celery.conf.update(
         **dict(

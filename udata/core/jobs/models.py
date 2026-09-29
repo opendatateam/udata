@@ -27,9 +27,7 @@ PERIODS = ("days", "hours", "minutes", "seconds", "microseconds")
 
 @generate_fields()
 class PeriodicTask(Document):
-    # `celery_mongobeat` reads and writes this collection directly through pymongo,
-    # so its name is a contract shared with `CELERY_MONGODB_SCHEDULER_COLLECTION`
-    # and cannot be left to MongoEngine's class-name derivation.
+    # Inherited from `celerybeat-mongo`, whose model this class used to extend.
     meta = {"collection": "schedules"}
 
     @generate_fields()
@@ -84,11 +82,6 @@ class PeriodicTask(Document):
     kwargs = field(DictField(), description="The job execution keyword arguments")
     enabled = field(BooleanField(default=False), description="Is this job enabled")
     last_run_at = field(DateTimeField(), readonly=True, description="The last job execution date")
-
-    # Written by the beat on every run (`MongoScheduler.save_entry`). Not part of the
-    # API, but declared so that loading a document does not raise `FieldDoesNotExist`.
-    total_run_count = IntField(min_value=0, default=0)
-    run_immediately = BooleanField()
 
     def clean(self):
         """Ensure the task carries exactly one of an interval or a crontab schedule."""
