@@ -205,3 +205,16 @@ class SerializeDetectedZonesTest(APITestCase):
             document = DatasetSearch.serialize(dataset)
 
             self.assertEqual(document["geozones_detected"], [])
+
+
+class DetectAndWriteZoneReturnTest(DBTestCase):
+    def test_returns_detected_zone_ids(self):
+        zone = GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+
+        self.assertEqual(detect_and_write_zone(str(dataset.id)), [zone.id])
+
+    def test_returns_nothing_without_match(self):
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+
+        self.assertFalse(detect_and_write_zone(str(dataset.id)))

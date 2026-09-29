@@ -60,6 +60,9 @@ def load_zones(col, json_geozones):
             "uri": geozone["uri"],
             "ancestors": geozone.get("ancestors", []),
         }
+        # optional, so that files without bboxes keep loading (and keep existing bboxes)
+        if geozone.get("bbox"):
+            params["bbox"] = geozone["bbox"]
         try:
             col.objects(id=geozone["_id"]).modify(
                 upsert=True, **{"set__{0}".format(k): v for k, v in params.items()}
@@ -69,17 +72,6 @@ def load_zones(col, json_geozones):
             log.warning("Validation error (%s) for %s with %s", e, geozone["nom"], params)
             continue
     return loaded_geozones
-
-
-def load_geozones_bboxes(col, geozones_bboxes):
-    loaded = 0
-    for zone_id, bbox in geozones_bboxes.items():
-        result = col.objects(id=zone_id).update(set__bbox=bbox)
-        if result:
-            loaded += 1
-        else:
-            log.warning("No matching GeoZone for id %s: skipped", zone_id)
-    return loaded
 
 
 @contextmanager
@@ -166,33 +158,6 @@ def load(geozones_file, levels_file, drop=False):
     count = fixup_removed_geozone()
     log.info(f"{count} geozones removed from datasets")
 
-
-@grp.command("load-geozones-bboxes")
-@click.argument("geozones-bboxes-file")
-def load_geozones_bboxes_command(geozones_bboxes_file):
-    """
-    Load zone bounding boxes from <geozones-bboxes-file> onto existing GeoZone documents.
-
-    <geozones-bboxes-file> can be either a local path or a remote URL. It's a JSON file:
-    a flat object mapping each zone id to its bounding box, e.g.:
-
-    {
-        "fr:departement:32": [-0.2821, 43.3108, 1.2032, 44.08],
-        "fr:commune:32019": [0.6007, 43.5626, 0.6645, 43.5936]
-    }
-
-    Each bounding box is [minx, miny, maxx, maxy] in WGS84 longitude/latitude.
-    """
-    if geozones_bboxes_file.startswith("http"):
-        json_bboxes = requests.get(geozones_bboxes_file).json()
-    else:
-        with open(geozones_bboxes_file) as f:
-            json_bboxes = json.load(f)
-
-    log.info("Loading zone bboxes")
-    total = load_geozones_bboxes(GeoZone, json_bboxes)
-    log.info("Loaded {total} zone bboxes".format(total=total))
-
     cache.delete(GEOZONE_BBOXES_CACHE_KEY)
 
 
@@ -202,15 +167,18 @@ def detect_zones_command():
     Detect zones for existing datasets that have a `spatial.geom`.
 
     Datasets are otherwise only processed when created or when their spatial coverage changes.
-    Requires zone bboxes (see `load-geozones-bboxes`). Each dataset is reindexed if its
-    detected zones changed.
+    Requires zone bboxes (loaded with `load`, when the geozones file has them).
+    Each dataset is reindexed if its detected zones changed.
     """
     datasets = Dataset.objects(spatial__geom__ne=None).only("id").timeout(False)
     total = datasets.count()
-    with click.progressbar(datasets, length=total) as bar:
-        for dataset in bar:
-            detect_and_write_zone(str(dataset.id))
-    log.info(f"Ran zone detection on {total} datasets")
+    detected = 0
+    for i, dataset in enumerate(datasets, 1):
+        if detect_and_write_zone(str(dataset.id)):
+            detected += 1
+        if i % 1000 == 0:
+            log.info(f"Ran zone detection on {i}/{total} datasets")
+    log.info(f"Ran zone detection on {total} datasets: zones detected for {detected}")
 
 
 @grp.command()

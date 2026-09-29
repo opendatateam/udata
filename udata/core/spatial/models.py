@@ -148,7 +148,7 @@ admin_levels = LocalProxy(get_spatial_admin_levels)
 GEOZONE_BBOXES_CACHE_KEY = "geozone-bboxes"
 
 
-# cache is invalidated explicitely by `load-geozones-bboxes` cmd
+# cache is invalidated explicitely by `spatial load` cmd
 @cache.cached(timeout=-1, key_prefix=GEOZONE_BBOXES_CACHE_KEY)
 def get_zone_bboxes():
     # `bbox` defaults to `[]` when never set, hence the `bbox__size=4` filter
