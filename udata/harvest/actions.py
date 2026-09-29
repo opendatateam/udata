@@ -8,7 +8,6 @@ from flask import current_app
 
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset, PeriodicTask
 from udata.storage.s3 import delete_file
 
@@ -247,8 +246,7 @@ def attach(domain, filename):
                 **{"harvest__domain": domain, "harvest__remote_id": row["remote"]}
             ).update(**{"unset__harvest__domain": True, "unset__harvest__remote_id": True})
 
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
+            dataset.set_harvested()
             dataset.harvest.domain = domain
             dataset.harvest.remote_id = row["remote"]
 
