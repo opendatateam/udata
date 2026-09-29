@@ -426,7 +426,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         job = source.get_last_job()
         assert job.status == "done"
         assert len(job.items) == 2
-        assert job.data["graphs"] is not None
+        assert len(job.data["graphs"]) == 1
         assert Dataset.objects.count() == 2
 
     def test_harvest_spatial(self, rmock):

@@ -82,8 +82,10 @@ class DcatBackend(BaseBackend):
         self.job.data = {"format": self.format}
         try:
             for page_graph, page_number in self.walk_paginated_graph(self.source.url):
-                self.process_one_datasets_page(page_graph, page_number)
+                # cache graph first in case processing raises exceptions, so graphs
+                # are always available to store_graphs()
                 self.graphs.append((page_graph, page_number))
+                self.process_one_datasets_page(page_graph, page_number)
 
             # We do a second pass to have all datasets in memory and attach datasets
             # to dataservices. It could be better to be one pass of graph walking and
