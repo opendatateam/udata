@@ -7,3 +7,6 @@ BASE_GRANULARITIES = [
 
 ADMIN_LEVEL_MIN = 1
 ADMIN_LEVEL_MAX = 110
+
+# Dataset extras key holding the zone ids detected from `spatial.geom`
+DETECTED_ZONES_KEY = "analysis:spatial:zones"
