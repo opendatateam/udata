@@ -50,6 +50,7 @@ def load_zones(col, json_geozones):
             "code": geozone["codeINSEE"],
             "name": geozone["nom"],
             "uri": geozone["uri"],
+            "ancestors": geozone.get("ancestors", []),
         }
         try:
             col.objects(id=geozone["_id"]).modify(

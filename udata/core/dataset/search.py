@@ -11,6 +11,7 @@ from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
     Filter,
+    GeoZoneAncestorsFilter,
     ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
@@ -54,6 +55,7 @@ class DatasetSearch(ModelSearchAdapter):
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
+        "geozone_with_ancestors": GeoZoneAncestorsFilter(),
         "granularity": ListFilter(),
         "format": ListFilter(),
         "schema": ListFilter(),

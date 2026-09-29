@@ -50,6 +50,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     code = StringField(required=True)
     level = StringField(required=True)
     uri = StringField()
+    ancestors = ListField(StringField())
 
     meta = {
         "indexes": [

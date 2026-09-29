@@ -8,7 +8,14 @@ from udata.utils import clean_string
 
 log = logging.getLogger(__name__)
 
-__all__ = ("BoolFilter", "ModelTermsFilter", "TemporalCoverageFilter", "Filter", "ListFilter")
+__all__ = (
+    "BoolFilter",
+    "GeoZoneAncestorsFilter",
+    "ModelTermsFilter",
+    "TemporalCoverageFilter",
+    "Filter",
+    "ListFilter",
+)
 
 
 ES_NUM_FAILURES = "-Infinity", "Infinity", "NaN", None
@@ -57,6 +64,22 @@ class ModelTermsFilter(Filter):
             return [self.model_field.to_mongo(v) for v in value.split(OR_SEPARATOR)]
         except Exception:
             raise ValueError('"{0}" is not valid identifier'.format(value))
+
+
+class GeoZoneAncestorsFilter(Filter):
+    """Match a zone and its ancestors (eg. a department also matches its region and country)."""
+
+    @staticmethod
+    def validate_parameter(value):
+        from udata.core.spatial.models import GeoZone
+
+        value = clean_string(value)
+        zone = GeoZone.objects(id=value).only("ancestors").first()
+        return [value, *zone.ancestors] if zone else [value]
+
+    @classmethod
+    def as_request_parser_kwargs(cls):
+        return {"type": cls.validate_parameter}
 
 
 class TemporalCoverageFilter(Filter):
