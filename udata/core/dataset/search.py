@@ -55,6 +55,7 @@ class DatasetSearch(ModelSearchAdapter):
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
         "include_geozone_ancestors": BoolFilter(),
+        "include_detected_geozones": BoolFilter(),
         "granularity": ListFilter(),
         "format": ListFilter(),
         "schema": ListFilter(),
