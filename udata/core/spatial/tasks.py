@@ -45,6 +45,8 @@ def detect_and_write_zone(dataset_id):
     if (zone_ids or None) != previous:
         reindex.delay("Dataset", str(dataset_id))
 
+    return zone_ids
+
 
 @Dataset.on_create.connect
 def detect_zone_on_create(document, **kwargs):

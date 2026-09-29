@@ -5,47 +5,56 @@ from unittest import mock
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.constants import DETECTED_ZONES_KEY
 from udata.core.spatial.factories import GeoZoneFactory
-from udata.core.spatial.models import SpatialCoverage, get_zone_bboxes, zone_bboxes
+from udata.core.spatial.models import GeoZone, SpatialCoverage, get_zone_bboxes, zone_bboxes
 from udata.tests.api import DBTestCase
 
+LEVELS = [{"id": "fr:departement", "label": "Département"}]
 
-class LoadGeozonesBboxesCommandTest(DBTestCase):
-    def _write_bboxes_file(self, bboxes):
-        with NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(bboxes, f)
-            return f.name
 
-    def test_load_geozones_bboxes(self):
-        zone = GeoZoneFactory()
-        other_zone = GeoZoneFactory()
-        path = self._write_bboxes_file(
-            {
-                zone.id: [0.0, 0.0, 1.0, 1.0],
-                "unknown:zone:id": [2.0, 2.0, 3.0, 3.0],
-            }
-        )
+def zone_record(**kwargs):
+    return {
+        "_id": "fr:departement:32",
+        "nom": "Gers",
+        "level": "fr:departement",
+        "codeINSEE": "32",
+        "uri": "http://id.insee.fr/geo/departement/32",
+        **kwargs,
+    }
 
-        result = self.cli(f"spatial load-geozones-bboxes {path}")
+
+class LoadGeozonesBboxCommandTest(DBTestCase):
+    def _load(self, zones):
+        paths = []
+        for content in (zones, LEVELS):
+            with NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+                json.dump(content, f)
+                paths.append(f.name)
+        return self.cli("spatial", "load", *paths)
+
+    def test_load_persists_bbox(self):
+        result = self._load([zone_record(bbox=[-0.2821, 43.3108, 1.2032, 44.08])])
 
         self.assertEqual(result.exit_code, 0)
+        self.assertEqual(
+            GeoZone.objects.get(id="fr:departement:32").bbox, [-0.2821, 43.3108, 1.2032, 44.08]
+        )
 
-        zone.reload()
-        self.assertEqual(zone.bbox, [0.0, 0.0, 1.0, 1.0])
+    def test_load_without_bbox_keeps_existing_bbox(self):
+        GeoZoneFactory(id="fr:departement:32", level="fr:departement", bbox=[0.0, 0.0, 1.0, 1.0])
 
-        other_zone.reload()
-        self.assertFalse(other_zone.bbox)
+        result = self._load([zone_record()])
 
-    def test_load_geozones_bboxes_refreshes_cache(self):
-        zone = GeoZoneFactory()
-        path = self._write_bboxes_file({zone.id: [0.0, 0.0, 1.0, 1.0]})
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(GeoZone.objects.get(id="fr:departement:32").bbox, [0.0, 0.0, 1.0, 1.0])
 
+    def test_load_refreshes_bboxes_cache(self):
         # warm the cache before the zone has a bbox
         get_zone_bboxes()
-        self.assertNotIn(zone.id, zone_bboxes)
+        self.assertNotIn("fr:departement:32", zone_bboxes)
 
-        self.cli(f"spatial load-geozones-bboxes {path}")
+        self._load([zone_record(bbox=[0.0, 0.0, 1.0, 1.0])])
 
-        self.assertEqual(zone_bboxes[zone.id], [0.0, 0.0, 1.0, 1.0])
+        self.assertEqual(zone_bboxes["fr:departement:32"], [0.0, 0.0, 1.0, 1.0])
 
 
 RECTANGLE_GEOM = {
