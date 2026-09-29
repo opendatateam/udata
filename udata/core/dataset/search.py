@@ -4,7 +4,7 @@ from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.dataset.constants import FormatFamily, get_format_family
 from udata.core.organization.constants import PRODUCER_TYPES
 from udata.core.organization.helpers import get_producer_type
-from udata.core.spatial.constants import ADMIN_LEVEL_MAX
+from udata.core.spatial.constants import ADMIN_LEVEL_MAX, DETECTED_ZONES_KEY
 from udata.core.spatial.models import admin_levels
 from udata.core.topic.models import TopicElement
 from udata.models import Dataset, GeoZone, License, Organization, Topic, User
@@ -114,6 +114,16 @@ class DatasetSearch(ModelSearchAdapter):
         return datasets.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
+    def valid_detected_zone_ids(cls, dataset):
+        """Detected zone ids come from a free-form extra: keep only ids of existing zones."""
+        value = dataset.extras.get(DETECTED_ZONES_KEY)
+        if not isinstance(value, list):
+            return []
+        ids = [v for v in value if isinstance(v, str)]
+        known = set(GeoZone.objects(id__in=ids).scalar("id"))
+        return [zone_id for zone_id in ids if zone_id in known]
+
+    @classmethod
     def serialize(cls, dataset):
         organization = None
 
@@ -207,4 +217,6 @@ class DatasetSearch(ModelSearchAdapter):
                     "granularity": dataset.spatial.granularity,
                 }
             )
+        # Detected zones stay apart from `geozones`: they are inferred, not declared.
+        document["geozones_detected"] = cls.valid_detected_zone_ids(dataset)
         return document

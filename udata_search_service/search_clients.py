@@ -236,6 +236,7 @@ class SearchableDataset(IndexDocument):
     temporal_coverage_end = Date()
     granularity = Keyword()
     geozones = Keyword(multi=True)
+    geozones_detected = Keyword(multi=True)
     description = Text(analyzer=dgv_analyzer)
     organization = Keyword()
     organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})

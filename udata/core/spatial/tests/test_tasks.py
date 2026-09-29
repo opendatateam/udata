@@ -1,7 +1,12 @@
+from unittest import mock
+
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.search import DatasetSearch
+from udata.core.spatial.constants import DETECTED_ZONES_KEY
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.spatial.models import SpatialCoverage
-from udata.tests.api import DBTestCase
+from udata.core.spatial.tasks import detect_and_write_zone
+from udata.tests.api import APITestCase, DBTestCase
 
 RECTANGLE_GEOM = {
     "type": "MultiPolygon",
@@ -127,3 +132,76 @@ class DetectZoneOnSpatialChangeTest(DBTestCase):
 
         dataset.reload()
         self.assertNotIn("analysis:spatial:zones", dataset.extras)
+
+
+class ReindexAfterDetectionTest(DBTestCase):
+    def test_reindexes_when_detected_zones_change(self):
+        GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory()
+
+        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+            dataset.spatial = SpatialCoverage(geom=RECTANGLE_GEOM)
+            dataset.save()
+
+        reindex.delay.assert_called_once_with("Dataset", str(dataset.id))
+
+    def test_does_not_reindex_when_detected_zones_are_unchanged(self):
+        GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+
+        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+            detect_and_write_zone(str(dataset.id))
+
+        reindex.delay.assert_not_called()
+
+    def test_does_not_reindex_when_nothing_was_or_is_detected(self):
+        dataset = DatasetFactory()
+
+        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+            detect_and_write_zone(str(dataset.id))
+
+        reindex.delay.assert_not_called()
+
+    def test_reindexes_when_stale_match_is_cleared(self):
+        GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+
+        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+            dataset.spatial = SpatialCoverage()
+            dataset.save()
+
+        reindex.delay.assert_called_once_with("Dataset", str(dataset.id))
+
+
+class SerializeDetectedZonesTest(APITestCase):
+    def test_detected_zones_are_indexed_apart_from_geozones(self):
+        zone = GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+        dataset.reload()
+
+        document = DatasetSearch.serialize(dataset)
+
+        self.assertEqual(document["geozones_detected"], [zone.id])
+        self.assertEqual(document["geozones"], [])
+
+    def test_no_detected_zones(self):
+        document = DatasetSearch.serialize(DatasetFactory())
+
+        self.assertEqual(document["geozones_detected"], [])
+
+    def test_unknown_detected_zone_ids_are_dropped(self):
+        zone = GeoZoneFactory()
+        dataset = DatasetFactory(extras={DETECTED_ZONES_KEY: [zone.id, "fr:commune:nope"]})
+
+        document = DatasetSearch.serialize(dataset)
+
+        self.assertEqual(document["geozones_detected"], [zone.id])
+
+    def test_malformed_detected_zones_extra_is_ignored(self):
+        zone = GeoZoneFactory()
+        for value in [zone.id, {"id": zone.id}, 42, [{"id": zone.id}, 1, None]]:
+            dataset = DatasetFactory(extras={DETECTED_ZONES_KEY: value})
+
+            document = DatasetSearch.serialize(dataset)
+
+            self.assertEqual(document["geozones_detected"], [])
