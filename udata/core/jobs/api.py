@@ -66,13 +66,13 @@ class JobAPI(API):
     def put(self, id):
         """Update a single scheduled job"""
         task = self.get_or_404(id_or_404(id))
-        # Sending one schedule and not the other switches type: drop the one left out,
-        # so `clean()` only rejects payloads that really carry both.
-        if "crontab" in request.json and "interval" not in request.json:
+        data = api.json_payload()
+        # A schedule sent replaces the whole schedule, so sending one switches type.
+        if "crontab" in data:
             task.interval = None
-        elif "interval" in request.json and "crontab" not in request.json:
+        if "interval" in data:
             task.crontab = None
-        return patch_and_save(task, request)
+        return patch_and_save(task, data)
 
     @api.secure(admin_permission)
     @api.response(204, "Successfuly deleted")

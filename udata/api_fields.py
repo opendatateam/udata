@@ -968,12 +968,11 @@ def patch(obj: _T, request) -> _T:
     """
     from udata.mongo.engine import db
 
-    data = request.json if isinstance(request, Request) else request
-    # A body that is valid JSON but not an object (a list, a string, a number, null)
-    # would blow up on `data.items()` below and surface as a 500. Endpoints used to get
-    # this for free from `api.validate()`, which every migrated endpoint has dropped.
+    data = api.json_payload() if isinstance(request, Request) else request
+    # Embedded values are patched recursively straight from the client payload, where
+    # anything may stand in for an object: without this, `data.items()` raises a 500.
     if not isinstance(data, dict):
-        api.abort(400, "Expected a JSON object")
+        api.abort(400, errors={"request": "expecting a JSON object"})
     api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
 
     for api_key, value in data.items():

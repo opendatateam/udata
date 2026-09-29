@@ -367,6 +367,21 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json["crontab"]["minute"], "5")
         self.assertIsNone(response.json["interval"])
 
+    def test_fail_on_update_with_a_non_object_body(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+
+        self.login(AdminFactory())
+        response = self.put(url_for("api.job", id=task.id), 42)
+        self.assert400(response)
+
     def test_fail_on_update_with_both_crontab_and_interval(self):
         @job("a-job")
         def test_job():

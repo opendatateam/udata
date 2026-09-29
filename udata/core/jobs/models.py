@@ -27,7 +27,7 @@ PERIODS = ("days", "hours", "minutes", "seconds", "microseconds")
 
 @generate_fields()
 class PeriodicTask(Document):
-    # Inherited from `celerybeat-mongo`, whose model this class used to extend.
+    # Existing jobs are stored in this collection.
     meta = {"collection": "schedules"}
 
     @generate_fields()

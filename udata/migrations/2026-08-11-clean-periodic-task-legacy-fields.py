@@ -1,40 +1,41 @@
 """
-This migration removes the `celerybeat-mongo` keys that `PeriodicTask` no longer declares.
+This migration reduces the `schedules` documents to the fields `PeriodicTask` declares.
 
 `PeriodicTask` used to inherit from `celerybeatmongo.models.PeriodicTask`, a
-`DynamicDocument` carrying a handful of fields udata never wrote (`queue`, `expires`, …),
-plus `last_run_id` and `total_run_count`, which had no reader left. It is now a plain,
-strict `Document`: any leftover key would make MongoEngine raise `FieldDoesNotExist` on load.
+`DynamicDocument` whose scheduler wrote bookkeeping keys on every run (`run_immediately`,
+`total_run_count`, `last_run_id`, …) and whose documents, allowing inheritance, carried
+a `_cls` at every level. It is now a plain, strict `Document`: any undeclared key makes
+MongoEngine raise `FieldDoesNotExist` on load. Keeping the declared fields rather than
+removing known legacy ones covers whatever keys any instance accumulated over the years.
 
-The top-level `_cls` is deliberately kept: MongoEngine tolerates it on load and never
-queries on it now that the class no longer allows inheritance.
+It also deletes the documents without a `name`: the old scheduler kept jobs in memory
+between reloads and upserted their run state even after they were deleted, leaving
+behind documents with no job definition at all. No `HarvestSource` can point to them,
+since deleting a job already nullified the references to it.
 """
 
 import logging
 
 log = logging.getLogger(__name__)
 
-LEGACY_FIELDS = [
-    # Written by nobody: udata routes its tasks through `udata.tasks.router`.
-    "queue",
-    "exchange",
-    "routing_key",
-    "soft_time_limit",
-    "expires",
-    # `celerybeat-mongo` features udata never enabled.
-    "start_after",
-    "max_run_count",
-    "date_changed",
-    # Written by the old scheduler, read by an admin frontend removed years ago.
-    "last_run_id",
-    "total_run_count",
-    # `Interval` and `Crontab` allowed inheritance, so MongoEngine stored a `_cls` inside
-    # each of them, naming classes that no longer exist.
-    "crontab._cls",
-    "interval._cls",
-]
+FIELDS = {"_id", "name", "description", "task", "args", "kwargs", "enabled", "last_run_at"}
+EMBEDDED_FIELDS = {
+    "crontab": {"minute", "hour", "day_of_week", "day_of_month", "month_of_year"},
+    "interval": {"every", "period"},
+}
 
 
 def migrate(db):
-    result = db.schedules.update_many({}, {"$unset": {field: 1 for field in LEGACY_FIELDS}})
-    log.info(f"Legacy PeriodicTask keys removed from {result.modified_count} objects")
+    deleted = db.schedules.delete_many({"name": {"$exists": False}}).deleted_count
+    log.info(f"Deleted {deleted} PeriodicTask objects without a name")
+
+    cleaned = 0
+    for document in db.schedules.find():
+        kept = {key: value for key, value in document.items() if key in FIELDS}
+        for key, fields in EMBEDDED_FIELDS.items():
+            if isinstance(document.get(key), dict):
+                kept[key] = {k: v for k, v in document[key].items() if k in fields}
+        if kept != document:
+            db.schedules.replace_one({"_id": document["_id"]}, kept)
+            cleaned += 1
+    log.info(f"Removed undeclared keys from {cleaned} PeriodicTask objects")

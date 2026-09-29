@@ -27,6 +27,10 @@ class Scheduler(BaseScheduler):
     """
 
     def setup_schedule(self):
+        # A job that never ran starts counting from its first load. Kept in memory only,
+        # that starting point would move on every restart and on every edit of any job,
+        # pushing back a long interval job for as long as those happen more often.
+        PeriodicTask.objects(enabled=True, last_run_at=None).update(set__last_run_at=self.app.now())
         self.data = {
             task.name: ScheduleEntry(
                 name=task.name,
