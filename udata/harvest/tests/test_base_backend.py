@@ -729,18 +729,22 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             for signal, receiver in signals.items():
                 signal.disconnect(receiver)
 
-    @pytest.mark.parametrize("max_items", [2, 3, 4])
+    @pytest.mark.parametrize("max_items", [2, 3, 4, 6, 7])
     def test_harvest_max_items(self, max_items):
         n = 3
-        assert max_items <= 2 * n
+        # max_items == 2 * n will log an error in the current implementation,
+        # so we include the case in max_reached
+        max_reached = max_items <= 2 * n
+
         backend = MockBackend(HarvestSourceFactory(), max_items=max_items)
         backend.mock_items = MockDataset.create(n) + MockDataservice.create(n)
 
         job = backend.harvest()
         assert job.status == "done"
-        assert len(job.items) == max_items
-        assert len(job.errors) == 1
-        assert job.errors[0].message.startswith(f"{max_items} max items reached")
+        assert len(job.items) == min(2 * n, max_items)
+        assert len(job.errors) == (1 if max_reached else 0)
+        if max_reached:
+            assert job.errors[0].message.startswith(f"{max_items} max items reached")
         assert Dataset.objects.count() == min(n, max_items)
         assert Dataservice.objects.count() == max(min(n, max_items - n), 0)
 
