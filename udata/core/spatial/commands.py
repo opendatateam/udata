@@ -18,6 +18,7 @@ from udata.commands import cli
 from udata.core.dataset.models import Dataset
 from udata.core.spatial import geoids
 from udata.core.spatial.models import GEOZONE_BBOXES_CACHE_KEY, GeoLevel, GeoZone, SpatialCoverage
+from udata.core.spatial.tasks import detect_and_write_zone
 
 log = logging.getLogger(__name__)
 
@@ -193,6 +194,23 @@ def load_geozones_bboxes_command(geozones_bboxes_file):
     log.info("Loaded {total} zone bboxes".format(total=total))
 
     cache.delete(GEOZONE_BBOXES_CACHE_KEY)
+
+
+@grp.command("detect-zones")
+def detect_zones_command():
+    """
+    Detect zones for existing datasets that have a `spatial.geom`.
+
+    Datasets are otherwise only processed when created or when their spatial coverage changes.
+    Requires zone bboxes (see `load-geozones-bboxes`). Each dataset is reindexed if its
+    detected zones changed.
+    """
+    datasets = Dataset.objects(spatial__geom__ne=None).only("id").timeout(False)
+    total = datasets.count()
+    with click.progressbar(datasets, length=total) as bar:
+        for dataset in bar:
+            detect_and_write_zone(str(dataset.id))
+    log.info(f"Ran zone detection on {total} datasets")
 
 
 @grp.command()
