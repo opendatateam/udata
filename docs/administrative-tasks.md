@@ -221,6 +221,14 @@ Zone ids must match existing `GeoZone` ids (run `udata spatial load` first if th
 exist yet). Ids present in the file with no matching `GeoZone` are skipped and logged as
 warnings, not fatal.
 
+Zones are then detected for a dataset when it's created or when its spatial coverage changes.
+To run the detection on existing datasets that have a `spatial.geom` (datasets whose detected
+zones change are reindexed):
+
+```shell
+$ udata spatial detect-zones
+```
+
 ## Workers
 
 Start a worker with:
