@@ -642,14 +642,14 @@ wheels = [
 
 [[package]]
 name = "faker"
-version = "40.38.0"
+version = "40.39.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f2/55/baeae0ecb04ef56c92d6ac1ef7b3b965af0502ac9863fc85db7afc0884fd/faker-40.38.0.tar.gz", hash = "sha256:72e421098664edf38478f4269a5d5a539337de5da18883ce67cb1e6bb96b0b3a", size = 2029190, upload-time = "2026-09-01T19:19:46.958Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/62/fea935af7a312f073c99d470b05a7c96650ee8d9562ce82e8cb7ee4c1247/faker-40.39.0.tar.gz", hash = "sha256:52799ad96fcf92aab2fc96a9e03869bbf1a634300f7cd91c38dbfd51f639f6fa", size = 2029463, upload-time = "2026-09-14T16:50:17.939Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/b8/48cb8733de8448023983f64e81d7f731ce1459c21e93b9b29657e5c48cab/faker-40.38.0-py3-none-any.whl", hash = "sha256:69927515d61759c8a257540b8a91891cd622ba1c24a386b62a0a777e44ba46a9", size = 2065931, upload-time = "2026-09-01T19:19:45.234Z" },
+    { url = "https://files.pythonhosted.org/packages/45/c8/901282279841ebb59216433be01aac825fb905e1a597de3b7b5ab8b0c43e/faker-40.39.0-py3-none-any.whl", hash = "sha256:c4c7ec2cddfaf602c5a8a2c960614946aa8c161250bd9d49a8846cd24d1ef028", size = 2066232, upload-time = "2026-09-14T16:50:16.061Z" },
 ]
 
 [[package]]
@@ -811,7 +811,7 @@ wheels = [
 
 [[package]]
 name = "flask-security"
-version = "5.8.1"
+version = "5.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "email-validator" },
@@ -823,9 +823,9 @@ dependencies = [
     { name = "markupsafe" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/7f/8565385530ade315a56d9adbcac87678dd797ee39aef8b1f94e5c8fa74df/flask_security-5.8.1.tar.gz", hash = "sha256:cba0f38c27fff3f1aa2767279d98913145513a7b2ad140686cdd6ae34d55b67b", size = 751395, upload-time = "2026-05-21T18:56:44.109Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/0b/24394e8f21e8ec4a1b8a5d162763a3bbb48a5aa043cf383db1d11f5a1a1e/flask_security-5.9.0.tar.gz", hash = "sha256:59271f131ea3e14dfd19293f01a776d8417e08fb3788848dc4e25fdd0c14c3d4", size = 788538, upload-time = "2026-09-24T18:59:37.143Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/92/3d69fe0ca90ce1f4301ec02edf9614c86e6ea84cc80726136860a20e89aa/flask_security-5.8.1-py3-none-any.whl", hash = "sha256:deeaf3ffabf1f0316d69697139d110e0c81898cb89e45a11419ac55a40fcf7a5", size = 492093, upload-time = "2026-05-21T18:56:42.358Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/a3/dbc816d1f700b0ecfdc0be26de142489e1006e96f251ccf45450d6ff88a0/flask_security-5.9.0-py3-none-any.whl", hash = "sha256:82ce22081d5d7335d30bfea014ab2c74bed1cc4c9494cba38f16fde38fad2270", size = 514470, upload-time = "2026-09-24T18:59:35.175Z" },
 ]
 
 [[package]]
@@ -2557,7 +2557,7 @@ requires-dist = [
     { name = "flask-mail", specifier = ">=0.10.0,<1.0.0" },
     { name = "flask-principal", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-restx", specifier = ">=1.3.0,<2.0.0" },
-    { name = "flask-security", specifier = ">=5.1.2,<5.9.0" },
+    { name = "flask-security", specifier = ">=5.9.0,<6.0.0" },
     { name = "flask-storage", specifier = ">=2.0.0,<3.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
@@ -2602,7 +2602,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.7.0,<8.0" },
-    { name = "faker", specifier = ">=40.38,<40.39" },
+    { name = "faker", specifier = ">=40.39,<40.40" },
     { name = "feedparser", specifier = ">=6.0.11,<7.0" },
     { name = "flake8", specifier = ">=7.1.2,<8.0" },
     { name = "flask-shell-ipython", specifier = ">=0.5.3,<1.0" },
