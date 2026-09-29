@@ -11,8 +11,6 @@ from udata.auth import admin_permission
 from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
-from udata.core.discussions.actions import discussions_for
-from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
@@ -205,23 +203,6 @@ class MyOrgReusesAPI(API):
         if q:
             reuses = reuses.filter(title__icontains=q)
         return list(reuses)
-
-
-@me.route("/org_discussions/", endpoint="my_org_discussions")
-class MyOrgDiscussionsAPI(API):
-    @api.secure
-    @api.doc("my_org_discussions")
-    @api.expect(filter_parser)
-    @api.marshal_list_with(Discussion.__read_fields__)
-    def get(self):
-        """List all discussions related to my organizations."""
-        q = filter_parser.parse_args().get("q")
-        discussions = discussions_for(current_user._get_current_object())
-        discussions = discussions.order_by("-created")
-        if q:
-            decoded = q
-            discussions = discussions.filter(title__icontains=decoded)
-        return list(discussions)
 
 
 @me.route("/api_tokens/", endpoint="my_api_tokens")
