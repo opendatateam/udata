@@ -435,7 +435,7 @@ class DatasetAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, dataset: Dataset):
         """Update a dataset given its identifier"""
-        request_deleted = request.json.get("deleted", True)
+        request_deleted = api.json_payload().get("deleted", True)
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()

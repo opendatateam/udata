@@ -501,7 +501,7 @@ class MembershipRefuseAPI(MembershipAPI):
         # TODO: use patch() here. Currently blocked because the API payload uses
         # "comment" but the model field is "refusal_comment" — patch() would set
         # the wrong field. Requires changing the API contract to use "refusal_comment".
-        comment = (request.json or {}).get("comment")
+        comment = api.json_payload().get("comment")
         if not comment:
             raise FieldValidationError(field="comment", message="Comment is required")
 
@@ -559,7 +559,7 @@ class MemberInviteAPI(API):
         from udata.core.user.models import User
 
         org.permissions["members"].test()
-        data = request.json or {}
+        data = api.json_payload()
 
         user_id = data.get("user")
         user = None

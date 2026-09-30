@@ -251,6 +251,29 @@ class TransferAPITest(APITestCase):
         response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "refuse"})
         self.assert400(response)
 
+    def test_request_and_respond_to_transfer_with_non_object_body(self):
+        user = self.login()
+        new_user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+
+        for body in ([1, 2, 3], 1, "subject"):
+            response = self.post(url_for("api.transfers"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        response = self._create_transfer(dataset, new_user)
+        self.assert201(response)
+        transfer = response.json
+
+        self.login(new_user)
+        for body in ([1, 2, 3], 1, "response"):
+            response = self.post(url_for("api.transfer", id=transfer["id"]), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        response = self.get(url_for("api.transfer", id=transfer["id"]))
+        self.assertEqual(response.json["status"], "pending")
+
     def _create_transfer(self, source: Dataset, destination: User):
         return self.post(
             url_for("api.transfers"),

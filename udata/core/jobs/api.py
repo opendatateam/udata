@@ -1,7 +1,6 @@
 from celery import states
 from celery.result import AsyncResult
 from celery.utils import get_full_cls_name
-from flask import request
 from kombu.utils.encoding import safe_repr
 
 from udata.api import API, api, fields
@@ -93,9 +92,10 @@ class JobsAPI(API):
     @api.marshal_with(job_fields)
     def post(self):
         """Create a new scheduled job"""
-        if "crontab" in request.json and "interval" in request.json:
+        payload = api.json_payload()
+        if "crontab" in payload and "interval" in payload:
             api.abort(400, "Cannot define both interval and crontab schedule")
-        if "crontab" in request.json:
+        if "crontab" in payload:
             form = api.validate(CrontabTaskForm)
         else:
             form = api.validate(IntervalTaskForm)
@@ -122,7 +122,7 @@ class JobAPI(API):
     def put(self, id):
         """Update a single scheduled job"""
         task = self.get_or_404(id_or_404(id))
-        if "crontab" in request.json:
+        if "crontab" in api.json_payload():
             task.interval = None
             task.crontab = PeriodicTask.Crontab()
             form = api.validate(CrontabTaskForm, task)

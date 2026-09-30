@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import abort, request
+from flask import abort
 
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
@@ -154,7 +154,7 @@ class TransferRequestsAPI(API):
     @api.marshal_with(transfer_fields)
     def post(self):
         """Initiate transfer request"""
-        data = request.json
+        data = api.json_payload()
 
         subject_model = db.resolve_model(data["subject"])
         subject_id = data["subject"]["id"]
@@ -198,7 +198,7 @@ class TransferRequestAPI(API):
         if transfer.status != "pending":
             abort(400, "Cannot update transfer after accepting/refusing")
 
-        data = request.json
+        data = api.json_payload()
         comment = data.get("comment")
 
         if data["response"] == "accept":

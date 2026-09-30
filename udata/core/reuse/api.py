@@ -169,7 +169,7 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         """Update a given reuse"""
-        request_deleted = request.json.get("deleted", True)
+        request_deleted = api.json_payload().get("deleted", True)
         if reuse.deleted and request_deleted is not None:
             api.abort(410, "This reuse has been deleted")
         reuse.permissions["edit"].test()
@@ -205,12 +205,13 @@ class ReuseDatasetsAPI(API):
     def post(self, reuse):
         """Add a dataset to a given reuse"""
         reuse.permissions["edit"].test()
-        if "id" not in request.json:
+        payload = api.json_payload()
+        if "id" not in payload:
             api.abort(400, "Expect a dataset identifier")
         try:
-            dataset = Dataset.objects.get_or_404(id=id_or_404(request.json["id"]))
+            dataset = Dataset.objects.get_or_404(id=id_or_404(payload["id"]))
         except Dataset.DoesNotExist:
-            msg = "Dataset {0} does not exists".format(request.json["id"])
+            msg = "Dataset {0} does not exists".format(payload["id"])
             return api.abort(404, msg)
 
         if dataset in reuse.datasets:
@@ -231,12 +232,13 @@ class ReuseDataservicesAPI(API):
     def post(self, reuse):
         """Add a dataservice to a given reuse"""
         reuse.permissions["edit"].test()
-        if "id" not in request.json:
+        payload = api.json_payload()
+        if "id" not in payload:
             api.abort(400, "Expect a dataservice identifier")
         try:
-            dataservice = Dataservice.objects.get_or_404(id=id_or_404(request.json["id"]))
+            dataservice = Dataservice.objects.get_or_404(id=id_or_404(payload["id"]))
         except Dataservice.DoesNotExist:
-            msg = "Dataservice {0} does not exists".format(request.json["id"])
+            msg = "Dataservice {0} does not exists".format(payload["id"])
             return api.abort(404, msg)
 
         if dataservice in reuse.dataservices:

@@ -239,7 +239,7 @@ class ApiTokenListAPI(API):
     @api.marshal_with(apitoken_created_fields, code=201)
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
-        data = request.json or {}
+        data = api.json_payload()
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
         token, plaintext = ApiToken.generate(
@@ -411,7 +411,7 @@ class UserListAPI(API):
     @api.response(400, "Validation error")
     def post(self):
         """Create a new user"""
-        data = request.json or {}
+        data = api.json_payload()
         user = patch(User(), data)
         _apply_admin_only_fields(user, data)
         user.save()
@@ -473,7 +473,7 @@ class UserAPI(API):
     @api.response(400, "Validation error")
     def put(self, user):
         """Update a user given its identifier"""
-        data = request.json or {}
+        data = api.json_payload()
         user = patch(user, data)
         _apply_admin_only_fields(user, data)
         user.save()

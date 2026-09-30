@@ -822,6 +822,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_dataset_api_update_with_non_object_body(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        for body in ([1, 2, 3], 1, "deleted"):
+            response = self.put(url_for("api.dataset", dataset=dataset), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(Dataset.objects.first().description, dataset.description)
+
     def test_dataset_api_update_with_null_frequency(self):
         """It should update the item even though internal frequency is null"""
         user = self.login()
