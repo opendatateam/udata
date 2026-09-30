@@ -68,3 +68,10 @@ class IncludeDetectedGeozonesParamTest(APITestCase):
         for raw, expected in (("true", True), ("false", False)):
             with self.app.test_request_context(f"/?include_detected_geozones={raw}"):
                 self.assertIs(parser.parse_args()["include_detected_geozones"], expected)
+
+    def test_geozone_params_are_documented(self):
+        from udata.core.dataset.search import DatasetSearch
+
+        parser = DatasetSearch.as_request_parser(store_missing=False)
+        helps = {arg.name: arg.help for arg in parser.args}
+        assert "detected" in helps["include_detected_geozones"]
