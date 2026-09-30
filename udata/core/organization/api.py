@@ -4,7 +4,6 @@ from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api, errors
-from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission, current_user
 from udata.core import csv
@@ -50,7 +49,6 @@ from .tasks import (
     notify_membership_response,
 )
 
-DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
 
 
@@ -87,64 +85,7 @@ def resolve_assignment_subjects(raw_assignments, org):
     return subjects
 
 
-# Declares filters by hand, in parallel with the generic system that derives them
-# from the model's `filterable=` fields. Organization declares none today, so
-# nothing is duplicated yet, but any filter added on both sides would have to be
-# kept in sync. Meant to disappear once the callers use
-# `Organization.apply_sort_filters()`.
-class OrgApiParser(ModelApiParser):
-    sorts = {
-        "name": "name",
-        "reuses": "metrics.reuses",
-        "datasets": "metrics.datasets",
-        "followers": "metrics.followers",
-        "views": "metrics.views",
-        "created": "created_at",
-        "last_modified": "last_modified",
-    }
-
-    def __init__(self):
-        super().__init__()
-        # Uses __badges__ (not available_badges) so that users can still filter
-        # by any existing badge, even hidden ones.
-        self.parser.add_argument(
-            "badge",
-            type=str,
-            choices=list(Organization.__badges__),
-            location="args",
-        )
-        self.parser.add_argument(
-            "name",
-            type=str,
-            location="args",
-        )
-        self.parser.add_argument(
-            "business_number_id",
-            type=str,
-            location="args",
-        )
-
-    @staticmethod
-    def parse_filters(organizations, args):
-        if args.get("q"):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            organizations = organizations.search_text(phrase_query)
-        if args.get("badge"):
-            organizations = organizations.with_badge(args["badge"])
-        if args.get("name"):
-            organizations = organizations.filter(name__iexact=args["name"])
-        if args.get("business_number_id"):
-            organizations = organizations.filter(business_number_id=args["business_number_id"])
-        return organizations
-
-
 ns = api.namespace("organizations", "Organization related operations")
-
-organization_parser = OrgApiParser()
 
 common_doc = {"params": {"org": "The organization ID or slug"}}
 
@@ -154,16 +95,12 @@ class OrganizationListAPI(API):
     """Organizations collection endpoint"""
 
     @api.doc("list_organizations")
-    @api.expect(organization_parser.parser)
+    @api.expect(Organization.__index_parser__)
     @api.marshal_with(Organization.__page_fields__)
     def get(self):
         """List or search all organizations"""
-        args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
-        organizations = organization_parser.parse_filters(organizations, args)
-
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return organizations.order_by(sort).paginate(args["page"], args["page_size"])
+        return Organization.apply_pagination(Organization.apply_sort_filters(organizations))
 
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})

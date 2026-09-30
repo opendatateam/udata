@@ -49,7 +49,20 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 
         response = self.get(url_for("api.organizations"))
         assert200(response)
-        len(response.json["data"]) == len(organizations)
+        assert len(response.json["data"]) == len(organizations)
+
+    def test_organization_api_list_search_and_sort(self):
+        alpha = OrganizationFactory(name="Alpha open data", metrics={"followers": 1})
+        beta = OrganizationFactory(name="Beta open data", metrics={"followers": 5})
+        OrganizationFactory(name="Gamma open")
+
+        response = self.get(url_for("api.organizations", q="open data", sort="-followers"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(beta.id), str(alpha.id)]
+
+        response = self.get(url_for("api.organizations", q="open data", sort="name"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(alpha.id), str(beta.id)]
 
     def test_organization_api_list_with_filters(self):
         """It should filter the organization list"""
@@ -84,7 +97,6 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         #### SIRET ####
         response = self.get(url_for("api.organizations", business_number_id=org.business_number_id))
         assert200(response)
-        print(response.json["data"])
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 

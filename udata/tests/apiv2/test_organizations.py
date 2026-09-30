@@ -1,5 +1,6 @@
 from flask import url_for
 
+from udata.core.organization.constants import PUBLIC_SERVICE
 from udata.core.organization.factories import Member, OrganizationFactory
 from udata.tests.api import APITestCase
 
@@ -11,6 +12,24 @@ class OrganizationSearchAPIV2Test(APITestCase):
 
         response = self.get("/api/2/organizations/search/?model=malicious")
         self.assert200(response)
+
+    def test_organization_search_without_search_service(self):
+        """Without Elasticsearch, the search falls back on the model filters and sorts."""
+        alpha = OrganizationFactory(name="Alpha open data", metrics={"followers": 1})
+        beta = OrganizationFactory(name="Beta open data", metrics={"followers": 5})
+        OrganizationFactory(name="Gamma open")
+        beta.add_badge(PUBLIC_SERVICE)
+
+        response = self.get(url_for("apiv2.organization_search", q="open data", sort="-followers"))
+        self.assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(beta.id), str(alpha.id)]
+        assert response.json["total"] == 2
+
+        response = self.get(
+            url_for("apiv2.organization_search", q="open data", badge=PUBLIC_SERVICE)
+        )
+        self.assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(beta.id)]
 
 
 class OrganizationExtrasAPITest(APITestCase):

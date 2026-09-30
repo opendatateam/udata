@@ -11,7 +11,6 @@ from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
-from udata.core.organization.api import OrgApiParser
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
 from udata.core.reuse.csv import ReuseCsvAdapter
@@ -21,7 +20,6 @@ from udata.harvest.csv import HarvestSourceCsvAdapter
 from udata.harvest.models import HarvestSource
 from udata.models import Dataset, Reuse
 from udata.rdf import CONTEXT, RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import multi_to_dict
 
 from .models import Site, current_site
 from .rdf import build_catalog
@@ -124,13 +122,11 @@ class SiteResourcesCsv(API):
 @api.route("/site/organizations.csv", endpoint="site_organizations_csv")
 class SiteOrganizationsCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "organization" in exported_models:
+        if not request.args and "organization" in exported_models:
             return redirect(get_export_url("organization"))
-        params["facets"] = False
-        organizations = OrgApiParser.parse_filters(get_csv_queryset(Organization), params)
+        organizations = Organization.apply_sort_filters(get_csv_queryset(Organization))
         return csv.stream(OrganizationCsvAdapter(organizations), "organizations")
 
 
@@ -148,12 +144,10 @@ class SiteReusesCsv(API):
 @api.route("/site/dataservices.csv", endpoint="site_dataservices_csv")
 class SiteDataservicesCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "dataservice" in exported_models:
+        if not request.args and "dataservice" in exported_models:
             return redirect(get_export_url("dataservice"))
-        params["facets"] = False
         dataservices = Dataservice.apply_sort_filters(get_csv_queryset(Dataservice))
         return csv.stream(DataserviceCsvAdapter(dataservices), "dataservices")
 

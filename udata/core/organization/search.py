@@ -1,7 +1,6 @@
 import datetime
 
 from udata import search
-from udata.core.organization.api import DEFAULT_SORTING, OrgApiParser
 from udata.core.organization.constants import PRODUCER_BADGE_TYPES, PRODUCER_TYPES, USER
 from udata.models import Organization
 from udata.search.fields import Filter, ModelTermsFilter
@@ -41,15 +40,11 @@ class OrganizationSearch(search.ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
+        # `args` is ignored: this fallback only runs while serving the search endpoint,
+        # whose query string the model's own parser reads again. It accepts every search
+        # sort and ignores the Elasticsearch-only `producer_type` filter.
         orgs = Organization.objects.visible()
-        orgs = OrgApiParser.parse_filters(orgs, args)
-
-        sort = (
-            cls.parse_sort(args["sort"])
-            or ("$text_score" if args["q"] else None)
-            or DEFAULT_SORTING
-        )
-        return orgs.order_by(sort).paginate(args["page"], args["page_size"])
+        return Organization.apply_pagination(Organization.apply_sort_filters(orgs))
 
     @classmethod
     def serialize(cls, organization):
