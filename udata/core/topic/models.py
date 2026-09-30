@@ -207,9 +207,13 @@ class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
             **self._self_api_url_kwargs(**kwargs),
         )
 
-    @field(description="The topic API URI")
+    @field(description="Link to the API endpoint for this topic", show_as_ref=True)
     def uri(self):
         return self.self_api_url()
+
+    @field(description="Link to the udata web page for this topic", show_as_ref=True)
+    def page(self):
+        return self.self_web_url()
 
 
 post_save.connect(Topic.post_save, sender=Topic)
