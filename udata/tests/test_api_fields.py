@@ -450,17 +450,17 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize("param", ["filter_field_name", "tag", "standalone"])
     def test_empty_filter_is_ignored(self, app, param) -> None:
         """An empty filter value leaves the filter unset instead of matching ""."""
-        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["a"])
-        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["b"])
+        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["tag-a"])
+        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["tag-b"])
         with app.test_request_context("/foobar", query_string={param: ""}):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert set(results) == {fake1, fake2}
 
     def test_empty_list_filter_values_are_dropped(self, app) -> None:
         """Empty values of a repeated list filter are dropped, the others still apply."""
-        fake1: Fake = FakeFactory(tags=["a"])
-        FakeFactory(tags=["b"])
-        with app.test_request_context("/foobar", query_string=[("tag", "a"), ("tag", "")]):
+        fake1: Fake = FakeFactory(tags=["tag-a"])
+        FakeFactory(tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string=[("tag", "tag-a"), ("tag", "")]):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert list(results) == [fake1]
 
