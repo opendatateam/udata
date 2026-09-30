@@ -320,6 +320,18 @@ class ReportsAPITest(APITestCase):
         self.assertIsNotNone(report.dismissed_at)
         self.assertEqual(report.dismissed_by.id, admin.id)
 
+    def test_reports_api_dismiss_with_non_object_body(self):
+        report = Report(subject=DatasetFactory(), reason=REASON_SPAM).save()
+        self.login(AdminFactory())
+
+        for body in ([1, 2, 3], 1, "dismissed_at"):
+            response = self.patch(url_for("api.report", report=report), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        report.reload()
+        self.assertIsNone(report.dismissed_at)
+
     def test_reports_api_undismiss(self):
         user = UserFactory()
         admin = AdminFactory()

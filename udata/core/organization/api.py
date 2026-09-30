@@ -207,7 +207,7 @@ class OrganizationAPI(API):
 
         :raises PermissionDenied:
         """
-        request_deleted = request.json.get("deleted", True)
+        request_deleted = api.json_payload().get("deleted", True)
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
         org.permissions["edit"].test()

@@ -367,6 +367,17 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert410(response)
         assert Organization.objects.first().description == org.description
 
+    def test_organization_api_update_with_non_object_body(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        for body in ([1, 2, 3], 1, "deleted"):
+            response = self.put(url_for("api.organization", org=org), body)
+            assert400(response)
+            assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        assert Organization.objects.first().description == org.description
+
     def test_organization_api_update_forbidden(self):
         """It should not update an organization from the API if not admin"""
         org = OrganizationFactory()
