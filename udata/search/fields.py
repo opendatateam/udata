@@ -19,17 +19,13 @@ OR_SEPARATOR = "|"
 
 
 class Filter:
-    def __init__(self, choices=None, help=None):
+    def __init__(self, choices=None):
         self.choices = choices
-        self.help = help
 
     def as_request_parser_kwargs(self):
-        kwargs = {"type": clean_string}
         if self.choices:
-            kwargs["choices"] = self.choices
-        if self.help:
-            kwargs["help"] = self.help
-        return kwargs
+            return {"type": clean_string, "choices": self.choices}
+        return {"type": clean_string}
 
 
 class ListFilter:
@@ -39,11 +35,14 @@ class ListFilter:
 
 
 class BoolFilter(Filter):
+    def __init__(self, help=None):
+        super().__init__()
+        self.help = help
+
     def as_request_parser_kwargs(self):
-        kwargs = {"type": inputs.boolean}
         if self.help:
-            kwargs["help"] = self.help
-        return kwargs
+            return {"type": inputs.boolean, "help": self.help}
+        return {"type": inputs.boolean}
 
 
 class ModelTermsFilter(Filter):
