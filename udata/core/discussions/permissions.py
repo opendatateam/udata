@@ -1,12 +1,26 @@
 from udata.auth import Permission, UserNeed
 from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.permissions import (
+    AssignmentNeed,
     OrganizationAdminNeed,
     OrganizationEditorNeed,
 )
 from udata.core.owned import Owned
 
 from .models import Discussion, Message
+
+
+def organization_voice_needs(organization, subject) -> list:
+    """Needs to speak in the name of `organization` in a discussion about `subject`.
+
+    Admins and editors speak for their organization everywhere, a reuser organization
+    writing to a producer being the common case. A partial editor only edits the objects
+    assigned to them, so they only speak for the organization on those.
+    """
+    needs = [OrganizationAdminNeed(organization.id), OrganizationEditorNeed(organization.id)]
+    if isinstance(subject, Owned) and subject.organization == organization:
+        needs.append(AssignmentNeed(subject.__class__.__name__, subject.id))
+    return needs
 
 
 # This is a hack to because double inheritance doesn't work really well with permissions.
@@ -25,25 +39,22 @@ def DiscussionAuthorOrSubjectOwnerPermission(discussion: Discussion):
 
 class DiscussionAuthorPermission(Permission):
     def __init__(self, discussion: Discussion):
-        needs = []
-
         if discussion.organization:
-            needs.append(OrganizationAdminNeed(discussion.organization.id))
-            needs.append(OrganizationEditorNeed(discussion.organization.id))
+            needs = organization_voice_needs(discussion.organization, discussion.subject)
         else:
-            needs.append(UserNeed(discussion.user.fs_uniquifier))
+            needs = [UserNeed(discussion.user.fs_uniquifier)]
 
         super(DiscussionAuthorPermission, self).__init__(*needs)
 
 
 class DiscussionMessagePermission(Permission):
     def __init__(self, message: Message):
-        needs = []
-
         if message.posted_by_organization:
-            needs.append(OrganizationAdminNeed(message.posted_by_organization.id))
-            needs.append(OrganizationEditorNeed(message.posted_by_organization.id))
+            # `_instance` is the discussion holding this embedded message.
+            needs = organization_voice_needs(
+                message.posted_by_organization, message._instance.subject
+            )
         else:
-            needs.append(UserNeed(message.posted_by.fs_uniquifier))
+            needs = [UserNeed(message.posted_by.fs_uniquifier)]
 
         super(DiscussionMessagePermission, self).__init__(*needs)
