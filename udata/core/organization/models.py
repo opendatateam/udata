@@ -204,7 +204,10 @@ class OrganizationBadge(Badge):
 
 class OrganizationBadgeMixin(BadgeMixin):
     badges = field(
-        BadgesList(OrganizationBadge), show_as_ref=True, **BadgeMixin.default_badges_list_params
+        BadgesList(OrganizationBadge),
+        show_as_ref=True,
+        filterable={"key": "badge"},
+        **BadgeMixin.default_badges_list_params,
     )
     __badges__ = BADGES
 
@@ -221,7 +224,22 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields(read_mask_exclude=["presentation_blocs"])
+def filter_by_name(base_query, value):
+    # Case-insensitive so that the uniqueness check on organization creation
+    # catches names differing only by case.
+    return base_query.filter(name__iexact=value)
+
+
+@generate_fields(
+    searchable=True,
+    additional_sorts=[
+        {"key": "reuses", "value": "metrics.reuses"},
+        {"key": "datasets", "value": "metrics.datasets"},
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
+    read_mask_exclude=["presentation_blocs"],
+)
 class Organization(
     Auditable,
     SpamMixin,
@@ -231,7 +249,12 @@ class Organization(
     Datetimed,
     Document[OrganizationQuerySet],
 ):
-    name = field(StringField(required=True), show_as_ref=True)
+    name = field(
+        StringField(required=True),
+        show_as_ref=True,
+        sortable=True,
+        filterable={"query": filter_by_name},
+    )
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -261,7 +284,9 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret])
+    business_number_id = field(
+        StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret], filterable={}
+    )
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
