@@ -14,7 +14,7 @@ from mongoengine.signals import post_delete, post_save
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields

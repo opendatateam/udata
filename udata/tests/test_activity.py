@@ -2,14 +2,17 @@ from datetime import date, datetime
 
 from blinker import Signal
 from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
 from mongoengine.fields import EmbeddedDocumentField, ListField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
 from udata.api_fields import field
 from udata.auth import login_user
-from udata.core.activity.models import Activity, Auditable
+from udata.core.activity.models import Activity
+from udata.core.auditable import Auditable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.mongo.datetime_fields import DateField, DateRange
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.taglist_field import TagListField
@@ -94,6 +97,17 @@ class ActivityTest(APITestCase):
         self.assertEqual(len(activities), 2)
         for activity in activities:
             self.assertIsInstance(activity, FakeActivity)
+
+    def test_actor_can_be_something_else_than_a_user(self):
+        """An activity is not necessarily the doing of a person."""
+        source = HarvestSourceFactory()
+        activity = FakeActivity.objects.create(actor=source, related_to=self.fake)
+
+        assert Activity.objects.get(id=activity.id).actor == source
+
+    def test_actor_cannot_be_an_arbitrary_document(self):
+        with self.assertRaises(ValidationError):
+            FakeActivity.objects.create(actor=self.fake, related_to=self.fake)
 
     def check_emitted(self, sender, activity):
         self.assertEqual(sender, FakeActivity)

@@ -24,7 +24,7 @@ from werkzeug.utils import cached_property
 from udata.api import api
 from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.checks import check_is_email
 from udata.core.edito_blocs.base import Bloc
