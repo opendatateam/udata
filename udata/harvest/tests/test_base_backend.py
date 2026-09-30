@@ -730,8 +730,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     )
     @pytest.mark.parametrize("dryrun", [False, True], ids=["liverun", "dryrun"])
     def test_harvest_loop(self, error, job_status, dryrun, mocker: MockerFixture):
-        liverun = not dryrun
-
         nb_datasets = 3
         nb_dataservices = 2
         record_errors = [error] if isinstance(error, MockRecordError) else []
@@ -740,6 +738,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             if isinstance(error, MockHarvestError)
             else []
         )
+        liverun = not dryrun
 
         org = OrganizationFactory()
         backend = MockBackend(
@@ -867,8 +866,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     )
     @pytest.mark.parametrize("dryrun", [False, True], ids=["liverun", "dryrun"])
     def test_process_item(self, record, item_status, dryrun, mocker: MockerFixture):
-        liverun = not dryrun
         record_error = item_status != "done"
+        liverun = not dryrun
 
         org = OrganizationFactory()
         backend = MockBackend(HarvestSourceFactory(organization=org), dryrun=dryrun)
