@@ -34,7 +34,6 @@ class HarvestableFactoryMixin(_ModelFactoryBase):
     class Meta:
         abstract = True
 
-    # FIXME: reset like factory does
     _ids = itertools.count()
 
     @factory.post_generation
