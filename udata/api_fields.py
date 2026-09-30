@@ -956,6 +956,30 @@ def run_check(check, value, key, obj, data):
 _T = TypeVar("_T")
 
 
+def _patch_embedded(value, field: str, document_class=None, generic_key: str | None = None):
+    """Patch a new embedded document from a field value, `field` naming the value in errors.
+
+    A generic embedded document gets its class from `value[generic_key]` instead of
+    `document_class`.
+    """
+    if not isinstance(value, dict):
+        raise FieldValidationError(message="Expected an object", field=field)
+    if generic_key is not None:
+        class_name = value.get(generic_key)
+        document_class = classes_by_names.get(class_name) if isinstance(class_name, str) else None
+        if document_class is None:
+            raise FieldValidationError(
+                message=f"Expected an object with a valid `{generic_key}` key", field=field
+            )
+    return patch(document_class(), value)
+
+
+def _expect_list(value, field: str) -> list:
+    if not isinstance(value, list):
+        raise FieldValidationError(message="Expected a list", field=field)
+    return value
+
+
 def patch(obj: _T, request) -> _T:
     """Patch the object with the data from the request.
 
@@ -1034,34 +1058,28 @@ def patch(obj: _T, request) -> _T:
                 model_attribute,
                 mongoengine.fields.GenericEmbeddedDocumentField,
             ):
-                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
-                embedded_field = classes_by_names[value[generic_key]]
-                value = patch(embedded_field(), value)
+                value = _patch_embedded(
+                    value, key, generic_key=info.get("generic_key", DEFAULT_GENERIC_KEY)
+                )
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
-                embedded_field = model_attribute.document_type().__class__
-                value = patch(embedded_field(), value)
+                value = _patch_embedded(value, key, model_attribute.document_type().__class__)
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
-                base_embedded_field = model_attribute.field.document_type().__class__
-                generic = info.get("generic", False)
-                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
-
-                objects = []
-                for embedded_value in value:
-                    # TODO add validation on generic_key presence and value
-                    embedded_field = (
-                        classes_by_names[embedded_value[generic_key]]
-                        if generic
-                        else base_embedded_field
-                    )
-                    objects.append(patch(embedded_field(), embedded_value))
-
-                value = objects
+                document_class = model_attribute.field.document_type().__class__
+                generic_key = (
+                    info.get("generic_key", DEFAULT_GENERIC_KEY)
+                    if info.get("generic", False)
+                    else None
+                )
+                value = [
+                    _patch_embedded(embedded_value, key, document_class, generic_key)
+                    for embedded_value in _expect_list(value, key)
+                ]
             elif (
                 value
                 and isinstance(
@@ -1076,14 +1094,10 @@ def patch(obj: _T, request) -> _T:
                 # discriminate each item on the generic key and patch it into an
                 # embedded document instance.
                 generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
-
-                objects = []
-                for embedded_value in value:
-                    # TODO add validation on generic_key presence and value
-                    embedded_field = classes_by_names[embedded_value[generic_key]]
-                    objects.append(patch(embedded_field(), embedded_value))
-
-                value = objects
+                value = [
+                    _patch_embedded(embedded_value, key, generic_key=generic_key)
+                    for embedded_value in _expect_list(value, key)
+                ]
 
             # Validate `choices` here because patch() never goes through
             # MongoEngine's validate(): without this, an invalid choice would only
