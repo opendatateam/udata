@@ -116,6 +116,18 @@ class FakeWithDefaultRejectingCheck(EmbeddedDocument):
     kind = field(StringField(), checks=[check_is_set])
 
 
+def check_code_needs_coded_kind(value: str = "", obj=None, field: str = "", **_kwargs) -> None:
+    """Reads the other field on `obj`, not in the payload."""
+    if value and obj.kind != "coded":
+        raise FieldValidationError("A code needs the coded kind", field=field)
+
+
+@generate_fields()
+class FakeWithCrossFieldCheck(EmbeddedDocument):
+    kind = field(StringField())
+    code = field(StringField(), checks=[check_code_needs_coded_kind])
+
+
 @generate_fields(
     searchable=True,
     additional_sorts=[
@@ -619,6 +631,20 @@ class ChecksOnCreationTest(PytestOnlyDBTestCase):
         stored = FakeWithRename.objects.create(label="a fine label")
         with pytest.raises(FieldValidationError):
             patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+
+class CrossFieldCheckTest(PytestOnlyDBTestCase):
+    """A check sees the object with every field of the payload written, whatever the
+    order of the keys in the payload."""
+
+    def test_other_field_is_written_before_the_check(self) -> None:
+        for payload in [{"code": "x", "kind": "coded"}, {"kind": "coded", "code": "x"}]:
+            assert patch(FakeWithCrossFieldCheck(), payload).code == "x"
+
+    def test_other_field_value_is_checked(self) -> None:
+        for payload in [{"code": "x", "kind": "plain"}, {"kind": "plain", "code": "x"}]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithCrossFieldCheck(), payload)
 
 
 class PatchBlankStringTest(PytestOnlyDBTestCase):

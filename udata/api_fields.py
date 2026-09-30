@@ -966,6 +966,7 @@ def patch(obj: _T, request) -> _T:
 
     data = request.json if isinstance(request, Request) else request
     api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
+    pending_checks = []
 
     for api_key, value in data.items():
         field = obj.__write_fields__.get(api_key)
@@ -1132,26 +1133,26 @@ def patch(obj: _T, request) -> _T:
             for check in info.get("checks", []):
                 if obj._created or modified or getattr(check, "always_run", False):
                     # Pass the API key so error messages match the payload the caller sent.
-                    run_check(check, value, api_key, obj, data)
+                    pending_checks.append((check, value, api_key))
 
             setattr(obj, key, value)
 
-    # Run `always_run` checks on fields absent from the request (the ones present
-    # already ran in the loop above). Some checks (like `required_if`) validate a
-    # cross-field constraint on the resulting object rather than on the value being
-    # written (e.g. "page_id is required if body_type is blocs"), so leaving the
-    # field out of the payload must not be a way to escape them.
+    # Run `always_run` checks on fields absent from the request too. Some checks (like
+    # `required_if`) validate a cross-field constraint on the resulting object rather
+    # than on the value being written (e.g. "page_id is required if body_type is
+    # blocs"), so leaving the field out of the payload must not be a way to escape them.
     for key, _, info in get_fields(obj.__class__):
         api_key = info.get("rename") or key
         if api_key in data:
             continue
-        checks = info.get("checks", [])
-        value = getattr(obj, key, None)
+        for check in info.get("checks", []):
+            if getattr(check, "always_run", False):
+                pending_checks.append((check, getattr(obj, key, None), api_key))
 
-        for check in checks:
-            if not getattr(check, "always_run", False):
-                continue
-            run_check(check, value, api_key, obj, data)
+    # Checks run once every field of the payload is written, so that a check reading
+    # another field on `obj` sees its new value whatever the order of the payload keys.
+    for check, value, api_key in pending_checks:
+        run_check(check, value, api_key, obj, data)
 
     return obj
 
