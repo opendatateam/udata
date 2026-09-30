@@ -21,8 +21,14 @@ from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
 log = logging.getLogger(__name__)
 
 
-DEFAULT_GEOZONES_FILE = "https://www.data.gouv.fr/datasets/r/a1bb263a-6cc7-4871-ab4f-2470235a67bf"
-DEFAULT_LEVELS_FILE = "https://www.data.gouv.fr/datasets/r/e0206442-78b3-4a00-b71c-c065d20561c8"
+# Zones 2026 https://www.data.gouv.fr/datasets/geozones?resource_id=2238e0eb-e48d-475c-9dd3-8eae3a86136b
+DEFAULT_GEOZONES_FILE = (
+    "https://www.data.gouv.fr/api/1/datasets/r/2238e0eb-e48d-475c-9dd3-8eae3a86136b"
+)
+# Levels 2026 https://www.data.gouv.fr/datasets/geozones?resource_id=c5194419-2ffd-4c04-a9de-713f3cf8b3a5
+DEFAULT_LEVELS_FILE = (
+    "https://www.data.gouv.fr/api/1/datasets/r/c5194419-2ffd-4c04-a9de-713f3cf8b3a5"
+)
 
 
 @cli.group("spatial")
