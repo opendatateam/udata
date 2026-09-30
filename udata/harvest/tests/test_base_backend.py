@@ -95,7 +95,22 @@ MockItem = Harvestable | MockHarvestError | MockRecordError
 
 
 class MockBackend(BaseBackend):
-    """FIXME"""
+    """Simulates a harvest feed from a list of MockItem.
+
+    A MockItem can either be a:
+    - Harvestable object: The mock object is used as a fixture for the remote record, setting
+      the harvested item fields from it, simulating what a real `item_processor` would do.
+    - MockRecordError: The mock error is raised in `item_processor`, simulating a processing error.
+    - MockHarvestError: The mock error is raised in `inner_harvest`, simulating an harvesting error.
+
+    Harvestable mock objects can be generated using their mongo factories, using the `remote_id`
+    parameter to simulate a remote record id. See HarvestableFactoryMixin for details.
+
+    Be careful to use the appropriate factory builder (`build` vs `create`), depending on whether
+    the object should exist in mongo when the harvester runs (impacts `get_item` behavior):
+    - `build` instantiates an object without saving it => mock item doesn't exist in mongo.
+    - `create` instantiates and saves an object => mock item already exists in mongo.
+    """
 
     name = "mock-backend"
     display_name = "Mock Backend"
@@ -132,7 +147,6 @@ class MockBackend(BaseBackend):
         for name in mock_item._fields:
             if name not in ("id", "pk") and (value := getattr(mock_item, name)) is not None:
                 setattr(item, name, value)
-        # FIXME: do it in factory?
         item.harvest.remote_url = f"http://www.example.com/records/{harvest_item.remote_id}"
         return item
 
@@ -360,7 +374,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         )
 
         backend.harvest()
-        # FIXME: double-harvest isn't really supported
+        # FIXME: double-harvest isn't really supported, but it works anyway...
         backend.harvest()  # Harvest twice to test same last_modified
 
         dataset = Dataset.objects.first()
@@ -371,11 +385,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         grace_days = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
         nb_datasets = 3
         nb_dataservices = 3
+        mock_datasets = DatasetFactory.build_batch(nb_datasets, remote_id=True)
+        mock_dataservices = DataserviceFactory.build_batch(nb_dataservices, remote_id=True)
         source = HarvestSourceFactory()
         backend = MockBackend(
             source,
-            mock_items=DatasetFactory.build_batch(nb_datasets, remote_id=True)
-            + DataserviceFactory.build_batch(nb_dataservices, remote_id=True),
+            mock_items=mock_datasets + mock_dataservices,
         )
 
         # create a dangling dataset to be archived
@@ -451,17 +466,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_at" not in dataservice_no_arch.harvest
         assert "archived_reason" not in dataservice_no_arch.harvest
 
-        # FIXME: backend.mock_items[i].remote_id
-
         # test unarchive: archive manually then relaunch harvest
-        dataset = Dataset.objects.get(**{"harvest__remote_id": backend.mock_items[0].remote_id})
+        dataset = Dataset.objects.get(**{"harvest__remote_id": mock_datasets[0].remote_id})
         dataset.archived = datetime.now(UTC)
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
         dataservice = Dataservice.objects.get(
-            **{"harvest__remote_id": backend.mock_items[nb_datasets].remote_id}
+            **{"harvest__remote_id": mock_dataservices[0].remote_id}
         )
         dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_at = datetime.now(UTC)
@@ -509,17 +522,14 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             + [DatasetFactory.build(remote_id=duplicated_remote_id_uri)],
         )
 
-        # FIXME: backend.mock_items[0].remote_id
-
         # Create a dataset that should be reused by the harvest, which will update it
         # instead of creating a new one, as it has the same remote_id, domain and source_id.
         dataset_reused = DatasetFactory(
             title="Reused Dataset",
             harvest={
                 "domain": source.domain,
-                "remote_id": backend.mock_items[
-                    0
-                ].remote_id,  # the MockBackend harvest should reuse this dataset
+                # the MockBackend harvest should reuse this dataset
+                "remote_id": backend.mock_items[0].remote_id,
                 "source_id": str(source.id),
             },
         )
@@ -540,9 +550,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             title="Duplicated Dataset",
             harvest={
                 "domain": "some-other-domain",
-                "remote_id": backend.mock_items[
-                    0
-                ].remote_id,  # the "source" harvest above should create another dataset with the same remote_id
+                # the "source" harvest above should create another dataset with the same remote_id
+                "remote_id": backend.mock_items[0].remote_id,
                 "source_id": "some-other-source-id",
             },
         )
@@ -614,14 +623,19 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             mock_items=[
                 DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
                 DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-unique"),
-                # dataservices don't check on uri remote_id (bug?)  # FIXME
+                DataserviceFactory.build(
+                    remote_id="https://data.example.com/catalog/dataservice-repeat"
+                ),
+                DataserviceFactory.build(
+                    remote_id="https://data.example.com/catalog/dataservice-unique"
+                ),
             ],
         )
 
         job1 = backend1.harvest()
 
         assert job1.status == "done"
-        assert len(job1.items) == 2
+        assert len(job1.items) == 4
 
         backend2 = MockBackend(
             HarvestSourceFactory(
@@ -631,13 +645,19 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             mock_items=[
                 DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
                 DatasetFactory.build(remote_id="https://other.example.com/catalog/dataset-unique"),
+                DataserviceFactory.build(
+                    remote_id="https://data.example.com/catalog/dataservice-repeat"
+                ),
+                DataserviceFactory.build(
+                    remote_id="https://other.example.com/catalog/dataservice-unique"
+                ),
             ],
         )
 
         job2 = backend2.harvest()
 
         assert job2.status == "done-errors"
-        assert len(job2.items) == 2
+        assert len(job2.items) == 4
         for item in job2.items:
             if not item.remote_id.endswith("-repeat"):
                 assert item.status == "done"
