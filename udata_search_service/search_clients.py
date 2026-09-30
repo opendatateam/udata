@@ -703,7 +703,7 @@ class ElasticClient:
                     minimum_should_match=1,
                 )
             elif key in ["license", "format", "schema", "granularity", "badges"]:
-                filter_key = {"geozones": "geozone", "badges": "badge"}.get(key, key)
+                filter_key = {"badges": "badge"}.get(key, key)
                 if isinstance(value, list):
                     list_filters = [query.Q("term", **{key: v}) for v in value]
                     filter_dict[filter_key] = query.Bool(

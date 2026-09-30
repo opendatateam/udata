@@ -214,6 +214,12 @@ class DetectAndWriteZoneReturnTest(DBTestCase):
 
         self.assertEqual(detect_and_write_zone(str(dataset.id)), [zone.id])
 
+    def test_uses_the_zones_it_is_given(self):
+        dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
+
+        zones = {"fr:departement:01": [0.0, 0.0, 10.0, 10.0]}
+        assert detect_and_write_zone(str(dataset.id), zones) == ["fr:departement:01"]
+
     def test_returns_nothing_without_match(self):
         dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
 

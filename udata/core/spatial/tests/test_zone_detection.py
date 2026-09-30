@@ -59,7 +59,13 @@ class DetectZoneTest:
             "fr:departement:972": [0, 0, 10, 10],
             "unrelated": [100, 100, 110, 110],
         }
-        assert sorted(detect_zone([0, 0, 10, 10], zones)) == ["fr:departement:972", "fr:region:03"]
+        assert detect_zone([0, 0, 10, 10], zones) == ["fr:departement:972", "fr:region:03"]
+
+    def test_tie_order_does_not_depend_on_zones_order(self):
+        zones = {"b": [0, 0, 10, 10], "a": [0, 0, 10, 10]}
+        reversed_zones = {"a": [0, 0, 10, 10], "b": [0, 0, 10, 10]}
+        assert detect_zone([0, 0, 10, 10], zones) == ["a", "b"]
+        assert detect_zone([0, 0, 10, 10], reversed_zones) == ["a", "b"]
 
 
 class GeomToBboxTest:
