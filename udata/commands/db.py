@@ -144,14 +144,18 @@ def check_references(models_to_check=()):
 
     references = []
     for model in get_all_models():
-        if model.__name__ == "Activity":
-            print("Skipping Activity model, scheduled for deprecation")
+        if models_to_check and model.__name__ not in models_to_check:
+            continue
+
+        # This command dereferences every reference of every document, and `activity` is
+        # by far the largest collection (tens of millions of documents against hundreds
+        # of thousands for the next one). Left out of the default sweep for that reason
+        # only — `--models Activity` still runs it.
+        if not models_to_check and model.__name__ == "Activity":
+            print("Skipping Activity model, pass `--models Activity` to inspect it")
             continue
         if model.__name__ == "GeoLevel":
             print("Skipping GeoLevel model, scheduled for deprecation")
-            continue
-
-        if models_to_check and model.__name__ not in models_to_check:
             continue
 
         # find "root" ReferenceField fields

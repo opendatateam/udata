@@ -20,7 +20,7 @@ from mongoengine.signals import post_save
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.models import WithAccessType
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import ContactPoint, validate_contact_points_ownership
