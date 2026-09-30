@@ -13,6 +13,7 @@ from udata.core.organization.constants import COMPANY, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
@@ -593,6 +594,26 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "CC-BY" in titles
         assert "ODbL" not in titles
+
+    def test_dataset_filter_by_geozone_with_ancestors(self):
+        region = GeoZoneFactory(id="fr:region:53")
+        departement = GeoZoneFactory(id="fr:departement:29", ancestors=[region.id])
+        elsewhere = GeoZoneFactory(id="fr:departement:75")
+        DatasetFactory(title="Département", spatial=SpatialCoverageFactory(zones=[departement]))
+        DatasetFactory(title="Région", spatial=SpatialCoverageFactory(zones=[region]))
+        DatasetFactory(title="Ailleurs", spatial=SpatialCoverageFactory(zones=[elsewhere]))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?geozone=fr:departement:29")
+        self.assert200(response)
+        assert {d["title"] for d in response.json["data"]} == {"Département"}
+
+        response = self.get(
+            "/api/2/datasets/search/?geozone=fr:departement:29&include_geozone_ancestors=true"
+        )
+        self.assert200(response)
+        assert {d["title"] for d in response.json["data"]} == {"Département", "Région"}
 
     def test_dataset_filter_by_organization(self):
         org = OrganizationFactory()
