@@ -459,7 +459,7 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
     def test_empty_list_filter_values_are_dropped(self, app) -> None:
         """Empty values of a repeated list filter are dropped, the others still apply."""
         fake1: Fake = FakeFactory(tags=["a"])
-        fake2: Fake = FakeFactory(tags=["b"])
+        FakeFactory(tags=["b"])
         with app.test_request_context("/foobar", query_string=[("tag", "a"), ("tag", "")]):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert list(results) == [fake1]
