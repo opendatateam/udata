@@ -1,6 +1,7 @@
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.core.spatial.commands import load_zones
-from udata.core.spatial.factories import GeoZoneFactory
+from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.core.spatial.models import GeoZone
 from udata.tests.api import APITestCase
 
@@ -43,3 +44,17 @@ class GeoZoneAncestorsTest(APITestCase):
 
     def test_include_ancestors_without_geozone_is_dropped(self):
         assert DatasetSearch.prepare_filters({"include_geozone_ancestors": True}) == {}
+
+    def test_mongo_fallback_includes_ancestors(self):
+        region = GeoZoneFactory(id="fr:region:53")
+        departement = GeoZoneFactory(id="fr:departement:29", ancestors=[region.id])
+        elsewhere = GeoZoneFactory(id="fr:departement:75")
+        DatasetFactory(title="Département", spatial=SpatialCoverageFactory(zones=[departement]))
+        DatasetFactory(title="Région", spatial=SpatialCoverageFactory(zones=[region]))
+        DatasetFactory(title="Ailleurs", spatial=SpatialCoverageFactory(zones=[elsewhere]))
+
+        response = self.get(
+            "/api/2/datasets/search/?geozone=fr:departement:29&include_geozone_ancestors=true"
+        )
+        self.assert200(response)
+        assert {d["title"] for d in response.json["data"]} == {"Département", "Région"}
