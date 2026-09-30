@@ -91,6 +91,9 @@ class MockRecordError(MockError):
         return str(self.exception)
 
 
+MockItem = Harvestable | MockHarvestError | MockRecordError
+
+
 class MockBackend(BaseBackend):
     """FIXME"""
 
@@ -110,9 +113,9 @@ class MockBackend(BaseBackend):
         HarvestExtraConfig("Test Str", "test_str", str),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, mock_items: Sequence[MockItem] | None = None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mock_items: Sequence[Harvestable | MockHarvestError | MockRecordError] = []
+        self.mock_items = mock_items or []
 
     @override
     def inner_harvest(self):
@@ -167,11 +170,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = MockBackend(source)
-        backend.mock_items = DatasetFactory.build_batch(
-            nb_datasets,
-            remote_id=lambda id: f"dataset-{id}",
-            timestamps=False,
+        backend = MockBackend(
+            source,
+            mock_items=DatasetFactory.build_batch(
+                nb_datasets,
+                remote_id=lambda id: f"dataset-{id}",
+                timestamps=False,
+            ),
         )
 
         before = datetime.now(UTC)
@@ -298,10 +303,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_item_remote_url(self):
         n = 3
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = DatasetFactory.build_batch(
-            n, remote_id=True
-        ) + DataserviceFactory.build_batch(n, remote_id=True)
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=DatasetFactory.build_batch(n, remote_id=True)
+            + DataserviceFactory.build_batch(n, remote_id=True),
+        )
 
         job = backend.harvest()
 
@@ -311,8 +317,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_harvest_source_id(self):
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = MockBackend(source)
-        backend.mock_items = DatasetFactory.build_batch(nb_datasets, remote_id=True)
+        backend = MockBackend(
+            source, mock_items=DatasetFactory.build_batch(nb_datasets, remote_id=True)
+        )
 
         job = backend.harvest()
 
@@ -334,10 +341,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_dont_overwrite_last_modified(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)
-        ]
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)],
+        )
 
         backend.harvest()
 
@@ -347,10 +354,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)
-        ]
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)],
+        )
 
         backend.harvest()
         # FIXME: double-harvest isn't really supported
@@ -365,10 +372,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         nb_datasets = 3
         nb_dataservices = 3
         source = HarvestSourceFactory()
-        backend = MockBackend(source)
-        backend.mock_items = DatasetFactory.build_batch(
-            nb_datasets, remote_id=True
-        ) + DataserviceFactory.build_batch(nb_dataservices, remote_id=True)
+        backend = MockBackend(
+            source,
+            mock_items=DatasetFactory.build_batch(nb_datasets, remote_id=True)
+            + DataserviceFactory.build_batch(nb_dataservices, remote_id=True),
+        )
 
         # create a dangling dataset to be archived
         last_update = datetime.now(UTC) - timedelta(days=grace_days + 1)
@@ -473,8 +481,10 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice.harvest
 
     def test_harvest_datasets_get_deleted(self):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = DatasetFactory.build_batch(3, remote_id=True)
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=DatasetFactory.build_batch(3, remote_id=True),
+        )
 
         job = backend.harvest()
 
@@ -493,10 +503,11 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         duplicated_remote_id_uri = "http://example.com/duplicated_remote_id_uri"
         nb_datasets = 3
         source = HarvestSourceFactory()
-        backend = MockBackend(source)
-        backend.mock_items = DatasetFactory.build_batch(nb_datasets, remote_id=True) + [
-            DatasetFactory.build(remote_id=duplicated_remote_id_uri)
-        ]
+        backend = MockBackend(
+            source,
+            mock_items=DatasetFactory.build_batch(nb_datasets, remote_id=True)
+            + [DatasetFactory.build(remote_id=duplicated_remote_id_uri)],
+        )
 
         # FIXME: backend.mock_items[0].remote_id
 
@@ -570,8 +581,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             DataserviceFactory.build(remote_id="dataservice-2"),
             DataserviceFactory.build(remote_id="dataservice-2"),
         ]
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = dataset_records + dataservice_records
+        backend = MockBackend(
+            HarvestSourceFactory(), mock_items=dataset_records + dataservice_records
+        )
 
         job = backend.harvest()
 
@@ -598,13 +610,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
                 **{owner_param: owner_factory()},
-            )
+            ),
+            mock_items=[
+                DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
+                DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-unique"),
+                # dataservices don't check on uri remote_id (bug?)  # FIXME
+            ],
         )
-        backend1.mock_items = [
-            DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
-            DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-unique"),
-            # dataservices don't check on uri remote_id (bug?)  # FIXME
-        ]
 
         job1 = backend1.harvest()
 
@@ -615,12 +627,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             HarvestSourceFactory(
                 url="https://other.example.com/catalog",
                 **{owner_param: owner_factory()},
-            )
+            ),
+            mock_items=[
+                DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
+                DatasetFactory.build(remote_id="https://other.example.com/catalog/dataset-unique"),
+            ],
         )
-        backend2.mock_items = [
-            DatasetFactory.build(remote_id="https://data.example.com/catalog/dataset-repeat"),
-            DatasetFactory.build(remote_id="https://other.example.com/catalog/dataset-unique"),
-        ]
 
         job2 = backend2.harvest()
 
@@ -643,14 +655,14 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             HarvestSourceFactory(
                 url="https://data.example.com/catalog",
                 **{owner_param: owner_factory()},
-            )
+            ),
+            mock_items=[
+                DatasetFactory.build(remote_id="dataset-repeat"),
+                DatasetFactory.build(remote_id="dataset-unique-1"),
+                DataserviceFactory.build(remote_id="dataservice-repeat"),
+                DataserviceFactory.build(remote_id="dataservice-unique-1"),
+            ],
         )
-        backend1.mock_items = [
-            DatasetFactory.build(remote_id="dataset-repeat"),
-            DatasetFactory.build(remote_id="dataset-unique-1"),
-            DataserviceFactory.build(remote_id="dataservice-repeat"),
-            DataserviceFactory.build(remote_id="dataservice-unique-1"),
-        ]
 
         job1 = backend1.harvest()
 
@@ -661,14 +673,14 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             HarvestSourceFactory(
                 url="https://data.example.com/other-catalog",  # same domain as backend1
                 **{owner_param: owner_factory()},
-            )
+            ),
+            mock_items=[
+                DatasetFactory.build(remote_id="dataset-repeat"),
+                DatasetFactory.build(remote_id="dataset-unique-2"),
+                DataserviceFactory.build(remote_id="dataservice-repeat"),
+                DataserviceFactory.build(remote_id="dataservice-unique-2"),
+            ],
         )
-        backend2.mock_items = [
-            DatasetFactory.build(remote_id="dataset-repeat"),
-            DatasetFactory.build(remote_id="dataset-unique-2"),
-            DataserviceFactory.build(remote_id="dataservice-repeat"),
-            DataserviceFactory.build(remote_id="dataservice-unique-2"),
-        ]
 
         job2 = backend2.harvest()
 
@@ -712,13 +724,16 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         )
 
         org = OrganizationFactory()
-        backend = MockBackend(HarvestSourceFactory(organization=org), dryrun=dryrun)
-        backend.mock_items = [
-            *record_errors,  # at the beginning to check if processing continues
-            *DatasetFactory.build_batch(nb_datasets, remote_id=True),
-            *DataserviceFactory.build_batch(nb_dataservices, remote_id=True),
-            *harvest_errors,  # at the end to check if *.objects.count() > 0
-        ]
+        backend = MockBackend(
+            HarvestSourceFactory(organization=org),
+            dryrun=dryrun,
+            mock_items=[
+                *record_errors,  # at the beginning to check if processing continues
+                *DatasetFactory.build_batch(nb_datasets, remote_id=True),
+                *DataserviceFactory.build_batch(nb_dataservices, remote_id=True),
+                *harvest_errors,  # at the end to check if *.objects.count() > 0
+            ],
+        )
 
         signals = {
             signal: signal.connect(mocker.Mock(name=signal.name), weak=False)
@@ -766,10 +781,12 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         # max_items == 2 * n will log an error in the current implementation,
         # so we include the case in max_reached
         max_reached = max_items <= 2 * n
-        backend = MockBackend(HarvestSourceFactory(), max_items=max_items)
-        backend.mock_items = DatasetFactory.build_batch(
-            n, remote_id=True
-        ) + DataserviceFactory.build_batch(n, remote_id=True)
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            max_items=max_items,
+            mock_items=DatasetFactory.build_batch(n, remote_id=True)
+            + DataserviceFactory.build_batch(n, remote_id=True),
+        )
 
         job = backend.harvest()
 
@@ -782,10 +799,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataservice.objects.count() == max(min(n, max_items - n), 0)
 
     def test_harvest_max_items_preview(self):
-        backend = MockBackend(HarvestSourceFactory(), max_items=2, dryrun=True)
-        backend.mock_items = DatasetFactory.build_batch(
-            3, remote_id=True
-        ) + DataserviceFactory.build_batch(3, remote_id=True)
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            max_items=2,
+            dryrun=True,
+            mock_items=DatasetFactory.build_batch(3, remote_id=True)
+            + DataserviceFactory.build_batch(3, remote_id=True),
+        )
 
         job = backend.harvest()
 
@@ -799,12 +819,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         [HarvestSkipException, HarvestValidationError, Exception],
     )
     def test_harvest_max_items_with_failure(self, exception_class):
-        backend = MockBackend(HarvestSourceFactory(), max_items=2)
-        backend.mock_items = [
-            DatasetFactory.build(remote_id="dataset-ok"),
-            MockRecordError(exception_class()),
-            DatasetFactory.build(remote_id="dataset-ignored"),  # not processed
-        ]
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            max_items=2,
+            mock_items=[
+                DatasetFactory.build(remote_id="dataset-ok"),
+                MockRecordError(exception_class()),
+                DatasetFactory.build(remote_id="dataset-ignored"),  # not processed
+            ],
+        )
 
         job = backend.harvest()
 
@@ -1013,8 +1036,9 @@ class HarvestItemLogsTest(PytestOnlyDBTestCase):
             return super().item_processor(harvest_item, mock_item)
 
     def test_logs_emitted_while_processing_are_reported_on_the_item(self):
-        backend = HarvestItemLogsTest.MockLoggingBackend(HarvestSourceFactory())
-        backend.mock_items = [DatasetFactory.build(remote_id=True)]
+        backend = HarvestItemLogsTest.MockLoggingBackend(
+            HarvestSourceFactory(), mock_items=[DatasetFactory.build(remote_id=True)]
+        )
 
         job = backend.harvest()
 
@@ -1078,21 +1102,25 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         harvest_logs.assert_not_sent_to_sentry()
 
     def test_job_validation_error_is_not_sent_to_sentry(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [MockHarvestError(HarvestValidationError("Descriptor declares a DTD"))]
+        message = "Descriptor declares a DTD"
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[MockHarvestError(HarvestValidationError(message))],
+        )
 
         job = backend.harvest()
 
         assert job.status == "failed"
-        assert "DTD" in job.errors[0].message
+        assert message in job.errors[0].message
         harvest_logs.warning.assert_called_once()
         harvest_logs.assert_not_sent_to_sentry()
 
     def test_job_unexpected_error_is_sent_to_sentry(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            MockHarvestError(AttributeError("'NoneType' object has no attribute 'title'"))
-        ]
+        message = "'NoneType' object has no attribute 'title'"
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[MockHarvestError(AttributeError(message))],
+        )
 
         job = backend.harvest()
 
@@ -1101,14 +1129,16 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         harvest_logs.assert_sent_to_sentry()
 
     def test_item_http_error_is_not_sent_to_sentry(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            MockRecordError(
-                requests.exceptions.HTTPError(
-                    "403 Client Error: Forbidden for url: https://remote.example.com/package_show"
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[
+                MockRecordError(
+                    requests.exceptions.HTTPError(
+                        "403 Client Error: Forbidden for url: https://remote.example.com/package_show"
+                    )
                 )
-            )
-        ]
+            ],
+        )
 
         job = backend.harvest()
 
@@ -1120,41 +1150,45 @@ class HarvestErrorReportingTest(PytestOnlyDBTestCase):
         harvest_logs.assert_not_sent_to_sentry()
 
     def test_item_validation_error_is_not_sent_to_sentry(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            MockRecordError(MongoValidationError("URL invalide", field_name="resources"))
-        ]
+        message = "URL invalide"
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[MockRecordError(MongoValidationError(message, field_name="resources"))],
+        )
 
         job = backend.harvest()
 
         assert job.items[0].status == "failed"
-        assert "URL invalide" in job.items[0].errors[0].message
+        assert message in job.items[0].errors[0].message
         harvest_logs.info.assert_called_once()
         harvest_logs.assert_not_sent_to_sentry()
 
     def test_item_unexpected_error_is_sent_to_sentry(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            MockRecordError(AttributeError("'NoneType' object has no attribute 'title'"))
-        ]
+        message = "'NoneType' object has no attribute 'title'"
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[MockRecordError(AttributeError(message))],
+        )
 
         job = backend.harvest()
 
         assert job.items[0].status == "failed"
-        assert "'NoneType' object has no attribute 'title'" in job.items[0].errors[0].message
+        assert message in job.items[0].errors[0].message
         harvest_logs.assert_sent_to_sentry()
 
     def test_invalid_remote_resource_url_only_fails_its_item(self, harvest_logs):
-        backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = [
-            DatasetFactory.build(
-                remote_id=True,
-                # A Windows UNC path where an URL is expected, as met on a real catalog.
-                resources=[
-                    ResourceFactory(url="//diffuweb.example.com\\OpenData\\dictionnaire.xlsx")
-                ],
-            )
-        ]
+        backend = MockBackend(
+            HarvestSourceFactory(),
+            mock_items=[
+                DatasetFactory.build(
+                    remote_id=True,
+                    # A Windows UNC path where an URL is expected, as met on a real catalog.
+                    resources=[
+                        ResourceFactory(url="//diffuweb.example.com\\OpenData\\dictionnaire.xlsx")
+                    ],
+                )
+            ],
+        )
 
         job = backend.harvest()
 
