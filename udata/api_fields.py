@@ -87,7 +87,6 @@ lazy_reference = api.model(
 
 DEFAULT_GENERIC_KEY = "class"
 
-classes_by_names = {}
 classes_by_parents = {}
 
 
@@ -513,7 +512,6 @@ def generate_fields(**kwargs) -> Callable:
         if issubclass(cls, mongoengine.Document) or issubclass(cls, mongoengine.DynamicDocument):
             read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
-        classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
 
         for key, field, info in get_fields(cls):
@@ -1034,8 +1032,12 @@ def patch(obj: _T, request) -> _T:
                 model_attribute,
                 mongoengine.fields.GenericEmbeddedDocumentField,
             ):
-                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
-                embedded_field = classes_by_names[value[generic_key]]
+                embedded_field = resolve_generic_class(
+                    value,
+                    info.get("generic_key", DEFAULT_GENERIC_KEY),
+                    model_attribute.choices or [],
+                    key,
+                )
                 value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
@@ -1047,15 +1049,20 @@ def patch(obj: _T, request) -> _T:
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
-                base_embedded_field = model_attribute.field.document_type().__class__
+                base_embedded_field = model_attribute.field.document_type
                 generic = info.get("generic", False)
                 generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
 
                 objects = []
                 for embedded_value in value:
-                    # TODO add validation on generic_key presence and value
                     embedded_field = (
-                        classes_by_names[embedded_value[generic_key]]
+                        resolve_generic_class(
+                            embedded_value,
+                            generic_key,
+                            # Same subclasses as the ones the read side marshals.
+                            classes_by_parents.get(base_embedded_field, set()),
+                            key,
+                        )
                         if generic
                         else base_embedded_field
                     )
@@ -1079,8 +1086,12 @@ def patch(obj: _T, request) -> _T:
 
                 objects = []
                 for embedded_value in value:
-                    # TODO add validation on generic_key presence and value
-                    embedded_field = classes_by_names[embedded_value[generic_key]]
+                    embedded_field = resolve_generic_class(
+                        embedded_value,
+                        generic_key,
+                        model_attribute.field.choices or [],
+                        key,
+                    )
                     objects.append(patch(embedded_field(), embedded_value))
 
                 value = objects
@@ -1154,6 +1165,30 @@ def patch(obj: _T, request) -> _T:
             run_check(check, value, api_key, obj, data)
 
     return obj
+
+
+def resolve_generic_class(value, generic_key: str, allowed_classes: Iterable, field: str) -> type:
+    """Return the class a generic embedded payload names under `generic_key`.
+
+    The name comes from the client: it must be one of the classes the field accepts,
+    not any class registered with `generate_fields`.
+    """
+    from udata.mongo.engine import db
+
+    allowed = {
+        cls.__name__: cls
+        for cls in (db.resolve_model(c) if isinstance(c, str) else c for c in allowed_classes)
+    }
+    name = value.get(generic_key) if isinstance(value, dict) else None
+    if not isinstance(name, str):
+        raise FieldValidationError(
+            message=f"Expected an object with a `{generic_key}` key", field=field
+        )
+    if name not in allowed:
+        raise FieldValidationError(
+            message=f"`{generic_key}` must be one of {sorted(allowed)}", field=field
+        )
+    return allowed[name]
 
 
 def is_value_modified(old_value, new_value) -> bool:

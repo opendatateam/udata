@@ -624,6 +624,25 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org.reload()
         assert org.presentation_blocs == []
 
+    @pytest.mark.parametrize(
+        "bloc",
+        [
+            {"title": "no class"},
+            {"class": "UnknownBloc", "title": "unknown class"},
+            # A class registered with `generate_fields`, but not a bloc.
+            {"class": "Organization", "name": "not a bloc"},
+            "not an object",
+        ],
+    )
+    def test_create_rejects_bloc_without_valid_class(self, bloc):
+        self.login()
+        data = OrganizationFactory.as_dict()
+        data["presentation_blocs"] = [bloc]
+        response = self.post(url_for("api.organizations"), data)
+        assert400(response)
+        assert "presentation_blocs" in response.json["errors"]
+        assert Organization.objects.count() == 0
+
 
 class MembershipAPITest(PytestOnlyAPITestCase):
     def test_request_membership(self):

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from io import BytesIO
 
+import pytest
 from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
@@ -218,6 +219,26 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
             OrFilters,
             AndFilters,
         )
+
+    @pytest.mark.parametrize(
+        "filters",
+        [
+            {"column": "a", "condition": "exact", "value": "b"},
+            {"_cls": "MarkdownBloc", "content": "not a filter"},
+            # Nested list of generic filters.
+            {"_cls": "AndFilters", "filters": [{"column": "a"}]},
+            {"_cls": "AndFilters", "filters": [{"_cls": "MarkdownBloc"}]},
+        ],
+    )
+    def test_visualization_api_create_rejects_filter_without_valid_cls(self, filters):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        data = chart.to_dict()
+        data["series"][0]["filters"] = filters
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+        assert Chart.objects.count() == 0
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
