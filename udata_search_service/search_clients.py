@@ -1823,6 +1823,9 @@ class ElasticClient:
                 else:
                     post_filters.append(query.Q("term", tags=value))
             else:
+                # Unreachable with the current `PostSearch` filters, kept for symmetry with
+                # the other `query_*` methods: a future scalar filter named after its
+                # indexed field works without a dedicated branch.
                 post_filters.append(query.Q("term", **{key: value}))
 
         if query_text:

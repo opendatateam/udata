@@ -457,6 +457,17 @@ class SearchIntegrationTest(APITestCase):
         self.assert200(response)
         assert response.json["total"] == 0
 
+    def test_post_filter_by_tags(self):
+        both = PostFactory(tags=["transport", "environnement"])
+        PostFactory(tags=["transport"])
+        PostFactory(tags=["sante"])
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?tag=transport&tag=environnement")
+        self.assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both.id)]
+
     def test_dataset_filter_by_multiple_tags(self):
         """Test filtering datasets by multiple tags."""
         DatasetFactory(title="Dataset with both tags", tags=["transport", "environnement"])
