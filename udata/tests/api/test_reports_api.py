@@ -30,6 +30,14 @@ class ReportsReasonsAPITest(APITestCase):
 
 
 class ReportsAPITest(APITestCase):
+    def test_reports_api_create_with_non_object_body(self):
+        for body in ([1, 2, 3], 1, "report"):
+            response = self.post(url_for("api.reports"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(Report.objects.count(), 0)
+
     def test_reports_api_create(self):
         user = UserFactory()
 

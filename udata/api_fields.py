@@ -964,7 +964,7 @@ def patch(obj: _T, request) -> _T:
     """
     from udata.mongo.engine import db
 
-    data = request.json if isinstance(request, Request) else request
+    data = api.json_payload() if isinstance(request, Request) else request
     api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
 
     for api_key, value in data.items():
