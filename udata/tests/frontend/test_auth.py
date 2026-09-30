@@ -1,3 +1,6 @@
+from datetime import timedelta
+from unittest import mock
+
 from flask import current_app, url_for
 from flask_security.utils import hash_data
 
@@ -22,6 +25,30 @@ class AuthTest(APITestCase):
 
         user.reload()
         assert user.email == new_email
+
+    def test_change_mail_expired(self):
+        """An expired link sends a new confirmation mail and redirects with a flash"""
+        user = self.login(AdminFactory())
+        original_email = user.email
+        new_email = "test@test.com"
+
+        security = current_app.extensions["security"]
+
+        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
+        token = security.confirm_serializer.dumps(data)
+        confirmation_link = url_for("security.confirm_change_email", token=token)
+
+        # A negative validity makes any freshly signed token already expired
+        with mock.patch.dict(
+            current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
+        ):
+            resp = self.get(confirmation_link)
+
+        assert resp.status_code == 302
+        assert "change_email_expired" in resp.location
+
+        user.reload()
+        assert user.email == original_email
 
     def test_change_mail_already_taken(self):
         """Should not allow changing email to one already taken by another user"""

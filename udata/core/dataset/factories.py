@@ -1,3 +1,4 @@
+import itertools
 import json
 from os.path import join
 
@@ -20,6 +21,32 @@ class DatasetFactory(ModelFactory):
     description = factory.Faker("text")
     frequency = UpdateFrequency.UNKNOWN
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
+
+    _ids = itertools.count()
+
+    @factory.post_generation
+    def remote_id(obj, create, extracted, **kwargs):
+        """Sets dataset.remote_id. In-memory only, not saved in the mongo document.
+
+        If remote_id is:
+        - falsy => attribute not set
+        - True => attribute set to "dataset-0", "dataset-1", ...
+        - string => attribute set to string value (will collide if more than one instance share the same id)
+        - callable(i) => attribute set to returned value (with i a sequence number)
+        """
+        if extracted is True:
+            extracted = lambda i: f"{type(obj).__name__.lower()}-{i}"  # noqa: E731
+        if callable(extracted):
+            extracted = extracted(next(DatasetFactory._ids))
+        if extracted:
+            obj.remote_id = extracted
+        # FIXME: if harvested=True, must use the same remote_id
+
+    @factory.post_generation
+    def timestamps(obj, create, extracted, **kwargs):
+        if extracted is False:
+            for field in ("created_at_internal", "last_modified_internal", "last_update"):
+                obj._data[field] = None
 
     class Params:
         geo = factory.Trait(spatial=factory.SubFactory(SpatialCoverageFactory))

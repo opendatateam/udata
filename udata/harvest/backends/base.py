@@ -10,6 +10,7 @@ from uuid import UUID
 import requests
 from bson import ObjectId
 from flask import current_app, g
+from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
@@ -32,6 +33,9 @@ from ..models import (
 )
 from ..signals import after_harvest_job, before_harvest_job
 
+# The log level is the routing: Sentry's logging integration turns `log.exception` into an event,
+# while `log.warning` and below stay breadcrumbs. Only udata bugs should go to Sentry, using
+# `log.exception`. Other logs should only go in the harvest report, using `log.warning` or below.
 log = logging.getLogger(__name__)
 
 # Disable those annoying warnings
@@ -237,29 +241,36 @@ class BaseBackend(ABC):
             if any(i.status == "failed" for i in self.job.items):
                 self.job.status += "-errors"
 
+        # IMPORTANT:
+        # Use `log.exception` only for errors that should be reported in Sentry. See `log`
+        # declaration for details.
+
         except HarvestValidationError as e:
             self.job.status = "failed"
-            log.exception(
-                f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
-            )
-            error = HarvestError(message=safe_unicode(e))
-            self.job.errors.append(error)
-
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            self.job.status = "failed"
             log.warning(
-                f'Harvesting connection error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
+                f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
             )
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            self.job.errors.append(error)
+            self.job.errors.append(HarvestError(message=safe_unicode(e)))
+
+        except requests.exceptions.RequestException as e:
+            self.job.status = "failed"
+            # Remote down, timeout, redirect or 4xx/5xx are not udata bugs => harvest report
+            log.warning(
+                f'Harvesting request error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
+            )
+            self.job.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
 
         except Exception as e:
             self.job.status = "failed"
+            # Unexpected exception (potential udata bug) => Sentry
             log.exception(
                 f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
             )
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            self.job.errors.append(error)
+            self.job.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
 
         finally:
             self.end_job()
@@ -325,21 +336,37 @@ class BaseBackend(ABC):
 
             harvest_item.status = "done"
 
+        # IMPORTANT:
+        # Use `log.exception` only for errors that should be reported in Sentry. See `log`
+        # declaration for details.
+
         except HarvestSkipException as e:
             harvest_item.status = "skipped"
             log.info(f"Skipped item {harvest_item.remote_id} : {safe_unicode(e)}")
             harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
-        except HarvestValidationError as e:
+        except (HarvestValidationError, MongoValidationError) as e:
             harvest_item.status = "failed"
             log.info(f"Error validating item {harvest_item.remote_id} : {safe_unicode(e)}")
             harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
+        except requests.exceptions.RequestException as e:
+            harvest_item.status = "failed"
+            log.warning(
+                f"Request error while processing {harvest_item.remote_id} : {safe_unicode(e)}"
+            )
+            # `requests` describes the failure, not the call site: a backend issuing several
+            # requests per item needs the traceback to tell which one failed.
+            harvest_item.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
         except Exception as e:
             harvest_item.status = "failed"
+            # Unexpected exception (potential udata bug) => Sentry
             log.exception(f"Error while processing {harvest_item.remote_id} : {safe_unicode(e)}")
-            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
-            harvest_item.errors.append(error)
+            harvest_item.errors.append(
+                HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            )
 
         finally:
             current_app.logger.removeHandler(log_catcher)
@@ -358,7 +385,6 @@ class BaseBackend(ABC):
     def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:
             raise HarvestValidationError(f"Identifier '{harvest_item.remote_id}' already exists")
-
         self.remote_ids.add(harvest_item.remote_id)
 
     def update_harvest_metadata(self, metadata: HarvestMetadata, remote_id: str) -> HarvestMetadata:
@@ -370,9 +396,7 @@ class BaseBackend(ABC):
         metadata.last_update = datetime.now(UTC)
         metadata.archived_at = None
         metadata.archived_reason = None
-
         # created_at, modified_at, remote_url, uri, dct_identifier are set in `*_from_rdf`
-
         return metadata
 
     def add_harvest_item(self, harvest_item: HarvestItem) -> HarvestItem:

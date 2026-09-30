@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from kombu import Exchange, Queue
 from tlds import tld_set
 
@@ -96,6 +98,9 @@ class Defaults(object):
     SECURITY_CONFIRMABLE = True
     SECURITY_RECOVERABLE = True
     SECURITY_CHANGEABLE = True
+
+    # Flask-Security lowered its default to 2 days in 5.9.0
+    SECURITY_CONFIRM_EMAIL_WITHIN = timedelta(days=5)
 
     SECURITY_PASSWORD_HASH = "bcrypt"
     SECURITY_PASSWORD_NORMALIZE_FORM = "NFKD"
@@ -362,14 +367,6 @@ class Defaults(object):
     # Specific support for inspire:
     # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
     INSPIRE_SUPPORT = True
-
-    # Ignore some endpoint from API tracking
-    # By default ignore the 3 most called APIs
-    TRACKING_BLACKLIST = [
-        "api.notifications",
-        "api.check_dataset_resource",
-        "api.avatar",
-    ]
 
     DELETE_ME = True
 
