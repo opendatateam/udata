@@ -17,7 +17,13 @@ from udata.app import cache
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
 from udata.core.spatial import geoids
-from udata.core.spatial.models import GEOZONE_BBOXES_CACHE_KEY, GeoLevel, GeoZone, SpatialCoverage
+from udata.core.spatial.models import (
+    GEOZONE_BBOXES_CACHE_KEY,
+    GeoLevel,
+    GeoZone,
+    SpatialCoverage,
+    get_zone_bboxes,
+)
 from udata.core.spatial.tasks import detect_and_write_zone
 
 log = logging.getLogger(__name__)
@@ -172,9 +178,10 @@ def detect_zones_command():
     """
     datasets = Dataset.objects(spatial__geom__ne=None).only("id").timeout(False)
     total = datasets.count()
+    zones = get_zone_bboxes()
     detected = 0
     for i, dataset in enumerate(datasets, 1):
-        if detect_and_write_zone(str(dataset.id)):
+        if detect_and_write_zone(str(dataset.id), zones):
             detected += 1
         if i % 1000 == 0:
             log.info(f"Ran zone detection on {i}/{total} datasets")

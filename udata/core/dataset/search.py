@@ -124,6 +124,8 @@ class DatasetSearch(ModelSearchAdapter):
         if not isinstance(value, list):
             return []
         ids = [v for v in value if isinstance(v, str)]
+        if not ids:
+            return []
         known = set(GeoZone.objects(id__in=ids).scalar("id"))
         return [zone_id for zone_id in ids if zone_id in known]
 

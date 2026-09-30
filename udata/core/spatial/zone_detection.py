@@ -30,6 +30,7 @@ def detect_zone(bbox, zones, threshold=IOU_THRESHOLD):
 
     Ties (exactly equal top score, e.g. a region and a department sharing
     identical geometry) are all returned rather than arbitrarily picking one.
+    Ids are sorted, so the result doesn't depend on the order of `zones`.
 
     bbox: [minx, miny, maxx, maxy]
     zones: {zone_id: [minx, miny, maxx, maxy]}
@@ -44,7 +45,7 @@ def detect_zone(bbox, zones, threshold=IOU_THRESHOLD):
     best_score = max(scores.values())
     if best_score < threshold:
         return None
-    return [zone_id for zone_id, score in scores.items() if score == best_score]
+    return sorted(zone_id for zone_id, score in scores.items() if score == best_score)
 
 
 def geom_to_bbox(geom):

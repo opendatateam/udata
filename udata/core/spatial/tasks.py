@@ -17,7 +17,8 @@ def compute_geozones_metrics(self):
 
 
 @task(route="low.spatial")
-def detect_and_write_zone(dataset_id):
+def detect_and_write_zone(dataset_id, zones=None):
+    """`zones` ({id: bbox}) can be passed by callers processing many datasets, to fetch it once."""
     dataset = Dataset.objects(id=dataset_id).first()
     if dataset is None:
         return
@@ -28,7 +29,7 @@ def detect_and_write_zone(dataset_id):
     if dataset.spatial and dataset.spatial.geom and not dataset.spatial.zones:
         bbox = geom_to_bbox(dataset.spatial.geom)
         if bbox is not None:
-            zone_ids = detect_zone(bbox, zone_bboxes)
+            zone_ids = detect_zone(bbox, zone_bboxes if zones is None else zones)
 
     previous = dataset.extras.get(DETECTED_ZONES_KEY)
     if zone_ids:
