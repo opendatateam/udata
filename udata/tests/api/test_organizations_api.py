@@ -51,18 +51,88 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert len(response.json["data"]) == len(organizations)
 
-    def test_organization_api_list_search_and_sort(self):
-        alpha = OrganizationFactory(name="Alpha open data", metrics={"followers": 1})
-        beta = OrganizationFactory(name="Beta open data", metrics={"followers": 5})
-        OrganizationFactory(name="Gamma open")
+    @pytest.mark.parametrize(
+        "sort", ["name", "reuses", "datasets", "followers", "views", "created", "last_modified"]
+    )
+    def test_organization_api_list_sorts(self, sort):
+        # Values are chosen so that neither order of any sort matches the default one
+        # (`-created_at`: second, first, third), except `-created` which is the default.
+        # `last_modified` follows the creation order since every save overwrites it.
+        first = OrganizationFactory(
+            name="A",
+            created_at=datetime(2020, 1, 2, tzinfo=UTC),
+            metrics={"reuses": 1, "datasets": 1, "followers": 1, "views": 1},
+        )
+        second = OrganizationFactory(
+            name="B",
+            created_at=datetime(2020, 1, 3, tzinfo=UTC),
+            metrics={"reuses": 2, "datasets": 2, "followers": 2, "views": 2},
+        )
+        third = OrganizationFactory(
+            name="C",
+            created_at=datetime(2020, 1, 1, tzinfo=UTC),
+            metrics={"reuses": 3, "datasets": 3, "followers": 3, "views": 3},
+        )
+        ascending = [third, first, second] if sort == "created" else [first, second, third]
 
-        response = self.get(url_for("api.organizations", q="open data", sort="-followers"))
+        response = self.get(url_for("api.organizations", sort=sort))
         assert200(response)
-        assert [o["id"] for o in response.json["data"]] == [str(beta.id), str(alpha.id)]
+        assert [o["id"] for o in response.json["data"]] == [str(o.id) for o in ascending]
 
-        response = self.get(url_for("api.organizations", q="open data", sort="name"))
+        response = self.get(url_for("api.organizations", sort=f"-{sort}"))
         assert200(response)
-        assert [o["id"] for o in response.json["data"]] == [str(alpha.id), str(beta.id)]
+        assert [o["id"] for o in response.json["data"]] == [str(o.id) for o in ascending[::-1]]
+
+    def test_organization_api_list_default_sort(self):
+        first = OrganizationFactory(created_at=datetime(2020, 1, 2, tzinfo=UTC))
+        second = OrganizationFactory(created_at=datetime(2020, 1, 3, tzinfo=UTC))
+        third = OrganizationFactory(created_at=datetime(2020, 1, 1, tzinfo=UTC))
+
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [
+            str(second.id),
+            str(first.id),
+            str(third.id),
+        ]
+
+    def test_organization_api_list_unknown_sort(self):
+        response = self.get(url_for("api.organizations", sort="unknown"))
+        assert400(response)
+
+    def test_organization_api_list_search(self):
+        # Created first, so the default `-created_at` order would put it last.
+        best = OrganizationFactory(name="open data open data")
+        other = OrganizationFactory(name="open data portal")
+        OrganizationFactory(name="open portal")
+
+        # Without an explicit sort, results are ranked by relevance.
+        response = self.get(url_for("api.organizations", q="open data"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(best.id), str(other.id)]
+
+        # An explicit sort takes precedence over relevance.
+        response = self.get(url_for("api.organizations", q="open data", sort="-created"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(other.id), str(best.id)]
+
+    def test_organization_api_list_pagination(self):
+        OrganizationFactory.create_batch(3)
+
+        response = self.get(url_for("api.organizations", page=2, page_size=2))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert response.json["page"] == 2
+        assert response.json["page_size"] == 2
+        assert len(response.json["data"]) == 1
+
+    @pytest.mark.parametrize("param", ["q", "name", "business_number_id"])
+    def test_organization_api_list_empty_filter_is_ignored(self, param):
+        organizations = OrganizationFactory.create_batch(2)
+
+        response = self.get(url_for("api.organizations") + f"?{param}=")
+        assert200(response)
+        assert len(response.json["data"]) == len(organizations)
 
     def test_organization_api_list_with_filters(self):
         """It should filter the organization list"""

@@ -447,6 +447,23 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             assert fake1 in results
             assert fake2 not in results
 
+    @pytest.mark.parametrize("param", ["filter_field_name", "tag", "standalone"])
+    def test_empty_filter_is_ignored(self, app, param) -> None:
+        """An empty filter value leaves the filter unset instead of matching ""."""
+        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["a"])
+        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["b"])
+        with app.test_request_context("/foobar", query_string={param: ""}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert set(results) == {fake1, fake2}
+
+    def test_empty_list_filter_values_are_dropped(self, app) -> None:
+        """Empty values of a repeated list filter are dropped, the others still apply."""
+        fake1: Fake = FakeFactory(tags=["a"])
+        fake2: Fake = FakeFactory(tags=["b"])
+        with app.test_request_context("/foobar", query_string=[("tag", "a"), ("tag", "")]):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert list(results) == [fake1]
+
     def test_nested_filters(self, app) -> None:
         """Filtering on an nested filter filters the results."""
         org_public_service: Organization = OrganizationFactory()

@@ -750,7 +750,11 @@ def generate_fields(**kwargs) -> Callable:
                 # eg use `organization_badge` instead of `organization.badges` which is
                 # computed to `organization_badges`.
                 filter = args.get(filterable.get("label", filterable["key"]))
-                if filter is not None:
+                # An empty value leaves the filter unset, like for `q`, instead of
+                # matching documents whose field is "".
+                if filterable.get("is_list") and filter is not None:
+                    filter = [value for value in filter if value != ""] or None
+                if filter is not None and filter != "":
                     for constraint in filterable.get("constraints", []):
                         if constraint == "objectid":
                             values = filter if filterable.get("is_list") else [filter]
