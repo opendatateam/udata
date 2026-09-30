@@ -442,6 +442,21 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert400(response)
 
+    def test_user_api_create_and_update_with_non_object_body(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+
+        for url, method in (
+            (url_for("api.users"), self.post),
+            (url_for("api.user", user=user), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "email"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(User.objects.count(), 2)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
