@@ -272,8 +272,13 @@ class BaseBackend(ABC):
                 HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             )
 
-        finally:
-            self.end_job()
+        try:
+            self.update_harvested_organizations()
+        except Exception as e:
+            # Unexpected exception (potential udata bug) => Sentry
+            log.exception(e)
+
+        self.end_job()
 
         return self.job
 
@@ -368,9 +373,9 @@ class BaseBackend(ABC):
                 HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             )
 
-        finally:
-            current_app.logger.removeHandler(log_catcher)
-            self.end_process_item(harvest_item, log_catcher.records)
+        current_app.logger.removeHandler(log_catcher)
+
+        self.end_process_item(harvest_item, log_catcher.records)
 
         if self.max_items and len(self.job.items) >= self.max_items:
             raise StopHarvest()
@@ -410,7 +415,6 @@ class BaseBackend(ABC):
         self.job.save()
 
     def end_job(self):
-        self.update_harvested_organizations()
         self.job.ended = datetime.now(UTC)
         self.save_job()
         after_harvest_job.send(self)

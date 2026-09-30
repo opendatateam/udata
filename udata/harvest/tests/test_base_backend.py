@@ -1043,6 +1043,27 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert m.archived_at is None  # set but None
         assert m.archived_reason is None  # set but None
 
+    def test_update_harvested_organizations_failsafe(self, mocker):
+        backend = MockBackend(HarvestSourceFactory())
+        backend.update_harvested_organizations = mocker.Mock(side_effect=Exception)
+
+        signals = {
+            signal: signal.connect(mocker.Mock(name=signal.name), weak=False)
+            for signal in [before_harvest_job, after_harvest_job, pre_save]
+        }
+
+        try:
+            job = backend.harvest()
+
+            assert job.status == "done"
+            # ensure end_job is fully executed
+            assert job.ended is not None
+            signals[pre_save].assert_called_with(HarvestJob, document=job)
+            signals[after_harvest_job].assert_called_with(backend)
+        finally:
+            for signal, receiver in signals.items():
+                signal.disconnect(receiver)
+
 
 class HarvestItemLogsTest(PytestOnlyDBTestCase):
     class MockLoggingBackend(MockBackend):
