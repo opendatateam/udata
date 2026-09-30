@@ -33,12 +33,6 @@ class DataserviceFactory(HarvestableFactoryMixin, ModelFactory):
     description = factory.Faker("text")
     base_api_url = factory.Faker("url")
 
-    @factory.post_generation
-    def timestamps(obj, create, extracted, **kwargs):
-        if extracted is False:
-            for field in ("created_at_internal", "last_modified_internal", "last_update"):
-                obj._data[field] = None
-
     class Params:
         org = factory.Trait(
             organization=factory.SubFactory(OrganizationFactory),
