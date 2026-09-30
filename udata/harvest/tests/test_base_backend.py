@@ -3,7 +3,6 @@ from abc import ABC
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import TypeVar
 from urllib.parse import urlparse
 
 import pytest
@@ -45,33 +44,6 @@ class Unknown:
 
 
 log = logging.getLogger(__name__)
-
-
-class HarvestLogs:
-    """Captures the log level the backend reported a failure with.
-
-    Sentry's logging integration turns `log.exception` into an event, while
-    `log.warning` and below stay breadcrumbs: the level *is* the routing.
-    """
-
-    def __init__(self, mocker):
-        self.info = mocker.patch("udata.harvest.backends.base.log.info")
-        self.warning = mocker.patch("udata.harvest.backends.base.log.warning")
-        self.exception = mocker.patch("udata.harvest.backends.base.log.exception")
-
-    def assert_not_sent_to_sentry(self):
-        self.exception.assert_not_called()
-
-    def assert_sent_to_sentry(self):
-        self.exception.assert_called_once()
-
-
-@pytest.fixture
-def harvest_logs(mocker):
-    return HarvestLogs(mocker)
-
-
-H = TypeVar("H", bound=Harvestable)
 
 
 @dataclass(frozen=True)
@@ -140,7 +112,9 @@ class MockBackend(BaseBackend):
             remote_id = getattr(mock_item, "remote_id", None)
             self.process_item(remote_id, self.item_processor, mock_item)
 
-    def item_processor(self, harvest_item: HarvestItem, mock_item: H | MockRecordError) -> H:
+    def item_processor(
+        self, harvest_item: HarvestItem, mock_item: Harvestable | MockRecordError
+    ) -> Harvestable:
         if isinstance(mock_item, MockRecordError):
             raise mock_item.exception
         item = self.get_item(harvest_item.remote_id, type(mock_item))
@@ -158,6 +132,30 @@ class MockFetchingBackend(BaseBackend):
 
     def inner_harvest(self):
         self.get(self.source.url).raise_for_status()
+
+
+class HarvestLogs:
+    """Captures the log level the backend reported a failure with.
+
+    Sentry's logging integration turns `log.exception` into an event, while
+    `log.warning` and below stay breadcrumbs: the level *is* the routing.
+    """
+
+    def __init__(self, mocker):
+        self.info = mocker.patch("udata.harvest.backends.base.log.info")
+        self.warning = mocker.patch("udata.harvest.backends.base.log.warning")
+        self.exception = mocker.patch("udata.harvest.backends.base.log.exception")
+
+    def assert_not_sent_to_sentry(self):
+        self.exception.assert_not_called()
+
+    def assert_sent_to_sentry(self):
+        self.exception.assert_called_once()
+
+
+@pytest.fixture
+def harvest_logs(mocker):
+    return HarvestLogs(mocker)
 
 
 class HarvestFilterTest:
@@ -1051,7 +1049,9 @@ class HarvestItemLogsTest(PytestOnlyDBTestCase):
         name = "mock-logging-backend"
         ITEM_LOG_MESSAGE = "Something worth reporting happened while processing this item"
 
-        def item_processor(self, harvest_item: HarvestItem, mock_item: H | MockRecordError) -> H:
+        def item_processor(
+            self, harvest_item: HarvestItem, mock_item: Harvestable | MockRecordError
+        ) -> Harvestable:
             log.info(self.ITEM_LOG_MESSAGE)
             return super().item_processor(harvest_item, mock_item)
 
