@@ -201,7 +201,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == nb_datasets
         before_naive = before.replace(tzinfo=None)
         after_naive = after.replace(tzinfo=None)
-        for dataset, mock_dataset in zip(Dataset.objects(), backend.mock_items):
+        for dataset in Dataset.objects():
             # MongoEngine returns naive datetimes, so normalize before comparison
             last_modified_naive = (
                 dataset.last_modified.replace(tzinfo=None)
