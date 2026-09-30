@@ -184,9 +184,7 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.filter(tags__all=args["tag"])
         if args.get("license"):
             datasets = datasets.filter(license__in=License.objects.filter(id=args["license"]))
-        if isinstance(args.get("geozone"), list):
-            datasets = datasets.filter(spatial__zones__in=args["geozone"])
-        elif args.get("geozone"):
+        if args.get("geozone"):
             datasets = datasets.filter(spatial__zones=args["geozone"])
         if args.get("granularity"):
             datasets = datasets.filter(spatial__granularity=args["granularity"])

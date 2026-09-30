@@ -101,6 +101,9 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def mongo_search(cls, args):
         datasets = Dataset.objects.visible()
+        if isinstance(args.get("geozone"), list):
+            # Expanded by prepare_filters (include_geozone_ancestors)
+            datasets = datasets.filter(spatial__zones__in=args.pop("geozone"))
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
         sort = (
