@@ -170,8 +170,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend = MockBackend(source)
         backend.mock_items = DatasetFactory.build_batch(
             nb_datasets,
-            timestamps=False,
             remote_id=lambda id: f"dataset-{id}",
+            timestamps=False,
         )
 
         before = datetime.now(UTC)
@@ -335,9 +335,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_dont_overwrite_last_modified(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
         backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = DatasetFactory.build_batch(
-            1, remote_id=True, last_modified_internal=last_modified
-        )
+        backend.mock_items = [
+            DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)
+        ]
 
         backend.harvest()
 
@@ -348,9 +348,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     def test_dont_overwrite_last_modified_even_if_set_to_same(self):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
         backend = MockBackend(HarvestSourceFactory())
-        backend.mock_items = DatasetFactory.build_batch(
-            1, remote_id=True, last_modified_internal=last_modified
-        )
+        backend.mock_items = [
+            DatasetFactory.build(remote_id=True, last_modified_internal=last_modified)
+        ]
 
         backend.harvest()
         # FIXME: double-harvest isn't really supported
@@ -494,9 +494,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         nb_datasets = 3
         source = HarvestSourceFactory()
         backend = MockBackend(source)
-        backend.mock_items = DatasetFactory.build_batch(
-            nb_datasets, remote_id=True
-        ) + DatasetFactory.build_batch(1, remote_id=duplicated_remote_id_uri)
+        backend.mock_items = DatasetFactory.build_batch(nb_datasets, remote_id=True) + [
+            DatasetFactory.build(remote_id=duplicated_remote_id_uri)
+        ]
 
         # FIXME: backend.mock_items[0].remote_id
 
@@ -783,7 +783,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
     def test_harvest_max_items_preview(self):
         backend = MockBackend(HarvestSourceFactory(), max_items=2, dryrun=True)
-        backend.mock_items = DatasetFactory.build_batch(3) + DataserviceFactory.build_batch(3)
+        backend.mock_items = DatasetFactory.build_batch(
+            3, remote_id=True
+        ) + DataserviceFactory.build_batch(3, remote_id=True)
 
         job = backend.harvest()
 
@@ -1012,7 +1014,7 @@ class HarvestItemLogsTest(PytestOnlyDBTestCase):
 
     def test_logs_emitted_while_processing_are_reported_on_the_item(self):
         backend = HarvestItemLogsTest.MockLoggingBackend(HarvestSourceFactory())
-        backend.mock_items = DatasetFactory.build_batch(1, remote_id=True)
+        backend.mock_items = [DatasetFactory.build(remote_id=True)]
 
         job = backend.harvest()
 
