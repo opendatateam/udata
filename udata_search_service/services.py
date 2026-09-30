@@ -93,7 +93,6 @@ class DatasetService(BaseService):
         "badge": "badges",
         "topic": "topics",
         "geozone": "geozones",
-        "geozone_with_ancestors": "geozones",
         "schema_": "schema",
         "organization_badge": "organization_badges",
         "organization": "organization_id_with_name",

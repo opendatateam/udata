@@ -1,9 +1,8 @@
+from udata.core.dataset.search import DatasetSearch
 from udata.core.spatial.commands import load_zones
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.spatial.models import GeoZone
-from udata.search.fields import GeoZoneAncestorsFilter
 from udata.tests.api import APITestCase
-from udata_search_service.services import DatasetService
 
 
 class GeoZoneAncestorsTest(APITestCase):
@@ -26,17 +25,21 @@ class GeoZoneAncestorsTest(APITestCase):
             "fr:region:53",
         ]
 
-    def test_filter_expands_zone_with_ancestors(self):
+    def test_include_ancestors_expands_geozone(self):
         GeoZoneFactory(id="fr:departement:29", ancestors=["country:fr", "fr:region:53"])
-        value = GeoZoneAncestorsFilter.validate_parameter("fr:departement:29")
-        assert value == ["fr:departement:29", "country:fr", "fr:region:53"]
+        params = {"geozone": "fr:departement:29", "include_geozone_ancestors": True}
+        assert DatasetSearch.prepare_filters(params) == {
+            "geozone": ["fr:departement:29", "country:fr", "fr:region:53"]
+        }
 
-    def test_filter_keeps_unknown_zone(self):
-        assert GeoZoneAncestorsFilter.validate_parameter("fr:departement:99") == [
-            "fr:departement:99"
-        ]
+    def test_geozone_untouched_without_flag(self):
+        GeoZoneFactory(id="fr:departement:29", ancestors=["country:fr", "fr:region:53"])
+        params = {"geozone": "fr:departement:29", "include_geozone_ancestors": False}
+        assert DatasetSearch.prepare_filters(params) == {"geozone": "fr:departement:29"}
 
-    def test_dataset_service_targets_geozones_field(self):
-        filters = {"geozone_with_ancestors": ["fr:departement:29", "country:fr"]}
-        DatasetService.format_filters(filters)
-        assert filters == {"geozones": ["fr:departement:29", "country:fr"]}
+    def test_include_ancestors_keeps_unknown_zone(self):
+        params = {"geozone": "fr:departement:99", "include_geozone_ancestors": True}
+        assert DatasetSearch.prepare_filters(params) == {"geozone": "fr:departement:99"}
+
+    def test_include_ancestors_without_geozone_is_dropped(self):
+        assert DatasetSearch.prepare_filters({"include_geozone_ancestors": True}) == {}

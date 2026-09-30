@@ -11,7 +11,6 @@ from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
     Filter,
-    GeoZoneAncestorsFilter,
     ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
@@ -55,7 +54,7 @@ class DatasetSearch(ModelSearchAdapter):
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
-        "geozone_with_ancestors": GeoZoneAncestorsFilter(),
+        "include_geozone_ancestors": BoolFilter(),
         "granularity": ListFilter(),
         "format": ListFilter(),
         "schema": ListFilter(),
@@ -86,6 +85,18 @@ class DatasetSearch(ModelSearchAdapter):
                 family = get_format_family(resource.format)
                 families.add(family.value)
         return list(families) if families else [FormatFamily.OTHER.value]
+
+    @classmethod
+    def prepare_filters(cls, params):
+        # Not a filter by itself: widens `geozone` to the zone and its ancestors
+        # (eg. a department also matches its region and country).
+        include_ancestors = params.pop("include_geozone_ancestors", None)
+        geozone = params.get("geozone")
+        if include_ancestors and geozone:
+            zone = GeoZone.objects(id=geozone).only("ancestors").first()
+            if zone and zone.ancestors:
+                params["geozone"] = [geozone, *zone.ancestors]
+        return params
 
     @classmethod
     def mongo_search(cls, args):

@@ -83,7 +83,7 @@ class SearchQuery:
             "sort": self.sort,
         }
         params.update(self._filters)
-        return params
+        return self.adapter.prepare_filters(params)
 
     # FIXME: unused?
     def to_url(self, url=None, replace=False, **kwargs):
