@@ -1,9 +1,7 @@
-import itertools
-
 import factory
 
 from udata.core.organization.factories import OrganizationFactory
-from udata.factories import ModelFactory
+from udata.factories import HarvestableFactoryMixin, ModelFactory
 
 from .models import Dataservice, HarvestDataserviceMetadata
 
@@ -27,33 +25,13 @@ class HarvestMetadataFactory(ModelFactory):
     issued_at = factory.Faker("date_time")
 
 
-class DataserviceFactory(ModelFactory):
+class DataserviceFactory(HarvestableFactoryMixin, ModelFactory):
     class Meta:
         model = Dataservice
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
     base_api_url = factory.Faker("url")
-
-    # FIXME: reset like factory does
-    _ids = itertools.count()
-
-    @factory.post_generation
-    def remote_id(obj, create, extracted, **kwargs):
-        """Sets dataset.remote_id. In-memory only, not saved in the mongo document.
-
-        If remote_id is:
-        - falsy => attribute not set
-        - True => attribute set to "dataset-0", "dataset-1", ...
-        - string => attribute set to string value (will collide if more than one instance share the same id)
-        - callable(i) => attribute set to returned value (with i a sequence number)
-        """
-        if extracted is True:
-            extracted = lambda i: f"{type(obj).__name__.lower()}-{i}"  # noqa: E731
-        if callable(extracted):
-            extracted = extracted(next(DataserviceFactory._ids))
-        if extracted:
-            obj.remote_id = extracted
 
     @factory.post_generation
     def timestamps(obj, create, extracted, **kwargs):

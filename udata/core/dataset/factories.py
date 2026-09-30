@@ -1,4 +1,3 @@
-import itertools
 import json
 from os.path import join
 
@@ -7,13 +6,13 @@ import factory
 from udata.app import ROOT_DIR
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
-from udata.factories import ModelFactory
+from udata.factories import HarvestableFactoryMixin, ModelFactory
 
 from .constants import UpdateFrequency
 from .models import Checksum, CommunityResource, Dataset, License, Resource
 
 
-class DatasetFactory(ModelFactory):
+class DatasetFactory(HarvestableFactoryMixin, ModelFactory):
     class Meta:
         model = Dataset
 
@@ -21,26 +20,6 @@ class DatasetFactory(ModelFactory):
     description = factory.Faker("text")
     frequency = UpdateFrequency.UNKNOWN
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
-
-    _ids = itertools.count()
-
-    @factory.post_generation
-    def remote_id(obj, create, extracted, **kwargs):
-        """Sets dataset.remote_id. In-memory only, not saved in the mongo document.
-
-        If remote_id is:
-        - falsy => attribute not set
-        - True => attribute set to "dataset-0", "dataset-1", ...
-        - string => attribute set to string value (will collide if more than one instance share the same id)
-        - callable(i) => attribute set to returned value (with i a sequence number)
-        """
-        if extracted is True:
-            extracted = lambda i: f"{type(obj).__name__.lower()}-{i}"  # noqa: E731
-        if callable(extracted):
-            extracted = extracted(next(DatasetFactory._ids))
-        if extracted:
-            obj.remote_id = extracted
-        # FIXME: if harvested=True, must use the same remote_id
 
     @factory.post_generation
     def timestamps(obj, create, extracted, **kwargs):
