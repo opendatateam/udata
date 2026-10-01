@@ -466,7 +466,7 @@ class DatasetAPI(API):
         return "", 204
 
 
-@ns.route("/<dataset:dataset>/doi", endpoint="dataset_doi")
+@ns.route("/<dataset:dataset>/doi/", endpoint="dataset_doi")
 @api.doc(**common_doc)
 class DatasetDoiAPI(API):
     @api.secure(admin_permission)
