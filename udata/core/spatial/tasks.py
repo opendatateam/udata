@@ -24,8 +24,6 @@ def detect_and_write_zone(dataset_id, zones=None):
         return
 
     zone_ids = None
-    # Zones and geom are mutually exclusive (SpatialCoverage.clean()), so an
-    # explicit zones already covers this dataset -- nothing to detect.
     if dataset.spatial and dataset.spatial.geom and not dataset.spatial.zones:
         bbox = geom_to_bbox(dataset.spatial.geom)
         if bbox is not None:
@@ -36,8 +34,7 @@ def detect_and_write_zone(dataset_id, zones=None):
         log.info("Detected zone(s) %s for dataset %s", zone_ids, dataset_id)
         Dataset.objects(id=dataset_id).update(**{f"set__extras__{DETECTED_ZONES_KEY}": zone_ids})
     else:
-        # Covers "no match" as well as "no longer applicable" (geom cleared,
-        # zones set explicitly, etc.) -- clears any stale previous match.
+        # Covers "no match" as well as "no longer applicable" (geom cleared, zones set explicitly, etc.)
         # No-op (and harmless) if the key was never set.
         log.debug("No zone match for dataset %s", dataset_id)
         Dataset.objects(id=dataset_id).update(**{f"unset__extras__{DETECTED_ZONES_KEY}": 1})
@@ -52,7 +49,6 @@ def detect_and_write_zone(dataset_id, zones=None):
 @Dataset.on_create.connect
 def detect_zone_on_create(document, **kwargs):
     # on_create doesn't carry changed_fields, so guard on geom presence directly
-    # (most datasets have no spatial data -- avoid dispatching a task for all of them).
     if document.spatial and document.spatial.geom:
         detect_and_write_zone.delay(str(document.id))
 
