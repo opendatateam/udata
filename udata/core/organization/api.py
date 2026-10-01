@@ -360,12 +360,17 @@ class MembershipRequestAPI(API):
             return org.requests
 
     @api.secure
+    @api.response(400, "Already a member of or invited to this organization")
     @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
         user = current_user._get_current_object()
+        if org.is_member(user):
+            api.abort(400, "You are already a member of this organization")
         membership_request = org.pending_request(user)
+        if membership_request and membership_request.kind == "invitation":
+            api.abort(400, "You are already invited to this organization, accept the invitation")
         code = 200 if membership_request else 201
 
         if membership_request:
@@ -407,15 +412,9 @@ class MembershipAcceptAPI(MembershipAPI):
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
-        membership_request.status = "accepted"
-        membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now(UTC)
-        member = Member(user=membership_request.user, role="editor")
-
-        org.members.append(member)
-        org.count_members()
-        org.save()
-        MembershipRequest.after_handle.send(membership_request, org=org)
+        member = org.accept_membership_request(
+            membership_request, handled_by=current_user._get_current_object()
+        )
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 

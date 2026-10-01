@@ -464,6 +464,22 @@ class UserAPITest(APITestCase):
         user.reload()
         self.assertEqual(user.email, "new.address@example.org")
 
+    def test_user_api_update_email_as_admin_links_pending_email_invitations(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+        organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", email="new.address@example.org")]
+        )
+        data = user.to_dict()
+        data["email"] = "New.Address@example.org"
+
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+
+        organization.reload()
+        assert organization.requests[0].user == user
+        assert organization.requests[0].email is None
+
     def test_user_api_update_with_website(self):
         """It should raise a 400"""
         self.login(AdminFactory())

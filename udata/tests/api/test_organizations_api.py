@@ -778,6 +778,52 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by is None
         assert request.refusal_comment is None
 
+    def test_member_cannot_request_membership(self):
+        """Accepting such a request could only fail, leaving it pending forever."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="editor")])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_invited_user_cannot_request_membership(self):
+        """Joining through one of two pending entries would leave the other one pending."""
+        user = self.login()
+        invitation = MembershipRequest(kind="invitation", user=user, created_by=UserFactory())
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+
+    @pytest.mark.parametrize("status", ["refused", "canceled"])
+    def test_user_with_a_handled_invitation_can_request_membership(self, status: str):
+        user = self.login()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=UserFactory(), status=status
+        )
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert201(response)
+
+        organization.reload()
+        assert [(r.kind, r.status, r.user) for r in organization.requests] == [
+            ("invitation", status, user),
+            ("request", "pending", user),
+        ]
+
     def test_get_membership_requests(self):
         user = self.login()
         applicant = UserFactory(email="thibaud@example.org")
@@ -1013,6 +1059,26 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         response = self.post(api_url)
         assert_status(response, 409)
 
+    def test_applicant_cannot_choose_the_role_granted_on_acceptance(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        applicant = self.login()
+
+        response = self.post(
+            url_for("api.request_membership", org=organization),
+            {"comment": "a comment", "role": "admin"},
+        )
+        assert201(response)
+
+        self.login(admin)
+        organization.reload()
+        api_url = url_for("api.accept_membership", org=organization, id=organization.requests[0].id)
+        response = self.post(api_url)
+        assert200(response)
+
+        assert response.json["role"] == "editor"
+        assert organization.reload().member(applicant).role == "editor"
+
     def test_only_admin_can_accept_membership(self):
         user = self.login()
         applicant = UserFactory()
@@ -1225,6 +1291,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         organization.reload()
         assert len(organization.requests) == 1
+        assert organization.requests[0].user == existing_user
+        assert organization.requests[0].email is None
+
+    def test_invite_member_by_email_existing_user_ignores_case(self):
+        """An unlinked invitation is invisible to the user, who then asks to join instead."""
+        user = self.login()
+        existing_user = UserFactory(email="John.Doe@example.com")
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        response = self.post(
+            url_for("api.invite_member", org=organization),
+            {"email": "john.doe@example.com", "role": "editor"},
+        )
+        assert201(response)
+
+        organization.reload()
         assert organization.requests[0].user == existing_user
         assert organization.requests[0].email is None
 

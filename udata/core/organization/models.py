@@ -459,11 +459,7 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if (
-                request.user == user
-                and request.status == "pending"
-                and request.kind != "invitation"
-            ):
+            if request.user == user and request.status == "pending":
                 return request
         return None
 
@@ -522,6 +518,17 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
+    def accept_membership_request(self, membership_request, handled_by):
+        membership_request.status = "accepted"
+        membership_request.handled_by = handled_by
+        membership_request.handled_on = datetime.now(UTC)
+        member = Member(user=membership_request.user, role=membership_request.role)
+        self.members.append(member)
+        self.count_members()
+        self.save()
+        MembershipRequest.after_handle.send(membership_request, org=self)
+        return member
+
     def add_membership_request(self, membership_request):
         self.requests.append(membership_request)
         self.save()
@@ -554,9 +561,8 @@ class Organization(
 
         # Resolve email to existing user
         if email and not user:
-            from udata.core.user.models import User
-
-            user = User.objects(email=email.lower()).first()
+            # Accounts keep the case of their email as typed at registration.
+            user = User.objects(email__iexact=email).first()
             if user:
                 email = None
 

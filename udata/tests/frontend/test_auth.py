@@ -4,23 +4,110 @@ from unittest import mock
 from flask import current_app, url_for
 from flask_security.utils import hash_data
 
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.models import Notification
+from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
 
 
 class AuthTest(APITestCase):
+    def change_email_link(self, user, new_email):
+        security = current_app.extensions["security"]
+        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
+        token = security.confirm_serializer.dumps(data)
+        return url_for("security.confirm_change_email", token=token)
+
+    def test_change_mail_links_pending_email_invitations(self):
+        """An unlinked invitation is invisible to the user, who could only ask to join."""
+        user = self.login()
+        organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", email="new@example.com")]
+        )
+
+        self.get(self.change_email_link(user, "New@example.com"))
+
+        organization.reload()
+        assert organization.requests[0].user == user
+        assert organization.requests[0].email is None
+
+    def test_change_mail_drops_email_invitations_of_organizations_already_joined(self):
+        user = self.login()
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="editor")],
+            requests=[MembershipRequest(kind="invitation", email="new@example.com")],
+        )
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        organization.reload()
+        assert organization.requests == []
+
+    def test_change_mail_drops_email_invitations_of_organizations_already_invited_to(self):
+        user = self.login()
+        invitation = MembershipRequest(kind="invitation", user=user)
+        organization = OrganizationFactory(
+            requests=[
+                invitation,
+                MembershipRequest(kind="invitation", email="new@example.com"),
+            ]
+        )
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+
+    def test_change_mail_replaces_a_pending_request_by_the_email_invitation(self):
+        """The invitation carries the role and assignments an admin chose, a request does not."""
+        admin = UserFactory()
+        user = self.login()
+        invitation = MembershipRequest(
+            kind="invitation", email="new@example.com", role="partial_editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")],
+            requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
+        )
+        request_notification = Notification(
+            user=admin,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization, request_user=user, kind="request"
+            ),
+        )
+        request_notification.save()
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+        assert organization.requests[0].user == user
+        assert organization.requests[0].role == "partial_editor"
+        request_notification.reload()
+        assert request_notification.handled_at is not None
+
+    def test_change_mail_leaves_organizations_without_pending_invitation_to_the_address(self):
+        """A canceled invitation and someone else's pending request are not a pending invitation."""
+        user = self.login()
+        organization = OrganizationFactory(
+            requests=[
+                MembershipRequest(kind="invitation", email="new@example.com", status="canceled"),
+                MembershipRequest(user=UserFactory(), comment="Please add me"),
+            ]
+        )
+        last_modified = organization.reload().last_modified
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        assert organization.reload().last_modified == last_modified
+
     def test_change_mail(self):
         user = self.login(AdminFactory())
 
         new_email = "test@test.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
-
-        resp = self.get(confirmation_link)
+        resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
 
         user.reload()
@@ -32,11 +119,7 @@ class AuthTest(APITestCase):
         original_email = user.email
         new_email = "test@test.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
+        confirmation_link = self.change_email_link(user, new_email)
 
         # A negative validity makes any freshly signed token already expired
         with mock.patch.dict(
@@ -59,13 +142,7 @@ class AuthTest(APITestCase):
         existing_user = UserFactory(email="taken@example.com")
         new_email = existing_user.email
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
-
-        resp = self.get(confirmation_link)
+        resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
         assert "change_email_already_taken" in resp.location
 
@@ -81,11 +158,7 @@ class AuthTest(APITestCase):
 
         new_email = "new@example.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
+        confirmation_link = self.change_email_link(user, new_email)
 
         # Change password via API
         resp = self.post(
