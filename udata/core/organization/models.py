@@ -535,8 +535,6 @@ class Organization(
 
         # Resolve email to existing user
         if email and not user:
-            from udata.core.user.models import User
-
             # Accounts keep the case of their email as typed at registration.
             user = User.objects(email__iexact=email).first()
             if user:
