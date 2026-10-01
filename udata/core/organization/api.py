@@ -423,6 +423,7 @@ class MembershipRequestAPI(API):
             return org.requests
 
     @api.secure
+    @api.response(400, "Already a member of or invited to this organization")
     @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
