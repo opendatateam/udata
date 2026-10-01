@@ -592,3 +592,10 @@ def match_email_invitations(sender, **kwargs):
 
 
 User.on_create.connect(match_email_invitations)
+
+
+@User.on_update.connect
+def match_email_invitations_on_email_change(user, **kwargs):
+    # Covers `/change-email` as well as sysadmins editing an address through the API.
+    if "email" in user._get_changed_fields():
+        match_email_invitations(user)
