@@ -497,6 +497,26 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
+    def add_member(self, user, role, handled_by):
+        """Add `user` as a member and accept all their pending requests and invitations.
+
+        A user can have both a request and an invitation pending (possibly an email invitation
+        sent before their account existed): joining through one of them makes the others moot.
+        """
+        member = Member(user=user, role=role)
+        self.members.append(member)
+        now = datetime.now(UTC)
+        for req in self.requests:
+            if req.status != "pending":
+                continue
+            if req.user == user or (req.email and req.email.lower() == user.email.lower()):
+                req.status = "accepted"
+                req.handled_by = handled_by
+                req.handled_on = now
+        self.count_members()
+        self.save()
+        return member
+
     def add_membership_request(self, membership_request):
         self.requests.append(membership_request)
         self.save()
@@ -531,7 +551,8 @@ class Organization(
         if email and not user:
             from udata.core.user.models import User
 
-            user = User.objects(email=email.lower()).first()
+            # Accounts keep the case of their email as typed at registration.
+            user = User.objects(email__iexact=email).first()
             if user:
                 email = None
 

@@ -428,6 +428,8 @@ class MembershipRequestAPI(API):
     def post(self, org):
         """Apply for membership to a given organization."""
         user = current_user._get_current_object()
+        if org.is_member(user):
+            api.abort(400, "You are already a member of this organization")
         membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
@@ -470,14 +472,9 @@ class MembershipAcceptAPI(MembershipAPI):
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
-        membership_request.status = "accepted"
-        membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now(UTC)
-        member = Member(user=membership_request.user, role="editor")
-
-        org.members.append(member)
-        org.count_members()
-        org.save()
+        member = org.add_member(
+            membership_request.user, "editor", handled_by=current_user._get_current_object()
+        )
         MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))

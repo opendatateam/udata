@@ -696,6 +696,19 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by is None
         assert request.refusal_comment is None
 
+    def test_member_cannot_request_membership(self):
+        """Accepting such a request could only fail, leaving it pending forever."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="editor")])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
     def test_get_membership_requests(self):
         user = self.login()
         applicant = UserFactory(email="thibaud@example.org")
@@ -953,6 +966,33 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert response.json["message"] == "Unknown membership request id"
 
+    def test_accept_membership_closes_pending_invitations_of_the_applicant(self):
+        """An invitation left pending would be listed forever for a user who is now a member."""
+        admin = self.login()
+        applicant = UserFactory(email="Applicant@example.org")
+        invitation = MembershipRequest(
+            kind="invitation", user=applicant, created_by=admin, role="admin"
+        )
+        email_invitation = MembershipRequest(
+            kind="invitation", email="applicant@example.org", created_by=admin, role="editor"
+        )
+        membership_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")],
+            requests=[invitation, email_invitation, membership_request],
+        )
+
+        response = self.post(
+            url_for("api.accept_membership", org=organization, id=membership_request.id)
+        )
+        assert200(response)
+
+        organization.reload()
+        assert len(organization.pending_requests) == 0
+        assert [r.status for r in organization.requests] == ["accepted"] * 3
+        assert all(r.handled_by == admin for r in organization.requests)
+        assert [m.user for m in organization.members] == [admin, applicant]
+
     def test_refuse_membership(self):
         user = self.login()
         applicant = UserFactory()
@@ -1143,6 +1183,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         organization.reload()
         assert len(organization.requests) == 1
+        assert organization.requests[0].user == existing_user
+        assert organization.requests[0].email is None
+
+    def test_invite_member_by_email_existing_user_ignores_case(self):
+        """An unlinked invitation is invisible to the user, who then asks to join instead."""
+        user = self.login()
+        existing_user = UserFactory(email="John.Doe@example.com")
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        response = self.post(
+            url_for("api.invite_member", org=organization),
+            {"email": "john.doe@example.com", "role": "editor"},
+        )
+        assert201(response)
+
+        organization.reload()
         assert organization.requests[0].user == existing_user
         assert organization.requests[0].email is None
 

@@ -310,7 +310,7 @@ class AcceptOrgInvitationAPI(API):
     def post(self, id):
         """Accept an organization invitation."""
         from udata.core.organization.assignment import Assignment
-        from udata.core.organization.models import Member, MembershipRequest, Organization
+        from udata.core.organization.models import MembershipRequest, Organization
 
         user = current_user._get_current_object()
 
@@ -319,15 +319,10 @@ class AcceptOrgInvitationAPI(API):
                 if req.id == id and req.kind == "invitation" and req.user == user:
                     if req.status != "pending":
                         api.abort(400, "Invitation is not pending")
+                    if org.is_member(user):
+                        api.abort(409, "You are already a member of this organization")
 
-                    req.status = "accepted"
-                    req.handled_by = user
-                    req.handled_on = datetime.now(UTC)
-
-                    member = Member(user=user, role=req.role)
-                    org.members.append(member)
-                    org.count_members()
-                    org.save()
+                    org.add_member(user, req.role, handled_by=user)
 
                     if req.assignments:
                         for subject in req.assignments:
