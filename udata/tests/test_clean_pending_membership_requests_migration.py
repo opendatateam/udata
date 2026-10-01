@@ -42,6 +42,26 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         organization.reload()
         assert organization.requests == []
 
+    def test_pending_request_without_kind_of_a_member_is_deleted(self):
+        """Requests created before invitations existed have no `kind` in the database."""
+        admin = UserFactory()
+        user = UserFactory()
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
+            requests=[MembershipRequest(user=user, comment="Please add me")],
+        )
+        notification = notify(admin, organization, user, "request")
+        get_db().organization.update_one(
+            {"_id": organization.id}, {"$unset": {"requests.0.kind": ""}}
+        )
+
+        migrate()
+
+        organization.reload()
+        assert organization.requests == []
+        notification.reload()
+        assert notification.handled_at is not None
+
     def test_pending_email_invitation_to_a_member_address_is_deleted(self):
         user = UserFactory(email="John.Doe@example.com")
         organization = OrganizationFactory(
