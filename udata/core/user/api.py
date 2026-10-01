@@ -16,6 +16,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
@@ -23,7 +24,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.models import Role, datastore
-from udata.models import CommunityResource, Dataset, Reuse, User
+from udata.models import CommunityResource, Dataset, MembershipRequest, Organization, Reuse, User
 from udata.mongo.errors import FieldValidationError
 
 from .api_fields import (
@@ -276,8 +277,6 @@ class MyOrgInvitationsAPI(API):
     @api.marshal_list_with(pending_invitation_fields)
     def get(self):
         """List pending organization invitations for current user."""
-        from udata.core.organization.models import Organization
-
         user = current_user._get_current_object()
         invitations = []
 
@@ -309,9 +308,6 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
-        from udata.core.organization.assignment import Assignment
-        from udata.core.organization.models import MembershipRequest, Organization
-
         user = current_user._get_current_object()
 
         for org in Organization.objects(requests__id=id):
@@ -350,8 +346,6 @@ class RefuseOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Refuse an organization invitation."""
-        from udata.core.organization.models import MembershipRequest, Organization
-
         user = current_user._get_current_object()
 
         for org in Organization.objects(requests__id=id):
