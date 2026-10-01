@@ -723,6 +723,25 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert [r.id for r in organization.requests] == [invitation.id]
 
+    @pytest.mark.parametrize("status", ["refused", "canceled"])
+    def test_user_with_a_handled_invitation_can_request_membership(self, status: str):
+        user = self.login()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=UserFactory(), status=status
+        )
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert201(response)
+
+        organization.reload()
+        assert [(r.kind, r.status, r.user) for r in organization.requests] == [
+            ("invitation", status, user),
+            ("request", "pending", user),
+        ]
+
     def test_get_membership_requests(self):
         user = self.login()
         applicant = UserFactory(email="thibaud@example.org")
