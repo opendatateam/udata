@@ -434,11 +434,7 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if (
-                request.user == user
-                and request.status == "pending"
-                and request.kind != "invitation"
-            ):
+            if request.user == user and request.status == "pending":
                 return request
         return None
 

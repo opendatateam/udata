@@ -430,9 +430,9 @@ class MembershipRequestAPI(API):
         user = current_user._get_current_object()
         if org.is_member(user):
             api.abort(400, "You are already a member of this organization")
-        if any(r.kind == "invitation" and r.user == user for r in org.pending_requests):
-            api.abort(400, "You are already invited to this organization, accept the invitation")
         membership_request = org.pending_request(user)
+        if membership_request and membership_request.kind == "invitation":
+            api.abort(400, "You are already invited to this organization, accept the invitation")
         code = 200 if membership_request else 201
 
         if membership_request:
