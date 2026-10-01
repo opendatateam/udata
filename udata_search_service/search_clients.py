@@ -236,6 +236,7 @@ class SearchableDataset(IndexDocument):
     temporal_coverage_end = Date()
     granularity = Keyword()
     geozones = Keyword(multi=True)
+    geozones_detected = Keyword(multi=True)
     description = Text(analyzer=dgv_analyzer)
     organization = Keyword()
     organization_name = Text(analyzer=dgv_analyzer, fields={"keyword": Keyword()})
@@ -673,8 +674,15 @@ class ElasticClient:
             "other": [],
         }
 
+        # geozone filters also match the zones detected from `spatial.geom`
+        geozone_fields = ["geozones"]
+        if filters.get("include_detected_geozones"):
+            geozone_fields.append("geozones_detected")
+
         for key, value in filters.items():
-            if key == "temporal_coverage_start":
+            if key == "include_detected_geozones":
+                continue
+            elif key == "temporal_coverage_start":
                 filter_dict["other"].append(
                     query.Q("range", temporal_coverage_start={"lte": value})
                 )
@@ -688,8 +696,14 @@ class ElasticClient:
             elif key == "tags":
                 tag_filters = [query.Q("term", tags=tag) for tag in value]
                 filter_dict["other"].append(query.Bool(must=tag_filters))
-            elif key in ["license", "format", "schema", "geozones", "granularity", "badges"]:
-                filter_key = {"geozones": "geozone", "badges": "badge"}.get(key, key)
+            elif key == "geozones":
+                values = value if isinstance(value, list) else [value]
+                filter_dict["geozone"] = query.Bool(
+                    should=[query.Q("terms", **{field: values}) for field in geozone_fields],
+                    minimum_should_match=1,
+                )
+            elif key in ["license", "format", "schema", "granularity", "badges"]:
+                filter_key = {"badges": "badge"}.get(key, key)
                 if isinstance(value, list):
                     list_filters = [query.Q("term", **{key: v}) for v in value]
                     filter_dict[filter_key] = query.Bool(

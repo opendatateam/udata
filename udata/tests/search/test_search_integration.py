@@ -736,6 +736,28 @@ class SearchIntegrationTest(APITestCase):
         assert "DS org" in titles
         assert "DS autre" not in titles
 
+    def test_dataset_geozone_filters_include_detected_zones_only_on_demand(self):
+        """A dataset with only detected zones is found through them with the flag, not without."""
+        parent = GeoZoneFactory(id="fr:departement:05", level="fr:departement")
+        child = GeoZoneFactory(id="fr:commune:05061", level="fr:commune", ancestors=[parent.id])
+        detected = DatasetFactory(
+            title="Detected on the departement", extras={"analysis:spatial:zones": [parent.id]}
+        )
+
+        self.refresh_index()
+
+        for params in (
+            f"geozone={parent.id}",
+            f"geozone={child.id}&include_geozone_ancestors=true",
+        ):
+            off = self.get(f"/api/2/datasets/search/?{params}")
+            self.assert200(off)
+            assert off.json["total"] == 0
+
+            on = self.get(f"/api/2/datasets/search/?{params}&include_detected_geozones=true")
+            self.assert200(on)
+            assert [d["id"] for d in on.json["data"]] == [str(detected.id)]
+
     def test_dataservice_filter_by_tags(self):
         DataserviceFactory(title="DS tagged", tags=["transport"])
         DataserviceFactory(title="DS other", tags=["sante"])

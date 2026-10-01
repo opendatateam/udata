@@ -1132,6 +1132,17 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         assert dataset.extras["recommendations:sources"] == ["x"]
 
+    def test_dataset_api_update_ignores_forged_detected_zones(self):
+        """A non-admin cannot forge the zones detected from the geometry."""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["extras"] = {"analysis:spatial:zones": ["country:fr"]}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert "analysis:spatial:zones" not in dataset.extras
+
     def test_dataset_api_update_preserves_omitted_reserved_resource_extra(self):
         """A resource whose extras are emptied by a full PUT keeps its reserved keys.
 
