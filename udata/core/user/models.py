@@ -574,7 +574,7 @@ def match_email_invitations(sender, **kwargs):
     for org in Organization.objects(
         requests__kind="invitation", requests__email=email, requests__status="pending"
     ):
-        already_linked = org.is_member(user) or any(r.user == user for r in org.pending_requests)
+        already_linked = org.is_member(user) or org.pending_request(user) is not None
         matched_requests = [
             r for r in org.pending_requests if r.kind == "invitation" and r.email == email
         ]
