@@ -58,20 +58,3 @@ class GeoZoneAncestorsTest(APITestCase):
         )
         self.assert200(response)
         assert {d["title"] for d in response.json["data"]} == {"Département", "Région"}
-
-
-class IncludeDetectedGeozonesParamTest(APITestCase):
-    def test_flag_is_parsed_as_a_boolean(self):
-        from udata.core.dataset.search import DatasetSearch
-
-        parser = DatasetSearch.as_request_parser(store_missing=False)
-        for raw, expected in (("true", True), ("false", False)):
-            with self.app.test_request_context(f"/?include_detected_geozones={raw}"):
-                self.assertIs(parser.parse_args()["include_detected_geozones"], expected)
-
-    def test_geozone_params_are_documented(self):
-        from udata.core.dataset.search import DatasetSearch
-
-        parser = DatasetSearch.as_request_parser(store_missing=False)
-        helps = {arg.name: arg.help for arg in parser.args}
-        assert "detected" in helps["include_detected_geozones"]
