@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from rdflib import (
     BNode,
@@ -30,7 +32,8 @@ from udata.rdf import (
     vocabulary_key,
     want_rdf,
 )
-from udata.tests import TestCase
+from udata.ssrf import BlockedAddressError
+from udata.tests import PytestOnlyTestCase, TestCase
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues
 
@@ -80,6 +83,40 @@ class ContentNegociationTest(TestCase):
 
         with self.app.test_request_context():
             self.assertFalse(want_rdf())
+
+
+@pytest.mark.usefixtures("no_ambient_proxy")
+class JsonLdRemoteContextTest(PytestOnlyTestCase):
+    def test_remote_context_is_fetched(self, rmock):
+        rmock.get("http://data.test.org/context.jsonld", json={"@context": {"@vocab": str(DCAT)}})
+        data = json.dumps(
+            {
+                "@context": "http://data.test.org/context.jsonld",
+                "@id": "http://data.test.org/catalog",
+                "@type": "Catalog",
+            }
+        )
+
+        graph = Graph().parse(data=data, format="json-ld")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    @pytest.mark.options(URLS_ALLOW_LOCAL=False)
+    def test_remote_context_on_a_loopback_address_is_blocked(self):
+        # Deliberately no rmock: requests_mock substitutes the session adapter,
+        # which is precisely the guard under test.
+        data = json.dumps({"@context": "http://127.0.0.1:9/context.jsonld", "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="loopback"):
+            Graph().parse(data=data, format="json-ld")
+
+    def test_remote_context_is_never_read_from_a_local_file(self, tmp_path):
+        context = tmp_path / "context.jsonld"
+        context.write_text(json.dumps({"@context": {"@vocab": str(DCAT)}}))
+        data = json.dumps({"@context": context.as_uri(), "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
+            Graph().parse(data=data, format="json-ld")
 
 
 class GuessFormatTest(object):

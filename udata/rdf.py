@@ -23,6 +23,7 @@ from rdflib.namespace import (
     NamespaceManager,
     split_uri,
 )
+from rdflib.plugins.shared.jsonld import context as jsonld_context
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
@@ -35,6 +36,7 @@ from udata.core.owned import ownership_filter
 from udata.core.user.models import User
 from udata.frontend.markdown import parse_html
 from udata.harvest.filters import normalize_tag
+from udata.http import ssrf_session
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
@@ -83,6 +85,18 @@ FORMAT_MAP = SUFFIX_FORMAT_MAP.copy()
 FORMAT_MAP["json"] = "json-ld"
 FORMAT_MAP["jsonld"] = "json-ld"
 FORMAT_MAP["xml"] = "xml"
+
+
+def _fetch_jsonld_context(url: str) -> tuple[dict, None]:
+    response = ssrf_session().get(url, headers={"Accept": "application/ld+json, application/json"})
+    response.raise_for_status()
+    return response.json(), None
+
+
+# rdflib resolves remote JSON-LD `@context` and `@import` with its own urllib loader, which also
+# opens local `file://` paths, and exposes no hook to replace it. Those URLs come from harvested
+# catalogs: fetch them through the SSRF-guarded session instead.
+jsonld_context.source_to_json = _fetch_jsonld_context
 
 # Map serialization formats to MIME types
 RDF_MIME_TYPES = {
