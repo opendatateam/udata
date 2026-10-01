@@ -11,11 +11,11 @@ from udata.tests.api import APITestCase
 
 
 class AuthTest(APITestCase):
-    def confirm_change_email(self, user, new_email):
+    def change_email_link(self, user, new_email):
         security = current_app.extensions["security"]
         data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
         token = security.confirm_serializer.dumps(data)
-        return self.get(url_for("security.confirm_change_email", token=token))
+        return url_for("security.confirm_change_email", token=token)
 
     def test_change_mail_links_pending_email_invitations(self):
         """An unlinked invitation is invisible to the user, who could only ask to join."""
@@ -24,8 +24,7 @@ class AuthTest(APITestCase):
             requests=[MembershipRequest(kind="invitation", email="new@example.com")]
         )
 
-        resp = self.confirm_change_email(user, "New@example.com")
-        assert resp.status_code == 302
+        self.get(self.change_email_link(user, "New@example.com"))
 
         organization.reload()
         assert organization.requests[0].user == user
@@ -38,7 +37,7 @@ class AuthTest(APITestCase):
             requests=[MembershipRequest(kind="invitation", email="new@example.com")],
         )
 
-        self.confirm_change_email(user, "new@example.com")
+        self.get(self.change_email_link(user, "new@example.com"))
 
         organization.reload()
         assert organization.requests == []
@@ -53,7 +52,7 @@ class AuthTest(APITestCase):
             ]
         )
 
-        self.confirm_change_email(user, "new@example.com")
+        self.get(self.change_email_link(user, "new@example.com"))
 
         organization.reload()
         assert [r.id for r in organization.requests] == [membership_request.id]
@@ -63,13 +62,7 @@ class AuthTest(APITestCase):
 
         new_email = "test@test.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
-
-        resp = self.get(confirmation_link)
+        resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
 
         user.reload()
@@ -81,11 +74,7 @@ class AuthTest(APITestCase):
         original_email = user.email
         new_email = "test@test.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
+        confirmation_link = self.change_email_link(user, new_email)
 
         # A negative validity makes any freshly signed token already expired
         with mock.patch.dict(
@@ -108,13 +97,7 @@ class AuthTest(APITestCase):
         existing_user = UserFactory(email="taken@example.com")
         new_email = existing_user.email
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
-
-        resp = self.get(confirmation_link)
+        resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
         assert "change_email_already_taken" in resp.location
 
@@ -130,11 +113,7 @@ class AuthTest(APITestCase):
 
         new_email = "new@example.com"
 
-        security = current_app.extensions["security"]
-
-        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
-        token = security.confirm_serializer.dumps(data)
-        confirmation_link = url_for("security.confirm_change_email", token=token)
+        confirmation_link = self.change_email_link(user, new_email)
 
         # Change password via API
         resp = self.post(
