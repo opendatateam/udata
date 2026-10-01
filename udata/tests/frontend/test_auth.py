@@ -57,6 +57,21 @@ class AuthTest(APITestCase):
         organization.reload()
         assert [r.id for r in organization.requests] == [membership_request.id]
 
+    def test_change_mail_leaves_organizations_without_pending_invitation_to_the_address(self):
+        """A canceled invitation and someone else's pending request are not a pending invitation."""
+        user = self.login()
+        organization = OrganizationFactory(
+            requests=[
+                MembershipRequest(kind="invitation", email="new@example.com", status="canceled"),
+                MembershipRequest(user=UserFactory(), comment="Please add me"),
+            ]
+        )
+        last_modified = organization.reload().last_modified
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        assert organization.reload().last_modified == last_modified
+
     def test_change_mail(self):
         user = self.login(AdminFactory())
 
