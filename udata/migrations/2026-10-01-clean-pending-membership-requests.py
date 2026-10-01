@@ -14,6 +14,7 @@ handled the removed entries, so they are not marked as accepted or refused.
 import logging
 from datetime import UTC, datetime
 
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ def migrate(db):
         kept_kinds = {}
         # Only entries that had a user got notifications.
         deleted_notified = set()
-        linked = 0
+        linked_invitations = []
         for req in requests:
             if req.get("status") != "pending":
                 kept_requests.append(req)
@@ -73,17 +74,17 @@ def migrate(db):
                 continue
             if user_id and not had_user:
                 req = {**req, "user": user_id, "email": None}
-                linked += 1
+                linked_invitations.append(req)
             if user_id:
                 kept_kinds[user_id] = kind
             kept_requests.append(req)
 
         deleted = len(requests) - len(kept_requests)
         removed = len(members) - len(unique_members)
-        if not deleted and not removed and not linked:
+        if not deleted and not removed and not linked_invitations:
             continue
 
-        linked_count += linked
+        linked_count += len(linked_invitations)
         deleted_count += deleted
         duplicate_count += removed
         db.organization.update_one(
@@ -107,6 +108,15 @@ def migrate(db):
                 details__kind__in=[kind, None] if kind == "request" else [kind],
                 handled_at=None,
             ).update(set__handled_at=now)
+        # Unlinked invitations had no user to notify: notify them now, as on registration.
+        for req in linked_invitations:
+            Notification(
+                user=req["user"],
+                created_at=req["created"],
+                details=MembershipRequestNotificationDetails(
+                    request_organization=org["_id"], request_user=req["user"], kind="invitation"
+                ),
+            ).save()
 
     log.info(f"Linked {linked_count} email invitations to their account")
     log.info(f"Deleted {deleted_count} redundant pending requests and invitations")

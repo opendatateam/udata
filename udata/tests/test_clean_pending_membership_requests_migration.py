@@ -94,6 +94,32 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         organization.reload()
         assert organization.requests[0].user == user
         assert organization.requests[0].email is None
+        notification = Notification.objects.get(user=user)
+        assert notification.details.request_organization == organization
+        assert notification.details.request_user == user
+        assert notification.details.kind == "invitation"
+        assert notification.handled_at is None
+        assert notification.created_at == organization.requests[0].created
+
+    def test_linked_email_invitation_kept_over_a_later_request_notifies_the_user(self):
+        admin = UserFactory()
+        user = UserFactory(email="John.Doe@example.com")
+        invitation = MembershipRequest(kind="invitation", email="john.doe@example.com")
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")],
+            requests=[invitation, MembershipRequest(user=user, comment="Please add me")],
+        )
+        request_notification = notify(admin, organization, user, "request")
+
+        migrate()
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+        request_notification.reload()
+        assert request_notification.handled_at is not None
+        notification = Notification.objects.get(user=user)
+        assert notification.details.kind == "invitation"
+        assert notification.handled_at is None
 
     def test_only_the_first_pending_entry_of_a_non_member_is_kept(self):
         admin = UserFactory()
