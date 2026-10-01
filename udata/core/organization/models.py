@@ -497,11 +497,11 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
-    def accept_membership_request(self, membership_request, role, handled_by):
+    def accept_membership_request(self, membership_request, handled_by):
         membership_request.status = "accepted"
         membership_request.handled_by = handled_by
         membership_request.handled_on = datetime.now(UTC)
-        member = Member(user=membership_request.user, role=role)
+        member = Member(user=membership_request.user, role=membership_request.role)
         self.members.append(member)
         self.count_members()
         self.save()

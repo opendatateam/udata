@@ -475,7 +475,7 @@ class MembershipAcceptAPI(MembershipAPI):
             return org.member(membership_request.user), 409
 
         member = org.accept_membership_request(
-            membership_request, "editor", handled_by=current_user._get_current_object()
+            membership_request, handled_by=current_user._get_current_object()
         )
         MembershipRequest.after_handle.send(membership_request, org=org)
 
