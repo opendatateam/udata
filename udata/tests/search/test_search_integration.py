@@ -748,7 +748,7 @@ class SearchIntegrationTest(APITestCase):
 
         for params in (
             f"geozone={parent.id}",
-            f"geozone_with_ancestors={child.id}",
+            f"geozone={child.id}&include_geozone_ancestors=true",
         ):
             off = self.get(f"/api/2/datasets/search/?{params}")
             self.assert200(off)
