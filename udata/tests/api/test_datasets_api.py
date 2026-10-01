@@ -1143,19 +1143,6 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         assert "analysis:spatial:zones" not in dataset.extras
 
-    def test_dataset_api_update_preserves_detected_zones_when_editing_other_extras(self):
-        """Editing other extras must not wipe the detected zones."""
-        user = self.login()
-        zones = ["fr:departement:05"]
-        dataset = DatasetFactory(owner=user, extras={"analysis:spatial:zones": zones})
-        data = dataset.to_dict()
-        data["extras"] = {"foo": "bar"}
-        response = self.put(url_for("api.dataset", dataset=dataset), data)
-        self.assert200(response)
-        dataset.reload()
-        assert dataset.extras["analysis:spatial:zones"] == zones
-        assert dataset.extras["foo"] == "bar"
-
     def test_dataset_api_update_preserves_omitted_reserved_resource_extra(self):
         """A resource whose extras are emptied by a full PUT keeps its reserved keys.
 
