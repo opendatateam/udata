@@ -2,13 +2,14 @@
 Leave at most one pending membership request or invitation per user and organization, none for
 members, and remove members listed twice.
 
-A user could ask to join an organization they were already invited to, and an email invitation
-stayed unlinked when the account's address differed in case or was changed afterwards: joining
-through one entry left the others pending, and admins were shown requests that could only fail.
+Members could be added directly by an admin (the endpoint removed in #3570), which left their
+pending requests behind; a user could also ask to join an organization they were already invited
+to, and an email invitation stayed unlinked when the account's address differed in case or was
+changed afterwards. Admins were shown entries that could only fail.
 
 Email invitations matching an account are linked to it, as on registration. Then, for each user,
-the first pending entry is kept and the others are removed, all of them for members. Nobody
-handled the removed entries, so they are not marked as accepted or refused.
+the first pending entry is kept and the others are removed, all of them for members. The removed
+entries are dropped rather than marked as accepted or refused: they were superseded, not decided.
 """
 
 import logging
