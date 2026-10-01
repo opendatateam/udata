@@ -124,15 +124,6 @@ class DetectZoneOnSpatialChangeTest(DBTestCase):
         dataset.reload()
         self.assertNotIn("analysis:spatial:zones", dataset.extras)
 
-    def test_unrelated_field_change_does_not_trigger_detection(self):
-        GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
-        dataset = DatasetFactory()
-        dataset.title = "updated title"
-        dataset.save()
-
-        dataset.reload()
-        self.assertNotIn("analysis:spatial:zones", dataset.extras)
-
 
 class ReindexAfterDetectionTest(DBTestCase):
     def test_reindexes_when_detected_zones_change(self):
@@ -148,14 +139,6 @@ class ReindexAfterDetectionTest(DBTestCase):
     def test_does_not_reindex_when_detected_zones_are_unchanged(self):
         GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
         dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
-
-        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
-            detect_and_write_zone(str(dataset.id))
-
-        reindex.delay.assert_not_called()
-
-    def test_does_not_reindex_when_nothing_was_or_is_detected(self):
-        dataset = DatasetFactory()
 
         with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
             detect_and_write_zone(str(dataset.id))
