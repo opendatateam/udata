@@ -108,8 +108,16 @@ def migrate(db):
                 details__kind__in=[kind, None] if kind == "request" else [kind],
                 handled_at=None,
             ).update(set__handled_at=now)
-        # Unlinked invitations had no user to notify: notify them now, as on registration.
+        # Unlinked invitations had no user to notify: notify them now, as on registration. The
+        # notification of a deleted invitation of the same user was kept above for this one.
         for req in linked_invitations:
+            if Notification.objects(
+                user=req["user"],
+                details__request_organization=org["_id"],
+                details__request_user=req["user"],
+                handled_at=None,
+            ).first():
+                continue
             Notification(
                 user=req["user"],
                 created_at=req["created"],

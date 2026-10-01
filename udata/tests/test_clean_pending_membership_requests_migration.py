@@ -144,6 +144,23 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         invitation_notification.reload()
         assert invitation_notification.handled_at is not None
 
+    def test_notification_of_a_deleted_invitation_is_kept_for_the_linked_one(self):
+        user = UserFactory(email="John.Doe@example.com")
+        email_invitation = MembershipRequest(kind="invitation", email="john.doe@example.com")
+        organization = OrganizationFactory(
+            requests=[email_invitation, MembershipRequest(kind="invitation", user=user)]
+        )
+        notification = notify(user, organization, user, "invitation")
+
+        migrate()
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [email_invitation.id]
+        assert organization.requests[0].user == user
+        assert [n.id for n in Notification.objects(user=user)] == [notification.id]
+        notification.reload()
+        assert notification.handled_at is None
+
     def test_email_invitation_of_a_user_with_a_pending_request_is_deleted(self):
         user = UserFactory(email="John.Doe@example.com")
         membership_request = MembershipRequest(user=user, comment="Please add me")
