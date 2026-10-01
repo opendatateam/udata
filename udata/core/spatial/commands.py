@@ -171,9 +171,6 @@ def load(geozones_file, levels_file, drop=False):
 def detect_zones_command():
     """
     Detect zones for existing datasets that have a `spatial.geom`.
-
-    Datasets are otherwise only processed when created or when their spatial coverage changes.
-    Requires zone bboxes (loaded with `load`, when the geozones file has them).
     Each dataset is reindexed if its detected zones changed.
     """
     datasets = Dataset.objects(spatial__geom__ne=None).only("id").timeout(False)
