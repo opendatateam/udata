@@ -9,9 +9,9 @@ changed afterwards. Admins were shown entries that could only fail.
 
 Email invitations matching an account are linked to it, as on registration. Then, for each user,
 a single pending entry is kept and the others are removed, all of them for members. As in
-`match_email_invitations`, an entry already linked to the account wins over an email invitation,
-otherwise the first one in the array is kept. The removed entries are dropped rather than marked
-as accepted or refused: they were superseded, not decided.
+`match_email_invitations`, an invitation wins over a request, an entry already linked to the
+account wins over an email invitation, otherwise the first one in the array is kept. The removed
+entries are dropped rather than marked as accepted or refused: they were superseded, not decided.
 """
 
 import logging
@@ -64,9 +64,15 @@ def migrate(db):
         deleted_indexes = set()
         linked_by_index = {}
         pending = [(i, req) for i, req in enumerate(requests) if req.get("status") == "pending"]
-        # Entries already linked to an account win over email invitations, as in
-        # `match_email_invitations` (stable sort: the array order decides among each group).
-        pending.sort(key=lambda item: item[1].get("user") is None)
+        # As in `match_email_invitations`: an invitation wins over a request since it carries the
+        # role and assignments an admin chose, then an entry already linked to the account wins
+        # over an email invitation (stable sort: the array order decides among each group).
+        pending.sort(
+            key=lambda item: (
+                item[1].get("kind", "request") != "invitation",
+                item[1].get("user") is None,
+            )
+        )
         for i, req in pending:
             kind = req.get("kind", "request")
             user_id = req.get("user")

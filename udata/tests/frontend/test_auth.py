@@ -5,7 +5,9 @@ from flask import current_app, url_for
 from flask_security.utils import hash_data
 
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
 
@@ -42,12 +44,12 @@ class AuthTest(APITestCase):
         organization.reload()
         assert organization.requests == []
 
-    def test_change_mail_drops_email_invitations_of_organizations_already_requested(self):
+    def test_change_mail_drops_email_invitations_of_organizations_already_invited_to(self):
         user = self.login()
-        membership_request = MembershipRequest(user=user, comment="Please add me")
+        invitation = MembershipRequest(kind="invitation", user=user)
         organization = OrganizationFactory(
             requests=[
-                membership_request,
+                invitation,
                 MembershipRequest(kind="invitation", email="new@example.com"),
             ]
         )
@@ -55,7 +57,35 @@ class AuthTest(APITestCase):
         self.get(self.change_email_link(user, "new@example.com"))
 
         organization.reload()
-        assert [r.id for r in organization.requests] == [membership_request.id]
+        assert [r.id for r in organization.requests] == [invitation.id]
+
+    def test_change_mail_replaces_a_pending_request_by_the_email_invitation(self):
+        """The invitation carries the role and assignments an admin chose, a request does not."""
+        admin = UserFactory()
+        user = self.login()
+        invitation = MembershipRequest(
+            kind="invitation", email="new@example.com", role="partial_editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")],
+            requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
+        )
+        request_notification = Notification(
+            user=admin,
+            details=MembershipRequestNotificationDetails(
+                request_organization=organization, request_user=user, kind="request"
+            ),
+        )
+        request_notification.save()
+
+        self.get(self.change_email_link(user, "new@example.com"))
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+        assert organization.requests[0].user == user
+        assert organization.requests[0].role == "partial_editor"
+        request_notification.reload()
+        assert request_notification.handled_at is not None
 
     def test_change_mail_leaves_organizations_without_pending_invitation_to_the_address(self):
         """A canceled invitation and someone else's pending request are not a pending invitation."""

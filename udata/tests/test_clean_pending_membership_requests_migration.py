@@ -101,38 +101,36 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         assert notification.handled_at is None
         assert notification.created_at == organization.requests[0].created
 
-    def test_request_kept_over_an_earlier_email_invitation_to_the_same_user(self):
-        """Same rule as `match_email_invitations`: the entry linked to the account wins."""
+    def test_email_invitation_kept_over_a_request_of_the_same_user(self):
+        """Same rule as `match_email_invitations`: the invitation carries the role an admin chose."""
         admin = UserFactory()
         user = UserFactory(email="John.Doe@example.com")
-        membership_request = MembershipRequest(user=user, comment="Please add me")
+        invitation = MembershipRequest(
+            kind="invitation", email="john.doe@example.com", role="partial_editor"
+        )
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")],
-            requests=[
-                MembershipRequest(kind="invitation", email="john.doe@example.com"),
-                membership_request,
-            ],
+            requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
         )
         request_notification = notify(admin, organization, user, "request")
 
         migrate()
 
         organization.reload()
-        assert [r.id for r in organization.requests] == [membership_request.id]
+        assert [r.id for r in organization.requests] == [invitation.id]
+        assert organization.requests[0].user == user
+        assert organization.requests[0].role == "partial_editor"
         request_notification.reload()
-        assert request_notification.handled_at is None
-        assert Notification.objects(user=user).count() == 0
+        assert request_notification.handled_at is not None
+        assert Notification.objects(user=user, details__kind="invitation").count() == 1
 
-    def test_only_the_first_pending_entry_of_a_non_member_is_kept(self):
+    def test_invitation_kept_over_an_earlier_request_of_the_same_user(self):
         admin = UserFactory()
         user = UserFactory()
-        membership_request = MembershipRequest(user=user, comment="Please add me")
+        invitation = MembershipRequest(kind="invitation", user=user, role="admin")
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")],
-            requests=[
-                membership_request,
-                MembershipRequest(kind="invitation", user=user, role="admin"),
-            ],
+            requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
         )
         request_notification = notify(admin, organization, user, "request")
         invitation_notification = notify(user, organization, user, "invitation")
@@ -140,11 +138,11 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         migrate()
 
         organization.reload()
-        assert [r.id for r in organization.requests] == [membership_request.id]
+        assert [r.id for r in organization.requests] == [invitation.id]
         request_notification.reload()
-        assert request_notification.handled_at is None
+        assert request_notification.handled_at is not None
         invitation_notification.reload()
-        assert invitation_notification.handled_at is not None
+        assert invitation_notification.handled_at is None
 
     def test_linked_invitation_kept_over_an_earlier_email_invitation_keeps_its_notification(self):
         user = UserFactory(email="John.Doe@example.com")
@@ -164,21 +162,6 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         assert [n.id for n in Notification.objects(user=user)] == [notification.id]
         notification.reload()
         assert notification.handled_at is None
-
-    def test_email_invitation_of_a_user_with_a_pending_request_is_deleted(self):
-        user = UserFactory(email="John.Doe@example.com")
-        membership_request = MembershipRequest(user=user, comment="Please add me")
-        organization = OrganizationFactory(
-            requests=[
-                membership_request,
-                MembershipRequest(kind="invitation", email="john.doe@example.com"),
-            ]
-        )
-
-        migrate()
-
-        organization.reload()
-        assert [r.id for r in organization.requests] == [membership_request.id]
 
     def test_member_listed_twice_is_kept_once_with_its_first_role(self):
         admin = UserFactory()

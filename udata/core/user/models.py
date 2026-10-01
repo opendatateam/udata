@@ -562,27 +562,38 @@ post_save.connect(SpamMixin.post_save, sender=User)
 def match_email_invitations(sender, **kwargs):
     """Link pending email invitations to the user owning their address.
 
-    Runs on registration and on email change. An organization the user already belongs to,
-    or already has a pending request or invitation for, keeps that entry: the email invitation
-    is dropped so that a user never has two pending entries for the same organization.
+    Runs on registration and on email change, keeping a single pending entry per organization.
+    An organization the user already belongs to, or is already invited to, keeps that state: the
+    email invitation is dropped. A pending request gives way to the invitation instead, since the
+    invitation carries the role and assignments an admin chose.
     """
     from udata.core.organization.models import Organization
     from udata.core.organization.notifications import _create_membership_notification
+    from udata.features.notifications.models import Notification
 
     user = sender
     email = user.email.lower()
     for org in Organization.objects(
         requests__match={"kind": "invitation", "email": email, "status": "pending"}
     ):
-        already_linked = org.is_member(user) or org.pending_request(user) is not None
+        pending = org.pending_request(user)
         matched_requests = [
             r for r in org.pending_requests if r.kind == "invitation" and r.email == email
         ]
-        if already_linked:
+        if org.is_member(user) or (pending is not None and pending.kind == "invitation"):
             matched_ids = {r.id for r in matched_requests}
             org.requests = [r for r in org.requests if r.id not in matched_ids]
             org.save()
             continue
+        if pending is not None:
+            org.requests = [r for r in org.requests if r.id != pending.id]
+            # Request notifications created before invitations existed have no `kind`.
+            Notification.objects(
+                details__request_organization=org,
+                details__request_user=user,
+                details__kind__in=["request", None],
+                handled_at=None,
+            ).update(set__handled_at=datetime.now(UTC))
         for req in matched_requests:
             req.user = user
             req.email = None
