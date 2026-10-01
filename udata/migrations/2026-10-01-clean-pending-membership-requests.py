@@ -8,8 +8,10 @@ to, and an email invitation stayed unlinked when the account's address differed 
 changed afterwards. Admins were shown entries that could only fail.
 
 Email invitations matching an account are linked to it, as on registration. Then, for each user,
-the first pending entry is kept and the others are removed, all of them for members. The removed
-entries are dropped rather than marked as accepted or refused: they were superseded, not decided.
+a single pending entry is kept and the others are removed, all of them for members. As in
+`match_email_invitations`, an entry already linked to the account wins over an email invitation,
+otherwise the first one in the array is kept. The removed entries are dropped rather than marked
+as accepted or refused: they were superseded, not decided.
 """
 
 import logging
@@ -55,15 +57,16 @@ def migrate(db):
             # The first entry is the one the application reads (`Organization.member`).
             unique_members.append(member)
 
-        kept_requests = []
         kept_kinds = {}
         # Only entries that had a user got notifications.
         deleted_notified = set()
-        linked_invitations = []
-        for req in requests:
-            if req.get("status") != "pending":
-                kept_requests.append(req)
-                continue
+        deleted_indexes = set()
+        linked_by_index = {}
+        pending = [(i, req) for i, req in enumerate(requests) if req.get("status") == "pending"]
+        # Entries already linked to an account win over email invitations, as in
+        # `match_email_invitations` (stable sort: the array order decides among each group).
+        pending.sort(key=lambda item: item[1].get("user") is None)
+        for i, req in pending:
             kind = req.get("kind", "request")
             user_id = req.get("user")
             had_user = user_id is not None
@@ -72,13 +75,18 @@ def migrate(db):
             if user_id and (user_id in member_ids or user_id in kept_kinds):
                 if had_user:
                     deleted_notified.add((user_id, kind))
+                deleted_indexes.add(i)
                 continue
             if user_id and not had_user:
-                req = {**req, "user": user_id, "email": None}
-                linked_invitations.append(req)
+                linked_by_index[i] = {**req, "user": user_id, "email": None}
             if user_id:
                 kept_kinds[user_id] = kind
-            kept_requests.append(req)
+        kept_requests = [
+            linked_by_index.get(i, req)
+            for i, req in enumerate(requests)
+            if i not in deleted_indexes
+        ]
+        linked_invitations = list(linked_by_index.values())
 
         deleted = len(requests) - len(kept_requests)
         removed = len(members) - len(unique_members)
@@ -109,8 +117,7 @@ def migrate(db):
                 details__kind__in=[kind, None] if kind == "request" else [kind],
                 handled_at=None,
             ).update(set__handled_at=now)
-        # Unlinked invitations had no user to notify: notify them now, as on registration. The
-        # notification of a deleted invitation of the same user was kept above for this one.
+        # Unlinked invitations had no user to notify: notify them now, as on registration.
         for req in linked_invitations:
             if Notification.objects(
                 user=req["user"],

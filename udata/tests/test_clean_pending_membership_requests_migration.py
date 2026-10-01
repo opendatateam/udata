@@ -101,25 +101,27 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         assert notification.handled_at is None
         assert notification.created_at == organization.requests[0].created
 
-    def test_linked_email_invitation_kept_over_a_later_request_notifies_the_user(self):
+    def test_request_kept_over_an_earlier_email_invitation_to_the_same_user(self):
+        """Same rule as `match_email_invitations`: the entry linked to the account wins."""
         admin = UserFactory()
         user = UserFactory(email="John.Doe@example.com")
-        invitation = MembershipRequest(kind="invitation", email="john.doe@example.com")
+        membership_request = MembershipRequest(user=user, comment="Please add me")
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")],
-            requests=[invitation, MembershipRequest(user=user, comment="Please add me")],
+            requests=[
+                MembershipRequest(kind="invitation", email="john.doe@example.com"),
+                membership_request,
+            ],
         )
         request_notification = notify(admin, organization, user, "request")
 
         migrate()
 
         organization.reload()
-        assert [r.id for r in organization.requests] == [invitation.id]
+        assert [r.id for r in organization.requests] == [membership_request.id]
         request_notification.reload()
-        assert request_notification.handled_at is not None
-        notification = Notification.objects.get(user=user)
-        assert notification.details.kind == "invitation"
-        assert notification.handled_at is None
+        assert request_notification.handled_at is None
+        assert Notification.objects(user=user).count() == 0
 
     def test_only_the_first_pending_entry_of_a_non_member_is_kept(self):
         admin = UserFactory()
@@ -144,19 +146,21 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         invitation_notification.reload()
         assert invitation_notification.handled_at is not None
 
-    def test_notification_of_a_deleted_invitation_is_kept_for_the_linked_one(self):
+    def test_linked_invitation_kept_over_an_earlier_email_invitation_keeps_its_notification(self):
         user = UserFactory(email="John.Doe@example.com")
-        email_invitation = MembershipRequest(kind="invitation", email="john.doe@example.com")
+        invitation = MembershipRequest(kind="invitation", user=user)
         organization = OrganizationFactory(
-            requests=[email_invitation, MembershipRequest(kind="invitation", user=user)]
+            requests=[
+                MembershipRequest(kind="invitation", email="john.doe@example.com"),
+                invitation,
+            ]
         )
         notification = notify(user, organization, user, "invitation")
 
         migrate()
 
         organization.reload()
-        assert [r.id for r in organization.requests] == [email_invitation.id]
-        assert organization.requests[0].user == user
+        assert [r.id for r in organization.requests] == [invitation.id]
         assert [n.id for n in Notification.objects(user=user)] == [notification.id]
         notification.reload()
         assert notification.handled_at is None
