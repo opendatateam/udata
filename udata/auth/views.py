@@ -27,6 +27,7 @@ from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
 
 from udata.auth.proconnect import get_logout_url
+from udata.core.user.models import match_email_invitations
 from udata.uris import homepage_url
 from udata.utils import wants_json
 
@@ -97,6 +98,7 @@ def confirm_change_email(token):
 
     user.email = new_email
     _datastore.put(user)
+    match_email_invitations(user)
 
     return redirect(homepage_url(flash="change_email_confirmed"))
 

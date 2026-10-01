@@ -319,10 +319,7 @@ class AcceptOrgInvitationAPI(API):
                 if req.id == id and req.kind == "invitation" and req.user == user:
                     if req.status != "pending":
                         api.abort(400, "Invitation is not pending")
-                    if org.is_member(user):
-                        api.abort(409, "You are already a member of this organization")
-
-                    org.add_member(user, req.role, handled_by=user)
+                    org.accept_membership_request(req, req.role, handled_by=user)
 
                     if req.assignments:
                         for subject in req.assignments:

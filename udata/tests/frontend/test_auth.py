@@ -4,11 +4,60 @@ from unittest import mock
 from flask import current_app, url_for
 from flask_security.utils import hash_data
 
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
 
 
 class AuthTest(APITestCase):
+    def confirm_change_email(self, user, new_email):
+        security = current_app.extensions["security"]
+        data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
+        token = security.confirm_serializer.dumps(data)
+        return self.get(url_for("security.confirm_change_email", token=token))
+
+    def test_change_mail_links_pending_email_invitations(self):
+        """An unlinked invitation is invisible to the user, who could only ask to join."""
+        user = self.login()
+        organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", email="new@example.com")]
+        )
+
+        resp = self.confirm_change_email(user, "New@example.com")
+        assert resp.status_code == 302
+
+        organization.reload()
+        assert organization.requests[0].user == user
+        assert organization.requests[0].email is None
+
+    def test_change_mail_drops_email_invitations_of_organizations_already_joined(self):
+        user = self.login()
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="editor")],
+            requests=[MembershipRequest(kind="invitation", email="new@example.com")],
+        )
+
+        self.confirm_change_email(user, "new@example.com")
+
+        organization.reload()
+        assert organization.requests == []
+
+    def test_change_mail_drops_email_invitations_of_organizations_already_requested(self):
+        user = self.login()
+        membership_request = MembershipRequest(user=user, comment="Please add me")
+        organization = OrganizationFactory(
+            requests=[
+                membership_request,
+                MembershipRequest(kind="invitation", email="new@example.com"),
+            ]
+        )
+
+        self.confirm_change_email(user, "new@example.com")
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [membership_request.id]
+
     def test_change_mail(self):
         user = self.login(AdminFactory())
 

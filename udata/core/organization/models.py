@@ -497,22 +497,12 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
-    def add_member(self, user, role, handled_by):
-        """Add `user` as a member and accept all their pending requests and invitations.
-
-        A user can have both a request and an invitation pending (possibly an email invitation
-        sent before their account existed): joining through one of them makes the others moot.
-        """
-        member = Member(user=user, role=role)
+    def accept_membership_request(self, membership_request, role, handled_by):
+        membership_request.status = "accepted"
+        membership_request.handled_by = handled_by
+        membership_request.handled_on = datetime.now(UTC)
+        member = Member(user=membership_request.user, role=role)
         self.members.append(member)
-        now = datetime.now(UTC)
-        for req in self.requests:
-            if req.status != "pending":
-                continue
-            if req.user == user or (req.email and req.email.lower() == user.email.lower()):
-                req.status = "accepted"
-                req.handled_by = handled_by
-                req.handled_on = now
         self.count_members()
         self.save()
         return member

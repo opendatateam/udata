@@ -560,31 +560,35 @@ post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):
-    """Match pending email invitations when user registers."""
+    """Link pending email invitations to the user owning their address.
+
+    Runs on registration and on email change. An organization the user already belongs to,
+    or already has a pending request or invitation for, keeps that entry: the email invitation
+    is dropped so that a user never has two pending entries for the same organization.
+    """
     from udata.core.organization.models import Organization
     from udata.core.organization.notifications import _create_membership_notification
 
     user = sender
+    email = user.email.lower()
     for org in Organization.objects(
-        requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
+        requests__kind="invitation", requests__email=email, requests__status="pending"
     ):
-        modified = False
-        matched_requests = []
-        for req in org.requests:
-            if (
-                req.kind == "invitation"
-                and req.email
-                and req.email.lower() == user.email.lower()
-                and req.status == "pending"
-            ):
-                req.user = user
-                req.email = None
-                modified = True
-                matched_requests.append(req)
-        if modified:
+        already_linked = org.is_member(user) or any(r.user == user for r in org.pending_requests)
+        matched_requests = [
+            r for r in org.pending_requests if r.kind == "invitation" and r.email == email
+        ]
+        if already_linked:
+            matched_ids = {r.id for r in matched_requests}
+            org.requests = [r for r in org.requests if r.id not in matched_ids]
             org.save()
-            for req in matched_requests:
-                _create_membership_notification(req, org, user)
+            continue
+        for req in matched_requests:
+            req.user = user
+            req.email = None
+        org.save()
+        for req in matched_requests:
+            _create_membership_notification(req, org, user)
 
 
 User.on_create.connect(match_email_invitations)

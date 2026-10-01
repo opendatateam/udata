@@ -817,42 +817,6 @@ class OrgInvitationsAPITest(APITestCase):
         response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
         self.assert400(response)
 
-    def test_accept_org_invitation_closes_pending_request_of_the_user(self):
-        """A request left pending would be listed forever to the admins of the organization."""
-        user = self.login()
-        admin = UserFactory()
-        invitation = MembershipRequest(
-            kind="invitation", user=user, created_by=admin, role="editor"
-        )
-        membership_request = MembershipRequest(user=user, comment="Please add me")
-        organization = OrganizationFactory(
-            members=[Member(user=admin, role="admin")], requests=[invitation, membership_request]
-        )
-
-        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
-        self.assert200(response)
-
-        organization.reload()
-        assert len(organization.pending_requests) == 0
-        assert [r.status for r in organization.requests] == ["accepted", "accepted"]
-
-    def test_accept_org_invitation_as_member_does_not_add_the_user_twice(self):
-        user = self.login()
-        admin = UserFactory()
-        invitation = MembershipRequest(
-            kind="invitation", user=user, created_by=admin, role="editor"
-        )
-        organization = OrganizationFactory(
-            members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
-            requests=[invitation],
-        )
-
-        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
-        self.assertStatus(response, 409)
-
-        organization.reload()
-        assert [m.user for m in organization.members] == [admin, user]
-
     def test_refuse_org_invitation(self):
         """Test refusing an organization invitation."""
         user = self.login()

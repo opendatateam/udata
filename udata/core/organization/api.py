@@ -430,6 +430,8 @@ class MembershipRequestAPI(API):
         user = current_user._get_current_object()
         if org.is_member(user):
             api.abort(400, "You are already a member of this organization")
+        if any(r.kind == "invitation" and r.user == user for r in org.pending_requests):
+            api.abort(400, "You are already invited to this organization, accept the invitation")
         membership_request = org.pending_request(user)
         code = 200 if membership_request else 201
 
@@ -472,8 +474,8 @@ class MembershipAcceptAPI(MembershipAPI):
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
-        member = org.add_member(
-            membership_request.user, "editor", handled_by=current_user._get_current_object()
+        member = org.accept_membership_request(
+            membership_request, "editor", handled_by=current_user._get_current_object()
         )
         MembershipRequest.after_handle.send(membership_request, org=org)
 

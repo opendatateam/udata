@@ -709,6 +709,20 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert len(organization.requests) == 0
 
+    def test_invited_user_cannot_request_membership(self):
+        """Joining through one of two pending entries would leave the other one pending."""
+        user = self.login()
+        invitation = MembershipRequest(kind="invitation", user=user, created_by=UserFactory())
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+
     def test_get_membership_requests(self):
         user = self.login()
         applicant = UserFactory(email="thibaud@example.org")
@@ -965,33 +979,6 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert404(response)
 
         assert response.json["message"] == "Unknown membership request id"
-
-    def test_accept_membership_closes_pending_invitations_of_the_applicant(self):
-        """An invitation left pending would be listed forever for a user who is now a member."""
-        admin = self.login()
-        applicant = UserFactory(email="Applicant@example.org")
-        invitation = MembershipRequest(
-            kind="invitation", user=applicant, created_by=admin, role="admin"
-        )
-        email_invitation = MembershipRequest(
-            kind="invitation", email="applicant@example.org", created_by=admin, role="editor"
-        )
-        membership_request = MembershipRequest(user=applicant, comment="test")
-        organization = OrganizationFactory(
-            members=[Member(user=admin, role="admin")],
-            requests=[invitation, email_invitation, membership_request],
-        )
-
-        response = self.post(
-            url_for("api.accept_membership", org=organization, id=membership_request.id)
-        )
-        assert200(response)
-
-        organization.reload()
-        assert len(organization.pending_requests) == 0
-        assert [r.status for r in organization.requests] == ["accepted"] * 3
-        assert all(r.handled_by == admin for r in organization.requests)
-        assert [m.user for m in organization.members] == [admin, applicant]
 
     def test_refuse_membership(self):
         user = self.login()
