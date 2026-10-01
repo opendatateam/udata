@@ -329,7 +329,6 @@ class AcceptOrgInvitationAPI(API):
                                 subject=subject,
                             ).save()
 
-                    MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))
 
                     return {"message": "Invitation accepted"}, 200

@@ -501,6 +501,7 @@ class Organization(
         self.members.append(member)
         self.count_members()
         self.save()
+        MembershipRequest.after_handle.send(membership_request, org=self)
         return member
 
     def add_membership_request(self, membership_request):

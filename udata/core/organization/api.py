@@ -478,7 +478,6 @@ class MembershipAcceptAPI(MembershipAPI):
         member = org.accept_membership_request(
             membership_request, handled_by=current_user._get_current_object()
         )
-        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
