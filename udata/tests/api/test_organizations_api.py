@@ -977,6 +977,26 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         response = self.post(api_url)
         assert_status(response, 409)
 
+    def test_applicant_cannot_choose_the_role_granted_on_acceptance(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        applicant = self.login()
+
+        response = self.post(
+            url_for("api.request_membership", org=organization),
+            {"comment": "a comment", "role": "admin"},
+        )
+        assert201(response)
+
+        self.login(admin)
+        organization.reload()
+        api_url = url_for("api.accept_membership", org=organization, id=organization.requests[0].id)
+        response = self.post(api_url)
+        assert200(response)
+
+        assert response.json["role"] == "editor"
+        assert organization.reload().member(applicant).role == "editor"
+
     def test_only_admin_can_accept_membership(self):
         user = self.login()
         applicant = UserFactory()
