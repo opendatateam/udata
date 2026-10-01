@@ -17,7 +17,8 @@ as accepted or refused: they were superseded, not decided.
 import logging
 from datetime import UTC, datetime
 
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.models import MembershipRequest
+from udata.core.organization.notifications import _create_membership_notification
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -119,20 +120,11 @@ def migrate(db):
             ).update(set__handled_at=now)
         # Unlinked invitations had no user to notify: notify them now, as on registration.
         for req in linked_invitations:
-            if Notification.objects(
-                user=req["user"],
-                details__request_organization=org["_id"],
-                details__request_user=req["user"],
-                handled_at=None,
-            ).first():
-                continue
-            Notification(
-                user=req["user"],
-                created_at=req["created"],
-                details=MembershipRequestNotificationDetails(
-                    request_organization=org["_id"], request_user=req["user"], kind="invitation"
-                ),
-            ).save()
+            _create_membership_notification(
+                MembershipRequest(user=req["user"], kind="invitation", created=req["created"]),
+                org["_id"],
+                req["user"],
+            )
 
     log.info(f"Linked {linked_count} email invitations to their account")
     log.info(f"Deleted {deleted_count} redundant pending requests and invitations")
