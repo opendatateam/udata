@@ -95,7 +95,8 @@ H = TypeVar("H", bound=Harvestable)
 ItemProcessorParams = ParamSpec("ItemProcessorParams")
 
 
-class StopHarvest(Exception):
+class StopHarvest(BaseException):
+    # Using BaseException so it can't get swallowed by a broad `except Exception`
     pass
 
 
