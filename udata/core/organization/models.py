@@ -13,6 +13,7 @@ from mongoengine.fields import (
     EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
+    IntField,
     ListField,
     MapField,
     ReferenceField,
@@ -32,7 +33,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
-from udata.core.storages import avatars, default_image_basename
+from udata.core.storages import avatars, banners, default_image_basename
 from udata.core.user.models import User, user_with_email_ref_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -49,6 +50,7 @@ from udata.uris import cdata_url
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
+    BANNER_MAX_DIMENSION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
     COMPANY,
@@ -283,6 +285,36 @@ class Organization(
         thumbnail_info={
             "size": BIGGEST_LOGO_SIZE,
         },
+    )
+    banner_color = field(
+        StringField(),
+        # Stored as a plain string with no model-level format check, exactly
+        # like LinkInBloc.color (udata/core/edito_blocs/models.py): any hex
+        # string the color picker produces is accepted. A shared hex validator
+        # can be introduced later (see data.gouv.fr#2049 follow-ups).
+        description="Hex color code (e.g. #000091) for the organization page banner",
+    )
+    banner_image = field(
+        ImageField(
+            fs=banners,
+            basename=default_image_basename,
+            # max_size caps the served file at 1920px on its longest side and
+            # keeps the original alongside. No `thumbnails`: they are square
+            # center-crops, wrong for a banner.
+            max_size=BANNER_MAX_DIMENSION,
+        ),
+        # Read-only: the banner image is managed through the dedicated upload
+        # endpoint (POST /organizations/<id>/banner/). Left writable, patch()
+        # would set it from the raw URL echoed back by clients.
+        readonly=True,
+        description="The organization page banner image URL",
+    )
+    banner_image_position = field(
+        IntField(min_value=0, max_value=100, default=50),
+        description=(
+            "Vertical position of the banner image, as a percentage matching "
+            "CSS background-position-y (0 = top, 50 = centered, 100 = bottom)"
+        ),
     )
     business_number_id = field(
         StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret], filterable={}
