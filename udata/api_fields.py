@@ -464,9 +464,14 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
         yield key, field, info
 
         if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+            if not getattr(field, "thumbnail_sizes", None) and not info.get("thumbnail_info"):
+                # The model generates no thumbnail files and no thumbnail is
+                # configured for the API: don't expose a `<key>_thumbnail` key
+                # that would only duplicate the main image URL.
+                continue
             thumbnail_info = {
                 **info,
-                **info.get("thumbnail_info", {}),
+                **(info.get("thumbnail_info") or {}),
                 "is_thumbnail": True,
                 "attribute": key,
             }
