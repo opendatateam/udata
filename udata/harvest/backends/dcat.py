@@ -93,7 +93,13 @@ class DcatBackend(BaseBackend):
             for page_graph, page_number in self.graphs:
                 self.process_one_dataservices_page(page_graph, page_number)
         finally:
-            self.store_graphs()
+            try:
+                self.store_graphs()
+            except Exception as e:
+                log.exception(f"Failed to store harvest graphs: {safe_unicode(e)}")
+                self.job.errors.append(
+                    HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+                )
 
     @cached_property
     def format(self) -> str:
