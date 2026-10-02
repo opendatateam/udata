@@ -289,6 +289,9 @@ class BaseBackend(ABC):
         *args: ItemProcessorParams.args,
         **kwargs: ItemProcessorParams.kwargs,
     ):
+        if self.max_items and len(self.job.items) >= self.max_items:
+            raise StopHarvest()
+
         log.debug(f"Processing item {remote_id}…")
 
         # TODO: add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
@@ -376,9 +379,6 @@ class BaseBackend(ABC):
         current_app.logger.removeHandler(log_catcher)
 
         self.end_process_item(harvest_item, log_catcher.records)
-
-        if self.max_items and len(self.job.items) >= self.max_items:
-            raise StopHarvest()
 
     def end_process_item(self, harvest_item: HarvestItem, logs: list[logging.LogRecord]):
         harvest_item.ended = datetime.now(UTC)

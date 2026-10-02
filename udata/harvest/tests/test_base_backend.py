@@ -795,9 +795,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize("max_items", [2, 3, 4, 6, 7])
     def test_harvest_max_items(self, max_items):
         n = 3
-        # max_items == 2 * n will log an error in the current implementation,
-        # so we include the case in max_reached
-        max_reached = max_items <= 2 * n
+        max_reached = max_items < 2 * n
         backend = MockBackend(
             HarvestSourceFactory(),
             max_items=max_items,
