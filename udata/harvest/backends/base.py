@@ -309,6 +309,11 @@ class BaseBackend(ABC):
                 raise HarvestSkipException("missing identifier")
 
             item = item_processor(harvest_item, *args, **kwargs)
+            if item.harvest is None:
+                # Ideally we'd want to check that get_item() got called in item_processor, but it
+                # would require instrumenting get_item() just for that purpose. So instead we check
+                # item.harvest as a proxy, since get_item() calls set_harvested().
+                raise RuntimeError("item_processor didn't initialize item.harvest")
 
             if item.organization:
                 item.organization.compute_aggregate_metrics = False
