@@ -6,13 +6,13 @@ import factory
 from udata.app import ROOT_DIR
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
-from udata.factories import ModelFactory
+from udata.factories import HarvestableFactoryMixin, ModelFactory
 
 from .constants import UpdateFrequency
 from .models import Checksum, CommunityResource, Dataset, License, Resource
 
 
-class DatasetFactory(ModelFactory):
+class DatasetFactory(HarvestableFactoryMixin, ModelFactory):
     class Meta:
         model = Dataset
 
@@ -20,6 +20,12 @@ class DatasetFactory(ModelFactory):
     description = factory.Faker("text")
     frequency = UpdateFrequency.UNKNOWN
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
+
+    @factory.post_generation
+    def timestamps(obj, create, extracted, **kwargs):
+        if extracted is False:
+            for field in ("created_at_internal", "last_modified_internal", "last_update"):
+                obj._data[field] = None
 
     class Params:
         geo = factory.Trait(spatial=factory.SubFactory(SpatialCoverageFactory))
