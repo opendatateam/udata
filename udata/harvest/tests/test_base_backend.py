@@ -839,7 +839,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             max_items=2,
             mock_items=[
                 DatasetFactory.build(remote_id="dataset-ok"),
-                MockRecordError(exception_class()),
+                MockRecordError(exception_class("record-error")),
                 DatasetFactory.build(remote_id="dataset-ignored"),  # not processed
             ],
         )
@@ -847,7 +847,8 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert len(job.items) == 2
-        assert len(job.errors) == 1
+        assert len(job.errors) == 1  # max_items reached
+        assert [item.remote_id for item in job.items] == ["dataset-ok", "record-error"]
         assert Dataset.objects.count() == 1
 
     @pytest.mark.parametrize(
