@@ -351,18 +351,18 @@ class BaseBackend(ABC):
 
         except HarvestSkipException as e:
             harvest_item.status = "skipped"
-            log.info(f"Skipped item {harvest_item.remote_id} : {safe_unicode(e)}")
+            log.info(f"Skipped item {harvest_item.remote_id}: {safe_unicode(e)}")
             harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
         except (HarvestValidationError, MongoValidationError) as e:
             harvest_item.status = "failed"
-            log.info(f"Error validating item {harvest_item.remote_id} : {safe_unicode(e)}")
+            log.info(f"Error validating item {harvest_item.remote_id}: {safe_unicode(e)}")
             harvest_item.errors.append(HarvestError(message=safe_unicode(e)))
 
         except requests.exceptions.RequestException as e:
             harvest_item.status = "failed"
             log.warning(
-                f"Request error while processing {harvest_item.remote_id} : {safe_unicode(e)}"
+                f"Request error while processing {harvest_item.remote_id}: {safe_unicode(e)}"
             )
             # `requests` describes the failure, not the call site: a backend issuing several
             # requests per item needs the traceback to tell which one failed.
@@ -373,7 +373,7 @@ class BaseBackend(ABC):
         except Exception as e:
             harvest_item.status = "failed"
             # Unexpected exception (potential udata bug) => Sentry
-            log.exception(f"Error while processing {harvest_item.remote_id} : {safe_unicode(e)}")
+            log.exception(f"Error while processing {harvest_item.remote_id}: {safe_unicode(e)}")
             harvest_item.errors.append(
                 HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             )
