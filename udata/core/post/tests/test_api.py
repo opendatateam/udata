@@ -646,6 +646,20 @@ class PostsAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(page_post.id)
 
+    def test_post_api_filter_by_tags(self):
+        """It should filter posts by one or several tags"""
+        both = PostFactory(tags=["a", "b"])
+        only_a = PostFactory(tags=["a"])
+        PostFactory(tags=["c"])
+
+        response = self.get(url_for("api.posts", tag="a"))
+        assert200(response)
+        assert {p["id"] for p in response.json["data"]} == {str(both.id), str(only_a.id)}
+
+        response = self.get(url_for("api.posts", tag=["a", "b"]))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both.id)]
+
     def test_rss_feed_only_returns_news(self):
         """RSS feed should only return posts with kind=news"""
         news_post = PostFactory(kind="news")
