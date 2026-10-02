@@ -1,5 +1,22 @@
 # Changelog
 
+## 17.10.0 (2026-10-01)
+
+- chore(deps): pin dependencies ([#3962](https://github.com/opendatateam/udata/pull/3962))
+- chore(deps): update astral-sh/setup-uv action to v10.2.0 ([#3963](https://github.com/opendatateam/udata/pull/3963))
+- chore(deps): update dependency faker to >=40.39, <40.40 ([#3950](https://github.com/opendatateam/udata/pull/3950))
+- feat: attach a DOI to a dataset ([#3735](https://github.com/opendatateam/udata/pull/3735))
+- feat: new tabular explore edito bloc ([#3753](https://github.com/opendatateam/udata/pull/3753))
+- feat: record what changed on a resource and rework the activity API around it ([#3958](https://github.com/opendatateam/udata/pull/3958))
+- feat(search): include_geozone_ancestors ([#3973](https://github.com/opendatateam/udata/pull/3973))
+- feat: upgrade flask-security to 5.9 and fix the 500 on expired change-email links ([#3971](https://github.com/opendatateam/udata/pull/3971))
+- fix: 500 on organizations.csv with a repeated query param by declaring organization filters on the model ([#3976](https://github.com/opendatateam/udata/pull/3976))
+- fix: allow a single pending membership request or invitation per user and organization ([#3981](https://github.com/opendatateam/udata/pull/3981))
+- fix(jobs): list and unschedule scheduled jobs whose task no longer exists ([#3969](https://github.com/opendatateam/udata/pull/3969))
+- fix: partial editor speaking for an org permissions ([#3979](https://github.com/opendatateam/udata/pull/3979))
+- fix: transfer api reference injection ([#3930](https://github.com/opendatateam/udata/pull/3930))
+
+
 ## 17.9.0 (2026-09-28)
 
 - chore: build and compile translations on build ([#3966](https://github.com/opendatateam/udata/pull/3966))

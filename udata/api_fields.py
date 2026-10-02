@@ -160,6 +160,20 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
     constructor_read: Callable | None = None
     constructor_write: Callable | None = None
 
+    def generic_choices_fields(wrapper) -> dict:
+        # `choices` may name classes not registered yet at decoration time (a model
+        # declared early, such as `Activity`, referencing one declared later, or mutually
+        # recursive embedded documents like AndFilters/OrFilters), so they are resolved
+        # lazily, on first marshalling. Each choice is converted as its own plain field,
+        # e.g. `ReferenceField(Organization)` instead of the generic one.
+        return {
+            cls.__name__: convert_db_to_field(f"{key}.{cls.__name__}", wrapper(cls), info)
+            for cls in (
+                db.resolve_model(choice) if isinstance(choice, str) else choice
+                for choice in field.choices
+            )
+        }
+
     if info.get("convert_to"):
         # TODO: this is currently never used. We may remove it if the auto-conversion
         # is always good enough.
@@ -339,19 +353,17 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             def constructor_read(**kwargs):
                 return restx_fields.Nested(shared_nested_fields, **kwargs)
         elif field.choices:
-            generic_fields = {}
-            for cls in field.choices:
-                cls = db.resolve_model(cls) if isinstance(cls, str) else cls
-                generic_fields[cls.__name__] = convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having GenericReferenceField() we'll create fields for each
-                    # of the subclasses with ReferenceField(Organization)…
-                    mongoengine.fields.ReferenceField(cls),
-                    info,
-                )
 
             def constructor_read(**kwargs):
-                return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+                return GenericField(
+                    lambda: {
+                        k: v[0].model
+                        for k, v in generic_choices_fields(
+                            mongoengine.fields.ReferenceField
+                        ).items()
+                    },
+                    **kwargs,
+                )
 
     elif isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
@@ -377,32 +389,26 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
 
-        def resolve_choice(choice):
-            return db.resolve_model(choice) if isinstance(choice, str) else choice
-
-        def generic_fields():
-            # Choices may reference classes not defined yet at decoration time
-            # (mutually recursive embedded documents like AndFilters/OrFilters),
-            # so resolve them lazily on first marshalling.
-            return {
-                cls.__name__: convert_db_to_field(
-                    f"{key}.{cls.__name__}",
-                    # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
-                    # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
-                    mongoengine.fields.EmbeddedDocumentField(cls),
-                    info,
-                )
-                for cls in (resolve_choice(choice) for choice in field.choices)
-            }
-
         def constructor_read(**kwargs):
             return GenericField(
-                lambda: {k: v[0].model for k, v in generic_fields().items()}, **kwargs
+                lambda: {
+                    k: v[0].model
+                    for k, v in generic_choices_fields(
+                        mongoengine.fields.EmbeddedDocumentField
+                    ).items()
+                },
+                **kwargs,
             )
 
         def constructor_write(**kwargs):
             return GenericField(
-                lambda: {k: v[1].model for k, v in generic_fields().items()}, **kwargs
+                lambda: {
+                    k: v[1].model
+                    for k, v in generic_choices_fields(
+                        mongoengine.fields.EmbeddedDocumentField
+                    ).items()
+                },
+                **kwargs,
             )
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
@@ -750,7 +756,11 @@ def generate_fields(**kwargs) -> Callable:
                 # eg use `organization_badge` instead of `organization.badges` which is
                 # computed to `organization_badges`.
                 filter = args.get(filterable.get("label", filterable["key"]))
-                if filter is not None:
+                # An empty value leaves the filter unset, like for `q`, instead of
+                # matching documents whose field is "".
+                if filterable.get("is_list") and filter is not None:
+                    filter = [value for value in filter if value != ""] or None
+                if filter is not None and filter != "":
                     for constraint in filterable.get("constraints", []):
                         if constraint == "objectid":
                             values = filter if filterable.get("is_list") else [filter]
@@ -966,6 +976,7 @@ def patch(obj: _T, request) -> _T:
 
     data = request.json if isinstance(request, Request) else request
     api_key_to_attribute = getattr(obj.__class__, "__api_key_to_attribute__", {})
+    pending_checks = []
 
     for api_key, value in data.items():
         field = obj.__write_fields__.get(api_key)
@@ -1132,26 +1143,26 @@ def patch(obj: _T, request) -> _T:
             for check in info.get("checks", []):
                 if obj._created or modified or getattr(check, "always_run", False):
                     # Pass the API key so error messages match the payload the caller sent.
-                    run_check(check, value, api_key, obj, data)
+                    pending_checks.append((check, value, api_key))
 
             setattr(obj, key, value)
 
-    # Run `always_run` checks on fields absent from the request (the ones present
-    # already ran in the loop above). Some checks (like `required_if`) validate a
-    # cross-field constraint on the resulting object rather than on the value being
-    # written (e.g. "page_id is required if body_type is blocs"), so leaving the
-    # field out of the payload must not be a way to escape them.
+    # Run `always_run` checks on fields absent from the request too. Some checks (like
+    # `required_if`) validate a cross-field constraint on the resulting object rather
+    # than on the value being written (e.g. "page_id is required if body_type is
+    # blocs"), so leaving the field out of the payload must not be a way to escape them.
     for key, _, info in get_fields(obj.__class__):
         api_key = info.get("rename") or key
         if api_key in data:
             continue
-        checks = info.get("checks", [])
-        value = getattr(obj, key, None)
+        for check in info.get("checks", []):
+            if getattr(check, "always_run", False):
+                pending_checks.append((check, getattr(obj, key, None), api_key))
 
-        for check in checks:
-            if not getattr(check, "always_run", False):
-                continue
-            run_check(check, value, api_key, obj, data)
+    # Checks run once every field of the payload is written, so that a check reading
+    # another field on `obj` sees its new value whatever the order of the payload keys.
+    for check, value, api_key in pending_checks:
+        run_check(check, value, api_key, obj, data)
 
     return obj
 

@@ -24,7 +24,7 @@ from werkzeug.utils import cached_property
 from udata.api import api
 from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.checks import check_is_email
 from udata.core.edito_blocs.base import Bloc
@@ -204,7 +204,10 @@ class OrganizationBadge(Badge):
 
 class OrganizationBadgeMixin(BadgeMixin):
     badges = field(
-        BadgesList(OrganizationBadge), show_as_ref=True, **BadgeMixin.default_badges_list_params
+        BadgesList(OrganizationBadge),
+        show_as_ref=True,
+        filterable={"key": "badge"},
+        **BadgeMixin.default_badges_list_params,
     )
     __badges__ = BADGES
 
@@ -221,7 +224,22 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields(read_mask_exclude=["presentation_blocs"])
+def filter_by_name(base_query, value):
+    # Case-insensitive so that the uniqueness check on organization creation
+    # catches names differing only by case.
+    return base_query.filter(name__iexact=value)
+
+
+@generate_fields(
+    searchable=True,
+    additional_sorts=[
+        {"key": "reuses", "value": "metrics.reuses"},
+        {"key": "datasets", "value": "metrics.datasets"},
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
+    read_mask_exclude=["presentation_blocs"],
+)
 class Organization(
     Auditable,
     SpamMixin,
@@ -231,7 +249,12 @@ class Organization(
     Datetimed,
     Document[OrganizationQuerySet],
 ):
-    name = field(StringField(required=True), show_as_ref=True)
+    name = field(
+        StringField(required=True),
+        show_as_ref=True,
+        sortable=True,
+        filterable={"query": filter_by_name},
+    )
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -261,7 +284,9 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret])
+    business_number_id = field(
+        StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret], filterable={}
+    )
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
@@ -434,11 +459,7 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if (
-                request.user == user
-                and request.status == "pending"
-                and request.kind != "invitation"
-            ):
+            if request.user == user and request.status == "pending":
                 return request
         return None
 
@@ -497,6 +518,17 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
+    def accept_membership_request(self, membership_request, handled_by):
+        membership_request.status = "accepted"
+        membership_request.handled_by = handled_by
+        membership_request.handled_on = datetime.now(UTC)
+        member = Member(user=membership_request.user, role=membership_request.role)
+        self.members.append(member)
+        self.count_members()
+        self.save()
+        MembershipRequest.after_handle.send(membership_request, org=self)
+        return member
+
     def add_membership_request(self, membership_request):
         self.requests.append(membership_request)
         self.save()
@@ -529,9 +561,8 @@ class Organization(
 
         # Resolve email to existing user
         if email and not user:
-            from udata.core.user.models import User
-
-            user = User.objects(email=email.lower()).first()
+            # Accounts keep the case of their email as typed at registration.
+            user = User.objects(email__iexact=email).first()
             if user:
                 email = None
 

@@ -7,6 +7,7 @@ import pytest
 import requests
 from bson import ObjectId
 from flask import current_app
+from flask_login import login_user
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 from mongoengine.errors import ValidationError
@@ -509,7 +510,6 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
     def test_dataset_activities(self, app, mocker):
         # A user must be authenticated for activities to be emitted
-        from flask_login import login_user
 
         user = UserFactory()
 
@@ -552,6 +552,58 @@ class DatasetModelTest(PytestOnlyDBTestCase):
                 dataset.deleted = datetime.now(UTC)
                 dataset.save()
                 mock_deleted.assert_called()
+
+    def test_resource_activities_name_the_resource(self, app):
+        """Every resource activity carries the resource title it had that day.
+
+        Copied rather than looked up on read: a removed resource is gone from the
+        dataset, and a renamed one no longer carries the name it had back then.
+        """
+
+        user = UserFactory()
+        with app.test_request_context():
+            login_user(user)
+
+            dataset = DatasetFactory(owner=user)
+            dataset.add_resource(ResourceFactory(title="Original title"))
+            dataset.reload()
+            resource = dataset.resources[0]
+
+            added = UserAddedResourceToDataset.objects.get(related_to=dataset)
+            assert added.extras == {
+                "resource_id": str(resource.id),
+                "resource_title": "Original title",
+            }
+
+            resource.title = "Renamed"
+            dataset.update_resource(resource)
+            updated = UserUpdatedResource.objects.get(related_to=dataset)
+            assert updated.extras["resource_title"] == "Renamed"
+
+            dataset.remove_resource(resource)
+            removed = UserRemovedResourceFromDataset.objects.get(related_to=dataset)
+            assert removed.extras == {
+                "resource_id": str(resource.id),
+                "resource_title": "Renamed",
+            }
+
+    def test_resource_update_activity_ignores_platform_maintained_fields(self, app):
+        """`last_modified_internal` is rewritten on every update: it is not an edit."""
+
+        user = UserFactory()
+        with app.test_request_context():
+            login_user(user)
+
+            dataset = DatasetFactory(owner=user, resources=[ResourceFactory()])
+            dataset.reload()
+            resource = dataset.resources[0]
+
+            resource.description = "New description"
+            resource.last_modified_internal = datetime.now(UTC)
+            dataset.update_resource(resource)
+
+            activity = UserUpdatedResource.objects.get(related_to=dataset)
+            assert activity.changes == ["description"]
 
     def test_dataset_metrics(self):
         # We need to init metrics module

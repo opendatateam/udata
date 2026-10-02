@@ -22,6 +22,7 @@ from udata.core.access_type.constants import (
     InspireLimitationCategory,
 )
 from udata.core.badges.factories import badge_factory
+from udata.core.dataset.activities import UserUpdatedResource
 from udata.core.dataset.constants import (
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
@@ -2436,6 +2437,60 @@ class DatasetResourceAPITest(APITestCase):
         self.assertNotEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
 
+    def test_update_records_an_activity_naming_the_resource_and_the_changed_fields(self):
+        """The recorded activity says which resource was touched, and how.
+
+        Going through the endpoint on purpose: the form repopulates every field of the
+        resource, so this is what says the activity reports the edited ones rather than
+        all of them.
+        """
+        resource = ResourceFactory(title="Original title", description="Original description")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "url": resource.url,
+                "filetype": resource.filetype,
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=self.dataset)
+        assert activity.changes == ["title"]
+        assert activity.extras == {
+            "resource_id": str(resource.id),
+            "resource_title": "New title",
+        }
+
+    def test_update_activity_ignores_stale_hosted_file_metadata(self):
+        """A client resending stale metadata of a hosted file does not show it as edited.
+
+        Those fields are kept server-side (#2544), so the activity must not report them.
+        """
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "filetype": resource.filetype,
+                "url": "https://stale.example.org/old.csv",
+                "checksum": {"type": "sha1", "value": "stale-checksum"},
+                "filesize": resource.filesize + 1,
+                "mime": "application/stale",
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert activity.changes == ["title"]
+
     def test_update_remote(self):
         resource = ResourceFactory()
         resource.filetype = "remote"
@@ -2628,6 +2683,23 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
+
+    def test_file_update_records_the_new_file_metadata_as_changed(self):
+        """Re-uploading reports what describes the new file, not its storage key."""
+        resource = ResourceFactory(format="csv", mime="text/csv")
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert sorted(activity.changes) == sorted(
+            ["title", "url", "checksum", "filesize", "mime", "format"]
+        )
 
     def test_file_update_old_file_deletion(self):
         """It should update a resource's file and delete the old one"""
