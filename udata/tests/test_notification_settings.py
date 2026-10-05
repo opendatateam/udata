@@ -51,8 +51,9 @@ def mute(user, category, channel, scope=None):
 
 
 def open_discussion(dataset):
+    author = UserFactory()
     discussion = DiscussionFactory(
-        subject=dataset, user=UserFactory(), discussion=[MessageDiscussionFactory()]
+        subject=dataset, user=author, discussion=[MessageDiscussionFactory(posted_by=author)]
     )
     discussion.signal_new()
     return discussion
@@ -811,6 +812,20 @@ class NotificationSettingsAPITest(APITestCase):
 
         self.assert200(response)
         assert response.json["mail_cadence"] is None
+
+
+class NotificationReasonsAPITest(APITestCase):
+    def test_the_bell_tells_why_the_user_is_concerned(self):
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+        open_discussion(DatasetFactory(organization=organization))
+
+        response = self.get("/api/1/notifications/")
+
+        self.assert200(response)
+        assert [n["reasons"] for n in response.json["data"]] == [
+            [NotificationReason.ORGANIZATION_ADMIN]
+        ]
 
 
 class DigestVisibilityTest(APITestCase):
