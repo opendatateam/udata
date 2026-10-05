@@ -68,10 +68,9 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
 class NotificationEvent:
     """Something happened that users need to hear about.
 
-    One subclass per `NotificationType`, holding the answers that used to be spread
-    over a signal handler and a celery task: who is concerned and why, what the in-app
-    notification says, what the email says, and what a setting about it can be scoped
-    to.
+    One subclass per `NotificationType`, holding everything about it in one place: who
+    is concerned and why, what the in-app notification says, what the email says, and
+    what a setting about it can be scoped to.
 
     `via_app` and `via_mail` double as the channel decision: returning `None` means
     this recipient gets nothing on that channel. The base class opts out of both, so
