@@ -697,13 +697,17 @@ class DigestTest(PytestOnlyDBTestCase):
             discussion.save()
             discussion.signal_comment(len(discussion.discussion) - 1)
 
-        pending = list(Notification.objects(user=admin, channels=NotificationChannel.MAIL))
+        pending = list(
+            Notification.objects(user=admin, channels=NotificationChannel.MAIL).order_by(
+                "created_at"
+            )
+        )
         assert len(pending) == 4
 
         message = notification_digest(pending)
         assert len(message.paragraphs) == 3  # intro, one line, CTA
-        assert "3" in message.paragraphs[1].content
-        assert "1" in message.paragraphs[1].content
+        assert message.paragraphs[1].label == discussion.title
+        assert message.paragraphs[1].content == "1 new discussion, 3 new comments"
 
     def test_running_the_digest_twice_sends_nothing_twice(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)

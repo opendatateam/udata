@@ -71,7 +71,7 @@ def notification_digest(notifications: list) -> MailMessage | None:
 
     lines = [
         LabelledContent(
-            str(subject),
+            subject.title,
             ", ".join(_counted(type, count) for type, count in by_type.items()),
             inline=True,
         )
