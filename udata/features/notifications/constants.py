@@ -79,7 +79,7 @@ class NotificationCategory(StrEnum):
     """What a user chooses to hear about, in their own words.
 
     Deliberately coarser than `NotificationType`: the settings screen offers a handful
-    of families, not the eighteen events feeding them.
+    of families, not one switch per event.
     """
 
     DISCUSSIONS = "discussions"
