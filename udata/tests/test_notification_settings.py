@@ -505,6 +505,27 @@ class DispatchTest(PytestOnlyDBTestCase):
 
         assert Notification.objects(user=editor).count() == 0
 
+    def test_an_editor_who_answered_keeps_hearing_about_the_thread(self):
+        """Concerned twice over, as an editor and as a participant: the participant's
+        default has to survive the merge with the editor's."""
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=UserFactory(),
+            discussion=[MessageDiscussionFactory(posted_by=editor)],
+        )
+
+        discussion.discussion.append(MessageDiscussionFactory())
+        discussion.save()
+        discussion.signal_comment(len(discussion.discussion) - 1)
+
+        notification = Notification.objects(user=editor).get()
+        assert set(notification.reasons) == {
+            NotificationReason.ORGANIZATION_EDITOR,
+            NotificationReason.DISCUSSION_PARTICIPANT,
+        }
+
     def test_an_admin_still_hears_about_discussions(self):
         admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
