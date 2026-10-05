@@ -1,13 +1,14 @@
 import factory
 
-from udata.core.dataservices.models import Dataservice, HarvestMetadata
 from udata.core.organization.factories import OrganizationFactory
-from udata.factories import ModelFactory
+from udata.factories import HarvestableFactoryMixin, ModelFactory
+
+from .models import Dataservice, HarvestDataserviceMetadata
 
 
 class HarvestMetadataFactory(ModelFactory):
     class Meta:
-        model = HarvestMetadata
+        model = HarvestDataserviceMetadata
 
     backend = "csw-dcat"
     domain = "data.gouv.fr"
@@ -24,7 +25,7 @@ class HarvestMetadataFactory(ModelFactory):
     issued_at = factory.Faker("date_time")
 
 
-class DataserviceFactory(ModelFactory):
+class DataserviceFactory(HarvestableFactoryMixin, ModelFactory):
     class Meta:
         model = Dataservice
 
