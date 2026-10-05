@@ -217,14 +217,11 @@ class NotificationEvent:
         decisions: dict[NotificationChannel, dict[Any, bool]] | None,
         category: NotificationCategory | None,
     ) -> bool:
-        if decisions is None or category is None:
+        if decisions is None:
             # Either an action to take or the answer to a request this recipient made:
             # neither is something to opt out of.
             return True
-        if not isinstance(recipient.user, User):
-            # A bare address has no account to hang a setting on.
-            return True
-        decided = decisions[channel].get(recipient.user.id)
+        decided = decisions[channel].get(recipient.key)
         return default_enabled(recipient.reasons, category) if decided is None else decided
 
     def already_pending(self, recipient: User, **details) -> bool:
