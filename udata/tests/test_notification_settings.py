@@ -8,6 +8,7 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionEvent
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import ORG_ROLES
@@ -690,6 +691,25 @@ class DigestTest(PytestOnlyDBTestCase):
 
         notification = Notification.objects(user=admin).first()
         assert notification.channels == [NotificationChannel.APP]
+
+    def test_one_failing_digest_does_not_deprive_the_others(self):
+        # Created first so the job meets it first: `distinct("user")` walks the index.
+        broken = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        healthy = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        gone = open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[broken])))
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[healthy])))
+        for notification in Notification.objects:
+            age(notification, days=8)
+        # Removed behind the signals' back, as a raw migration would: the digest can no
+        # longer read the discussion it is about.
+        Discussion._get_collection().delete_one({"_id": gone.id})
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert [mail.recipients for mail in mails] == [[healthy.email]]
+        assert Notification.objects(user=healthy, channels=NotificationChannel.MAIL).count() == 0
+        assert Notification.objects(user=broken, channels=NotificationChannel.MAIL).count() == 1
 
     def test_the_digest_deletes_what_nothing_else_carries(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)

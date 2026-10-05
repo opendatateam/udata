@@ -49,10 +49,16 @@ def send_notification_digests(self):
                 "created_at"
             )
         )
-        message = mails.notification_digest(notifications)
-        if message is not None:
-            message.send(user)
-            sent += 1
+        # One failing digest must not deprive the others. Its queue is left as is, so
+        # the next run tries again.
+        try:
+            message = mails.notification_digest(notifications)
+            if message is not None:
+                message.send(user)
+                sent += 1
+        except Exception as e:
+            log.error(f"Could not send the notification digest of {user}: {e}")
+            continue
 
         for notification in notifications:
             notification.channels = [
