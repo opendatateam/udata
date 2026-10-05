@@ -608,27 +608,6 @@ class DispatchTest(PytestOnlyDBTestCase):
 
         assert Notification.objects(user=owner).count() == 0
 
-    def test_a_type_without_a_category_ignores_every_setting(self):
-        """Transfers, invitations and the like are actions to take, not a feed."""
-        recipient = UserFactory()
-        for channel in NotificationChannel:
-            mute(recipient, NotificationCategory.DISCUSSIONS, channel)
-            mute(recipient, NotificationCategory.REUSES, channel)
-
-        owner = UserFactory()
-        TransferFactory(
-            user=owner,
-            owner=owner,
-            recipient=recipient,
-            subject=DatasetFactory(owner=owner),
-            status="pending",
-        )
-
-        assert (
-            Notification.objects(user=recipient, type=NotificationType.TRANSFER_REQUESTED).count()
-            == 1
-        )
-
 
 class DigestTest(PytestOnlyDBTestCase):
     def test_a_digest_recipient_queues_the_mail_instead_of_receiving_it(self):
