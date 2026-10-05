@@ -77,21 +77,25 @@ def decisions_for(
     from "never said anything" — the two differ as soon as a default changes.
 
     One query for the whole event, every channel included: resolving per recipient
-    would multiply it by the size of an organization.
+    would multiply it by the size of an organization. Rows are read raw, since only
+    identifiers are compared: loading them as documents would fetch the user and the
+    scope of each one.
     """
     users = list(users)
     if not users:
         return {}
 
-    by_key: dict[tuple[ObjectId, NotificationChannel], dict[Document | None, bool]] = {}
+    by_key: dict[tuple[ObjectId, NotificationChannel], dict[ObjectId | None, bool]] = {}
     for setting in NotificationSetting.objects(
         Q(scope=None) | Q(scope__in=scopes), user__in=users, category=category
-    ):
-        by_key.setdefault((setting.user.id, setting.channel), {})[setting.scope] = setting.enabled
+    ).as_pymongo():
+        scope = setting.get("scope")
+        key = (setting["user"], NotificationChannel(setting["channel"]))
+        by_key.setdefault(key, {})[scope["_ref"].id if scope else None] = setting["enabled"]
 
     decisions = {}
     for key, choices in by_key.items():
-        for scope in [*scopes, None]:
+        for scope in [*(scope.id for scope in scopes), None]:
             if scope in choices:
                 decisions[key] = choices[scope]
                 break
