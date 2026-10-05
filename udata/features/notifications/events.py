@@ -2,8 +2,8 @@ import logging
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
 
+from bson import ObjectId
 from mongoengine import Document, EmbeddedDocument
 
 from udata.core.user.models import User
@@ -47,7 +47,7 @@ class Recipient:
         return cls(member.user, frozenset({REASON_BY_ORGANIZATION_ROLE[member.role]}))
 
     @property
-    def key(self) -> Any:
+    def key(self) -> ObjectId | str:
         """What identifies the recipient across the several ways of reaching them."""
         return self.user.id if isinstance(self.user, User) else self.user
 
@@ -59,7 +59,7 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
     and having answered in it — and both reasons matter: the most generous one decides
     what they get, and the footer has to name them all for its links to be honest.
     """
-    merged: dict[Any, Recipient] = {}
+    merged: dict[ObjectId | str, Recipient] = {}
     for recipient in recipients:
         existing = merged.get(recipient.key)
         merged[recipient.key] = (
@@ -209,7 +209,7 @@ class NotificationEvent:
 
     def _decisions(
         self, recipients: list[Recipient], category: NotificationCategory | None
-    ) -> dict[NotificationChannel, dict[Any, bool]] | None:
+    ) -> dict[NotificationChannel, dict[ObjectId, bool]] | None:
         """What the recipients decided about this event, resolved once for all of them.
 
         `None` when the type carries no category, which is how the types that are not
@@ -229,7 +229,7 @@ class NotificationEvent:
         self,
         recipient: Recipient,
         channel: NotificationChannel,
-        decisions: dict[NotificationChannel, dict[Any, bool]] | None,
+        decisions: dict[NotificationChannel, dict[ObjectId, bool]] | None,
         category: NotificationCategory | None,
     ) -> bool:
         if decisions is None:

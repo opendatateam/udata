@@ -1,6 +1,6 @@
 from collections.abc import Iterable, Sequence
-from typing import Any
 
+from bson import ObjectId
 from mongoengine import CASCADE, Document, Q, ValidationError
 from mongoengine.fields import BooleanField, EnumField, GenericReferenceField, ReferenceField
 
@@ -69,7 +69,7 @@ def decisions_for(
     category: NotificationCategory,
     scopes: Sequence[Document],
     channel: NotificationChannel,
-) -> dict[Any, bool]:
+) -> dict[ObjectId, bool]:
     """What each of `users` decided about `category` on `channel`, by user id.
 
     `scopes` runs from the most specific subject to the broadest one, and the most
@@ -84,7 +84,7 @@ def decisions_for(
     if not users:
         return {}
 
-    by_user: dict[Any, dict[Any, bool]] = {}
+    by_user: dict[ObjectId, dict[Document | None, bool]] = {}
     for setting in NotificationSetting.objects(
         Q(scope=None) | Q(scope__in=scopes), user__in=users, category=category, channel=channel
     ):
