@@ -68,33 +68,32 @@ def decisions_for(
     users: Iterable[User],
     category: NotificationCategory,
     scopes: Sequence[Document],
-    channel: NotificationChannel,
-) -> dict[ObjectId, bool]:
-    """What each of `users` decided about `category` on `channel`, by user id.
+) -> dict[tuple[ObjectId, NotificationChannel], bool]:
+    """What each of `users` decided about `category`, by user id and channel.
 
     `scopes` runs from the most specific subject to the broadest one, and the most
     specific decision wins. Users who never decided anything are absent from the
     result rather than mapped to a default, so the caller can tell "chose to be quiet"
     from "never said anything" — the two differ as soon as a default changes.
 
-    One query for the whole event: resolving per recipient would multiply it by the
-    size of an organization.
+    One query for the whole event, every channel included: resolving per recipient
+    would multiply it by the size of an organization.
     """
     users = list(users)
     if not users:
         return {}
 
-    by_user: dict[ObjectId, dict[Document | None, bool]] = {}
+    by_key: dict[tuple[ObjectId, NotificationChannel], dict[Document | None, bool]] = {}
     for setting in NotificationSetting.objects(
-        Q(scope=None) | Q(scope__in=scopes), user__in=users, category=category, channel=channel
+        Q(scope=None) | Q(scope__in=scopes), user__in=users, category=category
     ):
-        by_user.setdefault(setting.user.id, {})[setting.scope] = setting.enabled
+        by_key.setdefault((setting.user.id, setting.channel), {})[setting.scope] = setting.enabled
 
     decisions = {}
-    for user_id, choices in by_user.items():
+    for key, choices in by_key.items():
         for scope in [*scopes, None]:
             if scope in choices:
-                decisions[user_id] = choices[scope]
+                decisions[key] = choices[scope]
                 break
     return decisions
 

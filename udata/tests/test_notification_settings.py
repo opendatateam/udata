@@ -390,15 +390,7 @@ class ResolutionTest(PytestOnlyDBTestCase):
     def test_nothing_decided_leaves_the_user_out_of_the_decisions(self):
         user = UserFactory()
 
-        assert (
-            decisions_for(
-                [user],
-                NotificationCategory.DISCUSSIONS,
-                [DatasetFactory()],
-                NotificationChannel.MAIL,
-            )
-            == {}
-        )
+        assert decisions_for([user], NotificationCategory.DISCUSSIONS, [DatasetFactory()]) == {}
 
     def test_the_most_specific_scope_wins(self):
         user = UserFactory()
@@ -413,14 +405,9 @@ class ResolutionTest(PytestOnlyDBTestCase):
             scope=organization,
         )
 
-        decisions = decisions_for(
-            [user],
-            NotificationCategory.DISCUSSIONS,
-            [dataset, organization],
-            NotificationChannel.MAIL,
-        )
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [dataset, organization])
 
-        assert decisions[user.id] is False
+        assert decisions[user.id, NotificationChannel.MAIL] is False
 
     def test_an_organization_decision_covers_its_datasets(self):
         user = UserFactory()
@@ -428,27 +415,25 @@ class ResolutionTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(organization=organization)
         mute(user, NotificationCategory.DISCUSSIONS, NotificationChannel.MAIL, scope=organization)
 
-        decisions = decisions_for(
-            [user],
-            NotificationCategory.DISCUSSIONS,
-            [dataset, organization],
-            NotificationChannel.MAIL,
-        )
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [dataset, organization])
 
-        assert decisions[user.id] is False
+        assert decisions[user.id, NotificationChannel.MAIL] is False
 
     def test_a_global_decision_covers_everything(self):
         user = UserFactory()
         mute(user, NotificationCategory.DISCUSSIONS, NotificationChannel.MAIL)
 
-        decisions = decisions_for(
-            [user],
-            NotificationCategory.DISCUSSIONS,
-            [DatasetFactory()],
-            NotificationChannel.MAIL,
-        )
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [DatasetFactory()])
 
-        assert decisions[user.id] is False
+        assert decisions[user.id, NotificationChannel.MAIL] is False
+
+    def test_a_decision_on_one_channel_leaves_the_other_undecided(self):
+        user = UserFactory()
+        mute(user, NotificationCategory.DISCUSSIONS, NotificationChannel.MAIL)
+
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [DatasetFactory()])
+
+        assert decisions == {(user.id, NotificationChannel.MAIL): False}
 
     def test_a_decision_on_another_subject_does_not_leak(self):
         user = UserFactory()
@@ -459,12 +444,7 @@ class ResolutionTest(PytestOnlyDBTestCase):
             scope=DatasetFactory(),
         )
 
-        decisions = decisions_for(
-            [user],
-            NotificationCategory.DISCUSSIONS,
-            [DatasetFactory()],
-            NotificationChannel.MAIL,
-        )
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [DatasetFactory()])
 
         assert decisions == {}
 
@@ -473,9 +453,7 @@ class ResolutionTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory()
         mute(user, NotificationCategory.REUSES, NotificationChannel.APP, scope=dataset)
 
-        decisions = decisions_for(
-            [user], NotificationCategory.DISCUSSIONS, [dataset], NotificationChannel.APP
-        )
+        decisions = decisions_for([user], NotificationCategory.DISCUSSIONS, [dataset])
 
         assert decisions == {}
 

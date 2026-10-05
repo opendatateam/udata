@@ -136,18 +136,15 @@ class NotificationEvent:
     def dispatch(self) -> None:
         from udata.features.notifications.models import Notification
 
-        category = self.category
-        recipients = self._concerned(category)
-        decisions = self._decisions(recipients, category)
+        recipients = self._concerned()
+        decisions = self._decisions(recipients)
 
         for recipient in recipients:
             # An in-app notification needs an account to hang on, so an address with no
             # user behind it is reachable by email only.
             is_user = isinstance(recipient.user, User)
-            wants_app = is_user and self._wants(
-                recipient, NotificationChannel.APP, decisions, category
-            )
-            wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions, category)
+            wants_app = is_user and self._wants(recipient, NotificationChannel.APP, decisions)
+            wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions)
 
             # Only what a digest knows how to summarize can wait for it. An invitation or
             # a source pending validation is an action to take: holding it for a week
@@ -189,16 +186,16 @@ class NotificationEvent:
                 except Exception:
                     log.exception(f"Could not email {recipient.user} about {self.type}")
 
-    def _concerned(self, category: NotificationCategory | None) -> list[Recipient]:
+    def _concerned(self) -> list[Recipient]:
         """Everybody this event reaches: those it concerns by itself, plus those who
         asked to be added, minus whoever it must never reach."""
         recipients = self.recipients()
-        if category is not None:
+        if self.category is not None:
             recipients = [
                 *recipients,
                 *(
                     Recipient(user, frozenset({NotificationReason.EXPLICIT_SUBSCRIBER}))
-                    for user in subscribers_for(category, self.scopes())
+                    for user in subscribers_for(self.category, self.scopes())
                 ),
             ]
 
@@ -208,36 +205,27 @@ class NotificationEvent:
         ]
 
     def _decisions(
-        self, recipients: list[Recipient], category: NotificationCategory | None
-    ) -> dict[NotificationChannel, dict[ObjectId, bool]] | None:
-        """What the recipients decided about this event, resolved once for all of them.
-
-        `None` when the type carries no category, which is how the types that are not
-        offered as a setting stay unconditional.
-        """
-        if category is None:
-            return None
+        self, recipients: list[Recipient]
+    ) -> dict[tuple[ObjectId, NotificationChannel], bool]:
+        """What the recipients decided about this event, resolved once for all of them."""
+        if self.category is None:
+            return {}
 
         users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
-        scopes = self.scopes()
-        return {
-            channel: decisions_for(users, category, scopes, channel)
-            for channel in NotificationChannel
-        }
+        return decisions_for(users, self.category, self.scopes())
 
     def _wants(
         self,
         recipient: Recipient,
         channel: NotificationChannel,
-        decisions: dict[NotificationChannel, dict[ObjectId, bool]] | None,
-        category: NotificationCategory | None,
+        decisions: dict[tuple[ObjectId, NotificationChannel], bool],
     ) -> bool:
-        if decisions is None:
+        if self.category is None:
             # Either an action to take or the answer to a request this recipient made:
             # neither is something to opt out of.
             return True
-        decided = decisions[channel].get(recipient.key)
-        return default_enabled(recipient.reasons, category) if decided is None else decided
+        decided = decisions.get((recipient.key, channel))
+        return default_enabled(recipient.reasons, self.category) if decided is None else decided
 
     def already_pending(self, recipient: User, **details) -> bool:
         """Whether the recipient still has an unhandled notification about the same
