@@ -36,6 +36,16 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         assert notifications.first().details.dataservice == dataservice
         assert notifications.first().created_at.replace(tzinfo=UTC) >= before
 
+    def test_editing_a_public_dataservice_does_not_notify_again(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(datasets=[dataset])
+
+        dataservice.title = "Another title"
+        dataservice.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
     def test_dataservice_creation_notifies_dataset_owner_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
