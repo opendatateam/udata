@@ -699,26 +699,44 @@ class DigestTest(PytestOnlyDBTestCase):
         assert Notification.objects(user=admin, channels=NotificationChannel.MAIL).count() == 0
 
     def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
-        # Created first so the job meets it first: `distinct("user")` walks the index.
-        broken = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        # Two broken users, whatever order the job meets them in: the second one is only
+        # reached if the job carries on after the first failure.
+        broken = [UserFactory(mail_cadence=MailCadence.WEEKLY) for _ in range(2)]
         healthy = UserFactory(mail_cadence=MailCadence.WEEKLY)
-        gone = open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[broken])))
+        gone = [
+            open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[user])))
+            for user in broken
+        ]
         open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[healthy])))
         for notification in Notification.objects:
             age(notification, days=8)
         # Removed behind the signals' back, as a raw migration would: the digest can no
         # longer read the discussion it is about.
-        Discussion._get_collection().delete_one({"_id": gone.id})
+        Discussion._get_collection().delete_many({"_id": {"$in": [d.id for d in gone]}})
 
         with capture_mails() as mails:
             send_notification_digests()
 
         assert [mail.recipients for mail in mails] == [[healthy.email]]
         assert Notification.objects(user=healthy, channels=NotificationChannel.MAIL).count() == 0
-        assert Notification.objects(user=broken, channels=NotificationChannel.MAIL).count() == 1
+        for user in broken:
+            assert Notification.objects(user=user, channels=NotificationChannel.MAIL).count() == 1
         # The trace has to reach the logs and Sentry, not only the exception message.
-        [failure] = [record for record in caplog.records if record.levelname == "ERROR"]
-        assert failure.exc_info[0] is DoesNotExist
+        failures = [record for record in caplog.records if record.levelname == "ERROR"]
+        assert [failure.exc_info[0] for failure in failures] == [DoesNotExist, DoesNotExist]
+
+    def test_a_deleted_user_gets_no_digest(self):
+        """Deleting an account leaves its queue behind, and its address now ends in
+        `@deleted`."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        age(Notification.objects(user=admin).first(), days=8)
+        admin.mark_as_deleted(notify=False)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert mails == []
 
     def test_the_digest_deletes_what_nothing_else_carries(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
