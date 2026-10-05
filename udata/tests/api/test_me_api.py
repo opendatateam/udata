@@ -453,6 +453,17 @@ class MeAPITest(APITestCase):
         self.assertIn("token_prefix", response.json)
         self.assertTrue(response.json["token"].startswith("udata_"))
 
+    def test_create_token_with_non_object_body(self):
+        self.login()
+
+        for body in ([1, 2, 3], 1, "name"):
+            response = self.post(url_for("api.my_api_tokens"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        response = self.get(url_for("api.my_api_tokens"))
+        self.assertEqual(response.json, [])
+
     def test_create_token_with_name(self):
         """It should create a named API token on POST"""
         self.login()
