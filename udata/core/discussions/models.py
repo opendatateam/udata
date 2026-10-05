@@ -422,7 +422,7 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return message
 
-    def owner_recipients(self, sender=None) -> list[Recipient]:
+    def owner_recipients(self) -> list[Recipient]:
         """Who should hear about this discussion, and on what ground.
 
         Somebody can qualify twice over — having answered in a thread about a dataset
@@ -456,10 +456,7 @@ class Discussion(SpamMixin, Linkable, Document):
         elif getattr(self.subject, "owner", None):
             recipients.append(Recipient(self.subject.owner, frozenset({NotificationReason.OWNER})))
 
-        merged = merge_recipients(recipients)
-        if sender:
-            merged = [recipient for recipient in merged if recipient.key != sender.id]
-        return merged
+        return merge_recipients(recipients)
 
     @spam_protected()
     def signal_new(self):

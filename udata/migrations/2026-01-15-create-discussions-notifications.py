@@ -35,7 +35,12 @@ def migrate(db):
                     if len(discussion.discussion) > 1:
                         last_comment = discussion.discussion[-1]
 
-                        recipients = discussion.owner_recipients(sender=last_comment.posted_by)
+                        sender = last_comment.posted_by
+                        recipients = [
+                            recipient
+                            for recipient in discussion.owner_recipients()
+                            if not sender or recipient.key != sender.id
+                        ]
 
                         for recipient in recipients:
                             notification = Notification(
@@ -54,7 +59,12 @@ def migrate(db):
                             created_count += 1
                     else:
                         # Add NEW_DISCUSSION notifications if no reply yet
-                        recipients = discussion.owner_recipients(sender=discussion.user)
+                        sender = discussion.user
+                        recipients = [
+                            recipient
+                            for recipient in discussion.owner_recipients()
+                            if not sender or recipient.key != sender.id
+                        ]
 
                         for recipient in recipients:
                             notification = Notification(
