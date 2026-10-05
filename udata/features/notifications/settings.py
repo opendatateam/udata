@@ -81,13 +81,9 @@ def decisions_for(
     if not users:
         return {}
 
-    scoped = Q(scope=None)
-    for scope in scopes:
-        scoped |= Q(scope=scope)
-
     by_user: dict[Any, dict[Any, bool]] = {}
     for setting in NotificationSetting.objects(
-        scoped, user__in=users, category=category, channel=channel
+        Q(scope=None) | Q(scope__in=scopes), user__in=users, category=category, channel=channel
     ):
         by_user.setdefault(setting.user.id, {})[setting.scope] = setting.enabled
 
@@ -113,12 +109,10 @@ def subscribers_for(category: NotificationCategory, scopes: Sequence[Document]) 
     if not scopes:
         return []
 
-    scoped = Q(scope=scopes[0])
-    for scope in scopes[1:]:
-        scoped |= Q(scope=scope)
-
     return list(
-        NotificationSetting.objects(scoped, category=category, enabled=True).distinct("user")
+        NotificationSetting.objects(scope__in=scopes, category=category, enabled=True).distinct(
+            "user"
+        )
     )
 
 
