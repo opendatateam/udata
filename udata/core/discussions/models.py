@@ -430,6 +430,8 @@ class Discussion(SpamMixin, Linkable, Document):
         generous one decides what they get, and an explanation naming only one of them
         would offer a way out that does not stop anything.
         """
+        # Not at the top: `Assignment` resolves the models it can point to when it is
+        # declared, and `Reuse` is not registered yet when this module loads.
         from udata.core.organization.assignment import Assignment
 
         recipients = [
