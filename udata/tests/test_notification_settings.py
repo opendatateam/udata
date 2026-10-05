@@ -494,7 +494,7 @@ class ResolutionTest(PytestOnlyDBTestCase):
         assert not default_enabled(frozenset(), NotificationCategory.DISCUSSIONS)
 
 
-class DispatchTest(PytestOnlyDBTestCase):
+class DispatchTest(APITestCase):
     def test_an_editor_is_no_longer_notified_of_every_discussion(self):
         """The default that does most of the work: an editor belongs to organizations
         whose datasets they never touched."""
@@ -542,18 +542,22 @@ class DispatchTest(PytestOnlyDBTestCase):
         organization = OrganizationFactory(admins=[admin])
         mute(admin, NotificationCategory.DISCUSSIONS, NotificationChannel.MAIL)
 
-        open_discussion(DatasetFactory(organization=organization))
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization))
 
         assert Notification.objects(user=admin).count() == 1
+        assert [mail for mail in mails if admin.email in mail.recipients] == []
 
-    def test_muting_the_bell_drops_the_notification(self):
+    def test_muting_the_bell_drops_the_notification_and_keeps_the_mail(self):
         admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
         mute(admin, NotificationCategory.DISCUSSIONS, NotificationChannel.APP)
 
-        open_discussion(DatasetFactory(organization=organization))
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization))
 
         assert Notification.objects(user=admin).count() == 0
+        assert [mail for mail in mails if admin.email in mail.recipients] != []
 
     def test_muting_one_dataset_leaves_the_others_alone(self):
         admin = UserFactory()
