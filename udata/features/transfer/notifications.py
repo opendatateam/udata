@@ -9,7 +9,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
-from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.events import NotificationEvent, Recipient
 from udata.models import Transfer
 
@@ -58,10 +58,7 @@ class TransferRequested(NotificationEvent):
             # type already says.
             return [Recipient(recipient)]
         if isinstance(recipient, Organization):
-            return [
-                Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
-                for member in recipient.by_role("admin")
-            ]
+            return [Recipient.from_member(member) for member in recipient.by_role("admin")]
         return []
 
     def _subject(self):

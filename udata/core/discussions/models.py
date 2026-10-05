@@ -28,7 +28,6 @@ from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.features.notifications.constants import (
-    REASON_BY_ORGANIZATION_ROLE,
     NotificationReason,
 )
 from udata.features.notifications.events import Recipient, merge_recipients
@@ -445,14 +444,11 @@ class Discussion(SpamMixin, Linkable, Document):
             assigned = {
                 assignment.user.id for assignment in Assignment.objects(subject=self.subject)
             }
-            for member in self.subject.organization.members:
-                reason = REASON_BY_ORGANIZATION_ROLE[member.role]
-                if (
-                    reason is NotificationReason.ORGANIZATION_PARTIAL_EDITOR
-                    and member.user.id not in assigned
-                ):
-                    continue
-                recipients.append(Recipient(member.user, frozenset({reason})))
+            recipients += [
+                Recipient.from_member(member)
+                for member in self.subject.organization.members
+                if member.role != "partial_editor" or member.user.id in assigned
+            ]
         elif getattr(self.subject, "owner", None):
             recipients.append(Recipient(self.subject.owner, frozenset({NotificationReason.OWNER})))
 

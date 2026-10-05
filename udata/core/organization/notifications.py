@@ -13,8 +13,6 @@ from udata.core.organization.constants import (
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
-    REASON_BY_ORGANIZATION_ROLE,
-    NotificationReason,
     NotificationType,
 )
 from udata.features.notifications.events import NotificationEvent, Recipient
@@ -124,10 +122,7 @@ class BadgeAdded(NotificationEvent):
         self.type = BADGE_NOTIFICATION_TYPES[kind]
 
     def recipients(self):
-        return [
-            Recipient(member.user, frozenset({REASON_BY_ORGANIZATION_ROLE[member.role]}))
-            for member in self.organization.members
-        ]
+        return [Recipient.from_member(member) for member in self.organization.members]
 
     def via_app(self, recipient):
         return NewBadgeNotificationDetails(organization=self.organization, kind=self.kind)
@@ -150,10 +145,7 @@ class MembershipRequested(NotificationEvent):
         return self.request.created
 
     def recipients(self):
-        return [
-            Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
-            for member in self.organization.by_role("admin")
-        ]
+        return [Recipient.from_member(member) for member in self.organization.by_role("admin")]
 
     def via_app(self, recipient):
         if self.already_pending(

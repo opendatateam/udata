@@ -82,7 +82,7 @@ class HarvestSourceReviewed(HarvestSourceEvent):
     def recipients(self):
         if self.source.organization:
             return [
-                Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
+                Recipient.from_member(member)
                 for member in self.source.organization.by_role("admin")
             ]
         if self.source.owner:

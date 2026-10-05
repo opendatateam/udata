@@ -9,6 +9,7 @@ from mongoengine import Document, EmbeddedDocument
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     CATEGORY_BY_TYPE,
+    REASON_BY_ORGANIZATION_ROLE,
     MailCadence,
     NotificationCategory,
     NotificationChannel,
@@ -40,6 +41,11 @@ class Recipient:
 
     user: User | str
     reasons: frozenset[NotificationReason] = field(default_factory=frozenset)
+
+    @classmethod
+    def from_member(cls, member) -> "Recipient":
+        """An organization member, concerned on the ground of their role."""
+        return cls(member.user, frozenset({REASON_BY_ORGANIZATION_ROLE[member.role]}))
 
     @property
     def key(self) -> Any:

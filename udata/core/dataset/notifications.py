@@ -21,7 +21,7 @@ class DatasetReusedEvent(NotificationEvent):
             # Editors are left out: being told that somebody reused a dataset is
             # something you act on as the publisher, not as a contributor.
             recipients += [
-                Recipient(member.user, frozenset({NotificationReason.ORGANIZATION_ADMIN}))
+                Recipient.from_member(member)
                 for member in self.dataset.organization.by_role("admin")
             ]
         return merge_recipients(recipients)
