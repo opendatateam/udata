@@ -1,5 +1,3 @@
-import copy
-
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
     AccessAudienceType,
@@ -123,17 +121,14 @@ class BaseResourceForm(ModelForm):
 
     def populate_obj(self, obj):
         # Only protect existing hosted files: a brand new resource has no url
-        # yet and must be populated normally. `checksum` is deep-copied because
-        # populate_obj mutates the existing embedded document in place.
+        # yet and must be populated normally. The protected fields are skipped
+        # rather than written then restored: mongoengine keeps a field marked as
+        # changed once written, and those marks are what the activity records.
         protect = obj.filetype == "file" and obj.url
-        protected_values = (
-            {name: copy.deepcopy(getattr(obj, name)) for name in HOSTED_RESOURCE_PROTECTED_FIELDS}
-            if protect
-            else {}
-        )
-        super().populate_obj(obj)
-        for name, value in protected_values.items():
-            setattr(obj, name, value)
+        for name, field in self._fields.items():
+            if protect and name in HOSTED_RESOURCE_PROTECTED_FIELDS:
+                continue
+            field.populate_obj(obj, name)
 
 
 class ResourceForm(BaseResourceForm):

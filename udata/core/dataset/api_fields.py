@@ -302,6 +302,7 @@ DEFAULT_MASK = ",".join(
         "page",
         "last_update",
         "archived",
+        "doi",
         "quality",
         "internal",
         "contact_points",
@@ -352,6 +353,7 @@ dataset_fields = api.model(
         ),
         "deleted": fields.ISODateTime(description="The deletion date if deleted", readonly=True),
         "archived": fields.ISODateTime(description="The archival date if archived"),
+        "doi": fields.String(description="The DOI minted for this dataset", readonly=True),
         "featured": fields.Boolean(description="Is the dataset featured"),
         "private": fields.Boolean(
             description="Is the dataset private to the owner or the organization"
