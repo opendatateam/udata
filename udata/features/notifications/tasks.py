@@ -27,6 +27,10 @@ def send_notification_digests(self):
     There is no cursor to keep: a notification still holding `MAIL` is one that has
     not been mailed, and the oldest of them says when the wait started. A missed run
     is therefore caught by the next one, and running twice sends nothing twice.
+
+    Schedule it hourly, not at the pace of a cadence: a notification that arrives just
+    after a daily run is not due at the next one, and would wait almost two days. Run
+    every hour, a digest leaves at most an hour after its cadence is up.
     """
     sent = 0
     # Only users with something waiting, which is a small set: an immediate recipient
