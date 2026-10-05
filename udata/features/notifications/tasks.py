@@ -56,8 +56,8 @@ def send_notification_digests(self):
             if message is not None:
                 message.send(user)
                 sent += 1
-        except Exception as e:
-            log.error(f"Could not send the notification digest of {user}: {e}")
+        except Exception:
+            log.exception(f"Could not send the notification digest of {user}")
             continue
 
         for notification in notifications:

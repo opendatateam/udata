@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from mongoengine import NotUniqueError
+from mongoengine import DoesNotExist, NotUniqueError
 
 import udata.models  # noqa: F401 -- registers every document before the imports below
 from udata.core.dataservices.factories import DataserviceFactory
@@ -692,7 +692,7 @@ class DigestTest(PytestOnlyDBTestCase):
         notification = Notification.objects(user=admin).first()
         assert notification.channels == [NotificationChannel.APP]
 
-    def test_one_failing_digest_does_not_deprive_the_others(self):
+    def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
         # Created first so the job meets it first: `distinct("user")` walks the index.
         broken = UserFactory(mail_cadence=MailCadence.WEEKLY)
         healthy = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -710,6 +710,9 @@ class DigestTest(PytestOnlyDBTestCase):
         assert [mail.recipients for mail in mails] == [[healthy.email]]
         assert Notification.objects(user=healthy, channels=NotificationChannel.MAIL).count() == 0
         assert Notification.objects(user=broken, channels=NotificationChannel.MAIL).count() == 1
+        # The trace has to reach the logs and Sentry, not only the exception message.
+        [failure] = [record for record in caplog.records if record.levelname == "ERROR"]
+        assert failure.exc_info[0] is DoesNotExist
 
     def test_the_digest_deletes_what_nothing_else_carries(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)

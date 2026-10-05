@@ -176,16 +176,16 @@ class NotificationEvent:
                             channels=channels,
                             created_at=self.occurred_at,
                         ).save()
-                except Exception as e:
-                    log.error(f"Could not notify {recipient.user} of {self.type}: {e}")
+                except Exception:
+                    log.exception(f"Could not notify {recipient.user} of {self.type}")
 
             if wants_mail and not deferred:
                 try:
                     mail = self.via_mail(recipient.user)
                     if mail is not None:
                         mail.send(recipient.user)
-                except Exception as e:
-                    log.error(f"Could not email {recipient.user} about {self.type}: {e}")
+                except Exception:
+                    log.exception(f"Could not email {recipient.user} about {self.type}")
 
     def _concerned(self, category: NotificationCategory | None) -> list[Recipient]:
         """Everybody this event reaches: those it concerns by itself, plus those who
