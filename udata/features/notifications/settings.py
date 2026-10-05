@@ -50,6 +50,8 @@ class NotificationSetting(UDataDocument):
     meta = {
         "indexes": [
             {"fields": ["user", "scope", "category", "channel"], "unique": True},
+            # `subscribers_for` looks across every user, once per configurable event.
+            ["scope", "category", "enabled"],
         ],
     }
 
