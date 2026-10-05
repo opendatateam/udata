@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-from mongoengine import CASCADE, Document, Q
+from mongoengine import CASCADE, Document, Q, ValidationError
 from mongoengine.fields import BooleanField, EnumField, GenericReferenceField, ReferenceField
 
 from udata.api import api
@@ -52,6 +52,16 @@ class NotificationSetting(UDataDocument):
             {"fields": ["user", "scope", "category", "channel"], "unique": True},
         ],
     }
+
+    def clean(self):
+        # `events` builds on this module, hence the import at call time.
+        from udata.features.notifications.events import category_has_mail
+
+        super().clean()
+        # A switch with nothing behind it would be stored and never read. It opens by
+        # itself once one of the events of the category writes a mail.
+        if self.channel is NotificationChannel.MAIL and not category_has_mail(self.category):
+            raise ValidationError(f"No {self.category} notification is sent by mail")
 
 
 def decisions_for(

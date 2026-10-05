@@ -71,6 +71,22 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
     return list(merged.values())
 
 
+def category_has_mail(category: NotificationCategory) -> bool:
+    """Whether one of the events of `category` writes a mail, which is what makes a
+    decision about that category on the mail channel mean anything."""
+
+    def event_classes(base):
+        for subclass in base.__subclasses__():
+            yield subclass
+            yield from event_classes(subclass)
+
+    return any(
+        event.has_mail()
+        for event in event_classes(NotificationEvent)
+        if CATEGORY_BY_TYPE.get(getattr(event, "type", None)) is category
+    )
+
+
 class NotificationEvent:
     """Something happened that users need to hear about.
 
@@ -117,6 +133,12 @@ class NotificationEvent:
 
     def via_mail(self, recipient: User | str) -> MailMessage | None:
         return None
+
+    @classmethod
+    def has_mail(cls) -> bool:
+        """Whether this event writes a mail at all, as opposed to `via_mail` returning
+        `None` for one recipient in particular."""
+        return cls.via_mail is not NotificationEvent.via_mail
 
     @property
     def occurred_at(self) -> datetime:

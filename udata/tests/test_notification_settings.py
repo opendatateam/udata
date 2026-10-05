@@ -315,9 +315,9 @@ class PersonaTest(APITestCase):
         """Thomas unsubscribed from everything; an invitation he never sees would
         leave him locked out without knowing it."""
         thomas = UserFactory()
-        for category in NotificationCategory:
-            for channel in NotificationChannel:
-                mute(thomas, category, channel)
+        mute(thomas, NotificationCategory.DISCUSSIONS, NotificationChannel.APP)
+        mute(thomas, NotificationCategory.DISCUSSIONS, NotificationChannel.MAIL)
+        mute(thomas, NotificationCategory.REUSES, NotificationChannel.APP)
 
         owner = UserFactory()
         TransferFactory(
@@ -487,10 +487,10 @@ class ResolutionTest(PytestOnlyDBTestCase):
     def test_a_decision_on_another_category_does_not_leak(self):
         user = UserFactory()
         dataset = DatasetFactory()
-        mute(user, NotificationCategory.REUSES, NotificationChannel.MAIL, scope=dataset)
+        mute(user, NotificationCategory.REUSES, NotificationChannel.APP, scope=dataset)
 
         decisions = decisions_for(
-            [user], NotificationCategory.DISCUSSIONS, [dataset], NotificationChannel.MAIL
+            [user], NotificationCategory.DISCUSSIONS, [dataset], NotificationChannel.APP
         )
 
         assert decisions == {}
@@ -795,14 +795,20 @@ class DigestTest(PytestOnlyDBTestCase):
 
 
 class NotificationSettingsAPITest(APITestCase):
-    def put_decision(self, enabled, scope=None, channel=NotificationChannel.APP):
+    def put_decision(
+        self,
+        enabled,
+        scope=None,
+        channel=NotificationChannel.APP,
+        category=NotificationCategory.DISCUSSIONS,
+    ):
         return self.put(
             "/api/1/notifications/settings/",
             {
                 "scope": {"class": scope.__class__.__name__, "id": str(scope.id)}
                 if scope
                 else None,
-                "category": NotificationCategory.DISCUSSIONS,
+                "category": category,
                 "channel": channel,
                 "enabled": enabled,
             },
@@ -862,6 +868,20 @@ class NotificationSettingsAPITest(APITestCase):
 
         self.assert400(response)
         assert NotificationSetting.objects.count() == 0
+
+    def test_the_mail_is_offered_only_for_a_category_that_sends_one(self):
+        self.login()
+
+        no_mail = self.put_decision(
+            True, channel=NotificationChannel.MAIL, category=NotificationCategory.REUSES
+        )
+        with_mail = self.put_decision(
+            True, channel=NotificationChannel.MAIL, category=NotificationCategory.DISCUSSIONS
+        )
+
+        self.assert400(no_mail)
+        self.assert201(with_mail)
+        assert NotificationSetting.objects.count() == 1
 
     def test_settings_require_an_account(self):
         self.assert401(self.get("/api/1/notifications/settings/"))
