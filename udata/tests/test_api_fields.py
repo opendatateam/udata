@@ -116,6 +116,18 @@ class FakeWithDefaultRejectingCheck(EmbeddedDocument):
     kind = field(StringField(), checks=[check_is_set])
 
 
+def check_code_needs_coded_kind(value: str = "", obj=None, field: str = "", **_kwargs) -> None:
+    """Reads the other field on `obj`, not in the payload."""
+    if value and obj.kind != "coded":
+        raise FieldValidationError("A code needs the coded kind", field=field)
+
+
+@generate_fields()
+class FakeWithCrossFieldCheck(EmbeddedDocument):
+    kind = field(StringField())
+    code = field(StringField(), checks=[check_code_needs_coded_kind])
+
+
 @generate_fields(
     searchable=True,
     additional_sorts=[
@@ -447,6 +459,23 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             assert fake1 in results
             assert fake2 not in results
 
+    @pytest.mark.parametrize("param", ["filter_field_name", "tag", "standalone"])
+    def test_empty_filter_is_ignored(self, app, param) -> None:
+        """An empty filter value leaves the filter unset instead of matching ""."""
+        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["tag-a"])
+        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string={param: ""}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert set(results) == {fake1, fake2}
+
+    def test_empty_list_filter_values_are_dropped(self, app) -> None:
+        """Empty values of a repeated list filter are dropped, the others still apply."""
+        fake1: Fake = FakeFactory(tags=["tag-a"])
+        FakeFactory(tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string=[("tag", "tag-a"), ("tag", "")]):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert list(results) == [fake1]
+
     def test_nested_filters(self, app) -> None:
         """Filtering on an nested filter filters the results."""
         org_public_service: Organization = OrganizationFactory()
@@ -619,6 +648,20 @@ class ChecksOnCreationTest(PytestOnlyDBTestCase):
         stored = FakeWithRename.objects.create(label="a fine label")
         with pytest.raises(FieldValidationError):
             patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+
+class CrossFieldCheckTest(PytestOnlyDBTestCase):
+    """A check sees the object with every field of the payload written, whatever the
+    order of the keys in the payload."""
+
+    def test_other_field_is_written_before_the_check(self) -> None:
+        for payload in [{"code": "x", "kind": "coded"}, {"kind": "coded", "code": "x"}]:
+            assert patch(FakeWithCrossFieldCheck(), payload).code == "x"
+
+    def test_other_field_value_is_checked(self) -> None:
+        for payload in [{"code": "x", "kind": "plain"}, {"kind": "plain", "code": "x"}]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithCrossFieldCheck(), payload)
 
 
 class PatchBlankStringTest(PytestOnlyDBTestCase):

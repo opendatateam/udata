@@ -183,6 +183,28 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json["description"], task.description)
         self.assertEqual(response.json["task"], task.task)
 
+    def test_create_and_update_job_with_non_object_body(self):
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+        self.login(AdminFactory())
+
+        for url, method in (
+            (url_for("api.jobs"), self.post),
+            (url_for("api.job", id=task.id), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "crontab"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(PeriodicTask.objects.count(), 1)
+        task.reload()
+        self.assertEqual(task.crontab.minute, "5")
+
     def test_update_job_need_admin(self):
         @job("a-job")
         def test_job():

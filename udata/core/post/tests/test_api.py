@@ -1,5 +1,6 @@
 from io import BytesIO
 from unittest import mock
+from uuid import uuid4
 
 from flask import url_for
 from mongoengine.context_managers import query_counter
@@ -15,6 +16,7 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataservicesListBloc,
     DatasetsListBloc,
+    ExploreBloc,
     ReusesListBloc,
 )
 from udata.core.organization.factories import OrganizationFactory
@@ -521,6 +523,7 @@ class PostsAPITest(APITestCase):
     def test_post_api_create_with_blocs(self):
         """It should create a post with body_type='blocs' and inline blocs"""
         datasets = DatasetFactory.create_batch(2)
+        resource_id = DatasetFactory(visible=True).resources[0].id
         self.login(AdminFactory())
         data = {
             "name": "Test blocs post",
@@ -530,15 +533,31 @@ class PostsAPITest(APITestCase):
                     "class": "DatasetsListBloc",
                     "title": "Featured datasets",
                     "datasets": [str(d.id) for d in datasets],
-                }
+                },
+                {"class": "ExploreBloc", "resource_id": str(resource_id)},
             ],
         }
         response = self.post(url_for("api.posts"), data)
         assert201(response)
         post = Post.objects.first()
         assert post.body_type == "blocs"
-        assert len(post.blocs) == 1
+        assert len(post.blocs) == 2
         assert post.blocs[0].title == "Featured datasets"
+        assert isinstance(post.blocs[1], ExploreBloc)
+        assert post.blocs[1].resource_id == resource_id
+
+    def test_post_api_create_with_explore_bloc_unknown_resource(self):
+        """An ExploreBloc must point to an existing resource"""
+        self.login(AdminFactory())
+        for resource_id in (str(uuid4()), "not-a-uuid"):
+            data = {
+                "name": "Test explore post",
+                "body_type": "blocs",
+                "blocs": [{"class": "ExploreBloc", "resource_id": resource_id}],
+            }
+            response = self.post(url_for("api.posts"), data)
+            assert400(response)
+        assert Post.objects.count() == 0
 
     def test_post_api_blocs_title_is_optional(self):
         """A list bloc nested under a heading that already names it needs no title of its own."""

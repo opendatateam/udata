@@ -33,7 +33,7 @@ from udata.app import cache
 from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
@@ -398,6 +398,14 @@ class Checksum(EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
+# Resource fields the platform maintains on its own: they say nothing about what the
+# author edited, so they are kept out of the recorded activity. `fs_filename` is the
+# storage key of a hosted file, already reflected by `url` when a new file is uploaded.
+# The equivalent for documents is the `auditable` flag of `field()`, which a plain
+# `EmbeddedDocument` such as `Resource` does not carry.
+RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
+
+
 class ResourceMixin(object):
     id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)
@@ -694,6 +702,13 @@ class Dataset(
     )
     deleted = field(DateTimeField(), auditable=False)
     archived = field(DateTimeField())
+    doi = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The DOI minted for this dataset, set by the DOI endpoint. A dataset that "
+        "has one can no longer be deleted, only archived.",
+    )
 
     def __str__(self):
         return self.title or ""
@@ -789,6 +804,21 @@ class Dataset(
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        if self.doi:
+            # A DOI is permanent and has to keep resolving to a public page. Archiving is the
+            # way out, not deletion nor unpublishing. Enforced here, and not only in the delete
+            # endpoint, because `deleted` is also written by the dataset form and by the
+            # harvester.
+            if self.deleted:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be deleted, it can only be archived"),
+                    field="deleted",
+                )
+            if self.private:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be made private"), field="private"
+                )
 
         self.last_update = self.compute_last_update()
 
@@ -1100,10 +1130,22 @@ class Dataset(
             set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_added.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
+
+        # Read before the write: this is the only point where the fields the caller
+        # actually touched are known, and the recorded activity reports them.
+        # mongoengine only marks a field as changed when its value really differs, so a
+        # form repopulating every field does not inflate this list.
+        changed_fields = [
+            field
+            for field in resource._get_changed_fields()
+            if field not in RESOURCE_NON_AUDITABLE_FIELDS
+        ]
 
         # Keep the in-memory document consistent with what we persist below, so we
         # don't need a self.reload() afterwards. reload() would re-read and
@@ -1121,7 +1163,13 @@ class Dataset(
             set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_updated.send(
+            self.__class__,
+            document=self,
+            resource_id=resource.id,
+            resource_title=resource.title,
+            changed_fields=changed_fields,
+        )
 
     def update_resource_extras(self, resource):
         """Persist a single resource's extras with a targeted positional update.
@@ -1168,7 +1216,9 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_removed.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     @property
     def community_resources(self):

@@ -22,6 +22,7 @@ from mongoengine.signals import post_save
 from udata import uris
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.auth import Permission
 from udata.core.checks import only_creation
 from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
@@ -29,6 +30,7 @@ from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.uuid_fields import AutoUUIDField
 
@@ -210,6 +212,20 @@ def filter_by_closed(base_query, filter_value):
     return base_query(closed=None)
 
 
+def check_organization_voice(organization, obj, **_kwargs):
+    """Check the current user may speak in the name of `organization` in the discussion `obj`.
+
+    Also run on replies, whose organization is not a `Discussion` field.
+    """
+    from .permissions import organization_voice_needs
+
+    check_organization_is_valid_for_current_user(organization)
+    if organization and not Permission(*organization_voice_needs(organization, obj.subject)).can():
+        raise FieldValidationError(
+            _("Permission denied for this organization"), field="organization"
+        )
+
+
 @generate_fields(
     searchable=True,
     default_sort="-created",
@@ -258,7 +274,7 @@ class Discussion(SpamMixin, Linkable, Document):
         ReferenceField("Organization"),
         allow_null=True,
         description="The organization to publish on behalf of",
-        checks=[check_organization_is_valid_for_current_user, only_creation],
+        checks=[check_organization_voice, only_creation],
     )
 
     subject = field(

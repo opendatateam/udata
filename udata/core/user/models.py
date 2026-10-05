@@ -567,31 +567,53 @@ post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):
-    """Match pending email invitations when user registers."""
+    """Link pending email invitations to the user owning their address.
+
+    Runs on registration and on email change, keeping a single pending entry per organization.
+    An organization the user already belongs to, or is already invited to, keeps that state: the
+    email invitation is dropped. A pending request gives way to the invitation instead, since the
+    invitation carries the role and assignments an admin chose.
+    """
     from udata.core.organization.models import Organization
     from udata.core.organization.notifications import _create_membership_notification
+    from udata.features.notifications.models import Notification
 
     user = sender
+    email = user.email.lower()
     for org in Organization.objects(
-        requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
+        requests__match={"kind": "invitation", "email": email, "status": "pending"}
     ):
-        modified = False
-        matched_requests = []
-        for req in org.requests:
-            if (
-                req.kind == "invitation"
-                and req.email
-                and req.email.lower() == user.email.lower()
-                and req.status == "pending"
-            ):
-                req.user = user
-                req.email = None
-                modified = True
-                matched_requests.append(req)
-        if modified:
+        pending = org.pending_request(user)
+        matched_requests = [
+            r for r in org.pending_requests if r.kind == "invitation" and r.email == email
+        ]
+        if org.is_member(user) or (pending is not None and pending.kind == "invitation"):
+            matched_ids = {r.id for r in matched_requests}
+            org.requests = [r for r in org.requests if r.id not in matched_ids]
             org.save()
-            for req in matched_requests:
-                _create_membership_notification(req, org, user)
+            continue
+        if pending is not None:
+            org.requests = [r for r in org.requests if r.id != pending.id]
+            # Request notifications created before invitations existed have no `kind`.
+            Notification.objects(
+                details__request_organization=org,
+                details__request_user=user,
+                details__kind__in=["request", None],
+                handled_at=None,
+            ).update(set__handled_at=datetime.now(UTC))
+        for req in matched_requests:
+            req.user = user
+            req.email = None
+        org.save()
+        for req in matched_requests:
+            _create_membership_notification(req, org, user)
 
 
 User.on_create.connect(match_email_invitations)
+
+
+@User.on_update.connect
+def match_email_invitations_on_email_change(user, **kwargs):
+    # Covers `/change-email` as well as sysadmins editing an address through the API.
+    if "email" in user._get_changed_fields():
+        match_email_invitations(user)
