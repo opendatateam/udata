@@ -5,7 +5,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.core.reuse.models import Reuse
@@ -27,7 +27,7 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
     dataset = field(
         ReferenceField(Dataset),
         readonly=True,
-        nested_fields=dataset_fields,
+        nested_fields=dataset_ref_fields,
         auditable=False,
         allow_null=True,
         filterable={},

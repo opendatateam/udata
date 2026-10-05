@@ -6,7 +6,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.models import Notification
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 
 
 class ReuseNotificationsTest(PytestOnlyDBTestCase):
@@ -130,3 +130,15 @@ class ReuseNotificationsTest(PytestOnlyDBTestCase):
 
         # All notifications should be cleaned up
         assert Notification.objects.count() == 0
+
+
+class ReuseNotificationsAPITest(APITestCase):
+    def test_the_bell_names_the_dataset_without_its_content(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        ReuseFactory(datasets=[dataset])
+
+        [notification] = self.get("/api/1/notifications/").json["data"]
+
+        assert notification["details"]["dataset"]["title"] == dataset.title
+        assert "resources" not in notification["details"]["dataset"]
