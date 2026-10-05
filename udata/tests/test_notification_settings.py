@@ -676,10 +676,10 @@ class DigestTest(PytestOnlyDBTestCase):
         organization = OrganizationFactory(admins=[admin])
         open_discussion(DatasetFactory(organization=organization))
 
-        send_notification_digests()
+        with capture_mails() as mails:
+            send_notification_digests()
 
-        notification = Notification.objects(user=admin).first()
-        assert NotificationChannel.MAIL in notification.channels
+        assert mails == []
 
     def test_the_digest_clears_the_mail_channel_and_keeps_the_bell(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -783,11 +783,11 @@ class DigestTest(PytestOnlyDBTestCase):
         open_discussion(DatasetFactory(organization=organization))
         age(Notification.objects(user=admin).first(), days=8)
 
-        send_notification_digests()
-        send_notification_digests()
+        with capture_mails() as mails:
+            send_notification_digests()
+            send_notification_digests()
 
-        notification = Notification.objects(user=admin).first()
-        assert NotificationChannel.MAIL not in notification.channels
+        assert [mail.recipients for mail in mails] == [[admin.email]]
 
 
 class NotificationSettingsAPITest(APITestCase):
