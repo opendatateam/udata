@@ -56,10 +56,8 @@ def send_notification_digests(self):
         # One failing digest must not deprive the others. Its queue is left as is, so
         # the next run tries again.
         try:
-            message = mails.notification_digest(notifications)
-            if message is not None:
-                message.send(user)
-                sent += 1
+            mails.notification_digest(notifications).send(user)
+            sent += 1
         except Exception:
             log.exception(f"Could not send the notification digest of {user}")
             continue

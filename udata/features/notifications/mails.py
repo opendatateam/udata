@@ -27,8 +27,8 @@ DIGEST_COUNTS: dict[NotificationType, Callable[[int], str]] = {
 }
 
 
-def notification_digest(notifications: list["Notification"]) -> MailMessage | None:
-    """What happened since the last digest, or `None` when nothing is left to say.
+def notification_digest(notifications: list["Notification"]) -> MailMessage:
+    """What happened since the last digest.
 
     One line per discussion rather than one per notification, because a busy thread
     would otherwise fill the mail with the same title repeated.
@@ -37,15 +37,7 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage | No
     # read in.
     counts: dict["Discussion", Counter[NotificationType]] = {}
     for notification in notifications:
-        subject = notification.details.discussion
-        if subject is None:
-            # The subject went away between the event and the digest; the notification
-            # is on its way out too.
-            continue
-        counts.setdefault(subject, Counter())[notification.type] += 1
-
-    if not counts:
-        return None
+        counts.setdefault(notification.details.discussion, Counter())[notification.type] += 1
 
     lines = [
         LabelledContent(
