@@ -9,7 +9,7 @@ import click
 
 from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
-from udata.features.notifications.constants import NotificationChannel, NotificationType
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -31,55 +31,33 @@ def migrate(db):
             try:
                 existing = Notification.objects(details__discussion=discussion).first()
                 if not existing:
-                    # Add NEW_COMMENT notifications for the last message
                     if len(discussion.discussion) > 1:
+                        # Add NEW_COMMENT notifications for the last message
                         last_comment = discussion.discussion[-1]
-
                         sender = last_comment.posted_by
-                        recipients = [
-                            recipient
-                            for recipient in discussion.owner_recipients()
-                            if not sender or recipient.key != sender.id
-                        ]
-
-                        for recipient in recipients:
-                            notification = Notification(
-                                user=recipient.user,
-                                type=NotificationType.DISCUSSION_COMMENT,
-                                reasons=sorted(recipient.reasons),
-                                channels=[NotificationChannel.APP],
-                                details=DiscussionNotificationDetails(
-                                    # Superseded by `type`, kept until the front reads it
-                                    status=DiscussionStatus.NEW_COMMENT,
-                                    message_id=str(last_comment.id),
-                                    discussion=discussion,
-                                ),
-                            )
-                            notification.save()
-                            created_count += 1
+                        notification_type = NotificationType.DISCUSSION_COMMENT
+                        # Superseded by `type`, kept until the front reads it
+                        status = DiscussionStatus.NEW_COMMENT
+                        message_id = str(last_comment.id)
                     else:
                         # Add NEW_DISCUSSION notifications if no reply yet
                         sender = discussion.user
-                        recipients = [
-                            recipient
-                            for recipient in discussion.owner_recipients()
-                            if not sender or recipient.key != sender.id
-                        ]
+                        notification_type = NotificationType.DISCUSSION_NEW
+                        status = DiscussionStatus.NEW_DISCUSSION
+                        message_id = None
 
-                        for recipient in recipients:
-                            notification = Notification(
-                                user=recipient.user,
-                                type=NotificationType.DISCUSSION_NEW,
-                                reasons=sorted(recipient.reasons),
-                                channels=[NotificationChannel.APP],
-                                details=DiscussionNotificationDetails(
-                                    # Superseded by `type`, kept until the front reads it
-                                    status=DiscussionStatus.NEW_DISCUSSION,
-                                    discussion=discussion,
-                                ),
-                            )
-                            notification.save()
-                            created_count += 1
+                    for recipient in discussion.owner_recipients():
+                        if sender and recipient.key == sender.id:
+                            continue
+                        Notification(
+                            user=recipient.user,
+                            type=notification_type,
+                            reasons=sorted(recipient.reasons),
+                            details=DiscussionNotificationDetails(
+                                status=status, message_id=message_id, discussion=discussion
+                            ),
+                        ).save()
+                        created_count += 1
             except Exception as e:
                 log.error(f"Error creating notification for discussion {discussion.id}: {e}")
 

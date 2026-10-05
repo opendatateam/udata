@@ -1,6 +1,6 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.features.notifications.constants import NotificationChannel, NotificationType
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.harvest.models import VALIDATION_PENDING
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
@@ -109,7 +109,6 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=owner,
             type=NotificationType.HARVEST_SOURCE_PENDING,
-            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -144,7 +143,6 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=owner,
             type=NotificationType.HARVEST_SOURCE_PENDING,
-            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -180,7 +178,6 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=org_admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
-            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
@@ -218,7 +215,6 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         pending_notification = Notification(
             user=org_admin,
             type=NotificationType.HARVEST_SOURCE_PENDING,
-            channels=[NotificationChannel.APP],
             details=ValidateHarvesterNotificationDetails(source=source),
         )
         pending_notification.save()
