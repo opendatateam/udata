@@ -126,7 +126,6 @@ def default_enabled(reasons: Iterable[NotificationReason], category: Notificatio
     """Whether somebody concerned for these reasons hears about this family by default.
 
     The most generous reason wins: being an editor who never opened a dataset does not
-    cancel out having taken part in the discussion. This keeps the union of recipients
-    the code produced before anybody could set anything.
+    cancel out having taken part in the discussion.
     """
     return any(DEFAULT_ENABLED[reason, category] for reason in reasons)
