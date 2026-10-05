@@ -51,18 +51,14 @@ class NotificationSettingsAPI(API):
         A decision is identified by its subject, category and channel: deciding again
         replaces the previous answer."""
         decision = patch(NotificationSetting(user=current_user._get_current_object()), request)
-        existing = NotificationSetting.objects(
+        setting, created = NotificationSetting.objects.get_or_create(
             user=decision.user,
             scope=decision.scope,
             category=decision.category,
             channel=decision.channel,
-        ).first()
-        if existing is None:
-            decision.save()
-            return decision, 201
-        existing.enabled = decision.enabled
-        existing.save()
-        return existing
+            updates={"enabled": decision.enabled},
+        )
+        return setting, 201 if created else 200
 
 
 @notifs.route("/settings/<notification_setting:setting>/", endpoint="notification_setting")
