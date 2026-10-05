@@ -15,6 +15,7 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
 )
+from udata.features.notifications.mails import DIGEST_COUNTS
 from udata.features.notifications.settings import (
     decisions_for,
     default_enabled,
@@ -112,17 +113,6 @@ class NotificationEvent:
     def via_mail(self, recipient: User | str) -> MailMessage | None:
         return None
 
-    @classmethod
-    def sends_mail(cls) -> bool:
-        """Whether this event has a mail to send at all.
-
-        Asked before deferring one, so that a weekly digest never conjures a mail the
-        immediate path does not send — a reuse creation reaches the bell only. Read off
-        the class rather than off a built message: rendering can fail, and a failed
-        render must not quietly cost somebody their digest entry.
-        """
-        return cls.via_mail is not NotificationEvent.via_mail
-
     @property
     def occurred_at(self) -> datetime:
         """When the event happened, which is not always when it is dispatched: a
@@ -135,10 +125,6 @@ class NotificationEvent:
         category = CATEGORY_BY_TYPE.get(self.type)
         recipients = self._concerned(category)
         decisions = self._decisions(recipients, category)
-        # Only the configurable types can wait. An invitation or a source pending
-        # validation is an action to take: holding it for a week would be a bug, not a
-        # setting.
-        deferrable = category is not None
 
         for recipient in recipients:
             # An in-app notification needs an account to hang on, so an address with no
@@ -149,10 +135,12 @@ class NotificationEvent:
             )
             wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions, category)
 
+            # Only what a digest knows how to summarize can wait for it. An invitation or
+            # a source pending validation is an action to take: holding it for a week
+            # would be a bug, not a setting.
             deferred = (
                 wants_mail
-                and deferrable
-                and self.sends_mail()
+                and self.type in DIGEST_COUNTS
                 and is_user
                 and recipient.user.mail_cadence is not MailCadence.IMMEDIATE
             )
