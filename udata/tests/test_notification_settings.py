@@ -6,10 +6,8 @@ from mongoengine import DoesNotExist, NotUniqueError
 import udata.models  # noqa: F401 -- registers every document before the imports below
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
-from udata.core.discussions.notifications import DiscussionEvent
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
@@ -17,7 +15,6 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.constants import (
     ANNOUNCEMENT_TYPES,
-    CATEGORY_BY_TYPE,
     DEFAULT_ENABLED,
     PERSONAL_TYPES,
     REASON_BY_ORGANIZATION_ROLE,
@@ -28,6 +25,7 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
 )
+from udata.features.notifications.events import concrete_events
 from udata.features.notifications.mails import notification_digest
 from udata.features.notifications.models import Notification
 from udata.features.notifications.settings import (
@@ -45,6 +43,10 @@ def decide(user, category, channel, enabled, scope=None):
     return NotificationSetting.objects.create(
         user=user, scope=scope, category=category, channel=channel, enabled=enabled
     )
+
+
+def configurable_types():
+    return {event.type for event in concrete_events() if event.category is not None}
 
 
 def mute(user, category, channel, scope=None):
@@ -342,12 +344,12 @@ class NotificationTablesTest:
         """A new type must be declared configurable, action-bound, personal or an
         announcement — deliberately, rather than by ending up unsettable by default."""
         assert (
-            set(CATEGORY_BY_TYPE) | TYPES_REQUIRING_ACTION | PERSONAL_TYPES | ANNOUNCEMENT_TYPES
+            configurable_types() | TYPES_REQUIRING_ACTION | PERSONAL_TYPES | ANNOUNCEMENT_TYPES
         ) == set(NotificationType)
 
     def test_the_groups_do_not_overlap(self):
         groups = [
-            set(CATEGORY_BY_TYPE),
+            configurable_types(),
             set(TYPES_REQUIRING_ACTION),
             set(PERSONAL_TYPES),
             set(ANNOUNCEMENT_TYPES),
@@ -364,24 +366,6 @@ class NotificationTablesTest:
 
     def test_every_organization_role_maps_to_a_reason(self):
         assert set(REASON_BY_ORGANIZATION_ROLE) == set(ORG_ROLES)
-
-    @pytest.mark.parametrize(
-        "event_class,category",
-        [
-            (DiscussionEvent, NotificationCategory.DISCUSSIONS),
-            (DatasetReusedEvent, NotificationCategory.REUSES),
-        ],
-    )
-    def test_categories_match_the_event_hierarchy(self, event_class, category):
-        """A category and its base event class must describe the same set of types.
-
-        The mapping stays declarative — resolving it from the classes at import time
-        would silently lose a type whose module happens not to be loaded — but the two
-        are not allowed to drift.
-        """
-        assert {type for type, c in CATEGORY_BY_TYPE.items() if c is category} == {
-            subclass.type for subclass in event_class.__subclasses__()
-        }
 
 
 class NotificationSettingModelTest(PytestOnlyDBTestCase):

@@ -8,7 +8,6 @@ from mongoengine import Document, EmbeddedDocument
 
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
-    CATEGORY_BY_TYPE,
     REASON_BY_ORGANIZATION_ROLE,
     MailCadence,
     NotificationCategory,
@@ -71,22 +70,6 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
     return list(merged.values())
 
 
-def category_has_mail(category: NotificationCategory) -> bool:
-    """Whether one of the events of `category` writes a mail, which is what makes a
-    decision about that category on the mail channel mean anything."""
-
-    def event_classes(base):
-        for subclass in base.__subclasses__():
-            yield subclass
-            yield from event_classes(subclass)
-
-    return any(
-        event.has_mail()
-        for event in event_classes(NotificationEvent)
-        if CATEGORY_BY_TYPE.get(getattr(event, "type", None)) is category
-    )
-
-
 class NotificationEvent:
     """Something happened that users need to hear about.
 
@@ -100,6 +83,10 @@ class NotificationEvent:
     """
 
     type: NotificationType
+    # The family a user decides about, declared once on the base class of each family.
+    # `None` keeps the event out of the settings: an action to take or the answer to
+    # one's own request is not something to opt out of.
+    category: NotificationCategory | None = None
 
     def recipients(self) -> list[Recipient]:
         raise NotImplementedError
@@ -149,7 +136,7 @@ class NotificationEvent:
     def dispatch(self) -> None:
         from udata.features.notifications.models import Notification
 
-        category = CATEGORY_BY_TYPE.get(self.type)
+        category = self.category
         recipients = self._concerned(category)
         decisions = self._decisions(recipients, category)
 
@@ -266,3 +253,21 @@ class NotificationEvent:
             ).first()
             is not None
         )
+
+
+def concrete_events() -> list[type[NotificationEvent]]:
+    """Every event that can be dispatched: the subclasses declaring a `type`, at any
+    depth, leaving out the base classes a family shares."""
+
+    def walk(base):
+        for subclass in base.__subclasses__():
+            yield subclass
+            yield from walk(subclass)
+
+    return [event for event in walk(NotificationEvent) if hasattr(event, "type")]
+
+
+def category_has_mail(category: NotificationCategory) -> bool:
+    """Whether one of the events of `category` writes a mail, which is what makes a
+    decision about that category on the mail channel mean anything."""
+    return any(event.has_mail() for event in concrete_events() if event.category is category)

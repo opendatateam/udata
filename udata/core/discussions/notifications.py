@@ -9,7 +9,7 @@ from udata.core.discussions import mails
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.core.user.models import User
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import NotificationCategory, NotificationType
 from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
@@ -58,6 +58,8 @@ class DiscussionNotificationDetails(EmbeddedDocument):
 class DiscussionEvent(NotificationEvent):
     """Everyone who took part in the discussion, plus the people responsible for its
     subject, minus whoever triggered the event."""
+
+    category = NotificationCategory.DISCUSSIONS
 
     def __init__(self, discussion: Discussion):
         self.discussion = discussion

@@ -1,5 +1,5 @@
 from udata.core.dataset.models import Dataset
-from udata.features.notifications.constants import NotificationReason
+from udata.features.notifications.constants import NotificationCategory, NotificationReason
 from udata.features.notifications.events import NotificationEvent, Recipient, merge_recipients
 
 
@@ -11,6 +11,7 @@ class DatasetReusedEvent(NotificationEvent):
     here once rather than twice.
     """
 
+    category = NotificationCategory.REUSES
     dataset: Dataset
 
     def recipients(self):

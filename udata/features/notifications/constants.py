@@ -86,18 +86,6 @@ class NotificationCategory(StrEnum):
     REUSES = "reuses"
 
 
-# The family each type belongs to. A type absent from this mapping is not configurable,
-# which is how the action-bound and personal ones stay out of the settings screen
-# without a flag of their own.
-CATEGORY_BY_TYPE: dict[NotificationType, NotificationCategory] = {
-    NotificationType.DISCUSSION_NEW: NotificationCategory.DISCUSSIONS,
-    NotificationType.DISCUSSION_COMMENT: NotificationCategory.DISCUSSIONS,
-    NotificationType.DISCUSSION_CLOSED: NotificationCategory.DISCUSSIONS,
-    NotificationType.REUSE_CREATED: NotificationCategory.REUSES,
-    NotificationType.DATASERVICE_CREATED: NotificationCategory.REUSES,
-}
-
-
 class NotificationChannel(StrEnum):
     APP = "app"
     MAIL = "mail"
