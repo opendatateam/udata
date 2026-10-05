@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import GenericReferenceField
+from mongoengine.signals import post_delete
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.models import Organization
@@ -136,17 +137,20 @@ def transfer_request_notifications(user):
     return notifications
 
 
-@Transfer.after_delete.connect
-def on_transfer_deleted(transfer, **kwargs):
+# MongoEngine's own signal rather than a custom one: having a receiver makes
+# `Transfer.objects(...).delete()` delete document by document, so the purges of the
+# transferred objects clean these notifications up too.
+@post_delete.connect_via(Transfer)
+def on_transfer_deleted(sender, document, **kwargs):
     """Clean up notifications when a transfer is deleted"""
     from udata.features.notifications.models import Notification
 
     try:
         # Delete all notifications that reference this transfer
         Notification.objects(
-            details__transfer_owner=transfer.owner,
-            details__transfer_recipient=transfer.recipient,
-            details__transfer_subject=transfer.subject,
+            details__transfer_owner=document.owner,
+            details__transfer_recipient=document.recipient,
+            details__transfer_subject=document.subject,
         ).delete()
     except Exception as e:
-        log.error(f"Error cleaning up notifications for deleted transfer {transfer.id}: {e}")
+        log.error(f"Error cleaning up notifications for deleted transfer {document.id}: {e}")

@@ -449,6 +449,17 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert410(response)
         assert Organization.objects.first().description == org.description
 
+    def test_organization_api_update_with_non_object_body(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        for body in ([1, 2, 3], 1, "deleted"):
+            response = self.put(url_for("api.organization", org=org), body)
+            assert400(response)
+            assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        assert Organization.objects.first().description == org.description
+
     def test_organization_api_update_forbidden(self):
         """It should not update an organization from the API if not admin"""
         org = OrganizationFactory()
@@ -1165,6 +1176,26 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization.reload()
         assert organization.requests[0].status == "pending"
         assert organization.requests[0].refusal_comment is None
+
+    def test_refuse_membership_and_invite_member_with_non_object_body(self):
+        user = self.login()
+        membership_request = MembershipRequest(user=UserFactory(), comment="test")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[membership_request]
+        )
+
+        for url in (
+            url_for("api.refuse_membership", org=organization, id=membership_request.id),
+            url_for("api.invite_member", org=organization),
+        ):
+            for body in ([1, 2, 3], 1, "comment"):
+                response = self.post(url, body)
+                assert400(response)
+                assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        organization.reload()
+        assert len(organization.requests) == 1
+        assert organization.requests[0].status == "pending"
 
     def test_accept_membership_rejects_invitation(self):
         """Test that accept_membership rejects invitations."""

@@ -311,6 +311,18 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.title, "Undeleted title")
         self.assertIsNone(dataservice.deleted_at)
 
+    def test_dataservice_api_patch_deleted_with_non_object_body(self):
+        user = self.login()
+        dataservice = DataserviceFactory(owner=user, deleted_at=datetime.now(UTC))
+
+        for body in ([1, 2, 3], 1, "deleted_at"):
+            response = self.patch(url_for("api.dataservice", dataservice=dataservice), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        dataservice.reload()
+        self.assertIsNotNone(dataservice.deleted_at)
+
     def test_dataservice_api_list_owned(self) -> None:
         """Should filter out private dataservices if not owner"""
         owner = UserFactory()

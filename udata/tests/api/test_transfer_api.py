@@ -1,9 +1,13 @@
+from datetime import UTC, datetime
+
 from bson import ObjectId
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.dataset.models import Dataset
+from udata.core.dataset.tasks import purge_datasets
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.tasks import purge_organizations
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
@@ -327,6 +331,68 @@ class TransferAPITest(APITestCase):
         self.assertEqual(response.json[0]["subject"]["name"], topic.name)
         self.assertEqual(response.json[0]["subject"]["page"], topic.self_web_url())
 
+    def test_deleting_a_topic_drops_its_transfers(self):
+        """A transfer left on a deleted topic made every transfer of its recipient unreadable."""
+        user = self.login()
+        topic = TopicFactory(owner=user)
+        recipient_org, recipient_admin = self.request_transfer_to_an_organization(topic)
+
+        response = self.delete(url_for("apiv2.topic", topic=topic))
+        self.assertStatus(response, 204)
+
+        self.login(recipient_admin)
+        response = self.get(url_for("api.transfers", recipient=str(recipient_org.id)))
+        self.assert200(response)
+        self.assertEqual(response.json, [])
+
+        response = self.get(url_for("api.notifications"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 0)
+
+    def request_transfer_to_an_organization(self, subject):
+        recipient_admin = UserFactory()
+        recipient_org = OrganizationFactory(admins=[recipient_admin])
+        response = self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {"class": subject.__class__.__name__, "id": str(subject.id)},
+                "recipient": {"class": "Organization", "id": str(recipient_org.id)},
+                "comment": faker.sentence(),
+            },
+        )
+        self.assert201(response)
+        return recipient_org, recipient_admin
+
+    def test_purging_a_dataset_drops_the_notifications_of_its_transfers(self):
+        """A notification left on a purged dataset made the notifications of its recipient
+        unreadable."""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        _, recipient_admin = self.request_transfer_to_an_organization(dataset)
+        dataset.deleted = datetime.now(UTC)
+        dataset.save()
+
+        purge_datasets()
+
+        self.login(recipient_admin)
+        response = self.get(url_for("api.notifications"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 0)
+
+    def test_purging_the_recipient_organization_drops_the_notifications_of_its_transfers(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        recipient_org, recipient_admin = self.request_transfer_to_an_organization(dataset)
+        recipient_org.deleted = datetime.now(UTC)
+        recipient_org.save()
+
+        purge_organizations()
+
+        self.login(recipient_admin)
+        response = self.get(url_for("api.notifications"))
+        self.assert200(response)
+        self.assertEqual(response.json["total"], 0)
+
     def test_400_on_recipient_class_outside_persons(self):
         user = self.login()
         dataset = DatasetFactory(owner=user)
@@ -396,6 +462,29 @@ class TransferAPITest(APITestCase):
 
         response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "refuse"})
         self.assert400(response)
+
+    def test_request_and_respond_to_transfer_with_non_object_body(self):
+        user = self.login()
+        new_user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+
+        for body in ([1, 2, 3], 1, "subject"):
+            response = self.post(url_for("api.transfers"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        response = self._create_transfer(dataset, new_user)
+        self.assert201(response)
+        transfer = response.json
+
+        self.login(new_user)
+        for body in ([1, 2, 3], 1, "response"):
+            response = self.post(url_for("api.transfer", id=transfer["id"]), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        response = self.get(url_for("api.transfer", id=transfer["id"]))
+        self.assertEqual(response.json["status"], "pending")
 
     def _create_transfer(self, source: Dataset, destination: User):
         return self.post(
