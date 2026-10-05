@@ -692,6 +692,21 @@ class DigestTest(PytestOnlyDBTestCase):
         notification = Notification.objects(user=admin).first()
         assert notification.channels == [NotificationChannel.APP]
 
+    def test_the_whole_queue_leaves_as_soon_as_its_oldest_is_due(self):
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        organization = OrganizationFactory(admins=[admin])
+        older = open_discussion(DatasetFactory(organization=organization))
+        newer = open_discussion(DatasetFactory(organization=organization))
+        age(Notification.objects(user=admin, details__discussion=older).first(), days=8)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [digest] = mails
+        assert digest.recipients == [admin.email]
+        assert digest.body.index(older.title) < digest.body.index(newer.title)
+        assert Notification.objects(user=admin, channels=NotificationChannel.MAIL).count() == 0
+
     def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
         # Created first so the job meets it first: `distinct("user")` walks the index.
         broken = UserFactory(mail_cadence=MailCadence.WEEKLY)
