@@ -476,6 +476,8 @@ class BaseCswDcatBackend(DcatBackend, ABC):
             or (returned_count == 0)
             # Current next record is lower than previous one
             or (next_record < start)
+            # Enough items have been harvested already
+            or self.has_reached_max_items()
         )
         return None if should_break else next_record
 

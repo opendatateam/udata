@@ -291,7 +291,7 @@ class BaseBackend(ABC):
         *args: ItemProcessorParams.args,
         **kwargs: ItemProcessorParams.kwargs,
     ):
-        if self.max_items and len(self.job.items) >= self.max_items:
+        if self.has_reached_max_items():
             raise StopHarvest()
 
         log.debug(f"Processing item {remote_id}…")
@@ -394,6 +394,9 @@ class BaseBackend(ABC):
             HarvestLog(level=record.levelname, message=record.getMessage()) for record in logs
         ]
         self.save_job()
+
+    def has_reached_max_items(self):
+        return self.max_items and len(self.job.items) >= self.max_items
 
     def ensure_unique_remote_id(self, harvest_item: HarvestItem):
         if harvest_item.remote_id in self.remote_ids:

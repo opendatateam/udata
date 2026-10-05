@@ -1205,6 +1205,35 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
 
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 2
+
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items_errors(self, rmock, mocker):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        backend = CswDcatBackend(HarvestSourceFactory(url=url))
+
+        backend.as_dcat = mocker.Mock(side_effect=Exception("boom"))
+
+        job = backend.harvest()
+        assert len(job.items) == 2
+
     def test_csw_error(self, rmock):
         exception_report = """<?xml version="1.0" encoding="UTF-8"?>
         <ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"
