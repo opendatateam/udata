@@ -692,6 +692,31 @@ class DigestTest(PytestOnlyDBTestCase):
         notification = Notification.objects(user=admin).first()
         assert notification.channels == [NotificationChannel.APP]
 
+    def test_switching_back_to_immediate_releases_the_queue(self):
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        organization = OrganizationFactory(admins=[admin])
+        open_discussion(DatasetFactory(organization=organization))
+        admin.mail_cadence = MailCadence.IMMEDIATE
+        admin.save()
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert [mail.recipients for mail in mails] == [[admin.email]]
+        assert Notification.objects(user=admin, channels=NotificationChannel.MAIL).count() == 0
+
+    def test_a_daily_digest_leaves_after_a_day_and_a_weekly_one_does_not(self):
+        daily = UserFactory(mail_cadence=MailCadence.DAILY)
+        weekly = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[daily, weekly])))
+        for notification in Notification.objects:
+            age(notification, days=2)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert [mail.recipients for mail in mails] == [[daily.email]]
+
     def test_the_whole_queue_leaves_as_soon_as_its_oldest_is_due(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
         organization = OrganizationFactory(admins=[admin])
