@@ -1,6 +1,6 @@
 from udata.core.dataset.models import Dataset
 from udata.features.notifications.constants import NotificationCategory, NotificationReason
-from udata.features.notifications.events import NotificationEvent, Recipient, merge_recipients
+from udata.features.notifications.events import NotificationEvent, Recipient
 
 
 class DatasetReusedEvent(NotificationEvent):
@@ -25,7 +25,7 @@ class DatasetReusedEvent(NotificationEvent):
                 Recipient.from_member(member)
                 for member in self.dataset.organization.by_role("admin")
             ]
-        return merge_recipients(recipients)
+        return recipients
 
     def scopes(self):
         scopes = [self.dataset]
