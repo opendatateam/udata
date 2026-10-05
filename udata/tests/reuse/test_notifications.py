@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -10,6 +10,40 @@ from udata.tests.api import PytestOnlyDBTestCase
 
 
 class ReuseNotificationsTest(PytestOnlyDBTestCase):
+    def test_a_private_reuse_notifies_nobody(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        ReuseFactory(datasets=[dataset], private=True)
+
+        assert Notification.objects(user=owner).count() == 0
+
+    def test_publishing_a_private_reuse_notifies_as_of_its_publication(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(
+            datasets=[dataset], private=True, created_at=datetime.now(UTC) - timedelta(days=90)
+        )
+
+        before = datetime.now(UTC)
+        reuse.private = False
+        reuse.save()
+
+        notifications = Notification.objects(user=owner)
+        assert notifications.count() == 1
+        assert notifications.first().details.reuse == reuse
+        assert notifications.first().created_at.replace(tzinfo=UTC) >= before
+
+    def test_editing_a_public_reuse_does_not_notify_again(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(datasets=[dataset])
+
+        reuse.title = "Another title"
+        reuse.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
     def test_reuse_creation_notifies_dataset_owner_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)

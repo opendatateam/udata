@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
@@ -34,17 +35,19 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
 
 
 class DataserviceCreated(DatasetReusedEvent):
-    """One event per exposed dataset: each set of dataset owners hears about their own."""
+    """A dataservice became visible: one event per exposed dataset, so that each set of
+    dataset owners hears about their own."""
 
     type = NotificationType.DATASERVICE_CREATED
 
-    def __init__(self, dataservice: Dataservice, dataset: Dataset):
+    def __init__(self, dataservice: Dataservice, dataset: Dataset, occurred_at: datetime):
         self.dataservice = dataservice
         self.dataset = dataset
+        self._occurred_at = occurred_at
 
     @property
     def occurred_at(self):
-        return self.dataservice.created_at
+        return self._occurred_at
 
     def via_app(self, recipient):
         return DataserviceCreatedNotificationDetails(
@@ -52,10 +55,25 @@ class DataserviceCreated(DatasetReusedEvent):
         )
 
 
+def announce_dataservice(dataservice: Dataservice, occurred_at: datetime) -> None:
+    for dataset in dataservice.datasets:
+        # `Dataservice.datasets` holds lazy references, which compare unequal to the
+        # datasets a setting is scoped to: the event needs the document itself.
+        DataserviceCreated(dataservice, dataset.fetch(), occurred_at).dispatch()
+
+
+# A private dataservice is announced when it is published, not when it is created:
+# until then, its existence is its owner's business only.
 @Dataservice.on_create.connect
 def on_dataservice_created(dataservice, **kwargs):
-    for dataset in dataservice.datasets:
-        DataserviceCreated(dataservice, dataset).dispatch()
+    if not dataservice.private:
+        announce_dataservice(dataservice, dataservice.created_at)
+
+
+@Dataservice.on_update.connect
+def on_dataservice_published(dataservice, changed_fields, previous, **kwargs):
+    if "private" in changed_fields and previous.get("private") and not dataservice.private:
+        announce_dataservice(dataservice, datetime.now(UTC))
 
 
 @Dataservice.on_delete.connect

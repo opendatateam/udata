@@ -182,6 +182,27 @@ class PersonaTest(APITestCase):
         assert notifications.first().details.discussion.subject == watched
         assert NotificationReason.EXPLICIT_SUBSCRIBER in notifications.first().reasons
 
+    def test_a_subscriber_never_hears_of_a_private_reuse_or_api(self):
+        """Following a public dataset must not hand over what others keep private on
+        top of it."""
+        outsider = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        decide(
+            outsider,
+            NotificationCategory.REUSES,
+            NotificationChannel.APP,
+            enabled=True,
+            scope=dataset,
+        )
+
+        ReuseFactory(datasets=[dataset], private=True)
+        DataserviceFactory(datasets=[dataset], private=True)
+        public = ReuseFactory(datasets=[dataset])
+
+        notifications = Notification.objects(user=outsider)
+        assert notifications.count() == 1
+        assert notifications.first().details.reuse == public
+
     def test_subscribing_to_the_bell_does_not_sign_up_for_the_mails(self):
         outsider = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory())
@@ -572,6 +593,15 @@ class DispatchTest(PytestOnlyDBTestCase):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
         mute(owner, NotificationCategory.REUSES, NotificationChannel.APP)
+
+        DataserviceFactory(datasets=[dataset])
+
+        assert Notification.objects(user=owner).count() == 0
+
+    def test_a_decision_on_a_dataset_covers_the_apis_exposing_it(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        mute(owner, NotificationCategory.REUSES, NotificationChannel.APP, scope=dataset)
 
         DataserviceFactory(datasets=[dataset])
 

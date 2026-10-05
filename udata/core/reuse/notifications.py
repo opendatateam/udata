@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
@@ -34,26 +35,41 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
 
 
 class ReuseCreated(DatasetReusedEvent):
-    """One event per reused dataset: each set of dataset owners hears about their own."""
+    """A reuse became visible: one event per reused dataset, so that each set of
+    dataset owners hears about their own."""
 
     type = NotificationType.REUSE_CREATED
 
-    def __init__(self, reuse: Reuse, dataset: Dataset):
+    def __init__(self, reuse: Reuse, dataset: Dataset, occurred_at: datetime):
         self.reuse = reuse
         self.dataset = dataset
+        self._occurred_at = occurred_at
 
     @property
     def occurred_at(self):
-        return self.reuse.created_at
+        return self._occurred_at
 
     def via_app(self, recipient):
         return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)
 
 
+def announce_reuse(reuse: Reuse, occurred_at: datetime) -> None:
+    for dataset in reuse.datasets:
+        ReuseCreated(reuse, dataset, occurred_at).dispatch()
+
+
+# A private reuse is announced when it is published, not when it is created: until
+# then, its existence is its owner's business only.
 @Reuse.on_create.connect
 def on_reuse_created(reuse, **kwargs):
-    for dataset in reuse.datasets:
-        ReuseCreated(reuse, dataset).dispatch()
+    if not reuse.private:
+        announce_reuse(reuse, reuse.created_at)
+
+
+@Reuse.on_update.connect
+def on_reuse_published(reuse, changed_fields, previous, **kwargs):
+    if "private" in changed_fields and previous.get("private") and not reuse.private:
+        announce_reuse(reuse, datetime.now(UTC))
 
 
 @Reuse.on_delete.connect
