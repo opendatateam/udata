@@ -867,6 +867,27 @@ class NotificationSettingsAPITest(APITestCase):
         self.assert201(with_mail)
         assert NotificationSetting.objects.count() == 1
 
+    def test_a_decision_goes_with_its_subject(self):
+        user = self.login()
+        discussion = DiscussionFactory(subject=DatasetFactory())
+        mute(user, NotificationCategory.DISCUSSIONS, NotificationChannel.APP, scope=discussion)
+
+        discussion.delete()
+
+        response = self.get("/api/1/notifications/settings/")
+        self.assert200(response)
+        assert response.json == []
+
+    def test_a_decision_goes_with_a_subject_purged_in_bulk(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(subject=dataset)
+        mute(user, NotificationCategory.DISCUSSIONS, NotificationChannel.APP, scope=discussion)
+
+        Discussion.objects(subject=dataset).delete()
+
+        assert NotificationSetting.objects(user=user).count() == 0
+
     def test_settings_require_an_account(self):
         self.assert401(self.get("/api/1/notifications/settings/"))
         self.assert401(self.put_decision(True))
