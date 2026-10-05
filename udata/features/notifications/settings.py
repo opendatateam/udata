@@ -6,6 +6,7 @@ from mongoengine.fields import BooleanField, EnumField, GenericReferenceField, R
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
+from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     DEFAULT_ENABLED,
@@ -18,15 +19,7 @@ from udata.mongo.document import UDataDocument
 # Everything a decision can be taken about. Anything an event can name in its
 # `scopes()` belongs here, which is why a discussion sits next to the objects that
 # carry them: muting a single thread is the finest useful grain.
-NOTIFICATION_SCOPES = (
-    "Organization",
-    "Dataset",
-    "Reuse",
-    "Dataservice",
-    "Post",
-    "Topic",
-    "Discussion",
-)
+NOTIFICATION_SCOPES = ("Organization", "Discussion", *DISCUSSION_SUBJECTS)
 
 
 @generate_fields()
