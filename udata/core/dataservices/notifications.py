@@ -1,5 +1,4 @@
 import logging
-from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
@@ -8,7 +7,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.notifications import DatasetReusedEvent
+from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.features.notifications.constants import NotificationType
 
 log = logging.getLogger(__name__)
@@ -40,14 +39,9 @@ class DataserviceCreated(DatasetReusedEvent):
 
     type = NotificationType.DATASERVICE_CREATED
 
-    def __init__(self, dataservice: Dataservice, dataset: Dataset, occurred_at: datetime):
+    def __init__(self, dataservice: Dataservice, dataset: Dataset):
         self.dataservice = dataservice
         self.dataset = dataset
-        self._occurred_at = occurred_at
-
-    @property
-    def occurred_at(self):
-        return self._occurred_at
 
     def via_app(self, recipient):
         return DataserviceCreatedNotificationDetails(
@@ -55,11 +49,11 @@ class DataserviceCreated(DatasetReusedEvent):
         )
 
 
-def announce_dataservice(dataservice: Dataservice, occurred_at: datetime) -> None:
+def announce_dataservice(dataservice: Dataservice) -> None:
     for dataset in dataservice.datasets:
         # `Dataservice.datasets` holds lazy references, which compare unequal to the
         # datasets a setting is scoped to: the event needs the document itself.
-        DataserviceCreated(dataservice, dataset.fetch(), occurred_at).dispatch()
+        DataserviceCreated(dataservice, dataset.fetch()).dispatch()
 
 
 # A private dataservice is announced when it is published, not when it is created:
@@ -67,13 +61,13 @@ def announce_dataservice(dataservice: Dataservice, occurred_at: datetime) -> Non
 @Dataservice.on_create.connect
 def on_dataservice_created(dataservice, **kwargs):
     if not dataservice.private:
-        announce_dataservice(dataservice, dataservice.created_at)
+        announce_dataservice(dataservice)
 
 
 @Dataservice.on_update.connect
 def on_dataservice_published(dataservice, changed_fields, previous, **kwargs):
-    if "private" in changed_fields and previous.get("private") and not dataservice.private:
-        announce_dataservice(dataservice, datetime.now(UTC))
+    if became_public(dataservice, changed_fields, previous):
+        announce_dataservice(dataservice)
 
 
 @Dataservice.on_delete.connect

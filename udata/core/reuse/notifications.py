@@ -1,5 +1,4 @@
 import logging
-from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
@@ -7,7 +6,7 @@ from mongoengine.fields import ReferenceField
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.notifications import DatasetReusedEvent
+from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.core.reuse.models import Reuse
 from udata.features.notifications.constants import NotificationType
 
@@ -40,22 +39,17 @@ class ReuseCreated(DatasetReusedEvent):
 
     type = NotificationType.REUSE_CREATED
 
-    def __init__(self, reuse: Reuse, dataset: Dataset, occurred_at: datetime):
+    def __init__(self, reuse: Reuse, dataset: Dataset):
         self.reuse = reuse
         self.dataset = dataset
-        self._occurred_at = occurred_at
-
-    @property
-    def occurred_at(self):
-        return self._occurred_at
 
     def via_app(self, recipient):
         return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)
 
 
-def announce_reuse(reuse: Reuse, occurred_at: datetime) -> None:
+def announce_reuse(reuse: Reuse) -> None:
     for dataset in reuse.datasets:
-        ReuseCreated(reuse, dataset, occurred_at).dispatch()
+        ReuseCreated(reuse, dataset).dispatch()
 
 
 # A private reuse is announced when it is published, not when it is created: until
@@ -63,13 +57,13 @@ def announce_reuse(reuse: Reuse, occurred_at: datetime) -> None:
 @Reuse.on_create.connect
 def on_reuse_created(reuse, **kwargs):
     if not reuse.private:
-        announce_reuse(reuse, reuse.created_at)
+        announce_reuse(reuse)
 
 
 @Reuse.on_update.connect
 def on_reuse_published(reuse, changed_fields, previous, **kwargs):
-    if "private" in changed_fields and previous.get("private") and not reuse.private:
-        announce_reuse(reuse, datetime.now(UTC))
+    if became_public(reuse, changed_fields, previous):
+        announce_reuse(reuse)
 
 
 @Reuse.on_delete.connect
