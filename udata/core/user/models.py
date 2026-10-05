@@ -90,6 +90,12 @@ def _email_for_admin_or_self(user):
     return None
 
 
+def _mail_cadence_for_admin_or_self(user):
+    if current_user_is_admin_or_self():
+        return user.mail_cadence
+    return None
+
+
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
@@ -232,7 +238,10 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
     # How often this user agrees to be mailed about what concerns them. What concerns
     # them is decided per subject in `NotificationSetting`; this is only the rhythm.
-    mail_cadence = EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True)
+    mail_cadence = field(
+        EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
+        attribute=_mail_cadence_for_admin_or_self,
+    )
 
     before_save = Signal()
     after_save = Signal()

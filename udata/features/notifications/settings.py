@@ -4,6 +4,8 @@ from typing import Any
 from mongoengine import CASCADE, Document, Q
 from mongoengine.fields import BooleanField, EnumField, GenericReferenceField, ReferenceField
 
+from udata.api import api
+from udata.api_fields import field, generate_fields
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     DEFAULT_ENABLED,
@@ -11,6 +13,7 @@ from udata.features.notifications.constants import (
     NotificationChannel,
     NotificationReason,
 )
+from udata.mongo.document import UDataDocument
 
 # Everything a decision can be taken about. Anything an event can name in its
 # `scopes()` belongs here, which is why a discussion sits next to the objects that
@@ -26,7 +29,8 @@ NOTIFICATION_SCOPES = (
 )
 
 
-class NotificationSetting(Document):
+@generate_fields()
+class NotificationSetting(UDataDocument):
     """One decision a user took about one family of notifications, on one channel.
 
     Only decisions are stored, never the resolved grid: an administrator of a
@@ -37,13 +41,18 @@ class NotificationSetting(Document):
     person (`User.mail_cadence`), not of the subject.
     """
 
+    # Not exposed: the API only ever lists and writes the current user's decisions.
     user = ReferenceField(User, required=True, reverse_delete_rule=CASCADE)
     # `None` means the decision covers every subject, and is the last word before the
-    # defaults.
-    scope = GenericReferenceField(choices=NOTIFICATION_SCOPES)
-    category = EnumField(NotificationCategory, required=True)
-    channel = EnumField(NotificationChannel, required=True)
-    enabled = BooleanField(required=True)
+    # defaults. Read back as a bare `{class, id}`: a decision can name an object its
+    # author can no longer see, and its title must not travel with it.
+    scope = field(
+        GenericReferenceField(choices=NOTIFICATION_SCOPES),
+        nested_fields=api.model_reference,
+    )
+    category = field(EnumField(NotificationCategory, required=True))
+    channel = field(EnumField(NotificationChannel, required=True))
+    enabled = field(BooleanField(required=True))
 
     meta = {
         "indexes": [

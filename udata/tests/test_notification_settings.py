@@ -76,12 +76,21 @@ class PersonaTest(APITestCase):
     def test_an_editor_follows_two_datasets_out_of_forty(self):
         """Sofia edits a handful of datasets in a large organization and wants the
         discussions of those, not of the 38 others."""
-        sofia = UserFactory()
+        sofia = self.login()
         organization = OrganizationFactory(editors=[sofia])
         hers = DatasetFactory(organization=organization)
         someone_elses = DatasetFactory(organization=organization)
         for channel in NotificationChannel:
-            decide(sofia, NotificationCategory.DISCUSSIONS, channel, enabled=True, scope=hers)
+            response = self.put(
+                "/api/1/notifications/settings/",
+                {
+                    "scope": {"class": "Dataset", "id": str(hers.id)},
+                    "category": NotificationCategory.DISCUSSIONS,
+                    "channel": channel,
+                    "enabled": True,
+                },
+            )
+            self.assert201(response)
 
         with capture_mails() as mails:
             open_discussion(hers)
@@ -706,6 +715,102 @@ class DigestTest(PytestOnlyDBTestCase):
 
         notification = Notification.objects(user=admin).first()
         assert NotificationChannel.MAIL not in notification.channels
+
+
+class NotificationSettingsAPITest(APITestCase):
+    def put_decision(self, enabled, scope=None, channel=NotificationChannel.APP):
+        return self.put(
+            "/api/1/notifications/settings/",
+            {
+                "scope": {"class": scope.__class__.__name__, "id": str(scope.id)}
+                if scope
+                else None,
+                "category": NotificationCategory.DISCUSSIONS,
+                "channel": channel,
+                "enabled": enabled,
+            },
+        )
+
+    def test_deciding_again_replaces_the_previous_answer(self):
+        user = self.login()
+        dataset = DatasetFactory()
+
+        self.assert201(self.put_decision(True, scope=dataset))
+        response = self.put_decision(False, scope=dataset)
+
+        self.assert200(response)
+        listed = self.get("/api/1/notifications/settings/").json
+        assert listed == [
+            {
+                "id": response.json["id"],
+                "scope": {"class": "Dataset", "id": str(dataset.id)},
+                "category": NotificationCategory.DISCUSSIONS,
+                "channel": NotificationChannel.APP,
+                "enabled": False,
+            }
+        ]
+        assert NotificationSetting.objects(user=user).count() == 1
+
+    def test_a_global_decision_silences_every_subject(self):
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+
+        self.assert201(self.put_decision(False))
+        open_discussion(DatasetFactory(organization=organization))
+
+        assert Notification.objects(user=admin).count() == 0
+
+    def test_withdrawing_a_decision_brings_the_default_back(self):
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+        decision = self.put_decision(False).json
+
+        self.assert204(self.delete(f"/api/1/notifications/settings/{decision['id']}/"))
+        open_discussion(DatasetFactory(organization=organization))
+
+        assert Notification.objects(user=admin).count() == 1
+
+    def test_nobody_sees_nor_withdraws_the_decisions_of_somebody_else(self):
+        theirs = mute(UserFactory(), NotificationCategory.DISCUSSIONS, NotificationChannel.APP)
+        self.login()
+
+        assert self.get("/api/1/notifications/settings/").json == []
+        self.assert404(self.delete(f"/api/1/notifications/settings/{theirs.id}/"))
+        assert NotificationSetting.objects(id=theirs.id).count() == 1
+
+    def test_a_decision_cannot_be_scoped_to_a_user(self):
+        self.login()
+
+        response = self.put_decision(True, scope=UserFactory())
+
+        self.assert400(response)
+        assert NotificationSetting.objects.count() == 0
+
+    def test_settings_require_an_account(self):
+        self.assert401(self.get("/api/1/notifications/settings/"))
+        self.assert401(self.put_decision(True))
+
+    def test_the_mail_cadence_is_set_on_me_and_defers_the_mails(self):
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+
+        response = self.put("/api/1/me/", {"mail_cadence": MailCadence.WEEKLY})
+        self.assert200(response)
+        assert response.json["mail_cadence"] == MailCadence.WEEKLY
+
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization))
+
+        assert [mail for mail in mails if admin.email in mail.recipients] == []
+
+    def test_the_mail_cadence_of_somebody_else_is_not_disclosed(self):
+        other = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        self.login()
+
+        response = self.get(f"/api/1/users/{other.id}/")
+
+        self.assert200(response)
+        assert response.json["mail_cadence"] is None
 
 
 class DigestVisibilityTest(APITestCase):

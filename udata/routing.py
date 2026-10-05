@@ -14,6 +14,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.core.visualizations.models import Chart
 from udata.features.notifications.models import Notification
+from udata.features.notifications.settings import NotificationSetting
 from udata.harvest.models import HarvestJob, HarvestSource
 from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url, homepage_url
@@ -191,6 +192,10 @@ class NotificationConverter(ModelConverter):
     model = Notification
 
 
+class NotificationSettingConverter(ModelConverter):
+    model = NotificationSetting
+
+
 class ApiTokenConverter(ModelConverter):
     model = ApiToken
 
@@ -282,6 +287,7 @@ def init_app(app):
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
     app.url_map.converters["notification"] = NotificationConverter
+    app.url_map.converters["notification_setting"] = NotificationSettingConverter
     app.url_map.converters["visualization"] = VisualizationConverter
     app.url_map.converters["api_token"] = ApiTokenConverter
 
