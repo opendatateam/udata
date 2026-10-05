@@ -1,9 +1,14 @@
 from collections import Counter
+from typing import TYPE_CHECKING
 
 from udata.features.notifications.constants import NotificationType
 from udata.i18n import lazy_gettext as _
 from udata.mail import LabelledContent, MailCTA, MailMessage
 from udata.uris import cdata_url
+
+if TYPE_CHECKING:
+    from udata.core.discussions.models import Discussion
+    from udata.features.notifications.models import Notification
 
 # The types a digest can summarize, and how each reads once counted. Being listed here
 # is what lets a notification wait for the digest instead of being mailed at once.
@@ -28,7 +33,7 @@ def _counted(type: NotificationType, count: int) -> str:
     return str(singular if count == 1 else plural) % {"count": count}
 
 
-def notification_digest(notifications: list) -> MailMessage | None:
+def notification_digest(notifications: list["Notification"]) -> MailMessage | None:
     """What happened since the last digest, or `None` when nothing is left to say.
 
     One line per discussion rather than one per notification, because a busy thread
@@ -36,7 +41,7 @@ def notification_digest(notifications: list) -> MailMessage | None:
     """
     # Insertion order keeps the oldest subject first, which is the order the queue was
     # read in.
-    counts: dict = {}
+    counts: dict["Discussion", Counter[NotificationType]] = {}
     for notification in notifications:
         subject = notification.details.discussion
         if subject is None:

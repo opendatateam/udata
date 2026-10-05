@@ -215,7 +215,7 @@ class NotificationEvent:
         self,
         recipient: Recipient,
         channel: NotificationChannel,
-        decisions,
+        decisions: dict[NotificationChannel, dict[Any, bool]] | None,
         category: NotificationCategory | None,
     ) -> bool:
         if decisions is None or category is None:
