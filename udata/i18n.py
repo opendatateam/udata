@@ -66,6 +66,10 @@ def lazy_pgettext(*args, **kwargs):
     return flask_babel.lazy_pgettext(*args, **kwargs)
 
 
+def lazy_ngettext(*args, **kwargs):
+    return flask_babel.lazy_ngettext(*args, **kwargs)
+
+
 def _default_lang(user=None):
     lang = getattr(user or current_user, "prefered_language", None)
     return lang or current_app.config["DEFAULT_LANGUAGE"]
