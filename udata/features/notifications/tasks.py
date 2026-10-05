@@ -62,18 +62,12 @@ def send_notification_digests(self):
             log.exception(f"Could not send the notification digest of {user}")
             continue
 
-        for notification in notifications:
-            notification.channels = [
-                channel
-                for channel in notification.channels
-                if channel is not NotificationChannel.MAIL
-            ]
-            if notification.channels:
-                notification.save()
-            else:
-                # Nothing left to deliver it through, and it was never meant to be read
-                # in the bell.
-                notification.delete()
+        # Only what was mailed is spent: a notification arriving meanwhile stays queued.
+        # `last_modified` is set by hand, a queryset update skips the `pre_save` filling it.
+        mailed = Notification.objects(id__in=[notification.id for notification in notifications])
+        mailed.update(pull__channels=NotificationChannel.MAIL, set__last_modified=datetime.now(UTC))
+        # Nothing left to deliver it through, and it was never meant to be read in the bell.
+        mailed.filter(channels__size=0).delete()
 
     log.info(f"Sent {sent} notification digests")
 
