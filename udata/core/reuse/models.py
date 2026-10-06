@@ -17,7 +17,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, generate_fields
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable

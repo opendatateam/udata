@@ -103,6 +103,30 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
 
+    def test_visualization_api_create_with_non_object_embedded_document(self):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+
+        serie = chart.to_dict()["series"][0]
+        cases = [
+            ("x_axis", [1, 2, 3], "x_axis"),
+            ("series", 1, "series"),
+            ("series", [[1, 2, 3]], "series"),
+            ("series", [{**serie, "filters": [1]}], "filters"),
+            ("series", [{**serie, "filters": {"column": "a"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "Unknown"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "AndFilters", "filters": 1}}], "filters"),
+        ]
+        for key, value, error_field in cases:
+            data = chart.to_dict()
+            data[key] = value
+            response = self.post(url_for("api.visualizations"), data)
+            assert response.status_code == 400, (key, value)
+            assert error_field in response.json["errors"], (key, value)
+
+        assert Chart.objects.count() == 0
+
     def test_visualization_api_create_filter(self):
         """It should create a visualization"""
         user = self.login()

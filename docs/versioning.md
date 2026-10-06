@@ -16,7 +16,7 @@ To create a release, you need to:
 The steps to make a release are:
 
 1. ensure translations are up to date
-2. ensure the CircleCI build is successful on the main branch
+2. ensure the [CI][] build is successful on the main branch
 3. run `./tag-version.sh X.Y.Z --dry-run` to preview the changelog and actions that will be performed
 4. run `./tag-version.sh X.Y.Z` to perform the release. The script will automatically check that you are on the main branch, that your working copy is clean, and that you are up to date with the remote. It will then:
     - retrieve all commits since the last tag
@@ -29,7 +29,7 @@ The steps to make a release are:
     - push both the commit and the tag to origin
     - create a GitHub release with the same changelog content
 5. check on [github][] that the release has been created
-6. wait for the [CircleCI][] build of the changelog commit on `main` to succeed — this is what
+6. wait for the [CI][] build of the changelog commit on `main` to succeed — this is what
    publishes to PyPI, tagged builds don't publish
 7. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
 8. celebrate!
@@ -46,5 +46,5 @@ release notes. Read the [changelog](changelog.md) before upgrading: this is wher
 changes, renamed settings and required migrations are documented.
 
 [github]: https://github.com/opendatateam/udata
-[CircleCI]: https://circleci.com/gh/opendatateam/udata
+[CI]: https://github.com/opendatateam/udata/actions/workflows/ci.yml
 [pep440]: https://www.python.org/dev/peps/pep-0440/
