@@ -1,3 +1,4 @@
+import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
@@ -2191,6 +2192,18 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
+
+    def test_create_with_compressed_file(self):
+        """A compressed file is described as the archive it is, not as its content"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(gzip.compress(b"a;b\n1;2\n")), "test.csv.gz")},
+            json=False,
+        )
+        self.assert201(response)
+        self.assertEqual(response.json["mime"], "application/gzip")
 
     def test_create_with_file_chunks(self):
         """It should create a resource from the API with a chunked file"""
