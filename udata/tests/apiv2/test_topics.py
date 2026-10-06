@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from bson import ObjectId
 from flask import url_for
@@ -7,6 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.core.page.factories import PageFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
@@ -1002,6 +1005,31 @@ class TopicElementsAPITest(APITestCase):
         assert no_elt_elt.tags == ["tag1", "tag2"]
         assert no_elt_elt.extras == {"extra": "value"}
         assert no_elt_elt.element is None
+
+    def test_add_page_element(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        page = PageFactory()
+        with patch("udata.core.topic.models.reindex") as reindex:
+            response = self.post(
+                url_for("apiv2.topic_elements", topic=topic),
+                [{"element": {"class": "Page", "id": page.id}}],
+            )
+            reindex.delay.assert_not_called()
+        self.assert201(response)
+        assert response.json[0]["element"]["class"] == "Page"
+        assert TopicElement.objects(topic=topic).first().element == page
+
+    def test_add_dataset_element_reindexes_it(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+        with patch("udata.core.topic.models.reindex") as reindex:
+            self.post(
+                url_for("apiv2.topic_elements", topic=topic),
+                [{"element": {"class": "Dataset", "id": dataset.id}}],
+            )
+            reindex.delay.assert_called_once_with("Dataset", str(dataset.id))
 
     def test_add_element_wrong_class(self):
         owner = self.login()

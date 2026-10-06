@@ -179,6 +179,10 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+class PageConverter(ModelConverter):
+    model = models.Page
+
+
 class ContactPointConverter(ModelConverter):
     model = models.ContactPoint
 
@@ -278,6 +282,7 @@ def init_app(app):
     app.url_map.converters["user"] = UserConverter
     app.url_map.converters["topic"] = TopicConverter
     app.url_map.converters["post"] = PostConverter
+    app.url_map.converters["page"] = PageConverter
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter

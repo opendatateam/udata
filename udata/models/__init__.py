@@ -17,6 +17,7 @@ from udata.core.site.models import *  # noqa
 from udata.core.activity.models import *  # noqa
 from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
+from udata.core.page.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
 from udata.core.spam.models import *  # noqa

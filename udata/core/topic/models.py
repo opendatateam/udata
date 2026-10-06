@@ -25,7 +25,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
-from udata.search import reindex
+from udata.search import adapter_catalog, reindex
 from udata.tasks import as_task_param
 from udata.uris import cdata_url
 
@@ -70,7 +70,7 @@ class TopicElement(Auditable, Document):
     element = field(
         # If modifying choices list below , also look at core/topic/parsers.py's
         # parse_filters for filtering support
-        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
+        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice", "Page"]),
         nested_fields=api.model_reference,
         allow_null=True,
         checks=[check_title_or_element_required],
@@ -97,13 +97,18 @@ class TopicElement(Auditable, Document):
     on_update = Signal()
     on_delete = Signal()
 
+    def reindex_element(self):
+        # Some elements (eg. Page) are not searchable, so there is nothing to reindex
+        if self.element.__class__ in adapter_catalog:
+            reindex.delay(*as_task_param(self.element))
+
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         """Trigger reindex when element is saved"""
         # Call parent post_save for Auditable functionality
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
-            reindex.delay(*as_task_param(document.element))
+            document.reindex_element()
         if document.topic:
             document.topic.save()
 
@@ -112,7 +117,7 @@ class TopicElement(Auditable, Document):
         """Trigger reindex when element is deleted"""
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
-                reindex.delay(*as_task_param(document.element))
+                document.reindex_element()
             if document.topic:
                 document.topic.save()
         except DoesNotExist:

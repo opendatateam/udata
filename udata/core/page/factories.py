@@ -1,0 +1,13 @@
+import factory
+
+from udata.factories import ModelFactory
+
+from .models import Page
+
+
+class PageFactory(ModelFactory):
+    class Meta:
+        model = Page
+
+    name = factory.Faker("sentence")
+    published = factory.Faker("past_datetime")
