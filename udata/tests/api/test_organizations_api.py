@@ -21,6 +21,7 @@ from udata.core.edito_blocs.models import (
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
@@ -37,6 +38,7 @@ from udata.tests.helpers import (
     assert_not_emit,
     assert_starts_with,
     assert_status,
+    capture_mails,
     create_test_image,
 )
 from udata.utils import faker
@@ -449,6 +451,29 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert410(response)
         assert Organization.objects.first().description == org.description
 
+    def test_organization_api_restore_deleted(self):
+        """It should restore a deleted organization from the API"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="admin")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert200(response)
+        assert response.json["deleted"] is None
+        org.reload()
+        assert org.deleted is None
+
+    def test_organization_api_restore_deleted_as_editor_forbidden(self):
+        """It should not restore a deleted organization from the API if not admin"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="editor")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert403(response)
+        org.reload()
+        assert org.deleted is not None
+
     def test_organization_api_update_with_non_object_body(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
@@ -717,6 +742,25 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org.reload()
         assert org.presentation_blocs == []
 
+    @pytest.mark.parametrize(
+        "bloc",
+        [
+            {"title": "no class"},
+            {"class": "UnknownBloc", "title": "unknown class"},
+            # A class registered with `generate_fields`, but not a bloc.
+            {"class": "Organization", "name": "not a bloc"},
+            "not an object",
+        ],
+    )
+    def test_create_rejects_bloc_without_valid_class(self, bloc):
+        self.login()
+        data = OrganizationFactory.as_dict()
+        data["presentation_blocs"] = [bloc]
+        response = self.post(url_for("api.organizations"), data)
+        assert400(response)
+        assert "presentation_blocs" in response.json["errors"]
+        assert Organization.objects.count() == 0
+
 
 class MembershipAPITest(PytestOnlyAPITestCase):
     def test_request_membership(self):
@@ -788,6 +832,29 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_on is None
         assert request.handled_by is None
         assert request.refusal_comment is None
+
+    def test_updating_a_pending_membership_request_pings_the_admins_again(self):
+        """Updating a request creates nothing, so `after_create` does not fire: the
+        admins are reached from the endpoint instead."""
+        user = self.login()
+        admin = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        organization.add_membership_request(MembershipRequest(user=user, comment="previous"))
+
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("api.request_membership", org=organization), {"comment": "a comment"}
+            )
+        assert200(response)
+
+        assert len(mails) == 1
+        assert mails[0].recipients == [admin.email]
+
+        # The admin already has one, and an unanswered request is not worth a second.
+        notifications = Notification.objects(user=admin, handled_at=None)
+        assert notifications.count() == 1
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
+        assert notifications.first().details.request_user == user
 
     def test_member_cannot_request_membership(self):
         """Accepting such a request could only fail, leaving it pending forever."""
@@ -1269,12 +1336,18 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.invite_member", org=organization)
-        self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+        with capture_mails() as mails:
+            self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+
+        # The invitee answers it, so they are the only one to hear about it: the admins
+        # used to get the request mail on this path too.
+        assert len(mails) == 1
+        assert mails[0].recipients == [invited_user.email]
 
         notifications = Notification.objects(user=invited_user)
         assert notifications.count() == 1
         assert notifications.first().details.request_organization == organization
-        assert notifications.first().details.kind == "invitation"
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
 
         admin_notifications = Notification.objects(user=user)
         assert admin_notifications.count() == 0
@@ -1289,13 +1362,20 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.invite_member", org=organization)
-        response = self.post(api_url, {"email": "newuser@example.com", "role": "editor"})
+        with capture_mails() as mails:
+            response = self.post(api_url, {"email": "newuser@example.com", "role": "editor"})
 
         assert201(response)
 
         assert response.json["kind"] == "invitation"
         assert response.json["email"] == "newuser@example.com"
         assert response.json["role"] == "editor"
+
+        # The address is the only channel there is: an in-app notification would need an
+        # account to hang on.
+        assert len(mails) == 1
+        assert mails[0].recipients == ["newuser@example.com"]
+        assert Notification.objects.count() == 0
 
         organization.reload()
         assert len(organization.requests) == 1
@@ -1519,6 +1599,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
         notification = Notification(
             user=invited_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=invited_user
             ),

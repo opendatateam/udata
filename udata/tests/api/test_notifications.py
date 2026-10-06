@@ -2,6 +2,7 @@ from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.features.notifications.constants import NotificationType
 
 from . import PytestOnlyAPITestCase
 
@@ -28,9 +29,10 @@ class NotificationsAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.notifications"))
         self.assert200(response)
         assert response.json["total"] == 1
-        assert response.json["data"][0]["details"]["request_organization"]["id"] == str(
-            organization.id
-        )
+        notification = response.json["data"][0]
+        assert notification["details"]["request_organization"]["id"] == str(organization.id)
+        assert notification["type"] == NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
+        assert notification["requires_action"] is True
 
     def test_read_notification(self):
         """Test marking a notification as read"""
@@ -47,6 +49,8 @@ class NotificationsAPITest(PytestOnlyAPITestCase):
         self.assert200(response)
         assert response.json["total"] == 1
         notification_id = response.json["data"][0]["id"]
+        assert response.json["data"][0]["type"] == NotificationType.ORGANIZATION_BADGE_CERTIFIED
+        assert response.json["data"][0]["requires_action"] is False
 
         # Now mark the notification as read
         response = self.post(url_for("api.read_notifications", notification=notification_id))

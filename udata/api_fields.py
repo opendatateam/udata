@@ -87,7 +87,6 @@ lazy_reference = api.model(
 
 DEFAULT_GENERIC_KEY = "class"
 
-classes_by_names = {}
 classes_by_parents = {}
 
 
@@ -519,7 +518,6 @@ def generate_fields(**kwargs) -> Callable:
         if issubclass(cls, mongoengine.Document) or issubclass(cls, mongoengine.DynamicDocument):
             read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
-        classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
 
         for key, field, info in get_fields(cls):
@@ -966,21 +964,22 @@ def run_check(check, value, key, obj, data):
 _T = TypeVar("_T")
 
 
-def _patch_embedded(value, field: str, document_class=None, generic_key: str | None = None):
+def _patch_embedded(
+    value,
+    field: str,
+    document_class=None,
+    generic_key: str | None = None,
+    allowed_classes: Iterable = (),
+):
     """Patch a new embedded document from a field value, `field` naming the value in errors.
 
-    A generic embedded document gets its class from `value[generic_key]` instead of
-    `document_class`.
+    A generic embedded document gets its class from `value[generic_key]`, which must be
+    one of `allowed_classes`, instead of `document_class`.
     """
     if not isinstance(value, dict):
         raise FieldValidationError(message="Expected an object", field=field)
     if generic_key is not None:
-        class_name = value.get(generic_key)
-        document_class = classes_by_names.get(class_name) if isinstance(class_name, str) else None
-        if document_class is None:
-            raise FieldValidationError(
-                message=f"Expected an object with a valid `{generic_key}` key", field=field
-            )
+        document_class = resolve_generic_class(value, generic_key, allowed_classes, field)
     return patch(document_class(), value)
 
 
@@ -1070,7 +1069,10 @@ def patch(obj: _T, request) -> _T:
                 mongoengine.fields.GenericEmbeddedDocumentField,
             ):
                 value = _patch_embedded(
-                    value, key, generic_key=info.get("generic_key", DEFAULT_GENERIC_KEY)
+                    value,
+                    key,
+                    generic_key=info.get("generic_key", DEFAULT_GENERIC_KEY),
+                    allowed_classes=model_attribute.choices or [],
                 )
             elif value and isinstance(
                 model_attribute,
@@ -1088,7 +1090,14 @@ def patch(obj: _T, request) -> _T:
                     else None
                 )
                 value = [
-                    _patch_embedded(embedded_value, key, document_class, generic_key)
+                    _patch_embedded(
+                        embedded_value,
+                        key,
+                        document_class,
+                        generic_key,
+                        # Same subclasses as the ones the read side marshals.
+                        allowed_classes=classes_by_parents.get(document_class, set()),
+                    )
                     for embedded_value in _expect_list(value, key)
                 ]
             elif (
@@ -1106,7 +1115,12 @@ def patch(obj: _T, request) -> _T:
                 # embedded document instance.
                 generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
                 value = [
-                    _patch_embedded(embedded_value, key, generic_key=generic_key)
+                    _patch_embedded(
+                        embedded_value,
+                        key,
+                        generic_key=generic_key,
+                        allowed_classes=model_attribute.field.choices or [],
+                    )
                     for embedded_value in _expect_list(value, key)
                 ]
 
@@ -1179,6 +1193,30 @@ def patch(obj: _T, request) -> _T:
         run_check(check, value, api_key, obj, data)
 
     return obj
+
+
+def resolve_generic_class(value, generic_key: str, allowed_classes: Iterable, field: str) -> type:
+    """Return the class a generic embedded payload names under `generic_key`.
+
+    The name comes from the client: it must be one of the classes the field accepts,
+    not any class registered with `generate_fields`.
+    """
+    from udata.mongo.engine import db
+
+    allowed = {
+        cls.__name__: cls
+        for cls in (db.resolve_model(c) if isinstance(c, str) else c for c in allowed_classes)
+    }
+    name = value.get(generic_key)
+    if not isinstance(name, str):
+        raise FieldValidationError(
+            message=f"Expected an object with a `{generic_key}` key", field=field
+        )
+    if name not in allowed:
+        raise FieldValidationError(
+            message=f"`{generic_key}` must be one of {sorted(allowed)}", field=field
+        )
+    return allowed[name]
 
 
 def is_value_modified(old_value, new_value) -> bool:
