@@ -948,23 +948,14 @@ def doi_from_rdf(d: RdfResource) -> str | None:
     (cruises, papers, other datasets), with nothing generic to tell the dataset's own DOI apart.
     """
     candidates = [
-        *d.objects(DCT.identifier),
-        *(
-            notation
-            for adms_identifier in d.objects(ADMS.identifier)
-            for notation in (
-                adms_identifier.objects(SKOS.notation)
-                if isinstance(adms_identifier, RdfResource)
-                else [adms_identifier]
-            )
-        ),
-        *d.objects(OWL.sameAs),
+        *rdf_unique_values(d, DCT.identifier),
+        *rdf_unique_values(d, ADMS.identifier, unwrap=[SKOS.notation]),
+        *rdf_unique_values(d, OWL.sameAs),
     ]
     # DOIs are case-insensitive: the same DOI written twice must not look like a conflict.
     dois: dict[str, str] = {}
     for candidate in candidates:
-        value = candidate.identifier if isinstance(candidate, RdfResource) else candidate
-        if match := DOI_IDENTIFIER_RE.match(str(value).strip()):
+        if match := DOI_IDENTIFIER_RE.match(str(candidate).strip()):
             dois.setdefault(match.group(1).lower(), match.group(1))
     if len(dois) > 1:
         # A dataset has a single DOI, so several of them is a source error. Picking one would

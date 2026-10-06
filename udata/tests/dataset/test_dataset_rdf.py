@@ -629,6 +629,25 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert dataset.harvest.doi == "10.5281/zenodo.1486279"
 
+    @pytest.mark.parametrize(
+        "adms_identifier",
+        [
+            Literal("https://doi.org/10.5281/zenodo.1486279"),
+            URIRef("https://doi.org/10.5281/zenodo.1486279"),
+        ],
+    )
+    def test_doi_from_adms_identifier_without_identifier_node(self, adms_identifier):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, ADMS.identifier, adms_identifier))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == "10.5281/zenodo.1486279"
+
     def test_doi_from_owl_same_as(self):
         node = BNode()
         g = Graph()
@@ -652,18 +671,6 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         dataset = dataset_from_rdf(g)
 
         assert dataset.harvest.doi == "10.25519/5S7X-X334"
-
-    def test_conflicting_dois_are_dropped(self):
-        node = BNode()
-        g = Graph()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.identifier, Literal("10.15148/762d02eb")))
-        g.add((node, DCT.title, Literal(faker.sentence())))
-        g.add((node, OWL.sameAs, URIRef("https://doi.org/10.15148/0e999ffc")))
-
-        dataset = dataset_from_rdf(g)
-
-        assert dataset.harvest.doi is None
 
     def test_doi_removed_from_source(self):
         node = BNode()

@@ -224,6 +224,20 @@ class DoiAPITest(PytestOnlyAPITestCase):
         assert dataset.doi is None
         assert not datacite.dois
 
+    def test_mint_doi_on_harvested_dataset_without_a_harvested_doi(self, datacite):
+        self.login(AdminFactory())
+        dataset = DatasetFactory(
+            organization=OrganizationFactory(),
+            harvest=HarvestDatasetMetadata(dct_identifier="http://data.test.org/datasets/1"),
+        )
+
+        response = self.post(url_for("api.dataset_doi", dataset=dataset))
+
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.doi == f"{PREFIX}/{dataset.id}"
+        assert datacite.dois[dataset.doi]["state"] == "findable"
+
     def test_mint_doi_on_hidden_dataset_is_refused(self, datacite):
         self.login(AdminFactory())
         dataset = DatasetFactory(organization=OrganizationFactory(), private=True)
