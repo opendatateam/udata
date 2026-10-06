@@ -1,5 +1,10 @@
 # Changelog
 
+## 17.11.1 (2026-10-06)
+
+- fix: store compressed resources as archives instead of their content type ([#3991](https://github.com/opendatateam/udata/pull/3991))
+
+
 ## 17.11.0 (2026-10-06)
 
 - chore(deps): update dependency faker to >=40.41, <40.42 ([#3972](https://github.com/opendatateam/udata/pull/3972))
