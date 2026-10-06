@@ -442,6 +442,21 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert400(response)
 
+    def test_user_api_create_and_update_with_non_object_body(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+
+        for url, method in (
+            (url_for("api.users"), self.post),
+            (url_for("api.user", user=user), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "email"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(User.objects.count(), 2)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
@@ -463,6 +478,22 @@ class UserAPITest(APITestCase):
         self.assert200(response)
         user.reload()
         self.assertEqual(user.email, "new.address@example.org")
+
+    def test_user_api_update_email_as_admin_links_pending_email_invitations(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+        organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", email="new.address@example.org")]
+        )
+        data = user.to_dict()
+        data["email"] = "New.Address@example.org"
+
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+
+        organization.reload()
+        assert organization.requests[0].user == user
+        assert organization.requests[0].email is None
 
     def test_user_api_update_with_website(self):
         """It should raise a 400"""

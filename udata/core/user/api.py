@@ -16,6 +16,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.api_fields import pending_invitation_fields
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.tasks import notify_membership_invitation_response
 from udata.core.storages.api import (
     image_parser,
@@ -23,7 +24,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.models import Role, datastore
-from udata.models import CommunityResource, Dataset, Reuse, User
+from udata.models import CommunityResource, Dataset, MembershipRequest, Organization, Reuse, User
 from udata.mongo.errors import FieldValidationError
 
 from .api_fields import (
@@ -239,7 +240,7 @@ class ApiTokenListAPI(API):
     @api.marshal_with(apitoken_created_fields, code=201)
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
-        data = request.json or {}
+        data = api.json_payload()
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
         token, plaintext = ApiToken.generate(
@@ -276,8 +277,6 @@ class MyOrgInvitationsAPI(API):
     @api.marshal_list_with(pending_invitation_fields)
     def get(self):
         """List pending organization invitations for current user."""
-        from udata.core.organization.models import Organization
-
         user = current_user._get_current_object()
         invitations = []
 
@@ -309,9 +308,6 @@ class AcceptOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Accept an organization invitation."""
-        from udata.core.organization.assignment import Assignment
-        from udata.core.organization.models import Member, MembershipRequest, Organization
-
         user = current_user._get_current_object()
 
         for org in Organization.objects(requests__id=id):
@@ -319,15 +315,7 @@ class AcceptOrgInvitationAPI(API):
                 if req.id == id and req.kind == "invitation" and req.user == user:
                     if req.status != "pending":
                         api.abort(400, "Invitation is not pending")
-
-                    req.status = "accepted"
-                    req.handled_by = user
-                    req.handled_on = datetime.now(UTC)
-
-                    member = Member(user=user, role=req.role)
-                    org.members.append(member)
-                    org.count_members()
-                    org.save()
+                    org.accept_membership_request(req, handled_by=user)
 
                     if req.assignments:
                         for subject in req.assignments:
@@ -341,7 +329,6 @@ class AcceptOrgInvitationAPI(API):
                                 subject=subject,
                             ).save()
 
-                    MembershipRequest.after_handle.send(req, org=org)
                     notify_membership_invitation_response.delay(str(org.id), str(req.id))
 
                     return {"message": "Invitation accepted"}, 200
@@ -358,8 +345,6 @@ class RefuseOrgInvitationAPI(API):
     @api.response(404, "Invitation not found")
     def post(self, id):
         """Refuse an organization invitation."""
-        from udata.core.organization.models import MembershipRequest, Organization
-
         user = current_user._get_current_object()
 
         for org in Organization.objects(requests__id=id):
@@ -411,7 +396,7 @@ class UserListAPI(API):
     @api.response(400, "Validation error")
     def post(self):
         """Create a new user"""
-        data = request.json or {}
+        data = api.json_payload()
         user = patch(User(), data)
         _apply_admin_only_fields(user, data)
         user.save()
@@ -473,7 +458,7 @@ class UserAPI(API):
     @api.response(400, "Validation error")
     def put(self, user):
         """Update a user given its identifier"""
-        data = request.json or {}
+        data = api.json_payload()
         user = patch(user, data)
         _apply_admin_only_fields(user, data)
         user.save()

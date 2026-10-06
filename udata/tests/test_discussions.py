@@ -26,6 +26,7 @@ from udata.core.discussions.tasks import (
     notify_new_discussion_comment,
 )
 from udata.core.linkable import Linkable
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.post.factories import PostFactory
@@ -1642,6 +1643,286 @@ class DiscussionsTest(APITestCase):
         self.login()
         response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
         self.assert403(response)
+
+
+class DiscussionOnBehalfOfOrgAsPartialEditorTest(APITestCase):
+    """A partial editor speaks in the name of the organization only on the objects
+    assigned to them, and keeps control over what they posted there.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partial_editor = UserFactory()
+        self.editor = UserFactory()
+        self.org = OrganizationFactory(partial_editors=[self.partial_editor], editors=[self.editor])
+        self.assigned_dataset = DatasetFactory(organization=self.org)
+        self.unassigned_dataset = DatasetFactory(organization=self.org)
+        Assignment(
+            user=self.partial_editor, organization=self.org, subject=self.assigned_dataset
+        ).save()
+
+    def start_discussion(self, dataset, organization=None):
+        payload = {
+            "title": "test title",
+            "comment": "bla bla",
+            "subject": {"class": "Dataset", "id": dataset.id},
+        }
+        if organization:
+            payload["organization"] = organization.id
+        return self.post(url_for("api.discussions"), payload)
+
+    def existing_discussion(self, dataset):
+        author = UserFactory()
+        return DiscussionFactory(
+            subject=dataset,
+            user=author,
+            discussion=[Message(content="bla bla", posted_by=author)],
+        )
+
+    def test_start_discussion_on_assigned_dataset(self):
+        self.login(self.partial_editor)
+
+        response = self.start_discussion(self.assigned_dataset, self.org)
+
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(self.org.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(self.org.id)
+
+    def test_cannot_start_discussion_on_unassigned_dataset(self):
+        self.login(self.partial_editor)
+
+        response = self.start_discussion(self.unassigned_dataset, self.org)
+
+        self.assert400(response)
+        assert Discussion.objects(subject=self.unassigned_dataset).count() == 0
+
+    def test_cannot_start_discussion_on_another_org_dataset(self):
+        self.login(self.partial_editor)
+        dataset = DatasetFactory(organization=OrganizationFactory())
+
+        response = self.start_discussion(dataset, self.org)
+
+        self.assert400(response)
+        assert Discussion.objects(subject=dataset).count() == 0
+
+    def test_cannot_start_discussion_on_user_dataset(self):
+        self.login(self.partial_editor)
+        dataset = DatasetFactory(owner=UserFactory())
+
+        response = self.start_discussion(dataset, self.org)
+
+        self.assert400(response)
+        assert Discussion.objects(subject=dataset).count() == 0
+
+    def test_cannot_start_discussion_in_the_name_of_another_org_of_theirs(self):
+        """The assignment is on a dataset of `self.org`: it grants nothing to speak
+        in the name of another organization the user is also a partial editor of.
+        """
+        other_org = OrganizationFactory(partial_editors=[self.partial_editor])
+        self.login(self.partial_editor)
+
+        response = self.start_discussion(self.assigned_dataset, other_org)
+
+        self.assert400(response)
+        assert Discussion.objects(subject=self.assigned_dataset).count() == 0
+
+    def test_start_discussion_in_their_own_name_on_unassigned_dataset(self):
+        self.login(self.partial_editor)
+
+        response = self.start_discussion(self.unassigned_dataset)
+
+        self.assert201(response)
+        assert response.json["organization"] is None
+
+    def test_reply_on_assigned_dataset(self):
+        discussion = self.existing_discussion(self.assigned_dataset)
+        self.login(self.partial_editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": self.org.id, "comment": "A comment"},
+        )
+
+        self.assert200(response)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(self.org.id)
+
+    def test_cannot_reply_on_unassigned_dataset(self):
+        discussion = self.existing_discussion(self.unassigned_dataset)
+        self.login(self.partial_editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": self.org.id, "comment": "A comment"},
+        )
+
+        self.assert400(response)
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+
+    def test_cannot_reply_on_another_org_dataset(self):
+        discussion = self.existing_discussion(DatasetFactory(organization=OrganizationFactory()))
+        self.login(self.partial_editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": self.org.id, "comment": "A comment"},
+        )
+
+        self.assert400(response)
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+
+    def test_cannot_reply_in_the_name_of_another_org_of_theirs(self):
+        other_org = OrganizationFactory(partial_editors=[self.partial_editor])
+        discussion = self.existing_discussion(self.assigned_dataset)
+        self.login(self.partial_editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": other_org.id, "comment": "A comment"},
+        )
+
+        self.assert400(response)
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+
+    def test_reply_in_their_own_name_on_unassigned_dataset(self):
+        discussion = self.existing_discussion(self.unassigned_dataset)
+        self.login(self.partial_editor)
+
+        response = self.post(url_for("api.discussion", id=discussion.id), {"comment": "A comment"})
+
+        self.assert200(response)
+        assert response.json["discussion"][1]["posted_by_organization"] is None
+
+    def test_cannot_close_on_unassigned_dataset(self):
+        """The partial editor opened the discussion in their own name, so they may close
+        it — but not in the name of an organization they cannot speak for here.
+        """
+        discussion = DiscussionFactory(
+            subject=self.unassigned_dataset,
+            user=self.partial_editor,
+            discussion=[Message(content="bla bla", posted_by=self.partial_editor)],
+        )
+        self.login(self.partial_editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": self.org.id, "close": True},
+        )
+
+        self.assert400(response)
+        discussion.reload()
+        assert discussion.closed is None
+
+    def test_editor_replies_in_the_name_of_their_org_on_another_org_dataset(self):
+        """Full members speak for their organization everywhere, not only on its own
+        content: a reuser organization writing to a producer is the common case.
+        """
+        editor = UserFactory()
+        org = OrganizationFactory(editors=[editor])
+        discussion = self.existing_discussion(DatasetFactory(organization=OrganizationFactory()))
+        self.login(editor)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id),
+            {"organization": org.id, "comment": "A comment"},
+        )
+
+        self.assert200(response)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(org.id)
+
+    def test_admin_starts_discussion_in_the_name_of_their_org_on_another_org_dataset(self):
+        admin = UserFactory()
+        org = OrganizationFactory(admins=[admin])
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        self.login(admin)
+
+        response = self.start_discussion(dataset, org)
+
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(org.id)
+
+    def test_edit_and_delete_their_org_message_on_assigned_dataset(self):
+        discussion = self.existing_discussion(self.assigned_dataset)
+        discussion.discussion.append(
+            Message(
+                content="in the name of the org",
+                posted_by=self.partial_editor,
+                posted_by_organization=self.org,
+            )
+        )
+        discussion.save()
+        self.login(self.partial_editor)
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=1), {"comment": "fixed"}
+        )
+        self.assert200(response)
+        discussion.reload()
+        assert discussion.discussion[1].content == "fixed"
+
+        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
+        self.assertStatus(response, 204)
+        discussion.reload()
+        assert len(discussion.discussion) == 1
+
+    def test_cannot_edit_nor_delete_org_message_on_unassigned_dataset(self):
+        discussion = self.existing_discussion(self.unassigned_dataset)
+        discussion.discussion.append(
+            Message(
+                content="in the name of the org",
+                posted_by=self.editor,
+                posted_by_organization=self.org,
+            )
+        )
+        discussion.save()
+        self.login(self.partial_editor)
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=1), {"comment": "hacked"}
+        )
+        self.assert403(response)
+
+        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
+        self.assert403(response)
+
+        discussion.reload()
+        assert discussion.discussion[1].content == "in the name of the org"
+
+    def test_edit_and_delete_their_org_discussion_on_assigned_dataset(self):
+        self.login(self.partial_editor)
+        response = self.start_discussion(self.assigned_dataset, self.org)
+        self.assert201(response)
+        discussion_id = response.json["id"]
+
+        response = self.put(url_for("api.discussion", id=discussion_id), {"title": "fixed"})
+        self.assert200(response)
+        assert response.json["title"] == "fixed"
+
+        response = self.delete(url_for("api.discussion", id=discussion_id))
+        self.assertStatus(response, 204)
+        assert Discussion.objects(id=discussion_id).count() == 0
+
+    def test_cannot_edit_nor_delete_org_discussion_on_unassigned_dataset(self):
+        discussion = DiscussionFactory(
+            subject=self.unassigned_dataset,
+            user=self.editor,
+            organization=self.org,
+            discussion=[
+                Message(content="bla bla", posted_by=self.editor, posted_by_organization=self.org)
+            ],
+        )
+        self.login(self.partial_editor)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {"title": "hacked"})
+        self.assert403(response)
+
+        response = self.delete(url_for("api.discussion", id=discussion.id))
+        self.assert403(response)
+
+        discussion.reload()
+        assert discussion.title != "hacked"
 
 
 class NotifyDiscussionsTest(APITestCase):
