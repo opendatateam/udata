@@ -210,6 +210,20 @@ class DoiAPITest(PytestOnlyAPITestCase):
         assert dataset.doi == f"{PREFIX}/already"
         assert not datacite.dois
 
+    def test_mint_doi_on_dataset_with_a_harvested_doi_is_refused(self, datacite):
+        self.login(AdminFactory())
+        dataset = DatasetFactory(
+            organization=OrganizationFactory(),
+            harvest=HarvestDatasetMetadata(doi="10.15148/762d02eb"),
+        )
+
+        response = self.post(url_for("api.dataset_doi", dataset=dataset))
+
+        self.assertStatus(response, 409)
+        dataset.reload()
+        assert dataset.doi is None
+        assert not datacite.dois
+
     def test_mint_doi_on_hidden_dataset_is_refused(self, datacite):
         self.login(AdminFactory())
         dataset = DatasetFactory(organization=OrganizationFactory(), private=True)

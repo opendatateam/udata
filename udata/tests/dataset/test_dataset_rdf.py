@@ -577,6 +577,42 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert dataset.description == "a description"
 
+    @pytest.mark.parametrize(
+        "identifier,expected",
+        [
+            ("10.15148/762d02eb-82dc", "10.15148/762d02eb-82dc"),
+            ("https://doi.org/10.25519/HYHX-NE30", "10.25519/HYHX-NE30"),
+            ("http://dx.doi.org/10.12770/0d177ff9", "10.12770/0d177ff9"),
+            ("doi:10.5281/zenodo.123", "10.5281/zenodo.123"),
+            (" 10.15148/762d02eb-82dc\n", "10.15148/762d02eb-82dc"),
+            ("0437a976-cff1-4fa6-807a-c23006df2f8f", None),
+            ("https://example.org/dataset/10.15148/762d02eb", None),
+            ("FR-330-715-368-00362_IFR_DOI_SPECTRHABENT_MNT", None),
+        ],
+    )
+    def test_doi_from_identifier(self, identifier, expected):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(identifier)))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == expected
+
+    def test_doi_removed_from_source(self):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        existing = DatasetFactory.build(harvest=HarvestDatasetMetadata(doi="10.15148/762d02eb"))
+
+        dataset = dataset_from_rdf(g, existing)
+
+        assert dataset.harvest.doi is None
+
     def test_future_modified_at(self):
         node = BNode()
         g = Graph()

@@ -69,6 +69,11 @@ dataset_harvest_fields = api.model(
         "dct_identifier": fields.String(
             description="The dct:identifier property from the harvested dataset", allow_null=True
         ),
+        "doi": fields.String(
+            description="The DOI declared by the source as the dct:identifier of the dataset",
+            allow_null=True,
+            readonly=True,
+        ),
     },
 )
 

@@ -5,6 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
+import re
 from collections.abc import Collection
 from datetime import UTC, date, datetime
 from fractions import Fraction
@@ -147,6 +148,9 @@ QUDT_TO_UDATA = {
     QUDT.KiloM: DistanceUom.KILOMETER,
     QUDT.M: DistanceUom.METER,
 }
+
+# A DOI as sources write it in `dct:identifier`: bare, as a `doi:` URI or as a resolver URL.
+DOI_IDENTIFIER_RE = re.compile(r"^(?:doi:|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I)
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -1061,6 +1065,11 @@ def dataset_from_rdf(
 
     dataset.set_harvested()
     dataset.harvest.dct_identifier = identifier
+    # Only `dct:identifier` says which DOI *is* the dataset. Sources also publish DOIs as
+    # distributions, but most of them point to related objects (cruises, papers, other
+    # datasets), with nothing generic to tell the dataset's own DOI apart.
+    doi_match = DOI_IDENTIFIER_RE.match(identifier.strip()) if identifier else None
+    dataset.harvest.doi = doi_match.group(1) if doi_match else None
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at

@@ -477,6 +477,9 @@ class DatasetDoiAPI(API):
         """Mint a DOI for the dataset and attach it"""
         if dataset.doi:
             api.abort(409, "Dataset already has a DOI")
+        if dataset.harvest and dataset.harvest.doi:
+            # A second DOI would split citations of the same dataset between two identifiers.
+            api.abort(409, "Dataset already has a DOI declared by its harvest source")
         dataset.doi = create_doi(dataset)
         dataset.save()
         return dataset
