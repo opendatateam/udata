@@ -4,7 +4,9 @@ from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import MembershipAcceptedNotificationDetails
 from udata.core.user.factories import UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -52,7 +54,11 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         assert notification is not None
 
         # Create an unrelated notification that should not be cleaned up
-        Notification(user=other_user).save()
+        Notification(
+            user=other_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED,
+            details=MembershipAcceptedNotificationDetails(organization=OrganizationFactory()),
+        ).save()
 
         dataservice.deleted_at = datetime.now(UTC)
         dataservice.save()
@@ -98,7 +104,11 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 2
 
         # Create an unrelated notification that should not be cleaned up
-        Notification(user=other_user).save()
+        Notification(
+            user=other_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED,
+            details=MembershipAcceptedNotificationDetails(organization=OrganizationFactory()),
+        ).save()
         assert Notification.objects.count() == 3
 
         # Delete the dataservice

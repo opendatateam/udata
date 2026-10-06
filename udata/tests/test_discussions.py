@@ -38,6 +38,7 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.db.migrations import load_migration
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.models import Dataset, License, Member
 from udata.mongo import db
@@ -1947,6 +1948,8 @@ class NotifyDiscussionsTest(APITestCase):
         # Verify notification was created for the owner
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].type, NotificationType.DISCUSSION_NEW)
+        # Transitional: still written for the front, which reads it instead of `type`
         self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_DISCUSSION)
 
     def test_new_discussion_comment_mail(self):
@@ -1978,6 +1981,8 @@ class NotifyDiscussionsTest(APITestCase):
         # Verify notification was created for the owner
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].type, NotificationType.DISCUSSION_COMMENT)
+        # Transitional: still written for the front, which reads it instead of `type`
         self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
         self.assertEqual(notifications[0].details.message_id, new_message.id)
 
@@ -2000,9 +2005,7 @@ class NotifyDiscussionsTest(APITestCase):
             notify_new_discussion_comment(discussion.id, message=len(discussion.discussion) - 1)
 
         # Verify previous notifications were handled
-        notifications = Notification.objects(
-            user=commenter, details__status=DiscussionStatus.NEW_DISCUSSION
-        )
+        notifications = Notification.objects(user=commenter, type=NotificationType.DISCUSSION_NEW)
         for notification in notifications:
             assert notification.handled_at is not None
 
@@ -2036,6 +2039,8 @@ class NotifyDiscussionsTest(APITestCase):
         # Verify notifications were created for the expected recipients
         notifications = Notification.objects(user__in=[poster, commenter])
         assert len(notifications) == len(expected_recipients)
+        assert notifications[0].type == NotificationType.DISCUSSION_CLOSED
+        # Transitional: still written for the front, which reads it instead of `type`
         assert notifications[0].details.status == DiscussionStatus.CLOSED
 
     def test_new_discussion_closed_handle_previous_notifications(self):
@@ -2065,7 +2070,7 @@ class NotifyDiscussionsTest(APITestCase):
 
         # Verify previous notifications (NEW_DISCUSSION and NEW_COMMENT) were handled
         notifications = Notification.objects(
-            user=commenter, details__status__ne=DiscussionStatus.CLOSED
+            user=commenter, type__ne=NotificationType.DISCUSSION_CLOSED
         )
         for notification in notifications:
             print(notification)
@@ -2487,9 +2492,9 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
     def notify_discussion(self, user, discussion_id):
         notification = Notification(
             user=user,
+            type=NotificationType.DISCUSSION_NEW,
             details=DiscussionNotificationDetails(
                 discussion=Discussion.objects.get(pk=discussion_id),
-                status=DiscussionStatus.NEW_DISCUSSION,
             ),
         )
         notification.save()

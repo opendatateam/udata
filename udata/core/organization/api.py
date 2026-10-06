@@ -43,7 +43,6 @@ from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
-    notify_membership_invitation,
     notify_membership_invitation_canceled,
     notify_membership_request,
     notify_membership_response,
@@ -380,10 +379,11 @@ class MembershipRequestAPI(API):
 
         if code == 200:
             org.save()
+            # Updating a pending request creates nothing, so `after_create` does not
+            # fire: the admins are pinged from here instead.
+            notify_membership_request.delay(str(org.id), str(membership_request.id))
         else:
             org.add_membership_request(membership_request)
-
-        notify_membership_request.delay(str(org.id), str(membership_request.id))
 
         return membership_request, code
 
@@ -516,8 +516,6 @@ class MemberInviteAPI(API):
             comment=data.get("comment"),
             assignment_subjects=assignment_subjects,
         )
-
-        notify_membership_invitation.delay(str(org.id), str(invitation.id))
 
         return invitation, 201
 
