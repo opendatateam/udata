@@ -70,7 +70,8 @@ dataset_harvest_fields = api.model(
             description="The dct:identifier property from the harvested dataset", allow_null=True
         ),
         "doi": fields.String(
-            description="The DOI declared by the source as the dct:identifier of the dataset",
+            description="The DOI the source declares for the dataset (dct:identifier, "
+            "adms:identifier or owl:sameAs)",
             allow_null=True,
             readonly=True,
         ),

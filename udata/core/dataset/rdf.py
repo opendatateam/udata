@@ -16,7 +16,7 @@ from flask import current_app
 from geomet import wkt
 from mongoengine.errors import ValidationError
 from rdflib import BNode, Graph, Literal, Node, URIRef
-from rdflib.namespace import RDF
+from rdflib.namespace import OWL, RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
@@ -149,8 +149,10 @@ QUDT_TO_UDATA = {
     QUDT.M: DistanceUom.METER,
 }
 
-# A DOI as sources write it in `dct:identifier`: bare, as a `doi:` URI or as a resolver URL.
-DOI_IDENTIFIER_RE = re.compile(r"^(?:doi:|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I)
+# A DOI as sources write it: bare, as a `doi:` or `info:doi/` URI, or as a resolver URL.
+DOI_IDENTIFIER_RE = re.compile(
+    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I
+)
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -939,6 +941,41 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> R
     return resource
 
 
+def doi_from_rdf(d: RdfResource) -> str | None:
+    """The DOI identifying the dataset, from the properties DCAT gives for identifiers.
+
+    Sources also publish DOIs as distributions, but most of them point to related objects
+    (cruises, papers, other datasets), with nothing generic to tell the dataset's own DOI apart.
+    """
+    candidates = [
+        *d.objects(DCT.identifier),
+        *(
+            notation
+            for adms_identifier in d.objects(ADMS.identifier)
+            for notation in (
+                adms_identifier.objects(SKOS.notation)
+                if isinstance(adms_identifier, RdfResource)
+                else [adms_identifier]
+            )
+        ),
+        *d.objects(OWL.sameAs),
+    ]
+    # DOIs are case-insensitive: the same DOI written twice must not look like a conflict.
+    dois: dict[str, str] = {}
+    for candidate in candidates:
+        value = candidate.identifier if isinstance(candidate, RdfResource) else candidate
+        if match := DOI_IDENTIFIER_RE.match(str(value).strip()):
+            dois.setdefault(match.group(1).lower(), match.group(1))
+    if len(dois) > 1:
+        # A dataset has a single DOI, so several of them is a source error. Picking one would
+        # depend on the RDF parsing order and could change from one harvest to the next.
+        log.warning(
+            f"Several DOIs identify this dataset, none is kept: {', '.join(sorted(dois.values()))}"
+        )
+        return None
+    return next(iter(dois.values()), None)
+
+
 def dataset_from_rdf(
     graph: Graph,
     dataset: Dataset | None = None,
@@ -1065,11 +1102,7 @@ def dataset_from_rdf(
 
     dataset.set_harvested()
     dataset.harvest.dct_identifier = identifier
-    # Only `dct:identifier` says which DOI *is* the dataset. Sources also publish DOIs as
-    # distributions, but most of them point to related objects (cruises, papers, other
-    # datasets), with nothing generic to tell the dataset's own DOI apart.
-    doi_match = DOI_IDENTIFIER_RE.match(identifier.strip()) if identifier else None
-    dataset.harvest.doi = doi_match.group(1) if doi_match else None
+    dataset.harvest.doi = doi_from_rdf(d)
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
