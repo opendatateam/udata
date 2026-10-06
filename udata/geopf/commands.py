@@ -6,8 +6,8 @@ from udata.core.user.models import User
 
 from .auth import resolve_access_token
 from .client import GeopfClient, GeopfError, GeopfReauthRequired
+from .models import build_datasheet_url
 from .tasks import (
-    datasheet_url,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
     resolve_datasheet_name,
@@ -92,7 +92,7 @@ def push_metadata(dataset_id, user_id, token, datastore_id):
         exit_with_error(str(e))
 
     click.echo(f"metadata={metadata_id}")
-    click.echo(f"fiche={datasheet_url(datastore_id, resolve_datasheet_name(dataset))}")
+    click.echo(f"fiche={build_datasheet_url(datastore_id, resolve_datasheet_name(dataset))}")
 
 
 @grp.command("pull-offerings")

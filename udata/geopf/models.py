@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 
+from flask import current_app
 from mongoengine import (
     DateTimeField,
     EmbeddedDocument,
@@ -13,6 +15,13 @@ from udata.mongo import db
 from udata.mongo.encrypted_field import EncryptedStringField
 
 
+def build_datasheet_url(datastore_id: str, datasheet_name: str) -> str:
+    """URL of the datasheet's fiche on the cartes.gouv.fr dashboard."""
+    base = current_app.config["GEOPF_DASHBOARD_BASE"]
+    name = quote(datasheet_name, safe="")
+    return f"{base}/tableau-de-bord/entrepots/{datastore_id}/donnees/{name}"
+
+
 @generate_fields()
 class GeopfDatasetPushMetadata(EmbeddedDocument):
     """Local state of a dataset's push to Géoplateforme."""
@@ -23,18 +32,21 @@ class GeopfDatasetPushMetadata(EmbeddedDocument):
         allow_null=True,
         description="The geopf datastore configured for this dataset's pushes",
     )
-    # StringField, not URLField: server-built from config, never user input.
-    datasheet_url = field(
-        StringField(),
-        readonly=True,
-        allow_null=True,
-        description="The cartes.gouv.fr fiche de données url for this dataset",
-    )
     # Internal only, hence not field-wrapped
     metadata_id = StringField()
     # The geopf `datasheet_name` tag grouping this dataset's entities into one
     # fiche. Frozen at first push so a later title change can't split the fiche.
     datasheet_name = StringField()
+
+    @property
+    @field(
+        description="The cartes.gouv.fr fiche de données url for this dataset",
+        allow_null=True,
+    )
+    def datasheet_url(self) -> str | None:
+        if not (self.datastore_id and self.datasheet_name):
+            return None
+        return build_datasheet_url(self.datastore_id, self.datasheet_name)
 
 
 @generate_fields()

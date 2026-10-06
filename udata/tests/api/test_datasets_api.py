@@ -3566,15 +3566,15 @@ class GeopfMetadataAPITest(PytestOnlyAPITestCase):
     def test_dataset_with_geopf_push_metadata(self):
         dataset = DatasetFactory(
             geopf=GeopfDatasetMetadata(
-                push=GeopfDatasetPushMetadata(
-                    datastore_id="ds-1", datasheet_url="https://cartes.example.com/fiche"
-                )
+                push=GeopfDatasetPushMetadata(datastore_id="ds-1", datasheet_name="Ma fiche")
             )
         )
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
-        assert response.json["geopf"] == {"datasheet_url": "https://cartes.example.com/fiche"}
+        assert response.json["geopf"] == {
+            "datasheet_url": "https://cartes.gouv.fr/tableau-de-bord/entrepots/ds-1/donnees/Ma%20fiche"
+        }
 
     def test_dataset_without_geopf_metadata_is_null(self):
         dataset = DatasetFactory()

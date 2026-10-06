@@ -118,7 +118,7 @@ Set on the original pushed resource by the push pipeline.
 |---|---|---|
 | `datastore_id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first *successful* push, reused as-is by every later push. |
 | `metadata_id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. Internal only, never surfaced via `/status/`. |
-| `datasheet_url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
+| `datasheet_url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Computed, not stored: built from `GEOPF_DASHBOARD_BASE`, `datastore_id` and the frozen `datasheet_name`, so `null` until the first successful push. |
 
 ### ISO 19115 metadata
 

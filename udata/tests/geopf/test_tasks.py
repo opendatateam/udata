@@ -15,6 +15,7 @@ from udata.geopf.models import (
     GeopfResourceMetadata,
     GeopfResourceOfferingMetadata,
     GeopfResourcePushMetadata,
+    build_datasheet_url,
     dataset_push_metadata,
     resource_offering_metadata,
 )
@@ -28,7 +29,6 @@ from udata.geopf.tasks import (
     _run_pipeline,
     _storage_chunks,
     _stored_data_name,
-    datasheet_url,
     pull_offerings_for_dataset,
     pull_offerings_from_geopf,
     push_resource_to_geopf,
@@ -227,8 +227,8 @@ class NamingTest(PytestOnlyDBTestCase):
         assert not name[0].isdigit()
 
     @pytest.mark.options(GEOPF_DASHBOARD_BASE="https://cartes.example.org")
-    def test_datasheet_url_quotes_datasheet_name(self):
-        assert datasheet_url("ds-1", "Mon jeu / données") == (
+    def test_build_datasheet_url_quotes_datasheet_name(self):
+        assert build_datasheet_url("ds-1", "Mon jeu / données") == (
             "https://cartes.example.org/tableau-de-bord/entrepots/ds-1/donnees/"
             "Mon%20jeu%20%2F%20donn%C3%A9es"
         )
@@ -423,7 +423,6 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         assert r.geopf.push.status == "done"
         assert r.geopf.push.stored_data_id == "sd-1"
         assert r.geopf.push.last_synced_at is not None
-        assert dataset.geopf.push.datasheet_url
 
     def test_leaves_upload_in_place_on_timeout(self):
         resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
