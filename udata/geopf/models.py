@@ -24,7 +24,7 @@ class GeopfDatasetPushMetadata(EmbeddedDocument):
         description="The geopf datastore configured for this dataset's pushes",
     )
     # StringField, not URLField: server-built from config, never user input.
-    fiche_url = field(
+    datasheet_url = field(
         StringField(),
         readonly=True,
         allow_null=True,

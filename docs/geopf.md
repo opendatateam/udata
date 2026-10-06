@@ -61,7 +61,7 @@ Each flow's specific metadata fields are listed in its own section below.
 
 ```json
 {
-  "push": {"datastore_id": "0f9b…", "fiche_url": "https://cartes.gouv.fr/…"},
+  "push": {"datastore_id": "0f9b…", "datasheet_url": "https://cartes.gouv.fr/…"},
   "pull": {"status": "done", "last_synced_at": "…", "error": null, "task_id": "…"},
   "pushable": [
     {"id": "…", "title": "communes.gpkg", "format": "gpkg", "url": "…",
@@ -118,7 +118,7 @@ Set on the original pushed resource by the push pipeline.
 |---|---|---|
 | `datastore_id` | UUID string | Entrepôt (datastore) this dataset is pushed into. Set on the dataset's first *successful* push, reused as-is by every later push. |
 | `metadata_id` | UUID string | Entrepôt metadata record ID. Stored after the first successful metadata upload to avoid re-creating the record on subsequent pushes. Internal only, never surfaced via `/status/`. |
-| `fiche_url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
+| `datasheet_url` | URL | Direct link to the dataset's fiche on cartes.gouv.fr. Set after the first successful push of any resource. |
 
 ### ISO 19115 metadata
 

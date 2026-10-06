@@ -93,8 +93,8 @@ resource_harvest_fields = api.model(
 dataset_geopf_fields = api.model(
     "GeopfDatasetMetadata",
     {
-        "fiche_url": fields.String(
-            attribute="push.fiche_url",
+        "datasheet_url": fields.String(
+            attribute="push.datasheet_url",
             description="Public Géoplateforme fiche (dashboard) url, once pushed",
             allow_null=True,
             readonly=True,

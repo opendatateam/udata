@@ -529,7 +529,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
         assert response.json == {
             "push": {
                 "datastore_id": None,
-                "fiche_url": None,
+                "datasheet_url": None,
             },
             "pull": {
                 "status": None,
@@ -584,7 +584,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
             resources=[resource],
             geopf=GeopfDatasetMetadata(
                 push=GeopfDatasetPushMetadata(
-                    datastore_id="ds-1", fiche_url="https://cartes.example.com/fiche"
+                    datastore_id="ds-1", datasheet_url="https://cartes.example.com/fiche"
                 ),
                 pull=GeopfDatasetPullMetadata(status="error", error="boom", task_id="task-2"),
             ),
@@ -594,7 +594,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
         self.assert200(response)
         assert response.json["push"] == {
             "datastore_id": "ds-1",
-            "fiche_url": "https://cartes.example.com/fiche",
+            "datasheet_url": "https://cartes.example.com/fiche",
         }
         assert response.json["pull"] == {
             "status": "error",

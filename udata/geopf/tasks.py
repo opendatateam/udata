@@ -253,7 +253,7 @@ def _run_pipeline(
 
     sync_metadata(dataset, client)
 
-    url = fiche_url(datastore_id, datasheet_name)
+    url = datasheet_url(datastore_id, datasheet_name)
     set_resource_push_metadata(
         dataset,
         resource,
@@ -261,11 +261,11 @@ def _run_pipeline(
         stored_data_id=stored_data_id,
         last_synced_at=datetime.now(UTC),
     )
-    set_dataset_push_metadata(dataset, fiche_url=url)
+    set_dataset_push_metadata(dataset, datasheet_url=url)
     log.info("geopf: push complete dataset=%s resource=%s fiche=%s", dataset_id, resource_id, url)
 
 
-def fiche_url(datastore_id: str, datasheet_name: str) -> str:
+def datasheet_url(datastore_id: str, datasheet_name: str) -> str:
     """URL of the datasheet's fiche on the cartes.gouv.fr dashboard."""
     base = current_app.config["GEOPF_DASHBOARD_BASE"]
     name = quote(datasheet_name, safe="")
