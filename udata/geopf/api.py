@@ -188,13 +188,16 @@ class GeopfPushAPI(ResourceMixin, API):
     @api.doc("geopf_push")
     @api.expect(geopf_push_request_fields)
     @api.marshal_with(geopf_task_fields, code=202)
-    @api.response(400, "Unsupported resource format or missing datastore_id")
+    @api.response(400, "Private dataset, unsupported resource format or missing datastore_id")
     @api.response(404, "Resource not found")
     @api.response(409, "A push is already in progress for this resource")
     @api.response(424, "Not connected to Géoplateforme")
     def post(self, dataset, rid):
         """Push a resource to Géoplateforme, as the current user."""
         dataset.permissions["edit_resources"].test()
+
+        if dataset.private:
+            api.abort(400, "Private datasets can't be pushed to Géoplateforme")
 
         resource = self.get_resource_or_404(dataset, rid)
         pushable_formats = current_app.config["GEOPF_PUSHABLE_FORMATS"]

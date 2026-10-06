@@ -236,6 +236,18 @@ class GeopfPushApiTest(APITestCase):
         response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
         self.assert400(response)
 
+    def test_rejects_private_dataset(self):
+        user = self.login()
+        resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
+        dataset = DatasetFactory(owner=user, private=True, resources=[resource])
+        create_geopf_token(user)
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay") as delay:
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        self.assert400(response)
+        delay.assert_not_called()
+
     @pytest.mark.options(GEOPF_PUSHABLE_FORMATS=frozenset({"gpkg", "csv"}))
     def test_allows_format_permitted_by_config(self):
         user = self.login()
