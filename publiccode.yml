@@ -2,8 +2,8 @@ publiccodeYmlVersion: '0.5.0'
 name: udata
 url: https://github.com/opendatateam/udata
 landingURL: https://udata.readthedocs.io
-softwareVersion: v17.10.0
-releaseDate: '2026-10-01'
+softwareVersion: v17.11.0
+releaseDate: '2026-10-06'
 platforms:
   - web
 logo: https://github.com/opendatateam.png
