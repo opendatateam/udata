@@ -167,8 +167,9 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
 
     def clean(self):
         super().clean()
-        if self.type is None:
-            # Reported by the `required` validation, which mongoengine runs after clean()
+        if not isinstance(self.type, NotificationType):
+            # A missing or unknown type is reported by the field validation, which
+            # mongoengine runs after clean(): EnumField keeps invalid values as is.
             return
         expected = DETAILS_BY_TYPE[self.type]
         if not isinstance(self.details, expected):

@@ -270,6 +270,16 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
         with pytest.raises(ValidationError):
             notification.save()
 
+    def test_saving_an_unknown_type_is_rejected(self):
+        notification = Notification(
+            user=UserFactory(),
+            type="unknown",
+            details=ReuseCreatedNotificationDetails(reuse=ReuseFactory()),
+        )
+
+        with pytest.raises(ValidationError):
+            notification.save()
+
     def test_dataservice_notification_cleanup_on_dataset_delete(self):
         """Test that dataservice notifications are cleaned up when a referenced dataset is deleted."""
         owner = UserFactory()
