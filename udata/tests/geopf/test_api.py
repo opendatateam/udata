@@ -292,6 +292,28 @@ class GeopfPushApiTest(APITestCase):
         self.assertStatus(response, 409)
         mock_delay.assert_not_called()
 
+    def test_already_pushed_resource_returns_409(self):
+        user = self.login()
+        resource = ResourceFactory.build(
+            format="gpkg",
+            url="http://files.example.com/f.gpkg",
+            geopf=GeopfResourceMetadata(
+                push=GeopfResourcePushMetadata(status="done", stored_data_id="sd-1")
+            ),
+        )
+        dataset = DatasetFactory(
+            owner=user,
+            resources=[resource],
+            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-existing")),
+        )
+        create_geopf_token(user)
+
+        with patch("udata.geopf.api.push_resource_to_geopf.delay") as mock_delay:
+            response = self.post(url_for("api.geopf_push", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 409)
+        mock_delay.assert_not_called()
+
     def test_connected_enqueues_push_task(self):
         user = self.login()
         resource = ResourceFactory.build(format="gpkg", url="http://files.example.com/f.gpkg")
