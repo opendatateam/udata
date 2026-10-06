@@ -317,7 +317,7 @@ class Organization(
         ),
     )
 
-    deleted = field(DateTimeField(), readonly=True)
+    deleted = field(DateTimeField())
 
     meta = {
         "indexes": [
