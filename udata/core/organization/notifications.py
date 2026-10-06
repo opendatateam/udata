@@ -25,11 +25,6 @@ BADGE_NOTIFICATION_TYPES = {
     LOCAL_AUTHORITY: NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY,
 }
 
-MEMBERSHIP_REQUEST_NOTIFICATION_TYPES = {
-    "request": NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
-    "invitation": NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-}
-
 BADGE_MAILS = {
     CERTIFIED: mails.badge_added_certified,
     PUBLIC_SERVICE: mails.badge_added_public_service,
@@ -182,10 +177,11 @@ class MembershipInvited(MembershipRequested):
 
 
 class MembershipInvitationMatched(MembershipInvited):
-    """A pending email invitation just got attached to a freshly created account.
+    """A pending email invitation just got attached to an account owning its address.
 
     The invitation mail went out when it was created, to an address that had no account
-    to hang a notification on: registering only makes the invitation reachable in-app.
+    to hang a notification on: registering or changing one's email only makes the
+    invitation reachable in-app.
     """
 
     def via_mail(self, recipient):

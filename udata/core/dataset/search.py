@@ -54,6 +54,7 @@ class DatasetSearch(ModelSearchAdapter):
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
+        "include_geozone_ancestors": BoolFilter(),
         "granularity": ListFilter(),
         "format": ListFilter(),
         "schema": ListFilter(),
@@ -86,8 +87,23 @@ class DatasetSearch(ModelSearchAdapter):
         return list(families) if families else [FormatFamily.OTHER.value]
 
     @classmethod
+    def prepare_filters(cls, params):
+        # Not a filter by itself: widens `geozone` to the zone and its ancestors
+        # (eg. a department also matches its region and country).
+        include_ancestors = params.pop("include_geozone_ancestors", None)
+        geozone = params.get("geozone")
+        if include_ancestors and geozone:
+            zone = GeoZone.objects(id=geozone).only("ancestors").first()
+            if zone and zone.ancestors:
+                params["geozone"] = [geozone, *zone.ancestors]
+        return params
+
+    @classmethod
     def mongo_search(cls, args):
         datasets = Dataset.objects.visible()
+        if isinstance(args.get("geozone"), list):
+            # Expanded by prepare_filters (include_geozone_ancestors)
+            datasets = datasets.filter(spatial__zones__in=args.pop("geozone"))
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
         sort = (

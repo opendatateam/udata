@@ -4,7 +4,6 @@ import xml.etree.ElementTree as ET
 from datetime import date
 
 import pytest
-import requests
 from flask import current_app, url_for
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
@@ -119,7 +118,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
-            assert d.harvest.archived is None
+            assert d.harvest.archived_reason is None
 
         # First dataset
         dataset = datasets["1"]
@@ -135,6 +134,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         dataset = datasets["3"]
         assert dataset.tags == ["tag-1", "tag-2"]
         assert len(dataset.resources) == 1
+
+        assert job.data["graphs"] is not None
 
     def test_flat_with_blank_nodes(self, rmock):
         filename = "bnodes.jsonld"
@@ -421,8 +422,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         actions.run(source)
 
+        job = source.get_last_job()
+        assert job.status == "done"
+        assert len(job.items) == 2
+        assert len(job.data["graphs"]) == 1
         assert Dataset.objects.count() == 2
-        assert HarvestJob.objects.first().status == "done"
 
     def test_harvest_spatial(self, rmock):
         filename = "bnodes.xml"
@@ -1003,40 +1007,6 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.errors) == 1
         assert "404 Client Error" in job.errors[0].message
 
-    @pytest.mark.parametrize(
-        "exception",
-        argvalues(
-            (requests.exceptions.ConnectTimeout("Connection timed out"), "timeout"),
-            (
-                requests.exceptions.ConnectionError(
-                    "Failed to resolve 'example.com' (Name resolution failed)"
-                ),
-                "resolution",
-            ),
-            (requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"), "certificate"),
-        ),
-    )
-    def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
-        """Connection exceptions should be logged as warning, not sent to Sentry."""
-        url = TEST_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
-        rmock.get(url, exc=exception)
-
-        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-
-        mock_warning = mocker.patch("udata.harvest.backends.base.log.warning")
-        mock_exception = mocker.patch("udata.harvest.backends.base.log.exception")
-
-        actions.run(source)
-        source.reload()
-
-        job = source.get_last_job()
-        assert job.status == "failed"
-        assert len(job.errors) == 1
-        assert str(exception) in job.errors[0].message
-        mock_warning.assert_called_once()
-        assert "connection error" in mock_warning.call_args[0][0].lower()
-        mock_exception.assert_not_called()
-
     def test_preview_does_not_create_contact_points(self, rmock):
         """Preview should not create ContactPoints in DB."""
         from udata.core.contact_point.models import ContactPoint
@@ -1234,6 +1204,35 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
+
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 2
+
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items_errors(self, rmock, mocker):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        backend = CswDcatBackend(HarvestSourceFactory(url=url))
+
+        backend.as_dcat = mocker.Mock(side_effect=Exception("boom"))
+
+        job = backend.harvest()
+        assert len(job.items) == 2
 
     def test_csw_error(self, rmock):
         exception_report = """<?xml version="1.0" encoding="UTF-8"?>

@@ -144,7 +144,7 @@ inv clean
 inv dist
 
 # Build without cleaning
-inv pydist
+uv build --wheel
 ```
 
 ## Testing Patterns

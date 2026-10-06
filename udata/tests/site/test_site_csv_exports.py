@@ -276,6 +276,14 @@ class SiteCsvExportsTest(APITestCase):
             self.assertIn(str(org.id), ids)
         self.assertNotIn(str(hidden_org.id), ids)
 
+    @pytest.mark.options(EXPORT_CSV_MODELS=[])
+    def test_organizations_csv_with_repeated_query_param(self):
+        OrganizationFactory()
+
+        response = self.get(url_for("api.site_organizations_csv") + "?q=&q=data")
+
+        self.assert200(response)
+
     @pytest.mark.usefixtures("instance_path")
     @pytest.mark.options(EXPORT_CSV_MODELS=["organization"])
     def test_organizations_csv_w_export_csv_feature(self):
