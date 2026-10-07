@@ -1,5 +1,26 @@
 # Changelog
 
+## 17.11.1 (2026-10-06)
+
+- fix: store compressed resources as archives instead of their content type ([#3991](https://github.com/opendatateam/udata/pull/3991))
+
+
+## 17.11.0 (2026-10-06)
+
+- chore(deps): update dependency faker to >=40.41, <40.42 ([#3972](https://github.com/opendatateam/udata/pull/3972))
+- chore(deps): update dependency pymongo to v4.18.2 [security] ([#3988](https://github.com/opendatateam/udata/pull/3988))
+- chore(deps): update dependency urllib3 to v2.8.0 [security] ([#3989](https://github.com/opendatateam/udata/pull/3989))
+- chore(deps): update dependency werkzeug to v3.1.9 [security] ([#3987](https://github.com/opendatateam/udata/pull/3987))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.1 ([#3985](https://github.com/opendatateam/udata/pull/3985))
+- fix: delete transfers and their notifications along with the objects they reference ([#3982](https://github.com/opendatateam/udata/pull/3982))
+- fix: post search tag filter crashing Elasticsearch by mapping tag to tags ([#3975](https://github.com/opendatateam/udata/pull/3975))
+- fix: reject generic embedded payloads with a missing or disallowed class instead of a 500 ([#3974](https://github.com/opendatateam/udata/pull/3974))
+- fix: restore a deleted organization through the API ([#3986](https://github.com/opendatateam/udata/pull/3986))
+- fix: return a 400 instead of a 500 on non-object JSON bodies ([#3977](https://github.com/opendatateam/udata/pull/3977))
+- refactor: add an explicit type to notifications and dispatch them through events ([#3955](https://github.com/opendatateam/udata/pull/3955))
+- refactor(harvest): consolidate harvester core ([#3872](https://github.com/opendatateam/udata/pull/3872))
+
+
 ## 17.10.0 (2026-10-01)
 
 - chore(deps): pin dependencies ([#3962](https://github.com/opendatateam/udata/pull/3962))

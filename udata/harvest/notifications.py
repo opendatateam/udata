@@ -1,5 +1,4 @@
 import logging
-from datetime import UTC, datetime
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField, StringField
@@ -7,6 +6,8 @@ from mongoengine.fields import ReferenceField, StringField
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.actions import notifier
+from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import NotificationEvent
 
 from .models import (
     VALIDATION_ACCEPTED,
@@ -24,6 +25,13 @@ from .signals import (
 
 log = logging.getLogger(__name__)
 
+# Superseded by `Notification.type`, kept until the front reads the type instead.
+STATES_BY_TYPE = {
+    NotificationType.HARVEST_SOURCE_PENDING: VALIDATION_PENDING,
+    NotificationType.HARVEST_SOURCE_ACCEPTED: VALIDATION_ACCEPTED,
+    NotificationType.HARVEST_SOURCE_REFUSED: VALIDATION_REFUSED,
+}
+
 
 @generate_fields()
 class ValidateHarvesterNotificationDetails(EmbeddedDocument):
@@ -35,6 +43,7 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
+    # Superseded by `Notification.type`, kept until the front reads the type instead.
     status = field(
         StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
         readonly=True,
@@ -43,104 +52,71 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
     )
 
 
-@harvest_source_created.connect
-def on_harvest_source_created(source: HarvestSource, **kwargs):
+class HarvestSourceEvent(NotificationEvent):
+    def __init__(self, source: HarvestSource):
+        self.source = source
+
+    def via_app(self, recipient):
+        return ValidateHarvesterNotificationDetails(
+            source=self.source, status=STATES_BY_TYPE[self.type]
+        )
+
+
+class HarvestSourcePending(HarvestSourceEvent):
+    """Only sysadmins can validate a source, so only they are asked to."""
+
+    type = NotificationType.HARVEST_SOURCE_PENDING
+
+    def recipients(self):
+        admin_role = Role.objects(name="admin").first()
+        if admin_role is None:
+            return []
+        return list(User.objects(roles=admin_role, active=True))
+
+
+class HarvestSourceReviewed(HarvestSourceEvent):
+    """The outcome goes back to whoever declared the source."""
+
+    def recipients(self):
+        if self.source.organization:
+            return [member.user for member in self.source.organization.by_role("admin")]
+        if self.source.owner:
+            return [self.source.owner]
+        return []
+
+
+class HarvestSourceValidated(HarvestSourceReviewed):
+    type = NotificationType.HARVEST_SOURCE_ACCEPTED
+
+
+class HarvestSourceRefused(HarvestSourceReviewed):
+    type = NotificationType.HARVEST_SOURCE_REFUSED
+
+
+def _handle_pending_notifications(source: HarvestSource):
+    """Reviewing the source answers the request sysadmins were sitting on."""
     from udata.features.notifications.models import Notification
 
-    """Create notification for sysadmins when a new harvest source is created"""
-    admin_role = Role.objects(name="admin").first()
-    if admin_role is None:
-        return
-
-    sysadmins = User.objects(roles=admin_role, active=True)
-
-    for admin in sysadmins:
-        try:
-            notification = Notification(
-                user=admin,
-                details=ValidateHarvesterNotificationDetails(
-                    source=source,
-                ),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Error creating notification for user {admin.id} "
-                f"and harvest source {source.id}: {e}"
-            )
+    Notification.objects(
+        details__source=source, type=NotificationType.HARVEST_SOURCE_PENDING, handled_at=None
+    ).mark_handled()
 
 
-def _get_source_recipients(source: HarvestSource):
-    """Get the recipients for a harvest source notification (owner or org admins)"""
-    if source.organization:
-        return [member.user for member in source.organization.members if member.role == "admin"]
-    elif source.owner:
-        return [source.owner]
-    return []
+@harvest_source_created.connect
+def on_harvest_source_created(source: HarvestSource, **kwargs):
+    HarvestSourcePending(source).dispatch()
 
 
 @harvest_source_validated.connect
 def on_harvest_source_validated(source: HarvestSource, **kwargs):
-    from udata.features.notifications.models import Notification
-
-    """Create notification for source owner/org admins when a harvest source is validated"""
-    recipients = _get_source_recipients(source)
-
-    # Update existing VALIDATION_PENDING notifications to mark them as handled
-    pending_notifications = Notification.objects(
-        details__source=source, details__status=VALIDATION_PENDING, handled_at=None
-    )
-    for notification in pending_notifications:
-        notification.handled_at = datetime.now(UTC)
-        notification.save()
-
-    for recipient in recipients:
-        try:
-            notification = Notification(
-                user=recipient,
-                details=ValidateHarvesterNotificationDetails(
-                    source=source,
-                    status=VALIDATION_ACCEPTED,
-                ),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Error creating validated notification for user {recipient.id} "
-                f"and harvest source {source.id}: {e}"
-            )
+    _handle_pending_notifications(source)
+    HarvestSourceValidated(source).dispatch()
 
 
 @harvest_source_refused.connect
 def on_harvest_source_refused(source: HarvestSource, **kwargs):
-    from udata.features.notifications.models import Notification
-
-    """Create notification for source owner/org admins when a harvest source is refused"""
-    recipients = _get_source_recipients(source)
-
-    # Update existing VALIDATION_PENDING notifications to mark them as handled
-    pending_notifications = Notification.objects(
-        details__source=source, details__status=VALIDATION_PENDING, handled_at=None
-    )
-    for notification in pending_notifications:
-        notification.handled_at = datetime.now(UTC)
-        notification.save()
-
-    for recipient in recipients:
-        try:
-            notification = Notification(
-                user=recipient,
-                details=ValidateHarvesterNotificationDetails(
-                    source=source,
-                    status=VALIDATION_REFUSED,
-                ),
-            )
-            notification.save()
-        except Exception as e:
-            log.error(
-                f"Error creating refused notification for user {recipient.id} "
-                f"and harvest source {source.id}: {e}"
-            )
+    _handle_pending_notifications(source)
+    HarvestSourceRefused(source).dispatch()
 
 
 @notifier("validate_harvester")

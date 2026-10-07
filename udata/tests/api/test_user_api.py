@@ -9,6 +9,7 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.models import Discussion, Follow, Member, MembershipRequest, User
 from udata.tests.helpers import capture_mails, create_test_image
@@ -442,6 +443,21 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert400(response)
 
+    def test_user_api_create_and_update_with_non_object_body(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+
+        for url, method in (
+            (url_for("api.users"), self.post),
+            (url_for("api.user", user=user), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "email"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(User.objects.count(), 2)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
@@ -865,6 +881,7 @@ class OrgInvitationsAPITest(APITestCase):
         )
         notification = Notification(
             user=user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=user
             ),
@@ -888,6 +905,7 @@ class OrgInvitationsAPITest(APITestCase):
         )
         notification = Notification(
             user=user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=user
             ),
@@ -923,7 +941,12 @@ class OrgInvitationsAPITest(APITestCase):
         )
 
         # Create user with the same email - should trigger match_email_invitations
-        new_user = UserFactory(email="newuser@example.com")
+        with capture_mails() as mails:
+            new_user = UserFactory(email="newuser@example.com")
+
+        # The invitation mail went out when the invitation was created: registering only
+        # makes it reachable in-app, it is not a second thing to announce.
+        assert mails == []
 
         organization.reload()
         assert organization.requests[0].user == new_user
@@ -933,7 +956,7 @@ class OrgInvitationsAPITest(APITestCase):
         notifications = Notification.objects(user=new_user)
         assert notifications.count() == 1
         assert notifications.first().details.request_organization == organization
-        assert notifications.first().details.kind == "invitation"
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
 
         # Now the user should see the invitation
         self.login(new_user)

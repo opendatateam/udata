@@ -4,6 +4,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import UserFactory
 from udata.db import migrations
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import PytestOnlyDBTestCase
@@ -18,6 +19,11 @@ def migrate():
 def notify(recipient, organization, user, kind):
     notification = Notification(
         user=recipient,
+        type=(
+            NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
+            if kind == "invitation"
+            else NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
+        ),
         details=MembershipRequestNotificationDetails(
             request_organization=organization, request_user=user, kind=kind
         ),

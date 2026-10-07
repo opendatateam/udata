@@ -49,10 +49,6 @@ class StorageUtilsTest(PytestOnlyTestCase):
         expected = "CA975130"  # Output of cksfv
         assert utils.crc32(self.file) == expected
 
-    def test_mime(self):
-        assert utils.mime("test.txt") == "text/plain"
-        assert utils.mime("test") is None
-
     def test_extension_default(self, app):
         assert utils.extension("test.txt") == "txt"
         assert utils.extension("prefix/test.txt") == "txt"
