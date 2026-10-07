@@ -1,4 +1,4 @@
-from flask import g, has_request_context, request
+from flask import has_request_context, request
 
 from udata.api import HEADER_API_KEY
 from udata.auth import current_user
@@ -6,28 +6,29 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
+from udata.features.notifications.constants import FollowOrigin
 from udata.features.notifications.settings import NotificationSetting
 
-# Tells the site that the request it just made started a follow, so it can say so and
-# offer to undo it, wherever the edit came from.
-FOLLOWED_HEADER = "X-Notification-Followed"
 
-
-def follow_worked_on(user: User, subject) -> bool:
+def follow_worked_on(user: User, subject) -> None:
     """Make a member who worked on a subject of their organization follow it.
 
     Having edited a dataset is a lasting reason to hear about it, whatever one's role
     is now or later: an administrator who becomes an editor keeps what they took care
     of. A decision already taken about the subject is left as is, so that editing
     something one chose to ignore does not bring it back.
+
+    Nothing is announced: the way out comes with the first notification it brings, when
+    it is something to decide about.
     """
     organization = getattr(subject, "organization", None)
     if organization is None or not organization.is_member(user):
-        return False
+        return
     if NotificationSetting.objects(user=user, scope=subject).first():
-        return False
-    NotificationSetting.objects.create(user=user, scope=subject, enabled=True)
-    return True
+        return
+    NotificationSetting.objects.create(
+        user=user, scope=subject, enabled=True, origin=FollowOrigin.EDITED
+    )
 
 
 def follow_if_edited_by_hand(subject) -> None:
@@ -37,15 +38,7 @@ def follow_if_edited_by_hand(subject) -> None:
         return
     if not current_user or not current_user.is_authenticated:
         return
-    if follow_worked_on(current_user._get_current_object(), subject):
-        g.notification_followed = subject
-
-
-def add_followed_header(response):
-    subject = g.pop("notification_followed", None)
-    if subject is not None:
-        response.headers[FOLLOWED_HEADER] = f"{subject.__class__.__name__}:{subject.id}"
-    return response
+    follow_worked_on(current_user._get_current_object(), subject)
 
 
 @Dataset.on_create.connect

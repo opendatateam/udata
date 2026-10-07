@@ -6,7 +6,7 @@ from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import NotificationChannel
+from udata.features.notifications.constants import FollowOrigin, NotificationChannel
 from udata.features.notifications.events import settable_events
 from udata.features.notifications.permissions import EditNotificationPermission
 from udata.mongo import db
@@ -99,8 +99,9 @@ class NotificationSettingsAPI(API):
         if rule.enabled is None:
             NotificationSetting.objects(**key).delete()
             return "", 204
+        # Set by the user themselves: a follow created by an edit becomes their own.
         setting, created = NotificationSetting.objects.get_or_create(
-            **key, updates={"enabled": rule.enabled}
+            **key, updates={"enabled": rule.enabled, "origin": FollowOrigin.FOLLOWED}
         )
         return setting, 201 if created else 200
 

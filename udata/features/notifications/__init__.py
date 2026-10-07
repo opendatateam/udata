@@ -13,6 +13,4 @@ def init_app(app):
     import udata.features.transfer.notifications  # noqa
 
     # Following what one works on
-    from udata.features.notifications.follow import add_followed_header
-
-    app.after_request(add_followed_header)
+    import udata.features.notifications.follow  # noqa

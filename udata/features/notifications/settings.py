@@ -15,7 +15,11 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.user.models import User
-from udata.features.notifications.constants import NotificationChannel, NotificationReason
+from udata.features.notifications.constants import (
+    FollowOrigin,
+    NotificationChannel,
+    NotificationReason,
+)
 from udata.mongo.document import UDataDocument
 
 # Everything a rule can be scoped to. Anything an event can name in its `scopes()`
@@ -72,6 +76,14 @@ class NotificationSetting(UDataDocument):
         description="Where the user is reached, null to decide whether they are concerned at all",
     )
     enabled = field(BooleanField(required=True))
+    # Only meaningful for a follow (a subject, no reason, no channel, yes): what made the
+    # user follow, hence why they hear about it. Back to `FOLLOWED` as soon as the user
+    # sets the rule themselves.
+    origin = field(
+        EnumField(FollowOrigin, default=FollowOrigin.FOLLOWED),
+        readonly=True,
+        description="What made the user follow the subject: by hand, or by editing it",
+    )
 
     meta = {
         "indexes": [
@@ -119,6 +131,7 @@ DEFAULT_RULES: list[Rule] = [
     Rule(reason=NotificationReason.ORGANIZATION_PARTIAL_EDITOR, enabled=True),
     Rule(reason=NotificationReason.DISCUSSION_PARTICIPANT, enabled=True),
     Rule(reason=NotificationReason.EXPLICIT_SUBSCRIBER, enabled=True),
+    Rule(reason=NotificationReason.CONTRIBUTOR, enabled=True),
     Rule(channel=NotificationChannel.APP, enabled=True),
     Rule(channel=NotificationChannel.MAIL, enabled=True),
 ]
@@ -223,28 +236,42 @@ def resolve(
     }
 
 
-def subscribers_for(events: Sequence[str], scopes: Sequence[Document]) -> list[User]:
-    """Users who chose to follow one of these subjects for this event.
+# The reason a follow gives, depending on what made the user follow.
+REASON_BY_ORIGIN = {
+    FollowOrigin.FOLLOWED: NotificationReason.EXPLICIT_SUBSCRIBER,
+    FollowOrigin.EDITED: NotificationReason.CONTRIBUTOR,
+}
+
+
+def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
+    """The follows of these subjects for this event: a subject, no reason, no channel,
+    yes. A rule without a subject is left out on purpose: "everywhere" means
+    "everywhere I am already concerned", not "subscribe me to the whole site"."""
+    return NotificationSetting.objects(
+        Q(event=None) | Q(event__in=events),
+        scope__in=scopes,
+        reason=None,
+        channel=None,
+        enabled=True,
+        **filters,
+    )
+
+
+def subscribers_for(
+    events: Sequence[str], scopes: Sequence[Document]
+) -> list[tuple[User, NotificationReason]]:
+    """Users who follow one of these subjects for this event, and the reason it gives.
 
     The other direction of the table: `rules_for` filters people the event already
     reaches, this one brings in those it would never have reached. Without it, somebody
     outside an organization could follow a subject and never hear about it.
-
-    A rule without a subject is left out on purpose: "everywhere" means "everywhere I
-    am already concerned", not "subscribe me to the whole site".
     """
     if not scopes:
         return []
-
-    return list(
-        NotificationSetting.objects(
-            Q(event=None) | Q(event__in=events),
-            scope__in=scopes,
-            reason=None,
-            channel=None,
-            enabled=True,
-        ).distinct("user")
-    )
+    return [
+        (setting.user, REASON_BY_ORIGIN[setting.origin])
+        for setting in follows(events, scopes).only("user", "origin").select_related()
+    ]
 
 
 def resolved_for(user: User, subject: Document, event: str | None) -> dict:
@@ -269,15 +296,9 @@ def resolved_for(user: User, subject: Document, event: str | None) -> dict:
     reasons = {
         reason for recipient in recipients if recipient.key == user.id for reason in recipient.reasons
     }
-    if NotificationSetting.objects(
-        Q(event=None) | Q(event__in=events),
-        user=user,
-        scope__in=scopes,
-        reason=None,
-        channel=None,
-        enabled=True,
-    ).first():
-        reasons.add(NotificationReason.EXPLICIT_SUBSCRIBER)
+    reasons |= {
+        REASON_BY_ORIGIN[setting.origin] for setting in follows(events, scopes, user=user).only("origin")
+    }
 
     rules = rules_for([user], events, scopes).get(user.id, [])
     return {

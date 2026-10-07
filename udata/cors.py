@@ -38,9 +38,6 @@ def set_allow_origin_headers(headers: Headers, origin: str) -> None:
         # can be sent and read cross-origin.
         headers.set("Access-Control-Allow-Origin", origin)
         headers.set("Access-Control-Allow-Credentials", "true")
-        # Only the trusted front-end edits on behalf of a user, so only it reads
-        # whether the edit made them follow what they edited.
-        headers.set("Access-Control-Expose-Headers", "X-Notification-Followed")
     else:
         # Any other origin only gets anonymous access. Reflecting an arbitrary
         # origin together with `Allow-Credentials: true` is what would, in

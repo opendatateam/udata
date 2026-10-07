@@ -291,8 +291,8 @@ class ConfigurableEvent(NotificationEvent):
 
     def _subscribers(self):
         return [
-            Recipient(user, frozenset({NotificationReason.EXPLICIT_SUBSCRIBER}))
-            for user in subscribers_for(self.decision_events(), self.scopes())
+            Recipient(user, frozenset({reason}))
+            for user, reason in subscribers_for(self.decision_events(), self.scopes())
         ]
 
     def _channels(self, recipients):

@@ -84,6 +84,15 @@ class NotificationReason(StrEnum):
     # Asked for it on this very subject, without being concerned otherwise. The only
     # way somebody outside an organization can follow a thread or a dataset.
     EXPLICIT_SUBSCRIBER = "explicit_subscriber"
+    # Edited this very subject: followed without asking, for having worked on it.
+    CONTRIBUTOR = "contributor"
+
+
+class FollowOrigin(StrEnum):
+    """What made a user follow a subject, which decides the reason the follow gives."""
+
+    FOLLOWED = "followed"
+    EDITED = "edited"
 
 
 # `Organization.members` holds bare role strings, so the mapping is spelled out here.
