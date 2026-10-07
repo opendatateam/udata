@@ -14,9 +14,18 @@ import logging
 
 from bson import DBRef
 
-from udata.core.activity.models import Activity, _registered_activities
+from udata.core.activity.models import Activity
+from udata.core.dataservices.activities import UserCreatedDataservice, UserUpdatedDataservice
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.activities import (
+    UserAddedResourceToDataset,
+    UserCreatedDataset,
+    UserRemovedResourceFromDataset,
+    UserUpdatedDataset,
+    UserUpdatedResource,
+)
 from udata.core.dataset.models import Dataset
+from udata.core.reuse.activities import UserCreatedReuse, UserUpdatedReuse
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.follow import follow_worked_on
@@ -24,15 +33,15 @@ from udata.features.notifications.follow import follow_worked_on
 log = logging.getLogger(__name__)
 
 EDITS = {
-    "dataset:created": Dataset,
-    "dataset:updated": Dataset,
-    "dataset:resource:added": Dataset,
-    "dataset:resource:updated": Dataset,
-    "dataset:resource:deleted": Dataset,
-    "reuse:created": Reuse,
-    "reuse:updated": Reuse,
-    "dataservice:created": Dataservice,
-    "dataservice:updated": Dataservice,
+    UserCreatedDataset: Dataset,
+    UserUpdatedDataset: Dataset,
+    UserAddedResourceToDataset: Dataset,
+    UserUpdatedResource: Dataset,
+    UserRemovedResourceFromDataset: Dataset,
+    UserCreatedReuse: Reuse,
+    UserUpdatedReuse: Reuse,
+    UserCreatedDataservice: Dataservice,
+    UserUpdatedDataservice: Dataservice,
 }
 
 
@@ -41,7 +50,7 @@ def ref_id(value):
 
 
 def migrate(db):
-    model_by_cls = {_registered_activities[key]._class_name: model for key, model in EDITS.items()}
+    model_by_cls = {activity._class_name: model for activity, model in EDITS.items()}
 
     log.info("Collecting who edited what from the activities...")
     edits = set()
