@@ -120,9 +120,13 @@ class Rule:
 # Partial editors are heard, which only looks inconsistent: they are never given this
 # reason unless the object was actually assigned to them, so "everything concerning
 # me" is already a short list.
+#
+# A badge is the exception for editors: rare, and about the organization as a whole
+# rather than about datasets they never touched.
 DEFAULT_RULES: list[Rule] = [
     Rule(enabled=True),
     Rule(reason=NotificationReason.ORGANIZATION_EDITOR, enabled=False),
+    Rule(event="organization.badge", enabled=True),
     Rule(channel=NotificationChannel.APP, enabled=True),
     Rule(channel=NotificationChannel.MAIL, enabled=True),
 ]
