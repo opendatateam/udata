@@ -137,8 +137,7 @@ def rules_for(
 
     rules: dict[ObjectId, list[Rule]] = {}
     for row in NotificationSetting.objects(
-        Q(scope=None) | Q(scope__in=scopes),
-        Q(event=None) | Q(event__in=events),
+        (Q(scope=None) | Q(scope__in=scopes)) & (Q(event=None) | Q(event__in=events)),
         user__in=users,
     ).as_pymongo():
         scope = row.get("scope")
