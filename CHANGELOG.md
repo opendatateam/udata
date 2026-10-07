@@ -1,5 +1,10 @@
 # Changelog
 
+## Current (in progress)
+
+- **Organization banner**: organizations can now customize their public page banner with a color (`banner_color`) and/or an image (`banner_image`, uploaded via `POST /api/1/organizations/<org>/banner/`, deletable via `DELETE`) with a vertical position (`banner_image_position`, 0–100, CSS `background-position-y` semantics) [#2049](https://github.com/datagouv/data.gouv.fr/issues/2049)
+
+
 ## 17.10.0 (2026-10-01)
 
 - chore(deps): pin dependencies ([#3962](https://github.com/opendatateam/udata/pull/3962))
