@@ -6,16 +6,11 @@ from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import NotificationChannel
+from udata.features.notifications.constants import DEFAULT_ENABLED, NotificationChannel
 from udata.features.notifications.permissions import EditNotificationPermission
 
 from .models import Notification
-from .settings import (
-    NotificationPreference,
-    NotificationSetting,
-    resolved_preferences,
-    subject_summary,
-)
+from .settings import CONFIGURABLE_REASONS, NotificationSetting, subject_summary
 
 notifs = api.namespace("notifications", "Notifications API")
 
@@ -68,9 +63,10 @@ class NotificationSettingsAPI(API):
     @api.doc("list_notification_settings")
     @api.marshal_list_with(listed_setting_fields)
     def get(self):
-        """List the decisions the current user took about their notifications.
+        """List the rules the current user set about their notifications.
 
-        Only decisions are listed: whatever is absent follows the defaults."""
+        Only rules are listed: whatever no rule covers follows the defaults of the
+        reasons the user is concerned for (see `/notifications/reasons/`)."""
         return list(NotificationSetting.objects(user=current_user.id))
 
     @api.secure
@@ -79,67 +75,54 @@ class NotificationSettingsAPI(API):
     @api.marshal_with(NotificationSetting.__read_fields__)
     @api.response(400, "Validation error")
     def put(self):
-        """Follow or ignore some notifications on a subject.
+        """Set a rule about some notifications.
 
-        A decision is identified by its subject and event: deciding again replaces the
-        previous answer."""
-        decision = patch(NotificationSetting(user=current_user._get_current_object()), request)
+        A rule is identified by its subject, event, reason and channel, any of them
+        possibly null: setting it again replaces the previous answer."""
+        rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
         setting, created = NotificationSetting.objects.get_or_create(
-            user=decision.user,
-            scope=decision.scope,
-            event=decision.event,
-            updates={"enabled": decision.enabled},
+            user=rule.user,
+            scope=rule.scope,
+            event=rule.event,
+            reason=rule.reason,
+            channel=rule.channel,
+            updates={"enabled": rule.enabled},
         )
         return setting, 201 if created else 200
 
 
-preference_fields = api.model(
-    "NotificationPreferenceResolved",
+reason_fields = api.model(
+    "NotificationReasonDefault",
     {
-        "reason": fields.String(description="Why the user is concerned"),
-        "channels": fields.List(
-            fields.String, description="Where the user hears about it, defaults included"
+        "reason": fields.String(description="Why a user can be concerned by a notification"),
+        "default": fields.Boolean(
+            description="Whether somebody concerned for this reason hears about it without any rule"
         ),
     },
 )
 
 
-@notifs.route("/preferences/", endpoint="notification_preferences")
-class NotificationPreferencesAPI(API):
-    @api.secure
-    @api.doc("list_notification_preferences")
-    @api.marshal_list_with(preference_fields)
+@notifs.route("/reasons/", endpoint="notification_reasons")
+class NotificationReasonsAPI(API):
+    @api.doc("list_notification_reasons")
+    @api.marshal_list_with(reason_fields)
     def get(self):
-        """How the current user hears about what concerns them, reason by reason."""
-        return resolved_preferences(current_user._get_current_object())
-
-    @api.secure
-    @api.doc("set_notification_preference")
-    @api.expect(NotificationPreference.__write_fields__)
-    @api.marshal_list_with(preference_fields)
-    @api.response(400, "Validation error")
-    def put(self):
-        """Choose the channels of one reason, and get every reason back."""
-        user = current_user._get_current_object()
-        preference = patch(NotificationPreference(user=user), request)
-        NotificationPreference.objects.get_or_create(
-            user=user,
-            reason=preference.reason,
-            updates={"channels": preference.channels},
-        )
-        return resolved_preferences(user)
+        """The configurable reasons, with what each one gets without any rule."""
+        return [
+            {"reason": reason, "default": DEFAULT_ENABLED[reason]} for reason in CONFIGURABLE_REASONS
+        ]
 
 
 @notifs.route("/settings/<notification_setting:setting>/", endpoint="notification_setting")
 class NotificationSettingAPI(API):
     @api.secure
     @api.doc("delete_notification_setting")
-    @api.response(204, "Decision removed, the default applies again")
-    @api.response(404, "Decision not found")
+    @api.response(204, "Rule removed, the broader rules or the defaults apply again")
+    @api.response(404, "Rule not found")
     def delete(self, setting: NotificationSetting):
-        """Withdraw a decision, so the default applies again."""
+        """Remove a rule, so the broader rules or the defaults apply again."""
         if setting.user != current_user._get_current_object():
-            api.abort(404, "Decision not found")
+            api.abort(404, "Rule not found")
         setting.delete()
         return "", 204
 

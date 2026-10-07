@@ -1,51 +1,44 @@
 from collections import Counter
-from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from udata.features.notifications.constants import NotificationType
 from udata.i18n import lazy_gettext as _
-from udata.i18n import lazy_ngettext, ngettext
+from udata.i18n import lazy_ngettext
 from udata.mail import LabelledContent, MailCTA, MailMessage
 from udata.uris import cdata_url
 
 if TYPE_CHECKING:
-    from udata.core.discussions.models import Discussion
     from udata.features.notifications.models import Notification
-
-# The types a digest can summarize, and how each reads once counted. Being listed here
-# is what lets a notification wait for the digest instead of being mailed at once.
-DIGEST_COUNTS: dict[NotificationType, Callable[[int], str]] = {
-    NotificationType.DISCUSSION_NEW: lambda count: ngettext(
-        "%(num)d new discussion", "%(num)d new discussions", count
-    ),
-    NotificationType.DISCUSSION_COMMENT: lambda count: ngettext(
-        "%(num)d new comment", "%(num)d new comments", count
-    ),
-    NotificationType.DISCUSSION_CLOSED: lambda count: ngettext(
-        "%(num)d closed discussion", "%(num)d closed discussions", count
-    ),
-}
 
 
 def notification_digest(notifications: list["Notification"]) -> MailMessage:
     """What happened since the last digest.
 
-    One line per discussion rather than one per notification, because a busy thread
-    would otherwise fill the mail with the same title repeated.
+    One line per subject rather than one per notification, because a busy thread would
+    otherwise fill the mail with the same title repeated. Each event says what its line
+    is about and how it counts (`digest_subject`, `digest_count`).
     """
+    # `events` builds on this module, hence the import at call time.
+    from udata.features.notifications.events import event_for_type
+
     # Insertion order keeps the oldest subject first, which is the order the queue was
     # read in.
-    counts: dict["Discussion", Counter[NotificationType]] = {}
+    titles: dict[object, str] = {}
+    counts: dict[object, Counter[NotificationType]] = {}
     for notification in notifications:
-        counts.setdefault(notification.details.discussion, Counter())[notification.type] += 1
+        key, title = event_for_type(notification.type).digest_subject(notification.details)
+        titles.setdefault(key, title)
+        counts.setdefault(key, Counter())[notification.type] += 1
 
     lines = [
         LabelledContent(
-            subject.title,
-            ", ".join(DIGEST_COUNTS[type](count) for type, count in by_type.items()),
+            titles[key],
+            ", ".join(
+                event_for_type(type).digest_count(count) for type, count in by_type.items()
+            ),
             inline=True,
         )
-        for subject, by_type in counts.items()
+        for key, by_type in counts.items()
     ]
 
     return MailMessage(

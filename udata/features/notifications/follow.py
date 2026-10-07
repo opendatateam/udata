@@ -6,7 +6,6 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
-from udata.features.notifications.events import ConfigurableEvent
 from udata.features.notifications.settings import NotificationSetting
 
 # Tells the site that the request it just made started a follow, so it can say so and
@@ -27,9 +26,7 @@ def follow_worked_on(user: User, subject) -> bool:
         return False
     if NotificationSetting.objects(user=user, scope=subject).first():
         return False
-    NotificationSetting.objects.create(
-        user=user, scope=subject, event=ConfigurableEvent.__name__, enabled=True
-    )
+    NotificationSetting.objects.create(user=user, scope=subject, enabled=True)
     return True
 
 

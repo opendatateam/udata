@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -14,13 +14,8 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.mails import DIGEST_COUNTS, settings_footer
-from udata.features.notifications.settings import (
-    decisions_for,
-    default_channels,
-    preferences_for,
-    subscribers_for,
-)
+from udata.features.notifications.mails import settings_footer
+from udata.features.notifications.settings import resolve, rules_for, subscribers_for
 from udata.mail import MailMessage
 
 log = logging.getLogger(__name__)
@@ -117,11 +112,16 @@ class NotificationEvent:
     def via_mail(self, recipient: User | str) -> MailMessage | None:
         return None
 
+    # How a digest counts this event ("3 new comments"), or `None` when it cannot wait
+    # for a digest and is mailed at once: an invitation or a source pending validation
+    # is an action to take, and holding it for a week would be a bug, not a setting.
+    digest_count: Callable[[int], str] | None = None
+
     @classmethod
-    def has_mail(cls) -> bool:
-        """Whether this event writes a mail at all, as opposed to `via_mail` returning
-        `None` for one recipient in particular."""
-        return cls.via_mail is not NotificationEvent.via_mail
+    def digest_subject(cls, details) -> tuple[object, str]:
+        """What a digest line is about, as a key to group on and a title: the digest
+        writes one line per subject rather than one per notification."""
+        raise NotImplementedError
 
     @property
     def occurred_at(self) -> datetime:
@@ -143,12 +143,9 @@ class NotificationEvent:
             wants_app = is_user and NotificationChannel.APP in wanted
             wants_mail = NotificationChannel.MAIL in wanted
 
-            # Only what a digest knows how to summarize can wait for it. An invitation or
-            # a source pending validation is an action to take: holding it for a week
-            # would be a bug, not a setting.
             deferred = (
                 wants_mail
-                and self.type in DIGEST_COUNTS
+                and self.digest_count is not None
                 and is_user
                 and recipient.user.mail_cadence is not MailCadence.IMMEDIATE
             )
@@ -227,16 +224,21 @@ class ConfigurableEvent(NotificationEvent):
     """An event users decide about, unlike an action to take or an answer to their own
     request.
 
-    A decision names one of the classes of the event by its name, from the event itself
-    up to this class, which stands for every configurable event. Renaming one of these
-    classes therefore needs a migration of `NotificationSetting.event`.
+    A rule names one of the classes of the event by its name, from the event itself up
+    to the family it belongs to; a rule naming none covers every configurable event.
+    Renaming one of these classes therefore needs a migration of
+    `NotificationSetting.event`.
     """
 
     @classmethod
     def decision_events(cls) -> list[str]:
-        """The class names a decision about this event can name, from the narrowest to
-        the broadest."""
-        return [klass.__name__ for klass in cls.__mro__ if issubclass(klass, ConfigurableEvent)]
+        """The class names a rule about this event can name, from the narrowest to the
+        broadest."""
+        return [
+            klass.__name__
+            for klass in cls.__mro__
+            if issubclass(klass, ConfigurableEvent) and klass is not ConfigurableEvent
+        ]
 
     def _mail(self, recipient):
         """Something one can turn off says where to."""
@@ -252,32 +254,16 @@ class ConfigurableEvent(NotificationEvent):
         ]
 
     def _channels(self, recipients):
-        """A subject the recipient ignores reaches them nowhere. Otherwise each of their
-        reasons brings the channels they chose for it: being concerned twice over, the
-        most generous reason wins, so an organization muted as an administrator does
-        not silence the thread one took part in.
-
-        Followers already carry `EXPLICIT_SUBSCRIBER` among their reasons, brought in by
-        `_subscribers`, so following only has to be read here as "not ignored"."""
+        """What the rules of each recipient leave of this event: see `resolve`."""
+        events, scopes = self.decision_events(), self.scopes()
         users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
-        decisions = decisions_for(users, self.decision_events(), self.scopes())
-        preferences = preferences_for(users)
-
-        channels = {}
-        for recipient in recipients:
-            if not isinstance(recipient.user, User) or decisions.get(recipient.key) is False:
-                channels[recipient.key] = set()
-                continue
-            wanted = set().union(
-                *(
-                    preferences.get((recipient.key, reason), default_channels(reason))
-                    for reason in recipient.reasons
-                )
-            )
-            if self.type in recipient.user.mail_muted_types:
-                wanted.discard(NotificationChannel.MAIL)
-            channels[recipient.key] = wanted
-        return channels
+        rules = rules_for(users, events, scopes)
+        return {
+            recipient.key: resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
+            if isinstance(recipient.user, User)
+            else set()
+            for recipient in recipients
+        }
 
 
 def concrete_events() -> list[type[NotificationEvent]]:
@@ -297,12 +283,10 @@ def configurable_events() -> list[type[ConfigurableEvent]]:
 
 
 def settable_events() -> set[str]:
-    """Everything a decision can name: each configurable type, the families they
-    belong to, and all of them at once."""
+    """Everything a rule can name: each configurable event and the families they
+    belong to."""
     return {name for event in configurable_events() for name in event.decision_events()}
 
 
-def event_has_mail(name: str) -> bool:
-    """Whether one of the events `name` covers writes a mail, which is what makes a
-    decision about it on the mail channel mean anything."""
-    return any(event.has_mail() for event in configurable_events() if name in event.decision_events())
+def event_for_type(notification_type: NotificationType) -> type[NotificationEvent]:
+    return next(event for event in concrete_events() if event.type == notification_type)

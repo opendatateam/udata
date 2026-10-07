@@ -47,33 +47,6 @@ TYPES_REQUIRING_ACTION = frozenset(
     }
 )
 
-# Notifications that answer a request the recipient made themselves, and reach nobody
-# else. Turning them off would mean never learning whether one's own request went
-# through, so they are not offered as a setting either.
-PERSONAL_TYPES = frozenset(
-    {
-        NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED,
-        NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED,
-        NotificationType.HARVEST_SOURCE_ACCEPTED,
-        NotificationType.HARVEST_SOURCE_REFUSED,
-    }
-)
-
-
-# Notifications a whole organization hears at once, about the organization itself.
-# They are broadcast like the configurable ones, but a badge is awarded once in the
-# life of an organization: offering to mute it would add a switch nobody would ever
-# look for.
-ANNOUNCEMENT_TYPES = frozenset(
-    {
-        NotificationType.ORGANIZATION_BADGE_CERTIFIED,
-        NotificationType.ORGANIZATION_BADGE_PUBLIC_SERVICE,
-        NotificationType.ORGANIZATION_BADGE_COMPANY,
-        NotificationType.ORGANIZATION_BADGE_ASSOCIATION,
-        NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY,
-    }
-)
-
 
 class NotificationChannel(StrEnum):
     APP = "app"
@@ -121,7 +94,7 @@ REASON_BY_ORGANIZATION_ROLE: dict[str, NotificationReason] = {
 }
 
 # What somebody gets before they ever open the settings screen, per reason, on every
-# channel. Individuals then change the channels of a reason in `NotificationPreference`.
+# channel. Individuals then depart from it with `NotificationSetting` rules.
 #
 # Editors start silent: they are members of organizations whose datasets they have
 # never touched, and mailing them every discussion of a 400-dataset organization is

@@ -11,6 +11,7 @@ from udata.core.discussions.signals import on_discussion_deleted, on_discussion_
 from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.events import ConfigurableEvent
+from udata.i18n import ngettext
 
 log = logging.getLogger(__name__)
 
@@ -87,9 +88,17 @@ class DiscussionEvent(ConfigurableEvent):
             status=STATUSES_BY_TYPE[self.type],
         )
 
+    @classmethod
+    def digest_subject(cls, details):
+        return details.discussion.id, details.discussion.title
+
 
 class NewDiscussion(DiscussionEvent):
     type = NotificationType.DISCUSSION_NEW
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d new discussion", "%(num)d new discussions", count)
+    )
 
     @property
     def sender(self):
@@ -105,6 +114,10 @@ class NewDiscussion(DiscussionEvent):
 
 class NewDiscussionComment(DiscussionEvent):
     type = NotificationType.DISCUSSION_COMMENT
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d new comment", "%(num)d new comments", count)
+    )
 
     def __init__(self, discussion: Discussion, message: Message):
         super().__init__(discussion)
@@ -131,6 +144,10 @@ class NewDiscussionComment(DiscussionEvent):
 
 class DiscussionClosed(DiscussionEvent):
     type = NotificationType.DISCUSSION_CLOSED
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d closed discussion", "%(num)d closed discussions", count)
+    )
 
     def __init__(self, discussion: Discussion, message: Message | None):
         super().__init__(discussion)

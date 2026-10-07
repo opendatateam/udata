@@ -1,12 +1,12 @@
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 
 from bson import ObjectId
-from mongoengine import CASCADE, Document, ValidationError
+from mongoengine import CASCADE, Document, Q, ValidationError
 from mongoengine.fields import (
     BooleanField,
     EnumField,
     GenericReferenceField,
-    ListField,
     ReferenceField,
     StringField,
 )
@@ -22,13 +22,13 @@ from udata.features.notifications.constants import (
 )
 from udata.mongo.document import UDataDocument
 
-# Everything a decision can be taken about. Anything an event can name in its
-# `scopes()` belongs here, which is why a discussion sits next to the objects that
-# carry them: muting a single thread is the finest useful grain.
+# Everything a rule can be scoped to. Anything an event can name in its `scopes()`
+# belongs here, which is why a discussion sits next to the objects that carry them:
+# muting a single thread is the finest useful grain.
 NOTIFICATION_SCOPES = ("Organization", "Discussion", *DISCUSSION_SUBJECTS)
 
-# Only reached by actions to take, which are not configurable: a preference about it
-# would be stored and never read.
+# Only reached by actions to take, which are not configurable: a rule about it would be
+# stored and never read.
 CONFIGURABLE_REASONS = tuple(
     reason for reason in NotificationReason if reason is not NotificationReason.SYSADMIN
 )
@@ -36,37 +36,50 @@ CONFIGURABLE_REASONS = tuple(
 
 @generate_fields()
 class NotificationSetting(UDataDocument):
-    """What a user decided about one subject: follow it, or ignore it.
+    """One rule a user set about their notifications.
 
-    Following makes the user concerned as an explicit subscriber, ignoring silences the
-    subject whatever the reasons the user had to hear about it. How the user is then
-    reached is not decided here but by their `NotificationPreference`s: a decision about
-    a subject says *whether*, never *how*.
+    Every dimension is optional, and leaving one out means "whatever it is": no scope
+    is everywhere, no event is every configurable notification, no reason is whatever
+    concerns the user, no channel is whether they are concerned at all. The settings
+    screen only offers some combinations; the model holds them all, so that a new
+    screen never needs a new model.
 
-    Only decisions are stored, never the resolved grid: an administrator of a
-    400-dataset organization would otherwise carry thousands of rows saying nothing.
+    - follow a thread: scope = the thread, event = `DiscussionEvent`, yes
+    - ignore a dataset: scope = the dataset, no
+    - "as an editor, never": reason = editor, no
+    - "as an administrator, in the app only": reason = administrator, channel = mail, no
+    - "no mail for the answers": event = `NewDiscussionComment`, channel = mail, no
+
+    See `resolve` for which rule wins when several apply.
     """
 
-    # Not exposed: the API only ever lists and writes the current user's decisions.
+    # Not exposed: the API only ever lists and writes the current user's rules.
     user = ReferenceField(User, required=True, reverse_delete_rule=CASCADE)
-    # Read back as a bare `{class, id}`: a decision can name an object its author can no
+    # Read back as a bare `{class, id}`: a rule can name an object its author can no
     # longer see, and its title must not travel with it.
     scope = field(
-        GenericReferenceField(choices=NOTIFICATION_SCOPES, required=True),
+        GenericReferenceField(choices=NOTIFICATION_SCOPES),
         nested_fields=api.model_reference,
+        description="The subject the rule is about, null for everywhere",
     )
-    # The name of a `ConfigurableEvent` class: a single event (`NewDiscussionComment`),
-    # a family of them (`DiscussionEvent`), or all of them (`ConfigurableEvent`). The
-    # narrower one wins on a given subject.
     event = field(
-        StringField(required=True),
-        description="A configurable event class: a single event, its family, or ConfigurableEvent for all",
+        StringField(),
+        description="A configurable event class (a single event or a family of them), "
+        "null for every configurable notification",
+    )
+    reason = field(
+        EnumField(NotificationReason),
+        description="Why the user is concerned, null for whatever the reason",
+    )
+    channel = field(
+        EnumField(NotificationChannel),
+        description="Where the user is reached, null to decide whether they are concerned at all",
     )
     enabled = field(BooleanField(required=True))
 
     meta = {
         "indexes": [
-            {"fields": ["user", "scope", "event"], "unique": True},
+            {"fields": ["user", "scope", "event", "reason", "channel"], "unique": True},
             # `subscribers_for` looks across every user, once per configurable event.
             ["scope", "event", "enabled"],
         ],
@@ -77,41 +90,143 @@ class NotificationSetting(UDataDocument):
         from udata.features.notifications.events import settable_events
 
         super().clean()
-        if self.event not in settable_events():
+        if self.event is not None and self.event not in settable_events():
             raise ValidationError(f"{self.event} is not a configurable notification")
-
-
-@generate_fields()
-class NotificationPreference(UDataDocument):
-    """How a user wants to hear about what concerns them for one reason.
-
-    "My own datasets in the bell and by mail, the organizations I edit nowhere": the
-    reason is what a user recognizes when deciding, and what the mail footer names.
-    Only stored once the user departs from `DEFAULT_ENABLED`.
-    """
-
-    user = ReferenceField(User, required=True, reverse_delete_rule=CASCADE)
-    reason = field(EnumField(NotificationReason, required=True))
-    channels = field(ListField(EnumField(NotificationChannel)))
-
-    meta = {
-        "indexes": [
-            {"fields": ["user", "reason"], "unique": True},
-        ],
-    }
-
-    def clean(self):
-        super().clean()
-        if self.reason not in CONFIGURABLE_REASONS:
+        if self.reason is not None and self.reason not in CONFIGURABLE_REASONS:
             raise ValidationError(f"Notifications for {self.reason} are not configurable")
 
 
-def visible_subject(scope, user: User):
-    """The subject of a decision as its author may see it today, or `None`.
+@dataclass(frozen=True)
+class Rule:
+    scope: ObjectId | None
+    event: str | None
+    reason: NotificationReason | None
+    channel: NotificationChannel | None
+    enabled: bool
 
-    A decision outlives the access to its subject: a dataset can turn private after
-    one's departure from its organization, and its title must not leak through the
-    list of what one follows."""
+
+def rules_for(
+    users: Iterable[User], events: Sequence[str], scopes: Sequence[Document]
+) -> dict[ObjectId, list[Rule]]:
+    """The rules of `users` that can apply to an event, by user id.
+
+    One query for the whole event: resolving per recipient would multiply it by the
+    size of an organization. Rows are read raw, since only identifiers are compared."""
+    users = list(users)
+    if not users:
+        return {}
+
+    rules: dict[ObjectId, list[Rule]] = {}
+    for row in NotificationSetting.objects(
+        Q(scope=None) | Q(scope__in=scopes),
+        Q(event=None) | Q(event__in=events),
+        user__in=users,
+    ).as_pymongo():
+        scope = row.get("scope")
+        rules.setdefault(row["user"], []).append(
+            Rule(
+                scope=scope["_ref"].id if scope else None,
+                event=row.get("event"),
+                reason=NotificationReason(row["reason"]) if row.get("reason") else None,
+                channel=NotificationChannel(row["channel"]) if row.get("channel") else None,
+                enabled=row["enabled"],
+            )
+        )
+    return rules
+
+
+def resolve(
+    rules: list[Rule],
+    events: Sequence[str],
+    scopes: Sequence[Document],
+    reasons: Iterable[NotificationReason],
+) -> set[NotificationChannel]:
+    """The channels one recipient is reached through, given their rules.
+
+    Two questions, in this order, for each reason the recipient has:
+
+    1. Are they concerned at all? Only the rules without a channel answer it, and
+       without any, the default of the reason does.
+    2. If so, through which channels? Only the rules naming a channel answer it, and
+       without any, every channel.
+
+    Splitting them is what keeps following a thread from bringing back the mails one
+    turned off: following says *whether*, a channel says *how*.
+
+    Among the rules answering a question, the most specific wins: the subject first
+    (a thread, then its dataset, then the organization, then everywhere), then the
+    event (a single event, then its family, then every notification), then the reason
+    (this reason, then whatever the reason). So a choice on a subject beats a choice on
+    a reason, and a choice on an event beats a choice on a reason.
+
+    Reasons are then combined generously: being an administrator who muted their
+    organizations does not silence the thread one took part in.
+    """
+    scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
+    event_rank = {event: rank for rank, event in enumerate([*events, None])}
+
+    def decide(reason: NotificationReason, channel: NotificationChannel | None) -> bool | None:
+        candidates = [
+            rule
+            for rule in rules
+            if rule.channel == channel
+            and rule.reason in (reason, None)
+            and rule.scope in scope_rank
+            and rule.event in event_rank
+        ]
+        if not candidates:
+            return None
+        best = min(
+            candidates,
+            key=lambda rule: (
+                scope_rank[rule.scope],
+                event_rank[rule.event],
+                0 if rule.reason == reason else 1,
+            ),
+        )
+        return best.enabled
+
+    channels: set[NotificationChannel] = set()
+    for reason in reasons:
+        concerned = decide(reason, None)
+        if not (DEFAULT_ENABLED[reason] if concerned is None else concerned):
+            continue
+        for channel in NotificationChannel:
+            if decide(reason, channel) is not False:
+                channels.add(channel)
+    return channels
+
+
+def subscribers_for(events: Sequence[str], scopes: Sequence[Document]) -> list[User]:
+    """Users who chose to follow one of these subjects for this event.
+
+    The other direction of the table: `rules_for` filters people the event already
+    reaches, this one brings in those it would never have reached. Without it, somebody
+    outside an organization could follow a subject and never hear about it.
+
+    A rule without a subject is left out on purpose: "everywhere" means "everywhere I
+    am already concerned", not "subscribe me to the whole site".
+    """
+    if not scopes:
+        return []
+
+    return list(
+        NotificationSetting.objects(
+            Q(event=None) | Q(event__in=events),
+            scope__in=scopes,
+            reason=None,
+            channel=None,
+            enabled=True,
+        ).distinct("user")
+    )
+
+
+def visible_subject(scope, user: User):
+    """The subject of a rule as its author may see it today, or `None`.
+
+    A rule outlives the access to its subject: a dataset can turn private after one's
+    departure from its organization, and its title must not leak through the list of
+    what one follows."""
     from udata.core.discussions.models import Discussion
 
     subject = scope.subject if isinstance(scope, Discussion) else scope
@@ -119,111 +234,29 @@ def visible_subject(scope, user: User):
         return None
     if getattr(subject, "private", False):
         organization = getattr(subject, "organization", None)
-        if not (organization and organization.is_member(user)) and getattr(subject, "owner", None) != user:
+        if not (organization and organization.is_member(user)) and getattr(
+            subject, "owner", None
+        ) != user:
             return None
     return subject
 
 
-def subject_summary(setting: "NotificationSetting") -> dict | None:
-    """What the settings screen shows of a followed or ignored subject: a title, a link,
-    and the organization to group it under."""
+def subject_summary(setting: NotificationSetting) -> dict | None:
+    """What the settings screen shows of the subject of a rule: a title, a link, and
+    the organization to group it under."""
     from udata.core.discussions.models import Discussion
     from udata.core.organization.models import Organization
 
     scope = setting.scope
+    if scope is None:
+        return None
     subject = visible_subject(scope, setting.user)
     if subject is None:
         return None
     return {
         "title": scope.title if isinstance(scope, Discussion) else str(subject),
         "page": scope.self_web_url(),
-        "organization": subject if isinstance(subject, Organization) else getattr(subject, "organization", None),
+        "organization": subject
+        if isinstance(subject, Organization)
+        else getattr(subject, "organization", None),
     }
-
-
-def default_channels(reason: NotificationReason) -> set[NotificationChannel]:
-    return set(NotificationChannel) if DEFAULT_ENABLED[reason] else set()
-
-
-def preferences_for(
-    users: Iterable[User],
-) -> dict[tuple[ObjectId, NotificationReason], set[NotificationChannel]]:
-    """The channels each of `users` chose per reason, for the reasons they changed.
-
-    One query for the whole event: resolving per recipient would multiply it by the
-    size of an organization."""
-    users = list(users)
-    if not users:
-        return {}
-    return {
-        (preference["user"], NotificationReason(preference["reason"])): {
-            NotificationChannel(channel) for channel in preference.get("channels", [])
-        }
-        for preference in NotificationPreference.objects(user__in=users).as_pymongo()
-    }
-
-
-def resolved_preferences(user: User) -> list[dict]:
-    """Every configurable reason with the channels it reaches the user through, defaults
-    included: what the settings screen shows."""
-    chosen = preferences_for([user])
-    return [
-        {
-            "reason": reason,
-            "channels": sorted(chosen.get((user.id, reason), default_channels(reason))),
-        }
-        for reason in CONFIGURABLE_REASONS
-    ]
-
-
-def decisions_for(
-    users: Iterable[User],
-    events: Sequence[str],
-    scopes: Sequence[Document],
-) -> dict[ObjectId, bool]:
-    """What each of `users` decided about an event on these subjects, by user id.
-
-    `events` names the event from its own class up to `ConfigurableEvent`, and `scopes`
-    runs from the most specific subject to the broadest one. The subject is weighed
-    first: ignoring one thread holds against following its whole dataset. Only then
-    does the narrower event win on that subject.
-
-    Users who decided nothing are absent from the result, so the caller falls back on
-    their reasons.
-    """
-    users = list(users)
-    if not users or not scopes:
-        return {}
-
-    by_user: dict[ObjectId, dict[tuple[ObjectId, str], bool]] = {}
-    for setting in NotificationSetting.objects(
-        user__in=users, scope__in=scopes, event__in=events
-    ).as_pymongo():
-        choice = (setting["scope"]["_ref"].id, setting["event"])
-        by_user.setdefault(setting["user"], {})[choice] = setting["enabled"]
-
-    precedence = [(scope.id, event) for scope in scopes for event in events]
-    decisions = {}
-    for user, choices in by_user.items():
-        for choice in precedence:
-            if choice in choices:
-                decisions[user] = choices[choice]
-                break
-    return decisions
-
-
-def subscribers_for(events: Sequence[str], scopes: Sequence[Document]) -> list[User]:
-    """Users who chose to follow one of these subjects for this event.
-
-    The other direction of the table: `decisions_for` filters people the event already
-    reaches, this one brings in those it would never have reached. Without it, somebody
-    outside an organization could follow a subject and never hear about it.
-    """
-    if not scopes:
-        return []
-
-    return list(
-        NotificationSetting.objects(scope__in=scopes, event__in=events, enabled=True).distinct(
-            "user"
-        )
-    )
