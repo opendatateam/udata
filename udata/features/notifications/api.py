@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import request
+from flask_restx import marshal
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
@@ -83,7 +84,9 @@ class NotificationSettingsAPI(API):
     @api.secure
     @api.doc("set_notification_setting")
     @api.expect(NotificationSetting.__write_fields__)
-    @api.marshal_with(NotificationSetting.__read_fields__)
+    # As listed, subject included: the screen adds the rule to its list as is.
+    @api.response(200, "Rule replaced", listed_setting_fields)
+    @api.response(201, "Rule created", listed_setting_fields)
     @api.response(204, "Rule removed, the broader rules or the defaults apply again")
     @api.response(400, "Validation error")
     def put(self):
@@ -106,7 +109,9 @@ class NotificationSettingsAPI(API):
         setting, created = NotificationSetting.objects.get_or_create(
             **key, updates={"enabled": rule.enabled, "origin": FollowOrigin.FOLLOWED}
         )
-        return setting, 201 if created else 200
+        # Marshalled here rather than by `marshal_with`, which would also run the subject
+        # of the empty 204 body through `subject_summary`.
+        return marshal(setting, listed_setting_fields), 201 if created else 200
 
 
 resolved_fields = api.model(

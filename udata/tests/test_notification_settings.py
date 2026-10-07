@@ -1104,6 +1104,18 @@ class NotificationSettingsAPITest(APITestCase):
         assert listed["subject"]["title"] == dataset.title
         assert NotificationSetting.objects(user=user).count() == 1
 
+    def test_a_rule_is_written_back_as_it_is_listed(self):
+        """The settings screen adds the rule it just wrote to its list as is: an
+        organization comes grouped under itself, as on reload."""
+        self.login()
+        organization = OrganizationFactory()
+
+        response = self.put_rule(False, organization, event=None)
+
+        self.assert201(response)
+        assert response.json["subject"]["title"] == organization.name
+        assert response.json["subject"]["organization"]["id"] == str(organization.id)
+
     def test_withdrawing_a_rule_brings_the_reasons_back(self):
         admin = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
