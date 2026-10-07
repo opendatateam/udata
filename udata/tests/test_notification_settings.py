@@ -9,7 +9,7 @@ import udata
 import udata.features.notifications.follow  # noqa: F401 -- connected by `init_app` in production
 import udata.models  # noqa: F401 -- registers every document before the imports below
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization.assignment import Assignment
@@ -1589,6 +1589,48 @@ class FollowWhatOneWorksOnTest(APITestCase):
         self.assert200(self.put(url_for("api.reuse", reuse=reuse), data))
 
         assert NotificationSetting.objects(user=editor, scope=reuse, enabled=True).count() == 1
+
+    def test_an_editor_who_adds_a_resource_follows_the_dataset(self):
+        """The most common edit of a dataset, saved without going through the dataset."""
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        self.login(editor)
+
+        response = self.post(
+            url_for("api.resources", dataset=dataset),
+            ResourceFactory.as_dict() | {"filetype": "remote"},
+        )
+
+        self.assert201(response)
+        assert NotificationSetting.objects(user=editor, scope=dataset, enabled=True).count() == 1
+
+    def test_an_editor_who_edits_a_dataservice_follows_it(self):
+        editor = UserFactory()
+        dataservice = DataserviceFactory(organization=OrganizationFactory(editors=[editor]))
+        self.login(editor)
+
+        response = self.patch(
+            url_for("api.dataservice", dataservice=dataservice), {"title": "new title"}
+        )
+
+        self.assert200(response)
+        assert (
+            NotificationSetting.objects(user=editor, scope=dataservice, enabled=True).count() == 1
+        )
+
+    def test_an_editor_who_creates_a_dataset_follows_it(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+        self.login(editor)
+
+        response = self.post(
+            url_for("api.datasets"),
+            DatasetFactory.as_dict() | {"organization": str(organization.id)},
+        )
+
+        self.assert201(response)
+        setting = NotificationSetting.objects(user=editor, enabled=True).get()
+        assert str(setting.scope.id) == response.json["id"]
 
     def test_an_administrator_follows_too_so_as_to_keep_it_as_an_editor(self):
         admin = UserFactory()
