@@ -287,25 +287,18 @@ def resolved_for(user: User, subject: Document, event: str | None) -> dict:
     }
 
 
-def visible_subject(scope, user: User):
-    """The subject of a rule as its author may see it today, or `None`.
+def visible_subject(scope):
+    """The subject of a rule as the current user may see it today, or `None`.
 
     A rule outlives the access to its subject: a dataset can turn private after one's
     departure from its organization, and its title must not leak through the list of
-    what one follows."""
+    what one follows. Each kind of subject says who may read it through its `read`
+    permission; one without any (an organization, a topic) is public."""
     from udata.core.discussions.models import Discussion
 
     subject = scope.subject if isinstance(scope, Discussion) else scope
-    # Datasets and reuses say `deleted`, dataservices `deleted_at`.
-    if getattr(subject, "deleted", None) or getattr(subject, "deleted_at", None):
-        return None
-    if getattr(subject, "private", False) and not user.sysadmin:
-        organization = getattr(subject, "organization", None)
-        if not (organization and organization.is_member(user)) and getattr(
-            subject, "owner", None
-        ) != user:
-            return None
-    return subject
+    read = getattr(subject, "permissions", {}).get("read")
+    return subject if read is None or read.can() else None
 
 
 @dataclass(frozen=True)
@@ -325,7 +318,7 @@ def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
     scope = setting.scope
     if scope is None:
         return None
-    subject = visible_subject(scope, setting.user)
+    subject = visible_subject(scope)
     if subject is None:
         return None
     return SubjectSummary(
