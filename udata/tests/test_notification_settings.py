@@ -1,82 +1,88 @@
 import importlib.util
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from flask import url_for
-from mongoengine import DoesNotExist, NotUniqueError
+from mongoengine import DoesNotExist, NotUniqueError, ValidationError
 from mongoengine.connection import get_db
 
 import udata
+import udata.features.notifications.follow  # noqa: F401 -- connected by `init_app` in production
 import udata.models  # noqa: F401 -- registers every document before the imports below
-from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.notifications import DatasetReusedEvent
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
-from udata.core.discussions.notifications import (
-    DiscussionEvent,
-    NewDiscussion,
-    NewDiscussionComment,
-)
 from udata.core.organization.assignment import Assignment
-from udata.core.organization.constants import ORG_ROLES
+from udata.core.organization.constants import CERTIFIED, ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.reuse.notifications import ReuseCreated
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import (
-    ANNOUNCEMENT_TYPES,
-    DEFAULT_ENABLED,
-    PERSONAL_TYPES,
     REASON_BY_ORGANIZATION_ROLE,
-    TYPES_REQUIRING_ACTION,
+    FollowOrigin,
     MailCadence,
     NotificationChannel,
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.events import ConfigurableEvent, configurable_events
+from udata.features.notifications.events import event_for_type, is_event_name
 from udata.features.notifications.mails import notification_digest
 from udata.features.notifications.models import Notification
 from udata.features.notifications.settings import (
-    CONFIGURABLE_REASONS,
-    NotificationPreference,
+    DEFAULT_RULES,
     NotificationSetting,
-    decisions_for,
+    Rule,
+    resolve,
+    rules_for,
 )
 from udata.features.notifications.tasks import send_notification_digests
 from udata.features.transfer.factories import TransferFactory
 from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import capture_mails
 
-ALL = ConfigurableEvent.__name__
-DISCUSSIONS = DiscussionEvent.__name__
-REUSES_AND_DATASERVICES = DatasetReusedEvent.__name__
+DISCUSSIONS = "discussion"
 
 APP = NotificationChannel.APP
 MAIL = NotificationChannel.MAIL
 
 
-def decide(user, scope, event, enabled):
-    return NotificationSetting.objects.create(user=user, scope=scope, event=event, enabled=enabled)
+def decide(user, scope=None, event=None, enabled=True, reason=None, channel=None, **kwargs):
+    return NotificationSetting.objects.create(
+        user=user,
+        scope=scope,
+        event=event,
+        reason=reason,
+        channel=channel,
+        enabled=enabled,
+        **kwargs,
+    )
 
 
-def follow(user, scope, event=ALL):
+def follow(user, scope, event=None):
     return decide(user, scope, event, enabled=True)
 
 
-def ignore(user, scope, event=ALL):
+def ignore(user, scope, event=None):
     return decide(user, scope, event, enabled=False)
 
 
 def prefer(user, reason, *channels):
-    return NotificationPreference.objects.create(user=user, reason=reason, channels=list(channels))
+    """The channels of a reason, written the way the settings screen writes them: only a
+    channel turned off is stored, and no channel at all turns both off."""
+    if channels:
+        decide(user, reason=reason, enabled=True)
+    for channel in NotificationChannel:
+        if channel not in channels:
+            decide(user, reason=reason, channel=channel, enabled=False)
 
 
-def configurable_types():
-    return {event.type for event in configurable_events()}
+def turn_everything_off(user):
+    for channel in NotificationChannel:
+        decide(user, channel=channel, enabled=False)
 
 
 def open_discussion(dataset):
@@ -105,6 +111,10 @@ def age(notification, **delta):
     )
 
 
+def ref(subject):
+    return {"class": subject.__class__.__name__, "id": str(subject.id)}
+
+
 class PersonaTest(APITestCase):
     """End-to-end scenarios, one per kind of person this feature exists for.
 
@@ -116,17 +126,14 @@ class PersonaTest(APITestCase):
     def test_an_editor_follows_two_datasets_out_of_forty(self):
         """Sofia edits a handful of datasets in a large organization and wants the
         discussions of those, not of the 38 others."""
-        sofia = self.login()
+        sofia = UserFactory()
         organization = OrganizationFactory(editors=[sofia])
         hers = DatasetFactory(organization=organization)
         someone_elses = DatasetFactory(organization=organization)
+        self.login(sofia)
         response = self.put(
             "/api/1/notifications/settings/",
-            {
-                "scope": {"class": "Dataset", "id": str(hers.id)},
-                "event": DISCUSSIONS,
-                "enabled": True,
-            },
+            {"scope": ref(hers), "event": DISCUSSIONS, "enabled": True},
         )
         self.assert201(response)
 
@@ -176,7 +183,6 @@ class PersonaTest(APITestCase):
             open_discussion(DatasetFactory(organization=organization))
 
         assert NotificationSetting.objects.count() == 0
-        assert NotificationPreference.objects.count() == 0
         assert mailed(mails, gilles)
 
     def test_a_partial_editor_hears_about_their_datasets_and_no_others(self):
@@ -218,7 +224,7 @@ class PersonaTest(APITestCase):
         top of it."""
         outsider = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory())
-        follow(outsider, dataset, REUSES_AND_DATASERVICES)
+        follow(outsider, dataset)
 
         ReuseFactory(datasets=[dataset], private=True)
         DataserviceFactory(datasets=[dataset], private=True)
@@ -317,12 +323,41 @@ class PersonaTest(APITestCase):
         assert notifications.count() == 1
         assert notifications.first().details.discussion == awaited
 
-    def test_somebody_who_turned_everything_off_still_gets_what_needs_an_answer(self):
+    def test_somebody_who_turned_every_reason_off_still_gets_what_needs_an_answer(self):
         """Thomas turned every reason off; an invitation he never sees would leave him
         locked out without knowing it."""
         thomas = UserFactory()
-        for reason in CONFIGURABLE_REASONS:
+        for reason in NotificationReason:
             prefer(thomas, reason)
+
+        owner = UserFactory()
+        TransferFactory(
+            user=owner,
+            owner=owner,
+            recipient=thomas,
+            subject=DatasetFactory(owner=owner),
+            status="pending",
+        )
+
+        assert Notification.objects(user=thomas).count() == 1
+
+    def test_turning_everything_off_silences_even_what_one_follows(self):
+        """"Turn everything off" means it: a follow, however precise, does not bring a
+        channel back."""
+        thomas = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(admins=[thomas]))
+        turn_everything_off(thomas)
+        follow(thomas, dataset)
+
+        with capture_mails() as mails:
+            open_discussion(dataset)
+
+        assert Notification.objects(user=thomas).count() == 0
+        assert mailed(mails, thomas) == []
+
+    def test_turning_everything_off_still_leaves_what_needs_an_answer(self):
+        thomas = UserFactory()
+        turn_everything_off(thomas)
 
         owner = UserFactory()
         TransferFactory(
@@ -337,37 +372,41 @@ class PersonaTest(APITestCase):
 
 
 class NotificationTablesTest:
-    """The tables a new notification type or role has to be added to.
+    """The tables a new notification type or role has to be added to, checked here,
+    where everything is imported."""
 
-    None of these can be derived at import time — the event modules are loaded lazily
-    to break cycles — so they are checked here, where everything is imported.
-    """
-
-    def test_every_type_is_classified(self):
-        """A new type must be declared configurable, action-bound, personal or an
-        announcement — deliberately, rather than by ending up unsettable by default."""
-        assert (
-            configurable_types() | TYPES_REQUIRING_ACTION | PERSONAL_TYPES | ANNOUNCEMENT_TYPES
-        ) == set(NotificationType)
-
-    def test_the_groups_do_not_overlap(self):
-        groups = [
-            configurable_types(),
-            set(TYPES_REQUIRING_ACTION),
-            set(PERSONAL_TYPES),
-            set(ANNOUNCEMENT_TYPES),
-        ]
-        assert sum(len(group) for group in groups) == len(set().union(*groups))
-
-    def test_every_reason_declares_a_default(self):
-        assert set(DEFAULT_ENABLED) == set(NotificationReason)
+    def test_every_type_finds_the_event_that_sends_it(self):
+        """The digest goes from a stored type back to its event: a type no event
+        declares, like one set on an instance only, cannot be summarized."""
+        for notification_type in NotificationType:
+            event = event_for_type(notification_type)
+            declared = event.types if hasattr(event, "types") else {event.type}
+            assert notification_type in declared
 
     def test_every_organization_role_maps_to_a_reason(self):
         assert set(REASON_BY_ORGANIZATION_ROLE) == set(ORG_ROLES)
 
+    def test_every_default_rule_names_a_real_event(self):
+        assert all(rule.event is None or is_event_name(rule.event) for rule in DEFAULT_RULES)
+
+
+class EventNameTest:
+    def test_a_type_and_its_prefixes_are_event_names(self):
+        assert is_event_name("discussion.comment")
+        assert is_event_name("discussion")
+        assert is_event_name("organization.badge")
+
+    def test_a_partial_word_is_not_a_prefix(self):
+        assert not is_event_name("discuss")
+        assert not is_event_name("discussion.comm")
+
+    def test_class_names_are_not_event_names(self):
+        assert not is_event_name("NewDiscussion")
+        assert not is_event_name("Unknown")
+
 
 class NotificationSettingModelTest(PytestOnlyDBTestCase):
-    def test_one_decision_per_user_scope_and_event(self):
+    def test_one_rule_per_user_scope_event_reason_and_channel(self):
         user = UserFactory()
         dataset = DatasetFactory()
         ignore(user, dataset, DISCUSSIONS)
@@ -379,23 +418,177 @@ class NotificationSettingModelTest(PytestOnlyDBTestCase):
         user = UserFactory()
         dataset = DatasetFactory()
         ignore(user, dataset, DISCUSSIONS)
-        follow(user, dataset, NewDiscussion.__name__)
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
 
         assert NotificationSetting.objects.count() == 2
 
-    def test_one_preference_per_user_and_reason(self):
+    def test_a_reason_can_be_decided_per_channel(self):
         user = UserFactory()
-        prefer(user, NotificationReason.OWNER, APP)
+        decide(user, reason=NotificationReason.OWNER, enabled=True)
+        decide(user, reason=NotificationReason.OWNER, channel=MAIL, enabled=False)
 
         with pytest.raises(NotUniqueError):
-            prefer(user, NotificationReason.OWNER, MAIL)
+            decide(user, reason=NotificationReason.OWNER, channel=MAIL, enabled=True)
 
-
-class ResolutionTest(PytestOnlyDBTestCase):
-    def test_nothing_decided_leaves_the_user_out_of_the_decisions(self):
+    def test_a_rule_names_a_type_or_a_prefix_of_one(self):
         user = UserFactory()
 
-        assert decisions_for([user], NewDiscussion.decision_events(), [DatasetFactory()]) == {}
+        for event in ("NewDiscussion", "Unknown", "discuss"):
+            with pytest.raises(ValidationError):
+                decide(user, event=event, enabled=False)
+
+        assert NotificationSetting.objects.count() == 0
+
+    def test_a_rule_is_set_by_hand_unless_told_otherwise(self):
+        assert follow(UserFactory(), DatasetFactory()).origin == FollowOrigin.FOLLOWED
+
+
+THREAD, DATASET, ORGANIZATION = (SimpleNamespace(id=name) for name in ("t", "d", "o"))
+SCOPES = [THREAD, DATASET, ORGANIZATION]
+NEW = ["discussion.new", "discussion"]
+COMMENT = ["discussion.comment", "discussion"]
+
+
+def rule(scope=None, event=None, reason=None, channel=None, enabled=True):
+    return Rule(
+        enabled=enabled,
+        scope=scope.id if scope else None,
+        event=event,
+        reason=reason,
+        channel=channel,
+    )
+
+
+class ResolveTest:
+    """`resolve` alone, on the cases the settings were designed around: which rule wins
+    when several apply."""
+
+    def test_the_defaults_alone(self):
+        assert resolve([], NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == {APP, MAIL}
+        assert resolve([], NEW, SCOPES, {NotificationReason.ORGANIZATION_EDITOR}) == set()
+
+    def test_a_new_reason_is_heard_by_default(self):
+        """No reason but the editors' is silenced by default, so that forgetting one
+        cannot silence it."""
+        for reason in set(NotificationReason) - {NotificationReason.ORGANIZATION_EDITOR}:
+            assert resolve([], NEW, SCOPES, {reason}) == {APP, MAIL}
+
+    def test_editors_hear_about_the_badges_of_their_organization(self):
+        assert resolve(
+            [], ["organization.badge.certified", "organization.badge", "organization"],
+            [ORGANIZATION], {NotificationReason.ORGANIZATION_EDITOR},
+        ) == {APP, MAIL}  # fmt: skip
+
+    def test_following_a_dataset_beats_never_as_an_administrator(self):
+        rules = [
+            rule(reason=NotificationReason.ORGANIZATION_ADMIN, enabled=False),
+            rule(scope=DATASET),
+        ]
+        reasons = {NotificationReason.ORGANIZATION_ADMIN, NotificationReason.EXPLICIT_SUBSCRIBER}
+
+        assert resolve(rules, NEW, SCOPES, reasons) == {APP, MAIL}
+
+    def test_following_does_not_bring_back_a_channel_turned_off(self):
+        """Following says whether, a channel says how: no mail for the answers holds
+        on a followed dataset."""
+        rules = [rule(event="discussion.comment", channel=MAIL, enabled=False), rule(scope=DATASET)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.EXPLICIT_SUBSCRIBER}) == {APP}
+
+    def test_a_channel_on_a_subject_beats_a_channel_on_a_reason(self):
+        rules = [
+            rule(reason=NotificationReason.ORGANIZATION_ADMIN, channel=MAIL, enabled=False),
+            rule(scope=DATASET, channel=MAIL),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == {APP, MAIL}
+
+    def test_an_event_on_a_thread_beats_the_thread(self):
+        rules = [rule(scope=THREAD, enabled=False), rule(scope=THREAD, event="discussion.comment")]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == {
+            APP,
+            MAIL,
+        }
+
+    def test_the_most_generous_reason_wins(self):
+        rules = [rule(reason=NotificationReason.ORGANIZATION_ADMIN, enabled=False)]
+        reasons = {NotificationReason.ORGANIZATION_ADMIN, NotificationReason.DISCUSSION_PARTICIPANT}
+
+        assert resolve(rules, COMMENT, SCOPES, reasons) == {APP, MAIL}
+
+    def test_an_event_beats_a_reason(self):
+        rules = [
+            rule(reason=NotificationReason.ORGANIZATION_EDITOR),
+            rule(event="discussion.new", enabled=False),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_EDITOR}) == set()
+
+    def test_ignoring_a_dataset(self):
+        rules = [rule(scope=DATASET, enabled=False)]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == set()
+
+    def test_turning_both_channels_off_beats_a_follow(self):
+        rules = [
+            rule(channel=APP, enabled=False),
+            rule(channel=MAIL, enabled=False),
+            rule(scope=DATASET),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.EXPLICIT_SUBSCRIBER}) == set()
+
+    def test_the_users_broad_choice_beats_a_precise_default(self):
+        """Defaults are only read where the user said nothing: "editors, yes" set by the
+        user is not undone by the narrower default of the badges."""
+        rules = [rule(enabled=False)]
+
+        assert resolve(
+            rules, ["organization.badge.certified", "organization.badge", "organization"],
+            [ORGANIZATION], {NotificationReason.ORGANIZATION_EDITOR},
+        ) == set()  # fmt: skip
+
+    def test_rules_about_other_subjects_or_events_are_ignored(self):
+        rules = [
+            rule(scope=SimpleNamespace(id="elsewhere"), enabled=False),
+            rule(event="reuse.created", enabled=False),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == {APP, MAIL}
+
+    def test_nobody_concerned_gets_nothing(self):
+        assert resolve([rule(scope=DATASET)], NEW, SCOPES, set()) == set()
+
+
+class RulesForTest(PytestOnlyDBTestCase):
+    def test_nothing_decided_leaves_the_user_out(self):
+        assert rules_for([UserFactory()], NEW, [DatasetFactory()]) == {}
+
+    def test_only_the_rules_that_can_apply_are_loaded(self):
+        user = UserFactory()
+        dataset = DatasetFactory()
+        ignore(user, dataset, DISCUSSIONS)
+        ignore(user, DatasetFactory(), DISCUSSIONS)
+        ignore(user, dataset, NotificationType.REUSE_CREATED)
+        decide(user, reason=NotificationReason.OWNER, channel=MAIL, enabled=False)
+
+        rules = rules_for([user], NEW, [dataset])[user.id]
+
+        assert sorted(rules, key=lambda rule: rule.reason or "") == [
+            Rule(enabled=False, scope=dataset.id, event=DISCUSSIONS),
+            Rule(enabled=False, reason=NotificationReason.OWNER, channel=MAIL),
+        ]
+
+    def test_an_organization_rule_covers_its_datasets(self):
+        user = UserFactory()
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+        ignore(user, organization, DISCUSSIONS)
+
+        rules = rules_for([user], NEW, [dataset, organization])[user.id]
+
+        assert resolve(rules, NEW, [dataset, organization], {NotificationReason.OWNER}) == set()
 
     def test_the_most_specific_scope_wins(self):
         user = UserFactory()
@@ -404,36 +597,9 @@ class ResolutionTest(PytestOnlyDBTestCase):
         ignore(user, dataset, DISCUSSIONS)
         follow(user, organization, DISCUSSIONS)
 
-        decisions = decisions_for([user], NewDiscussion.decision_events(), [dataset, organization])
+        rules = rules_for([user], NEW, [dataset, organization])[user.id]
 
-        assert decisions[user.id] is False
-
-    def test_an_organization_decision_covers_its_datasets(self):
-        user = UserFactory()
-        organization = OrganizationFactory()
-        dataset = DatasetFactory(organization=organization)
-        ignore(user, organization, DISCUSSIONS)
-
-        decisions = decisions_for([user], NewDiscussion.decision_events(), [dataset, organization])
-
-        assert decisions[user.id] is False
-
-    def test_a_decision_on_another_subject_does_not_leak(self):
-        user = UserFactory()
-        ignore(user, DatasetFactory(), DISCUSSIONS)
-
-        decisions = decisions_for([user], NewDiscussion.decision_events(), [DatasetFactory()])
-
-        assert decisions == {}
-
-    def test_a_decision_on_another_family_does_not_leak(self):
-        user = UserFactory()
-        dataset = DatasetFactory()
-        ignore(user, dataset, REUSES_AND_DATASERVICES)
-
-        decisions = decisions_for([user], NewDiscussion.decision_events(), [dataset])
-
-        assert decisions == {}
+        assert resolve(rules, NEW, [dataset, organization], {NotificationReason.OWNER}) == set()
 
 
 class DispatchTest(APITestCase):
@@ -446,6 +612,15 @@ class DispatchTest(APITestCase):
         open_discussion(DatasetFactory(organization=organization))
 
         assert Notification.objects(user=editor).count() == 0
+
+    def test_an_editor_still_hears_about_the_badges_of_their_organization(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+
+        organization.add_badge(CERTIFIED)
+
+        notification = Notification.objects(user=editor).get()
+        assert notification.reasons == [NotificationReason.ORGANIZATION_EDITOR]
 
     def test_an_editor_who_answered_keeps_hearing_about_the_thread(self):
         """Concerned twice over, as an editor and as a participant: the participant's
@@ -526,7 +701,8 @@ class DispatchTest(APITestCase):
 
     def test_a_type_can_be_kept_out_of_the_mails(self):
         """The new discussions by mail, not every comment: still both in the bell."""
-        admin = UserFactory(mail_muted_types=[NotificationType.DISCUSSION_COMMENT])
+        admin = UserFactory()
+        decide(admin, event=NotificationType.DISCUSSION_COMMENT, channel=MAIL, enabled=False)
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
 
         with capture_mails() as mails:
@@ -536,16 +712,37 @@ class DispatchTest(APITestCase):
         assert Notification.objects(user=admin).count() == 2
         assert len(mailed(mails, admin)) == 1
 
-    def test_a_mail_one_can_turn_off_says_where_to(self):
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    def test_a_mail_one_can_turn_off_says_why_and_where_to(self):
         admin = UserFactory()
-        dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
+        organization = OrganizationFactory(admins=[admin])
+        dataset = DatasetFactory(organization=organization)
 
         with capture_mails() as mails:
             open_discussion(dataset)
 
         [mail] = mailed(mails, admin)
         assert "/admin/me/notifications" in mail.body
+        assert f"you administer {organization.name}" in mail.body
 
+    def test_a_mail_names_every_reason(self):
+        """Naming only one would offer a way out that stops nothing."""
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        discussion = DiscussionFactory(
+            subject=DatasetFactory(organization=organization),
+            user=UserFactory(),
+            discussion=[MessageDiscussionFactory(posted_by=admin)],
+        )
+
+        with capture_mails() as mails:
+            comment(discussion)
+
+        [mail] = mailed(mails, admin)
+        assert f"you administer {organization.name}" in mail.body
+        assert "you take part in this discussion" in mail.body
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_a_mail_asking_for_an_action_offers_no_way_out(self):
         """A transfer to accept is not something to turn off."""
         recipient = UserFactory()
@@ -591,6 +788,15 @@ class DispatchTest(APITestCase):
 
         assert Notification.objects(user=admin).count() == 0
 
+    def test_ignoring_an_organization_covers_its_badges(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        ignore(admin, organization)
+
+        organization.add_badge(CERTIFIED)
+
+        assert Notification.objects(user=admin).count() == 0
+
     def test_ignoring_the_discussions_of_a_dataset_keeps_its_reuses(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
@@ -603,12 +809,10 @@ class DispatchTest(APITestCase):
             NotificationType.REUSE_CREATED
         ]
 
-    def test_a_decision_on_the_family_covers_reuses_and_dataservices(self):
-        """Both say "somebody plugged something onto your dataset", so one decision
-        can cover them."""
+    def test_ignoring_a_dataset_covers_its_reuses_and_dataservices(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
-        ignore(owner, dataset, REUSES_AND_DATASERVICES)
+        ignore(owner, dataset)
 
         ReuseFactory(datasets=[dataset])
         DataserviceFactory(datasets=[dataset])
@@ -618,7 +822,7 @@ class DispatchTest(APITestCase):
     def test_reuses_and_dataservices_can_be_decided_apart(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
-        ignore(owner, dataset, ReuseCreated.__name__)
+        ignore(owner, dataset, NotificationType.REUSE_CREATED)
 
         ReuseFactory(datasets=[dataset])
         DataserviceFactory(datasets=[dataset])
@@ -633,7 +837,7 @@ class DispatchTest(APITestCase):
         admin = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
         ignore(admin, dataset, DISCUSSIONS)
-        follow(admin, dataset, NewDiscussionComment.__name__)
+        follow(admin, dataset, NotificationType.DISCUSSION_COMMENT)
 
         comment(open_discussion(dataset))
 
@@ -649,7 +853,7 @@ class DispatchTest(APITestCase):
         discussion = open_discussion(dataset)
         Notification.objects(user=admin).delete()
         ignore(admin, discussion)
-        follow(admin, dataset, NewDiscussionComment.__name__)
+        follow(admin, dataset, NotificationType.DISCUSSION_COMMENT)
 
         comment(discussion)
 
@@ -658,12 +862,24 @@ class DispatchTest(APITestCase):
     def test_a_subject_can_be_followed_for_its_new_discussions_only(self):
         outsider = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory())
-        follow(outsider, dataset, NewDiscussion.__name__)
+        follow(outsider, dataset, NotificationType.DISCUSSION_NEW)
 
         comment(open_discussion(dataset))
 
         assert [notification.type for notification in Notification.objects(user=outsider)] == [
             NotificationType.DISCUSSION_NEW
+        ]
+
+    def test_a_type_can_be_turned_off_everywhere(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        decide(owner, event=NotificationType.REUSE_CREATED, enabled=False)
+
+        ReuseFactory(datasets=[dataset])
+        DataserviceFactory(datasets=[dataset])
+
+        assert [notification.type for notification in Notification.objects(user=owner)] == [
+            NotificationType.DATASERVICE_CREATED
         ]
 
 
@@ -863,82 +1079,97 @@ class DigestTest(PytestOnlyDBTestCase):
 
 
 class NotificationSettingsAPITest(APITestCase):
-    def put_decision(self, enabled, scope, event=DISCUSSIONS):
+    def put_rule(self, enabled, scope=None, event=DISCUSSIONS, **keys):
         return self.put(
             "/api/1/notifications/settings/",
-            {
-                "scope": {"class": scope.__class__.__name__, "id": str(scope.id)}
-                if scope
-                else None,
-                "event": event,
-                "enabled": enabled,
-            },
+            {"scope": ref(scope) if scope else None, "event": event, "enabled": enabled, **keys},
         )
 
     def test_deciding_again_replaces_the_previous_answer(self):
         user = self.login()
         dataset = DatasetFactory()
 
-        self.assert201(self.put_decision(True, dataset))
-        response = self.put_decision(False, dataset)
+        self.assert201(self.put_rule(True, dataset))
+        response = self.put_rule(False, dataset)
 
         self.assert200(response)
-        listed = self.get("/api/1/notifications/settings/").json
-        assert listed == [
-            {
-                "id": response.json["id"],
-                "scope": {"class": "Dataset", "id": str(dataset.id)},
-                "event": DISCUSSIONS,
-                "enabled": False,
-            }
-        ]
+        [listed] = self.get("/api/1/notifications/settings/").json
+        assert listed["id"] == response.json["id"]
+        assert listed["scope"] == ref(dataset)
+        assert listed["event"] == DISCUSSIONS
+        assert listed["reason"] is None
+        assert listed["channel"] is None
+        assert listed["enabled"] is False
+        assert listed["origin"] == FollowOrigin.FOLLOWED
+        assert listed["subject"]["title"] == dataset.title
         assert NotificationSetting.objects(user=user).count() == 1
 
-    def test_withdrawing_a_decision_brings_the_reasons_back(self):
-        admin = self.login()
+    def test_withdrawing_a_rule_brings_the_reasons_back(self):
+        admin = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
-        decision = self.put_decision(False, dataset).json
+        self.login(admin)
+        self.assert201(self.put_rule(False, dataset))
 
-        self.assert204(self.delete(f"/api/1/notifications/settings/{decision['id']}/"))
+        self.assert204(self.put_rule(None, dataset))
         open_discussion(dataset)
 
+        assert NotificationSetting.objects(user=admin).count() == 0
         assert Notification.objects(user=admin).count() == 1
 
-    def test_a_decision_names_a_subject(self):
-        """Not deciding anything about a subject is what the preferences are for."""
+    def test_withdrawing_a_rule_one_never_set_changes_nothing(self):
         self.login()
 
-        self.assert400(self.put_decision(False, None))
+        self.assert204(self.put_rule(None, DatasetFactory()))
 
-        assert NotificationSetting.objects.count() == 0
+    def test_a_rule_can_be_about_a_reason_or_a_channel_alone(self):
+        user = self.login()
 
-    def test_nobody_sees_nor_withdraws_the_decisions_of_somebody_else(self):
-        theirs = ignore(UserFactory(), DatasetFactory())
+        self.assert201(
+            self.put_rule(False, event=None, reason=NotificationReason.OWNER, channel=MAIL)
+        )
+        self.assert201(self.put_rule(False, event=None, channel=APP))
+
+        assert NotificationSetting.objects(user=user).count() == 2
+
+    def test_nobody_sees_nor_withdraws_the_rules_of_somebody_else(self):
+        dataset = DatasetFactory()
+        theirs = ignore(UserFactory(), dataset)
         self.login()
 
         assert self.get("/api/1/notifications/settings/").json == []
-        self.assert404(self.delete(f"/api/1/notifications/settings/{theirs.id}/"))
+        self.assert204(self.put_rule(None, dataset, event=None))
         assert NotificationSetting.objects(id=theirs.id).count() == 1
 
-    def test_a_decision_cannot_be_scoped_to_a_user(self):
+    def test_a_rule_cannot_be_scoped_to_a_user(self):
         self.login()
 
-        response = self.put_decision(True, UserFactory())
+        response = self.put_rule(True, UserFactory())
 
         self.assert400(response)
         assert NotificationSetting.objects.count() == 0
 
-    def test_a_decision_names_a_configurable_event(self):
-        """An invitation is an action to take, not something to opt out of."""
+    def test_a_rule_names_a_type_or_a_prefix_of_one(self):
         self.login()
         dataset = DatasetFactory()
 
-        for event in ("MembershipInvited", "NotificationEvent", "Unknown"):
-            self.assert400(self.put_decision(False, dataset, event=event))
+        for event in ("NewDiscussion", "Unknown", "discuss"):
+            self.assert400(self.put_rule(False, dataset, event=event))
 
         assert NotificationSetting.objects.count() == 0
 
-    def test_a_decision_goes_with_its_subject(self):
+    def test_setting_a_follow_by_hand_makes_it_ones_own(self):
+        """A follow created by an edit says "because you edited it" until the user
+        decides about it themselves."""
+        user = self.login()
+        dataset = DatasetFactory()
+        decide(user, dataset, enabled=True, origin=FollowOrigin.EDITED)
+
+        response = self.put_rule(True, dataset, event=None)
+
+        self.assert200(response)
+        assert NotificationSetting.objects(user=user).get().origin == FollowOrigin.FOLLOWED
+
+    def test_a_rule_goes_with_its_subject(self):
         user = self.login()
         discussion = DiscussionFactory(subject=DatasetFactory())
         ignore(user, discussion)
@@ -949,7 +1180,7 @@ class NotificationSettingsAPITest(APITestCase):
         self.assert200(response)
         assert response.json == []
 
-    def test_a_decision_goes_with_a_subject_purged_in_bulk(self):
+    def test_a_rule_goes_with_a_subject_purged_in_bulk(self):
         user = self.login()
         dataset = DatasetFactory()
         discussion = DiscussionFactory(subject=dataset)
@@ -961,100 +1192,211 @@ class NotificationSettingsAPITest(APITestCase):
 
     def test_settings_require_an_account(self):
         self.assert401(self.get("/api/1/notifications/settings/"))
-        self.assert401(self.put_decision(True, DatasetFactory()))
+        self.assert401(self.put_rule(True, DatasetFactory()))
 
 
-class NotificationPreferencesAPITest(APITestCase):
-    def test_every_configurable_reason_is_listed_with_its_defaults(self):
+class NotificationResolvedAPITest(APITestCase):
+    def resolved(self, scopes=(), events=(), reasons=()):
+        query = [
+            *(("scope", f"{scope.__class__.__name__}:{scope.id}") for scope in scopes),
+            *(("event", event) for event in events),
+            *(("reason", reason) for reason in reasons),
+        ]
+        return self.get("/api/1/notifications/resolved/", query_string=query)
+
+    def test_every_reason_resolves_to_its_defaults(self):
         self.login()
 
-        response = self.get("/api/1/notifications/preferences/")
+        response = self.resolved(reasons=list(NotificationReason))
 
         self.assert200(response)
-        assert {item["reason"]: item["channels"] for item in response.json} == {
-            reason: sorted(NotificationChannel) if DEFAULT_ENABLED[reason] else []
-            for reason in CONFIGURABLE_REASONS
+        assert {answer["reason"]: answer["channels"] for answer in response.json} == {
+            reason: [] if reason == NotificationReason.ORGANIZATION_EDITOR else [APP, MAIL]
+            for reason in NotificationReason
         }
 
     def test_choosing_the_channels_of_a_reason(self):
         user = self.login()
+        prefer(user, NotificationReason.ORGANIZATION_ADMIN, APP)
 
-        response = self.put(
-            "/api/1/notifications/preferences/",
-            {"reason": NotificationReason.ORGANIZATION_ADMIN, "channels": [APP]},
-        )
-        self.put(
-            "/api/1/notifications/preferences/",
-            {"reason": NotificationReason.ORGANIZATION_ADMIN, "channels": [MAIL]},
-        )
+        [answer] = self.resolved(reasons=[NotificationReason.ORGANIZATION_ADMIN]).json
 
-        self.assert200(response)
-        listed = {item["reason"]: item["channels"] for item in self.get("/api/1/notifications/preferences/").json}
-        assert listed[NotificationReason.ORGANIZATION_ADMIN] == [MAIL]
-        assert NotificationPreference.objects(user=user).count() == 1
+        assert answer["channels"] == [APP]
 
-    def test_sysadmin_notifications_are_not_configurable(self):
+    def test_the_notifications_of_the_site_administration_can_be_turned_off(self):
+        user = self.login(AdminFactory())
+        prefer(user, NotificationReason.SYSADMIN)
+
+        [answer] = self.resolved(reasons=[NotificationReason.SYSADMIN]).json
+
+        assert answer["channels"] == []
+
+    def test_an_administrator_hears_about_their_organization(self):
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+
+        [answer] = self.resolved(scopes=[organization], events=[DISCUSSIONS]).json
+
+        assert answer["scope"] == ref(organization)
+        assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
+        assert answer["channels"] == [APP, MAIL]
+
+    def test_an_owner_hears_about_the_threads_of_their_dataset(self):
+        owner = self.login()
+        discussion = DiscussionFactory(subject=DatasetFactory(owner=owner))
+
+        [answer] = self.resolved(scopes=[discussion], events=[DISCUSSIONS]).json
+
+        assert answer["reasons"] == [NotificationReason.OWNER]
+        assert answer["channels"] == [APP, MAIL]
+
+    def test_a_follow_gives_its_reason(self):
+        user = self.login()
+        followed, edited = DatasetFactory(), DatasetFactory()
+        follow(user, followed)
+        decide(user, edited, enabled=True, origin=FollowOrigin.EDITED)
+
+        answers = self.resolved(scopes=[followed, edited], events=[DISCUSSIONS]).json
+
+        assert [answer["reasons"] for answer in answers] == [
+            [NotificationReason.EXPLICIT_SUBSCRIBER],
+            [NotificationReason.CONTRIBUTOR],
+        ]
+
+    def test_nothing_concerns_an_outsider(self):
         self.login()
 
-        response = self.put(
-            "/api/1/notifications/preferences/",
-            {"reason": NotificationReason.SYSADMIN, "channels": []},
+        [answer] = self.resolved(scopes=[DatasetFactory()], events=[DISCUSSIONS]).json
+
+        assert answer == {
+            "scope": answer["scope"],
+            "event": DISCUSSIONS,
+            "reason": None,
+            "channels": [],
+            "reasons": [],
+        }
+
+    def test_an_ignored_thread_resolves_to_nothing(self):
+        owner = self.login()
+        discussion = DiscussionFactory(subject=DatasetFactory(owner=owner))
+        ignore(owner, discussion, DISCUSSIONS)
+
+        [answer] = self.resolved(scopes=[discussion], events=[DISCUSSIONS]).json
+
+        assert answer["channels"] == []
+
+    def test_one_answer_per_combination_of_repeated_keys(self):
+        """A page asks once for all of its threads."""
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        threads = [DiscussionFactory(subject=dataset) for _ in range(3)]
+        ignore(owner, threads[1])
+
+        answers = self.resolved(
+            scopes=threads, events=[NotificationType.DISCUSSION_NEW, DISCUSSIONS]
+        ).json
+
+        assert [(answer["scope"]["id"], answer["event"]) for answer in answers] == [
+            (str(thread.id), event)
+            for thread in threads
+            for event in (NotificationType.DISCUSSION_NEW, DISCUSSIONS)
+        ]
+        assert [bool(answer["channels"]) for answer in answers] == [
+            True,
+            True,
+            False,
+            False,
+            True,
+            True,
+        ]
+
+    def test_unknown_keys_are_refused(self):
+        self.login()
+
+        self.assert400(self.get("/api/1/notifications/resolved/?event=Unknown"))
+        self.assert400(self.get("/api/1/notifications/resolved/?reason=unknown"))
+        self.assert400(self.get("/api/1/notifications/resolved/?scope=User:anything"))
+        self.assert400(
+            self.get("/api/1/notifications/resolved/?scope=Dataset:000000000000000000000000")
         )
 
-        self.assert400(response)
-        assert NotificationPreference.objects.count() == 0
-
-    def test_preferences_require_an_account(self):
-        self.assert401(self.get("/api/1/notifications/preferences/"))
+    def test_resolving_requires_an_account(self):
+        self.assert401(self.get("/api/1/notifications/resolved/"))
 
 
 class MeMailSettingsAPITest(APITestCase):
     def test_the_mail_cadence_is_set_on_me_and_defers_the_mails(self):
-        admin = self.login()
+        admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
+        dataset = DatasetFactory(organization=organization)
+        self.login(admin)
 
         response = self.put("/api/1/me/", {"mail_cadence": MailCadence.WEEKLY})
         self.assert200(response)
         assert response.json["mail_cadence"] == MailCadence.WEEKLY
 
         with capture_mails() as mails:
-            open_discussion(DatasetFactory(organization=organization))
+            open_discussion(dataset)
 
         assert mailed(mails, admin) == []
 
-    def test_the_muted_mail_types_are_set_on_me(self):
-        self.login()
+    def test_a_type_is_kept_out_of_the_mails_through_a_rule(self):
+        admin = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
+        self.login(admin)
 
-        response = self.put("/api/1/me/", {"mail_muted_types": [NotificationType.DISCUSSION_COMMENT]})
+        response = self.put(
+            "/api/1/notifications/settings/",
+            {"event": NotificationType.DISCUSSION_COMMENT, "channel": MAIL, "enabled": False},
+        )
+        with capture_mails() as mails:
+            comment(open_discussion(dataset))
 
-        self.assert200(response)
-        assert response.json["mail_muted_types"] == [NotificationType.DISCUSSION_COMMENT]
+        self.assert201(response)
+        assert len(mailed(mails, admin)) == 1
 
     def test_the_mail_settings_of_somebody_else_are_not_disclosed(self):
-        other = UserFactory(
-            mail_cadence=MailCadence.WEEKLY,
-            mail_muted_types=[NotificationType.DISCUSSION_COMMENT],
-        )
+        other = UserFactory(mail_cadence=MailCadence.WEEKLY)
         self.login()
 
         response = self.get(f"/api/1/users/{other.id}/")
 
         self.assert200(response)
         assert response.json["mail_cadence"] is None
-        assert response.json["mail_muted_types"] is None
+        assert "mail_muted_types" not in response.json
 
 
 class NotificationReasonsAPITest(APITestCase):
     def test_the_bell_tells_why_the_user_is_concerned(self):
-        admin = self.login()
+        admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
         open_discussion(DatasetFactory(organization=organization))
+        self.login(admin)
 
         response = self.get("/api/1/notifications/")
 
         self.assert200(response)
         assert [n["reasons"] for n in response.json["data"]] == [
             [NotificationReason.ORGANIZATION_ADMIN]
+        ]
+
+    def test_the_bell_tells_which_notifications_ask_for_an_action(self):
+        recipient = self.login()
+        owner = UserFactory()
+        TransferFactory(
+            user=owner,
+            owner=owner,
+            recipient=recipient,
+            subject=DatasetFactory(owner=owner),
+            status="pending",
+        )
+        open_discussion(DatasetFactory(owner=recipient))
+
+        response = self.get("/api/1/notifications/")
+
+        assert sorted((n["type"], n["requires_action"]) for n in response.json["data"]) == [
+            (NotificationType.DISCUSSION_NEW, False),
+            (NotificationType.TRANSFER_REQUESTED, True),
         ]
 
 
@@ -1066,32 +1408,51 @@ class FollowWhatOneWorksOnTest(APITestCase):
 
     def test_an_editor_who_edits_a_dataset_follows_it(self):
         """Sofia no longer has to follow by hand what she works on."""
-        sofia = self.login()
+        sofia = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(editors=[sofia]))
+        self.login(sofia)
 
         response = self.edit(dataset)
         open_discussion(dataset)
 
         self.assert200(response)
-        assert response.headers["X-Notification-Followed"] == f"Dataset:{dataset.id}"
-        assert NotificationSetting.objects(user=sofia, scope=dataset, enabled=True).count() == 1
-        assert Notification.objects(user=sofia).count() == 1
+        setting = NotificationSetting.objects(user=sofia).get()
+        assert (setting.scope, setting.enabled, setting.origin) == (
+            dataset,
+            True,
+            FollowOrigin.EDITED,
+        )
+        notification = Notification.objects(user=sofia).get()
+        assert NotificationReason.CONTRIBUTOR in notification.reasons
 
-    def test_an_edit_that_follows_nothing_new_says_nothing(self):
-        """Already followed: the site has nothing to announce."""
-        sofia = self.login()
+    def test_editing_what_one_follows_changes_nothing(self):
+        """Already followed by hand: it stays a follow of one's own."""
+        sofia = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(editors=[sofia]))
         follow(sofia, dataset)
+        self.login(sofia)
 
-        response = self.edit(dataset)
+        self.assert200(self.edit(dataset))
 
-        self.assert200(response)
-        assert "X-Notification-Followed" not in response.headers
+        setting = NotificationSetting.objects(user=sofia).get()
+        assert setting.origin == FollowOrigin.FOLLOWED
+
+    def test_an_editor_who_edits_a_reuse_follows_it(self):
+        editor = UserFactory()
+        reuse = ReuseFactory(organization=OrganizationFactory(editors=[editor]))
+        self.login(editor)
+        data = reuse.to_dict()
+        data["description"] = "new description"
+
+        self.assert200(self.put(url_for("api.reuse", reuse=reuse), data))
+
+        assert NotificationSetting.objects(user=editor, scope=reuse, enabled=True).count() == 1
 
     def test_an_administrator_follows_too_so_as_to_keep_it_as_an_editor(self):
-        admin = self.login()
+        admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
         dataset = DatasetFactory(organization=organization)
+        self.login(admin)
 
         self.assert200(self.edit(dataset))
         organization.members[0].role = "editor"
@@ -1101,9 +1462,10 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert Notification.objects(user=admin).count() == 1
 
     def test_editing_what_one_ignores_keeps_it_ignored(self):
-        editor = self.login()
+        editor = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
         ignore(editor, dataset)
+        self.login(editor)
 
         self.assert200(self.edit(dataset))
 
@@ -1111,7 +1473,7 @@ class FollowWhatOneWorksOnTest(APITestCase):
 
     def test_editing_outside_of_ones_organizations_follows_nothing(self):
         """A site administrator fixing somebody else's dataset has not worked on it."""
-        self.login(UserFactory(roles=["admin"]))
+        self.login(AdminFactory())
         dataset = DatasetFactory(organization=OrganizationFactory())
 
         self.assert200(self.edit(dataset))
@@ -1128,10 +1490,11 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert NotificationSetting.objects.count() == 0
 
     def test_the_followed_subjects_are_listed_with_their_organization(self):
-        editor = self.login()
+        editor = UserFactory()
         organization = OrganizationFactory(editors=[editor])
         dataset = DatasetFactory(organization=organization)
         follow(editor, dataset)
+        self.login(editor)
 
         [listed] = self.get("/api/1/notifications/settings/").json
 
@@ -1171,22 +1534,21 @@ class FollowEditedSubjectsMigrationTest(PytestOnlyDBTestCase):
 
         self.migrate(get_db())
 
-        assert [(setting.user, setting.scope) for setting in NotificationSetting.objects] == [
-            (editor, edited)
-        ]
+        assert [
+            (setting.user, setting.scope, setting.origin) for setting in NotificationSetting.objects
+        ] == [(editor, edited, FollowOrigin.EDITED)]
 
 
 class DigestVisibilityTest(APITestCase):
     def test_a_mail_only_notification_is_not_listed_in_the_bell(self):
-        admin = self.login()
-        admin.mail_cadence = MailCadence.WEEKLY
-        admin.save()
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
         organization = OrganizationFactory(admins=[admin])
         prefer(admin, NotificationReason.ORGANIZATION_ADMIN, MAIL)
         open_discussion(DatasetFactory(organization=organization))
+        self.login(admin)
 
         response = self.get("/api/1/notifications/")
 
         self.assert200(response)
-        assert Notification.objects(user=admin).count() == 1
+        assert Notification.objects(user=admin).get().channels == [MAIL]
         assert response.json["data"] == []
