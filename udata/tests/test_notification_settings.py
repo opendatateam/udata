@@ -350,6 +350,21 @@ class PersonaTest(APITestCase):
         assert Notification.objects(user=thomas).count() == 0
         assert mailed(mails, thomas) == []
 
+    def test_a_request_to_answer_reaches_an_admin_who_turned_every_channel_off(self):
+        """Saying no to the app and the mails everywhere still leaves the requests to
+        join one's organization: unanswered, they would sit there with nobody knowing."""
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        for channel in NotificationChannel:
+            decide(admin, channel=channel, enabled=False)
+        self.login()
+
+        with capture_mails() as mails:
+            self.post(url_for("api.request_membership", org=organization), {"comment": "x"})
+
+        assert Notification.objects(user=admin).count() == 1
+        assert len(mailed(mails, admin)) == 1
+
     def test_turning_everything_off_still_leaves_what_needs_an_answer(self):
         thomas = UserFactory()
         turn_everything_off(thomas)
