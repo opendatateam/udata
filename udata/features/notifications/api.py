@@ -76,8 +76,8 @@ class NotificationSettingsAPI(API):
     def get(self):
         """List the rules the current user set about their notifications.
 
-        Only rules are listed: whatever no rule covers follows the default rules (see
-        `/notifications/defaults/`)."""
+        Only rules are listed: whatever no rule covers follows the default rules. What
+        they add up to is given by `/notifications/resolved/`."""
         return list(NotificationSetting.objects(user=current_user.id))
 
     @api.secure
