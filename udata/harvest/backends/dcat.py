@@ -15,6 +15,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.models import Dataset
 from udata.core.dataset.rdf import dataset_from_rdf
+from udata.harvest.exceptions import HarvestValidationError
 from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import lazy_gettext as _
 from udata.rdf import (
@@ -111,12 +112,10 @@ class DcatBackend(BaseBackend):
             response.raise_for_status()
             mime_type = response.headers.get("Content-Type", "").split(";", 1)[0]
             if not mime_type:
-                msg = "Unable to detect format from extension or mime type"
-                raise ValueError(msg)
+                raise HarvestValidationError("Unable to detect format from extension or mime type")
             fmt = guess_format(mime_type)
             if not fmt:
-                msg = 'Unsupported mime type "{0}"'.format(mime_type)
-                raise ValueError(msg)
+                raise HarvestValidationError(f'Unsupported mime type "{mime_type}"')
         return fmt
 
     def walk_paginated_graph(self, url: str) -> Generator[tuple[Graph, int], None, None]:
