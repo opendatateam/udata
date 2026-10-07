@@ -717,7 +717,7 @@ class DispatchTest(APITestCase):
         assert Notification.objects(user=admin).count() == 2
         assert len(mailed(mails, admin)) == 1
 
-    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_a_mail_one_can_turn_off_says_why_and_where_to(self):
         admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
@@ -730,6 +730,7 @@ class DispatchTest(APITestCase):
         assert "/admin/me/notifications" in mail.body
         assert f"you administer {organization.name}" in mail.body
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_a_title_in_the_footer_is_escaped(self):
         """A title is chosen by whoever publishes, and the mail leaves from the platform."""
         follower = UserFactory()
@@ -743,6 +744,7 @@ class DispatchTest(APITestCase):
         assert "<b>x</b>" not in mail.html
         assert "you follow <b>x</b>" in mail.body
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_a_mail_names_every_reason(self):
         """Naming only one would offer a way out that stops nothing."""
         admin = UserFactory()
@@ -971,6 +973,18 @@ class DigestTest(PytestOnlyDBTestCase):
         assert [mail.recipients for mail in mails] == [[admin.email]]
         assert Notification.objects(user=admin, channels=MAIL).count() == 0
 
+    def test_the_digest_counts_are_in_the_language_of_the_recipient(self):
+        """The counts are written while the digest is built, not when it is sent."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY, prefered_language="en")
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        age(Notification.objects(user=admin).first(), days=8)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mailed(mails, admin)
+        assert "1 new discussion" in mail.body
+
     def test_a_daily_digest_leaves_after_a_day_and_a_weekly_one_does_not(self):
         daily = UserFactory(mail_cadence=MailCadence.DAILY)
         weekly = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1060,6 +1074,7 @@ class DigestTest(PytestOnlyDBTestCase):
         notification = Notification.objects(user=owner).first()
         assert notification.channels == [APP]
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_repeated_events_on_one_subject_collapse_into_a_single_line(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
         organization = OrganizationFactory(admins=[admin])
