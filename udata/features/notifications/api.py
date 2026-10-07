@@ -6,11 +6,19 @@ from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import DEFAULT_ENABLED, NotificationChannel
+from udata.features.notifications.constants import NotificationChannel
+from udata.features.notifications.events import settable_events
 from udata.features.notifications.permissions import EditNotificationPermission
+from udata.mongo import db
 
 from .models import Notification
-from .settings import CONFIGURABLE_REASONS, NotificationSetting, subject_summary
+from .settings import (
+    DEFAULT_RULES,
+    NOTIFICATION_SCOPES,
+    NotificationSetting,
+    resolved_for,
+    subject_summary,
+)
 
 notifs = api.namespace("notifications", "Notifications API")
 
@@ -65,67 +73,95 @@ class NotificationSettingsAPI(API):
     def get(self):
         """List the rules the current user set about their notifications.
 
-        Only rules are listed: whatever no rule covers follows the defaults of the
-        reasons the user is concerned for (see `/notifications/reasons/`)."""
+        Only rules are listed: whatever no rule covers follows the default rules (see
+        `/notifications/defaults/`)."""
         return list(NotificationSetting.objects(user=current_user.id))
 
     @api.secure
     @api.doc("set_notification_setting")
     @api.expect(NotificationSetting.__write_fields__)
     @api.marshal_with(NotificationSetting.__read_fields__)
+    @api.response(204, "Rule removed, the broader rules or the defaults apply again")
     @api.response(400, "Validation error")
     def put(self):
-        """Set a rule about some notifications.
+        """Set a rule about some notifications, or remove it with `enabled: null`.
 
         A rule is identified by its subject, event, reason and channel, any of them
         possibly null: setting it again replaces the previous answer."""
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
+        key = {
+            "user": rule.user,
+            "scope": rule.scope,
+            "event": rule.event,
+            "reason": rule.reason,
+            "channel": rule.channel,
+        }
+        if rule.enabled is None:
+            NotificationSetting.objects(**key).delete()
+            return "", 204
         setting, created = NotificationSetting.objects.get_or_create(
-            user=rule.user,
-            scope=rule.scope,
-            event=rule.event,
-            reason=rule.reason,
-            channel=rule.channel,
-            updates={"enabled": rule.enabled},
+            **key, updates={"enabled": rule.enabled}
         )
         return setting, 201 if created else 200
 
 
-reason_fields = api.model(
-    "NotificationReasonDefault",
+default_rule_fields = api.model(
+    "NotificationDefaultRule",
     {
-        "reason": fields.String(description="Why a user can be concerned by a notification"),
-        "default": fields.Boolean(
-            description="Whether somebody concerned for this reason hears about it without any rule"
-        ),
+        "scope": fields.Raw(default=None, description="Always null: a default covers everything"),
+        "event": fields.String(description="A configurable event class, null for all of them"),
+        "reason": fields.String(description="Why the user is concerned, null for any reason"),
+        "channel": fields.String(description="Where the user is reached, null for whether at all"),
+        "enabled": fields.Boolean(),
     },
 )
 
 
-@notifs.route("/reasons/", endpoint="notification_reasons")
-class NotificationReasonsAPI(API):
-    @api.doc("list_notification_reasons")
-    @api.marshal_list_with(reason_fields)
+@notifs.route("/defaults/", endpoint="notification_defaults")
+class NotificationDefaultsAPI(API):
+    @api.doc("list_notification_defaults")
+    @api.marshal_list_with(default_rule_fields)
     def get(self):
-        """The configurable reasons, with what each one gets without any rule."""
-        return [
-            {"reason": reason, "default": DEFAULT_ENABLED[reason]} for reason in CONFIGURABLE_REASONS
-        ]
+        """The rules everybody starts with, read only where a user's own rules say
+        nothing."""
+        return DEFAULT_RULES
 
 
-@notifs.route("/settings/<notification_setting:setting>/", endpoint="notification_setting")
-class NotificationSettingAPI(API):
+resolved_fields = api.model(
+    "NotificationResolved",
+    {
+        "channels": fields.List(fields.String, description="Where the user is reached"),
+        "reasons": fields.List(fields.String, description="Why the user is concerned"),
+    },
+)
+
+resolved_parser = api.parser()
+resolved_parser.add_argument(
+    "scope", type=str, location="args", required=True, help="The subject, as `Class:id`"
+)
+resolved_parser.add_argument(
+    "event", type=str, location="args", help="A configurable event class, none for all"
+)
+
+
+@notifs.route("/resolved/", endpoint="notification_resolved")
+class NotificationResolvedAPI(API):
     @api.secure
-    @api.doc("delete_notification_setting")
-    @api.response(204, "Rule removed, the broader rules or the defaults apply again")
-    @api.response(404, "Rule not found")
-    def delete(self, setting: NotificationSetting):
-        """Remove a rule, so the broader rules or the defaults apply again."""
-        if setting.user != current_user._get_current_object():
-            api.abort(404, "Rule not found")
-        setting.delete()
-        return "", 204
-
+    @api.doc("resolve_notifications")
+    @api.expect(resolved_parser)
+    @api.marshal_with(resolved_fields)
+    @api.response(400, "Unknown subject or event")
+    def get(self):
+        """Whether, why and where the current user hears about an event on a subject,
+        once their rules and the defaults are applied."""
+        args = resolved_parser.parse_args()
+        cls, _, id = args["scope"].partition(":")
+        if cls not in NOTIFICATION_SCOPES or args["event"] not in (None, *settable_events()):
+            api.abort(400, "Unknown subject or event")
+        subject = db.resolve_model(cls).objects(id=id).first()
+        if subject is None:
+            api.abort(400, "Unknown subject or event")
+        return resolved_for(current_user._get_current_object(), subject, args["event"])
 
 @notifs.route("/<notification:notification>/read/", endpoint="read_notifications")
 class NotificationsReadAPI(API):

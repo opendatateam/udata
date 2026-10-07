@@ -1,7 +1,9 @@
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from udata.features.notifications.constants import NotificationType
+from flask_babel import LazyString
+
+from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.i18n import lazy_gettext as _
 from udata.i18n import lazy_ngettext
 from udata.mail import LabelledContent, MailCTA, MailMessage
@@ -54,8 +56,39 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
     )
 
 
-def settings_footer() -> MailCTA:
-    """The way out of every mail about something one never asked for by name."""
-    return MailCTA(
-        _("Manage or turn off these notifications"), cdata_url("/admin/me/notifications")
-    )
+def reason_sentence(reason: NotificationReason, subject) -> LazyString:
+    """Why one receives a mail about `subject`, in the words of the reason."""
+    organization = getattr(subject, "organization", None)
+    match reason:
+        case NotificationReason.OWNER:
+            return _("You receive this email because you own %(subject)s.", subject=str(subject))
+        case NotificationReason.ORGANIZATION_ADMIN:
+            return _(
+                "You receive this email because you administer %(organization)s.",
+                organization=organization.name,
+            )
+        case NotificationReason.ORGANIZATION_EDITOR:
+            return _(
+                "You receive this email because you are an editor of %(organization)s.",
+                organization=organization.name,
+            )
+        case NotificationReason.ORGANIZATION_PARTIAL_EDITOR:
+            return _(
+                "You receive this email because %(subject)s was assigned to you.",
+                subject=str(subject),
+            )
+        case NotificationReason.DISCUSSION_PARTICIPANT:
+            return _("You receive this email because you take part in this discussion.")
+        case NotificationReason.EXPLICIT_SUBSCRIBER:
+            return _("You receive this email because you follow %(subject)s.", subject=str(subject))
+        case NotificationReason.SYSADMIN:
+            return _("You receive this email because you administer the site.")
+
+
+def settings_footer(reasons=(), subject=None) -> list[LazyString | MailCTA]:
+    """Why one receives a mail, every reason of it, and the way out. Naming only one
+    reason would offer a way out that stops nothing: the most generous one wins."""
+    return [
+        *(reason_sentence(reason, subject) for reason in sorted(reasons)),
+        MailCTA(_("Manage or turn off these notifications"), cdata_url("/admin/me/notifications")),
+    ]

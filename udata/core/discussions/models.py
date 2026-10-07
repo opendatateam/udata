@@ -31,7 +31,11 @@ from udata.core.spam.models import SpamMixin, spam_protected
 from udata.features.notifications.constants import (
     NotificationReason,
 )
-from udata.features.notifications.events import Recipient, merge_recipients
+from udata.features.notifications.events import (
+    Recipient,
+    merge_recipients,
+    responsible_recipients,
+)
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
@@ -445,30 +449,17 @@ class Discussion(SpamMixin, Linkable, Document):
         generous one decides what they get, and an explanation naming only one of them
         would offer a way out that does not stop anything.
         """
-        # Not at the top: `Assignment` resolves the models it can point to when it is
-        # declared, and `Reuse` is not registered yet when this module loads.
-        from udata.core.organization.assignment import Assignment
-
-        recipients = [
-            Recipient(message.posted_by, frozenset({NotificationReason.DISCUSSION_PARTICIPANT}))
-            for message in self.discussion
-        ]
-        if getattr(self.subject, "organization", None):
-            # Partial editors are scoped to the objects handed to them: belonging to an
-            # organization whose datasets one cannot even edit is not a reason to hear
-            # about them. Everybody else is concerned by the whole organization.
-            assigned = {
-                assignment.user.id for assignment in Assignment.objects(subject=self.subject)
-            }
-            recipients += [
-                Recipient.from_member(member)
-                for member in self.subject.organization.members
-                if member.role != "partial_editor" or member.user.id in assigned
+        return merge_recipients(
+            [
+                *(
+                    Recipient(
+                        message.posted_by, frozenset({NotificationReason.DISCUSSION_PARTICIPANT})
+                    )
+                    for message in self.discussion
+                ),
+                *responsible_recipients(self.subject),
             ]
-        elif getattr(self.subject, "owner", None):
-            recipients.append(Recipient(self.subject.owner, frozenset({NotificationReason.OWNER})))
-
-        return merge_recipients(recipients)
+        )
 
     @spam_protected()
     def signal_new(self):

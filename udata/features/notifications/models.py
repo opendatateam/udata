@@ -130,32 +130,29 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     )
     # Why this user was concerned, recorded at dispatch time because it cannot be
     # recomputed later: roles change, discussions get answered, and the notification
-    # still has to explain itself — both in the bell and in the mail footer, which
-    # offer the matching ways out.
+    # still has to explain itself in the site's notification list, next to the ways out
+    # it offers.
     reasons = field(
         ListField(EnumField(NotificationReason)),
         readonly=True,
         auditable=False,
     )
-    # The channels this notification still has to reach the user through. The bell
+    # The channels this notification still has to reach the user through. The site
     # lists the ones holding APP; the digest job takes the ones holding MAIL and drops
-    # it once the mail is out. Somebody who muted the bell but asked for a weekly
-    # digest gets a MAIL-only row: invisible, but there to be summarized.
+    # it once the mail is out. Somebody who muted the app but asked for a weekly digest
+    # gets a MAIL-only row: invisible, but there to be summarized.
     #
     # It doubles as the digest cursor — "MAIL is still in there" *is* "not mailed yet",
-    # which makes the job replayable without a date to keep anywhere.
+    # which makes the job replayable without a date to keep anywhere. Internal to that
+    # queue, hence not exposed.
     #
-    # Defaults to the bell: everything creating a notification outside of `dispatch`
-    # is backfilling one somebody should read, and a migration must not be able to
-    # fail in production over a field it had no opinion about.
-    channels = field(
-        ListField(
-            EnumField(NotificationChannel),
-            required=True,
-            default=lambda: [NotificationChannel.APP],
-        ),
-        readonly=True,
-        auditable=False,
+    # Defaults to the app: everything creating a notification outside of `dispatch` is
+    # backfilling one somebody should read, and a migration must not be able to fail in
+    # production over a field it had no opinion about.
+    channels = ListField(
+        EnumField(NotificationChannel),
+        required=True,
+        default=lambda: [NotificationChannel.APP],
     )
 
     @field(

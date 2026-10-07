@@ -1,6 +1,9 @@
 from udata.core.dataset.models import Dataset
-from udata.features.notifications.constants import NotificationReason
-from udata.features.notifications.events import ConfigurableEvent, Recipient
+from udata.features.notifications.events import (
+    ConfigurableEvent,
+    responsible_recipients,
+    subject_scopes,
+)
 
 
 class DatasetReusedEvent(ConfigurableEvent):
@@ -13,24 +16,14 @@ class DatasetReusedEvent(ConfigurableEvent):
 
     dataset: Dataset
 
+    @property
+    def subject(self):
+        return self.dataset
     def recipients(self):
-        recipients = []
-        if self.dataset.owner:
-            recipients.append(Recipient(self.dataset.owner, frozenset({NotificationReason.OWNER})))
-        if self.dataset.organization:
-            # Editors are left out: being told that somebody reused a dataset is
-            # something you act on as the publisher, not as a contributor.
-            recipients += [
-                Recipient.from_member(member)
-                for member in self.dataset.organization.by_role("admin")
-            ]
-        return recipients
+        return responsible_recipients(self.dataset)
 
     def scopes(self):
-        scopes = [self.dataset]
-        if self.dataset.organization:
-            scopes.append(self.dataset.organization)
-        return scopes
+        return subject_scopes(self.dataset)
 
 
 def became_public(document, changed_fields, previous) -> bool:

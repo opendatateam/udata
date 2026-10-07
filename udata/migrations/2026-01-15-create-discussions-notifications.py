@@ -8,7 +8,7 @@ from datetime import datetime
 import click
 
 from udata.core.discussions.models import Discussion
-from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
@@ -36,14 +36,11 @@ def migrate(db):
                         last_comment = discussion.discussion[-1]
                         sender = last_comment.posted_by
                         notification_type = NotificationType.DISCUSSION_COMMENT
-                        # Superseded by `type`, kept until the front reads it
-                        status = DiscussionStatus.NEW_COMMENT
                         message_id = str(last_comment.id)
                     else:
                         # Add NEW_DISCUSSION notifications if no reply yet
                         sender = discussion.user
                         notification_type = NotificationType.DISCUSSION_NEW
-                        status = DiscussionStatus.NEW_DISCUSSION
                         message_id = None
 
                     for recipient in discussion.owner_recipients():
@@ -54,7 +51,7 @@ def migrate(db):
                             type=notification_type,
                             reasons=sorted(recipient.reasons),
                             details=DiscussionNotificationDetails(
-                                status=status, message_id=message_id, discussion=discussion
+                                message_id=message_id, discussion=discussion
                             ),
                         ).save()
                         created_count += 1

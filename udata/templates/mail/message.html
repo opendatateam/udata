@@ -37,9 +37,15 @@
     <p style="margin: 0;">{{ _('The %(site)s team', site=config.SITE_TITLE) }}</p>
 
     {% if message.footer %}
-    <p style="margin-top: 30px; font-size: 12px; color: #666;">
-        <a href="{{ message.footer.link }}" style="color: #666; text-decoration: underline;">{{ message.footer.label }}</a>
-    </p>
+    <div style="margin-top: 30px; font-size: 12px; color: #666;">
+        {% for item in message.footer %}
+            {% if item.__class__.__name__ == 'MailCTA' %}
+                <p style="margin: 0 0 5px;"><a href="{{ item.link }}" style="color: #666; text-decoration: underline;">{{ item.label }}</a></p>
+            {% else %}
+                <p style="margin: 0 0 5px;">{{ item }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
     {% endif %}
 </body>
 </html>

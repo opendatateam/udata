@@ -1,5 +1,5 @@
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import ReferenceField, StringField
+from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization import mails
@@ -51,13 +51,6 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    kind = field(
-        StringField(default="request"),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
 
 
 @generate_fields()
@@ -66,14 +59,6 @@ class NewBadgeNotificationDetails(EmbeddedDocument):
         ReferenceField(Organization),
         readonly=True,
         nested_fields=Organization.__ref_fields__,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    kind = field(
-        StringField(),
-        readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -120,7 +105,7 @@ class BadgeAdded(NotificationEvent):
         return [Recipient.from_member(member) for member in self.organization.members]
 
     def via_app(self, recipient):
-        return NewBadgeNotificationDetails(organization=self.organization, kind=self.kind)
+        return NewBadgeNotificationDetails(organization=self.organization)
 
     def via_mail(self, recipient):
         return BADGE_MAILS[self.kind](self.organization)
@@ -152,7 +137,6 @@ class MembershipRequested(NotificationEvent):
         return MembershipRequestNotificationDetails(
             request_organization=self.organization,
             request_user=self.request.user,
-            kind=self.request.kind,
         )
 
     def via_mail(self, recipient):

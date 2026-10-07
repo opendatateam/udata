@@ -15,11 +15,7 @@ from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.user.models import User
-from udata.features.notifications.constants import (
-    DEFAULT_ENABLED,
-    NotificationChannel,
-    NotificationReason,
-)
+from udata.features.notifications.constants import NotificationChannel, NotificationReason
 from udata.mongo.document import UDataDocument
 
 # Everything a rule can be scoped to. Anything an event can name in its `scopes()`
@@ -98,11 +94,34 @@ class NotificationSetting(UDataDocument):
 
 @dataclass(frozen=True)
 class Rule:
-    scope: ObjectId | None
-    event: str | None
-    reason: NotificationReason | None
-    channel: NotificationChannel | None
     enabled: bool
+    scope: ObjectId | None = None
+    event: str | None = None
+    reason: NotificationReason | None = None
+    channel: NotificationChannel | None = None
+
+
+# What somebody gets before they ever open the settings screen, written as rules so
+# that a default can be as precise as anything a user decides ("editors: the reuses
+# but not the discussions"). They are read only where the user's own rules say nothing.
+#
+# Editors start silent: they are members of organizations whose datasets they have
+# never touched, and mailing them every discussion of a 400-dataset organization is
+# what this whole thing is meant to stop.
+#
+# Partial editors start loud, which only looks inconsistent: they are never given this
+# reason unless the object was actually assigned to them, so "everything concerning
+# me" is already a short list.
+DEFAULT_RULES: list[Rule] = [
+    Rule(reason=NotificationReason.OWNER, enabled=True),
+    Rule(reason=NotificationReason.ORGANIZATION_ADMIN, enabled=True),
+    Rule(reason=NotificationReason.ORGANIZATION_EDITOR, enabled=False),
+    Rule(reason=NotificationReason.ORGANIZATION_PARTIAL_EDITOR, enabled=True),
+    Rule(reason=NotificationReason.DISCUSSION_PARTICIPANT, enabled=True),
+    Rule(reason=NotificationReason.EXPLICIT_SUBSCRIBER, enabled=True),
+    Rule(channel=NotificationChannel.APP, enabled=True),
+    Rule(channel=NotificationChannel.MAIL, enabled=True),
+]
 
 
 def rules_for(
@@ -145,10 +164,8 @@ def resolve(
 
     Two questions, in this order, for each reason the recipient has:
 
-    1. Are they concerned at all? Only the rules without a channel answer it, and
-       without any, the default of the reason does.
-    2. If so, through which channels? Only the rules naming a channel answer it, and
-       without any, every channel.
+    1. Are they concerned at all? Only the rules without a channel answer it.
+    2. If so, through which channels? Only the rules naming a channel answer it.
 
     Splitting them is what keeps following a thread from bringing back the mails one
     turned off: following says *whether*, a channel says *how*.
@@ -159,13 +176,18 @@ def resolve(
     (this reason, then whatever the reason). So a choice on a subject beats a choice on
     a reason, and a choice on an event beats a choice on a reason.
 
+    The user's own rules are read first, and `DEFAULT_RULES` only where they say
+    nothing: otherwise a precise default would beat a broad choice of the user.
+
     Reasons are then combined generously: being an administrator who muted their
     organizations does not silence the thread one took part in.
     """
     scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
     event_rank = {event: rank for rank, event in enumerate([*events, None])}
 
-    def decide(reason: NotificationReason, channel: NotificationChannel | None) -> bool | None:
+    def most_specific(
+        rules: list[Rule], reason: NotificationReason, channel: NotificationChannel | None
+    ) -> bool | None:
         candidates = [
             rule
             for rule in rules
@@ -186,15 +208,20 @@ def resolve(
         )
         return best.enabled
 
-    channels: set[NotificationChannel] = set()
-    for reason in reasons:
-        concerned = decide(reason, None)
-        if not (DEFAULT_ENABLED[reason] if concerned is None else concerned):
-            continue
-        for channel in NotificationChannel:
-            if decide(reason, channel) is not False:
-                channels.add(channel)
-    return channels
+    def decide(reason: NotificationReason, channel: NotificationChannel | None) -> bool:
+        for layer in (rules, DEFAULT_RULES):
+            enabled = most_specific(layer, reason, channel)
+            if enabled is not None:
+                return enabled
+        return False
+
+    return {
+        channel
+        for reason in reasons
+        if decide(reason, None)
+        for channel in NotificationChannel
+        if decide(reason, channel)
+    }
 
 
 def subscribers_for(events: Sequence[str], scopes: Sequence[Document]) -> list[User]:
@@ -221,6 +248,45 @@ def subscribers_for(events: Sequence[str], scopes: Sequence[Document]) -> list[U
     )
 
 
+def resolved_for(user: User, subject: Document, event: str | None) -> dict:
+    """Whether, why and where `user` hears about `event` on `subject`, the way the
+    dispatch would decide it: so that a button shows the real state instead of
+    guessing it from the rules it knows of."""
+    # `events` builds on this module, hence the import at call time.
+    from udata.core.discussions.models import Discussion
+    from udata.features.notifications.events import (
+        configurable_event_named,
+        responsible_recipients,
+        subject_scopes,
+    )
+
+    events = configurable_event_named(event).decision_events() if event else []
+    scopes = subject_scopes(subject)
+    recipients = (
+        subject.owner_recipients()
+        if isinstance(subject, Discussion)
+        else responsible_recipients(subject)
+    )
+    reasons = {
+        reason for recipient in recipients if recipient.key == user.id for reason in recipient.reasons
+    }
+    if NotificationSetting.objects(
+        Q(event=None) | Q(event__in=events),
+        user=user,
+        scope__in=scopes,
+        reason=None,
+        channel=None,
+        enabled=True,
+    ).first():
+        reasons.add(NotificationReason.EXPLICIT_SUBSCRIBER)
+
+    rules = rules_for([user], events, scopes).get(user.id, [])
+    return {
+        "channels": sorted(resolve(rules, events, scopes, reasons)),
+        "reasons": sorted(reasons),
+    }
+
+
 def visible_subject(scope, user: User):
     """The subject of a rule as its author may see it today, or `None`.
 
@@ -230,9 +296,10 @@ def visible_subject(scope, user: User):
     from udata.core.discussions.models import Discussion
 
     subject = scope.subject if isinstance(scope, Discussion) else scope
+    # Datasets and reuses say `deleted`, dataservices `deleted_at`.
     if getattr(subject, "deleted", None) or getattr(subject, "deleted_at", None):
         return None
-    if getattr(subject, "private", False):
+    if getattr(subject, "private", False) and not user.sysadmin:
         organization = getattr(subject, "organization", None)
         if not (organization and organization.is_member(user)) and getattr(
             subject, "owner", None
@@ -241,9 +308,17 @@ def visible_subject(scope, user: User):
     return subject
 
 
-def subject_summary(setting: NotificationSetting) -> dict | None:
-    """What the settings screen shows of the subject of a rule: a title, a link, and
-    the organization to group it under."""
+@dataclass(frozen=True)
+class SubjectSummary:
+    """What the settings screen shows of the subject of a rule."""
+
+    title: str
+    page: str
+    # What to group the subject under: its organization, or itself for an organization
+    organization: Document | None
+
+
+def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
     from udata.core.discussions.models import Discussion
     from udata.core.organization.models import Organization
 
@@ -253,10 +328,10 @@ def subject_summary(setting: NotificationSetting) -> dict | None:
     subject = visible_subject(scope, setting.user)
     if subject is None:
         return None
-    return {
-        "title": scope.title if isinstance(scope, Discussion) else str(subject),
-        "page": scope.self_web_url(),
-        "organization": subject
+    return SubjectSummary(
+        title=scope.title if isinstance(scope, Discussion) else str(subject),
+        page=scope.self_web_url(),
+        organization=subject
         if isinstance(subject, Organization)
         else getattr(subject, "organization", None),
-    }
+    )

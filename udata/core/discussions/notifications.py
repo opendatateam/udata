@@ -1,8 +1,7 @@
 import logging
-from enum import StrEnum, auto
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import EnumField, ReferenceField, UUIDField
+from mongoengine.fields import ReferenceField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions import mails
@@ -10,35 +9,14 @@ from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import ConfigurableEvent
+from udata.features.notifications.events import ConfigurableEvent, subject_scopes
 from udata.i18n import ngettext
 
 log = logging.getLogger(__name__)
 
 
-class DiscussionStatus(StrEnum):
-    NEW_DISCUSSION = auto()
-    NEW_COMMENT = auto()
-    CLOSED = auto()
-
-
-# Superseded by `Notification.type`, kept until the front reads the type instead.
-STATUSES_BY_TYPE = {
-    NotificationType.DISCUSSION_NEW: DiscussionStatus.NEW_DISCUSSION,
-    NotificationType.DISCUSSION_COMMENT: DiscussionStatus.NEW_COMMENT,
-    NotificationType.DISCUSSION_CLOSED: DiscussionStatus.CLOSED,
-}
-
-
 @generate_fields()
 class DiscussionNotificationDetails(EmbeddedDocument):
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    status = field(
-        EnumField(DiscussionStatus),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
     # keep track of the message to show in the notification
     message_id = field(
         UUIDField(),
@@ -74,19 +52,17 @@ class DiscussionEvent(ConfigurableEvent):
     def excluded(self):
         return [self.sender] if self.sender else []
 
+    @property
+    def subject(self):
+        return self.discussion.subject
+
     def scopes(self):
         """Muting one thread, one dataset or a whole organization are three grains of
         the same setting."""
-        scopes = [self.discussion, self.discussion.subject]
-        if getattr(self.discussion.subject, "organization", None):
-            scopes.append(self.discussion.subject.organization)
-        return scopes
+        return subject_scopes(self.discussion)
 
     def via_app(self, recipient):
-        return DiscussionNotificationDetails(
-            discussion=self.discussion,
-            status=STATUSES_BY_TYPE[self.type],
-        )
+        return DiscussionNotificationDetails(discussion=self.discussion)
 
     @classmethod
     def digest_subject(cls, details):

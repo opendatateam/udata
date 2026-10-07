@@ -16,5 +16,5 @@
 {{ _('The %(site)s team', site=config.SITE_TITLE) }}
 {% if message.footer %}
 
-{{ message.footer.label }}: {{ message.footer.link }}
-{% endif %}
+{% for item in message.footer %}{% if item.__class__.__name__ == 'MailCTA' %}{{ item.label }}: {{ item.link }}{% else %}{{ item }}{% endif %}
+{% endfor %}{% endif %}

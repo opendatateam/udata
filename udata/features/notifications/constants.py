@@ -92,23 +92,3 @@ REASON_BY_ORGANIZATION_ROLE: dict[str, NotificationReason] = {
     "editor": NotificationReason.ORGANIZATION_EDITOR,
     "partial_editor": NotificationReason.ORGANIZATION_PARTIAL_EDITOR,
 }
-
-# What somebody gets before they ever open the settings screen, per reason, on every
-# channel. Individuals then depart from it with `NotificationSetting` rules.
-#
-# Editors start silent: they are members of organizations whose datasets they have
-# never touched, and mailing them every discussion of a 400-dataset organization is
-# what this whole thing is meant to stop.
-#
-# Partial editors start loud, which only looks inconsistent: they are never given this
-# reason unless the object was actually assigned to them, so "everything concerning
-# me" is already a short list.
-DEFAULT_ENABLED: dict[NotificationReason, bool] = {
-    NotificationReason.OWNER: True,
-    NotificationReason.ORGANIZATION_ADMIN: True,
-    NotificationReason.ORGANIZATION_EDITOR: False,
-    NotificationReason.ORGANIZATION_PARTIAL_EDITOR: True,
-    NotificationReason.DISCUSSION_PARTICIPANT: True,
-    NotificationReason.SYSADMIN: True,
-    NotificationReason.EXPLICIT_SUBSCRIBER: True,
-}

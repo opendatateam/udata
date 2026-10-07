@@ -1,20 +1,14 @@
 import logging
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import ReferenceField, StringField
+from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.features.notifications.events import NotificationEvent, Recipient
 
-from .models import (
-    VALIDATION_ACCEPTED,
-    VALIDATION_PENDING,
-    VALIDATION_REFUSED,
-    VALIDATION_STATES,
-    HarvestSource,
-)
+from .models import HarvestSource
 from .signals import (
     harvest_source_created,
     harvest_source_deleted,
@@ -23,13 +17,6 @@ from .signals import (
 )
 
 log = logging.getLogger(__name__)
-
-# Superseded by `Notification.type`, kept until the front reads the type instead.
-STATES_BY_TYPE = {
-    NotificationType.HARVEST_SOURCE_PENDING: VALIDATION_PENDING,
-    NotificationType.HARVEST_SOURCE_ACCEPTED: VALIDATION_ACCEPTED,
-    NotificationType.HARVEST_SOURCE_REFUSED: VALIDATION_REFUSED,
-}
 
 
 @generate_fields()
@@ -42,13 +29,6 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    status = field(
-        StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
 
 
 class HarvestSourceEvent(NotificationEvent):
@@ -56,9 +36,7 @@ class HarvestSourceEvent(NotificationEvent):
         self.source = source
 
     def via_app(self, recipient):
-        return ValidateHarvesterNotificationDetails(
-            source=self.source, status=STATES_BY_TYPE[self.type]
-        )
+        return ValidateHarvesterNotificationDetails(source=self.source)
 
 
 class HarvestSourcePending(HarvestSourceEvent):

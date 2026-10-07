@@ -65,6 +65,43 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
     return list(merged.values())
 
 
+def responsible_recipients(subject) -> list[Recipient]:
+    """Who is answerable for a subject, and on what ground: its owner, or the members of
+    its organization.
+
+    Partial editors are scoped to the objects handed to them: belonging to an
+    organization whose datasets one cannot even edit is not a reason to hear about
+    them. Everybody else, editors included, is concerned by the whole organization;
+    whether that makes them hear about it is for their rules to say.
+    """
+    # Not at the top: `Assignment` resolves the models it can point to when it is
+    # declared, and `Reuse` is not registered yet when this module loads.
+    from udata.core.organization.assignment import Assignment
+
+    organization = getattr(subject, "organization", None)
+    if organization:
+        assigned = {assignment.user.id for assignment in Assignment.objects(subject=subject)}
+        return [
+            Recipient.from_member(member)
+            for member in organization.members
+            if member.role != "partial_editor" or member.user.id in assigned
+        ]
+    if getattr(subject, "owner", None):
+        return [Recipient(subject.owner, frozenset({NotificationReason.OWNER}))]
+    return []
+
+
+def subject_scopes(subject) -> list[Document]:
+    """What a rule about this subject can be taken on, most specific first: a thread,
+    then what it is about, then the organization behind it."""
+    from udata.core.discussions.models import Discussion
+
+    if isinstance(subject, Discussion):
+        return [subject, *subject_scopes(subject.subject)]
+    organization = getattr(subject, "organization", None)
+    return [subject, organization] if organization else [subject]
+
+
 class NotificationEvent:
     """Something happened that users need to hear about.
 
@@ -174,7 +211,7 @@ class NotificationEvent:
 
             if wants_mail and not deferred:
                 try:
-                    mail = self._mail(recipient.user)
+                    mail = self._mail(recipient)
                     if mail is not None:
                         mail.send(recipient.user)
                 except Exception:
@@ -193,8 +230,8 @@ class NotificationEvent:
     def _subscribers(self) -> list[Recipient]:
         return []
 
-    def _mail(self, recipient: User | str) -> MailMessage | None:
-        return self.via_mail(recipient)
+    def _mail(self, recipient: Recipient) -> MailMessage | None:
+        return self.via_mail(recipient.user)
 
     def _channels(
         self, recipients: list[Recipient]
@@ -240,11 +277,16 @@ class ConfigurableEvent(NotificationEvent):
             if issubclass(klass, ConfigurableEvent) and klass is not ConfigurableEvent
         ]
 
+    @property
+    def subject(self):
+        """What the event is about, as the mail footer names it."""
+        raise NotImplementedError
+
     def _mail(self, recipient):
-        """Something one can turn off says where to."""
-        mail = self.via_mail(recipient)
+        """Something one can turn off says why it was sent, and where to turn it off."""
+        mail = self.via_mail(recipient.user)
         if mail is not None:
-            mail.footer = settings_footer()
+            mail.footer = settings_footer(recipient.reasons, self.subject)
         return mail
 
     def _subscribers(self):
@@ -286,6 +328,17 @@ def settable_events() -> set[str]:
     """Everything a rule can name: each configurable event and the families they
     belong to."""
     return {name for event in configurable_events() for name in event.decision_events()}
+
+
+def configurable_event_named(name: str) -> type[ConfigurableEvent]:
+    """A configurable event or a family of them, from the name a rule stores."""
+
+    def walk(base):
+        for subclass in base.__subclasses__():
+            yield subclass
+            yield from walk(subclass)
+
+    return next(event for event in walk(ConfigurableEvent) if event.__name__ == name)
 
 
 def event_for_type(notification_type: NotificationType) -> type[NotificationEvent]:
