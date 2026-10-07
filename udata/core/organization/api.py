@@ -39,7 +39,14 @@ from .api_fields import (
     request_fields,
 )
 from .assignment import Assignment
-from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
+from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
+    BANNER_FORMATS,
+    BANNER_MAX_BYTES,
+    BANNER_MIN_SIZE,
+    DEFAULT_ROLE,
+    ORG_ROLES,
+)
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
@@ -667,6 +674,36 @@ class AvatarAPI(API):
         org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         return {"image": org.logo}
+
+
+@ns.route("/<org:org>/banner/", endpoint="organization_banner")
+@api.doc(**common_doc)
+class OrganizationBannerAPI(API):
+    @api.secure
+    @api.doc("organization_banner_upload")
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, org):
+        """Upload a new banner image"""
+        org.permissions["edit"].test()
+        parse_uploaded_image(
+            org.banner_image,
+            formats=BANNER_FORMATS,
+            min_size=BANNER_MIN_SIZE,
+            max_bytes=BANNER_MAX_BYTES,
+        )
+        org.save()
+        return {"image": org.banner_image}
+
+    @api.secure
+    @api.doc("organization_banner_delete")
+    @api.response(204, "Banner image deleted")
+    def delete(self, org):
+        """Delete the custom banner image, restoring the default banner"""
+        org.permissions["edit"].test()
+        org.banner_image = None
+        org.save()
+        return "", 204
 
 
 dataset_parser = DatasetApiParser()

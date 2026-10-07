@@ -238,11 +238,18 @@ def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
     return [left, upper, right, lower]
 
 
-def parse_uploaded_image(field):
-    """Parse an uploaded image and save into a ImageField()"""
+def parse_uploaded_image(field, formats=IMAGES_FORMATS, min_size=None, max_bytes=None):
+    """Parse an uploaded image and save into a ImageField()
+
+    :param formats: allowed PIL format names (defaults to all supported image formats)
+    :param min_size: optional (width, height) tuple — smaller images are rejected
+    :param max_bytes: optional upload size cap in bytes
+    """
     args = image_parser.parse_args()
 
     image = args["file"]
+    if max_bytes is not None and get_file_size(image) > max_bytes:
+        api.abort(413, "File is too large")
     # The mimetype is declared by the client and may not match the content at all
     # (an SVG announced as `image/png` for instance): decode the file to know what
     # it really is, otherwise Pillow raises further down and the request 500s.
@@ -255,8 +262,12 @@ def parse_uploaded_image(field):
         # A few dozen bytes are enough to declare a huge size, so this must be refused
         # here: every other decoding (resize, optimize, thumbnails) would raise too.
         api.abort(400, "Image is too large")
-    if uploaded.format not in IMAGES_FORMATS:
+    if uploaded.format not in formats:
         api.abort(400, "Unsupported image format")
+    if min_size is not None:
+        min_width, min_height = min_size
+        if uploaded.size[0] < min_width or uploaded.size[1] < min_height:
+            api.abort(400, "Image is too small")
 
     bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
 
