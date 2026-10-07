@@ -253,6 +253,14 @@ class ExternalPageAPITest(PytestOnlyAPITestCase):
         post = external_page(owner=UserFactory())
         assert403(self.post(url_for("api.post_image", post=post)))
 
+    def test_image_upload_is_not_supported_for_the_owner_nor_sysadmins(self):
+        user = self.login()
+        post = external_page(owner=user)
+        assert400(self.post(url_for("api.post_image", post=post)))
+        assert400(self.put(url_for("api.post_image", post=post)))
+        self.login(AdminFactory())
+        assert400(self.post(url_for("api.post_image", post=post)))
+
     def test_list_filter_by_topic(self):
         in_topic = external_page()
         external_page()

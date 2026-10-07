@@ -22,6 +22,13 @@ DEFAULT_SORTING = "-published"
 
 ns = api.namespace("posts", "Posts related operations")
 
+
+def abort_if_external_page(post):
+    # Hosting images uploaded by users on external pages would need moderation
+    if post.is_external_page:
+        api.abort(400, "Images are not supported on external pages")
+
+
 parser = Post.__index_parser__
 parser.add_argument(
     "with_drafts",
@@ -162,6 +169,7 @@ class PostImageAPI(API):
     def post(self, post):
         """Upload a new image"""
         post.permissions["edit"].test()
+        abort_if_external_page(post)
         parse_uploaded_image(post.image)
         post.save()
         return post
@@ -173,5 +181,6 @@ class PostImageAPI(API):
     def put(self, post):
         """Set the image BBox"""
         post.permissions["edit"].test()
+        abort_if_external_page(post)
         parse_uploaded_image(post.image)
         return post
