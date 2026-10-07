@@ -51,6 +51,7 @@ from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
+from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
@@ -430,6 +431,7 @@ class ResourceMixin(object):
         reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
+    geopf = EmbeddedDocumentField(GeopfResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
 
     created_at_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
@@ -654,6 +656,7 @@ class Dataset(
         readonly=True,
         auditable=False,
     )
+    geopf = field(EmbeddedDocumentField(GeopfDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)
 

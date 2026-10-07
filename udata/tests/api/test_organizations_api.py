@@ -451,6 +451,29 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert410(response)
         assert Organization.objects.first().description == org.description
 
+    def test_organization_api_restore_deleted(self):
+        """It should restore a deleted organization from the API"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="admin")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert200(response)
+        assert response.json["deleted"] is None
+        org.reload()
+        assert org.deleted is None
+
+    def test_organization_api_restore_deleted_as_editor_forbidden(self):
+        """It should not restore a deleted organization from the API if not admin"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="editor")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert403(response)
+        org.reload()
+        assert org.deleted is not None
+
     def test_organization_api_update_with_non_object_body(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
@@ -718,6 +741,25 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert400(response)
         org.reload()
         assert org.presentation_blocs == []
+
+    @pytest.mark.parametrize(
+        "bloc",
+        [
+            {"title": "no class"},
+            {"class": "UnknownBloc", "title": "unknown class"},
+            # A class registered with `generate_fields`, but not a bloc.
+            {"class": "Organization", "name": "not a bloc"},
+            "not an object",
+        ],
+    )
+    def test_create_rejects_bloc_without_valid_class(self, bloc):
+        self.login()
+        data = OrganizationFactory.as_dict()
+        data["presentation_blocs"] = [bloc]
+        response = self.post(url_for("api.organizations"), data)
+        assert400(response)
+        assert "presentation_blocs" in response.json["errors"]
+        assert Organization.objects.count() == 0
 
 
 class MembershipAPITest(PytestOnlyAPITestCase):

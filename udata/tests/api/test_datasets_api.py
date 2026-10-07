@@ -1,3 +1,4 @@
+import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
@@ -48,6 +49,13 @@ from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCo
 from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.geopf.models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+)
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member
 from udata.mongo.datetime_fields import DateRange
@@ -2192,6 +2200,18 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
 
+    def test_create_with_compressed_file(self):
+        """A compressed file is described as the archive it is, not as its content"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(gzip.compress(b"a;b\n1;2\n")), "test.csv.gz")},
+            json=False,
+        )
+        self.assert201(response)
+        self.assertEqual(response.json["mime"], "application/gzip")
+
     def test_create_with_file_chunks(self):
         """It should create a resource from the API with a chunked file"""
         user = self.login()
@@ -3553,3 +3573,45 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()
+
+
+class GeopfMetadataAPITest(PytestOnlyAPITestCase):
+    def test_dataset_with_geopf_push_metadata(self):
+        dataset = DatasetFactory(
+            geopf=GeopfDatasetMetadata(
+                push=GeopfDatasetPushMetadata(datastore_id="ds-1", datasheet_name="Ma fiche")
+            )
+        )
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] == {
+            "datasheet_url": "https://cartes.gouv.fr/tableau-de-bord/entrepots/ds-1/donnees/Ma%20fiche"
+        }
+
+    def test_dataset_without_geopf_metadata_is_null(self):
+        dataset = DatasetFactory()
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] is None
+
+    def test_resource_with_geopf_push_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(status="done"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"push_status": "done"}
+
+    def test_resource_with_geopf_offering_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offering-1"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"offering_id": "offering-1"}

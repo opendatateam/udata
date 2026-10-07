@@ -88,6 +88,7 @@ def s3_storages(app, instance_path):
     app.config["FS_S3_REGION"] = os.environ.get("UDATA_TEST_S3_REGION", "us-east-1")
     app.config["FS_S3_ACCESS_KEY"] = os.environ["UDATA_TEST_S3_ACCESS_KEY"]
     app.config["FS_S3_SECRET_KEY"] = os.environ["UDATA_TEST_S3_SECRET_KEY"]
+    app.config["FS_S3_CREATE_BUCKET"] = True
 
     # A bucket set per test: the suite runs on parallel xdist workers, and the
     # backend never removes the buckets it creates.
