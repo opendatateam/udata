@@ -21,6 +21,14 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class ValidateHarvesterNotificationDetails(EmbeddedDocument):
+    types = frozenset(
+        {
+            NotificationType.HARVEST_SOURCE_PENDING,
+            NotificationType.HARVEST_SOURCE_ACCEPTED,
+            NotificationType.HARVEST_SOURCE_REFUSED,
+        }
+    )
+
     source = field(
         ReferenceField(HarvestSource),
         readonly=True,

@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class TransferRequestNotificationDetails(EmbeddedDocument):
+    types = frozenset({NotificationType.TRANSFER_REQUESTED})
+
     # Same choices as `Transfer` itself: a notification describes a transfer, so anything
     # transferable must be notifiable. Listing them again here silently dropped the
     # notification of every transfer of a class added on one side only.

@@ -12,7 +12,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.models import DETAILS_BY_TYPE, Notification
+from udata.features.notifications.models import DETAILS_BY_TYPE, DETAILS_CLASSES, Notification
 from udata.features.transfer.factories import TransferFactory
 from udata.harvest.actions import delete_source, purge_sources
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
@@ -259,6 +259,10 @@ class NotificationIntegrityTest(PytestOnlyDBTestCase):
     def test_every_type_declares_the_details_it_carries(self):
         """A type the front receives must always come with the same payload shape."""
         assert set(DETAILS_BY_TYPE) == set(NotificationType)
+
+    def test_no_type_is_claimed_by_two_details(self):
+        claimed = [t for details in DETAILS_CLASSES for t in details.types]
+        assert len(claimed) == len(set(claimed))
 
     def test_saving_a_type_with_foreign_details_is_rejected(self):
         notification = Notification(

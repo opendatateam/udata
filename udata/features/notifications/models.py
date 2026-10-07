@@ -42,28 +42,22 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.uuid_fields import AutoUUIDField
 
-# The payload shape each type comes with. Several types legitimately map to the
-# same class; what matters is that the relation is a function, so that knowing
-# the type is enough to know which fields `details` exposes.
+# Every payload shape a notification can carry. Each declares the types it comes with,
+# so that knowing the type is enough to know which fields `details` exposes.
+DETAILS_CLASSES = (
+    DiscussionNotificationDetails,
+    MembershipRequestNotificationDetails,
+    MembershipAcceptedNotificationDetails,
+    MembershipRefusedNotificationDetails,
+    NewBadgeNotificationDetails,
+    ReuseCreatedNotificationDetails,
+    DataserviceCreatedNotificationDetails,
+    TransferRequestNotificationDetails,
+    ValidateHarvesterNotificationDetails,
+)
+
 DETAILS_BY_TYPE: dict[NotificationType, type] = {
-    NotificationType.DISCUSSION_NEW: DiscussionNotificationDetails,
-    NotificationType.DISCUSSION_COMMENT: DiscussionNotificationDetails,
-    NotificationType.DISCUSSION_CLOSED: DiscussionNotificationDetails,
-    NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED: MembershipRequestNotificationDetails,
-    NotificationType.ORGANIZATION_MEMBERSHIP_INVITED: MembershipRequestNotificationDetails,
-    NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED: MembershipAcceptedNotificationDetails,
-    NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED: MembershipRefusedNotificationDetails,
-    NotificationType.ORGANIZATION_BADGE_CERTIFIED: NewBadgeNotificationDetails,
-    NotificationType.ORGANIZATION_BADGE_PUBLIC_SERVICE: NewBadgeNotificationDetails,
-    NotificationType.ORGANIZATION_BADGE_COMPANY: NewBadgeNotificationDetails,
-    NotificationType.ORGANIZATION_BADGE_ASSOCIATION: NewBadgeNotificationDetails,
-    NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY: NewBadgeNotificationDetails,
-    NotificationType.REUSE_CREATED: ReuseCreatedNotificationDetails,
-    NotificationType.DATASERVICE_CREATED: DataserviceCreatedNotificationDetails,
-    NotificationType.TRANSFER_REQUESTED: TransferRequestNotificationDetails,
-    NotificationType.HARVEST_SOURCE_PENDING: ValidateHarvesterNotificationDetails,
-    NotificationType.HARVEST_SOURCE_ACCEPTED: ValidateHarvesterNotificationDetails,
-    NotificationType.HARVEST_SOURCE_REFUSED: ValidateHarvesterNotificationDetails,
+    notification_type: details for details in DETAILS_CLASSES for notification_type in details.types
 }
 
 
@@ -125,7 +119,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
         filterable={},
     )
     details = field(
-        GenericEmbeddedDocumentField(choices=tuple(dict.fromkeys(DETAILS_BY_TYPE.values()))),
+        GenericEmbeddedDocumentField(choices=DETAILS_CLASSES),
         generic=True,
     )
     # Why this user was concerned, recorded at dispatch time because it cannot be

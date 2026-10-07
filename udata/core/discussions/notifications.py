@@ -17,6 +17,14 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class DiscussionNotificationDetails(EmbeddedDocument):
+    types = frozenset(
+        {
+            NotificationType.DISCUSSION_NEW,
+            NotificationType.DISCUSSION_COMMENT,
+            NotificationType.DISCUSSION_CLOSED,
+        }
+    )
+
     # keep track of the message to show in the notification
     message_id = field(
         UUIDField(),

@@ -38,6 +38,13 @@ BADGE_MAILS = {
 
 @generate_fields()
 class MembershipRequestNotificationDetails(EmbeddedDocument):
+    types = frozenset(
+        {
+            NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
+            NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
+        }
+    )
+
     request_organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -57,6 +64,8 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class NewBadgeNotificationDetails(EmbeddedDocument):
+    types = frozenset(BADGE_NOTIFICATION_TYPES.values())
+
     organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -69,6 +78,8 @@ class NewBadgeNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class MembershipAcceptedNotificationDetails(EmbeddedDocument):
+    types = frozenset({NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED})
+
     organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -81,6 +92,8 @@ class MembershipAcceptedNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class MembershipRefusedNotificationDetails(EmbeddedDocument):
+    types = frozenset({NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED})
+
     organization = field(
         ReferenceField(Organization),
         readonly=True,
