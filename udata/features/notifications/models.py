@@ -11,15 +11,22 @@ from mongoengine.fields import (
 )
 
 from udata.api_fields import field, generate_fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
+from udata.core.dataset.models import Dataset
+from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails
+from udata.core.organization.models import Organization
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
     MembershipRefusedNotificationDetails,
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
 )
+from udata.core.post.models import Post
+from udata.core.reuse.models import Reuse
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
+from udata.core.topic.models import Topic
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     TYPES_REQUIRING_ACTION,
@@ -27,7 +34,7 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.settings import NOTIFICATION_SCOPES, NotificationSetting
+from udata.features.notifications.settings import NotificationSetting
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.mongo.datetime_fields import Datetimed
@@ -163,12 +170,13 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
             )
 
 
-@signals.post_delete.connect
 def delete_settings_of(sender, document, **kwargs):
     """A decision outlives nothing it was about: left behind, it could no longer be
-    listed (its scope fails to load) nor therefore withdrawn.
+    listed (its scope fails to load) nor therefore withdrawn."""
+    NotificationSetting.objects(scope=document).delete()
 
-    Connected to every document and filtered by name, so that this module needs none
-    of the scope classes to be importable when it loads."""
-    if type(document).__name__ in NOTIFICATION_SCOPES:
-        NotificationSetting.objects(scope=document).delete()
+
+# One sender per scope rather than every document: mongoengine turns the bulk delete of
+# any model with a `post_delete` receiver into one delete per document.
+for model in (Organization, Discussion, Dataset, Reuse, Post, Dataservice, Topic):
+    signals.post_delete.connect(delete_settings_of, sender=model)

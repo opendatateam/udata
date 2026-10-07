@@ -1,4 +1,5 @@
 from flask import has_request_context, request
+from mongoengine import NotUniqueError
 
 from udata.api import HEADER_API_KEY
 from udata.auth import current_user
@@ -26,9 +27,14 @@ def follow_worked_on(user: User, subject) -> None:
         return
     if NotificationSetting.objects(user=user, scope=subject).first():
         return
-    NotificationSetting.objects.create(
-        user=user, scope=subject, enabled=True, origin=FollowOrigin.EDITED
-    )
+    try:
+        NotificationSetting.objects.create(
+            user=user, scope=subject, enabled=True, origin=FollowOrigin.EDITED
+        )
+    except NotUniqueError:
+        # A concurrent edit by the same member created it in between: the edit itself
+        # is already saved and must not fail over it.
+        pass
 
 
 def follow_if_edited_by_hand(subject) -> None:

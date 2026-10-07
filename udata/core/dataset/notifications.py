@@ -19,6 +19,7 @@ class DatasetReusedEvent(NotificationEvent):
     @property
     def subject(self):
         return self.dataset
+
     def recipients(self):
         return responsible_recipients(self.dataset)
 

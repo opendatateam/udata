@@ -42,7 +42,9 @@
             {% if item.__class__.__name__ == 'MailCTA' %}
                 <p style="margin: 0 0 5px;"><a href="{{ item.link }}" style="color: #666; text-decoration: underline;">{{ item.label }}</a></p>
             {% else %}
-                <p style="margin: 0 0 5px;">{{ item }}</p>
+                {# `string` drops the `__html__` of LazyString, which would skip autoescaping
+                   the titles it interpolates. #}
+                <p style="margin: 0 0 5px;">{{ item|string }}</p>
             {% endif %}
         {% endfor %}
     </div>

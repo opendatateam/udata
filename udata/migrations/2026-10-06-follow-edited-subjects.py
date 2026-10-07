@@ -63,7 +63,9 @@ def migrate(db):
         actor = activity.get("actor")
         if not isinstance(actor, dict) or actor.get("_cls") != "User":
             continue
-        edits.add((ref_id(actor["_ref"]), model_by_cls[activity["_cls"]], ref_id(activity["related_to"])))
+        edits.add(
+            (ref_id(actor["_ref"]), model_by_cls[activity["_cls"]], ref_id(activity["related_to"]))
+        )
     log.info(f"{len(edits)} distinct edits found")
 
     before = db.notification_setting.count_documents({})

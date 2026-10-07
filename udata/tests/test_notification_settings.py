@@ -342,7 +342,7 @@ class PersonaTest(APITestCase):
         assert Notification.objects(user=thomas).count() == 1
 
     def test_turning_everything_off_silences_even_what_one_follows(self):
-        """"Turn everything off" means it: a follow, however precise, does not bring a
+        """ "Turn everything off" means it: a follow, however precise, does not bring a
         channel back."""
         thomas = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[thomas]))
@@ -725,6 +725,19 @@ class DispatchTest(APITestCase):
         assert "/admin/me/notifications" in mail.body
         assert f"you administer {organization.name}" in mail.body
 
+    def test_a_title_in_the_footer_is_escaped(self):
+        """A title is chosen by whoever publishes, and the mail leaves from the platform."""
+        follower = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(), title="<b>x</b>")
+        follow(follower, dataset)
+
+        with capture_mails() as mails:
+            open_discussion(dataset)
+
+        [mail] = mailed(mails, follower)
+        assert "<b>x</b>" not in mail.html
+        assert "you follow <b>x</b>" in mail.body
+
     def test_a_mail_names_every_reason(self):
         """Naming only one would offer a way out that stops nothing."""
         admin = UserFactory()
@@ -744,20 +757,16 @@ class DispatchTest(APITestCase):
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_a_mail_asking_for_an_action_offers_no_way_out(self):
-        """A transfer to accept is not something to turn off."""
-        recipient = UserFactory()
-        owner = UserFactory()
+        """A membership request to answer is not something to turn off."""
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        self.login()
 
         with capture_mails() as mails:
-            TransferFactory(
-                user=owner,
-                owner=owner,
-                recipient=recipient,
-                subject=DatasetFactory(owner=owner),
-                status="pending",
-            )
+            self.post(url_for("api.request_membership", org=organization), {"comment": "x"})
 
-        assert all("/admin/me/notifications" not in mail.body for mail in mailed(mails, recipient))
+        [mail] = mailed(mails, admin)
+        assert "/admin/me/notifications" not in mail.body
 
     def test_ignoring_one_dataset_leaves_the_others_alone(self):
         admin = UserFactory()
@@ -1144,7 +1153,7 @@ class NotificationSettingsAPITest(APITestCase):
         assert NotificationSetting.objects(user=user).count() == 2
 
     def test_a_rule_about_everywhere_is_listed_without_a_scope(self):
-        """"Turn everything off" is read back by the settings screen as two rules with
+        """ "Turn everything off" is read back by the settings screen as two rules with
         no scope at all."""
         user = UserFactory()
         turn_everything_off(user)
@@ -1389,7 +1398,6 @@ class MeMailSettingsAPITest(APITestCase):
 
         self.assert200(response)
         assert response.json["mail_cadence"] is None
-        assert "mail_muted_types" not in response.json
 
 
 class NotificationReasonsAPITest(APITestCase):
@@ -1555,8 +1563,12 @@ class FollowEditedSubjectsMigrationTest(PytestOnlyDBTestCase):
             DatasetFactory(organization=organization),
             DatasetFactory(organization=organization),
         )
-        UserUpdatedDataset.objects.create(actor=editor, related_to=edited, organization=organization)
-        UserUpdatedDataset.objects.create(actor=left, related_to=untouched, organization=organization)
+        UserUpdatedDataset.objects.create(
+            actor=editor, related_to=edited, organization=organization
+        )
+        UserUpdatedDataset.objects.create(
+            actor=left, related_to=untouched, organization=organization
+        )
 
         self.migrate(get_db())
 

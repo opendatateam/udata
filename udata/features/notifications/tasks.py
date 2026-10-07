@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
+from udata import i18n
 from udata.features.notifications import mails
 from udata.features.notifications.constants import MailCadence, NotificationChannel
 from udata.features.notifications.models import Notification
@@ -53,14 +54,18 @@ def send_notification_digests(self):
                 "created_at"
             )
         )
-        # One failing digest must not deprive the others. Its queue is left as is, so
-        # the next run tries again.
-        try:
-            mails.notification_digest(notifications).send(user)
-            sent += 1
-        except Exception:
-            log.exception(f"Could not send the notification digest of {user}")
-            continue
+        # The counts are rendered while the digest is built, before `send` switches to the
+        # recipient's language. Outside the `try`: `i18n.language` restores nothing when
+        # an exception goes through it.
+        with i18n.language(i18n._default_lang(user)):
+            # One failing digest must not deprive the others. Its queue is left as is, so
+            # the next run tries again.
+            try:
+                mails.notification_digest(notifications).send(user)
+                sent += 1
+            except Exception:
+                log.exception(f"Could not send the notification digest of {user}")
+                continue
 
         # Only what was mailed is spent: a notification arriving meanwhile stays queued.
         # `last_modified` is set by hand, a queryset update skips the `pre_save` filling it.
