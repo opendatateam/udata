@@ -197,9 +197,10 @@ class NotificationEvent:
     def via_mail(self, recipient: User | str) -> MailMessage | None:
         return None
 
-    # How a digest counts this event ("3 new comments"), or `None` when it cannot wait
-    # for a digest and is mailed at once: an invitation or a source pending validation
-    # is an action to take, and holding it for a week would be a bug, not a setting.
+    # How a digest counts this event ("3 new comments"), or `None` to mail it at once
+    # whatever the cadence: an action to take (an invitation, a source pending
+    # validation) cannot wait a week, and a rare event (a badge, the answer to one's
+    # request) is no flood worth holding back.
     digest_count: Callable[[int], str] | None = None
 
     @classmethod
