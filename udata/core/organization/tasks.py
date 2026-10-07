@@ -10,7 +10,7 @@ from .assignment import Assignment
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import MembershipRequest, Organization
 from .notifications import (
-    BADGE_EVENTS,
+    BadgeAdded,
     MembershipAccepted,
     MembershipInvited,
     MembershipRefused,
@@ -135,27 +135,27 @@ def notify_membership_invitation_canceled(org_id, invitation_id):
 
 
 # One task per badge kind because `notify_new_badge` registers a signal handler per
-# kind; each dispatches the event of its badge.
+# kind; they all dispatch the same event.
 @notify_new_badge(Organization, CERTIFIED)
 def notify_badge_certified(org_id):
-    BADGE_EVENTS[CERTIFIED](Organization.objects.get(pk=org_id)).dispatch()
+    BadgeAdded(Organization.objects.get(pk=org_id), CERTIFIED).dispatch()
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)
 def notify_badge_public_service(org_id):
-    BADGE_EVENTS[PUBLIC_SERVICE](Organization.objects.get(pk=org_id)).dispatch()
+    BadgeAdded(Organization.objects.get(pk=org_id), PUBLIC_SERVICE).dispatch()
 
 
 @notify_new_badge(Organization, COMPANY)
 def notify_badge_company(org_id):
-    BADGE_EVENTS[COMPANY](Organization.objects.get(pk=org_id)).dispatch()
+    BadgeAdded(Organization.objects.get(pk=org_id), COMPANY).dispatch()
 
 
 @notify_new_badge(Organization, ASSOCIATION)
 def notify_badge_association(org_id):
-    BADGE_EVENTS[ASSOCIATION](Organization.objects.get(pk=org_id)).dispatch()
+    BadgeAdded(Organization.objects.get(pk=org_id), ASSOCIATION).dispatch()
 
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
 def notify_badge_local_authority(org_id):
-    BADGE_EVENTS[LOCAL_AUTHORITY](Organization.objects.get(pk=org_id)).dispatch()
+    BadgeAdded(Organization.objects.get(pk=org_id), LOCAL_AUTHORITY).dispatch()

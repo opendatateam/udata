@@ -326,8 +326,9 @@ def event_for_type(notification_type: NotificationType) -> type[NotificationEven
             yield subclass
             yield from walk(subclass)
 
+    # An event carrying several types (one per kind of badge) lists them in `types`.
     return next(
         event
         for event in walk(NotificationEvent)
-        if getattr(event, "type", None) == notification_type
+        if notification_type in getattr(event, "types", {getattr(event, "type", None)})
     )
