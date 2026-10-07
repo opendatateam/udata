@@ -199,6 +199,8 @@ class MembershipInvitationMatched(MembershipInvited):
 class MembershipAnswered(NotificationEvent):
     """The applicant hears back about their own request."""
 
+    reaches_subscribers = False
+
     def __init__(self, organization: Organization, request: MembershipRequest):
         self.organization = organization
         self.request = request

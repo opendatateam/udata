@@ -15,6 +15,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import MembershipRequest
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import (
@@ -782,6 +783,22 @@ class DispatchTest(APITestCase):
         discussion.signal_new()
 
         assert Notification.objects(user=admin).count() == 0
+
+    def test_an_answer_to_a_request_only_reaches_the_applicant(self):
+        """Following an organization is not being told "your request was accepted"
+        every time somebody joins it."""
+        admin, applicant, follower = UserFactory(), UserFactory(), UserFactory()
+        request = MembershipRequest(user=applicant, comment="x")
+        organization = OrganizationFactory(admins=[admin], requests=[request])
+        follow(follower, organization)
+        self.login(admin)
+
+        with capture_mails() as mails:
+            self.post(url_for("api.accept_membership", org=organization, id=request.id))
+
+        assert Notification.objects(user=applicant).count() == 1
+        assert Notification.objects(user=follower).count() == 0
+        assert mailed(mails, follower) == []
 
     def test_ignoring_an_organization_covers_its_badges(self):
         admin = UserFactory()

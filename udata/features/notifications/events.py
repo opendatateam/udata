@@ -150,6 +150,10 @@ class NotificationEvent:
     """
 
     type: NotificationType
+    # An answer addressed to one person ("your request was accepted") is not news about
+    # its subject: following the subject must not bring it in. Its scopes still let the
+    # recipient silence it.
+    reaches_subscribers: bool = True
 
     @property
     def requires_action(self) -> bool:
@@ -272,7 +276,7 @@ class NotificationEvent:
         ]
 
     def _subscribers(self) -> list[Recipient]:
-        if self.requires_action:
+        if self.requires_action or not self.reaches_subscribers:
             return []
         return [
             Recipient(user, frozenset({reason}))
