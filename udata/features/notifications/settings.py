@@ -112,23 +112,17 @@ class Rule:
 # that a default can be as precise as anything a user decides ("editors: the reuses
 # but not the discussions"). They are read only where the user's own rules say nothing.
 #
-# Editors start silent: they are members of organizations whose datasets they have
-# never touched, and mailing them every discussion of a 400-dataset organization is
-# what this whole thing is meant to stop.
+# Every reason is heard, so that a new one cannot be silenced by forgetting it here,
+# except editors: they are members of organizations whose datasets they have never
+# touched, and mailing them every discussion of a 400-dataset organization is what this
+# whole thing is meant to stop.
 #
-# Partial editors start loud, which only looks inconsistent: they are never given this
+# Partial editors are heard, which only looks inconsistent: they are never given this
 # reason unless the object was actually assigned to them, so "everything concerning
 # me" is already a short list.
 DEFAULT_RULES: list[Rule] = [
-    Rule(reason=NotificationReason.OWNER, enabled=True),
-    Rule(reason=NotificationReason.ORGANIZATION_ADMIN, enabled=True),
+    Rule(enabled=True),
     Rule(reason=NotificationReason.ORGANIZATION_EDITOR, enabled=False),
-    Rule(reason=NotificationReason.ORGANIZATION_PARTIAL_EDITOR, enabled=True),
-    Rule(reason=NotificationReason.DISCUSSION_PARTICIPANT, enabled=True),
-    Rule(reason=NotificationReason.EXPLICIT_SUBSCRIBER, enabled=True),
-    Rule(reason=NotificationReason.CONTRIBUTOR, enabled=True),
-    Rule(reason=NotificationReason.REQUESTER, enabled=True),
-    Rule(reason=NotificationReason.SYSADMIN, enabled=True),
     Rule(channel=NotificationChannel.APP, enabled=True),
     Rule(channel=NotificationChannel.MAIL, enabled=True),
 ]
