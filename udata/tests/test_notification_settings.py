@@ -1057,6 +1057,18 @@ class DigestTest(PytestOnlyDBTestCase):
         assert [mail.recipients for mail in mails] == [[admin.email]]
         assert Notification.objects(user=admin, channels=MAIL).count() == 0
 
+    def test_what_was_handled_meanwhile_is_left_out_of_the_digest(self):
+        """Answered in the bell on Tuesday, it is no news on Sunday."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        age(Notification.objects(user=admin).first(), days=8)
+        Notification.objects(user=admin).mark_handled()
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert mails == []
+
     def test_the_digest_counts_are_in_the_language_of_the_recipient(self):
         """The counts are written while the digest is built, not when it is sent."""
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY, prefered_language="en")

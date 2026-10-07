@@ -41,19 +41,15 @@ def send_notification_digests(self):
             continue
 
         due_before = datetime.now(UTC) - DIGEST_INTERVALS[user.mail_cadence]
-        if not Notification.objects(
-            user=user, channels=NotificationChannel.MAIL, created_at__lte=due_before
-        ).first():
+        # What was answered or read in the meantime is no news any more.
+        queue = Notification.objects(user=user, channels=NotificationChannel.MAIL, handled_at=None)
+        if not queue.filter(created_at__lte=due_before).first():
             continue
 
         # The whole queue goes out, not only the part that came of age: a digest is
         # "what happened since last time", and holding back the recent half would only
         # push it to the next run.
-        notifications = list(
-            Notification.objects(user=user, channels=NotificationChannel.MAIL).order_by(
-                "created_at"
-            )
-        )
+        notifications = list(queue.order_by("created_at"))
         # The counts are rendered while the digest is built, before `send` switches to the
         # recipient's language. Outside the `try`: `i18n.language` restores nothing when
         # an exception goes through it.
