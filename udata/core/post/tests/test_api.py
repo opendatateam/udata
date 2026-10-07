@@ -631,6 +631,20 @@ class PostsAPITest(APITestCase):
         assert "title" in dataservice_json
         assert "datasets" not in dataservice_json
 
+    def test_post_api_filter_by_tag(self):
+        """It should filter posts having all the given tags"""
+        both = PostFactory(tags=["a", "b"])
+        PostFactory(tags=["a"])
+        PostFactory(tags=["c"])
+
+        response = self.get(url_for("api.posts", tag="a"))
+        assert200(response)
+        assert len(response.json["data"]) == 2
+
+        response = self.get(url_for("api.posts", tag=["a", "b"]))
+        assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both.id)]
+
     def test_post_api_filter_by_kind(self):
         """It should filter posts by kind"""
         news_post = PostFactory(kind="news")

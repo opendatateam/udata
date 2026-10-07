@@ -1,3 +1,4 @@
+from udata.core.post.constants import EXTERNAL_PAGE
 from udata.core.post.models import Post
 from udata.search import Filter, ListFilter, ModelSearchAdapter, register
 from udata_search_service.consumers import PostConsumer
@@ -25,11 +26,12 @@ class PostSearch(ModelSearchAdapter):
     def is_indexable(cls, post: Post) -> bool:
         # Unpublished posts are drafts: they must never reach the search index,
         # which is public and unauthenticated.
-        return post.is_visible
+        # External pages are shown by external sites, not on the main site.
+        return post.is_visible and not post.is_external_page
 
     @classmethod
     def mongo_search(cls, args):
-        posts = Post.objects().visible()
+        posts = Post.objects(kind__ne=EXTERNAL_PAGE).visible()
         if args.get("q"):
             # Following code splits the 'q' argument by spaces to surround
             # every word in it with quotes before rebuild it.
