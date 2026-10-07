@@ -95,6 +95,12 @@ def _mail_cadence_for_admin_or_self(user):
     return None
 
 
+def _notifications_paused_for_admin_or_self(user):
+    if current_user_is_admin_or_self():
+        return user.notifications_paused
+    return None
+
+
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
@@ -246,6 +252,12 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     mail_cadence = field(
         EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
         attribute=_mail_cadence_for_admin_or_self,
+    )
+    # "Turn everything off": nothing reaches the user but what asks for an action. A
+    # field rather than a rule, so that no rule, however precise, can bring anything back.
+    notifications_paused = field(
+        BooleanField(default=False),
+        attribute=_notifications_paused_for_admin_or_self,
     )
 
     before_save = Signal()

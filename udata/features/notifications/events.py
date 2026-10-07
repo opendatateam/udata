@@ -16,7 +16,12 @@ from udata.features.notifications.constants import (
     NotificationType,
 )
 from udata.features.notifications.mails import settings_footer
-from udata.features.notifications.settings import resolve, rules_for, subscribers_for
+from udata.features.notifications.settings import (
+    readable_by,
+    resolve,
+    rules_for,
+    subscribers_for,
+)
 from udata.mail import MailMessage
 
 log = logging.getLogger(__name__)
@@ -272,6 +277,7 @@ class NotificationEvent:
         return [
             Recipient(user, frozenset({reason}))
             for user, reason in subscribers_for(event_chain(self.type), self.scopes())
+            if self.subject is None or readable_by(user, self.subject)
         ]
 
     def _mail(self, recipient: Recipient) -> MailMessage | None:
@@ -296,7 +302,7 @@ class NotificationEvent:
         # thing reaching it, and an invitation is an action to take.
         return {
             recipient.key: resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
-            if isinstance(recipient.user, User)
+            if isinstance(recipient.user, User) and not recipient.user.notifications_paused
             else set()
             for recipient in recipients
         }

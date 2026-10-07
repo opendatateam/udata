@@ -2,6 +2,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
 from bson import ObjectId
+from flask_principal import Identity, RoleNeed, UserNeed
 from mongoengine import CASCADE, Document, Q, ValidationError
 from mongoengine.fields import (
     BooleanField,
@@ -189,13 +190,19 @@ def resolve(
 
     Reasons are then combined generously: being an administrator who muted their
     organizations does not silence the thread one took part in.
+
+    Taking part in a thread is following it: whether one hears about it as a participant
+    is only decided by a rule on the thread itself or on that reason, never by one on its
+    dataset or organization. How one hears about it still follows them.
     """
     scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
     event_rank = {event: rank for rank, event in enumerate([*events, None])}
+    thread_ranks = {0, scope_rank[None]}
 
     def most_specific(
         rules: list[Rule], reason: NotificationReason, channel: NotificationChannel | None
     ) -> bool | None:
+        bound_to_thread = channel is None and reason == NotificationReason.DISCUSSION_PARTICIPANT
         candidates = [
             rule
             for rule in rules
@@ -203,6 +210,7 @@ def resolve(
             and rule.reason in (reason, None)
             and rule.scope in scope_rank
             and rule.event in event_rank
+            and (not bound_to_thread or scope_rank[rule.scope] in thread_ranks)
         ]
         if not candidates:
             return None
@@ -343,7 +351,9 @@ def resolved_for(
                         scope=subject,
                         event=event,
                         reason=reason,
-                        channels=sorted(resolve(rules, chain, scopes, concerned)),
+                        channels=[]
+                        if user.notifications_paused
+                        else sorted(resolve(rules, chain, scopes, concerned)),
                         reasons=sorted(concerned),
                     )
                 )
@@ -362,6 +372,30 @@ def visible_subject(scope):
     subject = scope.subject if isinstance(scope, Discussion) else scope
     read = getattr(subject, "permissions", {}).get("read")
     return subject if read is None or read.can() else None
+
+
+def readable_by(user: User, scope) -> bool:
+    """Whether `user` may read the subject of `scope`, as its `read` permission says.
+
+    A follow reaches people the event would not reach by itself, and anybody can follow
+    an organization: without this, its private datasets would leak through their
+    discussions. The permission is checked against the needs `user` would have once
+    logged in, not against `current_user`, who is whoever triggered the event."""
+    from udata.core.discussions.models import Discussion
+    from udata.core.organization.models import Organization
+    from udata.core.organization.permissions import OrganizationNeed
+
+    subject = scope.subject if isinstance(scope, Discussion) else scope
+    read = getattr(subject, "permissions", {}).get("read")
+    if read is None:
+        return True
+    identity = Identity(user.id)
+    identity.provides.add(UserNeed(user.fs_uniquifier))
+    identity.provides.update(RoleNeed(role.name) for role in user.roles)
+    for organization in Organization.objects(members__user=user.id).only("members"):
+        membership = next(member for member in organization.members if member.user.id == user.id)
+        identity.provides.add(OrganizationNeed(membership.role, organization.id))
+    return read.allows(identity)
 
 
 @dataclass(frozen=True)

@@ -82,8 +82,8 @@ def prefer(user, reason, *channels):
 
 
 def turn_everything_off(user):
-    for channel in NotificationChannel:
-        decide(user, channel=channel, enabled=False)
+    user.notifications_paused = True
+    user.save()
 
 
 def open_discussion(dataset):
@@ -235,6 +235,19 @@ class PersonaTest(APITestCase):
         assert notifications.count() == 1
         assert notifications.first().details.reuse == public
 
+    def test_following_an_organization_does_not_disclose_its_private_datasets(self):
+        """Anybody can follow an organization: what it keeps private must not reach them
+        through the discussions about it."""
+        outsider = UserFactory()
+        organization = OrganizationFactory()
+        follow(outsider, organization)
+
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization, private=True))
+
+        assert Notification.objects(user=outsider).count() == 0
+        assert mailed(mails, outsider) == []
+
     def test_followed_subjects_reach_through_the_channels_chosen_for_them(self):
         """What one follows is heard where one chose to hear it, once for all of them."""
         outsider = UserFactory()
@@ -352,6 +365,21 @@ class PersonaTest(APITestCase):
 
         with capture_mails() as mails:
             open_discussion(dataset)
+
+        assert Notification.objects(user=thomas).count() == 0
+        assert mailed(mails, thomas) == []
+
+    def test_turning_everything_off_beats_the_channels_of_an_organization(self):
+        """An organization set to "the app and by mail" is a rule saying yes to channels,
+        more precise than anything: the pause is not a rule, so that it still wins."""
+        thomas = UserFactory()
+        organization = OrganizationFactory(admins=[thomas])
+        for channel in NotificationChannel:
+            decide(thomas, organization, channel=channel, enabled=True)
+        turn_everything_off(thomas)
+
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization))
 
         assert Notification.objects(user=thomas).count() == 0
         assert mailed(mails, thomas) == []
@@ -564,6 +592,35 @@ class ResolveTest:
 
     def test_nobody_concerned_gets_nothing(self):
         assert resolve([rule(scope=DATASET)], NEW, SCOPES, set()) == set()
+
+    def test_a_participant_is_not_silenced_by_a_rule_on_the_organization(self):
+        """Taking part in a thread is following it: "only what I follow" on the
+        organization keeps it."""
+        rules = [rule(scope=ORGANIZATION, enabled=False)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) == {
+            APP,
+            MAIL,
+        }
+
+    def test_a_participant_can_still_ignore_the_thread(self):
+        rules = [rule(scope=THREAD, enabled=False)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) == set()
+
+    def test_a_participant_hears_through_the_channels_of_the_organization(self):
+        """Only whether is bound to the thread: how follows the organization."""
+        rules = [rule(scope=ORGANIZATION, channel=MAIL, enabled=False)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) == {APP}
+
+    def test_the_channels_of_an_organization_beat_those_of_a_kind_of_notification(self):
+        rules = [
+            rule(event=DISCUSSIONS, channel=MAIL, enabled=False),
+            rule(scope=ORGANIZATION, channel=MAIL),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) == {APP, MAIL}
 
 
 class RulesForTest(PytestOnlyDBTestCase):
@@ -899,6 +956,76 @@ class DispatchTest(APITestCase):
         ]
 
 
+class OrganizationSettingsTest(APITestCase):
+    """What the settings screen offers per organization: everything, or only what one
+    follows, and the channels it reaches one through."""
+
+    def test_an_editor_can_hear_about_everything_of_one_organization(self):
+        editor = UserFactory()
+        critical, other = OrganizationFactory(editors=[editor]), OrganizationFactory(editors=[editor])
+        follow(editor, critical)
+
+        open_discussion(DatasetFactory(organization=critical))
+        open_discussion(DatasetFactory(organization=other))
+
+        [notification] = Notification.objects(user=editor)
+        assert notification.details.discussion.subject.organization == critical
+
+    def test_an_administrator_can_hear_only_what_they_follow_in_one_organization(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        followed = DatasetFactory(organization=organization)
+        ignore(admin, organization)
+        follow(admin, followed)
+
+        open_discussion(followed)
+        open_discussion(DatasetFactory(organization=organization))
+
+        [notification] = Notification.objects(user=admin)
+        assert notification.details.discussion.subject == followed
+
+    def test_a_partial_editor_can_hear_about_everything_of_their_organization(self):
+        """Not only what is assigned to them: their membership lets them read the private
+        datasets too."""
+        lea = UserFactory()
+        organization = OrganizationFactory(partial_editors=[lea])
+        follow(lea, organization)
+
+        open_discussion(DatasetFactory(organization=organization))
+        open_discussion(DatasetFactory(organization=organization, private=True))
+
+        assert Notification.objects(user=lea).count() == 2
+
+    def test_the_threads_one_answered_still_reach_one(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        ignore(admin, organization)
+        discussion = DiscussionFactory(
+            subject=DatasetFactory(organization=organization),
+            user=UserFactory(),
+            discussion=[MessageDiscussionFactory(posted_by=admin)],
+        )
+
+        comment(discussion)
+
+        notification = Notification.objects(user=admin).get()
+        assert NotificationReason.DISCUSSION_PARTICIPANT in notification.reasons
+
+    def test_a_critical_organization_is_mailed_despite_the_kind_of_notification(self):
+        """No mail for the discussions, but everything by mail for one organization."""
+        admin = UserFactory()
+        critical, other = OrganizationFactory(admins=[admin]), OrganizationFactory(admins=[admin])
+        decide(admin, event=DISCUSSIONS, channel=MAIL, enabled=False)
+        decide(admin, critical, channel=MAIL, enabled=True)
+
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=critical))
+            open_discussion(DatasetFactory(organization=other))
+
+        assert Notification.objects(user=admin).count() == 2
+        assert len(mailed(mails, admin)) == 1
+
+
 class DigestTest(PytestOnlyDBTestCase):
     def test_a_digest_recipient_queues_the_mail_instead_of_receiving_it(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1173,10 +1300,11 @@ class NotificationSettingsAPITest(APITestCase):
         assert NotificationSetting.objects(user=user).count() == 2
 
     def test_a_rule_about_everywhere_is_listed_without_a_scope(self):
-        """ "Turn everything off" is read back by the settings screen as two rules with
-        no scope at all."""
+        """The rules on a kind of notification, read back by the settings screen, have no
+        scope at all."""
         user = UserFactory()
-        turn_everything_off(user)
+        for channel in NotificationChannel:
+            decide(user, event=DISCUSSIONS, channel=channel, enabled=False)
         self.login(user)
 
         listed = self.get("/api/1/notifications/settings/").json
@@ -1269,6 +1397,16 @@ class NotificationResolvedAPITest(APITestCase):
             reason: [] if reason == NotificationReason.ORGANIZATION_EDITOR else [APP, MAIL]
             for reason in NotificationReason
         }
+
+    def test_nothing_reaches_a_user_who_paused_everything(self):
+        admin = UserFactory(notifications_paused=True)
+        organization = OrganizationFactory(admins=[admin])
+        self.login(admin)
+
+        [answer] = self.resolved(scopes=[organization], events=[DISCUSSIONS]).json
+
+        assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
+        assert answer["channels"] == []
 
     def test_choosing_the_channels_of_a_reason(self):
         user = self.login()
@@ -1411,13 +1549,31 @@ class MeMailSettingsAPITest(APITestCase):
         assert len(mailed(mails, admin)) == 1
 
     def test_the_mail_settings_of_somebody_else_are_not_disclosed(self):
-        other = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        other = UserFactory(mail_cadence=MailCadence.WEEKLY, notifications_paused=True)
         self.login()
 
         response = self.get(f"/api/1/users/{other.id}/")
 
         self.assert200(response)
         assert response.json["mail_cadence"] is None
+        assert response.json["notifications_paused"] is None
+
+    def test_notifications_are_paused_and_resumed_on_me(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+        self.login(admin)
+
+        response = self.put("/api/1/me/", {"notifications_paused": True})
+        open_discussion(DatasetFactory(organization=organization))
+
+        self.assert200(response)
+        assert response.json["notifications_paused"] is True
+        assert Notification.objects(user=admin).count() == 0
+
+        self.put("/api/1/me/", {"notifications_paused": False})
+        open_discussion(DatasetFactory(organization=organization))
+
+        assert Notification.objects(user=admin).count() == 1
 
 
 class NotificationReasonsAPITest(APITestCase):
