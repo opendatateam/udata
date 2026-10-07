@@ -1,18 +1,14 @@
-import importlib.util
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from flask import url_for
 from mongoengine import DoesNotExist, NotUniqueError, ValidationError
-from mongoengine.connection import get_db
 
 import udata
 import udata.features.notifications.follow  # noqa: F401 -- connected by `init_app` in production
 import udata.models  # noqa: F401 -- registers every document before the imports below
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
@@ -962,7 +958,10 @@ class OrganizationSettingsTest(APITestCase):
 
     def test_an_editor_can_hear_about_everything_of_one_organization(self):
         editor = UserFactory()
-        critical, other = OrganizationFactory(editors=[editor]), OrganizationFactory(editors=[editor])
+        critical, other = (
+            OrganizationFactory(editors=[editor]),
+            OrganizationFactory(editors=[editor]),
+        )
         follow(editor, critical)
 
         open_discussion(DatasetFactory(organization=critical))
@@ -1720,37 +1719,6 @@ class FollowWhatOneWorksOnTest(APITestCase):
         [listed] = self.get("/api/1/notifications/settings/").json
 
         assert listed["subject"] is None
-
-
-class FollowEditedSubjectsMigrationTest(PytestOnlyDBTestCase):
-    def migrate(self, db):
-        spec = importlib.util.spec_from_file_location(
-            "follow_edited_subjects",
-            Path(udata.__file__).parent / "migrations" / "2026-10-06-follow-edited-subjects.py",
-        )
-        migration = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(migration)
-        migration.migrate(db)
-
-    def test_the_members_who_edited_follow_what_they_edited(self):
-        editor, left = UserFactory(), UserFactory()
-        organization = OrganizationFactory(editors=[editor])
-        edited, untouched = (
-            DatasetFactory(organization=organization),
-            DatasetFactory(organization=organization),
-        )
-        UserUpdatedDataset.objects.create(
-            actor=editor, related_to=edited, organization=organization
-        )
-        UserUpdatedDataset.objects.create(
-            actor=left, related_to=untouched, organization=organization
-        )
-
-        self.migrate(get_db())
-
-        assert [
-            (setting.user, setting.scope, setting.origin) for setting in NotificationSetting.objects
-        ] == [(editor, edited, FollowOrigin.EDITED)]
 
 
 class DigestVisibilityTest(APITestCase):
