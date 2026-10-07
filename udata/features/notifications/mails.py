@@ -57,4 +57,12 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
             *lines,
             MailCTA(_("See all my notifications"), cdata_url("/admin/me/notifications")),
         ],
+        footer=settings_footer(),
+    )
+
+
+def settings_footer() -> MailCTA:
+    """The way out of every mail about something one never asked for by name."""
+    return MailCTA(
+        _("Manage or turn off these notifications"), cdata_url("/admin/me/notifications")
     )

@@ -1,9 +1,9 @@
 from udata.core.dataset.models import Dataset
-from udata.features.notifications.constants import NotificationCategory, NotificationReason
-from udata.features.notifications.events import NotificationEvent, Recipient
+from udata.features.notifications.constants import NotificationReason
+from udata.features.notifications.events import ConfigurableEvent, Recipient
 
 
-class DatasetReusedEvent(NotificationEvent):
+class DatasetReusedEvent(ConfigurableEvent):
     """Somebody plugged something of theirs onto a dataset of ours.
 
     Reuses and dataservices differ only by the object they carry: the same people hear
@@ -11,7 +11,6 @@ class DatasetReusedEvent(NotificationEvent):
     here once rather than twice.
     """
 
-    category = NotificationCategory.REUSES
     dataset: Dataset
 
     def recipients(self):

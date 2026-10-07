@@ -31,7 +31,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
-from udata.features.notifications.constants import MailCadence
+from udata.features.notifications.constants import MailCadence, NotificationType
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -92,6 +92,12 @@ def _email_for_admin_or_self(user):
 def _mail_cadence_for_admin_or_self(user):
     if current_user_is_admin_or_self():
         return user.mail_cadence
+    return None
+
+
+def _mail_muted_types_for_admin_or_self(user):
+    if current_user_is_admin_or_self():
+        return user.mail_muted_types
     return None
 
 
@@ -242,10 +248,17 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     inactive_deletion_notified_at = DateTimeField()
 
     # How often this user agrees to be mailed about what concerns them. What concerns
-    # them is decided per subject in `NotificationSetting`; this is only the rhythm.
+    # them is decided per reason in `NotificationPreference` and per subject in
+    # `NotificationSetting`; this is only the rhythm.
     mail_cadence = field(
         EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
         attribute=_mail_cadence_for_admin_or_self,
+    )
+    # Configurable notifications this user still reads in the bell but never wants by
+    # mail, whatever concerns them: "the new discussions by mail, not every comment".
+    mail_muted_types = field(
+        ListField(EnumField(NotificationType)),
+        attribute=_mail_muted_types_for_admin_or_self,
     )
 
     before_save = Signal()

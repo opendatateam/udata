@@ -77,6 +77,9 @@ class ParagraphWithLinks:
 class MailMessage:
     subject: LazyString
     paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent | None]
+    # Shown small under the signature, for what the mail is not about: typically the way
+    # out of the mails one did not ask for.
+    footer: MailCTA | None = None
 
     def __post_init__(self):
         self.paragraphs = [p for p in self.paragraphs if p is not None]

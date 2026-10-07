@@ -10,15 +10,15 @@ from udata.core.user.models import User
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
     MailCadence,
-    NotificationCategory,
     NotificationChannel,
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.mails import DIGEST_COUNTS
+from udata.features.notifications.mails import DIGEST_COUNTS, settings_footer
 from udata.features.notifications.settings import (
     decisions_for,
-    default_enabled,
+    default_channels,
+    preferences_for,
     subscribers_for,
 )
 from udata.mail import MailMessage
@@ -83,10 +83,6 @@ class NotificationEvent:
     """
 
     type: NotificationType
-    # The family a user decides about, declared once on the base class of each family.
-    # `None` keeps the event out of the settings: an action to take or the answer to
-    # one's own request is not something to opt out of.
-    category: NotificationCategory | None = None
 
     def recipients(self) -> list[Recipient]:
         raise NotImplementedError
@@ -137,14 +133,15 @@ class NotificationEvent:
         from udata.features.notifications.models import Notification
 
         recipients = self._concerned()
-        decisions = self._decisions(recipients)
+        channels_by_recipient = self._channels(recipients)
 
         for recipient in recipients:
             # An in-app notification needs an account to hang on, so an address with no
             # user behind it is reachable by email only.
             is_user = isinstance(recipient.user, User)
-            wants_app = is_user and self._wants(recipient, NotificationChannel.APP, decisions)
-            wants_mail = self._wants(recipient, NotificationChannel.MAIL, decisions)
+            wanted = channels_by_recipient[recipient.key]
+            wants_app = is_user and NotificationChannel.APP in wanted
+            wants_mail = NotificationChannel.MAIL in wanted
 
             # Only what a digest knows how to summarize can wait for it. An invitation or
             # a source pending validation is an action to take: holding it for a week
@@ -180,7 +177,7 @@ class NotificationEvent:
 
             if wants_mail and not deferred:
                 try:
-                    mail = self.via_mail(recipient.user)
+                    mail = self._mail(recipient.user)
                     if mail is not None:
                         mail.send(recipient.user)
                 except Exception:
@@ -189,43 +186,26 @@ class NotificationEvent:
     def _concerned(self) -> list[Recipient]:
         """Everybody this event reaches: those it concerns by itself, plus those who
         asked to be added, minus whoever it must never reach."""
-        recipients = self.recipients()
-        if self.category is not None:
-            recipients = [
-                *recipients,
-                *(
-                    Recipient(user, frozenset({NotificationReason.EXPLICIT_SUBSCRIBER}))
-                    for user in subscribers_for(self.category, self.scopes())
-                ),
-            ]
-
         excluded = {user.id for user in self.excluded()}
         return [
-            recipient for recipient in merge_recipients(recipients) if recipient.key not in excluded
+            recipient
+            for recipient in merge_recipients([*self.recipients(), *self._subscribers()])
+            if recipient.key not in excluded
         ]
 
-    def _decisions(
+    def _subscribers(self) -> list[Recipient]:
+        return []
+
+    def _mail(self, recipient: User | str) -> MailMessage | None:
+        return self.via_mail(recipient)
+
+    def _channels(
         self, recipients: list[Recipient]
-    ) -> dict[tuple[ObjectId, NotificationChannel], bool]:
-        """What the recipients decided about this event, resolved once for all of them."""
-        if self.category is None:
-            return {}
-
-        users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
-        return decisions_for(users, self.category, self.scopes())
-
-    def _wants(
-        self,
-        recipient: Recipient,
-        channel: NotificationChannel,
-        decisions: dict[tuple[ObjectId, NotificationChannel], bool],
-    ) -> bool:
-        if self.category is None:
-            # Either an action to take or the answer to a request this recipient made:
-            # neither is something to opt out of.
-            return True
-        decided = decisions.get((recipient.key, channel))
-        return default_enabled(recipient.reasons, self.category) if decided is None else decided
+    ) -> dict[ObjectId | str, set[NotificationChannel]]:
+        """The channels each recipient is reached through, by recipient key."""
+        # Either an action to take or the answer to a request this recipient made:
+        # neither is something to opt out of.
+        return {recipient.key: set(NotificationChannel) for recipient in recipients}
 
     def already_pending(self, recipient: User, **details) -> bool:
         """Whether the recipient still has an unhandled notification about the same
@@ -243,6 +223,63 @@ class NotificationEvent:
         )
 
 
+class ConfigurableEvent(NotificationEvent):
+    """An event users decide about, unlike an action to take or an answer to their own
+    request.
+
+    A decision names one of the classes of the event by its name, from the event itself
+    up to this class, which stands for every configurable event. Renaming one of these
+    classes therefore needs a migration of `NotificationSetting.event`.
+    """
+
+    @classmethod
+    def decision_events(cls) -> list[str]:
+        """The class names a decision about this event can name, from the narrowest to
+        the broadest."""
+        return [klass.__name__ for klass in cls.__mro__ if issubclass(klass, ConfigurableEvent)]
+
+    def _mail(self, recipient):
+        """Something one can turn off says where to."""
+        mail = self.via_mail(recipient)
+        if mail is not None:
+            mail.footer = settings_footer()
+        return mail
+
+    def _subscribers(self):
+        return [
+            Recipient(user, frozenset({NotificationReason.EXPLICIT_SUBSCRIBER}))
+            for user in subscribers_for(self.decision_events(), self.scopes())
+        ]
+
+    def _channels(self, recipients):
+        """A subject the recipient ignores reaches them nowhere. Otherwise each of their
+        reasons brings the channels they chose for it: being concerned twice over, the
+        most generous reason wins, so an organization muted as an administrator does
+        not silence the thread one took part in.
+
+        Followers already carry `EXPLICIT_SUBSCRIBER` among their reasons, brought in by
+        `_subscribers`, so following only has to be read here as "not ignored"."""
+        users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
+        decisions = decisions_for(users, self.decision_events(), self.scopes())
+        preferences = preferences_for(users)
+
+        channels = {}
+        for recipient in recipients:
+            if not isinstance(recipient.user, User) or decisions.get(recipient.key) is False:
+                channels[recipient.key] = set()
+                continue
+            wanted = set().union(
+                *(
+                    preferences.get((recipient.key, reason), default_channels(reason))
+                    for reason in recipient.reasons
+                )
+            )
+            if self.type in recipient.user.mail_muted_types:
+                wanted.discard(NotificationChannel.MAIL)
+            channels[recipient.key] = wanted
+        return channels
+
+
 def concrete_events() -> list[type[NotificationEvent]]:
     """Every event that can be dispatched: the subclasses declaring a `type`, at any
     depth, leaving out the base classes a family shares."""
@@ -255,7 +292,17 @@ def concrete_events() -> list[type[NotificationEvent]]:
     return [event for event in walk(NotificationEvent) if hasattr(event, "type")]
 
 
-def category_has_mail(category: NotificationCategory) -> bool:
-    """Whether one of the events of `category` writes a mail, which is what makes a
-    decision about that category on the mail channel mean anything."""
-    return any(event.has_mail() for event in concrete_events() if event.category is category)
+def configurable_events() -> list[type[ConfigurableEvent]]:
+    return [event for event in concrete_events() if issubclass(event, ConfigurableEvent)]
+
+
+def settable_events() -> set[str]:
+    """Everything a decision can name: each configurable type, the families they
+    belong to, and all of them at once."""
+    return {name for event in configurable_events() for name in event.decision_events()}
+
+
+def event_has_mail(name: str) -> bool:
+    """Whether one of the events `name` covers writes a mail, which is what makes a
+    decision about it on the mail channel mean anything."""
+    return any(event.has_mail() for event in configurable_events() if name in event.decision_events())
