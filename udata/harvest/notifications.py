@@ -35,6 +35,14 @@ class HarvestSourceEvent(NotificationEvent):
     def __init__(self, source: HarvestSource):
         self.source = source
 
+    @property
+    def subject(self):
+        return self.source
+
+    def scopes(self):
+        # A source is not something a rule names: its organization is.
+        return [self.source.organization] if self.source.organization else []
+
     def via_app(self, recipient):
         return ValidateHarvesterNotificationDetails(source=self.source)
 

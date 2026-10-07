@@ -12,9 +12,7 @@ from udata.core.organization.constants import (
 )
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
-from udata.features.notifications.constants import (
-    NotificationType,
-)
+from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.features.notifications.events import NotificationEvent, Recipient
 
 BADGE_NOTIFICATION_TYPES = {
@@ -101,8 +99,15 @@ class BadgeAdded(NotificationEvent):
         self.kind = kind
         self.type = BADGE_NOTIFICATION_TYPES[kind]
 
+    @property
+    def subject(self):
+        return self.organization
+
     def recipients(self):
         return [Recipient.from_member(member) for member in self.organization.members]
+
+    def scopes(self):
+        return [self.organization]
 
     def via_app(self, recipient):
         return NewBadgeNotificationDetails(organization=self.organization)
@@ -179,9 +184,15 @@ class MembershipAnswered(NotificationEvent):
         self.organization = organization
         self.request = request
 
+    @property
+    def subject(self):
+        return self.organization
+
     def recipients(self):
-        # No reason to carry: hearing back about one's own request needs no explaining.
-        return [Recipient(self.request.user)]
+        return [Recipient(self.request.user, frozenset({NotificationReason.REQUESTER}))]
+
+    def scopes(self):
+        return [self.organization]
 
 
 class MembershipAccepted(MembershipAnswered):

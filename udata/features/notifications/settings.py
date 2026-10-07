@@ -27,28 +27,25 @@ from udata.mongo.document import UDataDocument
 # muting a single thread is the finest useful grain.
 NOTIFICATION_SCOPES = ("Organization", "Discussion", *DISCUSSION_SUBJECTS)
 
-# Only reached by actions to take, which are not configurable: a rule about it would be
-# stored and never read.
-CONFIGURABLE_REASONS = tuple(
-    reason for reason in NotificationReason if reason is not NotificationReason.SYSADMIN
-)
-
 
 @generate_fields()
 class NotificationSetting(UDataDocument):
     """One rule a user set about their notifications.
 
     Every dimension is optional, and leaving one out means "whatever it is": no scope
-    is everywhere, no event is every configurable notification, no reason is whatever
-    concerns the user, no channel is whether they are concerned at all. The settings
-    screen only offers some combinations; the model holds them all, so that a new
-    screen never needs a new model.
+    is everywhere, no event is every notification, no reason is whatever concerns the
+    user, no channel is whether they are concerned at all. The settings screen only
+    offers some combinations; the model holds them all, so that a new screen never
+    needs a new model.
 
-    - follow a thread: scope = the thread, event = `DiscussionEvent`, yes
+    - follow a thread: scope = the thread, event = `discussion`, yes
     - ignore a dataset: scope = the dataset, no
-    - "as an editor, never": reason = editor, no
+    - "as an editor, never": reason = editor, channel = app, no; and the same by mail
     - "as an administrator, in the app only": reason = administrator, channel = mail, no
-    - "no mail for the answers": event = `NewDiscussionComment`, channel = mail, no
+    - "no mail for the answers": event = `discussion.comment`, channel = mail, no
+
+    Actions to take (an invitation, a source to validate) are the only notifications
+    no rule applies to.
 
     See `resolve` for which rule wins when several apply.
     """
@@ -64,8 +61,8 @@ class NotificationSetting(UDataDocument):
     )
     event = field(
         StringField(),
-        description="A configurable event class (a single event or a family of them), "
-        "null for every configurable notification",
+        description="A notification type, or a dotted prefix of some (`discussion` covers "
+        "`discussion.*`), null for every notification",
     )
     reason = field(
         EnumField(NotificationReason),
@@ -95,13 +92,11 @@ class NotificationSetting(UDataDocument):
 
     def clean(self):
         # `events` builds on this module, hence the import at call time.
-        from udata.features.notifications.events import settable_events
+        from udata.features.notifications.events import is_event_name
 
         super().clean()
-        if self.event is not None and self.event not in settable_events():
-            raise ValidationError(f"{self.event} is not a configurable notification")
-        if self.reason is not None and self.reason not in CONFIGURABLE_REASONS:
-            raise ValidationError(f"Notifications for {self.reason} are not configurable")
+        if self.event is not None and not is_event_name(self.event):
+            raise ValidationError(f"{self.event} is not a notification type nor a prefix of one")
 
 
 @dataclass(frozen=True)
@@ -132,6 +127,8 @@ DEFAULT_RULES: list[Rule] = [
     Rule(reason=NotificationReason.DISCUSSION_PARTICIPANT, enabled=True),
     Rule(reason=NotificationReason.EXPLICIT_SUBSCRIBER, enabled=True),
     Rule(reason=NotificationReason.CONTRIBUTOR, enabled=True),
+    Rule(reason=NotificationReason.REQUESTER, enabled=True),
+    Rule(reason=NotificationReason.SYSADMIN, enabled=True),
     Rule(channel=NotificationChannel.APP, enabled=True),
     Rule(channel=NotificationChannel.MAIL, enabled=True),
 ]
@@ -274,31 +271,49 @@ def subscribers_for(
     ]
 
 
-def resolved_for(user: User, subject: Document, event: str | None) -> dict:
-    """Whether, why and where `user` hears about `event` on `subject`, the way the
-    dispatch would decide it: so that a button shows the real state instead of
-    guessing it from the rules it knows of."""
+def resolved_for(
+    user: User,
+    subject: Document | None = None,
+    event: str | None = None,
+    reason: NotificationReason | None = None,
+) -> dict:
+    """Whether, why and where `user` hears about a notification, the way the dispatch
+    would decide it, so that the front never resolves rules by itself.
+
+    Every key is optional, like those of a rule: "a new discussion on this dataset",
+    "anything reaching me as an editor", "a new reuse anywhere I administer". Without a
+    reason, the reasons are the ones `user` has for `subject`.
+    """
     # `events` builds on this module, hence the import at call time.
     from udata.core.discussions.models import Discussion
     from udata.features.notifications.events import (
-        configurable_event_named,
+        event_chain,
         responsible_recipients,
         subject_scopes,
     )
 
-    events = configurable_event_named(event).decision_events() if event else []
-    scopes = subject_scopes(subject)
-    recipients = (
-        subject.owner_recipients()
-        if isinstance(subject, Discussion)
-        else responsible_recipients(subject)
-    )
-    reasons = {
-        reason for recipient in recipients if recipient.key == user.id for reason in recipient.reasons
-    }
-    reasons |= {
-        REASON_BY_ORIGIN[setting.origin] for setting in follows(events, scopes, user=user).only("origin")
-    }
+    events = event_chain(event)
+    scopes = subject_scopes(subject) if subject else []
+    if reason is not None:
+        reasons = {reason}
+    elif subject is not None:
+        recipients = (
+            subject.owner_recipients()
+            if isinstance(subject, Discussion)
+            else responsible_recipients(subject)
+        )
+        reasons = {
+            reason
+            for recipient in recipients
+            if recipient.key == user.id
+            for reason in recipient.reasons
+        }
+        reasons |= {
+            REASON_BY_ORIGIN[setting.origin]
+            for setting in follows(events, scopes, user=user).only("origin")
+        }
+    else:
+        reasons = set()
 
     rules = rules_for([user], events, scopes).get(user.id, [])
     return {

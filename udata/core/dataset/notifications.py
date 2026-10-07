@@ -1,12 +1,12 @@
 from udata.core.dataset.models import Dataset
 from udata.features.notifications.events import (
-    ConfigurableEvent,
+    NotificationEvent,
     responsible_recipients,
     subject_scopes,
 )
 
 
-class DatasetReusedEvent(ConfigurableEvent):
+class DatasetReusedEvent(NotificationEvent):
     """Somebody plugged something of theirs onto a dataset of ours.
 
     Reuses and dataservices differ only by the object they carry: the same people hear

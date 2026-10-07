@@ -58,7 +58,9 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
 
 def reason_sentence(reason: NotificationReason, subject) -> LazyString:
     """Why one receives a mail about `subject`, in the words of the reason."""
-    organization = getattr(subject, "organization", None)
+    from udata.core.organization.models import Organization
+
+    organization = subject if isinstance(subject, Organization) else getattr(subject, "organization", None)
     match reason:
         case NotificationReason.OWNER:
             return _("You receive this email because you own %(subject)s.", subject=str(subject))
@@ -83,6 +85,8 @@ def reason_sentence(reason: NotificationReason, subject) -> LazyString:
             return _("You receive this email because you follow %(subject)s.", subject=str(subject))
         case NotificationReason.CONTRIBUTOR:
             return _("You receive this email because you edited %(subject)s.", subject=str(subject))
+        case NotificationReason.REQUESTER:
+            return _("You receive this email because you made this request.")
         case NotificationReason.SYSADMIN:
             return _("You receive this email because you administer the site.")
 

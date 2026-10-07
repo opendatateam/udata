@@ -9,6 +9,7 @@ from mongoengine import Document, EmbeddedDocument
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
+    TYPES_REQUIRING_ACTION,
     MailCadence,
     NotificationChannel,
     NotificationReason,
@@ -102,6 +103,25 @@ def subject_scopes(subject) -> list[Document]:
     return [subject, organization] if organization else [subject]
 
 
+def event_chain(event: str | None) -> list[str]:
+    """What a rule about this event can name, from the narrowest to the broadest: the
+    type itself, then each of its dotted prefixes. `discussion.comment` yields
+    `["discussion.comment", "discussion"]`; a rule naming no event covers them all.
+
+    Grouping by prefix rather than by class keeps what a rule means apart from how the
+    events share their code: refactoring a base class must not change who hears what.
+    """
+    if not event:
+        return []
+    parts = event.split(".")
+    return [".".join(parts[:length]) for length in range(len(parts), 0, -1)]
+
+
+def is_event_name(event: str) -> bool:
+    """Whether a rule can name `event`: a notification type, or a prefix of some."""
+    return any(type == event or type.startswith(f"{event}.") for type in NotificationType)
+
+
 class NotificationEvent:
     """Something happened that users need to hear about.
 
@@ -112,9 +132,22 @@ class NotificationEvent:
     `via_app` and `via_mail` double as the channel decision: returning `None` means
     this recipient gets nothing on that channel. The base class opts out of both, so
     a subclass only declares the channels it actually uses.
+
+    Every event goes through the user's rules, except an action to take (an invitation,
+    a source to validate): leaving it unanswered would be a bug, not a setting. What the
+    settings screen offers to turn off is for the front to decide.
     """
 
     type: NotificationType
+
+    @property
+    def requires_action(self) -> bool:
+        return self.type in TYPES_REQUIRING_ACTION
+
+    @property
+    def subject(self):
+        """What the event is about, as the mail footer names it."""
+        return None
 
     def recipients(self) -> list[Recipient]:
         raise NotImplementedError
@@ -228,18 +261,39 @@ class NotificationEvent:
         ]
 
     def _subscribers(self) -> list[Recipient]:
-        return []
+        if self.requires_action:
+            return []
+        return [
+            Recipient(user, frozenset({reason}))
+            for user, reason in subscribers_for(event_chain(self.type), self.scopes())
+        ]
 
     def _mail(self, recipient: Recipient) -> MailMessage | None:
-        return self.via_mail(recipient.user)
+        """Something one can turn off says why it was sent, and where to turn it off."""
+        mail = self.via_mail(recipient.user)
+        if mail is not None and not self.requires_action:
+            mail.footer = settings_footer(recipient.reasons, self.subject)
+        return mail
 
     def _channels(
         self, recipients: list[Recipient]
     ) -> dict[ObjectId | str, set[NotificationChannel]]:
-        """The channels each recipient is reached through, by recipient key."""
-        # Either an action to take or the answer to a request this recipient made:
-        # neither is something to opt out of.
-        return {recipient.key: set(NotificationChannel) for recipient in recipients}
+        """The channels each recipient is reached through, by recipient key: what their
+        rules leave of this event (see `resolve`)."""
+        if self.requires_action:
+            return {recipient.key: set(NotificationChannel) for recipient in recipients}
+
+        events, scopes = event_chain(self.type), self.scopes()
+        users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
+        rules = rules_for(users, events, scopes)
+        # An address with no account behind it has no rules: an invitation is the only
+        # thing reaching it, and an invitation is an action to take.
+        return {
+            recipient.key: resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
+            if isinstance(recipient.user, User)
+            else set()
+            for recipient in recipients
+        }
 
     def already_pending(self, recipient: User, **details) -> bool:
         """Whether the recipient still has an unhandled notification about the same
@@ -257,89 +311,17 @@ class NotificationEvent:
         )
 
 
-class ConfigurableEvent(NotificationEvent):
-    """An event users decide about, unlike an action to take or an answer to their own
-    request.
-
-    A rule names one of the classes of the event by its name, from the event itself up
-    to the family it belongs to; a rule naming none covers every configurable event.
-    Renaming one of these classes therefore needs a migration of
-    `NotificationSetting.event`.
-    """
-
-    @classmethod
-    def decision_events(cls) -> list[str]:
-        """The class names a rule about this event can name, from the narrowest to the
-        broadest."""
-        return [
-            klass.__name__
-            for klass in cls.__mro__
-            if issubclass(klass, ConfigurableEvent) and klass is not ConfigurableEvent
-        ]
-
-    @property
-    def subject(self):
-        """What the event is about, as the mail footer names it."""
-        raise NotImplementedError
-
-    def _mail(self, recipient):
-        """Something one can turn off says why it was sent, and where to turn it off."""
-        mail = self.via_mail(recipient.user)
-        if mail is not None:
-            mail.footer = settings_footer(recipient.reasons, self.subject)
-        return mail
-
-    def _subscribers(self):
-        return [
-            Recipient(user, frozenset({reason}))
-            for user, reason in subscribers_for(self.decision_events(), self.scopes())
-        ]
-
-    def _channels(self, recipients):
-        """What the rules of each recipient leave of this event: see `resolve`."""
-        events, scopes = self.decision_events(), self.scopes()
-        users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
-        rules = rules_for(users, events, scopes)
-        return {
-            recipient.key: resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
-            if isinstance(recipient.user, User)
-            else set()
-            for recipient in recipients
-        }
-
-
-def concrete_events() -> list[type[NotificationEvent]]:
-    """Every event that can be dispatched: the subclasses declaring a `type`, at any
-    depth, leaving out the base classes a family shares."""
-
-    def walk(base):
-        for subclass in base.__subclasses__():
-            yield subclass
-            yield from walk(subclass)
-
-    return [event for event in walk(NotificationEvent) if hasattr(event, "type")]
-
-
-def configurable_events() -> list[type[ConfigurableEvent]]:
-    return [event for event in concrete_events() if issubclass(event, ConfigurableEvent)]
-
-
-def settable_events() -> set[str]:
-    """Everything a rule can name: each configurable event and the families they
-    belong to."""
-    return {name for event in configurable_events() for name in event.decision_events()}
-
-
-def configurable_event_named(name: str) -> type[ConfigurableEvent]:
-    """A configurable event or a family of them, from the name a rule stores."""
-
-    def walk(base):
-        for subclass in base.__subclasses__():
-            yield subclass
-            yield from walk(subclass)
-
-    return next(event for event in walk(ConfigurableEvent) if event.__name__ == name)
-
-
 def event_for_type(notification_type: NotificationType) -> type[NotificationEvent]:
-    return next(event for event in concrete_events() if event.type == notification_type)
+    """The event class behind a stored notification, which the digest asks how to
+    summarize it."""
+
+    def walk(base):
+        for subclass in base.__subclasses__():
+            yield subclass
+            yield from walk(subclass)
+
+    return next(
+        event
+        for event in walk(NotificationEvent)
+        if getattr(event, "type", None) == notification_type
+    )

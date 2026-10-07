@@ -86,6 +86,8 @@ class NotificationReason(StrEnum):
     EXPLICIT_SUBSCRIBER = "explicit_subscriber"
     # Edited this very subject: followed without asking, for having worked on it.
     CONTRIBUTOR = "contributor"
+    # Made the request this notification answers (a membership, a harvest source).
+    REQUESTER = "requester"
 
 
 class FollowOrigin(StrEnum):
