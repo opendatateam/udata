@@ -112,19 +112,45 @@ class NotificationSettingsAPI(API):
 resolved_fields = api.model(
     "NotificationResolved",
     {
+        "scope": fields.Raw(
+            attribute=lambda resolution: (
+                {"class": resolution.scope.__class__.__name__, "id": str(resolution.scope.pk)}
+                if resolution.scope
+                else None
+            ),
+            description="The subject asked about, as `{class, id}`",
+        ),
+        "event": fields.String(allow_null=True, description="The event asked about"),
+        "reason": fields.String(allow_null=True, description="The reason asked about"),
         "channels": fields.List(fields.String, description="Where the user is reached"),
         "reasons": fields.List(fields.String, description="Why the user is concerned"),
     },
 )
 
 resolved_parser = api.parser()
-resolved_parser.add_argument("scope", type=str, location="args", help="A subject, as `Class:id`")
 resolved_parser.add_argument(
-    "event", type=str, location="args", help="A notification type or a prefix of some"
+    "scope", type=str, action="append", location="args", help="A subject, as `Class:id`"
 )
 resolved_parser.add_argument(
-    "reason", type=str, location="args", help="Why the user would be concerned"
+    "event",
+    type=str,
+    action="append",
+    location="args",
+    help="A notification type or a prefix of some",
 )
+resolved_parser.add_argument(
+    "reason", type=str, action="append", location="args", help="Why the user would be concerned"
+)
+
+
+def parse_subject(value: str):
+    cls, _, id = value.partition(":")
+    if cls not in NOTIFICATION_SCOPES:
+        api.abort(400, "Unknown subject")
+    subject = db.resolve_model(cls).objects(id=id).first()
+    if subject is None:
+        api.abort(400, "Unknown subject")
+    return subject
 
 
 @notifs.route("/resolved/", endpoint="notification_resolved")
@@ -132,32 +158,27 @@ class NotificationResolvedAPI(API):
     @api.secure
     @api.doc("resolve_notifications")
     @api.expect(resolved_parser)
-    @api.marshal_with(resolved_fields)
+    @api.marshal_list_with(resolved_fields)
     @api.response(400, "Unknown subject, event or reason")
     def get(self):
-        """Whether, why and where the current user hears about a notification, once
+        """Whether, why and where the current user hears about notifications, once
         their rules and the defaults are applied.
 
         Every key is optional, like those of a rule; without a reason, the reasons are
-        the ones the user has for the subject."""
+        the ones the user has for the subject. Each key can be repeated: one answer comes
+        back for every combination, so that a page asks once for all of its subjects."""
         args = resolved_parser.parse_args()
-        if args["event"] and not is_event_name(args["event"]):
+        events = args["event"] or [None]
+        reasons = args["reason"] or [None]
+        if any(event is not None and not is_event_name(event) for event in events):
             api.abort(400, "Unknown event")
-        if args["reason"] and args["reason"] not in set(NotificationReason):
+        if any(reason is not None and reason not in set(NotificationReason) for reason in reasons):
             api.abort(400, "Unknown reason")
-        subject = None
-        if args["scope"]:
-            cls, _, id = args["scope"].partition(":")
-            if cls not in NOTIFICATION_SCOPES:
-                api.abort(400, "Unknown subject")
-            subject = db.resolve_model(cls).objects(id=id).first()
-            if subject is None:
-                api.abort(400, "Unknown subject")
         return resolved_for(
             current_user._get_current_object(),
-            subject,
-            args["event"],
-            NotificationReason(args["reason"]) if args["reason"] else None,
+            [parse_subject(scope) for scope in args["scope"]] if args["scope"] else [None],
+            events,
+            [NotificationReason(reason) if reason else None for reason in reasons],
         )
 
 

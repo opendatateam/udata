@@ -265,18 +265,33 @@ def subscribers_for(
     ]
 
 
+@dataclass(frozen=True)
+class Resolution:
+    """What `user` gets for one combination of keys, echoed so that the caller can match
+    each answer to its question."""
+
+    scope: Document | None
+    event: str | None
+    reason: NotificationReason | None
+    channels: list[NotificationChannel]
+    reasons: list[NotificationReason]
+
+
 def resolved_for(
     user: User,
-    subject: Document | None = None,
-    event: str | None = None,
-    reason: NotificationReason | None = None,
-) -> dict:
-    """Whether, why and where `user` hears about a notification, the way the dispatch
+    subjects: Sequence[Document | None] = (None,),
+    events: Sequence[str | None] = (None,),
+    reasons: Sequence[NotificationReason | None] = (None,),
+) -> list[Resolution]:
+    """Whether, why and where `user` hears about notifications, the way the dispatch
     would decide it, so that the front never resolves rules by itself.
 
     Every key is optional, like those of a rule: "a new discussion on this dataset",
     "anything reaching me as an editor", "a new reuse anywhere I administer". Without a
-    reason, the reasons are the ones `user` has for `subject`.
+    reason, the reasons are the ones `user` has for the subject.
+
+    One answer per combination of the given keys, so that a page asks once for all of
+    its threads; the rules are loaded once for all of them.
     """
     # `events` builds on this module, hence the import at call time.
     from udata.core.discussions.models import Discussion
@@ -286,34 +301,48 @@ def resolved_for(
         subject_scopes,
     )
 
-    events = event_chain(event)
-    scopes = subject_scopes(subject) if subject else []
-    if reason is not None:
-        reasons = {reason}
-    elif subject is not None:
-        recipients = (
-            subject.owner_recipients()
-            if isinstance(subject, Discussion)
-            else responsible_recipients(subject)
-        )
-        reasons = {
-            reason
-            for recipient in recipients
-            if recipient.key == user.id
-            for reason in recipient.reasons
-        }
-        reasons |= {
-            REASON_BY_ORIGIN[setting.origin]
-            for setting in follows(events, scopes, user=user).only("origin")
-        }
-    else:
-        reasons = set()
+    chains = {event: event_chain(event) for event in events}
+    scopes_of = [(subject, subject_scopes(subject) if subject else []) for subject in subjects]
+    rules = rules_for(
+        [user],
+        list({name for chain in chains.values() for name in chain}),
+        list({scope.pk: scope for _, scopes in scopes_of for scope in scopes}.values()),
+    ).get(user.id, [])
 
-    rules = rules_for([user], events, scopes).get(user.id, [])
-    return {
-        "channels": sorted(resolve(rules, events, scopes, reasons)),
-        "reasons": sorted(reasons),
-    }
+    resolutions = []
+    for subject, scopes in scopes_of:
+        responsible: set[NotificationReason] = set()
+        if subject is not None:
+            recipients = (
+                subject.owner_recipients()
+                if isinstance(subject, Discussion)
+                else responsible_recipients(subject)
+            )
+            responsible = {
+                reason
+                for recipient in recipients
+                if recipient.key == user.id
+                for reason in recipient.reasons
+            }
+        for event, chain in chains.items():
+            held = responsible
+            if subject is not None:
+                held = responsible | {
+                    REASON_BY_ORIGIN[setting.origin]
+                    for setting in follows(chain, scopes, user=user).only("origin")
+                }
+            for reason in reasons:
+                concerned = {reason} if reason is not None else held
+                resolutions.append(
+                    Resolution(
+                        scope=subject,
+                        event=event,
+                        reason=reason,
+                        channels=sorted(resolve(rules, chain, scopes, concerned)),
+                        reasons=sorted(concerned),
+                    )
+                )
+    return resolutions
 
 
 def visible_subject(scope):
