@@ -1131,6 +1131,20 @@ class NotificationSettingsAPITest(APITestCase):
 
         assert NotificationSetting.objects(user=user).count() == 2
 
+    def test_a_rule_about_everywhere_is_listed_without_a_scope(self):
+        """"Turn everything off" is read back by the settings screen as two rules with
+        no scope at all."""
+        user = UserFactory()
+        turn_everything_off(user)
+        self.login(user)
+
+        listed = self.get("/api/1/notifications/settings/").json
+
+        assert sorted((rule["scope"], rule["channel"]) for rule in listed) == [
+            (None, APP),
+            (None, MAIL),
+        ]
+
     def test_nobody_sees_nor_withdraws_the_rules_of_somebody_else(self):
         dataset = DatasetFactory()
         theirs = ignore(UserFactory(), dataset)

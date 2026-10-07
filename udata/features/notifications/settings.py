@@ -57,6 +57,7 @@ class NotificationSetting(UDataDocument):
     scope = field(
         GenericReferenceField(choices=NOTIFICATION_SCOPES),
         nested_fields=api.model_reference,
+        allow_null=True,
         description="The subject the rule is about, null for everywhere",
     )
     event = field(
