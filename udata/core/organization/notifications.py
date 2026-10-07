@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
 
@@ -13,23 +15,13 @@ from udata.core.organization.constants import (
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationReason, NotificationType
-from udata.features.notifications.events import NotificationEvent, Recipient
+from udata.features.notifications.events import (
+    NotificationEvent,
+    Recipient,
+    responsible_recipients,
+)
+from udata.mail import MailMessage
 
-BADGE_NOTIFICATION_TYPES = {
-    CERTIFIED: NotificationType.ORGANIZATION_BADGE_CERTIFIED,
-    PUBLIC_SERVICE: NotificationType.ORGANIZATION_BADGE_PUBLIC_SERVICE,
-    COMPANY: NotificationType.ORGANIZATION_BADGE_COMPANY,
-    ASSOCIATION: NotificationType.ORGANIZATION_BADGE_ASSOCIATION,
-    LOCAL_AUTHORITY: NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY,
-}
-
-BADGE_MAILS = {
-    CERTIFIED: mails.badge_added_certified,
-    PUBLIC_SERVICE: mails.badge_added_public_service,
-    COMPANY: mails.badge_added_company,
-    ASSOCIATION: mails.badge_added_association,
-    LOCAL_AUTHORITY: mails.badge_added_local_authority,
-}
 
 
 @generate_fields()
@@ -90,21 +82,22 @@ class MembershipRefusedNotificationDetails(EmbeddedDocument):
 class BadgeAdded(NotificationEvent):
     """The whole organization hears about a badge it was awarded.
 
-    One class for the five badge types: they differ only by the type they carry and
-    the email they send, both looked up from the badge kind.
+    One subclass per badge, declaring its type on the class like every other event, so
+    that the type alone finds the event (see `event_for_type`). They differ only by that
+    type and the email they send.
     """
 
-    def __init__(self, organization: Organization, kind: str):
+    badge_mail: Callable[[Organization], MailMessage]
+
+    def __init__(self, organization: Organization):
         self.organization = organization
-        self.kind = kind
-        self.type = BADGE_NOTIFICATION_TYPES[kind]
 
     @property
     def subject(self):
         return self.organization
 
     def recipients(self):
-        return [Recipient.from_member(member) for member in self.organization.members]
+        return responsible_recipients(self.organization)
 
     def scopes(self):
         return [self.organization]
@@ -113,7 +106,41 @@ class BadgeAdded(NotificationEvent):
         return NewBadgeNotificationDetails(organization=self.organization)
 
     def via_mail(self, recipient):
-        return BADGE_MAILS[self.kind](self.organization)
+        return self.badge_mail(self.organization)
+
+
+class CertifiedBadgeAdded(BadgeAdded):
+    type = NotificationType.ORGANIZATION_BADGE_CERTIFIED
+    badge_mail = staticmethod(mails.badge_added_certified)
+
+
+class PublicServiceBadgeAdded(BadgeAdded):
+    type = NotificationType.ORGANIZATION_BADGE_PUBLIC_SERVICE
+    badge_mail = staticmethod(mails.badge_added_public_service)
+
+
+class CompanyBadgeAdded(BadgeAdded):
+    type = NotificationType.ORGANIZATION_BADGE_COMPANY
+    badge_mail = staticmethod(mails.badge_added_company)
+
+
+class AssociationBadgeAdded(BadgeAdded):
+    type = NotificationType.ORGANIZATION_BADGE_ASSOCIATION
+    badge_mail = staticmethod(mails.badge_added_association)
+
+
+class LocalAuthorityBadgeAdded(BadgeAdded):
+    type = NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY
+    badge_mail = staticmethod(mails.badge_added_local_authority)
+
+
+BADGE_EVENTS: dict[str, type[BadgeAdded]] = {
+    CERTIFIED: CertifiedBadgeAdded,
+    PUBLIC_SERVICE: PublicServiceBadgeAdded,
+    COMPANY: CompanyBadgeAdded,
+    ASSOCIATION: AssociationBadgeAdded,
+    LOCAL_AUTHORITY: LocalAuthorityBadgeAdded,
+}
 
 
 class MembershipRequested(NotificationEvent):

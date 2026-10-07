@@ -68,7 +68,7 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
 
 def responsible_recipients(subject) -> list[Recipient]:
     """Who is answerable for a subject, and on what ground: its owner, or the members of
-    its organization.
+    its organization, or of the organization it is.
 
     Partial editors are scoped to the objects handed to them: belonging to an
     organization whose datasets one cannot even edit is not a reason to hear about
@@ -78,6 +78,12 @@ def responsible_recipients(subject) -> list[Recipient]:
     # Not at the top: `Assignment` resolves the models it can point to when it is
     # declared, and `Reuse` is not registered yet when this module loads.
     from udata.core.organization.assignment import Assignment
+    from udata.core.organization.models import Organization
+
+    if isinstance(subject, Organization):
+        # The organization itself concerns all of its members, whatever was assigned to
+        # them.
+        return [Recipient.from_member(member) for member in subject.members]
 
     organization = getattr(subject, "organization", None)
     if organization:
