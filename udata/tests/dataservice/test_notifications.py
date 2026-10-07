@@ -46,6 +46,21 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
 
         assert Notification.objects(user=owner).count() == 1
 
+    def test_publishing_a_dataservice_again_does_not_announce_it_again(self):
+        """Hidden for a fix and published back, even once the first announcement was
+        read: it is the same dataservice."""
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(datasets=[dataset])
+        Notification.objects(user=owner).mark_handled()
+
+        dataservice.private = True
+        dataservice.save()
+        dataservice.private = False
+        dataservice.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
     def test_dataservice_creation_notifies_dataset_owner_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)

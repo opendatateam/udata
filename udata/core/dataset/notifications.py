@@ -28,6 +28,7 @@ class DatasetReusedEvent(NotificationEvent):
 
 
 def became_public(document, changed_fields, previous) -> bool:
-    """Whether this update is the one publishing a reuse or a dataservice, which is when
-    it gets announced if it was created private."""
+    """Whether this update publishes a reuse or a dataservice, which is when it gets
+    announced if it was created private. Publishing it again after hiding it announces
+    nothing new: the events skip whoever already heard about it."""
     return "private" in changed_fields and bool(previous.get("private")) and not document.private

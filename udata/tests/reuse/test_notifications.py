@@ -44,6 +44,21 @@ class ReuseNotificationsTest(PytestOnlyDBTestCase):
 
         assert Notification.objects(user=owner).count() == 1
 
+    def test_publishing_a_reuse_again_does_not_announce_it_again(self):
+        """Hidden for a fix and published back, even once the first announcement was
+        read: it is the same reuse."""
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(datasets=[dataset])
+        Notification.objects(user=owner).mark_handled()
+
+        reuse.private = True
+        reuse.save()
+        reuse.private = False
+        reuse.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
     def test_reuse_creation_notifies_dataset_owner_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)

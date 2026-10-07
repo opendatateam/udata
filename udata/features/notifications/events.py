@@ -316,15 +316,23 @@ class NotificationEvent:
         """Whether the recipient still has an unhandled notification about the same
         thing. Used by the events that ask for an action: until it is taken, a second
         notification adds nothing."""
+        return (
+            self._notifications_about(recipient, details).filter(handled_at=None).first()
+            is not None
+        )
+
+    def already_notified(self, recipient: User, **details) -> bool:
+        """Whether the recipient was ever notified about the same thing, read or not.
+        Used by the announcements that must happen once, however often their trigger
+        comes back."""
+        return self._notifications_about(recipient, details).first() is not None
+
+    @staticmethod
+    def _notifications_about(recipient: User, details: dict):
         from udata.features.notifications.models import Notification
 
-        return (
-            Notification.objects(
-                user=recipient,
-                handled_at=None,
-                **{f"details__{name}": value for name, value in details.items()},
-            ).first()
-            is not None
+        return Notification.objects(
+            user=recipient, **{f"details__{name}": value for name, value in details.items()}
         )
 
 

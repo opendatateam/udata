@@ -46,6 +46,8 @@ class ReuseCreated(DatasetReusedEvent):
         self.dataset = dataset
 
     def via_app(self, recipient):
+        if self.already_notified(recipient, reuse=self.reuse, dataset=self.dataset):
+            return None
         return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)
 
 

@@ -46,6 +46,8 @@ class DataserviceCreated(DatasetReusedEvent):
         self.dataset = dataset
 
     def via_app(self, recipient):
+        if self.already_notified(recipient, dataservice=self.dataservice, dataset=self.dataset):
+            return None
         return DataserviceCreatedNotificationDetails(
             dataservice=self.dataservice, dataset=self.dataset
         )
