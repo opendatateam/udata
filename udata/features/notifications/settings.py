@@ -34,16 +34,16 @@ class NotificationSetting(UDataDocument):
     """One rule a user set about their notifications.
 
     Every dimension is optional, and leaving one out means "whatever it is": no scope
-    is everywhere, no event is every notification, no reason is whatever concerns the
-    user, no channel is whether they are concerned at all. The settings screen only
-    offers some combinations; the model holds them all, so that a new screen never
-    needs a new model.
+    is everywhere, no event is every notification, no channel is whether they are
+    concerned at all.
 
     - follow a thread: scope = the thread, event = `discussion`, yes
     - ignore a dataset: scope = the dataset, no
-    - "as an editor, never": reason = editor, channel = app, no; and the same by mail
-    - "as an administrator, in the app only": reason = administrator, channel = mail, no
+    - "this organization, in the app only": scope = the organization, channel = mail, no
     - "no mail for the answers": event = `discussion.comment`, channel = mail, no
+
+    Why the user is concerned (their role, a thread they took part in) is not something
+    they set: only the defaults tell reasons apart.
 
     Actions to take (an invitation, a source to validate) are the only notifications
     no rule applies to.
@@ -66,16 +66,12 @@ class NotificationSetting(UDataDocument):
         description="A notification type, or a dotted prefix of some (`discussion` covers "
         "`discussion.*`), null for every notification",
     )
-    reason = field(
-        EnumField(NotificationReason),
-        description="Why the user is concerned, null for whatever the reason",
-    )
     channel = field(
         EnumField(NotificationChannel),
         description="Where the user is reached, null to decide whether they are concerned at all",
     )
     enabled = field(BooleanField(required=True))
-    # Only meaningful for a follow (a subject, no reason, no channel, yes): what made the
+    # Only meaningful for a follow (a subject, no channel, yes): what made the
     # user follow, hence why they hear about it. Back to `FOLLOWED` as soon as the user
     # sets the rule themselves.
     origin = field(
@@ -86,7 +82,7 @@ class NotificationSetting(UDataDocument):
 
     meta = {
         "indexes": [
-            {"fields": ["user", "scope", "event", "reason", "channel"], "unique": True},
+            {"fields": ["user", "scope", "event", "channel"], "unique": True},
             # `subscribers_for` looks across every user, once per configurable event.
             ["scope", "event", "enabled"],
         ],
@@ -155,7 +151,6 @@ def rules_for(
             Rule(
                 scope=scope["_ref"].id if scope else None,
                 event=row.get("event"),
-                reason=NotificationReason(row["reason"]) if row.get("reason") else None,
                 channel=NotificationChannel(row["channel"]) if row.get("channel") else None,
                 enabled=row["enabled"],
             )
@@ -182,8 +177,7 @@ def resolve(
     Among the rules answering a question, the most specific wins: the subject first
     (a thread, then its dataset, then the organization, then everywhere), then the
     event (a single event, then its family, then every notification), then the reason
-    (this reason, then whatever the reason). So a choice on a subject beats a choice on
-    a reason, and a choice on an event beats a choice on a reason.
+    (this reason, then whatever the reason), which only the defaults name.
 
     The user's own rules are read first, and `DEFAULT_RULES` only where they say
     nothing: otherwise a precise default would beat a broad choice of the user.
@@ -192,7 +186,7 @@ def resolve(
     organizations does not silence the thread one took part in.
 
     Taking part in a thread is following it: whether one hears about it as a participant
-    is only decided by a rule on the thread itself or on that reason, never by one on its
+    is only decided by a rule on the thread itself or everywhere, never by one on its
     dataset or organization. How one hears about it still follows them.
     """
     scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
@@ -248,13 +242,12 @@ REASON_BY_ORIGIN = {
 
 
 def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
-    """The follows of these subjects for this event: a subject, no reason, no channel,
-    yes. A rule without a subject is left out on purpose: "everywhere" means
-    "everywhere I am already concerned", not "subscribe me to the whole site"."""
+    """The follows of these subjects for this event: a subject, no channel, yes. A rule
+    without a subject is left out on purpose: "everywhere" means "everywhere I am
+    already concerned", not "subscribe me to the whole site"."""
     return NotificationSetting.objects(
         Q(event=None) | Q(event__in=events),
         scope__in=scopes,
-        reason=None,
         channel=None,
         enabled=True,
         **filters,
@@ -285,7 +278,6 @@ class Resolution:
 
     scope: Document | None
     event: str | None
-    reason: NotificationReason | None
     channels: list[NotificationChannel]
     reasons: list[NotificationReason]
 
@@ -294,14 +286,12 @@ def resolved_for(
     user: User,
     subjects: Sequence[Document | None] = (None,),
     events: Sequence[str | None] = (None,),
-    reasons: Sequence[NotificationReason | None] = (None,),
 ) -> list[Resolution]:
     """Whether, why and where `user` hears about notifications, the way the dispatch
     would decide it, so that the front never resolves rules by itself.
 
     Every key is optional, like those of a rule: "a new discussion on this dataset",
-    "anything reaching me as an editor", "a new reuse anywhere I administer". Without a
-    reason, the reasons are the ones `user` has for the subject.
+    "a new reuse anywhere". The reasons are the ones `user` has for the subject.
 
     One answer per combination of the given keys, so that a page asks once for all of
     its threads; the rules are loaded once for all of them.
@@ -344,19 +334,16 @@ def resolved_for(
                     REASON_BY_ORIGIN[setting.origin]
                     for setting in follows(chain, scopes, user=user).only("origin")
                 }
-            for reason in reasons:
-                concerned = {reason} if reason is not None else held
-                resolutions.append(
-                    Resolution(
-                        scope=subject,
-                        event=event,
-                        reason=reason,
-                        channels=[]
-                        if user.notifications_paused
-                        else sorted(resolve(rules, chain, scopes, concerned)),
-                        reasons=sorted(concerned),
-                    )
+            resolutions.append(
+                Resolution(
+                    scope=subject,
+                    event=event,
+                    channels=[]
+                    if user.notifications_paused
+                    else sorted(resolve(rules, chain, scopes, held)),
+                    reasons=sorted(held),
                 )
+            )
     return resolutions
 
 

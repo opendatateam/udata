@@ -10,7 +10,6 @@ from udata.core.organization.models import Organization
 from udata.features.notifications.constants import (
     FollowOrigin,
     NotificationChannel,
-    NotificationReason,
 )
 from udata.features.notifications.events import is_event_name
 from udata.features.notifications.permissions import EditNotificationPermission
@@ -92,14 +91,13 @@ class NotificationSettingsAPI(API):
     def put(self):
         """Set a rule about some notifications, or remove it with `enabled: null`.
 
-        A rule is identified by its subject, event, reason and channel, any of them
-        possibly null: setting it again replaces the previous answer."""
+        A rule is identified by its subject, event and channel, any of them possibly
+        null: setting it again replaces the previous answer."""
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
         key = {
             "user": rule.user,
             "scope": rule.scope,
             "event": rule.event,
-            "reason": rule.reason,
             "channel": rule.channel,
         }
         if rule.enabled is None:
@@ -126,7 +124,6 @@ resolved_fields = api.model(
             description="The subject asked about, as `{class, id}`",
         ),
         "event": fields.String(allow_null=True, description="The event asked about"),
-        "reason": fields.String(allow_null=True, description="The reason asked about"),
         "channels": fields.List(fields.String, description="Where the user is reached"),
         "reasons": fields.List(fields.String, description="Why the user is concerned"),
     },
@@ -142,9 +139,6 @@ resolved_parser.add_argument(
     action="append",
     location="args",
     help="A notification type or a prefix of some",
-)
-resolved_parser.add_argument(
-    "reason", type=str, action="append", location="args", help="Why the user would be concerned"
 )
 
 
@@ -164,26 +158,22 @@ class NotificationResolvedAPI(API):
     @api.doc("resolve_notifications")
     @api.expect(resolved_parser)
     @api.marshal_list_with(resolved_fields)
-    @api.response(400, "Unknown subject, event or reason")
+    @api.response(400, "Unknown subject or event")
     def get(self):
         """Whether, why and where the current user hears about notifications, once
         their rules and the defaults are applied.
 
-        Every key is optional, like those of a rule; without a reason, the reasons are
-        the ones the user has for the subject. Each key can be repeated: one answer comes
-        back for every combination, so that a page asks once for all of its subjects."""
+        Every key is optional, like those of a rule. Each key can be repeated: one answer
+        comes back for every combination, so that a page asks once for all of its
+        subjects."""
         args = resolved_parser.parse_args()
         events = args["event"] or [None]
-        reasons = args["reason"] or [None]
         if any(event is not None and not is_event_name(event) for event in events):
             api.abort(400, "Unknown event")
-        if any(reason is not None and reason not in set(NotificationReason) for reason in reasons):
-            api.abort(400, "Unknown reason")
         return resolved_for(
             current_user._get_current_object(),
             [parse_subject(scope) for scope in args["scope"]] if args["scope"] else [None],
             events,
-            [NotificationReason(reason) if reason else None for reason in reasons],
         )
 
 
