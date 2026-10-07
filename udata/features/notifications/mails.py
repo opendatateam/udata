@@ -74,9 +74,16 @@ def reason_sentence(reason: NotificationReason, subject) -> LazyString:
                 "You receive this email because you are an editor of %(organization)s.",
                 organization=organization.name,
             )
+        case NotificationReason.ORGANIZATION_PARTIAL_EDITOR if subject is organization:
+            # Something about the organization as a whole (a badge) reaches all of its
+            # members: nothing of it was assigned to them.
+            return _(
+                "You receive this email because you are a partial editor of %(organization)s.",
+                organization=organization.name,
+            )
         case NotificationReason.ORGANIZATION_PARTIAL_EDITOR:
             return _(
-                "You receive this email because %(subject)s was assigned to you.",
+                "You receive this email because %(subject)s is assigned to you.",
                 subject=str(subject),
             )
         case NotificationReason.DISCUSSION_PARTICIPANT:

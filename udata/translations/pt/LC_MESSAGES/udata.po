@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-07 16:57+0200\n"
+"POT-Creation-Date: 2026-10-07 18:10+0200\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
@@ -47,7 +47,7 @@ msgstr "O seu conjunto de dados foi arquivado"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:1540 udata/tests/test_model.py:439
+#: udata/tests/api/test_datasets_api.py:1548 udata/tests/test_model.py:439
 #: udata/uris.py:64
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
@@ -448,7 +448,7 @@ msgid "A contact point cannot change owner."
 msgstr ""
 
 #: udata/core/contact_point/models.py:114
-#: udata/tests/api/test_datasets_api.py:1450
+#: udata/tests/api/test_datasets_api.py:1458
 #, python-brace-format
 msgid "Contact point {id} does not belong to the owner of this object"
 msgstr ""
@@ -477,12 +477,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:295 udata/core/dataset/models.py:669
+#: udata/core/dataservices/models.py:295 udata/core/dataset/models.py:672
 #: udata/mongo/datetime_fields.py:61
 msgid "Creation date"
 msgstr "Data de criação"
 
-#: udata/core/dataservices/models.py:302 udata/core/dataset/models.py:675
+#: udata/core/dataservices/models.py:302 udata/core/dataset/models.py:678
 #: udata/mongo/datetime_fields.py:68
 msgid "Last modification date"
 msgstr "Data da última modificação"
@@ -872,70 +872,70 @@ msgstr ""
 "Restringir a visibilidade do dataset para si ou para a sua organização "
 "apenas."
 
-#: udata/core/dataset/models.py:100
+#: udata/core/dataset/models.py:101
 msgid "Pivotal data"
 msgstr "Dados centrais"
 
-#: udata/core/dataset/models.py:101
+#: udata/core/dataset/models.py:102
 msgid "Reference data public service"
 msgstr ""
 
-#: udata/core/dataset/models.py:102
+#: udata/core/dataset/models.py:103
 msgid "Inspire"
 msgstr ""
 
-#: udata/core/dataset/models.py:103
+#: udata/core/dataset/models.py:104
 msgid "High value datasets"
 msgstr ""
 
-#: udata/core/dataset/models.py:104
+#: udata/core/dataset/models.py:105
 msgid "Certified statistic series"
 msgstr ""
 
-#: udata/core/dataset/models.py:105
+#: udata/core/dataset/models.py:106
 msgid "Statistical series of general interest"
 msgstr ""
 
-#: udata/core/dataset/models.py:183
+#: udata/core/dataset/models.py:184
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:215 udata/tests/api/test_datasets_api.py:1548
-#: udata/tests/api/test_datasets_api.py:1559
+#: udata/core/dataset/models.py:216 udata/tests/api/test_datasets_api.py:1556
+#: udata/tests/api/test_datasets_api.py:1567
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:234 udata/tests/api/test_datasets_api.py:1571
+#: udata/core/dataset/models.py:235 udata/tests/api/test_datasets_api.py:1579
 #, python-brace-format
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:505 udata/core/dataset/rdf.py:752
+#: udata/core/dataset/models.py:507 udata/core/dataset/rdf.py:752
 #: udata/tests/dataset/test_dataset_rdf.py:889
 #: udata/tests/dataset/test_dataset_rdf.py:902
 msgid "Nameless resource"
 msgstr "Recurso sem nome"
 
-#: udata/core/dataset/models.py:624
+#: udata/core/dataset/models.py:626
 msgid "Future date of update"
 msgstr "Data futura de atualização"
 
-#: udata/core/dataset/models.py:683
+#: udata/core/dataset/models.py:686
 msgid "Last update of the dataset resources"
 msgstr ""
 
-#: udata/core/dataset/models.py:745
+#: udata/core/dataset/models.py:748
 msgid "dataset"
 msgstr "conjunto de dados"
 
-#: udata/core/dataset/models.py:809
+#: udata/core/dataset/models.py:812
 msgid "A dataset with a DOI cannot be deleted, it can only be archived"
 msgstr ""
 
-#: udata/core/dataset/models.py:814
+#: udata/core/dataset/models.py:817
 msgid "A dataset with a DOI cannot be made private"
 msgstr ""
 
@@ -1522,11 +1522,11 @@ msgstr ""
 msgid "View the reuse"
 msgstr ""
 
-#: udata/core/reuse/models.py:60
+#: udata/core/reuse/models.py:61
 msgid "This URL is already registered"
 msgstr "Este URL já está registado"
 
-#: udata/core/reuse/models.py:224
+#: udata/core/reuse/models.py:225
 msgid "reuse"
 msgstr "reutilização"
 
@@ -1729,7 +1729,7 @@ msgid ""
 "can always re-create an account on the %(site)s platform if necessary."
 msgstr ""
 
-#: udata/core/user/models.py:273
+#: udata/core/user/models.py:285
 msgid "account"
 msgstr ""
 
@@ -1779,34 +1779,41 @@ msgstr ""
 msgid "You receive this email because you are an editor of %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:79
+#: udata/features/notifications/mails.py:81
 #, python-format
-msgid "You receive this email because %(subject)s was assigned to you."
+msgid ""
+"You receive this email because you are a partial editor of "
+"%(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:83
+#: udata/features/notifications/mails.py:86
+#, python-format
+msgid "You receive this email because %(subject)s is assigned to you."
+msgstr ""
+
+#: udata/features/notifications/mails.py:90
 msgid "You receive this email because you take part in this discussion."
 msgstr ""
 
-#: udata/features/notifications/mails.py:85
+#: udata/features/notifications/mails.py:92
 #, python-format
 msgid "You receive this email because you follow %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:87
+#: udata/features/notifications/mails.py:94
 #, python-format
 msgid "You receive this email because you edited %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:89
+#: udata/features/notifications/mails.py:96
 msgid "You receive this email because you made this request."
 msgstr ""
 
-#: udata/features/notifications/mails.py:91
+#: udata/features/notifications/mails.py:98
 msgid "You receive this email because you administer the site."
 msgstr ""
 
-#: udata/features/notifications/mails.py:99
+#: udata/features/notifications/mails.py:106
 msgid "Manage or turn off these notifications"
 msgstr ""
 
@@ -2348,4 +2355,7 @@ msgstr ""
 
 #~ msgid "Backend"
 #~ msgstr "Backend"
+
+#~ msgid "You receive this email because %(subject)s was assigned to you."
+#~ msgstr ""
 
