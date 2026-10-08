@@ -235,28 +235,25 @@ def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
 
 @dataclass(frozen=True)
 class Resolution:
-    """What `user` gets for one combination of keys, echoed so that the caller can match
-    each answer to its question."""
+    """What `user` gets for one subject, echoed so that the caller can match each answer
+    to its question."""
 
-    scope: Document | None
+    scope: Document
     event: str | None
     channels: list[NotificationChannel]
     reasons: list[NotificationReason]
 
 
 def resolved_for(
-    user: User,
-    subjects: Sequence[Document | None] = (None,),
-    events: Sequence[str | None] = (None,),
+    user: User, subjects: Sequence[Document], event: str | None = None
 ) -> list[Resolution]:
-    """Whether, why and where `user` hears about notifications, the way the dispatch
-    would decide it, so that the front never resolves rules by itself.
+    """Whether, why and where `user` hears about notifications on each subject (all of
+    them without an event), the way the dispatch would decide it, so that the front
+    never resolves rules by itself.
 
-    Every key is optional, like those of a rule: "a new discussion on this dataset",
-    "a new reuse anywhere". The reasons are the ones `user` has for the subject.
-
-    One answer per combination of the given keys, so that a page asks once for all of
-    its threads; the rules are loaded once for all of them.
+    Several subjects at once, so that a page asks once for all of its threads; the rules
+    are loaded once for all of them. A subject is required: without one, nothing reaches
+    anybody (a rule naming no subject follows nothing).
     """
     # `events` builds on this module, hence the import at call time.
     from udata.core.discussions.models import Discussion
@@ -266,46 +263,40 @@ def resolved_for(
         subject_scopes,
     )
 
-    chains = {event: event_chain(event) for event in events}
-    scopes_of = [(subject, subject_scopes(subject) if subject else []) for subject in subjects]
+    chain = event_chain(event)
+    scopes_of = [(subject, subject_scopes(subject)) for subject in subjects]
     rules = rules_for(
         [user],
-        list({name for chain in chains.values() for name in chain}),
+        chain,
         list({scope.pk: scope for _, scopes in scopes_of for scope in scopes}.values()),
     ).get(user.id, [])
 
     resolutions = []
     for subject, scopes in scopes_of:
-        responsible: set[NotificationReason] = set()
-        if subject is not None:
-            recipients = (
-                subject.owner_recipients()
-                if isinstance(subject, Discussion)
-                else responsible_recipients(subject)
+        recipients = (
+            subject.owner_recipients()
+            if isinstance(subject, Discussion)
+            else responsible_recipients(subject)
+        )
+        held = {
+            reason
+            for recipient in recipients
+            if recipient.key == user.id
+            for reason in recipient.reasons
+        } | {
+            REASON_BY_ORIGIN[setting.origin]
+            for setting in follows(chain, scopes, user=user).only("origin")
+        }
+        resolutions.append(
+            Resolution(
+                scope=subject,
+                event=event,
+                channels=sorted(NotificationChannel)
+                if not user.notifications_paused and resolve(rules, chain, scopes, held)
+                else [],
+                reasons=sorted(held),
             )
-            responsible = {
-                reason
-                for recipient in recipients
-                if recipient.key == user.id
-                for reason in recipient.reasons
-            }
-        for event, chain in chains.items():
-            held = responsible
-            if subject is not None:
-                held = responsible | {
-                    REASON_BY_ORIGIN[setting.origin]
-                    for setting in follows(chain, scopes, user=user).only("origin")
-                }
-            resolutions.append(
-                Resolution(
-                    scope=subject,
-                    event=event,
-                    channels=sorted(NotificationChannel)
-                    if not user.notifications_paused and resolve(rules, chain, scopes, held)
-                    else [],
-                    reasons=sorted(held),
-                )
-            )
+        )
     return resolutions
 
 

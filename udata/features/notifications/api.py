@@ -121,16 +121,23 @@ resolved_fields = api.model(
     },
 )
 
+# A page asks for all of its subjects at once, each one costing a few queries.
+MAX_RESOLVED_SUBJECTS = 100
+
 resolved_parser = api.parser()
 resolved_parser.add_argument(
-    "scope", type=str, action="append", location="args", help="A subject, as `Class:id`"
+    "scope",
+    type=str,
+    action="append",
+    required=True,
+    location="args",
+    help=f"A subject, as `Class:id`, repeated for up to {MAX_RESOLVED_SUBJECTS} subjects",
 )
 resolved_parser.add_argument(
     "event",
     type=str,
-    action="append",
     location="args",
-    help="A notification type or a prefix of some",
+    help="A notification type or a prefix of some, every notification without one",
 )
 
 
@@ -150,22 +157,23 @@ class NotificationResolvedAPI(API):
     @api.doc("resolve_notifications")
     @api.expect(resolved_parser)
     @api.marshal_list_with(resolved_fields)
-    @api.response(400, "Unknown subject or event")
+    @api.response(400, "Unknown subject or event, or too many subjects")
     def get(self):
-        """Whether, why and where the current user hears about notifications, once
-        their rules and the defaults are applied.
+        """Whether, why and where the current user hears about notifications on some
+        subjects, once their rules and the defaults are applied.
 
-        Every key is optional, like those of a rule. Each key can be repeated: one answer
-        comes back for every combination, so that a page asks once for all of its
-        subjects."""
+        One answer per subject, so that a page asks once for all of its subjects. Without
+        an event, it is about every notification on them."""
         args = resolved_parser.parse_args()
-        events = args["event"] or [None]
-        if any(event is not None and not is_event_name(event) for event in events):
+        if args["event"] is not None and not is_event_name(args["event"]):
             api.abort(400, "Unknown event")
+        scopes = list(dict.fromkeys(args["scope"]))
+        if len(scopes) > MAX_RESOLVED_SUBJECTS:
+            api.abort(400, f"At most {MAX_RESOLVED_SUBJECTS} subjects")
         return resolved_for(
             current_user._get_current_object(),
-            [parse_subject(scope) for scope in args["scope"]] if args["scope"] else [None],
-            events,
+            [parse_subject(scope) for scope in scopes],
+            args["event"],
         )
 
 

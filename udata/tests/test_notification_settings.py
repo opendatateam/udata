@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
+from bson import ObjectId
 from flask import url_for
 from mongoengine import DoesNotExist, NotUniqueError, ValidationError
 from mongoengine.connection import get_db
@@ -21,6 +22,7 @@ from udata.core.organization.models import MembershipRequest
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
+from udata.features.notifications.api import MAX_RESOLVED_SUBJECTS
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
     TYPES_REQUIRING_ACTION,
@@ -1302,11 +1304,10 @@ class NotificationSettingsAPITest(APITestCase):
 
 
 class NotificationResolvedAPITest(APITestCase):
-    def resolved(self, scopes=(), events=()):
-        query = [
-            *(("scope", f"{scope.__class__.__name__}:{scope.id}") for scope in scopes),
-            *(("event", event) for event in events),
-        ]
+    def resolved(self, scopes, event=None):
+        query = [("scope", f"{scope.__class__.__name__}:{scope.id}") for scope in scopes]
+        if event is not None:
+            query.append(("event", event))
         return self.get("/api/1/notifications/resolved/", query_string=query)
 
     def test_nothing_reaches_a_user_who_paused_everything(self):
@@ -1314,7 +1315,7 @@ class NotificationResolvedAPITest(APITestCase):
         organization = OrganizationFactory(admins=[admin])
         self.login(admin)
 
-        [answer] = self.resolved(scopes=[organization], events=[DISCUSSIONS]).json
+        [answer] = self.resolved([organization], DISCUSSIONS).json
 
         assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
         assert answer["channels"] == []
@@ -1323,7 +1324,7 @@ class NotificationResolvedAPITest(APITestCase):
         admin = self.login()
         organization = OrganizationFactory(admins=[admin])
 
-        [answer] = self.resolved(scopes=[organization], events=[DISCUSSIONS]).json
+        [answer] = self.resolved([organization], DISCUSSIONS).json
 
         assert answer["scope"] == ref(organization)
         assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
@@ -1333,7 +1334,7 @@ class NotificationResolvedAPITest(APITestCase):
         owner = self.login()
         discussion = DiscussionFactory(subject=DatasetFactory(owner=owner))
 
-        [answer] = self.resolved(scopes=[discussion], events=[DISCUSSIONS]).json
+        [answer] = self.resolved([discussion], DISCUSSIONS).json
 
         assert answer["reasons"] == [NotificationReason.OWNER]
         assert answer["channels"] == [APP, MAIL]
@@ -1344,7 +1345,7 @@ class NotificationResolvedAPITest(APITestCase):
         follow(user, followed)
         decide(user, edited, enabled=True, origin=FollowOrigin.EDITED)
 
-        answers = self.resolved(scopes=[followed, edited], events=[DISCUSSIONS]).json
+        answers = self.resolved([followed, edited], DISCUSSIONS).json
 
         assert [answer["reasons"] for answer in answers] == [
             [NotificationReason.EXPLICIT_SUBSCRIBER],
@@ -1354,7 +1355,7 @@ class NotificationResolvedAPITest(APITestCase):
     def test_nothing_concerns_an_outsider(self):
         self.login()
 
-        [answer] = self.resolved(scopes=[DatasetFactory()], events=[DISCUSSIONS]).json
+        [answer] = self.resolved([DatasetFactory()], DISCUSSIONS).json
 
         assert answer == {
             "scope": answer["scope"],
@@ -1368,43 +1369,67 @@ class NotificationResolvedAPITest(APITestCase):
         discussion = DiscussionFactory(subject=DatasetFactory(owner=owner))
         ignore(owner, discussion, DISCUSSIONS)
 
-        [answer] = self.resolved(scopes=[discussion], events=[DISCUSSIONS]).json
+        [answer] = self.resolved([discussion], DISCUSSIONS).json
 
         assert answer["channels"] == []
 
-    def test_one_answer_per_combination_of_repeated_keys(self):
+    def test_one_answer_per_subject(self):
         """A page asks once for all of its threads."""
         owner = self.login()
         dataset = DatasetFactory(owner=owner)
         threads = [DiscussionFactory(subject=dataset) for _ in range(3)]
         ignore(owner, threads[1])
 
-        answers = self.resolved(
-            scopes=threads, events=[NotificationType.DISCUSSION_NEW, DISCUSSIONS]
-        ).json
+        answers = self.resolved(threads, NotificationType.DISCUSSION_NEW).json
 
         assert [(answer["scope"]["id"], answer["event"]) for answer in answers] == [
-            (str(thread.id), event)
-            for thread in threads
-            for event in (NotificationType.DISCUSSION_NEW, DISCUSSIONS)
+            (str(thread.id), NotificationType.DISCUSSION_NEW) for thread in threads
         ]
-        assert [bool(answer["channels"]) for answer in answers] == [
-            True,
-            True,
-            False,
-            False,
-            True,
-            True,
-        ]
+        assert [bool(answer["channels"]) for answer in answers] == [True, False, True]
+
+    def test_a_subject_asked_twice_is_answered_once(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+
+        answers = self.resolved([dataset, dataset]).json
+
+        assert [answer["scope"] for answer in answers] == [ref(dataset)]
+
+    def test_without_an_event_it_is_about_every_notification(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+
+        [answer] = self.resolved([dataset]).json
+
+        assert answer["event"] is None
+        assert answer["channels"] == [APP, MAIL]
 
     def test_unknown_keys_are_refused(self):
         self.login()
+        dataset = DatasetFactory()
 
-        self.assert400(self.get("/api/1/notifications/resolved/?event=Unknown"))
+        self.assert400(self.resolved([dataset], "Unknown"))
         self.assert400(self.get("/api/1/notifications/resolved/?scope=User:anything"))
         self.assert400(
             self.get("/api/1/notifications/resolved/?scope=Dataset:000000000000000000000000")
         )
+
+    def test_a_subject_is_required(self):
+        """Without one, nothing reaches anybody: the answer would always be empty."""
+        self.login()
+
+        self.assert400(self.get("/api/1/notifications/resolved/?event=discussion"))
+
+    def test_the_number_of_subjects_is_capped(self):
+        self.login()
+        ids = [f"Dataset:{ObjectId()}" for _ in range(MAX_RESOLVED_SUBJECTS + 1)]
+
+        response = self.get(
+            "/api/1/notifications/resolved/", query_string=[("scope", id) for id in ids]
+        )
+
+        self.assert400(response)
+        assert response.json["message"] == f"At most {MAX_RESOLVED_SUBJECTS} subjects"
 
     def test_resolving_requires_an_account(self):
         self.assert401(self.get("/api/1/notifications/resolved/"))
