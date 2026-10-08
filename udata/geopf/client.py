@@ -9,10 +9,9 @@ import requests
 from flask import current_app
 
 from udata.geopf.metadata import XML_NS
+from udata.geopf.srs import DEFAULT_SRS
 
 log = logging.getLogger(__name__)
-
-DEFAULT_SRS = "EPSG:4326"
 
 POLL_INTERVAL = 10  # seconds between status checks
 
@@ -27,15 +26,36 @@ def _truncate_body(text: str) -> str:
     return text
 
 
-def _check_logs_text(resp: requests.Response) -> str:
-    """Plain text of a check execution's logs, which geopf may return as JSON or text."""
+# A geopf check log line, e.g. `2026-10-08 15:11:37,732INFO||cli||238||message`
+LOG_LINE_RE = re.compile(
+    r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d,\d+(?P<level>[A-Z]+)\|\|[^|]*\|\|\d+\|\|(?P<message>.*)$"
+)
+
+
+def _check_logs_lines(resp: requests.Response) -> list[str]:
+    """Lines of a check execution's logs, which geopf may return as JSON or text."""
     try:
         data = resp.json()
     except ValueError:
-        return resp.text.strip()
+        return resp.text.strip().splitlines()
     if isinstance(data, list):
-        return "\n".join(str(line) for line in data)
-    return str(data)
+        return [line for item in data for line in str(item).splitlines()]
+    return str(data).splitlines()
+
+
+def _error_messages(lines: list[str]) -> list[str]:
+    """Messages of the ERROR log lines (with their continuation lines), the last lines if none."""
+    messages = []
+    in_error = False
+    for line in lines:
+        match = LOG_LINE_RE.match(line)
+        if match:
+            in_error = match["level"] in ("ERROR", "CRITICAL")
+            if in_error:
+                messages.append(match["message"])
+        elif in_error:
+            messages.append(line)
+    return messages or lines[-3:]
 
 
 # Community rights (per GET /users/me's communities_member[].rights) needed to
@@ -165,7 +185,7 @@ class GeopfClient:
             for execution in executions:
                 resp = self.session.get(self._url(f"checks/executions/{execution['_id']}/logs"))
                 self._raise(resp)
-                logs.append(_check_logs_text(resp))
+                logs.extend(_error_messages(_check_logs_lines(resp)))
         except (GeopfError, ValueError, KeyError):
             return ""
         return _truncate_body("\n".join(line for line in logs if line))

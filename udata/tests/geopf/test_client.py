@@ -111,6 +111,22 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
         )
         assert logs == "GeoPackage invalide (nom de table invalide : secteurs-pnc)"
 
+    def test_failed_check_logs_keeps_only_error_lines(self, rmock):
+        rmock.get(
+            f"{TEST_API_URL}/checks/executions/e1/logs",
+            json=[
+                "2026-10-08 15:11:37,732INFO||cli||238||Récupération des fichiers",
+                "2026-10-08 15:11:37,755ERROR||checks_ogr||340||nom de table invalide",
+                "detail ligne suivante",
+                "2026-10-08 15:11:37,760INFO||core||90||Fin",
+            ],
+        )
+        client = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
+        assert (
+            client.failed_check_logs([{"_id": "e1"}])
+            == "nom de table invalide\ndetail ligne suivante"
+        )
+
     def test_failed_check_logs_empty_on_error(self, rmock):
         rmock.get(f"{TEST_API_URL}/checks/executions/e1/logs", status_code=500)
         client = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)

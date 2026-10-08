@@ -678,8 +678,8 @@ class Defaults(object):
     # Base URL of the cartes.gouv.fr dashboard, used to build fiche URLs.
     GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"
     # Resource formats eligible for push. Only gpkg is actually processed today
-    # (see udata/geopf/validation.py), so adding a format here without validation
-    # support for it would just fail at push time.
+    # (see udata/geopf/srs.py), so adding a format here without SRS-detection
+    # support for it would just fail at upload time.
     GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
     # Maximum size (bytes) of a resource file materialized to disk for a push,
     # whether downloaded from a remote URL or copied from local storage.

@@ -21,7 +21,6 @@ from udata.utils import get_by
 
 from .auth import resolve_access_token
 from .client import (
-    DEFAULT_SRS,
     GeopfClient,
     GeopfError,
     GeopfReauthRequired,
@@ -40,7 +39,7 @@ from .models import (
     resource_offering_metadata,
     resource_push_metadata,
 )
-from .validation import validate_and_detect_srs
+from .srs import DEFAULT_SRS, detect_srs
 
 log = logging.getLogger(__name__)
 
@@ -154,11 +153,10 @@ def _run_pipeline(
 
     try:
         with _open_resource_file(resource) as f:
-            srs = validate_and_detect_srs(f, resource.format) or DEFAULT_SRS
-
             file_md5 = md5(f)
             f.seek(0)
 
+            srs = detect_srs(f, resource.format) or DEFAULT_SRS
             log.debug("geopf: using srs=%s dataset=%s resource=%s", srs, dataset_id, resource_id)
 
             upload_id = client.create_upload(
@@ -187,7 +185,7 @@ def _run_pipeline(
         if status != "CLOSED":
             reason = client.failed_check_logs(failed_checks)
             raise GeopfError(
-                f"Upload checks failed with status {status}" + (f": {reason}" if reason else "")
+                f"Upload checks failed with status {status}" + (f":\n{reason}" if reason else "")
             )
 
         client.tag_entity("uploads", upload_id, datasheet_name)

@@ -7,7 +7,7 @@ from flask_storage.errors import OperationNotSupported
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 from udata.core.user.factories import UserFactory
-from udata.geopf.client import DEFAULT_SRS, GeopfError, GeopfTimeoutError
+from udata.geopf.client import GeopfError, GeopfTimeoutError
 from udata.geopf.models import (
     GeopfDatasetMetadata,
     GeopfDatasetPullMetadata,
@@ -19,6 +19,7 @@ from udata.geopf.models import (
     dataset_push_metadata,
     resource_offering_metadata,
 )
+from udata.geopf.srs import DEFAULT_SRS
 from udata.geopf.tasks import (
     _copy_to_tempfile,
     _download_chunks,
@@ -402,10 +403,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.poll_execution.return_value = ("SUCCESS", "sd-1")
         client.upload_metadata.return_value = "meta-1"
 
-        with (
-            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
-        ):
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             _run_pipeline(dataset, resource, "ds-1", client)
 
@@ -437,10 +435,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.side_effect = GeopfTimeoutError("still running")
 
-        with (
-            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
-        ):
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfTimeoutError):
                 _run_pipeline(dataset, resource, "ds-1", client)
@@ -457,15 +452,32 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.side_effect = GeopfError("boom")
 
-        with (
-            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
-        ):
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfError):
                 _run_pipeline(dataset, resource, "ds-1", client)
 
         client.delete_upload.assert_called_once_with("upload-1")
+
+    def test_failed_checks_error_includes_logs_and_cleans_up(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        failed = [{"_id": "e1"}]
+        client = MagicMock(datastore="ds-1")
+        client.create_upload.return_value = "upload-1"
+        client.poll_upload.return_value = ("UNSTABLE", failed)
+        client.failed_check_logs.return_value = "table invalide"
+
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+            mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
+            with pytest.raises(GeopfError, match="UNSTABLE:\ntable invalide"):
+                _run_pipeline(dataset, resource, "ds-1", client)
+
+        client.failed_check_logs.assert_called_once_with(failed)
+        client.delete_upload.assert_called_once_with("upload-1")
+        client.launch_processing.assert_not_called()
 
 
 @TEST_GEOPF_CONF
