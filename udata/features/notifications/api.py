@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from flask import request
-from flask_restx import marshal
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
@@ -56,28 +55,21 @@ class NotificationSettingsAPI(API):
     @api.secure
     @api.doc("set_notification_setting")
     @api.expect(NotificationSetting.__write_fields__)
-    # As listed, subject included: the screen adds the rule to its list as is.
-    @api.response(200, "Rule replaced", NotificationSetting.__read_fields__)
-    @api.response(201, "Rule created", NotificationSetting.__read_fields__)
-    @api.response(204, "Rule removed, the broader rules or the defaults apply again")
+    @api.response(204, "Rule set or removed: the list says what applies now")
     @api.response(400, "Validation error")
     def put(self):
         """Set a rule about some notifications, or remove it with `enabled: null`.
 
         A rule is identified by its subject and event, either of them possibly null:
         setting it again replaces the previous answer. Removing a follow udata made by
-        itself (for editing a subject or answering about it) turns it into a "no", which
-        comes back as a 200: removed, the next edit or answer would make it again."""
+        itself (for editing a subject or answering about it) turns it into a "no":
+        removed, the next edit or answer would make it again."""
         # Left out, it would read as `null` and withdraw the rule.
         if "enabled" not in api.json_payload():
             api.abort(400, errors={"enabled": "Expected true, false or null"})
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
-        setting, created = set_rule(rule.user, rule.scope, rule.event, rule.enabled)
-        if setting is None:
-            return "", 204
-        # Marshalled here rather than by `marshal_with`, which would also marshal the
-        # empty 204 body.
-        return marshal(setting, NotificationSetting.__read_fields__), 201 if created else 200
+        set_rule(rule.user, rule.scope, rule.event, rule.enabled)
+        return "", 204
 
 
 resolved_fields = api.model(

@@ -132,7 +132,7 @@ class PersonaTest(APITestCase):
             "/api/1/notifications/settings/",
             {"scope": ref(hers), "event": DISCUSSIONS, "enabled": True},
         )
-        self.assert201(response)
+        self.assert204(response)
 
         with capture_mails() as mails:
             open_discussion(hers)
@@ -1352,12 +1352,13 @@ class NotificationSettingsAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory()
 
-        self.assert201(self.put_rule(True, dataset))
+        self.assert204(self.put_rule(True, dataset))
+        first = NotificationSetting.objects(user=user).get()
         response = self.put_rule(False, dataset)
 
-        self.assert200(response)
+        self.assert204(response)
         [listed] = self.get("/api/1/notifications/settings/").json["data"]
-        assert listed["id"] == response.json["id"]
+        assert listed["id"] == str(first.id)
         assert listed["scope"] == ref(dataset)
         assert listed["event"] == DISCUSSIONS
         assert "channel" not in listed
@@ -1366,23 +1367,21 @@ class NotificationSettingsAPITest(APITestCase):
         assert listed["subject"]["title"] == dataset.title
         assert NotificationSetting.objects(user=user).count() == 1
 
-    def test_a_rule_is_written_back_as_it_is_listed(self):
-        """The settings screen adds the rule it just wrote to its list as is: an
-        organization belongs to no other one, as on reload."""
+    def test_an_organization_is_listed_as_belonging_to_no_other(self):
         self.login()
         organization = OrganizationFactory()
+        self.assert204(self.put_rule(False, organization, event=None))
 
-        response = self.put_rule(False, organization, event=None)
+        [listed] = self.get("/api/1/notifications/settings/").json["data"]
 
-        self.assert201(response)
-        assert response.json["subject"]["title"] == organization.name
-        assert response.json["subject"]["organization"] is None
+        assert listed["subject"]["title"] == organization.name
+        assert listed["subject"]["organization"] is None
 
     def test_withdrawing_a_rule_brings_the_reasons_back(self):
         admin = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
         self.login(admin)
-        self.assert201(self.put_rule(False, dataset))
+        self.assert204(self.put_rule(False, dataset))
 
         self.assert204(self.put_rule(None, dataset))
         open_discussion(dataset)
@@ -1418,8 +1417,7 @@ class NotificationSettingsAPITest(APITestCase):
 
         response = self.put_rule(None, dataset, event=None)
 
-        self.assert200(response)
-        assert response.json["enabled"] is False
+        self.assert204(response)
         setting = NotificationSetting.objects(user=user).get()
         assert (setting.enabled, setting.origin) == (False, FollowOrigin.FOLLOWED)
 
@@ -1490,7 +1488,7 @@ class NotificationSettingsAPITest(APITestCase):
 
         response = self.put_rule(True, dataset, event=None)
 
-        self.assert200(response)
+        self.assert204(response)
         assert NotificationSetting.objects(user=user).get().origin == FollowOrigin.FOLLOWED
 
     def test_a_rule_goes_with_its_subject(self):

@@ -320,11 +320,8 @@ def follows(events: Sequence[str], scopes: Sequence[Document]):
     )
 
 
-def set_rule(
-    user: User, scope: Document | None, event: str | None, enabled: bool | None
-) -> tuple[NotificationSetting | None, bool]:
-    """Set a rule as the user decided it, or withdraw it with `None`, and return it with
-    whether it was created.
+def set_rule(user: User, scope: Document | None, event: str | None, enabled: bool | None) -> None:
+    """Set a rule as the user decided it, or withdraw it with `None`.
 
     A follow udata made by itself, for editing the subject or taking part in its
     discussions, is turned into a "no" rather than withdrawn: withdrawn, the next edit
@@ -333,12 +330,12 @@ def set_rule(
     if enabled is None:
         existing = NotificationSetting.objects(**key).first()
         if existing is None:
-            return None, False
+            return
         if not existing.enabled or existing.origin == FollowOrigin.FOLLOWED:
             existing.delete()
-            return None, False
+            return
         enabled = False
-    return NotificationSetting.objects.get_or_create(
+    NotificationSetting.objects.get_or_create(
         **key, updates={"enabled": enabled, "origin": FollowOrigin.FOLLOWED}
     )
 
