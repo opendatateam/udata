@@ -142,7 +142,8 @@ class NotificationEvent:
 
     `via_app` and `via_mail` double as the channel decision: returning `None` means
     this recipient gets nothing on that channel. The base class opts out of both, so
-    a subclass only declares the channels it actually uses.
+    a subclass only declares the channels it actually uses. The user's rules only say
+    whether they hear about it, never through which channel.
 
     Every event goes through the user's rules, except an action to take (an invitation,
     a source to validate): leaving it unanswered would be a bug, not a setting. What the
@@ -219,31 +220,25 @@ class NotificationEvent:
         from udata.features.notifications.models import Notification
 
         recipients = self._concerned()
-        channels_by_recipient = self._channels(recipients)
+        heard = self._heard(recipients)
 
         for recipient in recipients:
+            if recipient.key not in heard:
+                continue
             # An in-app notification needs an account to hang on, so an address with no
             # user behind it is reachable by email only.
             is_user = isinstance(recipient.user, User)
-            wanted = channels_by_recipient[recipient.key]
-            wants_app = is_user and NotificationChannel.APP in wanted
-            wants_mail = NotificationChannel.MAIL in wanted
-
             deferred = (
-                wants_mail
+                is_user
                 and self.digest_count is not None
-                and is_user
                 and recipient.user.mail_cadence is not MailCadence.IMMEDIATE
             )
 
-            channels = []
-            if wants_app:
-                channels.append(NotificationChannel.APP)
-            if deferred:
-                channels.append(NotificationChannel.MAIL)
-
             # One failing recipient must not deprive the others of their notification.
-            if channels:
+            if is_user:
+                channels = [NotificationChannel.APP]
+                if deferred:
+                    channels.append(NotificationChannel.MAIL)
                 try:
                     details = self.via_app(recipient.user)
                     if details is not None:
@@ -258,7 +253,7 @@ class NotificationEvent:
                 except Exception:
                     log.exception(f"Could not notify {recipient.user} of {self.type}")
 
-            if wants_mail and not deferred:
+            if not deferred:
                 try:
                     mail = self._mail(recipient)
                     if mail is not None:
@@ -292,13 +287,11 @@ class NotificationEvent:
             mail.footer = settings_footer(recipient.reasons, self.subject)
         return mail
 
-    def _channels(
-        self, recipients: list[Recipient]
-    ) -> dict[ObjectId | str, set[NotificationChannel]]:
-        """The channels each recipient is reached through, by recipient key: what their
-        rules leave of this event (see `resolve`)."""
+    def _heard(self, recipients: list[Recipient]) -> set[ObjectId | str]:
+        """The keys of the recipients their rules let hear about this event (see
+        `resolve`)."""
         if self.requires_action:
-            return {recipient.key: set(NotificationChannel) for recipient in recipients}
+            return {recipient.key for recipient in recipients}
 
         events, scopes = event_chain(self.type), self.scopes()
         users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
@@ -306,10 +299,11 @@ class NotificationEvent:
         # An address with no account behind it has no rules: an invitation is the only
         # thing reaching it, and an invitation is an action to take.
         return {
-            recipient.key: resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
-            if isinstance(recipient.user, User) and not recipient.user.notifications_paused
-            else set()
+            recipient.key
             for recipient in recipients
+            if isinstance(recipient.user, User)
+            and not recipient.user.notifications_paused
+            and resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
         }
 
     def already_pending(self, recipient: User, **details) -> bool:

@@ -35,8 +35,6 @@ class NotificationsAPI(API):
     def get(self):
         """List all current user pending notifications"""
         user = current_user._get_current_object()
-        # Rows that only carry MAIL belong to somebody who muted the bell and asked for
-        # a digest: they exist to be summarized, not to be shown here.
         notifications = Notification.objects(user=user, channels=NotificationChannel.APP)
         return Notification.apply_pagination(Notification.apply_sort_filters(notifications))
 
@@ -91,14 +89,13 @@ class NotificationSettingsAPI(API):
     def put(self):
         """Set a rule about some notifications, or remove it with `enabled: null`.
 
-        A rule is identified by its subject, event and channel, any of them possibly
-        null: setting it again replaces the previous answer."""
+        A rule is identified by its subject and event, either of them possibly null:
+        setting it again replaces the previous answer."""
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
         key = {
             "user": rule.user,
             "scope": rule.scope,
             "event": rule.event,
-            "channel": rule.channel,
         }
         if rule.enabled is None:
             NotificationSetting.objects(**key).delete()

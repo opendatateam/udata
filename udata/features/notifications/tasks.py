@@ -67,8 +67,6 @@ def send_notification_digests(self):
         # `last_modified` is set by hand, a queryset update skips the `pre_save` filling it.
         mailed = Notification.objects(id__in=[notification.id for notification in notifications])
         mailed.update(pull__channels=NotificationChannel.MAIL, set__last_modified=datetime.now(UTC))
-        # Nothing left to deliver it through, and it was never meant to be read in the bell.
-        mailed.filter(channels__size=0).delete()
 
     log.info(f"Sent {sent} notification digests")
 

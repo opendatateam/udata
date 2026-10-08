@@ -34,13 +34,14 @@ class NotificationSetting(UDataDocument):
     """One rule a user set about their notifications.
 
     Every dimension is optional, and leaving one out means "whatever it is": no scope
-    is everywhere, no event is every notification, no channel is whether they are
-    concerned at all.
+    is everywhere, no event is every notification.
 
     - follow a thread: scope = the thread, event = `discussion`, yes
     - ignore a dataset: scope = the dataset, no
-    - "this organization, in the app only": scope = the organization, channel = mail, no
-    - "no mail for the answers": event = `discussion.comment`, channel = mail, no
+    - "no new reuses": event = `reuse.created`, no
+
+    A notification reaches both the bell and the mailbox; only the cadence of the mails
+    is the user's to choose.
 
     Why the user is concerned (their role, a thread they took part in) is not something
     they set: only the defaults tell reasons apart.
@@ -66,12 +67,8 @@ class NotificationSetting(UDataDocument):
         description="A notification type, or a dotted prefix of some (`discussion` covers "
         "`discussion.*`), null for every notification",
     )
-    channel = field(
-        EnumField(NotificationChannel),
-        description="Where the user is reached, null to decide whether they are concerned at all",
-    )
     enabled = field(BooleanField(required=True))
-    # Only meaningful for a follow (a subject, no channel, yes): what made the
+    # Only meaningful for a follow (a subject, yes): what made the
     # user follow, hence why they hear about it. Back to `FOLLOWED` as soon as the user
     # sets the rule themselves.
     origin = field(
@@ -82,7 +79,7 @@ class NotificationSetting(UDataDocument):
 
     meta = {
         "indexes": [
-            {"fields": ["user", "scope", "event", "channel"], "unique": True},
+            {"fields": ["user", "scope", "event"], "unique": True},
             # `subscribers_for` looks across every user, once per configurable event.
             ["scope", "event", "enabled"],
         ],
@@ -103,7 +100,6 @@ class Rule:
     scope: ObjectId | None = None
     event: str | None = None
     reason: NotificationReason | None = None
-    channel: NotificationChannel | None = None
 
 
 # What somebody gets before they ever open the settings screen, written as rules so
@@ -125,8 +121,6 @@ DEFAULT_RULES: list[Rule] = [
     Rule(enabled=True),
     Rule(reason=NotificationReason.ORGANIZATION_EDITOR, enabled=False),
     Rule(event="organization.badge", enabled=True),
-    Rule(channel=NotificationChannel.APP, enabled=True),
-    Rule(channel=NotificationChannel.MAIL, enabled=True),
 ]
 
 
@@ -151,7 +145,6 @@ def rules_for(
             Rule(
                 scope=scope["_ref"].id if scope else None,
                 event=row.get("event"),
-                channel=NotificationChannel(row["channel"]) if row.get("channel") else None,
                 enabled=row["enabled"],
             )
         )
@@ -163,21 +156,13 @@ def resolve(
     events: Sequence[str],
     scopes: Sequence[Document],
     reasons: Iterable[NotificationReason],
-) -> set[NotificationChannel]:
-    """The channels one recipient is reached through, given their rules.
+) -> bool:
+    """Whether one recipient hears about an event, given their rules.
 
-    Two questions, in this order, for each reason the recipient has:
-
-    1. Are they concerned at all? Only the rules without a channel answer it.
-    2. If so, through which channels? Only the rules naming a channel answer it.
-
-    Splitting them is what keeps following a thread from bringing back the mails one
-    turned off: following says *whether*, a channel says *how*.
-
-    Among the rules answering a question, the most specific wins: the subject first
-    (a thread, then its dataset, then the organization, then everywhere), then the
-    event (a single event, then its family, then every notification), then the reason
-    (this reason, then whatever the reason), which only the defaults name.
+    Among the rules that apply, the most specific wins: the subject first (a thread,
+    then its dataset, then the organization, then everywhere), then the event (a single
+    event, then its family, then every notification), then the reason (this reason,
+    then whatever the reason), which only the defaults name.
 
     The user's own rules are read first, and `DEFAULT_RULES` only where they say
     nothing: otherwise a precise default would beat a broad choice of the user.
@@ -187,21 +172,18 @@ def resolve(
 
     Taking part in a thread is following it: whether one hears about it as a participant
     is only decided by a rule on the thread itself or everywhere, never by one on its
-    dataset or organization. How one hears about it still follows them.
+    dataset or organization.
     """
     scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
     event_rank = {event: rank for rank, event in enumerate([*events, None])}
     thread_ranks = {0, scope_rank[None]}
 
-    def most_specific(
-        rules: list[Rule], reason: NotificationReason, channel: NotificationChannel | None
-    ) -> bool | None:
-        bound_to_thread = channel is None and reason == NotificationReason.DISCUSSION_PARTICIPANT
+    def most_specific(rules: list[Rule], reason: NotificationReason) -> bool | None:
+        bound_to_thread = reason == NotificationReason.DISCUSSION_PARTICIPANT
         candidates = [
             rule
             for rule in rules
-            if rule.channel == channel
-            and rule.reason in (reason, None)
+            if rule.reason in (reason, None)
             and rule.scope in scope_rank
             and rule.event in event_rank
             and (not bound_to_thread or scope_rank[rule.scope] in thread_ranks)
@@ -218,20 +200,14 @@ def resolve(
         )
         return best.enabled
 
-    def decide(reason: NotificationReason, channel: NotificationChannel | None) -> bool:
+    def decide(reason: NotificationReason) -> bool:
         for layer in (rules, DEFAULT_RULES):
-            enabled = most_specific(layer, reason, channel)
+            enabled = most_specific(layer, reason)
             if enabled is not None:
                 return enabled
         return False
 
-    return {
-        channel
-        for reason in reasons
-        if decide(reason, None)
-        for channel in NotificationChannel
-        if decide(reason, channel)
-    }
+    return any(decide(reason) for reason in reasons)
 
 
 # The reason a follow gives, depending on what made the user follow.
@@ -242,13 +218,12 @@ REASON_BY_ORIGIN = {
 
 
 def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
-    """The follows of these subjects for this event: a subject, no channel, yes. A rule
+    """The follows of these subjects for this event: a subject, yes. A rule
     without a subject is left out on purpose: "everywhere" means "everywhere I am
     already concerned", not "subscribe me to the whole site"."""
     return NotificationSetting.objects(
         Q(event=None) | Q(event__in=events),
         scope__in=scopes,
-        channel=None,
         enabled=True,
         **filters,
     )
@@ -338,9 +313,9 @@ def resolved_for(
                 Resolution(
                     scope=subject,
                     event=event,
-                    channels=[]
-                    if user.notifications_paused
-                    else sorted(resolve(rules, chain, scopes, held)),
+                    channels=sorted(NotificationChannel)
+                    if not user.notifications_paused and resolve(rules, chain, scopes, held)
+                    else [],
                     reasons=sorted(held),
                 )
             )

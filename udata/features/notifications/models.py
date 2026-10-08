@@ -133,8 +133,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     )
     # The channels this notification still has to reach the user through. The site
     # lists the ones holding APP; the digest job takes the ones holding MAIL and drops
-    # it once the mail is out. Somebody who muted the app but asked for a weekly digest
-    # gets a MAIL-only row: invisible, but there to be summarized.
+    # it once the mail is out.
     #
     # It doubles as the digest cursor — "MAIL is still in there" *is* "not mailed yet",
     # which makes the job replayable without a date to keep anywhere. Internal to that
