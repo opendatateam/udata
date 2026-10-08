@@ -491,6 +491,48 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_at" not in dataservice.harvest
         assert "archived_reason" not in dataservice.harvest
 
+    @pytest.mark.parametrize(
+        ("factory", "mock_factory", "key", "archived_field"),
+        [
+            (DatasetFactory, DatasetFactory, "dataset", "archived"),
+            (DataserviceFactory, DataserviceFactory, "dataservice", "archived_at"),
+        ],
+    )
+    def test_autoarchive_archive_without_remote_id(
+        self, app, factory, mock_factory, key, archived_field
+    ):
+        grace_days = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
+        source = HarvestSourceFactory()
+        last_update = datetime.now(UTC) - timedelta(days=grace_days + 1)
+
+        # an object with a None remote_id (e.g. removed due to the `attach` command),
+        # older than the grace period, so it should be eligible for archiving
+        item_arch = factory(
+            harvest={
+                "domain": source.domain,
+                "source_id": str(source.id),
+                "remote_id": None,
+                "last_update": last_update,
+            }
+        )
+
+        # process an item with remote_id missing so that `None` lands in
+        # `remote_ids` inside `autoarchive`
+        backend = MockBackend(
+            source,
+            mock_items=[mock_factory.build(remote_id=None)],
+        )
+        job = backend.harvest()
+
+        archived_items = [i for i in job.items if i.status == "archived"]
+        assert len(archived_items) == 1
+        assert getattr(archived_items[0], key) == item_arch
+
+        item_arch.reload()
+        assert getattr(item_arch, archived_field) is not None
+        assert "archived_at" in item_arch.harvest
+        assert "archived_reason" in item_arch.harvest
+
     def test_harvest_datasets_get_deleted(self):
         backend = MockBackend(
             HarvestSourceFactory(),
