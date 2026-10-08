@@ -634,6 +634,34 @@ class RulesForTest(PytestOnlyDBTestCase):
 
 
 class DispatchTest(APITestCase):
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_a_follow_on_the_organization_is_named_in_the_footer(self):
+        """Not the dataset the discussion is about: it was never followed as such."""
+        follower = UserFactory()
+        organization = OrganizationFactory()
+        follow(follower, organization)
+
+        with capture_mails() as mails:
+            open_discussion(DatasetFactory(organization=organization))
+
+        [mail] = mailed(mails, follower)
+        assert f"you follow {organization.name}" in mail.body
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_the_most_specific_follow_is_the_one_named(self):
+        follower = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        discussion = open_discussion(dataset)
+        follow(follower, discussion)
+        follow(follower, dataset)
+
+        with capture_mails() as mails:
+            comment(discussion)
+
+        [mail] = mailed(mails, follower)
+        assert f"you follow {discussion.title}" in mail.body
+        assert f"you follow {dataset.title}" not in mail.body
+
     def test_an_editor_is_no_longer_notified_of_every_discussion(self):
         """The default that does most of the work: an editor belongs to organizations
         whose datasets they never touched."""
@@ -1218,6 +1246,19 @@ class DigestTest(PytestOnlyDBTestCase):
         assert dataset.title in mail.body
         assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
+    def test_what_was_read_while_queued_leaves_the_queue_unmailed(self):
+        """Read is no news any more, and left queued it would bring its user back to
+        every run until it expires."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        Notification.objects(user=admin).mark_handled()
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert mails == []
+        assert Notification.objects(user=admin, mail_pending=True).count() == 0
+
     def test_pausing_holds_back_what_was_already_queued(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
         open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
@@ -1792,6 +1833,7 @@ class NotificationFollowAPITest(APITestCase):
         assert response.json["followed_events"] == []
         assert self.rules(user) == [(dataset, NotificationType.REUSE_CREATED, False)]
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_following_a_thread_brings_its_comments(self):
         """From the API to the bell: somebody the thread would never reach."""
         user = self.login()
@@ -1806,6 +1848,7 @@ class NotificationFollowAPITest(APITestCase):
         assert notification.details.discussion == discussion
         [mail] = mailed(mails, user)
         assert discussion.title in mail.body
+        assert f"you follow {discussion.title}" in mail.body
 
     def test_stopping_what_a_broader_follow_brings_says_no(self):
         user = self.login()
@@ -2234,6 +2277,9 @@ class CreateDiscussionsNotificationsMigrationTest(PytestOnlyDBTestCase):
         assert [notification.id for notification in Notification.objects] == before
 
 
+HARVESTER_ID = "6ac000000000000000000001"
+
+
 class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
     def migrate(self, db):
         load_migration("2026-10-08-follow-worked-on-subjects.py").migrate(db)
@@ -2293,6 +2339,21 @@ class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
             (editor, dataservice, FollowOrigin.EDITED),
             (editor, reuse, FollowOrigin.EDITED),
         ]
+
+    @pytest.mark.options(HARVEST_ACTIVITY_USER_ID=HARVESTER_ID)
+    def test_the_harvesting_account_follows_nothing(self):
+        """Harvesting follows nothing when it runs, whatever account it is attributed to."""
+        harvester = UserFactory(id=ObjectId(HARVESTER_ID))
+        organization = OrganizationFactory(editors=[harvester])
+        UserUpdatedDataset.objects.create(
+            actor=harvester,
+            related_to=DatasetFactory(organization=organization),
+            organization=organization,
+        )
+
+        self.migrate(get_db())
+
+        assert self.follows() == []
 
     def test_deleted_users_follow_nothing(self):
         editor = UserFactory()

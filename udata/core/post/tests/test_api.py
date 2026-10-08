@@ -11,6 +11,8 @@ from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
+from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
@@ -19,8 +21,6 @@ from udata.core.edito_blocs.models import (
     ExploreBloc,
     ReusesListBloc,
 )
-from udata.core.discussions.factories import DiscussionFactory
-from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
