@@ -77,45 +77,19 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
-def _email_for_admin_or_self(user):
-    """Return the email only to a sysadmin or to the user themselves, `None` otherwise.
+def _admin_or_self(name: str):
+    """An `attribute` giving the field `name` only to a sysadmin or to the user
+    themselves, `None` otherwise."""
 
-    Stricter than `_visible_email`, which always yields at least a domain: the user API
-    (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all, whereas
-    `_visible_email` serves the org contexts where members are allowed to reach out.
-    """
-    if current_user_is_admin_or_self():
-        return user.email
-    return None
+    def visible(user):
+        return getattr(user, name) if current_user_is_admin_or_self() else None
 
-
-def _mail_cadence_for_admin_or_self(user):
-    if current_user_is_admin_or_self():
-        return user.mail_cadence
-    return None
-
-
-def _notifications_paused_for_admin_or_self(user):
-    if current_user_is_admin_or_self():
-        return user.notifications_paused
-    return None
+    return visible
 
 
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
-    return None
-
-
-def _visible_password_rotation_demanded(user):
-    if current_user_is_admin_or_self():
-        return user.password_rotation_demanded
-    return None
-
-
-def _visible_password_rotation_performed(user):
-    if current_user_is_admin_or_self():
-        return user.password_rotation_performed
     return None
 
 
@@ -144,7 +118,10 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     )
     email = field(
         StringField(max_length=255, required=True, unique=True),
-        attribute=_email_for_admin_or_self,
+        # Stricter than `_visible_email`, which always yields at least a domain: the user
+        # API (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all,
+        # whereas `_visible_email` serves the org contexts where members may reach out.
+        attribute=_admin_or_self("email"),
         # The address is an identity: `Organization.create_invitation` resolves one into
         # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
         # the `/change-email` flow carries that proof over, by mailing a token to the new
@@ -204,13 +181,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_password_rotation_demanded,
+        attribute=_admin_or_self("password_rotation_demanded"),
     )
     password_rotation_performed = field(
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_password_rotation_performed,
+        attribute=_admin_or_self("password_rotation_performed"),
     )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
@@ -251,13 +228,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # them is decided by their `NotificationSetting` rules; this is only the rhythm.
     mail_cadence = field(
         EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
-        attribute=_mail_cadence_for_admin_or_self,
+        attribute=_admin_or_self("mail_cadence"),
     )
     # "Turn everything off": nothing reaches the user but what asks for an action. A
     # field rather than a rule, so that no rule, however precise, can bring anything back.
     notifications_paused = field(
         BooleanField(default=False),
-        attribute=_notifications_paused_for_admin_or_self,
+        attribute=_admin_or_self("notifications_paused"),
     )
 
     before_save = Signal()
@@ -573,7 +550,7 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 #
 # `email` is declared here rather than reused from `__read_fields__` because the two
 # obey different rules: `_visible_email` grants org members a partial address, while the
-# user API hands third parties nothing (see `_email_for_admin_or_self`).
+# user API hands third parties nothing (see `User.email`).
 user_with_email_ref_fields = api.inherit(
     "UserReferenceWithEmail",
     User.__ref_fields__,

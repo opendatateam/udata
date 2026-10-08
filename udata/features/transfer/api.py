@@ -158,8 +158,8 @@ class TransferRequestsAPI(API):
         """Initiate transfer request"""
         data = api.json_payload()
 
-        subject = api.resolve_reference(data, "subject", TRANSFERABLE_SUBJECTS)
-        recipient = api.resolve_reference(data, "recipient", TRANSFER_PERSONS)
+        subject = api.resolve_reference(data.get("subject"), "subject", TRANSFERABLE_SUBJECTS)
+        recipient = api.resolve_reference(data.get("recipient"), "recipient", TRANSFER_PERSONS)
 
         comment = data.get("comment")
 

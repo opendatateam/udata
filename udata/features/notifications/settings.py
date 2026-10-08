@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from bson import ObjectId
 from flask_principal import Identity, RoleNeed, UserNeed
+from flask_restx.inputs import boolean
 from mongoengine import CASCADE, Document, Q, ValidationError
 from mongoengine.fields import (
     BooleanField,
@@ -12,10 +13,11 @@ from mongoengine.fields import (
     StringField,
 )
 
-from udata.api import api
+from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.discussions.models import Discussion
+from udata.core.organization.models import Organization
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin, NotificationReason
@@ -27,7 +29,46 @@ from udata.mongo.document import UDataDocument
 NOTIFICATION_SCOPES = ("Organization", "Discussion", *DISCUSSION_SUBJECTS)
 
 
-@generate_fields()
+@dataclass(frozen=True)
+class SubjectSummary:
+    """What the settings screen shows of the subject of a rule."""
+
+    title: str
+    page: str
+    # The organization the subject belongs to, none for an organization itself
+    organization: Document | None
+
+
+subject_summary_fields = api.model(
+    "NotificationSubjectSummary",
+    {
+        "title": fields.String(description="The subject title"),
+        "page": fields.String(description="The subject web page"),
+        "organization": fields.Nested(
+            Organization.__ref_fields__,
+            allow_null=True,
+            description="The organization the subject belongs to, null for an organization",
+        ),
+    },
+)
+
+
+def filter_by_followed(base_query, followed: bool):
+    if followed:
+        return base_query(scope__ne=None, enabled=True)
+    return base_query(Q(scope=None) | Q(enabled=False))
+
+
+@generate_fields(
+    standalone_filters=[
+        {
+            "key": "followed",
+            "type": boolean,
+            "query": filter_by_followed,
+            "help": "Only the follows (a subject, yes), or only the other rules",
+        },
+    ],
+)
 class NotificationSetting(UDataDocument):
     """One rule a user set about their notifications.
 
@@ -91,6 +132,26 @@ class NotificationSetting(UDataDocument):
         ],
     }
 
+    @field(
+        nested_fields=subject_summary_fields,
+        allow_null=True,
+        description="The subject as the user may see it today, null once out of reach",
+    )
+    def subject(self) -> SubjectSummary | None:
+        """A rule outlives the access to its subject: a dataset can turn private after
+        one's departure from its organization, and its title must not leak through the
+        list of what one follows."""
+        if self.scope is None:
+            return None
+        subject, read = read_permission(self.scope)
+        if read is not None and not read.can():
+            return None
+        return SubjectSummary(
+            title=self.scope.title if isinstance(self.scope, Discussion) else str(subject),
+            page=self.scope.self_web_url(),
+            organization=getattr(subject, "organization", None),
+        )
+
     def clean(self):
         # `events` builds on this module, hence the import at call time.
         from udata.features.notifications.events import is_event_name
@@ -122,9 +183,10 @@ def heard_by_default(reason: NotificationReason, events: Sequence[str]) -> bool:
     touched, and mailing them every discussion of a 400-dataset organization is what
     this whole thing is meant to stop.
 
-    Partial editors are heard, which only looks inconsistent: they are never given this
-    reason unless the object was actually assigned to them, so "everything concerning
-    me" is already a short list.
+    Partial editors are heard, which only looks inconsistent: on a dataset, a reuse or an
+    API, they are only given this reason when it was assigned to them, so "everything
+    concerning me" is already a short list. On the organization itself (a badge), every
+    member is concerned, partial editors included.
     """
     if reason == NotificationReason.ORGANIZATION_EDITOR:
         return HEARD_BY_EDITORS in events
@@ -414,30 +476,3 @@ def readable_by(user: User, scope) -> bool:
     identity.provides.update(RoleNeed(role.name) for role in user.roles)
     identity.provides.update(organization_needs(user))
     return read.allows(identity)
-
-
-@dataclass(frozen=True)
-class SubjectSummary:
-    """What the settings screen shows of the subject of a rule."""
-
-    title: str
-    page: str
-    # The organization the subject belongs to, none for an organization itself
-    organization: Document | None
-
-
-def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
-    """A rule outlives the access to its subject: a dataset can turn private after one's
-    departure from its organization, and its title must not leak through the list of
-    what one follows."""
-    scope = setting.scope
-    if scope is None:
-        return None
-    subject, read = read_permission(scope)
-    if read is not None and not read.can():
-        return None
-    return SubjectSummary(
-        title=scope.title if isinstance(scope, Discussion) else str(subject),
-        page=scope.self_web_url(),
-        organization=getattr(subject, "organization", None),
-    )

@@ -172,8 +172,8 @@ def delete_settings_of(sender, document, **kwargs):
 
 
 # One sender per scope rather than every document: mongoengine turns the bulk delete of
-# any model with a `post_delete` receiver into one delete per document. The classes of
-# `NOTIFICATION_SCOPES`, which names them only so that `settings` needs no model.
+# any model with a `post_delete` receiver into one delete per document. The same classes
+# as `NOTIFICATION_SCOPES`, which names them.
 SCOPE_MODELS = (Organization, Discussion, Dataset, Reuse, Post, Dataservice, Topic)
 for model in SCOPE_MODELS:
     signals.post_delete.connect(delete_settings_of, sender=model)

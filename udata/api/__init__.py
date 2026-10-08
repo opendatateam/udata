@@ -153,10 +153,11 @@ class UDataApi(Api):
             self.abort(400, errors={"request": "expecting a JSON object"})
         return data
 
-    def resolve_reference(self, data: dict, field_name: str, allowed_classes):
-        """Resolve the `{"class": …, "id": …}` reference held by `field_name` into a document.
+    def resolve_reference(self, reference, field_name: str, allowed_classes):
+        """Resolve a `{"class": …, "id": …}` reference into a document, errors reported on
+        `field_name`.
 
-        Both parts come straight from the request body, and both are checked before anything
+        Both parts come straight from the request, and both are checked before anything
         reaches MongoDB. `class` is matched against `allowed_classes` rather than resolved
         against the whole document registry, because a generic reference only validates its
         choices on save — long after the lookup below has run. And `id` has to be an object
@@ -164,7 +165,6 @@ class UDataApi(Api):
         arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
         a `StringField` one.
         """
-        reference = data.get(field_name)
         if not isinstance(reference, dict):
             self.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
 
