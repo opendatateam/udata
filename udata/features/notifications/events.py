@@ -267,12 +267,14 @@ class NotificationEvent:
 
     def _concerned(self) -> list[Recipient]:
         """Everybody this event reaches: those it concerns by itself, plus those who
-        asked to be added, minus whoever it must never reach."""
+        asked to be added, minus whoever it must never reach. A deleted account keeps its
+        rules and may still own subjects, but nobody is behind it any more."""
         excluded = {user.id for user in self.excluded()}
         return [
             recipient
             for recipient in merge_recipients([*self.recipients(), *self._subscribers()])
             if recipient.key not in excluded
+            and not (isinstance(recipient.user, User) and recipient.user.deleted)
         ]
 
     def _subscribers(self) -> list[Recipient]:

@@ -2,6 +2,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
+from udata.features.notifications.settings import NotificationSetting
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -73,6 +74,16 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         # Org editor should not receive notification
         member_notifications = Notification.objects(user=org_member)
         assert member_notifications.count() == 0
+
+    def test_following_the_organization_does_not_bring_the_outcome_of_its_sources(self):
+        org = OrganizationFactory(members=[{"user": UserFactory(), "role": "admin"}])
+        follower = UserFactory()
+        NotificationSetting.objects.create(user=follower, scope=org, enabled=True)
+        source = HarvestSourceFactory(organization=org)
+
+        actions.validate_source(source)
+
+        assert Notification.objects(user=follower).count() == 0
 
     def test_refuse_source_creates_notification_for_owner(self):
         owner = UserFactory()

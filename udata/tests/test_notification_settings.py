@@ -753,6 +753,29 @@ class DispatchTest(APITestCase):
         assert Notification.objects(user=follower).count() == 0
         assert mailed(mails, follower) == []
 
+    def test_a_deleted_account_hears_nothing_of_what_it_followed(self):
+        follower = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+        follow(follower, dataset)
+        follower.mark_as_deleted(notify=False)
+
+        with capture_mails() as mails:
+            open_discussion(dataset)
+
+        assert Notification.objects(user=follower).count() == 0
+        assert mailed(mails, follower) == []
+
+    def test_a_deleted_account_hears_nothing_of_what_it_still_owns(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        owner.mark_as_deleted(notify=False)
+
+        with capture_mails() as mails:
+            open_discussion(dataset)
+
+        assert Notification.objects(user=owner).count() == 0
+        assert mailed(mails, owner) == []
+
     def test_ignoring_an_organization_covers_its_badges(self):
         admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
@@ -1058,6 +1081,32 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert mails == []
+
+    def test_pausing_holds_back_what_was_already_queued(self):
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        age(Notification.objects(user=admin).first(), days=8)
+        turn_everything_off(admin)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        assert mails == []
+
+    def test_resuming_does_not_release_what_was_queued_before_the_pause(self):
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[admin])))
+        age(Notification.objects(user=admin).first(), days=8)
+        turn_everything_off(admin)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+            admin.notifications_paused = False
+            admin.save()
+            send_notification_digests()
+
+        assert mails == []
+        assert Notification.objects(user=admin).first().channels == [APP]
 
     def test_a_type_that_never_mails_is_not_queued(self):
         """A reuse creation has no `via_mail`, so going weekly must not conjure a mail

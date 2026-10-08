@@ -40,6 +40,14 @@ def send_notification_digests(self):
         if user is None or user.deleted:
             continue
 
+        # What was queued before the pause stays in the bell, but is not mailed: neither
+        # now, nor in one go on resuming.
+        if user.notifications_paused:
+            Notification.objects(user=user, channels=NotificationChannel.MAIL).update(
+                pull__channels=NotificationChannel.MAIL, set__last_modified=datetime.now(UTC)
+            )
+            continue
+
         due_before = datetime.now(UTC) - DIGEST_INTERVALS[user.mail_cadence]
         # What was answered or read in the meantime is no news any more.
         queue = Notification.objects(user=user, channels=NotificationChannel.MAIL, handled_at=None)

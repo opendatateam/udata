@@ -74,6 +74,8 @@ class HarvestSourcePending(HarvestSourceEvent):
 class HarvestSourceReviewed(HarvestSourceEvent):
     """The outcome goes back to whoever declared the source."""
 
+    reaches_subscribers = False
+
     def recipients(self):
         if self.source.organization:
             return [
