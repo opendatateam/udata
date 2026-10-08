@@ -512,6 +512,25 @@ class ResolveTest:
 
         assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) is True
 
+    def test_turning_a_type_off_holds_against_a_followed_subject(self):
+        """Each rule is the more specific on one dimension: the "no" wins."""
+        rules = [rule(scope=DATASET), rule(event="discussion.new", enabled=False)]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.CONTRIBUTOR}) is False
+
+    def test_a_rule_more_specific_on_both_dimensions_still_wins(self):
+        rules = [
+            rule(event="discussion", enabled=False),
+            rule(scope=DATASET, event="discussion.new"),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) is True
+
+    def test_ignoring_what_a_thread_is_about_silences_its_participant(self):
+        rules = [rule(scope=DATASET, enabled=False)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) is False
+
     def test_nobody_concerned_gets_nothing(self):
         assert resolve([rule(scope=DATASET)], NEW, SCOPES, set()) is False
 
@@ -884,6 +903,20 @@ class DispatchTest(APITestCase):
             NotificationType.DATASERVICE_CREATED
         ]
 
+    def test_a_type_turned_off_stays_off_on_what_one_edited(self):
+        """Editing follows the dataset; "no new reuses" set from the bell still holds."""
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        decide(editor, dataset, enabled=True, origin=FollowOrigin.EDITED)
+        decide(editor, event=NotificationType.REUSE_CREATED, enabled=False)
+
+        ReuseFactory(datasets=[dataset])
+        DataserviceFactory(datasets=[dataset])
+
+        assert [notification.type for notification in Notification.objects(user=editor)] == [
+            NotificationType.DATASERVICE_CREATED
+        ]
+
 
 class OrganizationSettingsTest(APITestCase):
     """What a rule on an organization does: everything about it, or only what one
@@ -1193,7 +1226,7 @@ class NotificationSettingsAPITest(APITestCase):
 
     def test_a_rule_is_written_back_as_it_is_listed(self):
         """The settings screen adds the rule it just wrote to its list as is: an
-        organization comes grouped under itself, as on reload."""
+        organization belongs to no other one, as on reload."""
         self.login()
         organization = OrganizationFactory()
 
@@ -1201,7 +1234,7 @@ class NotificationSettingsAPITest(APITestCase):
 
         self.assert201(response)
         assert response.json["subject"]["title"] == organization.name
-        assert response.json["subject"]["organization"]["id"] == str(organization.id)
+        assert response.json["subject"]["organization"] is None
 
     def test_withdrawing_a_rule_brings_the_reasons_back(self):
         admin = UserFactory()
@@ -1306,7 +1339,8 @@ class NotificationResolvedAPITest(APITestCase):
             query.append(("event", event))
         return self.get("/api/1/notifications/resolved/", query_string=query)
 
-    def test_nothing_reaches_a_user_who_paused_everything(self):
+    def test_the_pause_is_left_out_so_that_following_still_shows(self):
+        """A follow button keeps telling, and changing, what one follows meanwhile."""
         admin = UserFactory(notifications_paused=True)
         organization = OrganizationFactory(admins=[admin])
         self.login(admin)
@@ -1314,7 +1348,36 @@ class NotificationResolvedAPITest(APITestCase):
         [answer] = self.resolved([organization], DISCUSSIONS).json
 
         assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
+        assert answer["heard"] is True
+
+    def test_a_subject_said_no_to_reads_as_muted(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        ignore(owner, dataset)
+
+        [answer] = self.resolved([dataset]).json
+
         assert answer["heard"] is False
+        assert answer["muted"] is True
+
+    def test_the_events_still_followed_on_a_subject_are_listed(self):
+        """Muted as a whole but following its new discussions: asked about everything,
+        the subject is not heard, yet some of it is."""
+        user = self.login()
+        dataset = DatasetFactory()
+        ignore(user, dataset)
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+        follow(user, dataset, NotificationType.REUSE_CREATED)
+
+        [everything] = self.resolved([dataset]).json
+        [discussions] = self.resolved([dataset], DISCUSSIONS).json
+
+        assert everything["muted"] is True
+        assert everything["followed_events"] == [
+            NotificationType.DISCUSSION_NEW,
+            NotificationType.REUSE_CREATED,
+        ]
+        assert discussions["followed_events"] == [NotificationType.DISCUSSION_NEW]
 
     def test_an_administrator_hears_about_their_organization(self):
         admin = self.login()
@@ -1358,6 +1421,8 @@ class NotificationResolvedAPITest(APITestCase):
             "event": DISCUSSIONS,
             "heard": False,
             "reasons": [],
+            "muted": False,
+            "followed_events": [],
         }
 
     def test_an_ignored_thread_resolves_to_nothing(self):
@@ -1429,6 +1494,92 @@ class NotificationResolvedAPITest(APITestCase):
 
     def test_resolving_requires_an_account(self):
         self.assert401(self.get("/api/1/notifications/resolved/"))
+
+
+class NotificationFollowAPITest(APITestCase):
+    def put_follow(self, scope, followed, event=None):
+        return self.put(
+            "/api/1/notifications/follow/",
+            {"scope": ref(scope), "event": event, "followed": followed},
+        )
+
+    def rules(self, user):
+        return [
+            (setting.scope, setting.event, setting.enabled)
+            for setting in NotificationSetting.objects(user=user)
+        ]
+
+    def test_following_writes_a_follow_and_answers_heard(self):
+        user = self.login()
+        dataset = DatasetFactory()
+
+        response = self.put_follow(dataset, True, NotificationType.DISCUSSION_NEW)
+
+        self.assert200(response)
+        assert response.json["heard"] is True
+        assert self.rules(user) == [(dataset, NotificationType.DISCUSSION_NEW, True)]
+
+    def test_stopping_ones_own_follow_only_withdraws_it(self):
+        """Nothing else brings these notifications: no "no" is left behind."""
+        user = self.login()
+        dataset = DatasetFactory()
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+
+        response = self.put_follow(dataset, False, NotificationType.DISCUSSION_NEW)
+
+        assert response.json["heard"] is False
+        assert self.rules(user) == []
+
+    def test_stopping_what_ones_role_brings_says_no(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.put_follow(dataset, False)
+
+        assert response.json["heard"] is False
+        assert response.json["muted"] is True
+        assert self.rules(owner) == [(dataset, None, False)]
+
+    def test_stopping_an_automatic_follow_keeps_it_away(self):
+        """Withdrawn, the next edit would make it again."""
+        editor = self.login()
+        # Created by the editor, so followed by udata itself.
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        assert [setting.origin for setting in NotificationSetting.objects(user=editor)] == [
+            FollowOrigin.EDITED
+        ]
+
+        self.put_follow(dataset, False)
+
+        [setting] = NotificationSetting.objects(user=editor)
+        assert (setting.enabled, setting.origin) == (False, FollowOrigin.FOLLOWED)
+
+    def test_stopping_everything_drops_the_narrower_follows(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+        follow(user, dataset, NotificationType.REUSE_CREATED)
+
+        response = self.put_follow(dataset, False)
+
+        assert response.json["followed_events"] == []
+        assert self.rules(user) == []
+
+    def test_unknown_keys_are_refused(self):
+        self.login()
+        dataset = DatasetFactory()
+
+        self.assert400(self.put_follow(dataset, True, "Unknown"))
+        self.assert400(
+            self.put(
+                "/api/1/notifications/follow/",
+                {"scope": {"class": "Dataset", "id": "not-an-id"}, "followed": True},
+            )
+        )
+        self.assert400(self.put("/api/1/notifications/follow/", {"scope": ref(dataset)}))
+
+    def test_following_requires_an_account(self):
+        self.assert401(self.put_follow(DatasetFactory(), True))
 
 
 class MeMailSettingsAPITest(APITestCase):

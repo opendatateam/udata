@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import request
 from flask_restx import marshal
+from mongoengine import ValidationError
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
@@ -17,6 +18,7 @@ from .settings import (
     NOTIFICATION_SCOPES,
     NotificationSetting,
     resolved_for,
+    set_follow,
     subject_summary,
 )
 
@@ -44,7 +46,7 @@ subject_summary_fields = api.model(
         "organization": fields.Nested(
             Organization.__ref_fields__,
             allow_null=True,
-            description="The organization to group the subject under",
+            description="The organization the subject belongs to, null for an organization",
         ),
     },
 )
@@ -113,8 +115,12 @@ resolved_fields = api.model(
             api.model_reference, allow_null=True, description="The subject asked about"
         ),
         "event": fields.String(allow_null=True, description="The event asked about"),
-        "heard": fields.Boolean(description="Whether the user hears about it"),
+        "heard": fields.Boolean(description="Whether the user hears about it, pause aside"),
         "reasons": fields.List(fields.String, description="Why the user is concerned"),
+        "muted": fields.Boolean(description="Whether the user said no to this subject and event"),
+        "followed_events": fields.List(
+            fields.String, description="The narrower events the user still follows on it"
+        ),
     },
 )
 
@@ -142,7 +148,10 @@ def parse_subject(value: str):
     cls, _, id = value.partition(":")
     if cls not in NOTIFICATION_SCOPES:
         api.abort(400, "Unknown subject")
-    subject = db.resolve_model(cls).objects(id=id).first()
+    try:
+        subject = db.resolve_model(cls).objects(id=id).first()
+    except ValidationError:
+        subject = None
     if subject is None:
         api.abort(400, "Unknown subject")
     return subject
@@ -171,6 +180,47 @@ class NotificationResolvedAPI(API):
             current_user._get_current_object(),
             [parse_subject(scope) for scope in scopes],
             args["event"],
+        )
+
+
+follow_fields = api.model(
+    "NotificationFollow",
+    {
+        "scope": fields.Nested(api.model_reference, required=True, description="The subject"),
+        "event": fields.String(
+            allow_null=True,
+            description="A notification type or a prefix of some, every notification without one",
+        ),
+        "followed": fields.Boolean(required=True, description="Follow, or stop following"),
+    },
+)
+
+
+@notifs.route("/follow/", endpoint="notification_follow")
+class NotificationFollowAPI(API):
+    @api.secure
+    @api.doc("follow_notifications")
+    @api.expect(follow_fields)
+    @api.marshal_with(resolved_fields)
+    @api.response(400, "Unknown subject or event")
+    def put(self):
+        """Follow some notifications on a subject, or stop, and get what the current user
+        hears about once done.
+
+        Which rules to write or withdraw depends on how they rank, which is the server's
+        to know: stopping withdraws one's own follow, and only says no when a role or a
+        broader follow still brings the notifications in."""
+        payload = request.get_json(silent=True) or {}
+        scope, event = payload.get("scope") or {}, payload.get("event")
+        if not isinstance(payload.get("followed"), bool):
+            api.abort(400, "`followed` is required")
+        if event is not None and not is_event_name(event):
+            api.abort(400, "Unknown event")
+        return set_follow(
+            current_user._get_current_object(),
+            parse_subject(f"{scope.get('class')}:{scope.get('id')}"),
+            event,
+            payload["followed"],
         )
 
 

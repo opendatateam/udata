@@ -15,7 +15,6 @@ from mongoengine.fields import (
 from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
-from udata.core.organization.models import Organization
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin, NotificationReason
@@ -165,9 +164,16 @@ def resolve(
 ) -> bool:
     """Whether one recipient hears about an event, given their rules.
 
-    Among the rules that apply, the most specific wins: the subject first (a thread,
-    then its dataset, then the organization, then everywhere), then the event (a single
-    event, then its family, then every notification).
+    Among the rules that apply, a rule beats another when it is at least as specific on
+    both of their dimensions: the subject (a thread, then its dataset, then the
+    organization, then everywhere) and the event (a single event, then its family, then
+    every notification). Ignoring a dataset but following one of its threads, or ignoring
+    the discussions of a dataset but keeping their answers, is therefore unambiguous.
+
+    Two rules each more specific on one dimension are two deliberate choices that
+    contradict each other: following a dataset, and turning off a type of notification
+    anywhere; following the answers on a dataset, and ignoring one of its threads. The
+    "no" wins: a way out offered to the user has to hold, whatever they follow.
 
     The defaults (`heard_by_default`) are only read where the user's rules say nothing:
     otherwise a precise default would beat a broad choice of the user.
@@ -176,12 +182,20 @@ def resolve(
     organizations does not silence the thread one took part in.
 
     Taking part in a thread is following it: whether one hears about it as a participant
-    is only decided by a rule on the thread itself or everywhere, never by one on its
-    dataset or organization.
+    is decided by a rule on the thread, on what it is about, or everywhere, never by one
+    on the organization behind it ("only what I follow" there keeps the threads one
+    answered).
     """
     scope_rank = {scope_id: rank for rank, scope_id in enumerate([*(s.id for s in scopes), None])}
     event_rank = {event: rank for rank, event in enumerate([*events, None])}
-    thread_ranks = {0, scope_rank[None]}
+    # The thread, what it is about, and everywhere.
+    thread_ranks = {0, 1, scope_rank[None]}
+
+    def ranks(rule: Rule) -> tuple[int, int]:
+        return scope_rank[rule.scope], event_rank[rule.event]
+
+    def beats(rule: Rule, other: Rule) -> bool:
+        return all(mine <= theirs for mine, theirs in zip(ranks(rule), ranks(other)))
 
     def decide(reason: NotificationReason) -> bool:
         bound_to_thread = reason == NotificationReason.DISCUSSION_PARTICIPANT
@@ -194,8 +208,12 @@ def resolve(
         ]
         if not candidates:
             return heard_by_default(reason, events)
-        best = min(candidates, key=lambda rule: (scope_rank[rule.scope], event_rank[rule.event]))
-        return best.enabled
+        unbeaten = [
+            rule
+            for rule in candidates
+            if not any(other is not rule and beats(other, rule) for other in candidates)
+        ]
+        return all(rule.enabled for rule in unbeaten)
 
     return any(decide(reason) for reason in reasons)
 
@@ -229,6 +247,11 @@ class Resolution:
     event: str | None
     heard: bool
     reasons: list[NotificationReason]
+    # The user said no to exactly this subject and event.
+    muted: bool
+    # The narrower events the user still follows on exactly this subject: hearing about
+    # some of its notifications only reads as `heard` when asking about each of them.
+    followed_events: list[str]
 
 
 def resolved_for(
@@ -241,6 +264,9 @@ def resolved_for(
     Several subjects at once, so that a page asks once for all of its threads; the rules
     are loaded once for all of them. A subject is required: without one, nothing reaches
     anybody (a rule naming no subject follows nothing).
+
+    The pause is left out: it holds everything back whatever the rules say, and is
+    shown as such. Following or not is still worth showing, and changing, meanwhile.
     """
     # `events` builds on this module, hence the import at call time.
     from udata.core.discussions.models import Discussion
@@ -257,6 +283,11 @@ def resolved_for(
         chain,
         list({scope.pk: scope for _, scopes in scopes_of for scope in scopes}.values()),
     ).get(user.id, [])
+    own = {
+        (row["scope"]["_ref"].id, row.get("event")): row["enabled"]
+        for row in NotificationSetting.objects(user=user, scope__in=list(subjects)).as_pymongo()
+    }
+    under = f"{event}." if event else ""
 
     resolutions = []
     for subject, scopes in scopes_of:
@@ -278,11 +309,57 @@ def resolved_for(
             Resolution(
                 scope=subject,
                 event=event,
-                heard=not user.notifications_paused and resolve(rules, chain, scopes, held),
+                heard=resolve(rules, chain, scopes, held),
                 reasons=sorted(held),
+                muted=own.get((subject.pk, event)) is False,
+                followed_events=sorted(
+                    named
+                    for (scope_id, named), enabled in own.items()
+                    if scope_id == subject.pk and enabled and named and named.startswith(under)
+                ),
             )
         )
     return resolutions
+
+
+def set_follow(user: User, subject: Document, event: str | None, followed: bool) -> Resolution:
+    """Follow some notifications on a subject (all of them without an event), or stop,
+    and say what the user gets once done.
+
+    Following is a "concerned" rule. Stopping withdraws the user's own follow first: if
+    nothing else brings these notifications, that is enough, and the defaults of their
+    role stay untouched. Only when a role or a broader follow still brings them is "not
+    concerned" written. A follow made by udata itself, for editing the subject or taking
+    part in its discussions, is turned into a "no" rather than withdrawn: withdrawn, the
+    next edit or answer would make it again.
+
+    Stopping everything on a subject drops the follows restricted to some of its
+    notifications too: left behind, they would beat the "no".
+    """
+    key = {"user": user, "scope": subject, "event": event}
+
+    def decide(enabled: bool) -> None:
+        NotificationSetting.objects.get_or_create(
+            **key, updates={"enabled": enabled, "origin": FollowOrigin.FOLLOWED}
+        )
+
+    if followed:
+        decide(True)
+        return resolved_for(user, [subject], event)[0]
+
+    if event is None:
+        NotificationSetting.objects(user=user, scope=subject, event__ne=None).delete()
+    own = NotificationSetting.objects(**key).first()
+    if own is not None and own.enabled:
+        if own.origin == FollowOrigin.FOLLOWED:
+            own.delete()
+        else:
+            decide(False)
+    [resolution] = resolved_for(user, [subject], event)
+    if not resolution.heard:
+        return resolution
+    decide(False)
+    return resolved_for(user, [subject], event)[0]
 
 
 def visible_subject(scope):
@@ -325,7 +402,7 @@ class SubjectSummary:
 
     title: str
     page: str
-    # What to group the subject under: its organization, or itself for an organization
+    # The organization the subject belongs to, none for an organization itself
     organization: Document | None
 
 
@@ -341,7 +418,5 @@ def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
     return SubjectSummary(
         title=scope.title if isinstance(scope, Discussion) else str(subject),
         page=scope.self_web_url(),
-        organization=subject
-        if isinstance(subject, Organization)
-        else getattr(subject, "organization", None),
+        organization=getattr(subject, "organization", None),
     )
