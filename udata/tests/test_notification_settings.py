@@ -36,8 +36,10 @@ from udata.features.notifications.constants import (
     MailCadence,
     NotificationReason,
     NotificationType,
+    event_chain,
+    is_event_name,
 )
-from udata.features.notifications.events import event_chain, event_for_type, is_event_name
+from udata.features.notifications.events import event_for_type
 from udata.features.notifications.mails import notification_digest, reason_sentence
 from udata.features.notifications.models import SCOPE_MODELS, Notification
 from udata.features.notifications.settings import (
@@ -1751,6 +1753,31 @@ class NotificationFollowAPITest(APITestCase):
 
         assert response.json["heard"] is True
         assert self.rules(user) == [(dataset, None, True)]
+
+    def test_stopping_an_organization_stops_the_badges_of_an_editor(self):
+        """What the way out of a badge mail does: editors hear about badges alone, and
+        asking about every notification must not read as hearing none of them."""
+        editor = self.login()
+        organization = OrganizationFactory(editors=[editor])
+
+        response = self.put_follow(organization, False)
+        organization.add_badge(CERTIFIED)
+
+        assert response.json["heard"] is False
+        assert self.rules(editor) == [(organization, None, False)]
+        assert Notification.objects(user=editor).count() == 0
+
+    def test_a_partial_editor_does_not_hear_every_discussion_of_their_organization(self):
+        """Only those of what was assigned to them, as at dispatch."""
+        partial_editor = self.login()
+        organization = OrganizationFactory(partial_editors=[partial_editor])
+
+        [answer] = self.get(
+            "/api/1/notifications/resolved/",
+            query_string={"scope": f"Organization:{organization.id}", "event": DISCUSSIONS},
+        ).json
+
+        assert answer["heard"] is False
 
     def test_a_prefix_only_drops_the_rules_under_it(self):
         """`discussion` covers `discussion.*`, not what merely starts with the same word."""

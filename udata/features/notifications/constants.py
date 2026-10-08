@@ -35,6 +35,25 @@ class NotificationType(StrEnum):
     HARVEST_SOURCE_REFUSED = "harvest.source.refused"
 
 
+def event_chain(event: str | None) -> list[str]:
+    """What a rule about this event can name, from the narrowest to the broadest: the
+    type itself, then each of its dotted prefixes. `discussion.comment` yields
+    `["discussion.comment", "discussion"]`; a rule naming no event covers them all.
+
+    Grouping by prefix rather than by class keeps what a rule means apart from how the
+    events share their code: refactoring a base class must not change who hears what.
+    """
+    if not event:
+        return []
+    parts = event.split(".")
+    return [".".join(parts[:length]) for length in range(len(parts), 0, -1)]
+
+
+def is_event_name(event: str) -> bool:
+    """Whether a rule can name `event`: a notification type, or a prefix of some."""
+    return any(type == event or type.startswith(f"{event}.") for type in NotificationType)
+
+
 # Notifications that are resolved by acting on their subject (accepting a request,
 # validating a source) rather than by reading them. Exposed as `requires_action` so the
 # front doesn't offer to mark them as read; the API accepts it on any notification.

@@ -6,15 +6,14 @@ from flask_restx import marshal
 from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
-from udata.features.notifications.events import is_event_name
+from udata.features.notifications.constants import is_event_name
 from udata.features.notifications.permissions import EditNotificationPermission
 
 from .models import Notification
+from .resolution import resolved_for, set_follow
 from .settings import (
     NOTIFICATION_SCOPES,
     NotificationSetting,
-    resolved_for,
-    set_follow,
     set_rule,
     subject_summary_fields,
 )

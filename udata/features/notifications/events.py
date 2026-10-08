@@ -16,6 +16,7 @@ from udata.features.notifications.constants import (
     MailCadence,
     NotificationReason,
     NotificationType,
+    event_chain,
 )
 from udata.features.notifications.mails import settings_footer, way_out
 from udata.features.notifications.settings import (
@@ -142,25 +143,6 @@ def subject_scopes(subject) -> list[Document]:
         return [subject, *subject_scopes(subject.subject)]
     organization = getattr(subject, "organization", None)
     return [subject, organization] if organization else [subject]
-
-
-def event_chain(event: str | None) -> list[str]:
-    """What a rule about this event can name, from the narrowest to the broadest: the
-    type itself, then each of its dotted prefixes. `discussion.comment` yields
-    `["discussion.comment", "discussion"]`; a rule naming no event covers them all.
-
-    Grouping by prefix rather than by class keeps what a rule means apart from how the
-    events share their code: refactoring a base class must not change who hears what.
-    """
-    if not event:
-        return []
-    parts = event.split(".")
-    return [".".join(parts[:length]) for length in range(len(parts), 0, -1)]
-
-
-def is_event_name(event: str) -> bool:
-    """Whether a rule can name `event`: a notification type, or a prefix of some."""
-    return any(type == event or type.startswith(f"{event}.") for type in NotificationType)
 
 
 class NotificationEvent:
