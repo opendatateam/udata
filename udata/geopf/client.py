@@ -17,7 +17,7 @@ POLL_INTERVAL = 10  # seconds between status checks
 
 # Error response bodies are stored and re-exposed via the public status API ,
 # so bound how much of an untrusted upstream response we repeat (avoids sensitive tracebacks)
-ERROR_BODY_LIMIT = 500
+ERROR_BODY_LIMIT = 1000
 
 
 def _truncate_body(text: str) -> str:
@@ -26,36 +26,8 @@ def _truncate_body(text: str) -> str:
     return text
 
 
-# A geopf check log line, e.g. `2026-10-08 15:11:37,732INFO||cli||238||message`
-LOG_LINE_RE = re.compile(
-    r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d,\d+(?P<level>[A-Z]+)\|\|[^|]*\|\|\d+\|\|(?P<message>.*)$"
-)
-
-
-def _check_logs_lines(resp: requests.Response) -> list[str]:
-    """Lines of a check execution's logs, which geopf may return as JSON or text."""
-    try:
-        data = resp.json()
-    except ValueError:
-        return resp.text.strip().splitlines()
-    if isinstance(data, list):
-        return [line for item in data for line in str(item).splitlines()]
-    return str(data).splitlines()
-
-
-def _error_messages(lines: list[str]) -> list[str]:
-    """Messages of the ERROR log lines (with their continuation lines), the last lines if none."""
-    messages = []
-    in_error = False
-    for line in lines:
-        match = LOG_LINE_RE.match(line)
-        if match:
-            in_error = match["level"] in ("ERROR", "CRITICAL")
-            if in_error:
-                messages.append(match["message"])
-        elif in_error:
-            messages.append(line)
-    return messages or lines[-3:]
+# Timestamped INFO/DEBUG/WARNING lines of a geopf check log, e.g. `2026-10-08 15:11:37,732INFO||cli||238||...`
+LOG_NOISE_RE = re.compile(r"^\d{4}-\d\d-\d\d .*?(INFO|DEBUG|WARNING)\|\|")
 
 
 # Community rights (per GET /users/me's communities_member[].rights) needed to
@@ -185,10 +157,11 @@ class GeopfClient:
             for execution in executions:
                 resp = self.session.get(self._url(f"checks/executions/{execution['_id']}/logs"))
                 self._raise(resp)
-                logs.extend(_error_messages(_check_logs_lines(resp)))
-        except (GeopfError, ValueError, KeyError):
+                logs.extend(line for line in resp.json() if not LOG_NOISE_RE.match(line))
+        except (GeopfError, ValueError, KeyError, TypeError):
             return ""
-        return _truncate_body("\n".join(line for line in logs if line))
+        # Failure reasons come last in a check log, so list newest first to keep them under truncation
+        return _truncate_body("\n".join(line for line in reversed(logs) if line))
 
     def delete_upload(self, upload_id: str) -> None:
         resp = self.session.delete(self._url(f"uploads/{upload_id}"))

@@ -54,8 +54,8 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
             GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).create_upload(
                 "name", "description"
             )
-        assert str(exc_info.value).endswith("x" * 500 + "…")
-        assert len(str(exc_info.value)) < 600
+        assert str(exc_info.value).endswith("x" * 1000 + "…")
+        assert len(str(exc_info.value)) < 1100
 
     def test_push_file_sends_path_param(self, rmock):
         rmock.post(f"{TEST_API_URL}/uploads/u1/data", json={})
@@ -104,28 +104,40 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
     def test_failed_check_logs(self, rmock):
         rmock.get(
             f"{TEST_API_URL}/checks/executions/e1/logs",
-            text="GeoPackage invalide (nom de table invalide : secteurs-pnc)",
+            json=["GeoPackage invalide (nom de table invalide : secteurs-pnc)"],
         )
         logs = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).failed_check_logs(
             [{"_id": "e1"}]
         )
         assert logs == "GeoPackage invalide (nom de table invalide : secteurs-pnc)"
 
-    def test_failed_check_logs_keeps_only_error_lines(self, rmock):
+    def test_failed_check_logs_drops_noise_lines(self, rmock):
         rmock.get(
             f"{TEST_API_URL}/checks/executions/e1/logs",
             json=[
                 "2026-10-08 15:11:37,732INFO||cli||238||Récupération des fichiers",
+                "2026-10-08 15:11:37,740WARNING||checks_ogr||223||SRS indéterminé",
                 "2026-10-08 15:11:37,755ERROR||checks_ogr||340||nom de table invalide",
                 "detail ligne suivante",
                 "2026-10-08 15:11:37,760INFO||core||90||Fin",
             ],
         )
         client = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
-        assert (
-            client.failed_check_logs([{"_id": "e1"}])
-            == "nom de table invalide\ndetail ligne suivante"
+        assert client.failed_check_logs([{"_id": "e1"}]) == (
+            "detail ligne suivante\n"
+            "2026-10-08 15:11:37,755ERROR||checks_ogr||340||nom de table invalide"
         )
+
+    def test_failed_check_logs_truncation_keeps_last_line_whole(self, rmock):
+        last = "dernière ligne " + "x" * 100
+        rmock.get(
+            f"{TEST_API_URL}/checks/executions/e1/logs",
+            json=["première ligne " + "y" * 1000, last],
+        )
+        client = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
+        logs = client.failed_check_logs([{"_id": "e1"}])
+        assert logs.startswith(last + "\npremière ligne")
+        assert logs.endswith("…")
 
     def test_failed_check_logs_empty_on_error(self, rmock):
         rmock.get(f"{TEST_API_URL}/checks/executions/e1/logs", status_code=500)
@@ -331,9 +343,9 @@ class GeopfClientMetadataTest(PytestOnlyTestCase):
             )
 
     def test_upload_metadata_409_no_match_truncates_body(self, rmock):
-        rmock.post(f"{TEST_API_URL}/metadata", status_code=409, text="x" * 1000)
+        rmock.post(f"{TEST_API_URL}/metadata", status_code=409, text="x" * 2000)
         rmock.get(f"{TEST_API_URL}/metadata", json=[])
-        with pytest.raises(GeopfError, match="x" * 500 + "…"):
+        with pytest.raises(GeopfError, match="x" * 1000 + "…"):
             GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).upload_metadata(
                 TEST_METADATA_XML
             )
