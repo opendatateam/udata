@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-07 18:10+0200\n"
-"PO-Revision-Date: 2026-10-07 18:10+0200\n"
+"POT-Creation-Date: 2026-10-08 10:09+0200\n"
+"PO-Revision-Date: 2026-10-08 10:09+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -999,21 +999,21 @@ msgstr ""
 msgid "discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:84
+#: udata/core/discussions/notifications.py:88
 #, python-format
 msgid "%(num)d new discussion"
 msgid_plural "%(num)d new discussions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/core/discussions/notifications.py:103
+#: udata/core/discussions/notifications.py:107
 #, python-format
 msgid "%(num)d new comment"
 msgid_plural "%(num)d new comments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/core/discussions/notifications.py:133
+#: udata/core/discussions/notifications.py:137
 #, python-format
 msgid "%(num)d closed discussion"
 msgid_plural "%(num)d closed discussions"
@@ -1738,69 +1738,74 @@ msgstr ""
 msgid "chart"
 msgstr ""
 
-#: udata/features/notifications/mails.py:46
+#: udata/features/notifications/mails.py:38
+#, python-format
+msgid "%(subject)s: %(counts)s"
+msgstr ""
+
+#: udata/features/notifications/mails.py:50
 #, python-format
 msgid "%(num)d update on what you follow"
 msgid_plural "%(num)d updates on what you follow"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/features/notifications/mails.py:49
+#: udata/features/notifications/mails.py:53
 msgid "Here is what happened on what you follow since our last message."
 msgstr ""
 
-#: udata/features/notifications/mails.py:51
+#: udata/features/notifications/mails.py:55
 msgid "See all my notifications"
 msgstr ""
 
-#: udata/features/notifications/mails.py:66
+#: udata/features/notifications/mails.py:70
 #, python-format
 msgid "You receive this email because you own %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:69
+#: udata/features/notifications/mails.py:73
 #, python-format
 msgid "You receive this email because you administer %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:74
+#: udata/features/notifications/mails.py:78
 #, python-format
 msgid "You receive this email because you are an editor of %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:81
+#: udata/features/notifications/mails.py:85
 #, python-format
 msgid "You receive this email because you are a partial editor of %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:86
+#: udata/features/notifications/mails.py:90
 #, python-format
 msgid "You receive this email because %(subject)s is assigned to you."
 msgstr ""
 
-#: udata/features/notifications/mails.py:90
+#: udata/features/notifications/mails.py:94
 msgid "You receive this email because you take part in this discussion."
 msgstr ""
 
-#: udata/features/notifications/mails.py:92
+#: udata/features/notifications/mails.py:96
 #, python-format
 msgid "You receive this email because you follow %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:94
+#: udata/features/notifications/mails.py:98
 #, python-format
 msgid "You receive this email because you edited %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:96
+#: udata/features/notifications/mails.py:100
 msgid "You receive this email because you made this request."
 msgstr ""
 
-#: udata/features/notifications/mails.py:98
+#: udata/features/notifications/mails.py:102
 msgid "You receive this email because you administer the site."
 msgstr ""
 
-#: udata/features/notifications/mails.py:106
+#: udata/features/notifications/mails.py:110
 msgid "Manage or turn off these notifications"
 msgstr ""
 

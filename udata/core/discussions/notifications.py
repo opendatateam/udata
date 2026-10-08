@@ -11,6 +11,7 @@ from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.events import NotificationEvent, subject_scopes
 from udata.i18n import ngettext
+from udata.mail import Link
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,10 @@ class DiscussionEvent(NotificationEvent):
 
     @classmethod
     def digest_subject(cls, details):
-        return details.discussion.id, details.discussion.title
+        # The thread is grouped under what it is about: a count of new discussions only
+        # makes sense there, and that is where the reader goes to read them.
+        subject = details.discussion.subject
+        return subject.id, Link(str(subject), subject.self_web_url(append="/discussions"))
 
 
 class NewDiscussion(DiscussionEvent):

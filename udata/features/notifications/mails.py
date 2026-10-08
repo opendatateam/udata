@@ -6,7 +6,7 @@ from flask_babel import LazyString
 from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.i18n import lazy_gettext as _
 from udata.i18n import lazy_ngettext
-from udata.mail import LabelledContent, MailCTA, MailMessage
+from udata.mail import Link, MailCTA, MailMessage, ParagraphWithLinks
 from udata.uris import cdata_url
 
 if TYPE_CHECKING:
@@ -25,18 +25,22 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
 
     # Insertion order keeps the oldest subject first, which is the order the queue was
     # read in.
-    titles: dict[object, str] = {}
+    links: dict[object, Link] = {}
     counts: dict[object, Counter[NotificationType]] = {}
     for notification in notifications:
-        key, title = event_for_type(notification.type).digest_subject(notification.details)
-        titles.setdefault(key, title)
+        key, link = event_for_type(notification.type).digest_subject(notification.details)
+        links.setdefault(key, link)
         counts.setdefault(key, Counter())[notification.type] += 1
 
     lines = [
-        LabelledContent(
-            titles[key],
-            ", ".join(event_for_type(type).digest_count(count) for type, count in by_type.items()),
-            inline=True,
+        ParagraphWithLinks(
+            _(
+                "%(subject)s: %(counts)s",
+                subject=links[key],
+                counts=", ".join(
+                    event_for_type(type).digest_count(count) for type, count in by_type.items()
+                ),
+            )
         )
         for key, by_type in counts.items()
     ]

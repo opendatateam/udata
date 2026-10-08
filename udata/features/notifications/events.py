@@ -22,7 +22,7 @@ from udata.features.notifications.settings import (
     rules_for,
     subscribers_for,
 )
-from udata.mail import MailMessage
+from udata.mail import Link, MailMessage
 
 log = logging.getLogger(__name__)
 
@@ -205,9 +205,9 @@ class NotificationEvent:
     digest_count: Callable[[int], str] | None = None
 
     @classmethod
-    def digest_subject(cls, details) -> tuple[object, str]:
-        """What a digest line is about, as a key to group on and a title: the digest
-        writes one line per subject rather than one per notification."""
+    def digest_subject(cls, details) -> tuple[object, Link]:
+        """What a digest line is about, as a key to group on and a link to it: the
+        digest writes one line per subject rather than one per notification."""
         raise NotImplementedError
 
     @property

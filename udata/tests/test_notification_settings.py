@@ -972,7 +972,7 @@ class DigestTest(PytestOnlyDBTestCase):
 
         [digest] = mails
         assert digest.recipients == [admin.email]
-        assert digest.body.index(older.title) < digest.body.index(newer.title)
+        assert digest.body.index(older.subject.title) < digest.body.index(newer.subject.title)
         assert Notification.objects(user=admin, channels=MAIL).count() == 0
 
     def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
@@ -1027,24 +1027,24 @@ class DigestTest(PytestOnlyDBTestCase):
         assert notification.channels == [APP]
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
-    def test_repeated_events_on_one_subject_collapse_into_a_single_line(self):
+    def test_the_threads_of_one_subject_collapse_into_a_single_line(self):
+        """A count of new discussions only means something for what they are about."""
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
         organization = OrganizationFactory(admins=[admin])
         dataset = DatasetFactory(organization=organization)
-        discussion = DiscussionFactory(
-            subject=dataset, user=UserFactory(), discussion=[MessageDiscussionFactory()]
-        )
-        discussion.signal_new()
+        discussion = open_discussion(dataset)
+        open_discussion(dataset)
         for _index in range(3):
             comment(discussion)
 
         pending = list(Notification.objects(user=admin, channels=MAIL).order_by("created_at"))
-        assert len(pending) == 4
+        assert len(pending) == 5
 
         message = notification_digest(pending)
         assert len(message.paragraphs) == 3  # intro, one line, CTA
-        assert message.paragraphs[1].label == discussion.title
-        assert message.paragraphs[1].content == "1 new discussion, 3 new comments"
+        line = message.paragraphs[1]
+        assert str(line) == f"{dataset.title}: 2 new discussions, 3 new comments"
+        assert f'href="{dataset.self_web_url(append="/discussions")}"' in line.html
 
     def test_running_the_digest_twice_sends_nothing_twice(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
