@@ -1483,6 +1483,24 @@ class NotificationResolvedAPITest(APITestCase):
             query.append(("event", event))
         return self.get("/api/1/notifications/resolved/", query_string=query)
 
+    def test_the_subject_is_named_as_the_user_may_see_it(self):
+        """What a mail link names is read back from here: a private subject keeps its
+        title."""
+        self.login()
+        organization = OrganizationFactory()
+        visible = DatasetFactory(organization=organization)
+        private = DatasetFactory(organization=organization, private=True)
+
+        answers = self.resolved([visible, private]).json
+
+        assert answers[0]["subject"] == {
+            "title": visible.title,
+            "page": visible.self_web_url(),
+            "organization": answers[0]["subject"]["organization"],
+        }
+        assert answers[0]["subject"]["organization"]["id"] == str(organization.id)
+        assert answers[1]["subject"] is None
+
     def test_following_what_one_cannot_read_brings_nothing(self):
         """As at dispatch, which leaves out the followers who may not read the subject."""
         outsider = self.login()
@@ -1569,7 +1587,9 @@ class NotificationResolvedAPITest(APITestCase):
     def test_nothing_concerns_an_outsider(self):
         self.login()
 
-        [answer] = self.resolved([DatasetFactory()], DISCUSSIONS).json
+        dataset = DatasetFactory()
+
+        [answer] = self.resolved([dataset], DISCUSSIONS).json
 
         assert answer == {
             "scope": answer["scope"],
@@ -1578,6 +1598,7 @@ class NotificationResolvedAPITest(APITestCase):
             "reasons": [],
             "muted": False,
             "followed_events": [],
+            "subject": {"title": dataset.title, "page": None, "organization": None},
         }
 
     def test_an_ignored_thread_resolves_to_nothing(self):

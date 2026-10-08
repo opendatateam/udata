@@ -39,6 +39,23 @@ class SubjectSummary:
     organization: Document | None
 
 
+def subject_summary(scope) -> SubjectSummary | None:
+    """What the current user may see of `scope`. A rule outlives the access to its
+    subject: a dataset can turn private after one's departure from its organization, and
+    its title must not leak through the list of what one follows, nor through a mail link
+    naming it."""
+    if scope is None:
+        return None
+    subject, read = read_permission(scope)
+    if read is not None and not read.can():
+        return None
+    return SubjectSummary(
+        title=scope.title if isinstance(scope, Discussion) else str(subject),
+        page=scope.self_web_url(),
+        organization=getattr(subject, "organization", None),
+    )
+
+
 subject_summary_fields = api.model(
     "NotificationSubjectSummary",
     {
@@ -138,19 +155,7 @@ class NotificationSetting(UDataDocument):
         description="The subject as the user may see it today, null once out of reach",
     )
     def subject(self) -> SubjectSummary | None:
-        """A rule outlives the access to its subject: a dataset can turn private after
-        one's departure from its organization, and its title must not leak through the
-        list of what one follows."""
-        if self.scope is None:
-            return None
-        subject, read = read_permission(self.scope)
-        if read is not None and not read.can():
-            return None
-        return SubjectSummary(
-            title=self.scope.title if isinstance(self.scope, Discussion) else str(subject),
-            page=self.scope.self_web_url(),
-            organization=getattr(subject, "organization", None),
-        )
+        return subject_summary(self.scope)
 
     def clean(self):
         # `events` builds on this module, hence the import at call time.
@@ -327,6 +332,10 @@ class Resolution:
     # The narrower events the user still follows on exactly this subject: hearing about
     # some of its notifications only reads as `heard` when asking about each of them.
     followed_events: list[str]
+
+    @property
+    def subject(self) -> SubjectSummary | None:
+        return subject_summary(self.scope)
 
 
 def resolved_for(

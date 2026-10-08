@@ -16,6 +16,7 @@ from .settings import (
     resolved_for,
     set_follow,
     set_rule,
+    subject_summary_fields,
 )
 
 notifs = api.namespace("notifications", "Notifications API")
@@ -92,6 +93,11 @@ resolved_fields = api.model(
         "muted": fields.Boolean(description="Whether the user said no to this subject and event"),
         "followed_events": fields.List(
             fields.String, description="The narrower events the user still follows on it"
+        ),
+        "subject": fields.Nested(
+            subject_summary_fields,
+            allow_null=True,
+            description="The subject as the user may see it, null when out of reach",
         ),
     },
 )
