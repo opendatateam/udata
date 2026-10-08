@@ -1,9 +1,17 @@
+import pytest
 from mongoengine.connection import get_db
 
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import (
+    MembershipRequestNotificationDetails,
+    NewBadgeNotificationDetails,
+)
 from udata.core.user.factories import UserFactory
 from udata.db.migrations import load_migration
 from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.models import Notification
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.tests.api import PytestOnlyDBTestCase
 
 
@@ -81,56 +89,42 @@ class SetNotificationTypeMigrationTest(PytestOnlyDBTestCase):
         assert self.stored(notification) == first
 
 
-class DropNotificationStatusAndKindMigrationTest(PytestOnlyDBTestCase):
-    def insert(self, details):
-        return (
-            get_db()
-            .notification.insert_one({"user": UserFactory().id, "details": details})
-            .inserted_id
+class PreviousReleaseNotificationTest(PytestOnlyDBTestCase):
+    """While this release is deployed, workers still on the previous one keep writing
+    `details.status` and `details.kind`: the notifications they write must load."""
+
+    @pytest.mark.parametrize(
+        "notification_type,details,field_name,value",
+        [
+            (NotificationType.DISCUSSION_CLOSED, DiscussionNotificationDetails, "status", "closed"),
+            (
+                NotificationType.HARVEST_SOURCE_PENDING,
+                ValidateHarvesterNotificationDetails,
+                "status",
+                "pending",
+            ),
+            (
+                NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
+                MembershipRequestNotificationDetails,
+                "kind",
+                "invitation",
+            ),
+            (
+                NotificationType.ORGANIZATION_BADGE_CERTIFIED,
+                NewBadgeNotificationDetails,
+                "kind",
+                "certified",
+            ),
+        ],
+    )
+    def test_a_notification_written_by_the_previous_release_loads(
+        self, notification_type, details, field_name, value
+    ):
+        notification = Notification(
+            user=UserFactory(), type=notification_type, details=details()
+        ).save()
+        get_db().notification.update_one(
+            {"_id": notification.id}, {"$set": {f"details.{field_name}": value}}
         )
 
-    def stored(self, notification_id):
-        return get_db().notification.find_one({"_id": notification_id})["details"]
-
-    def test_the_old_discriminators_are_dropped_and_the_rest_kept(self):
-        organization = OrganizationFactory().id
-        discussion = self.insert(
-            {"_cls": "DiscussionNotificationDetails", "status": "closed", "discussion": None}
-        )
-        harvester = self.insert(
-            {"_cls": "ValidateHarvesterNotificationDetails", "status": "pending", "source": None}
-        )
-        request = self.insert(
-            {"_cls": "MembershipRequestNotificationDetails", "kind": "invitation"}
-        )
-        badge = self.insert(
-            {
-                "_cls": "NewBadgeNotificationDetails",
-                "kind": "certified",
-                "organization": organization,
-            }
-        )
-
-        load_migration("2026-10-07-drop-notification-status-and-kind.py").migrate(get_db())
-
-        assert self.stored(discussion) == {
-            "_cls": "DiscussionNotificationDetails",
-            "discussion": None,
-        }
-        assert self.stored(harvester) == {
-            "_cls": "ValidateHarvesterNotificationDetails",
-            "source": None,
-        }
-        assert self.stored(request) == {"_cls": "MembershipRequestNotificationDetails"}
-        assert self.stored(badge) == {
-            "_cls": "NewBadgeNotificationDetails",
-            "organization": organization,
-        }
-
-    def test_a_field_of_another_details_class_is_left_alone(self):
-        """`status` and `kind` are only dropped where they were discriminators."""
-        other = self.insert({"_cls": "TransferRequestNotificationDetails", "status": "kept"})
-
-        load_migration("2026-10-07-drop-notification-status-and-kind.py").migrate(get_db())
-
-        assert self.stored(other)["status"] == "kept"
+        assert Notification.objects.get(id=notification.id).type == notification_type

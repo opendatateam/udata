@@ -16,8 +16,6 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class DataserviceCreatedNotificationDetails(EmbeddedDocument):
-    types = frozenset({NotificationType.DATASERVICE_CREATED})
-
     dataservice = field(
         ReferenceField(Dataservice),
         readonly=True,

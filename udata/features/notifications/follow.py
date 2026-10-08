@@ -22,9 +22,12 @@ def follow_worked_on(user: User, subject, origin: FollowOrigin) -> None:
 
     Nothing is announced: the way out comes with the first notification it brings, when
     it is something to decide about.
+
+    Sysadmins are left out: they edit and answer on behalf of the platform, not of the
+    organizations they happen to belong to.
     """
     organization = getattr(subject, "organization", None)
-    if organization is None or not organization.is_member(user):
+    if organization is None or not organization.is_member(user) or user.sysadmin:
         return
     if NotificationSetting.objects(user=user, scope=subject).first():
         return

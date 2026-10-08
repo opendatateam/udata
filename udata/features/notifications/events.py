@@ -7,6 +7,7 @@ from bson import ObjectId
 from flask_babel import LazyString
 from mongoengine import Document, EmbeddedDocument
 
+from udata.core.discussions.models import Discussion
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
@@ -105,11 +106,29 @@ def responsible_recipients(subject) -> list[Recipient]:
     return []
 
 
+def discussion_recipients(discussion) -> list[Recipient]:
+    """Who should hear about a discussion, and on what ground: whoever took part in it,
+    and whoever is answerable for its subject.
+
+    Somebody can qualify twice over — having answered in a thread about a dataset of the
+    organization they administer — and both grounds are kept: the most generous one
+    decides what they get, and an explanation naming only one of them would offer a way
+    out that does not stop anything.
+    """
+    return merge_recipients(
+        [
+            *(
+                Recipient(message.posted_by, frozenset({NotificationReason.DISCUSSION_PARTICIPANT}))
+                for message in discussion.discussion
+            ),
+            *responsible_recipients(discussion.subject),
+        ]
+    )
+
+
 def subject_scopes(subject) -> list[Document]:
     """What a rule about this subject can be taken on, most specific first: a thread,
     then what it is about, then the organization behind it."""
-    from udata.core.discussions.models import Discussion
-
     if isinstance(subject, Discussion):
         return [subject, *subject_scopes(subject.subject)]
     organization = getattr(subject, "organization", None)

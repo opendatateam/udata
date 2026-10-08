@@ -2,16 +2,13 @@ from datetime import datetime
 
 from flask import request
 from flask_restx import marshal
-from mongoengine import ValidationError
 
-from udata.api import API, api, fields
+from udata.api import API, add_pagination_arguments, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import FollowOrigin
 from udata.features.notifications.events import is_event_name
 from udata.features.notifications.permissions import EditNotificationPermission
-from udata.mongo import db
 
 from .models import Notification
 from .settings import (
@@ -19,6 +16,7 @@ from .settings import (
     NotificationSetting,
     resolved_for,
     set_follow,
+    set_rule,
     subject_summary,
 )
 
@@ -65,17 +63,32 @@ listed_setting_fields = api.inherit(
 )
 
 
+listed_settings_page_fields = api.model(
+    "NotificationSettingListedPage", fields.pager(listed_setting_fields)
+)
+
+# Paginated: editing or answering follows a subject, so the rules of a busy account
+# keep growing, and each one reads its subject back.
+settings_parser = add_pagination_arguments(api.parser(), page_size=50)
+
+
 @notifs.route("/settings/", endpoint="notification_settings")
 class NotificationSettingsAPI(API):
     @api.secure
     @api.doc("list_notification_settings")
-    @api.marshal_list_with(listed_setting_fields)
+    @api.expect(settings_parser)
+    @api.marshal_with(listed_settings_page_fields)
     def get(self):
-        """List the rules the current user set about their notifications.
+        """List the rules the current user set about their notifications, latest first.
 
         Only rules are listed: whatever no rule covers follows the default rules. What
         they add up to is given by `/notifications/resolved/`."""
-        return list(NotificationSetting.objects(user=current_user.id))
+        args = settings_parser.parse_args()
+        return (
+            NotificationSetting.objects(user=current_user.id)
+            .order_by("-id")
+            .paginate(args["page"], args["page_size"])
+        )
 
     @api.secure
     @api.doc("set_notification_setting")
@@ -89,20 +102,13 @@ class NotificationSettingsAPI(API):
         """Set a rule about some notifications, or remove it with `enabled: null`.
 
         A rule is identified by its subject and event, either of them possibly null:
-        setting it again replaces the previous answer."""
+        setting it again replaces the previous answer. Removing a follow udata made by
+        itself (for editing a subject or answering about it) turns it into a "no", which
+        comes back as a 200: removed, the next edit or answer would make it again."""
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
-        key = {
-            "user": rule.user,
-            "scope": rule.scope,
-            "event": rule.event,
-        }
-        if rule.enabled is None:
-            NotificationSetting.objects(**key).delete()
+        setting, created = set_rule(rule.user, rule.scope, rule.event, rule.enabled)
+        if setting is None:
             return "", 204
-        # Set by the user themselves: a follow created by an edit becomes their own.
-        setting, created = NotificationSetting.objects.get_or_create(
-            **key, updates={"enabled": rule.enabled, "origin": FollowOrigin.FOLLOWED}
-        )
         # Marshalled here rather than by `marshal_with`, which would also run the subject
         # of the empty 204 body through `subject_summary`.
         return marshal(setting, listed_setting_fields), 201 if created else 200
@@ -145,16 +151,11 @@ resolved_parser.add_argument(
 
 
 def parse_subject(value: str):
-    cls, _, id = value.partition(":")
-    if cls not in NOTIFICATION_SCOPES:
-        api.abort(400, "Unknown subject")
-    try:
-        subject = db.resolve_model(cls).objects(id=id).first()
-    except ValidationError:
-        subject = None
-    if subject is None:
-        api.abort(400, "Unknown subject")
-    return subject
+    """A subject named `Class:id` in a query string, checked as one in a body."""
+    class_name, _, id = value.partition(":")
+    return api.resolve_reference(
+        {"scope": {"class": class_name, "id": id}}, "scope", NOTIFICATION_SCOPES
+    )
 
 
 @notifs.route("/resolved/", endpoint="notification_resolved")
@@ -210,15 +211,15 @@ class NotificationFollowAPI(API):
         Which rules to write or withdraw depends on how they rank, which is the server's
         to know: stopping withdraws one's own follow, and only says no when a role or a
         broader follow still brings the notifications in."""
-        payload = request.get_json(silent=True) or {}
-        scope, event = payload.get("scope") or {}, payload.get("event")
+        payload = api.json_payload()
+        event = payload.get("event")
         if not isinstance(payload.get("followed"), bool):
-            api.abort(400, "`followed` is required")
-        if event is not None and not is_event_name(event):
-            api.abort(400, "Unknown event")
+            api.abort(400, errors={"followed": "Expected true or false"})
+        if event is not None and (not isinstance(event, str) or not is_event_name(event)):
+            api.abort(400, errors={"event": "Unknown event"})
         return set_follow(
             current_user._get_current_object(),
-            parse_subject(f"{scope.get('class')}:{scope.get('id')}"),
+            api.resolve_reference(payload, "scope", NOTIFICATION_SCOPES),
             event,
             payload["followed"],
         )

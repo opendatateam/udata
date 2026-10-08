@@ -2,13 +2,14 @@
 Make every member who edited a dataset, a reuse or a dataservice of their organization,
 or took part in the discussions of one of its subjects, follow it, as doing so now does.
 
-The activities are the only record of who edited what. Only the activities of a user
-count: once an activity can be attributed to the API token that performed it, the
-edits made by a script are left out, as they are at edit time.
+The activities are the only record of who edited what, and they do not tell an edit made
+by hand from one made by a script through an API key: both are attributed to the user.
+Unlike at edit time, the accounts that publish through a script are therefore made to
+follow what they published.
 
 Membership is read as it is now, not as it was then: someone who left the organization
-long ago does not start hearing about it again. Sysadmins are left out: they edit and
-answer on behalf of the platform, not of the organizations they happen to belong to.
+long ago does not start hearing about it again. Who is left out otherwise is the same
+as at edit time (see `follow_worked_on`).
 """
 
 import logging
@@ -100,7 +101,7 @@ def migrate(db):
         subject_deleted = subject is not None and (
             getattr(subject, "deleted", None) or getattr(subject, "deleted_at", None)
         )
-        if user is None or user.deleted or user.sysadmin or subject is None or subject_deleted:
+        if user is None or user.deleted or subject is None or subject_deleted:
             continue
         follow_worked_on(user, subject, origin)
 

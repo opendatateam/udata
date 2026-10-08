@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from bson import DBRef, ObjectId
@@ -38,8 +38,9 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.db.migrations import load_migration
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import MailCadence, NotificationType
 from udata.features.notifications.models import Notification
+from udata.features.notifications.tasks import send_notification_digests
 from udata.models import Dataset, License, Member
 from udata.mongo import db
 from udata.tests.helpers import capture_mails
@@ -2147,6 +2148,30 @@ class DiscussionExternalNotificationTest(APITestCase):
         # The subject type label comes from the Topic's verbose_name.
         assert "collection" in mail.subject
         assert f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in mail.body
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_a_digest_links_to_the_external_page_too(self):
+        """Mailed in a digest rather than at once, the thread still leads to the platform
+        it is displayed on, at the subject level the digest groups by."""
+        owner = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        user = UserFactory()
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[Message(content=faker.sentence(), posted_by=user)],
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
+        )
+        notify_new_discussion(discussion.id)
+        Notification.objects(user=owner).update(
+            set__created_at=datetime.now(UTC) - timedelta(days=8)
+        )
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mails
+        assert 'href="https://eco.example.com/bouquets/foo/"' in mail.html
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_notify_topic_without_external_url_links_to_canonical_page(self):

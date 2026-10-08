@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-08 10:54+0200\n"
+"POT-Creation-Date: 2026-10-08 15:00+0200\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
@@ -284,7 +284,7 @@ msgstr "Само себе можете да означите као власни
 msgid "Unknown organization"
 msgstr "Непозната организација"
 
-#: udata/core/discussions/models.py:233 udata/core/owned.py:84
+#: udata/core/discussions/models.py:225 udata/core/owned.py:84
 #: udata/forms/fields.py:754 udata/tests/api/test_dataservices_api.py:616
 msgid "Permission denied for this organization"
 msgstr "Дозвола ја ову организацију је одбијена"
@@ -488,7 +488,7 @@ msgstr "Датум креирања"
 msgid "Last modification date"
 msgstr "Датум последње измене"
 
-#: udata/core/dataservices/notifications.py:44
+#: udata/core/dataservices/notifications.py:42
 msgid "New APIs"
 msgstr ""
 
@@ -998,23 +998,23 @@ msgstr ""
 msgid "View the discussion"
 msgstr ""
 
-#: udata/core/discussions/models.py:70
+#: udata/core/discussions/models.py:62
 msgid "message"
 msgstr ""
 
-#: udata/core/discussions/models.py:273
+#: udata/core/discussions/models.py:265
 msgid "discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:80
+#: udata/core/discussions/notifications.py:81
 msgid "Stop following this discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:94
+#: udata/core/discussions/notifications.py:98
 msgid "New discussions"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:97
+#: udata/core/discussions/notifications.py:101
 #, python-format
 msgid "%(num)d new discussion"
 msgid_plural "%(num)d new discussions"
@@ -1022,11 +1022,11 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: udata/core/discussions/notifications.py:114
+#: udata/core/discussions/notifications.py:118
 msgid "Replies to discussions"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:117
+#: udata/core/discussions/notifications.py:121
 #, python-format
 msgid "%(num)d new comment"
 msgid_plural "%(num)d new comments"
@@ -1034,11 +1034,11 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: udata/core/discussions/notifications.py:145
+#: udata/core/discussions/notifications.py:149
 msgid "Closed discussions"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:148
+#: udata/core/discussions/notifications.py:152
 #, python-format
 msgid "%(num)d closed discussion"
 msgid_plural "%(num)d closed discussions"
@@ -1371,15 +1371,15 @@ msgstr ""
 msgid "organization"
 msgstr ""
 
-#: udata/core/organization/notifications.py:116
+#: udata/core/organization/notifications.py:111
 msgid "Badges of the organization"
 msgstr ""
 
-#: udata/core/organization/notifications.py:223
+#: udata/core/organization/notifications.py:212
 msgid "Accepted memberships"
 msgstr ""
 
-#: udata/core/organization/notifications.py:234
+#: udata/core/organization/notifications.py:223
 msgid "Refused memberships"
 msgstr ""
 
@@ -1566,7 +1566,7 @@ msgstr "Овај URL је већ регистрован"
 msgid "reuse"
 msgstr "пример употребе"
 
-#: udata/core/reuse/notifications.py:44
+#: udata/core/reuse/notifications.py:42
 msgid "New reuses"
 msgstr ""
 
@@ -1789,90 +1789,90 @@ msgstr "Модератор сајта"
 msgid "chart"
 msgstr ""
 
-#: udata/features/notifications/events.py:301
+#: udata/features/notifications/events.py:328
 #, python-format
 msgid "Receive nothing more about %(subject)s"
 msgstr ""
 
-#: udata/features/notifications/events.py:305
+#: udata/features/notifications/events.py:332
 #, python-format
 msgid "Stop receiving: %(type)s"
 msgstr ""
 
-#: udata/features/notifications/mails.py:38
+#: udata/features/notifications/mails.py:39
 #, python-format
 msgid "%(subject)s: %(counts)s"
 msgstr ""
 
-#: udata/features/notifications/mails.py:50
+#: udata/features/notifications/mails.py:51
 #, python-format
-msgid "%(num)d update on what you follow"
-msgid_plural "%(num)d updates on what you follow"
+msgid "Updates on an item you follow"
+msgid_plural "Updates on %(num)d items you follow"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: udata/features/notifications/mails.py:53
+#: udata/features/notifications/mails.py:56
 msgid "Here is what happened on what you follow since our last message."
 msgstr ""
 
-#: udata/features/notifications/mails.py:69
+#: udata/features/notifications/mails.py:70
 #, python-format
 msgid "You receive this email because you own %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:72
+#: udata/features/notifications/mails.py:73
 #, python-format
 msgid "You receive this email because you administer %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:77
+#: udata/features/notifications/mails.py:78
 #, python-format
 msgid "You receive this email because you are an editor of %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:84
+#: udata/features/notifications/mails.py:85
 #, python-format
 msgid ""
 "You receive this email because you are a partial editor of "
 "%(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:89
+#: udata/features/notifications/mails.py:90
 #, python-format
 msgid "You receive this email because %(subject)s is assigned to you."
 msgstr ""
 
-#: udata/features/notifications/mails.py:93
+#: udata/features/notifications/mails.py:94
 msgid "You receive this email because you take part in this discussion."
 msgstr ""
 
-#: udata/features/notifications/mails.py:95
+#: udata/features/notifications/mails.py:96
 #, python-format
 msgid "You receive this email because you follow %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:97
+#: udata/features/notifications/mails.py:98
 #, python-format
 msgid "You receive this email because you edited %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:100
+#: udata/features/notifications/mails.py:101
 #, python-format
 msgid ""
 "You receive this email because you took part in the discussions of "
 "%(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:104
+#: udata/features/notifications/mails.py:105
 msgid "You receive this email because you made this request."
 msgstr ""
 
-#: udata/features/notifications/mails.py:106
+#: udata/features/notifications/mails.py:107
 msgid "You receive this email because you administer the site."
 msgstr ""
 
-#: udata/features/notifications/mails.py:130
+#: udata/features/notifications/mails.py:131
 msgid "Manage your notifications"
 msgstr ""
 
@@ -1997,11 +1997,11 @@ msgstr "Прескочено"
 msgid "Archived"
 msgstr "Архивирано"
 
-#: udata/harvest/notifications.py:90
+#: udata/harvest/notifications.py:89
 msgid "Validated harvesters"
 msgstr ""
 
-#: udata/harvest/notifications.py:95
+#: udata/harvest/notifications.py:94
 msgid "Refused harvesters"
 msgstr ""
 
@@ -2441,4 +2441,10 @@ msgstr ""
 
 #~ msgid "Stop receiving this type of notification"
 #~ msgstr ""
+
+#~ msgid "%(num)d update on what you follow"
+#~ msgid_plural "%(num)d updates on what you follow"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgstr[2] ""
 

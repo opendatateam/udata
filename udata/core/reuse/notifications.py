@@ -16,8 +16,6 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class ReuseCreatedNotificationDetails(EmbeddedDocument):
-    types = frozenset({NotificationType.REUSE_CREATED})
-
     reuse = field(
         ReferenceField(Reuse),
         readonly=True,

@@ -28,14 +28,6 @@ from udata.core.linkable import Linkable
 from udata.core.organization.models import Organization
 from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.core.spam.models import SpamMixin, spam_protected
-from udata.features.notifications.constants import (
-    NotificationReason,
-)
-from udata.features.notifications.events import (
-    Recipient,
-    merge_recipients,
-    responsible_recipients,
-)
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
@@ -426,13 +418,24 @@ class Discussion(SpamMixin, Linkable, Document):
         migrations), or a config change tightening the allow-list could all
         leave an unsafe URL in storage.
         """
+        external_url = self._notification_external_url()
+        if external_url:
+            return f"{external_url}#discussion-{self.id}"
+        return self.url_for()
+
+    @property
+    def subject_notification_url(self):
+        """URL to point to in a notification about the discussions of the subject as a
+        whole, such as a digest line: the same platform as `notification_url`, without
+        pointing at this thread."""
+        return self._notification_external_url() or self.subject.self_web_url(append="/discussions")
+
+    def _notification_external_url(self) -> str | None:
         # Raw DB writes (imports, migrations) bypassing mongoengine validation
         # can leave `notification` set to `None`, hence the `or {}` coercion.
         notification = (self.extras or {}).get("notification") or {}
         meta_url = notification.get("external_url")
-        if is_valid_notification_external_url(meta_url):
-            return f"{meta_url}#discussion-{self.id}"
-        return self.url_for()
+        return meta_url if is_valid_notification_external_url(meta_url) else None
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
@@ -440,26 +443,6 @@ class Discussion(SpamMixin, Linkable, Document):
             message += f" de [{self.user.fullname}]({self.user.url_for()})"
 
         return message
-
-    def owner_recipients(self) -> list[Recipient]:
-        """Who should hear about this discussion, and on what ground.
-
-        Somebody can qualify twice over — having answered in a thread about a dataset
-        of the organization they administer — and both grounds are kept: the most
-        generous one decides what they get, and an explanation naming only one of them
-        would offer a way out that does not stop anything.
-        """
-        return merge_recipients(
-            [
-                *(
-                    Recipient(
-                        message.posted_by, frozenset({NotificationReason.DISCUSSION_PARTICIPANT})
-                    )
-                    for message in self.discussion
-                ),
-                *responsible_recipients(self.subject),
-            ]
-        )
 
     @spam_protected()
     def signal_new(self):

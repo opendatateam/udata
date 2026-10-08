@@ -48,7 +48,9 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
 
     return MailMessage(
         subject=lazy_ngettext(
-            "%(num)d update on what you follow", "%(num)d updates on what you follow", len(lines)
+            "Updates on an item you follow",
+            "Updates on %(num)d items you follow",
+            len(lines),
         ),
         paragraphs=[
             _("Here is what happened on what you follow since our last message."),

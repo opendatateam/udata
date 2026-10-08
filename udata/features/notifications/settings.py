@@ -15,6 +15,7 @@ from mongoengine.fields import (
 from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
+from udata.core.discussions.models import Discussion
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin, NotificationReason
@@ -72,9 +73,9 @@ class NotificationSetting(UDataDocument):
         "`discussion.*`), null for every notification",
     )
     enabled = field(BooleanField(required=True))
-    # Only meaningful for a follow (a subject, yes): what made the
-    # user follow, hence why they hear about it. Back to `FOLLOWED` as soon as the user
-    # sets the rule themselves.
+    # Only meaningful for a follow, that is a "yes" on a subject: what made the user
+    # follow it, hence why they hear about it. Back to `FOLLOWED` as soon as the user sets
+    # the rule themselves.
     origin = field(
         EnumField(FollowOrigin, default=FollowOrigin.FOLLOWED),
         readonly=True,
@@ -104,6 +105,7 @@ class Rule:
     enabled: bool
     scope: ObjectId | None = None
     event: str | None = None
+    origin: FollowOrigin = FollowOrigin.FOLLOWED
 
 
 # What editors still hear about by default: rare, and about the organization as a whole
@@ -151,6 +153,7 @@ def rules_for(
                 scope=scope["_ref"].id if scope else None,
                 event=row.get("event"),
                 enabled=row["enabled"],
+                origin=FollowOrigin(row.get("origin", FollowOrigin.FOLLOWED)),
             )
         )
     return rules
@@ -226,7 +229,7 @@ REASON_BY_ORIGIN = {
 }
 
 
-def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
+def follows(events: Sequence[str], scopes: Sequence[Document]):
     """The follows of these subjects for this event: a subject, yes. A rule
     without a subject is left out on purpose: "everywhere" means "everywhere I am
     already concerned", not "subscribe me to the whole site"."""
@@ -234,7 +237,6 @@ def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
         Q(event=None) | Q(event__in=events),
         scope__in=scopes,
         enabled=True,
-        **filters,
     )
 
 
@@ -269,8 +271,8 @@ def resolved_for(
     shown as such. Following or not is still worth showing, and changing, meanwhile.
     """
     # `events` builds on this module, hence the import at call time.
-    from udata.core.discussions.models import Discussion
     from udata.features.notifications.events import (
+        discussion_recipients,
         event_chain,
         responsible_recipients,
         subject_scopes,
@@ -292,18 +294,20 @@ def resolved_for(
     resolutions = []
     for subject, scopes in scopes_of:
         recipients = (
-            subject.owner_recipients()
+            discussion_recipients(subject)
             if isinstance(subject, Discussion)
             else responsible_recipients(subject)
         )
+        scope_ids = {scope.id for scope in scopes}
         held = {
             reason
             for recipient in recipients
             if recipient.key == user.id
             for reason in recipient.reasons
         } | {
-            REASON_BY_ORIGIN[setting.origin]
-            for setting in follows(chain, scopes, user=user).only("origin")
+            REASON_BY_ORIGIN[rule.origin]
+            for rule in rules
+            if rule.enabled and rule.scope in scope_ids
         }
         resolutions.append(
             Resolution(
@@ -322,6 +326,29 @@ def resolved_for(
     return resolutions
 
 
+def set_rule(
+    user: User, scope: Document | None, event: str | None, enabled: bool | None
+) -> tuple[NotificationSetting | None, bool]:
+    """Set a rule as the user decided it, or withdraw it with `None`, and return it with
+    whether it was created.
+
+    A follow udata made by itself, for editing the subject or taking part in its
+    discussions, is turned into a "no" rather than withdrawn: withdrawn, the next edit
+    or answer would make it again."""
+    key = {"user": user, "scope": scope, "event": event}
+    if enabled is None:
+        existing = NotificationSetting.objects(**key).first()
+        if existing is None:
+            return None, False
+        if not existing.enabled or existing.origin == FollowOrigin.FOLLOWED:
+            existing.delete()
+            return None, False
+        enabled = False
+    return NotificationSetting.objects.get_or_create(
+        **key, updates={"enabled": enabled, "origin": FollowOrigin.FOLLOWED}
+    )
+
+
 def set_follow(user: User, subject: Document, event: str | None, followed: bool) -> Resolution:
     """Follow some notifications on a subject (all of them without an event), or stop,
     and say what the user gets once done.
@@ -329,51 +356,33 @@ def set_follow(user: User, subject: Document, event: str | None, followed: bool)
     Following is a "concerned" rule. Stopping withdraws the user's own follow first: if
     nothing else brings these notifications, that is enough, and the defaults of their
     role stay untouched. Only when a role or a broader follow still brings them is "not
-    concerned" written. A follow made by udata itself, for editing the subject or taking
-    part in its discussions, is turned into a "no" rather than withdrawn: withdrawn, the
-    next edit or answer would make it again.
+    concerned" written.
 
-    Stopping everything on a subject drops the follows restricted to some of its
-    notifications too: left behind, they would beat the "no".
+    Either way, the rules on narrower events of the same subject go: left behind, a
+    narrower "no" would beat the follow, and a narrower follow the "no".
     """
-    key = {"user": user, "scope": subject, "event": event}
-
-    def decide(enabled: bool) -> None:
-        NotificationSetting.objects.get_or_create(
-            **key, updates={"enabled": enabled, "origin": FollowOrigin.FOLLOWED}
-        )
+    narrower = Q(event__ne=None) if event is None else Q(event__startswith=f"{event}.")
+    NotificationSetting.objects(narrower, user=user, scope=subject).delete()
 
     if followed:
-        decide(True)
+        set_rule(user, subject, event, True)
         return resolved_for(user, [subject], event)[0]
 
-    if event is None:
-        NotificationSetting.objects(user=user, scope=subject, event__ne=None).delete()
-    own = NotificationSetting.objects(**key).first()
+    own = NotificationSetting.objects(user=user, scope=subject, event=event).first()
     if own is not None and own.enabled:
-        if own.origin == FollowOrigin.FOLLOWED:
-            own.delete()
-        else:
-            decide(False)
+        set_rule(user, subject, event, None)
     [resolution] = resolved_for(user, [subject], event)
     if not resolution.heard:
         return resolution
-    decide(False)
+    set_rule(user, subject, event, False)
     return resolved_for(user, [subject], event)[0]
 
 
-def visible_subject(scope):
-    """The subject of a rule as the current user may see it today, or `None`.
-
-    A rule outlives the access to its subject: a dataset can turn private after one's
-    departure from its organization, and its title must not leak through the list of
-    what one follows. Each kind of subject says who may read it through its `read`
-    permission; one without any (an organization, a topic) is public."""
-    from udata.core.discussions.models import Discussion
-
+def read_permission(scope):
+    """What a rule on `scope` is about, a thread standing for its subject, and who may
+    read it: its `read` permission, `None` when anybody may (an organization, a topic)."""
     subject = scope.subject if isinstance(scope, Discussion) else scope
-    read = getattr(subject, "permissions", {}).get("read")
-    return subject if read is None or read.can() else None
+    return subject, getattr(subject, "permissions", {}).get("read")
 
 
 def readable_by(user: User, scope) -> bool:
@@ -383,10 +392,7 @@ def readable_by(user: User, scope) -> bool:
     an organization: without this, its private datasets would leak through their
     discussions. The permission is checked against the needs `user` would have once
     logged in, not against `current_user`, who is whoever triggered the event."""
-    from udata.core.discussions.models import Discussion
-
-    subject = scope.subject if isinstance(scope, Discussion) else scope
-    read = getattr(subject, "permissions", {}).get("read")
+    _, read = read_permission(scope)
     if read is None:
         return True
     identity = Identity(user.id)
@@ -407,13 +413,14 @@ class SubjectSummary:
 
 
 def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
-    from udata.core.discussions.models import Discussion
-
+    """A rule outlives the access to its subject: a dataset can turn private after one's
+    departure from its organization, and its title must not leak through the list of
+    what one follows."""
     scope = setting.scope
     if scope is None:
         return None
-    subject = visible_subject(scope)
-    if subject is None:
+    subject, read = read_permission(scope)
+    if read is not None and not read.can():
         return None
     return SubjectSummary(
         title=scope.title if isinstance(scope, Discussion) else str(subject),

@@ -10,6 +10,7 @@ import click
 from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import discussion_recipients
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def migrate(db):
                         notification_type = NotificationType.DISCUSSION_NEW
                         message_id = None
 
-                    for recipient in discussion.owner_recipients():
+                    for recipient in discussion_recipients(discussion):
                         if sender and recipient.key == sender.id:
                             continue
                         Notification(

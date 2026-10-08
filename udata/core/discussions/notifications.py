@@ -1,7 +1,7 @@
 import logging
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import ReferenceField, UUIDField
+from mongoengine.fields import ReferenceField, StringField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions import mails
@@ -9,7 +9,11 @@ from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent, subject_scopes
+from udata.features.notifications.events import (
+    NotificationEvent,
+    discussion_recipients,
+    subject_scopes,
+)
 from udata.features.notifications.mails import way_out
 from udata.i18n import lazy_gettext as _
 from udata.i18n import ngettext
@@ -20,13 +24,10 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class DiscussionNotificationDetails(EmbeddedDocument):
-    types = frozenset(
-        {
-            NotificationType.DISCUSSION_NEW,
-            NotificationType.DISCUSSION_COMMENT,
-            NotificationType.DISCUSSION_CLOSED,
-        }
-    )
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    status = StringField()
 
     # keep track of the message to show in the notification
     message_id = field(
@@ -58,7 +59,7 @@ class DiscussionEvent(NotificationEvent):
         raise NotImplementedError
 
     def recipients(self):
-        return self.discussion.owner_recipients()
+        return discussion_recipients(self.discussion)
 
     def excluded(self):
         return [self.sender] if self.sender else []
@@ -85,8 +86,11 @@ class DiscussionEvent(NotificationEvent):
     def digest_subject(cls, details):
         # The thread is grouped under what it is about: a count of new discussions only
         # makes sense there, and that is where the reader goes to read them.
-        subject = details.discussion.subject
-        return subject.id, Link(str(subject), subject.self_web_url(append="/discussions"))
+        # The threads of one subject share where it is displayed: the first one's link
+        # stands for all of them.
+        discussion = details.discussion
+        subject = discussion.subject
+        return subject.id, Link(str(subject), discussion.subject_notification_url)
 
 
 class NewDiscussion(DiscussionEvent):

@@ -1,5 +1,5 @@
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import ReferenceField
+from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization import mails
@@ -39,12 +39,10 @@ BADGE_MAILS = {
 
 @generate_fields()
 class MembershipRequestNotificationDetails(EmbeddedDocument):
-    types = frozenset(
-        {
-            NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
-            NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-        }
-    )
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    kind = StringField()
 
     request_organization = field(
         ReferenceField(Organization),
@@ -65,7 +63,8 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class NewBadgeNotificationDetails(EmbeddedDocument):
-    types = frozenset(BADGE_NOTIFICATION_TYPES.values())
+    # See `MembershipRequestNotificationDetails.kind`.
+    kind = StringField()
 
     organization = field(
         ReferenceField(Organization),
@@ -79,8 +78,6 @@ class NewBadgeNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class MembershipAcceptedNotificationDetails(EmbeddedDocument):
-    types = frozenset({NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED})
-
     organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -93,8 +90,6 @@ class MembershipAcceptedNotificationDetails(EmbeddedDocument):
 
 @generate_fields()
 class MembershipRefusedNotificationDetails(EmbeddedDocument):
-    types = frozenset({NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED})
-
     organization = field(
         ReferenceField(Organization),
         readonly=True,

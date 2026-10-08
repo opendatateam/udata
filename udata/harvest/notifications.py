@@ -1,7 +1,7 @@
 import logging
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import ReferenceField
+from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
@@ -22,13 +22,10 @@ log = logging.getLogger(__name__)
 
 @generate_fields()
 class ValidateHarvesterNotificationDetails(EmbeddedDocument):
-    types = frozenset(
-        {
-            NotificationType.HARVEST_SOURCE_PENDING,
-            NotificationType.HARVEST_SOURCE_ACCEPTED,
-            NotificationType.HARVEST_SOURCE_REFUSED,
-        }
-    )
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    status = StringField()
 
     source = field(
         ReferenceField(HarvestSource),
