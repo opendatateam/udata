@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-08 10:12+0200\n"
+"POT-Creation-Date: 2026-10-08 10:51+0200\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
@@ -487,6 +487,10 @@ msgstr "Датум креирања"
 #: udata/mongo/datetime_fields.py:68
 msgid "Last modification date"
 msgstr "Датум последње измене"
+
+#: udata/core/dataservices/notifications.py:44
+msgid "New APIs"
+msgstr ""
 
 #: udata/core/dataset/activities.py:25
 msgid "created a dataset"
@@ -1006,7 +1010,11 @@ msgstr ""
 msgid "Stop following this discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:96
+#: udata/core/discussions/notifications.py:94
+msgid "New discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:97
 #, python-format
 msgid "%(num)d new discussion"
 msgid_plural "%(num)d new discussions"
@@ -1014,7 +1022,11 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: udata/core/discussions/notifications.py:115
+#: udata/core/discussions/notifications.py:114
+msgid "Replies to discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:117
 #, python-format
 msgid "%(num)d new comment"
 msgid_plural "%(num)d new comments"
@@ -1023,6 +1035,10 @@ msgstr[1] ""
 msgstr[2] ""
 
 #: udata/core/discussions/notifications.py:145
+msgid "Closed discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:148
 #, python-format
 msgid "%(num)d closed discussion"
 msgid_plural "%(num)d closed discussions"
@@ -1355,6 +1371,18 @@ msgstr ""
 msgid "organization"
 msgstr ""
 
+#: udata/core/organization/notifications.py:116
+msgid "Badges of the organization"
+msgstr ""
+
+#: udata/core/organization/notifications.py:223
+msgid "Accepted memberships"
+msgstr ""
+
+#: udata/core/organization/notifications.py:234
+msgid "Refused memberships"
+msgstr ""
+
 #: udata/core/post/api.py:73
 msgid "Latests posts"
 msgstr ""
@@ -1537,6 +1565,10 @@ msgstr "Овај URL је већ регистрован"
 #: udata/core/reuse/models.py:225
 msgid "reuse"
 msgstr "пример употребе"
+
+#: udata/core/reuse/notifications.py:44
+msgid "New reuses"
+msgstr ""
 
 #: udata/core/spatial/constants.py:4
 msgid "POI"
@@ -1757,13 +1789,14 @@ msgstr "Модератор сајта"
 msgid "chart"
 msgstr ""
 
-#: udata/features/notifications/events.py:298
+#: udata/features/notifications/events.py:301
 #, python-format
 msgid "Receive nothing more about %(subject)s"
 msgstr ""
 
-#: udata/features/notifications/events.py:302
-msgid "Stop receiving this type of notification"
+#: udata/features/notifications/events.py:305
+#, python-format
+msgid "Stop receiving: %(type)s"
 msgstr ""
 
 #: udata/features/notifications/mails.py:38
@@ -1956,6 +1989,14 @@ msgstr "Прескочено"
 #: udata/harvest/models.py:68
 msgid "Archived"
 msgstr "Архивирано"
+
+#: udata/harvest/notifications.py:90
+msgid "Validated harvesters"
+msgstr ""
+
+#: udata/harvest/notifications.py:95
+msgid "Refused harvesters"
+msgstr ""
 
 #: udata/harvest/backends/dcat.py:286
 msgid "Remote URL prefix"
@@ -2389,5 +2430,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Manage or turn off these notifications"
+#~ msgstr ""
+
+#~ msgid "Stop receiving this type of notification"
 #~ msgstr ""
 

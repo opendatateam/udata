@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from bson import ObjectId
+from flask_babel import LazyString
 from mongoengine import Document, EmbeddedDocument
 
 from udata.core.user.models import User
@@ -152,6 +153,8 @@ class NotificationEvent:
     """
 
     type: NotificationType
+    # What the type is called where one can turn it off, an action to take excepted.
+    label: LazyString | None = None
     # An answer addressed to one person ("your request was accepted") is not news about
     # its subject: following the subject must not bring it in. Its scopes still let the
     # recipient silence it.
@@ -299,7 +302,7 @@ class NotificationEvent:
                     scope=self.subject,
                 )
             )
-        ways_out.append(way_out(_("Stop receiving this type of notification"), event=self.type))
+        ways_out.append(way_out(_("Stop receiving: %(type)s", type=self.label), event=self.type))
         return ways_out
 
     def _heard(self, recipients: list[Recipient]) -> set[ObjectId | str]:

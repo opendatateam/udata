@@ -91,6 +91,7 @@ class DiscussionEvent(NotificationEvent):
 
 class NewDiscussion(DiscussionEvent):
     type = NotificationType.DISCUSSION_NEW
+    label = _("New discussions")
 
     digest_count = staticmethod(
         lambda count: ngettext("%(num)d new discussion", "%(num)d new discussions", count)
@@ -110,6 +111,7 @@ class NewDiscussion(DiscussionEvent):
 
 class NewDiscussionComment(DiscussionEvent):
     type = NotificationType.DISCUSSION_COMMENT
+    label = _("Replies to discussions")
 
     digest_count = staticmethod(
         lambda count: ngettext("%(num)d new comment", "%(num)d new comments", count)
@@ -140,6 +142,7 @@ class NewDiscussionComment(DiscussionEvent):
 
 class DiscussionClosed(DiscussionEvent):
     type = NotificationType.DISCUSSION_CLOSED
+    label = _("Closed discussions")
 
     digest_count = staticmethod(
         lambda count: ngettext("%(num)d closed discussion", "%(num)d closed discussions", count)

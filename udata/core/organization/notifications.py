@@ -18,6 +18,7 @@ from udata.features.notifications.events import (
     Recipient,
     responsible_recipients,
 )
+from udata.i18n import lazy_gettext as _
 
 BADGE_NOTIFICATION_TYPES = {
     CERTIFIED: NotificationType.ORGANIZATION_BADGE_CERTIFIED,
@@ -112,6 +113,7 @@ class BadgeAdded(NotificationEvent):
     """
 
     types = frozenset(BADGE_NOTIFICATION_TYPES.values())
+    label = _("Badges of the organization")
 
     def __init__(self, organization: Organization, kind: str):
         self.organization = organization
@@ -218,6 +220,7 @@ class MembershipAnswered(NotificationEvent):
 
 class MembershipAccepted(MembershipAnswered):
     type = NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED
+    label = _("Accepted memberships")
 
     def via_app(self, recipient):
         return MembershipAcceptedNotificationDetails(organization=self.organization)
@@ -228,6 +231,7 @@ class MembershipAccepted(MembershipAnswered):
 
 class MembershipRefused(MembershipAnswered):
     type = NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED
+    label = _("Refused memberships")
 
     def via_app(self, recipient):
         return MembershipRefusedNotificationDetails(organization=self.organization)

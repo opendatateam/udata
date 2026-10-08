@@ -9,6 +9,7 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.features.notifications.constants import NotificationType
+from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class DataserviceCreated(DatasetReusedEvent):
     dataset owners hears about their own."""
 
     type = NotificationType.DATASERVICE_CREATED
+    label = _("New APIs")
 
     def __init__(self, dataservice: Dataservice, dataset: Dataset):
         self.dataservice = dataservice

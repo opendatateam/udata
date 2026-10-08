@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-08 10:12+0200\n"
-"PO-Revision-Date: 2026-10-08 10:12+0200\n"
+"POT-Creation-Date: 2026-10-08 10:51+0200\n"
+"PO-Revision-Date: 2026-10-08 10:51+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -485,6 +485,10 @@ msgstr ""
 #: udata/core/dataservices/models.py:302 udata/core/dataset/models.py:678
 #: udata/mongo/datetime_fields.py:68
 msgid "Last modification date"
+msgstr ""
+
+#: udata/core/dataservices/notifications.py:44
+msgid "New APIs"
 msgstr ""
 
 #: udata/core/dataset/activities.py:25
@@ -1003,14 +1007,22 @@ msgstr ""
 msgid "Stop following this discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:96
+#: udata/core/discussions/notifications.py:94
+msgid "New discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:97
 #, python-format
 msgid "%(num)d new discussion"
 msgid_plural "%(num)d new discussions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/core/discussions/notifications.py:115
+#: udata/core/discussions/notifications.py:114
+msgid "Replies to discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:117
 #, python-format
 msgid "%(num)d new comment"
 msgid_plural "%(num)d new comments"
@@ -1018,6 +1030,10 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/core/discussions/notifications.py:145
+msgid "Closed discussions"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:148
 #, python-format
 msgid "%(num)d closed discussion"
 msgid_plural "%(num)d closed discussions"
@@ -1344,6 +1360,18 @@ msgstr ""
 msgid "organization"
 msgstr ""
 
+#: udata/core/organization/notifications.py:116
+msgid "Badges of the organization"
+msgstr ""
+
+#: udata/core/organization/notifications.py:223
+msgid "Accepted memberships"
+msgstr ""
+
+#: udata/core/organization/notifications.py:234
+msgid "Refused memberships"
+msgstr ""
+
 #: udata/core/post/api.py:73
 msgid "Latests posts"
 msgstr ""
@@ -1523,6 +1551,10 @@ msgstr ""
 
 #: udata/core/reuse/models.py:225
 msgid "reuse"
+msgstr ""
+
+#: udata/core/reuse/notifications.py:44
+msgid "New reuses"
 msgstr ""
 
 #: udata/core/spatial/constants.py:4
@@ -1742,13 +1774,14 @@ msgstr ""
 msgid "chart"
 msgstr ""
 
-#: udata/features/notifications/events.py:298
+#: udata/features/notifications/events.py:301
 #, python-format
 msgid "Receive nothing more about %(subject)s"
 msgstr ""
 
-#: udata/features/notifications/events.py:302
-msgid "Stop receiving this type of notification"
+#: udata/features/notifications/events.py:305
+#, python-format
+msgid "Stop receiving: %(type)s"
 msgstr ""
 
 #: udata/features/notifications/mails.py:38
@@ -1937,6 +1970,14 @@ msgstr ""
 
 #: udata/harvest/models.py:68
 msgid "Archived"
+msgstr ""
+
+#: udata/harvest/notifications.py:90
+msgid "Validated harvesters"
+msgstr ""
+
+#: udata/harvest/notifications.py:95
+msgid "Refused harvesters"
 msgstr ""
 
 #: udata/harvest/backends/dcat.py:286

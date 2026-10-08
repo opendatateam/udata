@@ -7,6 +7,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
 from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.features.notifications.events import NotificationEvent, Recipient
+from udata.i18n import lazy_gettext as _
 
 from .models import HarvestSource
 from .signals import (
@@ -86,10 +87,12 @@ class HarvestSourceReviewed(HarvestSourceEvent):
 
 class HarvestSourceValidated(HarvestSourceReviewed):
     type = NotificationType.HARVEST_SOURCE_ACCEPTED
+    label = _("Validated harvesters")
 
 
 class HarvestSourceRefused(HarvestSourceReviewed):
     type = NotificationType.HARVEST_SOURCE_REFUSED
+    label = _("Refused harvesters")
 
 
 def _handle_pending_notifications(source: HarvestSource):

@@ -9,6 +9,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.core.reuse.models import Reuse
 from udata.features.notifications.constants import NotificationType
+from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class ReuseCreated(DatasetReusedEvent):
     dataset owners hears about their own."""
 
     type = NotificationType.REUSE_CREATED
+    label = _("New reuses")
 
     def __init__(self, reuse: Reuse, dataset: Dataset):
         self.reuse = reuse

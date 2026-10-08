@@ -20,6 +20,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
+    TYPES_REQUIRING_ACTION,
     FollowOrigin,
     MailCadence,
     NotificationChannel,
@@ -366,6 +367,11 @@ class NotificationTablesTest:
             declared = event.types if hasattr(event, "types") else {event.type}
             assert notification_type in declared
 
+    def test_every_type_one_can_turn_off_is_named(self):
+        """The ways out of a mail name the type they stop."""
+        for notification_type in set(NotificationType) - TYPES_REQUIRING_ACTION:
+            assert event_for_type(notification_type).label is not None, notification_type
+
     def test_every_organization_role_maps_to_a_reason(self):
         assert set(REASON_BY_ORGANIZATION_ROLE) == set(ORG_ROLES)
 
@@ -638,10 +644,7 @@ class DispatchTest(APITestCase):
             f"Receive nothing more about {dataset.title}: {settings}?scope=Dataset%3A{dataset.id}"
             in mail.body
         )
-        assert (
-            f"Stop receiving this type of notification: {settings}?event=discussion.new"
-            in mail.body
-        )
+        assert f"Stop receiving: New discussions: {settings}?event=discussion.new" in mail.body
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_a_badge_mail_offers_its_organization_and_its_type(self):
