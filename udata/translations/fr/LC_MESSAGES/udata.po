@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-08 10:51+0200\n"
+"POT-Creation-Date: 2026-10-08 10:54+0200\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -1966,15 +1966,24 @@ msgstr "Vous recevez cet e-mail car vous suivez %(subject)s."
 msgid "You receive this email because you edited %(subject)s."
 msgstr "Vous recevez cet e-mail car vous avez modifié %(subject)s."
 
-#: udata/features/notifications/mails.py:99
+#: udata/features/notifications/mails.py:100
+#, python-format
+msgid ""
+"You receive this email because you took part in the discussions of "
+"%(subject)s."
+msgstr ""
+"Vous recevez cet e-mail car vous avez participé aux discussions de "
+"%(subject)s."
+
+#: udata/features/notifications/mails.py:104
 msgid "You receive this email because you made this request."
 msgstr "Vous recevez cet e-mail car vous avez fait cette demande."
 
-#: udata/features/notifications/mails.py:101
+#: udata/features/notifications/mails.py:106
 msgid "You receive this email because you administer the site."
 msgstr "Vous recevez cet e-mail car vous administrez le site."
 
-#: udata/features/notifications/mails.py:125
+#: udata/features/notifications/mails.py:130
 msgid "Manage your notifications"
 msgstr "Gérer vos notifications"
 

@@ -74,7 +74,8 @@ class NotificationSetting(UDataDocument):
     origin = field(
         EnumField(FollowOrigin, default=FollowOrigin.FOLLOWED),
         readonly=True,
-        description="What made the user follow the subject: by hand, or by editing it",
+        description="What made the user follow the subject: by hand, by editing it, or by "
+        "taking part in its discussions",
     )
 
     meta = {
@@ -214,6 +215,7 @@ def resolve(
 REASON_BY_ORIGIN = {
     FollowOrigin.FOLLOWED: NotificationReason.EXPLICIT_SUBSCRIBER,
     FollowOrigin.EDITED: NotificationReason.CONTRIBUTOR,
+    FollowOrigin.DISCUSSED: NotificationReason.DISCUSSANT,
 }
 
 

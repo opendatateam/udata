@@ -95,6 +95,11 @@ def reason_sentence(reason: NotificationReason, subject) -> LazyString:
             return _("You receive this email because you follow %(subject)s.", subject=str(subject))
         case NotificationReason.CONTRIBUTOR:
             return _("You receive this email because you edited %(subject)s.", subject=str(subject))
+        case NotificationReason.DISCUSSANT:
+            return _(
+                "You receive this email because you took part in the discussions of %(subject)s.",
+                subject=str(subject),
+            )
         case NotificationReason.REQUESTER:
             return _("You receive this email because you made this request.")
         case NotificationReason.SYSADMIN:

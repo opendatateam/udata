@@ -1550,6 +1550,68 @@ class FollowWhatOneWorksOnTest(APITestCase):
 
         assert NotificationSetting.objects.count() == 0
 
+    def open_discussion_on(self, dataset):
+        return self.post(
+            url_for("api.discussions"),
+            {"subject": ref(dataset), "title": "A question", "comment": "Is it up to date?"},
+        )
+
+    def test_an_editor_who_opens_a_discussion_follows_the_dataset(self):
+        """Answering about a dataset is following it: the next questions are for her too."""
+        sofia = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[sofia]))
+        self.login(sofia)
+
+        self.assert201(self.open_discussion_on(dataset))
+        open_discussion(dataset)
+
+        setting = NotificationSetting.objects(user=sofia).get()
+        assert setting.scope == dataset
+        assert setting.origin == FollowOrigin.DISCUSSED
+        [notification] = Notification.objects(user=sofia)
+        assert NotificationReason.DISCUSSANT in notification.reasons
+
+    def test_an_editor_who_answers_a_discussion_follows_the_dataset(self):
+        sofia = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[sofia]))
+        discussion = open_discussion(dataset)
+        self.login(sofia)
+
+        response = self.post(url_for("api.discussion", id=discussion.id), {"comment": "Yes."})
+
+        self.assert200(response)
+        setting = NotificationSetting.objects(user=sofia).get()
+        assert setting.scope == dataset
+        assert setting.origin == FollowOrigin.DISCUSSED
+
+    def test_answering_outside_of_ones_organizations_follows_nothing(self):
+        """A citizen asking a question follows the thread, not the dataset."""
+        self.login()
+        dataset = DatasetFactory(organization=OrganizationFactory())
+
+        self.assert201(self.open_discussion_on(dataset))
+
+        assert NotificationSetting.objects.count() == 0
+
+    def test_answering_about_what_one_ignores_keeps_it_ignored(self):
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        ignore(editor, dataset)
+        self.login(editor)
+
+        self.assert201(self.open_discussion_on(dataset))
+
+        assert [setting.enabled for setting in NotificationSetting.objects(user=editor)] == [False]
+
+    def test_answering_with_an_api_key_follows_nothing(self):
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+
+        with self.api_user(editor):
+            self.assert201(self.open_discussion_on(dataset))
+
+        assert NotificationSetting.objects.count() == 0
+
     def test_the_followed_subjects_are_listed_with_their_organization(self):
         editor = UserFactory()
         organization = OrganizationFactory(editors=[editor])

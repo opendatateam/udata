@@ -5,19 +5,20 @@ from udata.api import HEADER_API_KEY
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.signals import on_new_discussion, on_new_discussion_comment
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin
 from udata.features.notifications.settings import NotificationSetting
 
 
-def follow_worked_on(user: User, subject) -> None:
+def follow_worked_on(user: User, subject, origin: FollowOrigin) -> None:
     """Make a member who worked on a subject of their organization follow it.
 
-    Having edited a dataset is a lasting reason to hear about it, whatever one's role
-    is now or later: an administrator who becomes an editor keeps what they took care
-    of. A decision already taken about the subject is left as is, so that editing
-    something one chose to ignore does not bring it back.
+    Having edited a dataset, or answered about it, is a lasting reason to hear about it,
+    whatever one's role is now or later: an administrator who becomes an editor keeps
+    what they took care of. A decision already taken about the subject is left as is, so
+    that working on something one chose to ignore does not bring it back.
 
     Nothing is announced: the way out comes with the first notification it brings, when
     it is something to decide about.
@@ -28,23 +29,24 @@ def follow_worked_on(user: User, subject) -> None:
     if NotificationSetting.objects(user=user, scope=subject).first():
         return
     try:
-        NotificationSetting.objects.create(
-            user=user, scope=subject, enabled=True, origin=FollowOrigin.EDITED
-        )
+        NotificationSetting.objects.create(user=user, scope=subject, enabled=True, origin=origin)
     except NotUniqueError:
         # A concurrent edit by the same member created it in between: the edit itself
         # is already saved and must not fail over it.
         pass
 
 
-def follow_if_edited_by_hand(subject) -> None:
-    """Only a person editing through the site: a script publishing with an API key has
-    not worked on each of the subjects it touches, and harvesting has no user."""
+def follow_if_by_hand(subject, origin: FollowOrigin, user: User | None = None) -> None:
+    """Only a person working through the site: a script publishing with an API key has
+    not worked on each of the subjects it touches, and harvesting has no user. Whoever
+    worked is the current user, unless the change says who did it."""
     if not has_request_context() or request.headers.get(HEADER_API_KEY):
         return
-    if not current_user or not current_user.is_authenticated:
-        return
-    follow_worked_on(current_user._get_current_object(), subject)
+    if user is None:
+        if not current_user or not current_user.is_authenticated:
+            return
+        user = current_user._get_current_object()
+    follow_worked_on(user, subject, origin)
 
 
 @Dataset.on_create.connect
@@ -54,11 +56,20 @@ def follow_if_edited_by_hand(subject) -> None:
 @Dataservice.on_create.connect
 @Dataservice.on_update.connect
 def on_subject_saved(subject, **kwargs):
-    follow_if_edited_by_hand(subject)
+    follow_if_by_hand(subject, FollowOrigin.EDITED)
 
 
 @Dataset.on_resource_added.connect
 @Dataset.on_resource_updated.connect
 @Dataset.on_resource_removed.connect
 def on_resource_changed(sender, document, **kwargs):
-    follow_if_edited_by_hand(document)
+    follow_if_by_hand(document, FollowOrigin.EDITED)
+
+
+# Answering about a dataset is following it: the next questions on it will be for the
+# same people. A new discussion is its first message.
+@on_new_discussion.connect
+@on_new_discussion_comment.connect
+def on_discussed(discussion, message: int = 0, **kwargs):
+    author = discussion.discussion[message].posted_by
+    follow_if_by_hand(discussion.subject, FollowOrigin.DISCUSSED, author)

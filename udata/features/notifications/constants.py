@@ -86,6 +86,9 @@ class NotificationReason(StrEnum):
     EXPLICIT_SUBSCRIBER = "explicit_subscriber"
     # Edited this very subject: followed without asking, for having worked on it.
     CONTRIBUTOR = "contributor"
+    # Took part in the discussions of this very subject, as a member of its organization:
+    # followed without asking, for having answered about it.
+    DISCUSSANT = "discussant"
     # Made the request this notification answers (a membership, a harvest source).
     REQUESTER = "requester"
 
@@ -95,6 +98,7 @@ class FollowOrigin(StrEnum):
 
     FOLLOWED = "followed"
     EDITED = "edited"
+    DISCUSSED = "discussed"
 
 
 # `Organization.members` holds bare role strings, so the mapping is spelled out here.
