@@ -24,6 +24,7 @@ from udata.core.organization.constants import CERTIFIED, ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import MembershipRequest
 from udata.core.post.factories import PostFactory
+from udata.core.reuse.activities import UserUpdatedReuse
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
@@ -196,6 +197,24 @@ class PersonaTest(APITestCase):
         assert NotificationSetting.objects(user=lea).count() == 0
         assert notifications.count() == 1
         assert notifications.first().details.discussion.subject == assigned
+
+    def test_a_partial_editor_hears_who_reuses_their_datasets_and_an_editor_does_not(self):
+        """A reuse or an API built on an assigned dataset is part of looking after it. An
+        editor, who never touched the dataset, keeps out of it."""
+        lea = UserFactory()
+        editor = UserFactory()
+        organization = OrganizationFactory(partial_editors=[lea], editors=[editor])
+        assigned = DatasetFactory(organization=organization)
+        Assignment.objects.create(user=lea, organization=organization, subject=assigned)
+
+        ReuseFactory(datasets=[assigned])
+        DataserviceFactory(datasets=[assigned])
+
+        assert sorted(notification.type for notification in Notification.objects(user=lea)) == [
+            NotificationType.DATASERVICE_CREATED,
+            NotificationType.REUSE_CREATED,
+        ]
+        assert Notification.objects(user=editor).count() == 0
 
     def test_an_outsider_can_follow_the_discussions_of_one_dataset(self):
         """Nobody in particular: not a member, not an owner, never answered. Following
@@ -1712,6 +1731,34 @@ class NotificationFollowAPITest(APITestCase):
         assert response.json["heard"] is True
         assert self.rules(user) == [(dataset, None, True)]
 
+    def test_a_prefix_only_drops_the_rules_under_it(self):
+        """`discussion` covers `discussion.*`, not what merely starts with the same word."""
+        user = self.login()
+        dataset = DatasetFactory()
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+        ignore(user, dataset, NotificationType.REUSE_CREATED)
+
+        response = self.put_follow(dataset, False, DISCUSSIONS)
+
+        self.assert200(response)
+        assert response.json["followed_events"] == []
+        assert self.rules(user) == [(dataset, NotificationType.REUSE_CREATED, False)]
+
+    def test_following_a_thread_brings_its_comments(self):
+        """From the API to the bell: somebody the thread would never reach."""
+        user = self.login()
+        discussion = open_discussion(DatasetFactory())
+
+        self.assert200(self.put_follow(discussion, True))
+        with capture_mails() as mails:
+            comment(discussion)
+
+        [notification] = Notification.objects(user=user)
+        assert notification.type == NotificationType.DISCUSSION_COMMENT
+        assert notification.details.discussion == discussion
+        [mail] = mailed(mails, user)
+        assert discussion.title in mail.body
+
     def test_stopping_what_a_broader_follow_brings_says_no(self):
         user = self.login()
         organization = OrganizationFactory()
@@ -2092,6 +2139,53 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert listed["subject"] is None
 
 
+class CreateDiscussionsNotificationsMigrationTest(PytestOnlyDBTestCase):
+    def migrate(self):
+        load_migration("2026-01-15-create-discussions-notifications.py").migrate(get_db())
+
+    def test_an_unanswered_discussion_notifies_its_recipients_but_its_author(self):
+        owner, author = UserFactory(), UserFactory()
+        discussion = DiscussionFactory(
+            subject=DatasetFactory(owner=owner),
+            user=author,
+            discussion=[MessageDiscussionFactory(posted_by=author)],
+        )
+
+        self.migrate()
+
+        [notification] = Notification.objects
+        assert notification.user == owner
+        assert notification.type == NotificationType.DISCUSSION_NEW
+        assert notification.reasons == [NotificationReason.OWNER]
+        assert notification.details.discussion == discussion
+        assert notification.details.message_id is None
+
+    def test_an_answered_discussion_notifies_its_last_comment(self):
+        owner, author = UserFactory(), UserFactory()
+        answer = MessageDiscussionFactory(posted_by=author)
+        DiscussionFactory(
+            subject=DatasetFactory(owner=owner),
+            user=author,
+            discussion=[MessageDiscussionFactory(posted_by=author), answer],
+        )
+
+        self.migrate()
+
+        [notification] = Notification.objects
+        assert notification.user == owner
+        assert notification.type == NotificationType.DISCUSSION_COMMENT
+        assert notification.details.message_id == answer.id
+
+    def test_a_discussion_already_notified_is_left_alone(self):
+        owner = UserFactory()
+        open_discussion(DatasetFactory(owner=owner))
+        before = [notification.id for notification in Notification.objects]
+
+        self.migrate()
+
+        assert [notification.id for notification in Notification.objects] == before
+
+
 class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
     def migrate(self, db):
         load_migration("2026-10-08-follow-worked-on-subjects.py").migrate(db)
@@ -2134,6 +2228,36 @@ class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
         self.migrate(get_db())
 
         assert self.follows() == [(editor, dataset, FollowOrigin.DISCUSSED)]
+
+    def test_the_members_who_edited_follow_the_reuses_and_apis_they_edited(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+        reuse = ReuseFactory(organization=organization)
+        dataservice = DataserviceFactory(organization=organization)
+        UserUpdatedReuse.objects.create(actor=editor, related_to=reuse, organization=organization)
+        UserUpdatedDataservice.objects.create(
+            actor=editor, related_to=dataservice, organization=organization
+        )
+
+        self.migrate(get_db())
+
+        assert sorted(self.follows(), key=lambda row: row[1].__class__.__name__) == [
+            (editor, dataservice, FollowOrigin.EDITED),
+            (editor, reuse, FollowOrigin.EDITED),
+        ]
+
+    def test_deleted_users_follow_nothing(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+        dataset = DatasetFactory(organization=organization)
+        UserUpdatedDataset.objects.create(
+            actor=editor, related_to=dataset, organization=organization
+        )
+        editor.mark_as_deleted(notify=False)
+
+        self.migrate(get_db())
+
+        assert self.follows() == []
 
     def test_having_edited_wins_over_having_discussed(self):
         editor = UserFactory()
