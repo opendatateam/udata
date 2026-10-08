@@ -102,29 +102,29 @@ class Rule:
     enabled: bool
     scope: ObjectId | None = None
     event: str | None = None
-    reason: NotificationReason | None = None
 
 
-# What somebody gets before they ever open the settings screen, written as rules so
-# that a default can be as precise as anything a user decides ("editors: the reuses
-# but not the discussions"). They are read only where the user's own rules say nothing.
-#
-# Every reason is heard, so that a new one cannot be silenced by forgetting it here,
-# except editors: they are members of organizations whose datasets they have never
-# touched, and mailing them every discussion of a 400-dataset organization is what this
-# whole thing is meant to stop.
-#
-# Partial editors are heard, which only looks inconsistent: they are never given this
-# reason unless the object was actually assigned to them, so "everything concerning
-# me" is already a short list.
-#
-# A badge is the exception for editors: rare, and about the organization as a whole
+# What editors still hear about by default: rare, and about the organization as a whole
 # rather than about datasets they never touched.
-DEFAULT_RULES: list[Rule] = [
-    Rule(enabled=True),
-    Rule(reason=NotificationReason.ORGANIZATION_EDITOR, enabled=False),
-    Rule(event="organization.badge", enabled=True),
-]
+HEARD_BY_EDITORS = "organization.badge"
+
+
+def heard_by_default(reason: NotificationReason, events: Sequence[str]) -> bool:
+    """What somebody gets on the ground of `reason` before they ever open the settings
+    screen, read only where their own rules say nothing.
+
+    Every reason is heard, so that a new one cannot be silenced by forgetting it here,
+    except editors: they are members of organizations whose datasets they have never
+    touched, and mailing them every discussion of a 400-dataset organization is what
+    this whole thing is meant to stop.
+
+    Partial editors are heard, which only looks inconsistent: they are never given this
+    reason unless the object was actually assigned to them, so "everything concerning
+    me" is already a short list.
+    """
+    if reason == NotificationReason.ORGANIZATION_EDITOR:
+        return HEARD_BY_EDITORS in events
+    return True
 
 
 def rules_for(
@@ -164,11 +164,10 @@ def resolve(
 
     Among the rules that apply, the most specific wins: the subject first (a thread,
     then its dataset, then the organization, then everywhere), then the event (a single
-    event, then its family, then every notification), then the reason (this reason,
-    then whatever the reason), which only the defaults name.
+    event, then its family, then every notification).
 
-    The user's own rules are read first, and `DEFAULT_RULES` only where they say
-    nothing: otherwise a precise default would beat a broad choice of the user.
+    The defaults (`heard_by_default`) are only read where the user's rules say nothing:
+    otherwise a precise default would beat a broad choice of the user.
 
     Reasons are then combined generously: being an administrator who muted their
     organizations does not silence the thread one took part in.
@@ -181,34 +180,19 @@ def resolve(
     event_rank = {event: rank for rank, event in enumerate([*events, None])}
     thread_ranks = {0, scope_rank[None]}
 
-    def most_specific(rules: list[Rule], reason: NotificationReason) -> bool | None:
+    def decide(reason: NotificationReason) -> bool:
         bound_to_thread = reason == NotificationReason.DISCUSSION_PARTICIPANT
         candidates = [
             rule
             for rule in rules
-            if rule.reason in (reason, None)
-            and rule.scope in scope_rank
+            if rule.scope in scope_rank
             and rule.event in event_rank
             and (not bound_to_thread or scope_rank[rule.scope] in thread_ranks)
         ]
         if not candidates:
-            return None
-        best = min(
-            candidates,
-            key=lambda rule: (
-                scope_rank[rule.scope],
-                event_rank[rule.event],
-                0 if rule.reason == reason else 1,
-            ),
-        )
+            return heard_by_default(reason, events)
+        best = min(candidates, key=lambda rule: (scope_rank[rule.scope], event_rank[rule.event]))
         return best.enabled
-
-    def decide(reason: NotificationReason) -> bool:
-        for layer in (rules, DEFAULT_RULES):
-            enabled = most_specific(layer, reason)
-            if enabled is not None:
-                return enabled
-        return False
 
     return any(decide(reason) for reason in reasons)
 

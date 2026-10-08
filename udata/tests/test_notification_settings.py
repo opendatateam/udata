@@ -36,7 +36,7 @@ from udata.features.notifications.events import event_for_type, is_event_name
 from udata.features.notifications.mails import notification_digest, reason_sentence
 from udata.features.notifications.models import SCOPE_MODELS, Notification
 from udata.features.notifications.settings import (
-    DEFAULT_RULES,
+    HEARD_BY_EDITORS,
     NOTIFICATION_SCOPES,
     NotificationSetting,
     Rule,
@@ -386,8 +386,8 @@ class NotificationTablesTest:
         for reason in NotificationReason:
             assert reason_sentence(reason, dataset) is not None, reason
 
-    def test_every_default_rule_names_a_real_event(self):
-        assert all(rule.event is None or is_event_name(rule.event) for rule in DEFAULT_RULES)
+    def test_what_editors_hear_by_default_is_a_real_event(self):
+        assert is_event_name(HEARD_BY_EDITORS)
 
     def test_every_scope_takes_its_rules_along_when_deleted(self):
         """A scope missing from the cleanup leaves rules no one can list nor withdraw."""
