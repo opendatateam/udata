@@ -5,7 +5,8 @@ or took part in the discussions of one of its subjects, follow it, as doing so n
 The activities are the only record of who edited what, and they do not tell an edit made
 by hand from one made by a script through an API key: both are attributed to the user.
 Unlike at edit time, the accounts that publish through a script are therefore made to
-follow what they published.
+follow what they published. Harvesting, attributed to `HARVEST_ACTIVITY_USER_ID`, is
+left out, as it follows nothing at harvest time.
 
 Membership is read as it is now, not as it was then: someone who left the organization
 long ago does not start hearing about it again. Who is left out otherwise is the same
@@ -15,6 +16,7 @@ as at edit time (see `follow_worked_on`).
 import logging
 
 from bson import DBRef
+from flask import current_app
 
 from udata.core.activity.models import Activity
 from udata.core.dataservices.activities import UserCreatedDataservice, UserUpdatedDataservice
@@ -30,10 +32,10 @@ from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion
 from udata.core.reuse.activities import UserCreatedReuse, UserUpdatedReuse
 from udata.core.reuse.models import Reuse
-from udata.core.topic.models import Topic
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin
 from udata.features.notifications.follow import follow_worked_on
+from udata.mongo import db as mongo
 
 log = logging.getLogger(__name__)
 
@@ -49,8 +51,6 @@ EDITS = {
     UserUpdatedDataservice: Dataservice,
 }
 
-DISCUSSED = {"Dataset": Dataset, "Reuse": Reuse, "Dataservice": Dataservice, "Topic": Topic}
-
 
 def ref_id(value):
     return value.id if isinstance(value, DBRef) else value
@@ -58,6 +58,8 @@ def ref_id(value):
 
 def migrate(db):
     model_by_cls = {activity._class_name: model for activity, model in EDITS.items()}
+    # Harvesting is attributed to this account, and harvesting follows nothing.
+    harvester = current_app.config["HARVEST_ACTIVITY_USER_ID"]
 
     # (user, model, subject) -> origin. Having edited a subject says more than having
     # talked about it, so an edit wins.
@@ -73,6 +75,8 @@ def migrate(db):
         actor = activity.get("actor")
         if not isinstance(actor, dict) or actor.get("_cls") != "User":
             continue
+        if harvester and str(ref_id(actor["_ref"])) == harvester:
+            continue
         key = (
             ref_id(actor["_ref"]),
             model_by_cls[activity["_cls"]],
@@ -84,9 +88,7 @@ def migrate(db):
     for discussion in (
         Discussion.objects.only("subject", "discussion.posted_by").as_pymongo().batch_size(1000)
     ):
-        model = DISCUSSED.get(discussion["subject"]["_cls"])
-        if model is None:
-            continue
+        model = mongo.resolve_model(discussion["subject"]["_cls"])
         for message in discussion.get("discussion", []):
             if message.get("posted_by"):
                 key = (message["posted_by"], model, ref_id(discussion["subject"]["_ref"]))
