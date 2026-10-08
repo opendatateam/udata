@@ -2560,17 +2560,3 @@ msgstr "Suppression de votre compte {site} inactif"
 #~ msgid "Backend"
 #~ msgstr "Implémentation"
 
-#~ msgid "See all my notifications"
-#~ msgstr "Voir toutes mes notifications"
-
-#~ msgid "Manage or turn off these notifications"
-#~ msgstr "Gérer ou désactiver ces notifications"
-
-#~ msgid "Stop receiving this type of notification"
-#~ msgstr "Ne plus recevoir ce type de notification"
-
-#~ msgid "%(num)d update on what you follow"
-#~ msgid_plural "%(num)d updates on what you follow"
-#~ msgstr[0] "%(num)d nouveauté sur ce que vous suivez"
-#~ msgstr[1] "%(num)d nouveautés sur ce que vous suivez"
-

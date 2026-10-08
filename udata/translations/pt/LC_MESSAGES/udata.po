@@ -2418,20 +2418,3 @@ msgstr ""
 #~ msgid "Backend"
 #~ msgstr "Backend"
 
-#~ msgid "You receive this email because %(subject)s was assigned to you."
-#~ msgstr ""
-
-#~ msgid "See all my notifications"
-#~ msgstr ""
-
-#~ msgid "Manage or turn off these notifications"
-#~ msgstr ""
-
-#~ msgid "Stop receiving this type of notification"
-#~ msgstr ""
-
-#~ msgid "%(num)d update on what you follow"
-#~ msgid_plural "%(num)d updates on what you follow"
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
