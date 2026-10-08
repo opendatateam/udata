@@ -397,6 +397,9 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return OwnablePermission(self.subject).can()
 
+    def __str__(self):
+        return self.title or ""
+
     @field(description="The discussion web URL")
     def self_web_url(self, **kwargs):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)

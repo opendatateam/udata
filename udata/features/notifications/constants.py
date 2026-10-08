@@ -35,6 +35,10 @@ class NotificationType(StrEnum):
     HARVEST_SOURCE_REFUSED = "harvest.source.refused"
 
 
+# The family of the five badge types: a rule naming it covers them all.
+ORGANIZATION_BADGES = "organization.badge"
+
+
 def event_chain(event: str | None) -> list[str]:
     """What a rule about this event can name, from the narrowest to the broadest: the
     type itself, then each of its dotted prefixes. `discussion.comment` yields

@@ -12,13 +12,16 @@ from udata.core.organization.constants import (
 )
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
-from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.constants import (
+    ORGANIZATION_BADGES,
+    NotificationReason,
+    NotificationType,
+)
 from udata.features.notifications.events import (
     NotificationEvent,
     Recipient,
     responsible_recipients,
 )
-from udata.features.notifications.settings import HEARD_BY_EDITORS
 from udata.i18n import lazy_gettext as _
 
 BADGE_NOTIFICATION_TYPES = {
@@ -110,7 +113,7 @@ class BadgeAdded(NotificationEvent):
 
     types = frozenset(BADGE_NOTIFICATION_TYPES.values())
     label = _("Badges of the organization")
-    labelled_event = HEARD_BY_EDITORS
+    labelled_event = ORGANIZATION_BADGES
 
     def __init__(self, organization: Organization, kind: str):
         self.organization = organization

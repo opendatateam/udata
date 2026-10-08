@@ -21,6 +21,7 @@ from udata.core.organization.models import Organization
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
+    ORGANIZATION_BADGES,
     FollowOrigin,
     NotificationReason,
     is_event_name,
@@ -54,7 +55,7 @@ def subject_summary(scope) -> SubjectSummary | None:
     if read is not None and not read.can():
         return None
     return SubjectSummary(
-        title=scope.title if isinstance(scope, Discussion) else str(subject),
+        title=str(scope),
         page=scope.self_web_url(),
         organization=getattr(subject, "organization", None),
     )
@@ -177,7 +178,7 @@ class Rule:
 
 # What editors still hear about by default: rare, and about the organization as a whole
 # rather than about datasets they never touched.
-HEARD_BY_EDITORS = "organization.badge"
+HEARD_BY_EDITORS = ORGANIZATION_BADGES
 
 
 def heard_by_default(reason: NotificationReason, events: Sequence[str]) -> bool:

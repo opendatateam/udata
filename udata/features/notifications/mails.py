@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from flask_babel import LazyString
 from mongoengine import DoesNotExist
 
-from udata.core.discussions.models import Discussion
 from udata.core.organization.models import Organization
 from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.i18n import lazy_gettext as _
@@ -76,8 +75,7 @@ def reason_sentence(reason: NotificationReason, subject, followed=None) -> LazyS
     organization = (
         subject if isinstance(subject, Organization) else getattr(subject, "organization", None)
     )
-    followed = followed or subject
-    followed_name = followed.title if isinstance(followed, Discussion) else str(followed)
+    followed_name = str(followed or subject)
     match reason:
         case NotificationReason.OWNER:
             return _("You receive this email because you own %(subject)s.", subject=str(subject))
