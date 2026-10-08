@@ -28,7 +28,6 @@ from udata.features.notifications.constants import (
     TYPES_REQUIRING_ACTION,
     FollowOrigin,
     MailCadence,
-    NotificationChannel,
     NotificationReason,
     NotificationType,
 )
@@ -49,9 +48,6 @@ from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import capture_mails
 
 DISCUSSIONS = "discussion"
-
-APP = NotificationChannel.APP
-MAIL = NotificationChannel.MAIL
 
 
 def decide(user, scope=None, event=None, enabled=True, **kwargs):
@@ -152,7 +148,7 @@ class PersonaTest(APITestCase):
             open_discussion(second)
 
         assert mailed(immediate, naima) == []
-        assert Notification.objects(user=naima, channels=APP).count() == 2
+        assert Notification.objects(user=naima).count() == 2
 
         for notification in Notification.objects(user=naima):
             age(notification, days=8)
@@ -161,9 +157,9 @@ class PersonaTest(APITestCase):
             send_notification_digests()
 
         assert len(mailed(weekly, naima)) == 1
-        # Still readable in the bell afterwards: the digest only spends the mail channel.
-        assert Notification.objects(user=naima, channels=APP).count() == 2
-        assert Notification.objects(user=naima, channels=MAIL).count() == 0
+        # Still readable in the bell afterwards: the digest only empties the mail queue.
+        assert Notification.objects(user=naima).count() == 2
+        assert Notification.objects(user=naima, mail_pending=True).count() == 0
 
     def test_an_administrator_who_never_logs_in_gets_everything_by_mail(self):
         """Gilles runs a small town's organization and never opens the site: the
@@ -621,7 +617,7 @@ class DispatchTest(APITestCase):
         notification = Notification.objects(user=admin).first()
         assert notification is not None
         assert NotificationReason.ORGANIZATION_ADMIN in notification.reasons
-        assert notification.channels == [APP]
+        assert notification.mail_pending is False
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_a_mail_one_can_turn_off_says_why_and_where_to(self):
@@ -666,7 +662,7 @@ class DispatchTest(APITestCase):
             organization.add_badge(CERTIFIED)
 
         assert len(mailed(mails, admin)) == 1
-        assert Notification.objects(user=admin).first().channels == [APP]
+        assert Notification.objects(user=admin).first().mail_pending is False
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_a_badge_mail_offers_its_organization_and_its_type(self):
@@ -956,7 +952,7 @@ class DigestTest(PytestOnlyDBTestCase):
         open_discussion(DatasetFactory(organization=organization))
 
         notification = Notification.objects(user=admin).first()
-        assert set(notification.channels) == {APP, MAIL}
+        assert notification.mail_pending is True
 
     def test_ignoring_an_organization_queues_nothing(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -973,7 +969,7 @@ class DigestTest(PytestOnlyDBTestCase):
 
         open_discussion(DatasetFactory(organization=organization))
 
-        assert Notification.objects(user=admin).first().channels == [APP]
+        assert Notification.objects(user=admin).first().mail_pending is False
 
     def test_the_digest_waits_for_the_cadence(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -994,7 +990,7 @@ class DigestTest(PytestOnlyDBTestCase):
         send_notification_digests()
 
         notification = Notification.objects(user=admin).first()
-        assert notification.channels == [APP]
+        assert notification.mail_pending is False
 
     def test_switching_back_to_immediate_releases_the_queue(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1007,7 +1003,7 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert [mail.recipients for mail in mails] == [[admin.email]]
-        assert Notification.objects(user=admin, channels=MAIL).count() == 0
+        assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
     def test_what_was_handled_meanwhile_is_left_out_of_the_digest(self):
         """Answered in the bell on Tuesday, it is no news on Sunday."""
@@ -1058,7 +1054,7 @@ class DigestTest(PytestOnlyDBTestCase):
         [digest] = mails
         assert digest.recipients == [admin.email]
         assert digest.body.index(older.subject.title) < digest.body.index(newer.subject.title)
-        assert Notification.objects(user=admin, channels=MAIL).count() == 0
+        assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
     def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
         # Two broken users, whatever order the job meets them in: the second one is only
@@ -1080,9 +1076,9 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert [mail.recipients for mail in mails] == [[healthy.email]]
-        assert Notification.objects(user=healthy, channels=MAIL).count() == 0
+        assert Notification.objects(user=healthy, mail_pending=True).count() == 0
         for user in broken:
-            assert Notification.objects(user=user, channels=MAIL).count() == 1
+            assert Notification.objects(user=user, mail_pending=True).count() == 1
         # The trace has to reach the logs and Sentry, not only the exception message.
         failures = [record for record in caplog.records if record.levelname == "ERROR"]
         assert [failure.exc_info[0] for failure in failures] == [DoesNotExist, DoesNotExist]
@@ -1124,7 +1120,7 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert mails == []
-        assert Notification.objects(user=admin).first().channels == [APP]
+        assert Notification.objects(user=admin).first().mail_pending is False
 
     def test_a_type_that_never_mails_is_not_queued(self):
         """A reuse creation has no `via_mail`, so going weekly must not conjure a mail
@@ -1135,7 +1131,7 @@ class DigestTest(PytestOnlyDBTestCase):
         ReuseFactory(datasets=[dataset])
 
         notification = Notification.objects(user=owner).first()
-        assert notification.channels == [APP]
+        assert notification.mail_pending is False
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_the_threads_of_one_subject_collapse_into_a_single_line(self):
@@ -1148,7 +1144,7 @@ class DigestTest(PytestOnlyDBTestCase):
         for _index in range(3):
             comment(discussion)
 
-        pending = list(Notification.objects(user=admin, channels=MAIL).order_by("created_at"))
+        pending = list(Notification.objects(user=admin, mail_pending=True).order_by("created_at"))
         assert len(pending) == 5
 
         message = notification_digest(pending)
@@ -1318,7 +1314,7 @@ class NotificationResolvedAPITest(APITestCase):
         [answer] = self.resolved([organization], DISCUSSIONS).json
 
         assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
-        assert answer["channels"] == []
+        assert answer["heard"] is False
 
     def test_an_administrator_hears_about_their_organization(self):
         admin = self.login()
@@ -1328,7 +1324,7 @@ class NotificationResolvedAPITest(APITestCase):
 
         assert answer["scope"] == ref(organization)
         assert answer["reasons"] == [NotificationReason.ORGANIZATION_ADMIN]
-        assert answer["channels"] == [APP, MAIL]
+        assert answer["heard"] is True
 
     def test_an_owner_hears_about_the_threads_of_their_dataset(self):
         owner = self.login()
@@ -1337,7 +1333,7 @@ class NotificationResolvedAPITest(APITestCase):
         [answer] = self.resolved([discussion], DISCUSSIONS).json
 
         assert answer["reasons"] == [NotificationReason.OWNER]
-        assert answer["channels"] == [APP, MAIL]
+        assert answer["heard"] is True
 
     def test_a_follow_gives_its_reason(self):
         user = self.login()
@@ -1360,7 +1356,7 @@ class NotificationResolvedAPITest(APITestCase):
         assert answer == {
             "scope": answer["scope"],
             "event": DISCUSSIONS,
-            "channels": [],
+            "heard": False,
             "reasons": [],
         }
 
@@ -1371,7 +1367,7 @@ class NotificationResolvedAPITest(APITestCase):
 
         [answer] = self.resolved([discussion], DISCUSSIONS).json
 
-        assert answer["channels"] == []
+        assert answer["heard"] is False
 
     def test_one_answer_per_subject(self):
         """A page asks once for all of its threads."""
@@ -1385,7 +1381,7 @@ class NotificationResolvedAPITest(APITestCase):
         assert [(answer["scope"]["id"], answer["event"]) for answer in answers] == [
             (str(thread.id), NotificationType.DISCUSSION_NEW) for thread in threads
         ]
-        assert [bool(answer["channels"]) for answer in answers] == [True, False, True]
+        assert [answer["heard"] for answer in answers] == [True, False, True]
 
     def test_a_subject_asked_twice_is_answered_once(self):
         owner = self.login()
@@ -1402,7 +1398,7 @@ class NotificationResolvedAPITest(APITestCase):
         [answer] = self.resolved([dataset]).json
 
         assert answer["event"] is None
-        assert answer["channels"] == [APP, MAIL]
+        assert answer["heard"] is True
 
     def test_unknown_keys_are_refused(self):
         self.login()

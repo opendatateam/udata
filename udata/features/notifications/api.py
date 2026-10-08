@@ -7,10 +7,7 @@ from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import current_user
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import (
-    FollowOrigin,
-    NotificationChannel,
-)
+from udata.features.notifications.constants import FollowOrigin
 from udata.features.notifications.events import is_event_name
 from udata.features.notifications.permissions import EditNotificationPermission
 from udata.mongo import db
@@ -35,7 +32,7 @@ class NotificationsAPI(API):
     def get(self):
         """List all current user pending notifications"""
         user = current_user._get_current_object()
-        notifications = Notification.objects(user=user, channels=NotificationChannel.APP)
+        notifications = Notification.objects(user=user)
         return Notification.apply_pagination(Notification.apply_sort_filters(notifications))
 
 
@@ -116,7 +113,7 @@ resolved_fields = api.model(
             api.model_reference, allow_null=True, description="The subject asked about"
         ),
         "event": fields.String(allow_null=True, description="The event asked about"),
-        "channels": fields.List(fields.String, description="Where the user is reached"),
+        "heard": fields.Boolean(description="Whether the user hears about it"),
         "reasons": fields.List(fields.String, description="Why the user is concerned"),
     },
 )
@@ -159,7 +156,7 @@ class NotificationResolvedAPI(API):
     @api.marshal_list_with(resolved_fields)
     @api.response(400, "Unknown subject or event, or too many subjects")
     def get(self):
-        """Whether, why and where the current user hears about notifications on some
+        """Whether and why the current user hears about notifications on some
         subjects, once their rules and the defaults are applied.
 
         One answer per subject, so that a page asks once for all of its subjects. Without

@@ -13,7 +13,6 @@ from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
     TYPES_REQUIRING_ACTION,
     MailCadence,
-    NotificationChannel,
     NotificationReason,
     NotificationType,
 )
@@ -241,9 +240,6 @@ class NotificationEvent:
 
             # One failing recipient must not deprive the others of their notification.
             if is_user:
-                channels = [NotificationChannel.APP]
-                if deferred:
-                    channels.append(NotificationChannel.MAIL)
                 try:
                     details = self.via_app(recipient.user)
                     if details is not None:
@@ -252,7 +248,7 @@ class NotificationEvent:
                             type=self.type,
                             details=details,
                             reasons=sorted(recipient.reasons),
-                            channels=channels,
+                            mail_pending=deferred,
                             created_at=self.occurred_at,
                         ).save()
                 except Exception:

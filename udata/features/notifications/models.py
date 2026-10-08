@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from flask_restx.inputs import boolean
 from mongoengine import NULLIFY, Q, ValidationError, signals
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     EnumField,
     GenericEmbeddedDocumentField,
@@ -30,7 +31,6 @@ from udata.core.topic.models import Topic
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     TYPES_REQUIRING_ACTION,
-    NotificationChannel,
     NotificationReason,
     NotificationType,
 )
@@ -95,7 +95,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     meta = {
         "ordering": ["-created_at"],
         "queryset_class": NotificationQuerySet,
-        "indexes": [("user", "channels")],
+        "indexes": [("user", "mail_pending")],
     }
 
     id = field(AutoUUIDField(primary_key=True))
@@ -131,22 +131,12 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
         readonly=True,
         auditable=False,
     )
-    # The channels this notification still has to reach the user through. The site
-    # lists the ones holding APP; the digest job takes the ones holding MAIL and drops
-    # it once the mail is out.
+    # Waiting for the next digest of its user, and dropped once the digest is out.
     #
-    # It doubles as the digest cursor — "MAIL is still in there" *is* "not mailed yet",
-    # which makes the job replayable without a date to keep anywhere. Internal to that
-    # queue, hence not exposed.
-    #
-    # Defaults to the app: everything creating a notification outside of `dispatch` is
-    # backfilling one somebody should read, and a migration must not be able to fail in
-    # production over a field it had no opinion about.
-    channels = ListField(
-        EnumField(NotificationChannel),
-        required=True,
-        default=lambda: [NotificationChannel.APP],
-    )
+    # It doubles as the digest cursor — "still pending" *is* "not mailed yet", which
+    # makes the job replayable without a date to keep anywhere. Internal to that queue,
+    # hence not exposed.
+    mail_pending = BooleanField(default=False)
 
     @field(
         description="Whether the notification is resolved by acting on its subject "

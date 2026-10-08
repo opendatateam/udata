@@ -5,7 +5,7 @@ from flask import current_app
 
 from udata import i18n
 from udata.features.notifications import mails
-from udata.features.notifications.constants import MailCadence, NotificationChannel
+from udata.features.notifications.constants import MailCadence
 from udata.features.notifications.models import Notification
 from udata.tasks import job
 
@@ -25,7 +25,7 @@ DIGEST_INTERVALS = {
 def send_notification_digests(self):
     """Mail everyone whose pending notifications have waited out their cadence.
 
-    There is no cursor to keep: a notification still holding `MAIL` is one that has
+    There is no cursor to keep: a notification still `mail_pending` is one that has
     not been mailed, and the oldest of them says when the wait started. A missed run
     is therefore caught by the next one, and running twice sends nothing twice.
 
@@ -36,21 +36,21 @@ def send_notification_digests(self):
     sent = 0
     # Only users with something waiting, which is a small set: an immediate recipient
     # never queues anything.
-    for user in Notification.objects(channels=NotificationChannel.MAIL).distinct("user"):
+    for user in Notification.objects(mail_pending=True).distinct("user"):
         if user is None or user.deleted:
             continue
 
         # What was queued before the pause stays in the bell, but is not mailed: neither
         # now, nor in one go on resuming.
         if user.notifications_paused:
-            Notification.objects(user=user, channels=NotificationChannel.MAIL).update(
-                pull__channels=NotificationChannel.MAIL, set__last_modified=datetime.now(UTC)
+            Notification.objects(user=user, mail_pending=True).update(
+                set__mail_pending=False, set__last_modified=datetime.now(UTC)
             )
             continue
 
         due_before = datetime.now(UTC) - DIGEST_INTERVALS[user.mail_cadence]
         # What was answered or read in the meantime is no news any more.
-        queue = Notification.objects(user=user, channels=NotificationChannel.MAIL, handled_at=None)
+        queue = Notification.objects(user=user, mail_pending=True, handled_at=None)
         if not queue.filter(created_at__lte=due_before).first():
             continue
 
@@ -74,7 +74,7 @@ def send_notification_digests(self):
         # Only what was mailed is spent: a notification arriving meanwhile stays queued.
         # `last_modified` is set by hand, a queryset update skips the `pre_save` filling it.
         mailed = Notification.objects(id__in=[notification.id for notification in notifications])
-        mailed.update(pull__channels=NotificationChannel.MAIL, set__last_modified=datetime.now(UTC))
+        mailed.update(set__mail_pending=False, set__last_modified=datetime.now(UTC))
 
     log.info(f"Sent {sent} notification digests")
 

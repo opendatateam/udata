@@ -18,11 +18,7 @@ from udata.core.discussions.constants import DISCUSSION_SUBJECTS
 from udata.core.organization.models import Organization
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
-from udata.features.notifications.constants import (
-    FollowOrigin,
-    NotificationChannel,
-    NotificationReason,
-)
+from udata.features.notifications.constants import FollowOrigin, NotificationReason
 from udata.mongo.document import UDataDocument
 
 # Everything a rule can be scoped to. Anything an event can name in its `scopes()`
@@ -224,14 +220,14 @@ class Resolution:
 
     scope: Document
     event: str | None
-    channels: list[NotificationChannel]
+    heard: bool
     reasons: list[NotificationReason]
 
 
 def resolved_for(
     user: User, subjects: Sequence[Document], event: str | None = None
 ) -> list[Resolution]:
-    """Whether, why and where `user` hears about notifications on each subject (all of
+    """Whether and why `user` hears about notifications on each subject (all of
     them without an event), the way the dispatch would decide it, so that the front
     never resolves rules by itself.
 
@@ -275,9 +271,7 @@ def resolved_for(
             Resolution(
                 scope=subject,
                 event=event,
-                channels=sorted(NotificationChannel)
-                if not user.notifications_paused and resolve(rules, chain, scopes, held)
-                else [],
+                heard=not user.notifications_paused and resolve(rules, chain, scopes, held),
                 reasons=sorted(held),
             )
         )

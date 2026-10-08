@@ -48,11 +48,6 @@ TYPES_REQUIRING_ACTION = frozenset(
 )
 
 
-class NotificationChannel(StrEnum):
-    APP = "app"
-    MAIL = "mail"
-
-
 class MailCadence(StrEnum):
     """How often somebody agrees to be written to.
 
