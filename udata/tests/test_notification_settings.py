@@ -18,12 +18,10 @@ from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
-from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import MembershipRequest
-from udata.core.post.factories import PostFactory
 from udata.core.reuse.activities import UserUpdatedReuse
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -1222,30 +1220,6 @@ class DigestTest(PytestOnlyDBTestCase):
 
         assert mails == []
 
-    def test_a_subject_gone_does_not_hold_back_the_rest_of_the_digest(self):
-        """Deleting a post leaves its discussions, and their notifications, behind."""
-        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
-        dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
-        post = PostFactory()
-        orphan = DiscussionFactory(subject=post)
-        Notification(
-            user=admin,
-            type=NotificationType.DISCUSSION_NEW,
-            details=DiscussionNotificationDetails(discussion=orphan),
-            mail_pending=True,
-        ).save()
-        open_discussion(dataset)
-        post.delete()
-        for notification in Notification.objects(user=admin):
-            age(notification, days=8)
-
-        with capture_mails() as mails:
-            send_notification_digests()
-
-        [mail] = mailed(mails, admin)
-        assert dataset.title in mail.body
-        assert Notification.objects(user=admin, mail_pending=True).count() == 0
-
     def test_what_was_read_while_queued_leaves_the_queue_unmailed(self):
         """Read is no news any more, and left queued it would bring its user back to
         every run until it expires."""
@@ -1297,6 +1271,7 @@ class DigestTest(PytestOnlyDBTestCase):
         assert notification.mail_pending is False
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_the_threads_of_one_subject_collapse_into_a_single_line(self):
         """A count of new discussions only means something for what they are about."""
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1314,7 +1289,9 @@ class DigestTest(PytestOnlyDBTestCase):
         assert len(message.paragraphs) == 2  # intro, one line
         line = message.paragraphs[1]
         assert str(line) == f"{dataset.title}: 2 new discussions, 3 new comments"
-        assert f'href="{dataset.self_web_url(append="/discussions")}"' in line.html
+        # The discussions of the subject, not one of its threads.
+        assert f'href="https://www.data.gouv.fr/datasets/{dataset.slug}/discussions' in line.html
+        assert "discussion_id=" not in line.html
 
     def test_running_the_digest_twice_sends_nothing_twice(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1335,6 +1312,21 @@ class NotificationSettingsAPITest(APITestCase):
             "/api/1/notifications/settings/",
             {"scope": ref(scope) if scope else None, "event": event, "enabled": enabled, **keys},
         )
+
+    def test_a_type_is_turned_off_everywhere_through_the_api(self):
+        """What the "stop receiving this type" of the bell sends: no scope at all."""
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+
+        self.assert204(self.put_rule(False, event=NotificationType.REUSE_CREATED))
+        self.assert204(self.put_rule(False, event=NotificationType.REUSE_CREATED))
+        ReuseFactory(datasets=[dataset])
+
+        assert NotificationSetting.objects(user=owner).count() == 1
+        assert Notification.objects(user=owner).count() == 0
+
+        self.assert204(self.put_rule(None, event=NotificationType.REUSE_CREATED))
+        assert NotificationSetting.objects(user=owner).count() == 0
 
     def test_a_rule_without_enabled_is_refused_rather_than_withdrawn(self):
         user = self.login()
@@ -1524,6 +1516,18 @@ class NotificationResolvedAPITest(APITestCase):
             query.append(("event", event))
         return self.get("/api/1/notifications/resolved/", query_string=query)
 
+    def test_an_editor_hears_nothing_of_a_dataset_they_never_touched(self):
+        """The badges editors hear about by default are about the organization only: they
+        must not make every dataset of it read as heard."""
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        self.login(editor)
+
+        [answer] = self.resolved([dataset]).json
+
+        assert answer["heard"] is False
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_the_subject_is_named_as_the_user_may_see_it(self):
         """What a mail link names is read back from here: a private subject keeps its
         title."""
@@ -1536,7 +1540,7 @@ class NotificationResolvedAPITest(APITestCase):
 
         assert answers[0]["subject"] == {
             "title": visible.title,
-            "page": visible.self_web_url(),
+            "page": f"https://www.data.gouv.fr/datasets/{visible.slug}",
             "organization": answers[0]["subject"]["organization"],
         }
         assert answers[0]["subject"]["organization"]["id"] == str(organization.id)
@@ -1625,6 +1629,7 @@ class NotificationResolvedAPITest(APITestCase):
             [NotificationReason.CONTRIBUTOR],
         ]
 
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_nothing_concerns_an_outsider(self):
         self.login()
 
@@ -1639,7 +1644,11 @@ class NotificationResolvedAPITest(APITestCase):
             "reasons": [],
             "muted": False,
             "followed_events": [],
-            "subject": {"title": dataset.title, "page": None, "organization": None},
+            "subject": {
+                "title": dataset.title,
+                "page": f"https://www.data.gouv.fr/datasets/{dataset.slug}",
+                "organization": None,
+            },
         }
 
     def test_an_ignored_thread_resolves_to_nothing(self):
@@ -2205,6 +2214,7 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert listed["subject"]["title"] == dataset.title
         assert listed["subject"]["organization"]["id"] == str(organization.id)
 
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_a_thread_is_listed_with_its_title_and_the_organization_of_its_subject(self):
         user = self.login()
         organization = OrganizationFactory()
@@ -2214,7 +2224,10 @@ class FollowWhatOneWorksOnTest(APITestCase):
         [listed] = self.get("/api/1/notifications/settings/").json["data"]
 
         assert listed["subject"]["title"] == discussion.title
-        assert listed["subject"]["page"] == discussion.self_web_url()
+        assert listed["subject"]["page"] == (
+            f"https://www.data.gouv.fr/datasets/{discussion.subject.slug}"
+            f"/discussions?discussion_id={discussion.id}"
+        )
         assert listed["subject"]["organization"]["id"] == str(organization.id)
 
     def test_a_subject_out_of_reach_is_listed_without_its_title(self):

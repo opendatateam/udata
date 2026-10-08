@@ -203,9 +203,9 @@ class NotificationEvent:
     def via_app(self, recipient: User) -> EmbeddedDocument | None:
         """The payload of the stored notification, or `None` to store nothing.
 
-        A configurable type must always return one: the stored notification is what a
-        digest is later built from, so returning `None` there would silently drop the
-        mail of anybody who asked for a weekly summary.
+        A type with a `digest_count` should always return one: the stored notification is
+        what a digest is later built from, and without it the mail leaves at once, whatever
+        cadence its recipient chose.
         """
         return None
 
@@ -249,6 +249,7 @@ class NotificationEvent:
             )
 
             # One failing recipient must not deprive the others of their notification.
+            queued = False
             if is_user:
                 try:
                     details = self.via_app(recipient.user)
@@ -261,10 +262,12 @@ class NotificationEvent:
                             mail_pending=deferred,
                             created_at=self.occurred_at,
                         ).save()
+                        queued = deferred
                 except Exception:
                     log.exception(f"Could not notify {recipient.user} of {self.type}")
 
-            if not deferred:
+            # The digest is built from what was stored: what could not be is mailed now.
+            if not queued:
                 try:
                     mail = self._mail(recipient)
                     if mail is not None:

@@ -1850,10 +1850,6 @@ msgstr ""
 msgid "You receive this email because you made this request."
 msgstr ""
 
-#: udata/features/notifications/mails.py:107
-msgid "You receive this email because you administer the site."
-msgstr ""
-
 #: udata/features/notifications/mails.py:131
 msgid "Manage your notifications"
 msgstr ""

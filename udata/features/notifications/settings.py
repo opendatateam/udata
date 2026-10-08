@@ -51,13 +51,13 @@ def subject_summary(scope) -> SubjectSummary | None:
     naming it."""
     if scope is None:
         return None
-    subject, read = read_permission(scope)
+    read = read_permission(scope)
     if read is not None and not read.can():
         return None
     return SubjectSummary(
         title=str(scope),
         page=scope.self_web_url(),
-        organization=getattr(subject, "organization", None),
+        organization=getattr(subject_of(scope), "organization", None),
     )
 
 
@@ -340,11 +340,15 @@ def set_rule(user: User, scope: Document | None, event: str | None, enabled: boo
     )
 
 
+def subject_of(scope):
+    """What a rule on `scope` is about: a thread stands for its subject."""
+    return scope.subject if isinstance(scope, Discussion) else scope
+
+
 def read_permission(scope):
-    """What a rule on `scope` is about, a thread standing for its subject, and who may
-    read it: its `read` permission, `None` when anybody may (an organization, a topic)."""
-    subject = scope.subject if isinstance(scope, Discussion) else scope
-    return subject, getattr(subject, "permissions", {}).get("read")
+    """Who may read what a rule on `scope` is about: its `read` permission, `None` when
+    anybody may (an organization, a topic)."""
+    return getattr(subject_of(scope), "permissions", {}).get("read")
 
 
 def readable_by(user: User, scope) -> bool:
@@ -354,7 +358,7 @@ def readable_by(user: User, scope) -> bool:
     an organization: without this, its private datasets would leak through their
     discussions. The permission is checked against the needs `user` would have once
     logged in, not against `current_user`, who is whoever triggered the event."""
-    _, read = read_permission(scope)
+    read = read_permission(scope)
     if read is None:
         return True
     identity = Identity(user.id)

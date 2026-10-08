@@ -53,9 +53,19 @@ def event_chain(event: str | None) -> list[str]:
     return [".".join(parts[:length]) for length in range(len(parts), 0, -1)]
 
 
+def types_under(event: str | None) -> list[NotificationType]:
+    """The types a rule naming `event` covers: the type itself, or every type it is a
+    prefix of, all of them without an event."""
+    return [
+        type
+        for type in NotificationType
+        if event is None or type == event or type.startswith(f"{event}.")
+    ]
+
+
 def is_event_name(event: str) -> bool:
     """Whether a rule can name `event`: a notification type, or a prefix of some."""
-    return any(type == event or type.startswith(f"{event}.") for type in NotificationType)
+    return bool(types_under(event))
 
 
 # Notifications that are resolved by acting on their subject (accepting a request,
@@ -98,7 +108,6 @@ class NotificationReason(StrEnum):
     ORGANIZATION_EDITOR = "organization.editor"
     ORGANIZATION_PARTIAL_EDITOR = "organization.partial_editor"
     DISCUSSION_PARTICIPANT = "discussion.participant"
-    SYSADMIN = "sysadmin"
     # Asked for it on this very subject, without being concerned otherwise. The only
     # way somebody outside an organization can follow a thread or a dataset.
     EXPLICIT_SUBSCRIBER = "explicit_subscriber"

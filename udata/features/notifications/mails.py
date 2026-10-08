@@ -56,8 +56,6 @@ def reason_sentence(reason: NotificationReason, subject, followed=None) -> LazyS
             )
         case NotificationReason.REQUESTER:
             return _("You receive this email because you made this request.")
-        case NotificationReason.SYSADMIN:
-            return _("You receive this email because you administer the site.")
 
 
 def way_out(label: LazyString, scope=None, event: str | None = None) -> MailCTA:

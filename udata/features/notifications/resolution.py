@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from mongoengine import Document, Q
 
+from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
@@ -15,6 +16,7 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
     event_chain,
+    types_under,
 )
 from udata.features.notifications.events import (
     discussion_recipients,
@@ -54,6 +56,19 @@ class Resolution:
         return subject_summary(self.scope)
 
 
+def can_concern(type: NotificationType, subject: Document) -> bool:
+    """Whether a notification of this type can be about `subject`, that is have it among
+    its scopes at dispatch: a badge is about an organization, never about one of its
+    datasets. A type not listed here is about no subject a rule can name."""
+    if type.startswith("discussion."):
+        return True
+    if type in (NotificationType.REUSE_CREATED, NotificationType.DATASERVICE_CREATED):
+        return isinstance(subject, Dataset | Organization)
+    if type.startswith("organization."):
+        return isinstance(subject, Organization)
+    return False
+
+
 def resolved_for(
     user: User, subjects: Sequence[Document], event: str | None = None
 ) -> list[Resolution]:
@@ -73,22 +88,14 @@ def resolved_for(
     notification" would miss what the defaults only grant to some types, the badges of
     an editor.
     """
-    types = [
-        type
-        for type in NotificationType
-        if type not in TYPES_REQUIRING_ACTION
-        and (event is None or type == event or type.startswith(f"{event}."))
-    ]
+    types = [type for type in types_under(event) if type not in TYPES_REQUIRING_ACTION]
     scopes_of = [(subject, subject_scopes(subject)) for subject in subjects]
+    # The subjects are among their own scopes: the rules on them are in there too.
     rules = rules_for(
         [user],
         list({name for type in types for name in event_chain(type)}),
         list({scope.pk: scope for _, scopes in scopes_of for scope in scopes}.values()),
     ).get(user.id, [])
-    own = {
-        (row["scope"]["_ref"].id, row.get("event")): row["enabled"]
-        for row in NotificationSetting.objects(user=user, scope__in=list(subjects)).as_pymongo()
-    }
     under = f"{event}." if event else ""
 
     resolutions = []
@@ -131,14 +138,22 @@ def resolved_for(
                 scope=subject,
                 event=event,
                 heard=any(
-                    resolve(rules, event_chain(type), scopes, held_for(type)) for type in types
+                    resolve(rules, event_chain(type), scopes, held_for(type))
+                    for type in types
+                    if can_concern(type, subject)
                 ),
                 reasons=sorted(roles | followed),
-                muted=own.get((subject.pk, event)) is False,
+                muted=any(
+                    rule.scope == subject.pk and rule.event == event and not rule.enabled
+                    for rule in rules
+                ),
                 followed_events=sorted(
-                    named
-                    for (scope_id, named), enabled in own.items()
-                    if scope_id == subject.pk and enabled and named and named.startswith(under)
+                    rule.event
+                    for rule in rules
+                    if rule.scope == subject.pk
+                    and rule.enabled
+                    and rule.event
+                    and rule.event.startswith(under)
                 ),
             )
         )

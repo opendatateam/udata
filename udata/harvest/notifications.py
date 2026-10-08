@@ -62,10 +62,7 @@ class HarvestSourcePending(HarvestSourceEvent):
         admin_role = Role.objects(name="admin").first()
         if admin_role is None:
             return []
-        return [
-            Recipient(user, frozenset({NotificationReason.SYSADMIN}))
-            for user in User.objects(roles=admin_role, active=True)
-        ]
+        return [Recipient(user) for user in User.objects(roles=admin_role, active=True)]
 
 
 class HarvestSourceReviewed(HarvestSourceEvent):
