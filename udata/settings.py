@@ -47,9 +47,7 @@ class Defaults(object):
     CELERY_RESULT_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["pickle", "json"]
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-    CELERY_BEAT_SCHEDULER = "udata.tasks.Scheduler"
-    CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
-    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
+    CELERY_BEAT_SCHEDULER = "udata.core.jobs.scheduler.Scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = "default"

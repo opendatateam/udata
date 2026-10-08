@@ -25,6 +25,7 @@ from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
+from udata.core.jobs.models import PeriodicTask
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
@@ -286,7 +287,7 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         checks=[check_config_matches_backend],
         description="The configuration as key-value pairs",
     )
-    periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=NULLIFY)
+    periodic_task = ReferenceField(PeriodicTask, reverse_delete_rule=NULLIFY)
     created_at = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
