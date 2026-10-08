@@ -64,7 +64,12 @@ def can_concern(type: NotificationType, subject: Document) -> bool:
         return True
     if type in (NotificationType.REUSE_CREATED, NotificationType.DATASERVICE_CREATED):
         return isinstance(subject, Dataset | Organization)
-    if type.startswith("organization."):
+    # The answer to a membership request reaches its requester alone, whatever their
+    # role: no rule on the organization changes who gets it.
+    if type.startswith("organization.membership."):
+        return False
+    # A harvest source is no scope: its organization is.
+    if type.startswith("organization.") or type.startswith("harvest."):
         return isinstance(subject, Organization)
     return False
 

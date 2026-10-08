@@ -8,7 +8,7 @@ from udata.core.organization.notifications import MembershipAcceptedNotification
 from udata.core.user.factories import UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 
 
 class DataserviceNotificationsTest(PytestOnlyDBTestCase):
@@ -167,3 +167,15 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         # Only the unrelated notification should remain
         assert Notification.objects.count() == 1
         assert Notification.objects(user=other_user).count() == 1
+
+
+class DataserviceNotificationsAPITest(APITestCase):
+    def test_the_bell_names_the_dataset_without_its_content(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        DataserviceFactory(datasets=[dataset])
+
+        [notification] = self.get("/api/1/notifications/").json["data"]
+
+        assert notification["details"]["dataset"]["title"] == dataset.title
+        assert "resources" not in notification["details"]["dataset"]

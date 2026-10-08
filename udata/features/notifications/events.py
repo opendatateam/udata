@@ -8,6 +8,7 @@ from flask_babel import LazyString
 from mongoengine import Document, EmbeddedDocument
 
 from udata.core.discussions.models import Discussion
+from udata.core.organization.assignment import Assignment
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
@@ -21,6 +22,7 @@ from udata.features.notifications.constants import (
 from udata.features.notifications.mails import settings_footer, way_out
 from udata.features.notifications.settings import (
     REASON_BY_ORIGIN,
+    follow_holds,
     follows,
     readable_by,
     resolve,
@@ -94,10 +96,6 @@ def responsible_recipients(subject) -> list[Recipient]:
     them. Everybody else, editors included, is concerned by the whole organization;
     whether that makes them hear about it is for their rules to say.
     """
-    # Not at the top: `Assignment` resolves the models it can point to when it is
-    # declared, and `Reuse` is not registered yet when this module loads.
-    from udata.core.organization.assignment import Assignment
-
     if isinstance(subject, Organization):
         # The organization itself concerns all of its members, whatever was assigned to
         # them.
@@ -233,12 +231,7 @@ class NotificationEvent:
     def dispatch(self) -> None:
         from udata.features.notifications.models import Notification
 
-        recipients = self._concerned()
-        heard = self._heard(recipients)
-
-        for recipient in recipients:
-            if recipient.key not in heard:
-                continue
+        for recipient in self._heard(self._concerned()):
             # An in-app notification needs an account to hang on, so an address with no
             # user behind it is reachable by email only.
             is_user = isinstance(recipient.user, User)
@@ -309,7 +302,8 @@ class NotificationEvent:
         return [
             Recipient(setting.user, frozenset({REASON_BY_ORIGIN[setting.origin]}), setting.scope)
             for setting in settings
-            if self.subject is None or readable_by(setting.user, self.subject)
+            if follow_holds(setting.origin, setting.user, setting.scope)
+            and (self.subject is None or readable_by(setting.user, self.subject))
         ]
 
     def _mail(self, recipient: Recipient) -> MailMessage | None:
@@ -343,24 +337,23 @@ class NotificationEvent:
         an event class stands for (the five badges)."""
         return self.type
 
-    def _heard(self, recipients: list[Recipient]) -> set[ObjectId | str]:
-        """The keys of the recipients their rules let hear about this event (see
-        `resolve`)."""
+    def _heard(self, recipients: list[Recipient]) -> list[Recipient]:
+        """The recipients their rules let hear about this event (see `resolve`)."""
         if self.requires_action:
-            return {recipient.key for recipient in recipients}
+            return recipients
 
         events, scopes = event_chain(self.type), self.scopes()
         users = [recipient.user for recipient in recipients if isinstance(recipient.user, User)]
         rules = rules_for(users, events, scopes)
         # An address with no account behind it has no rules: an invitation is the only
         # thing reaching it, and an invitation is an action to take.
-        return {
-            recipient.key
+        return [
+            recipient
             for recipient in recipients
             if isinstance(recipient.user, User)
             and not recipient.user.notifications_paused
             and resolve(rules.get(recipient.key, []), events, scopes, recipient.reasons)
-        }
+        ]
 
     def already_pending(self, recipient: User, **details) -> bool:
         """Whether the recipient still has an unhandled notification about the same

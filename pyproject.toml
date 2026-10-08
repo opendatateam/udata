@@ -149,7 +149,7 @@ local_scheme = "no-local-version"
 
 [tool.babel]
 compile_catalog = { domain = "udata", directory = "udata/translations", statistics = true }
-extract_messages = { keywords = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2 lazy_ngettext:1,2", mapping_file = "babel.cfg", add_comments = "TRANSLATORS:", output_file = "udata/translations/udata.pot", width = 80 }
+extract_messages = { keywords = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2", mapping_file = "babel.cfg", add_comments = "TRANSLATORS:", output_file = "udata/translations/udata.pot", width = 80 }
 init_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations" }
 update_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations", previous = true }
 

@@ -50,7 +50,7 @@ def i18n(ctx, update=False):
     info("Extract Python strings")
     with ctx.cd(ROOT):
         ctx.run(
-            "pybabel extract -F babel.cfg -k _ -k N_:1,2 -k P_:1c,2 -k L_ -k gettext -k ngettext:1,2 -k pgettext:1c,2 -k npgettext:1c,2,3 -k lazy_gettext -k lazy_pgettext:1c,2 -k lazy_ngettext:1,2 --add-comments=TRANSLATORS: --width=80 -o udata/translations/udata.pot udata"
+            "pybabel extract -F babel.cfg -k _ -k N_:1,2 -k P_:1c,2 -k L_ -k gettext -k ngettext:1,2 -k pgettext:1c,2 -k npgettext:1c,2,3 -k lazy_gettext -k lazy_pgettext:1c,2 --add-comments=TRANSLATORS: --width=80 -o udata/translations/udata.pot udata"
         )
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile

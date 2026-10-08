@@ -207,25 +207,38 @@ def rules_for(
 
     One query for the whole event: resolving per recipient would multiply it by the
     size of an organization. Rows are read raw, since only identifiers are compared."""
-    users = list(users)
+    users = {user.id: user for user in users}
     if not users:
         return {}
+    scopes_by_id = {scope.pk: scope for scope in scopes}
 
     rules: dict[ObjectId, list[Rule]] = {}
     for row in NotificationSetting.objects(
         (Q(scope=None) | Q(scope__in=scopes)) & (Q(event=None) | Q(event__in=events)),
-        user__in=users,
+        user__in=list(users.values()),
     ).as_pymongo():
         scope = row.get("scope")
+        origin = FollowOrigin(row.get("origin", FollowOrigin.FOLLOWED))
+        if scope and not follow_holds(origin, users[row["user"]], scopes_by_id[scope["_ref"].id]):
+            continue
         rules.setdefault(row["user"], []).append(
             Rule(
                 scope=scope["_ref"].id if scope else None,
                 event=row.get("event"),
                 enabled=row["enabled"],
-                origin=FollowOrigin(row.get("origin", FollowOrigin.FOLLOWED)),
+                origin=origin,
             )
         )
     return rules
+
+
+def follow_holds(origin: FollowOrigin, user: User, scope) -> bool:
+    """Whether a follow still counts. One udata made for working on a subject as a
+    member was part of the job, and ends with it; one set by hand is the user's own."""
+    if origin == FollowOrigin.FOLLOWED:
+        return True
+    organization = getattr(subject_of(scope), "organization", None)
+    return organization is None or organization.is_member(user)
 
 
 def resolve(

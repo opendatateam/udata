@@ -2,6 +2,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
+from udata.features.notifications.resolution import set_follow
 from udata.features.notifications.settings import NotificationSetting
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.tests.api import PytestOnlyDBTestCase
@@ -84,6 +85,16 @@ class HarvestNotificationsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         actions.validate_source(source)
 
         assert Notification.objects(user=follower).count() == 0
+
+    def test_stopping_the_harvests_of_an_organization_stops_them(self):
+        """Asked through /follow/, which only writes a no when something is heard."""
+        admin = UserFactory()
+        org = OrganizationFactory(members=[{"user": admin, "role": "admin"}])
+
+        set_follow(admin, org, "harvest", False)
+        actions.validate_source(HarvestSourceFactory(organization=org))
+
+        assert Notification.objects(user=admin).count() == 0
 
     def test_refuse_source_creates_notification_for_owner(self):
         owner = UserFactory()

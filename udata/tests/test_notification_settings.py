@@ -299,6 +299,20 @@ class PersonaTest(APITestCase):
         assert NotificationSetting.objects(user=marc).count() == 0
         assert Notification.objects(user=marc).count() == 1
 
+    def test_an_automatic_follow_ends_with_leaving_the_organization(self):
+        """Marc followed what he edited as a member: that was his job, and it ends with it.
+        Only a follow he set himself outlives his leaving."""
+        marc = UserFactory()
+        organization = OrganizationFactory(editors=[marc])
+        dataset = DatasetFactory(organization=organization)
+        decide(marc, dataset, enabled=True, origin=FollowOrigin.EDITED)
+
+        organization.members = []
+        organization.save()
+        open_discussion(dataset)
+
+        assert Notification.objects(user=marc).count() == 0
+
     def test_a_follow_outlives_leaving_the_organization(self):
         """The other half of the rule above: what somebody asked for is theirs, and
         does not depend on a role. Discussions are public, so this grants nothing."""
@@ -524,8 +538,8 @@ class ResolveTest:
         assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) is False
 
     def test_the_users_broad_choice_beats_a_precise_default(self):
-        """Defaults are only read where the user said nothing: "editors, yes" set by the
-        user is not undone by the narrower default of the badges."""
+        """Defaults are only read where the user said nothing: a "no" everywhere set by
+        the user is not undone by the narrower default giving editors the badges."""
         rules = [rule(enabled=False)]
 
         assert resolve(
@@ -1219,6 +1233,7 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert mails == []
+        assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
     def test_what_was_read_while_queued_leaves_the_queue_unmailed(self):
         """Read is no news any more, and left queued it would bring its user back to
@@ -1270,7 +1285,6 @@ class DigestTest(PytestOnlyDBTestCase):
         notification = Notification.objects(user=owner).first()
         assert notification.mail_pending is False
 
-    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_the_threads_of_one_subject_collapse_into_a_single_line(self):
         """A count of new discussions only means something for what they are about."""
@@ -1628,6 +1642,15 @@ class NotificationResolvedAPITest(APITestCase):
             [NotificationReason.EXPLICIT_SUBSCRIBER],
             [NotificationReason.CONTRIBUTOR],
         ]
+
+    def test_the_answers_to_membership_requests_concern_no_administrator(self):
+        """They reach the requester alone: an administrator hears none of them."""
+        admin = self.login()
+        organization = OrganizationFactory(admins=[admin])
+
+        [answer] = self.resolved([organization], "organization.membership").json
+
+        assert answer["heard"] is False
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_nothing_concerns_an_outsider(self):

@@ -10,7 +10,7 @@ from udata.features.notifications.events import event_for_type
 from udata.features.notifications.mails import settings_footer
 from udata.features.notifications.models import Notification
 from udata.i18n import lazy_gettext as _
-from udata.i18n import lazy_ngettext
+from udata.i18n import ngettext
 from udata.mail import Link, MailMessage, ParagraphWithLinks
 from udata.tasks import job
 
@@ -56,7 +56,8 @@ def notification_digest(notifications: list[Notification]) -> MailMessage:
     ]
 
     return MailMessage(
-        subject=lazy_ngettext(
+        # Built in the language of its recipient (see `send_notification_digests`).
+        subject=ngettext(
             "Updates on an item you follow",
             "Updates on %(num)d items you follow",
             len(lines),
@@ -85,7 +86,9 @@ def send_notification_digests(self):
     # Only users with something waiting, which is a small set: an immediate recipient
     # never queues anything.
     for user in Notification.objects(mail_pending=True).distinct("user"):
+        # Nobody to mail any more: left queued, they would come back at every run.
         if user is None or user.deleted:
+            Notification.objects(user=user, mail_pending=True).mark_mailed()
             continue
 
         # What was queued before the pause stays in the bell, but is not mailed: neither
