@@ -7,24 +7,6 @@ log = logging.getLogger(__name__)
 DEFAULT_SRS = "EPSG:4326"
 
 
-def detect_srs(f: IO[bytes], file_format: str | None) -> str | None:
-    """Return SRS string (e.g. 'EPSG:4326') or None if undetermined.
-
-    Currently supports GeoPackage. Shapefile (.prj + pyproj) and spec-defined
-    WGS84 formats (GeoJSON, KML, KMZ, GPX) can be added here without changing
-    the pipeline.
-    """
-    fmt = (file_format or "").lower()
-    if fmt == "gpkg":
-        try:
-            layers = read_gpkg_layers(f)
-        except sqlite3.Error:
-            log.warning("geopf: failed to detect SRS from GPKG", exc_info=True)
-            return None
-        return next((srs for _, srs in layers if srs), None)
-    return None
-
-
 def read_gpkg_layers(f: IO[bytes]) -> list[tuple[str, str | None]]:
     """Return `(table_name, srs)` for each geometry layer, `srs` being None if undetermined.
 

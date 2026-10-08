@@ -39,8 +39,8 @@ from .models import (
     resource_offering_metadata,
     resource_push_metadata,
 )
-from .srs import DEFAULT_SRS, detect_srs
-from .validation import validate_file
+from .srs import DEFAULT_SRS
+from .validation import validate_gpkg
 
 log = logging.getLogger(__name__)
 
@@ -154,12 +154,11 @@ def _run_pipeline(
 
     try:
         with _open_resource_file(resource) as f:
-            validate_file(f, resource.format)
+            srs = validate_gpkg(f) or DEFAULT_SRS
 
             file_md5 = md5(f)
             f.seek(0)
 
-            srs = detect_srs(f, resource.format) or DEFAULT_SRS
             log.debug("geopf: using srs=%s dataset=%s resource=%s", srs, dataset_id, resource_id)
 
             upload_id = client.create_upload(

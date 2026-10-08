@@ -403,7 +403,10 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.poll_execution.return_value = ("SUCCESS", "sd-1")
         client.upload_metadata.return_value = "meta-1"
 
-        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+        with (
+            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
+            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+        ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             _run_pipeline(dataset, resource, "ds-1", client)
 
@@ -435,7 +438,10 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.side_effect = GeopfTimeoutError("still running")
 
-        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+        with (
+            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
+            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+        ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfTimeoutError):
                 _run_pipeline(dataset, resource, "ds-1", client)
@@ -452,7 +458,10 @@ class RunPipelineTest(PytestOnlyDBTestCase):
         client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.side_effect = GeopfError("boom")
 
-        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+        with (
+            patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
+            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+        ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfError):
                 _run_pipeline(dataset, resource, "ds-1", client)
