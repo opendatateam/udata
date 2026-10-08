@@ -40,6 +40,7 @@ from .models import (
     resource_push_metadata,
 )
 from .srs import DEFAULT_SRS, detect_srs
+from .validation import validate_file
 
 log = logging.getLogger(__name__)
 
@@ -153,6 +154,8 @@ def _run_pipeline(
 
     try:
         with _open_resource_file(resource) as f:
+            validate_file(f, resource.format)
+
             file_md5 = md5(f)
             f.seek(0)
 
@@ -181,9 +184,12 @@ def _run_pipeline(
             dataset_id,
             resource_id,
         )
-        status = client.poll_upload(upload_id)
+        status, failed_checks = client.poll_upload(upload_id)
         if status != "CLOSED":
-            raise GeopfError(f"Upload checks failed with status {status}")
+            reason = client.failed_check_logs(failed_checks)
+            raise GeopfError(
+                f"Upload checks failed with status {status}" + (f": {reason}" if reason else "")
+            )
 
         client.tag_entity("uploads", upload_id, datasheet_name)
 

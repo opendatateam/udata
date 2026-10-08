@@ -398,7 +398,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.return_value = ("SUCCESS", "sd-1")
         client.upload_metadata.return_value = "meta-1"
@@ -431,7 +431,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.side_effect = GeopfTimeoutError("still running")
 
@@ -449,7 +449,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.side_effect = GeopfError("boom")
 
         with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:

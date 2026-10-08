@@ -86,16 +86,35 @@ class GeopfClientUploadTest(PytestOnlyTestCase):
             f"{TEST_API_URL}/uploads/u1/checks",
             json={"asked": [], "in_progress": [], "failed": []},
         )
-        status = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).poll_upload("u1")
-        assert status == "CLOSED"
+        assert GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).poll_upload("u1") == (
+            "CLOSED",
+            [],
+        )
 
     def test_poll_upload_unstable_when_failed(self, rmock):
         rmock.get(
             f"{TEST_API_URL}/uploads/u1/checks",
-            json={"failed": [{"id": "c1"}], "asked": [], "in_progress": []},
+            json={"failed": [{"_id": "c1"}], "asked": [], "in_progress": []},
         )
-        status = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).poll_upload("u1")
-        assert status == "UNSTABLE"
+        assert GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).poll_upload("u1") == (
+            "UNSTABLE",
+            [{"_id": "c1"}],
+        )
+
+    def test_failed_check_logs(self, rmock):
+        rmock.get(
+            f"{TEST_API_URL}/checks/executions/e1/logs",
+            text="GeoPackage invalide (nom de table invalide : secteurs-pnc)",
+        )
+        logs = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).failed_check_logs(
+            [{"_id": "e1"}]
+        )
+        assert logs == "GeoPackage invalide (nom de table invalide : secteurs-pnc)"
+
+    def test_failed_check_logs_empty_on_error(self, rmock):
+        rmock.get(f"{TEST_API_URL}/checks/executions/e1/logs", status_code=500)
+        client = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID)
+        assert client.failed_check_logs([{"_id": "e1"}]) == ""
 
     @pytest.mark.options(GEOPF_POLL_TIMEOUT=-1)
     def test_poll_upload_raises_timeout_error(self, rmock):

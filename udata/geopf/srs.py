@@ -16,28 +16,39 @@ def detect_srs(f: IO[bytes], file_format: str | None) -> str | None:
     """
     fmt = (file_format or "").lower()
     if fmt == "gpkg":
-        return _from_gpkg(f)
+        try:
+            layers = read_gpkg_layers(f)
+        except sqlite3.Error:
+            log.warning("geopf: failed to detect SRS from GPKG", exc_info=True)
+            return None
+        return next((srs for _, srs in layers if srs), None)
     return None
 
 
-def _from_gpkg(f: IO[bytes]) -> str | None:
+def read_gpkg_layers(f: IO[bytes]) -> list[tuple[str, str | None]]:
+    """Return `(table_name, srs)` for each geometry layer, `srs` being None if undetermined.
+
+    Raises `sqlite3.Error` if the file is not a readable GeoPackage.
+    """
     # Lazy import: pyproj uses PROJ which is not fork-safe. Importing here
     # ensures PROJ is only initialized after the fork, inside the worker process.
     from pyproj import CRS
 
-    try:
-        with sqlite3.connect(f.name) as conn:
-            row = conn.execute("SELECT srs_id FROM gpkg_geometry_columns LIMIT 1").fetchone()
-            if row is None:
-                return None
-            wkt_row = conn.execute(
-                "SELECT definition FROM gpkg_spatial_ref_sys WHERE srs_id = ?",
-                (row[0],),
-            ).fetchone()
-            if wkt_row and wkt_row[0] and wkt_row[0] != "undefined":
-                auth = CRS.from_wkt(wkt_row[0]).to_authority()
-                if auth:
-                    return f"{auth[0]}:{auth[1]}"
-    except Exception:
-        log.warning("geopf: failed to detect SRS from GPKG", exc_info=True)
-    return None
+    with sqlite3.connect(f.name) as conn:
+        rows = conn.execute(
+            "SELECT gc.table_name, rs.definition FROM gpkg_geometry_columns gc "
+            "LEFT JOIN gpkg_spatial_ref_sys rs ON gc.srs_id = rs.srs_id"
+        ).fetchall()
+
+    layers = []
+    for table_name, definition in rows:
+        srs = None
+        if definition and definition != "undefined":
+            try:
+                auth = CRS.from_wkt(definition).to_authority()
+            except Exception:
+                log.warning("geopf: failed to parse GPKG SRS definition", exc_info=True)
+            else:
+                srs = f"{auth[0]}:{auth[1]}" if auth else None
+        layers.append((table_name, srs))
+    return layers
