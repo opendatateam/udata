@@ -8,10 +8,17 @@ from dataclasses import dataclass
 from mongoengine import Document, Q
 
 from udata.core.discussions.models import Discussion
+from udata.core.organization.models import Organization
 from udata.core.user.models import User
-from udata.features.notifications.constants import NotificationReason, event_chain
+from udata.features.notifications.constants import (
+    TYPES_REQUIRING_ACTION,
+    NotificationReason,
+    NotificationType,
+    event_chain,
+)
 from udata.features.notifications.events import (
     discussion_recipients,
+    event_for_type,
     responsible_recipients,
     subject_scopes,
 )
@@ -60,12 +67,22 @@ def resolved_for(
 
     The pause is left out: it holds everything back whatever the rules say, and is
     shown as such. Following or not is still worth showing, and changing, meanwhile.
+
+    The dispatch decides type by type, and so does this: a family of events, or every
+    notification, is heard when one of its types is. Asked as a whole, "every
+    notification" would miss what the defaults only grant to some types, the badges of
+    an editor.
     """
-    chain = event_chain(event)
+    types = [
+        type
+        for type in NotificationType
+        if type not in TYPES_REQUIRING_ACTION
+        and (event is None or type == event or type.startswith(f"{event}."))
+    ]
     scopes_of = [(subject, subject_scopes(subject)) for subject in subjects]
     rules = rules_for(
         [user],
-        chain,
+        list({name for type in types for name in event_chain(type)}),
         list({scope.pk: scope for _, scopes in scopes_of for scope in scopes}.values()),
     ).get(user.id, [])
     own = {
@@ -82,25 +99,41 @@ def resolved_for(
             else responsible_recipients(subject)
         )
         scope_ids = {scope.id for scope in scopes}
-        held = {
+        roles = {
             reason
             for recipient in recipients
             if recipient.key == user.id
             for reason in recipient.reasons
         }
         # As at dispatch: a follow only brings what its user may read.
-        if readable_by(user, subject):
-            held |= {
+        followed = (
+            {
                 REASON_BY_ORIGIN[rule.origin]
                 for rule in rules
                 if rule.enabled and rule.scope in scope_ids
             }
+            if readable_by(user, subject)
+            else set()
+        )
+
+        def held_for(type: NotificationType) -> set[NotificationReason]:
+            held = set(roles)
+            # On the organization, a partial editor is only concerned by what is about the
+            # organization itself: the rest reaches them through what was assigned.
+            if isinstance(subject, Organization) and not type.startswith("organization."):
+                held.discard(NotificationReason.ORGANIZATION_PARTIAL_EDITOR)
+            if event_for_type(type).reaches_subscribers:
+                held |= followed
+            return held
+
         resolutions.append(
             Resolution(
                 scope=subject,
                 event=event,
-                heard=resolve(rules, chain, scopes, held),
-                reasons=sorted(held),
+                heard=any(
+                    resolve(rules, event_chain(type), scopes, held_for(type)) for type in types
+                ),
+                reasons=sorted(roles | followed),
                 muted=own.get((subject.pk, event)) is False,
                 followed_events=sorted(
                     named
