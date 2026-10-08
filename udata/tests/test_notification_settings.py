@@ -1314,6 +1314,23 @@ class NotificationSettingsAPITest(APITestCase):
             ref(older),
         ]
 
+    def test_the_follows_and_the_other_rules_are_listed_apart(self):
+        """The settings screen pages through each of its two lists on its own."""
+        user = self.login()
+        followed, ignored = DatasetFactory(), DatasetFactory()
+        follow(user, followed)
+        ignore(user, ignored)
+        decide(user, event=NotificationType.REUSE_CREATED, enabled=False)
+
+        follows = self.get("/api/1/notifications/settings/?followed=true").json["data"]
+        others = self.get("/api/1/notifications/settings/?followed=false").json["data"]
+
+        assert [rule["scope"] for rule in follows] == [ref(followed)]
+        assert [(rule["scope"], rule["event"]) for rule in others] == [
+            (None, NotificationType.REUSE_CREATED),
+            (ref(ignored), None),
+        ]
+
     def test_nobody_sees_nor_withdraws_the_rules_of_somebody_else(self):
         dataset = DatasetFactory()
         theirs = ignore(UserFactory(), dataset)

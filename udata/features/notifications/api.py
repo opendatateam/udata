@@ -2,6 +2,8 @@ from datetime import datetime
 
 from flask import request
 from flask_restx import marshal
+from flask_restx.inputs import boolean
+from mongoengine import Q
 
 from udata.api import API, add_pagination_arguments, api, fields
 from udata.api_fields import patch
@@ -69,7 +71,13 @@ listed_settings_page_fields = api.model(
 
 # Paginated: editing or answering follows a subject, so the rules of a busy account
 # keep growing, and each one reads its subject back.
-settings_parser = add_pagination_arguments(api.parser(), page_size=50)
+settings_parser = add_pagination_arguments(api.parser(), page_size=20)
+settings_parser.add_argument(
+    "followed",
+    type=boolean,
+    location="args",
+    help="Only the follows (a subject, yes), or only the other rules",
+)
 
 
 @notifs.route("/settings/", endpoint="notification_settings")
@@ -84,11 +92,12 @@ class NotificationSettingsAPI(API):
         Only rules are listed: whatever no rule covers follows the default rules. What
         they add up to is given by `/notifications/resolved/`."""
         args = settings_parser.parse_args()
-        return (
-            NotificationSetting.objects(user=current_user.id)
-            .order_by("-id")
-            .paginate(args["page"], args["page_size"])
-        )
+        settings = NotificationSetting.objects(user=current_user.id)
+        if args["followed"] is True:
+            settings = settings.filter(scope__ne=None, enabled=True)
+        elif args["followed"] is False:
+            settings = settings.filter(Q(scope=None) | Q(enabled=False))
+        return settings.order_by("-id").paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("set_notification_setting")
