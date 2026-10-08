@@ -47,6 +47,12 @@ class NotificationSetting(UDataDocument):
     Actions to take (an invitation, a source to validate) are the only notifications
     no rule applies to.
 
+    Following a subject here is not putting it in one's favorites (`Follow`). Following
+    is hearing about the life of a subject one looks after: its discussions, its reuses.
+    A favorite is a reader's bookmark: if it is to bring notifications, it is by making
+    its owner a recipient of the few events a reader cares about (a new resource), with
+    a reason of its own, not by creating a follow here.
+
     See `resolve` for which rule wins when several apply.
     """
 
