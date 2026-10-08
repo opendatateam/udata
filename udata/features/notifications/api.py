@@ -64,9 +64,15 @@ class NotificationSettingsAPI(API):
         setting it again replaces the previous answer. Removing a follow udata made by
         itself (for editing a subject or answering about it) turns it into a "no":
         removed, the next edit or answer would make it again."""
+        payload = api.json_payload()
         # Left out, it would read as `null` and withdraw the rule.
-        if "enabled" not in api.json_payload():
+        if "enabled" not in payload:
             api.abort(400, errors={"enabled": "Expected true, false or null"})
+        # Checked before anything reaches MongoDB: withdrawing reads the rule by its key,
+        # without the validation a save would run.
+        event = payload.get("event")
+        if event is not None and (not isinstance(event, str) or not is_event_name(event)):
+            api.abort(400, errors={"event": "Unknown event"})
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
         set_rule(rule.user, rule.scope, rule.event, rule.enabled)
         return "", 204
@@ -84,6 +90,12 @@ resolved_fields = api.model(
         "muted": fields.Boolean(description="Whether the user said no to this subject and event"),
         "followed_events": fields.List(
             fields.String, description="The narrower events the user still follows on it"
+        ),
+        "heard_types": fields.List(
+            fields.String, description="The types asked about the user hears on it"
+        ),
+        "partial": fields.Boolean(
+            description="Whether the user hears only some of the types that can be about it"
         ),
         "subject": fields.Nested(
             subject_summary_fields,

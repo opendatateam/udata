@@ -5,7 +5,11 @@ from udata.api import HEADER_API_KEY
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.signals import on_new_discussion, on_new_discussion_comment
+from udata.core.discussions.signals import (
+    on_discussion_closed,
+    on_new_discussion,
+    on_new_discussion_comment,
+)
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 from udata.features.notifications.constants import FollowOrigin
@@ -76,9 +80,13 @@ def on_resource_changed(sender, document, **kwargs):
 
 
 # Answering about a dataset is following it: the next questions on it will be for the
-# same people. A new discussion is its first message.
+# same people. A new discussion is its first message, and closing with a message answers
+# too; closing without one does not.
 @on_new_discussion.connect
 @on_new_discussion_comment.connect
-def on_discussed(discussion, message: int = 0, **kwargs):
+@on_discussion_closed.connect
+def on_discussed(discussion, message: int | None = 0, **kwargs):
+    if message is None:
+        return
     author = discussion.discussion[message].posted_by
     follow_if_by_hand(discussion.subject, FollowOrigin.DISCUSSED, author)

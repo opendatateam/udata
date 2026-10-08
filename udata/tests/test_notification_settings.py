@@ -603,6 +603,12 @@ class ResolveTest:
 
         assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) is False
 
+    def test_a_participant_can_turn_a_type_off_everywhere(self):
+        """What the "stop receiving" link of every discussion mail writes."""
+        rules = [rule(event=NotificationType.DISCUSSION_COMMENT, enabled=False)]
+
+        assert resolve(rules, COMMENT, SCOPES, {NotificationReason.DISCUSSION_PARTICIPANT}) is False
+
 
 class RulesForTest(PytestOnlyDBTestCase):
     def test_nothing_decided_leaves_the_user_out(self):
@@ -1342,6 +1348,14 @@ class NotificationSettingsAPITest(APITestCase):
         self.assert204(self.put_rule(None, event=NotificationType.REUSE_CREATED))
         assert NotificationSetting.objects(user=owner).count() == 0
 
+    def test_an_event_that_is_no_name_is_refused(self):
+        """An operator in its place would pick any rule of the user to withdraw."""
+        user = self.login()
+        ignore(user, DatasetFactory())
+
+        self.assert400(self.put_rule(None, event={"$ne": None}))
+        assert NotificationSetting.objects(user=user).count() == 1
+
     def test_a_rule_without_enabled_is_refused_rather_than_withdrawn(self):
         user = self.login()
         dataset = DatasetFactory()
@@ -1643,6 +1657,42 @@ class NotificationResolvedAPITest(APITestCase):
             [NotificationReason.CONTRIBUTOR],
         ]
 
+    def test_an_owner_following_the_new_discussions_alone_hears_part_of_the_dataset(self):
+        """A no on the dataset, then its new discussions followed: what the box of the
+        admin page reads to say "only the new discussions"."""
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        ignore(owner, dataset)
+        follow(owner, dataset, NotificationType.DISCUSSION_NEW)
+
+        [answer] = self.resolved([dataset]).json
+
+        assert answer["partial"] is True
+        assert answer["heard_types"] == [NotificationType.DISCUSSION_NEW]
+
+    def test_following_a_dataset_and_its_new_discussions_is_hearing_all_of_it(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        follow(user, dataset)
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+
+        [answer] = self.resolved([dataset]).json
+
+        assert answer["heard"] is True
+        assert answer["partial"] is False
+
+    def test_a_follow_of_other_events_does_not_bring_a_thread(self):
+        """Following the reuses of an organization is not following its discussions."""
+        user = self.login()
+        organization = OrganizationFactory()
+        discussion = DiscussionFactory(subject=DatasetFactory(organization=organization))
+        follow(user, organization, "reuse")
+
+        [answer] = self.resolved([discussion]).json
+
+        assert answer["heard"] is False
+        assert answer["reasons"] == []
+
     def test_the_answers_to_membership_requests_concern_no_administrator(self):
         """They reach the requester alone: an administrator hears none of them."""
         admin = self.login()
@@ -1667,6 +1717,8 @@ class NotificationResolvedAPITest(APITestCase):
             "reasons": [],
             "muted": False,
             "followed_events": [],
+            "heard_types": [],
+            "partial": False,
             "subject": {
                 "title": dataset.title,
                 "page": f"https://www.data.gouv.fr/datasets/{dataset.slug}",
@@ -2197,6 +2249,21 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert setting.scope == dataset
         assert setting.origin == FollowOrigin.DISCUSSED
 
+    def test_an_editor_who_answers_and_closes_follows_the_dataset(self):
+        """ "Répondre & Clôturer" sends both at once, which only signals the closing."""
+        sofia = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[sofia]))
+        discussion = open_discussion(dataset)
+        self.login(sofia)
+
+        response = self.post(
+            url_for("api.discussion", id=discussion.id), {"comment": "Done.", "close": True}
+        )
+
+        self.assert200(response)
+        setting = NotificationSetting.objects(user=sofia).get()
+        assert (setting.scope, setting.origin) == (dataset, FollowOrigin.DISCUSSED)
+
     def test_answering_outside_of_ones_organizations_follows_nothing(self):
         """A citizen asking a question follows the thread, not the dataset."""
         self.login()
@@ -2236,6 +2303,21 @@ class FollowWhatOneWorksOnTest(APITestCase):
 
         assert listed["subject"]["title"] == dataset.title
         assert listed["subject"]["organization"]["id"] == str(organization.id)
+
+    def test_a_thread_about_what_one_cannot_read_is_listed_without_its_title(self):
+        """The title of the thread says as much as the one of its subject."""
+        user = self.login()
+        private = DatasetFactory(organization=OrganizationFactory(), private=True)
+        discussion = DiscussionFactory(subject=private)
+        ignore(user, discussion)
+
+        [listed] = self.get("/api/1/notifications/settings/").json["data"]
+        [resolved] = self.get(
+            "/api/1/notifications/resolved/", query_string={"scope": f"Discussion:{discussion.id}"}
+        ).json
+
+        assert listed["subject"] is None
+        assert resolved["subject"] is None
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_a_thread_is_listed_with_its_title_and_the_organization_of_its_subject(self):

@@ -50,6 +50,10 @@ class Resolution:
     # The narrower events the user still follows on exactly this subject: hearing about
     # some of its notifications only reads as `heard` when asking about each of them.
     followed_events: list[str]
+    # The types asked about the user hears on this subject, and whether that is only some
+    # of those that can be about it: following its new discussions alone, say.
+    heard_types: list[NotificationType]
+    partial: bool
 
     @property
     def subject(self) -> SubjectSummary | None:
@@ -118,15 +122,22 @@ def resolved_for(
             for reason in recipient.reasons
         }
         # As at dispatch: a follow only brings what its user may read.
-        followed = (
-            {
-                REASON_BY_ORIGIN[rule.origin]
-                for rule in rules
-                if rule.enabled and rule.scope in scope_ids
-            }
+        follows = (
+            [rule for rule in rules if rule.enabled and rule.scope in scope_ids]
             if readable_by(user, subject)
-            else set()
+            else []
         )
+
+        def followed_for(type: NotificationType) -> set[NotificationReason]:
+            """The reasons the follows covering `type` give, as at dispatch."""
+            if not event_for_type(type).reaches_subscribers:
+                return set()
+            chain = event_chain(type)
+            return {
+                REASON_BY_ORIGIN[rule.origin]
+                for rule in follows
+                if rule.event is None or rule.event in chain
+            }
 
         def held_for(type: NotificationType) -> set[NotificationReason]:
             held = set(roles)
@@ -134,20 +145,22 @@ def resolved_for(
             # organization itself: the rest reaches them through what was assigned.
             if isinstance(subject, Organization) and not type.startswith("organization."):
                 held.discard(NotificationReason.ORGANIZATION_PARTIAL_EDITOR)
-            if event_for_type(type).reaches_subscribers:
-                held |= followed
-            return held
+            return held | followed_for(type)
 
+        concerning = [type for type in types if can_concern(type, subject)]
+        heard_types = [
+            type for type in concerning if resolve(rules, event_chain(type), scopes, held_for(type))
+        ]
         resolutions.append(
             Resolution(
                 scope=subject,
                 event=event,
-                heard=any(
-                    resolve(rules, event_chain(type), scopes, held_for(type))
-                    for type in types
-                    if can_concern(type, subject)
+                heard=bool(heard_types),
+                heard_types=heard_types,
+                partial=0 < len(heard_types) < len(concerning),
+                reasons=sorted(
+                    roles | {reason for type in concerning for reason in followed_for(type)}
                 ),
-                reasons=sorted(roles | followed),
                 muted=any(
                     rule.scope == subject.pk and rule.event == event and not rule.enabled
                     for rule in rules

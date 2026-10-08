@@ -314,7 +314,6 @@ def resolve(
     return any(decide(reason) for reason in reasons)
 
 
-# The reason a follow gives, depending on what made the user follow.
 REASON_BY_ORIGIN = {
     FollowOrigin.FOLLOWED: NotificationReason.EXPLICIT_SUBSCRIBER,
     FollowOrigin.EDITED: NotificationReason.CONTRIBUTOR,
