@@ -78,6 +78,11 @@ class NotificationQuerySet(UDataQuerySet):
         """This function must be updated to handle new details cases"""
         return self.filter(details__request_user=user)
 
+    def mark_mailed(self):
+        """Out of the queue of the digests, mailed or not to be: `last_modified` is set
+        by hand, as in `mark_handled`."""
+        return self.update(set__mail_pending=False, set__last_modified=datetime.now(UTC))
+
     def mark_handled(self, at=None):
         """The subject got acted upon, so whatever was pending about it is resolved.
 

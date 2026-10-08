@@ -43,14 +43,13 @@ def send_notification_digests(self):
         # What was queued before the pause stays in the bell, but is not mailed: neither
         # now, nor in one go on resuming.
         if user.notifications_paused:
-            Notification.objects(user=user, mail_pending=True).update(
-                set__mail_pending=False, set__last_modified=datetime.now(UTC)
-            )
+            Notification.objects(user=user, mail_pending=True).mark_mailed()
             continue
 
-        due_before = datetime.now(UTC) - DIGEST_INTERVALS[user.mail_cadence]
         # What was answered or read in the meantime is no news any more.
-        queue = Notification.objects(user=user, mail_pending=True, handled_at=None)
+        Notification.objects(user=user, mail_pending=True, handled_at__ne=None).mark_mailed()
+        due_before = datetime.now(UTC) - DIGEST_INTERVALS[user.mail_cadence]
+        queue = Notification.objects(user=user, mail_pending=True)
         if not queue.filter(created_at__lte=due_before).first():
             continue
 
@@ -74,9 +73,9 @@ def send_notification_digests(self):
                 continue
 
         # Only what was mailed is spent: a notification arriving meanwhile stays queued.
-        # `last_modified` is set by hand, a queryset update skips the `pre_save` filling it.
-        mailed = Notification.objects(id__in=[notification.id for notification in notifications])
-        mailed.update(set__mail_pending=False, set__last_modified=datetime.now(UTC))
+        Notification.objects(
+            id__in=[notification.id for notification in notifications]
+        ).mark_mailed()
 
     log.info(f"Sent {sent} notification digests")
 
