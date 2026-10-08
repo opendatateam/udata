@@ -1,3 +1,4 @@
+import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
@@ -22,6 +23,7 @@ from udata.core.access_type.constants import (
     InspireLimitationCategory,
 )
 from udata.core.badges.factories import badge_factory
+from udata.core.dataset.activities import UserUpdatedResource
 from udata.core.dataset.constants import (
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
@@ -47,6 +49,13 @@ from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCo
 from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.geopf.models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+)
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member
 from udata.mongo.datetime_fields import DateRange
@@ -821,6 +830,17 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
+
+    def test_dataset_api_update_with_non_object_body(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        for body in ([1, 2, 3], 1, "deleted"):
+            response = self.put(url_for("api.dataset", dataset=dataset), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(Dataset.objects.first().description, dataset.description)
 
     def test_dataset_api_update_with_null_frequency(self):
         """It should update the item even though internal frequency is null"""
@@ -2180,6 +2200,18 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
 
+    def test_create_with_compressed_file(self):
+        """A compressed file is described as the archive it is, not as its content"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(gzip.compress(b"a;b\n1;2\n")), "test.csv.gz")},
+            json=False,
+        )
+        self.assert201(response)
+        self.assertEqual(response.json["mime"], "application/gzip")
+
     def test_create_with_file_chunks(self):
         """It should create a resource from the API with a chunked file"""
         user = self.login()
@@ -2436,6 +2468,60 @@ class DatasetResourceAPITest(APITestCase):
         self.assertNotEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
 
+    def test_update_records_an_activity_naming_the_resource_and_the_changed_fields(self):
+        """The recorded activity says which resource was touched, and how.
+
+        Going through the endpoint on purpose: the form repopulates every field of the
+        resource, so this is what says the activity reports the edited ones rather than
+        all of them.
+        """
+        resource = ResourceFactory(title="Original title", description="Original description")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "url": resource.url,
+                "filetype": resource.filetype,
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=self.dataset)
+        assert activity.changes == ["title"]
+        assert activity.extras == {
+            "resource_id": str(resource.id),
+            "resource_title": "New title",
+        }
+
+    def test_update_activity_ignores_stale_hosted_file_metadata(self):
+        """A client resending stale metadata of a hosted file does not show it as edited.
+
+        Those fields are kept server-side (#2544), so the activity must not report them.
+        """
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {
+                "title": "New title",
+                "description": resource.description,
+                "filetype": resource.filetype,
+                "url": "https://stale.example.org/old.csv",
+                "checksum": {"type": "sha1", "value": "stale-checksum"},
+                "filesize": resource.filesize + 1,
+                "mime": "application/stale",
+            },
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert activity.changes == ["title"]
+
     def test_update_remote(self):
         resource = ResourceFactory()
         resource.filetype = "remote"
@@ -2628,6 +2714,23 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
+
+    def test_file_update_records_the_new_file_metadata_as_changed(self):
+        """Re-uploading reports what describes the new file, not its storage key."""
+        resource = ResourceFactory(format="csv", mime="text/csv")
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+
+        activity = UserUpdatedResource.objects.get(related_to=dataset)
+        assert sorted(activity.changes) == sorted(
+            ["title", "url", "checksum", "filesize", "mime", "format"]
+        )
 
     def test_file_update_old_file_deletion(self):
         """It should update a resource's file and delete the old one"""
@@ -3379,17 +3482,19 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         date = datetime(2022, 2, 22, tzinfo=UTC)
         harvest_metadata = HarvestDatasetMetadata(
             backend="DCAT",
-            created_at=date,
-            modified_at=date,
-            source_id="source_id",
-            remote_id="remote_id",
             domain="domain.gouv.fr",
-            last_update=date,
+            source_id="source_id",
+            source_url="http://example.com/source",
+            remote_id="remote_id",
             remote_url="http://domain.gouv.fr/dataset/remote_url",
+            created_at=date,
+            issued_at=date,
+            modified_at=date,
+            last_update=date,
+            archived_at=date,
+            archived_reason="not-on-remote",
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
-            archived_at=date,
-            archived="not-on-remote",
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
@@ -3397,17 +3502,19 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["harvest"] == {
             "backend": "DCAT",
-            "created_at": date.isoformat(),
-            "modified_at": date.isoformat(),
-            "source_id": "source_id",
-            "remote_id": "remote_id",
             "domain": "domain.gouv.fr",
-            "last_update": date.isoformat(),
+            "source_id": "source_id",
+            "source_url": "http://example.com/source",
+            "remote_id": "remote_id",
             "remote_url": "http://domain.gouv.fr/dataset/remote_url",
+            "created_at": date.isoformat(),
+            "issued_at": date.isoformat(),
+            "modified_at": date.isoformat(),
+            "last_update": date.isoformat(),
+            "archived_at": date.isoformat(),
+            "archived_reason": "not-on-remote",
             "uri": "http://domain.gouv.fr/dataset/uri",
             "dct_identifier": "http://domain.gouv.fr/dataset/identifier",
-            "archived_at": date.isoformat(),
-            "archived": "not-on-remote",
         }
 
     def test_dataset_with_resource_harvest_metadata(self):
@@ -3466,3 +3573,45 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()
+
+
+class GeopfMetadataAPITest(PytestOnlyAPITestCase):
+    def test_dataset_with_geopf_push_metadata(self):
+        dataset = DatasetFactory(
+            geopf=GeopfDatasetMetadata(
+                push=GeopfDatasetPushMetadata(datastore_id="ds-1", datasheet_name="Ma fiche")
+            )
+        )
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] == {
+            "datasheet_url": "https://cartes.gouv.fr/tableau-de-bord/entrepots/ds-1/donnees/Ma%20fiche"
+        }
+
+    def test_dataset_without_geopf_metadata_is_null(self):
+        dataset = DatasetFactory()
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] is None
+
+    def test_resource_with_geopf_push_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(status="done"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"push_status": "done"}
+
+    def test_resource_with_geopf_offering_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offering-1"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"offering_id": "offering-1"}

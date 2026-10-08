@@ -1,5 +1,49 @@
 # Changelog
 
+## 17.12.0 (2026-10-07)
+
+- chore(deps): update flask-storage to 2.0.3 so startup no longer depends on S3 ([#3998](https://github.com/opendatateam/udata/pull/3998))
+- feat: add geopf sync ([#3827](https://github.com/opendatateam/udata/pull/3827))
+
+
+## 17.11.1 (2026-10-06)
+
+- fix: store compressed resources as archives instead of their content type ([#3991](https://github.com/opendatateam/udata/pull/3991))
+
+
+## 17.11.0 (2026-10-06)
+
+- chore(deps): update dependency faker to >=40.41, <40.42 ([#3972](https://github.com/opendatateam/udata/pull/3972))
+- chore(deps): update dependency pymongo to v4.18.2 [security] ([#3988](https://github.com/opendatateam/udata/pull/3988))
+- chore(deps): update dependency urllib3 to v2.8.0 [security] ([#3989](https://github.com/opendatateam/udata/pull/3989))
+- chore(deps): update dependency werkzeug to v3.1.9 [security] ([#3987](https://github.com/opendatateam/udata/pull/3987))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.1 ([#3985](https://github.com/opendatateam/udata/pull/3985))
+- fix: delete transfers and their notifications along with the objects they reference ([#3982](https://github.com/opendatateam/udata/pull/3982))
+- fix: post search tag filter crashing Elasticsearch by mapping tag to tags ([#3975](https://github.com/opendatateam/udata/pull/3975))
+- fix: reject generic embedded payloads with a missing or disallowed class instead of a 500 ([#3974](https://github.com/opendatateam/udata/pull/3974))
+- fix: restore a deleted organization through the API ([#3986](https://github.com/opendatateam/udata/pull/3986))
+- fix: return a 400 instead of a 500 on non-object JSON bodies ([#3977](https://github.com/opendatateam/udata/pull/3977))
+- refactor: add an explicit type to notifications and dispatch them through events ([#3955](https://github.com/opendatateam/udata/pull/3955))
+- refactor(harvest): consolidate harvester core ([#3872](https://github.com/opendatateam/udata/pull/3872))
+
+
+## 17.10.0 (2026-10-01)
+
+- chore(deps): pin dependencies ([#3962](https://github.com/opendatateam/udata/pull/3962))
+- chore(deps): update astral-sh/setup-uv action to v10.2.0 ([#3963](https://github.com/opendatateam/udata/pull/3963))
+- chore(deps): update dependency faker to >=40.39, <40.40 ([#3950](https://github.com/opendatateam/udata/pull/3950))
+- feat: attach a DOI to a dataset ([#3735](https://github.com/opendatateam/udata/pull/3735))
+- feat: new tabular explore edito bloc ([#3753](https://github.com/opendatateam/udata/pull/3753))
+- feat: record what changed on a resource and rework the activity API around it ([#3958](https://github.com/opendatateam/udata/pull/3958))
+- feat(search): include_geozone_ancestors ([#3973](https://github.com/opendatateam/udata/pull/3973))
+- feat: upgrade flask-security to 5.9 and fix the 500 on expired change-email links ([#3971](https://github.com/opendatateam/udata/pull/3971))
+- fix: 500 on organizations.csv with a repeated query param by declaring organization filters on the model ([#3976](https://github.com/opendatateam/udata/pull/3976))
+- fix: allow a single pending membership request or invitation per user and organization ([#3981](https://github.com/opendatateam/udata/pull/3981))
+- fix(jobs): list and unschedule scheduled jobs whose task no longer exists ([#3969](https://github.com/opendatateam/udata/pull/3969))
+- fix: partial editor speaking for an org permissions ([#3979](https://github.com/opendatateam/udata/pull/3979))
+- fix: transfer api reference injection ([#3930](https://github.com/opendatateam/udata/pull/3930))
+
+
 ## 17.9.0 (2026-09-28)
 
 - chore: build and compile translations on build ([#3966](https://github.com/opendatateam/udata/pull/3966))

@@ -8,7 +8,6 @@ from flask import current_app
 
 from udata.auth import current_user
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset, PeriodicTask
 from udata.storage.s3 import delete_file
 
@@ -18,8 +17,7 @@ from .models import (
     VALIDATION_REFUSED,
     HarvestJob,
     HarvestSource,
-    archive_harvested_dataservice,
-    archive_harvested_dataset,
+    archive_harvested,
 )
 from .tasks import harvest
 
@@ -84,8 +82,13 @@ def clean_source(source: HarvestSource):
     for dataset in datasets:
         if dataset.organization:
             organizations.add(dataset.organization)
-        dataset.deleted = datetime.now(UTC)
-        dataset.save(signal_kwargs={"ignores": ["metrics"]})
+        if dataset.doi:
+            # Its DOI has to keep resolving, so this one is archived instead of deleted.
+            if not dataset.archived:
+                archive_harvested(dataset, reason="harvester-cleaned")
+        else:
+            dataset.deleted = datetime.now(UTC)
+            dataset.save(signal_kwargs={"ignores": ["metrics"]})
     for org in organizations:
         org.count_datasets()
     return len(datasets)
@@ -105,12 +108,12 @@ def purge_sources():
             Dataset.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
         )
         for dataset in datasets:
-            archive_harvested_dataset(dataset, reason="harvester-deleted", dryrun=False)
+            archive_harvested(dataset, reason="harvester-deleted", dryrun=False)
         dataservices = (
             Dataservice.objects.filter(harvest__source_id=str(source.id)).no_cache().timeout(False)
         )
         for dataservice in dataservices:
-            archive_harvested_dataservice(dataservice, reason="harvester-deleted", dryrun=False)
+            archive_harvested(dataservice, reason="harvester-deleted", dryrun=False)
 
         # Clean up notifications before deleting the source
         from udata.features.notifications.models import Notification
@@ -248,8 +251,7 @@ def attach(domain, filename):
                 **{"harvest__domain": domain, "harvest__remote_id": row["remote"]}
             ).update(**{"unset__harvest__domain": True, "unset__harvest__remote_id": True})
 
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
+            dataset.set_harvested()
             dataset.harvest.domain = domain
             dataset.harvest.remote_id = row["remote"]
 

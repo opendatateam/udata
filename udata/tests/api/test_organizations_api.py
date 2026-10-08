@@ -21,6 +21,7 @@ from udata.core.edito_blocs.models import (
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
@@ -37,6 +38,7 @@ from udata.tests.helpers import (
     assert_not_emit,
     assert_starts_with,
     assert_status,
+    capture_mails,
     create_test_image,
 )
 from udata.utils import faker
@@ -49,7 +51,90 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 
         response = self.get(url_for("api.organizations"))
         assert200(response)
-        len(response.json["data"]) == len(organizations)
+        assert len(response.json["data"]) == len(organizations)
+
+    @pytest.mark.parametrize(
+        "sort", ["name", "reuses", "datasets", "followers", "views", "created", "last_modified"]
+    )
+    def test_organization_api_list_sorts(self, sort):
+        # Values are chosen so that neither order of any sort matches the default one
+        # (`-created_at`: second, first, third), except `-created` which is the default.
+        # `last_modified` follows the creation order since every save overwrites it.
+        first = OrganizationFactory(
+            name="A",
+            created_at=datetime(2020, 1, 2, tzinfo=UTC),
+            metrics={"reuses": 1, "datasets": 1, "followers": 1, "views": 1},
+        )
+        second = OrganizationFactory(
+            name="B",
+            created_at=datetime(2020, 1, 3, tzinfo=UTC),
+            metrics={"reuses": 2, "datasets": 2, "followers": 2, "views": 2},
+        )
+        third = OrganizationFactory(
+            name="C",
+            created_at=datetime(2020, 1, 1, tzinfo=UTC),
+            metrics={"reuses": 3, "datasets": 3, "followers": 3, "views": 3},
+        )
+        ascending = [third, first, second] if sort == "created" else [first, second, third]
+
+        response = self.get(url_for("api.organizations", sort=sort))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(o.id) for o in ascending]
+
+        response = self.get(url_for("api.organizations", sort=f"-{sort}"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(o.id) for o in ascending[::-1]]
+
+    def test_organization_api_list_default_sort(self):
+        first = OrganizationFactory(created_at=datetime(2020, 1, 2, tzinfo=UTC))
+        second = OrganizationFactory(created_at=datetime(2020, 1, 3, tzinfo=UTC))
+        third = OrganizationFactory(created_at=datetime(2020, 1, 1, tzinfo=UTC))
+
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [
+            str(second.id),
+            str(first.id),
+            str(third.id),
+        ]
+
+    def test_organization_api_list_unknown_sort(self):
+        response = self.get(url_for("api.organizations", sort="unknown"))
+        assert400(response)
+
+    def test_organization_api_list_search(self):
+        # Created first, so the default `-created_at` order would put it last.
+        best = OrganizationFactory(name="open data open data")
+        other = OrganizationFactory(name="open data portal")
+        OrganizationFactory(name="open portal")
+
+        # Without an explicit sort, results are ranked by relevance.
+        response = self.get(url_for("api.organizations", q="open data"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(best.id), str(other.id)]
+
+        # An explicit sort takes precedence over relevance.
+        response = self.get(url_for("api.organizations", q="open data", sort="-created"))
+        assert200(response)
+        assert [o["id"] for o in response.json["data"]] == [str(other.id), str(best.id)]
+
+    def test_organization_api_list_pagination(self):
+        OrganizationFactory.create_batch(3)
+
+        response = self.get(url_for("api.organizations", page=2, page_size=2))
+        assert200(response)
+        assert response.json["total"] == 3
+        assert response.json["page"] == 2
+        assert response.json["page_size"] == 2
+        assert len(response.json["data"]) == 1
+
+    @pytest.mark.parametrize("param", ["q", "name", "business_number_id"])
+    def test_organization_api_list_empty_filter_is_ignored(self, param):
+        organizations = OrganizationFactory.create_batch(2)
+
+        response = self.get(url_for("api.organizations") + f"?{param}=")
+        assert200(response)
+        assert len(response.json["data"]) == len(organizations)
 
     def test_organization_api_list_with_filters(self):
         """It should filter the organization list"""
@@ -84,7 +169,6 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         #### SIRET ####
         response = self.get(url_for("api.organizations", business_number_id=org.business_number_id))
         assert200(response)
-        print(response.json["data"])
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
@@ -367,6 +451,40 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert410(response)
         assert Organization.objects.first().description == org.description
 
+    def test_organization_api_restore_deleted(self):
+        """It should restore a deleted organization from the API"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="admin")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert200(response)
+        assert response.json["deleted"] is None
+        org.reload()
+        assert org.deleted is None
+
+    def test_organization_api_restore_deleted_as_editor_forbidden(self):
+        """It should not restore a deleted organization from the API if not admin"""
+        user = self.login()
+        org = OrganizationFactory(
+            deleted=datetime.now(UTC), members=[Member(user=user, role="editor")]
+        )
+        response = self.put(url_for("api.organization", org=org), {"deleted": None})
+        assert403(response)
+        org.reload()
+        assert org.deleted is not None
+
+    def test_organization_api_update_with_non_object_body(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        for body in ([1, 2, 3], 1, "deleted"):
+            response = self.put(url_for("api.organization", org=org), body)
+            assert400(response)
+            assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        assert Organization.objects.first().description == org.description
+
     def test_organization_api_update_forbidden(self):
         """It should not update an organization from the API if not admin"""
         org = OrganizationFactory()
@@ -624,6 +742,25 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org.reload()
         assert org.presentation_blocs == []
 
+    @pytest.mark.parametrize(
+        "bloc",
+        [
+            {"title": "no class"},
+            {"class": "UnknownBloc", "title": "unknown class"},
+            # A class registered with `generate_fields`, but not a bloc.
+            {"class": "Organization", "name": "not a bloc"},
+            "not an object",
+        ],
+    )
+    def test_create_rejects_bloc_without_valid_class(self, bloc):
+        self.login()
+        data = OrganizationFactory.as_dict()
+        data["presentation_blocs"] = [bloc]
+        response = self.post(url_for("api.organizations"), data)
+        assert400(response)
+        assert "presentation_blocs" in response.json["errors"]
+        assert Organization.objects.count() == 0
+
 
 class MembershipAPITest(PytestOnlyAPITestCase):
     def test_request_membership(self):
@@ -695,6 +832,75 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_on is None
         assert request.handled_by is None
         assert request.refusal_comment is None
+
+    def test_updating_a_pending_membership_request_pings_the_admins_again(self):
+        """Updating a request creates nothing, so `after_create` does not fire: the
+        admins are reached from the endpoint instead."""
+        user = self.login()
+        admin = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        organization.add_membership_request(MembershipRequest(user=user, comment="previous"))
+
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("api.request_membership", org=organization), {"comment": "a comment"}
+            )
+        assert200(response)
+
+        assert len(mails) == 1
+        assert mails[0].recipients == [admin.email]
+
+        # The admin already has one, and an unanswered request is not worth a second.
+        notifications = Notification.objects(user=admin, handled_at=None)
+        assert notifications.count() == 1
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
+        assert notifications.first().details.request_user == user
+
+    def test_member_cannot_request_membership(self):
+        """Accepting such a request could only fail, leaving it pending forever."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="editor")])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_invited_user_cannot_request_membership(self):
+        """Joining through one of two pending entries would leave the other one pending."""
+        user = self.login()
+        invitation = MembershipRequest(kind="invitation", user=user, created_by=UserFactory())
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert400(response)
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [invitation.id]
+
+    @pytest.mark.parametrize("status", ["refused", "canceled"])
+    def test_user_with_a_handled_invitation_can_request_membership(self, status: str):
+        user = self.login()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=UserFactory(), status=status
+        )
+        organization = OrganizationFactory(requests=[invitation])
+
+        response = self.post(
+            url_for("api.request_membership", org=organization), {"comment": "a comment"}
+        )
+        assert201(response)
+
+        organization.reload()
+        assert [(r.kind, r.status, r.user) for r in organization.requests] == [
+            ("invitation", status, user),
+            ("request", "pending", user),
+        ]
 
     def test_get_membership_requests(self):
         user = self.login()
@@ -931,6 +1137,26 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         response = self.post(api_url)
         assert_status(response, 409)
 
+    def test_applicant_cannot_choose_the_role_granted_on_acceptance(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        applicant = self.login()
+
+        response = self.post(
+            url_for("api.request_membership", org=organization),
+            {"comment": "a comment", "role": "admin"},
+        )
+        assert201(response)
+
+        self.login(admin)
+        organization.reload()
+        api_url = url_for("api.accept_membership", org=organization, id=organization.requests[0].id)
+        response = self.post(api_url)
+        assert200(response)
+
+        assert response.json["role"] == "editor"
+        assert organization.reload().member(applicant).role == "editor"
+
     def test_only_admin_can_accept_membership(self):
         user = self.login()
         applicant = UserFactory()
@@ -1018,6 +1244,26 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.requests[0].status == "pending"
         assert organization.requests[0].refusal_comment is None
 
+    def test_refuse_membership_and_invite_member_with_non_object_body(self):
+        user = self.login()
+        membership_request = MembershipRequest(user=UserFactory(), comment="test")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[membership_request]
+        )
+
+        for url in (
+            url_for("api.refuse_membership", org=organization, id=membership_request.id),
+            url_for("api.invite_member", org=organization),
+        ):
+            for body in ([1, 2, 3], 1, "comment"):
+                response = self.post(url, body)
+                assert400(response)
+                assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        organization.reload()
+        assert len(organization.requests) == 1
+        assert organization.requests[0].status == "pending"
+
     def test_accept_membership_rejects_invitation(self):
         """Test that accept_membership rejects invitations."""
         user = self.login()
@@ -1090,12 +1336,18 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.invite_member", org=organization)
-        self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+        with capture_mails() as mails:
+            self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
+
+        # The invitee answers it, so they are the only one to hear about it: the admins
+        # used to get the request mail on this path too.
+        assert len(mails) == 1
+        assert mails[0].recipients == [invited_user.email]
 
         notifications = Notification.objects(user=invited_user)
         assert notifications.count() == 1
         assert notifications.first().details.request_organization == organization
-        assert notifications.first().details.kind == "invitation"
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
 
         admin_notifications = Notification.objects(user=user)
         assert admin_notifications.count() == 0
@@ -1110,13 +1362,20 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.invite_member", org=organization)
-        response = self.post(api_url, {"email": "newuser@example.com", "role": "editor"})
+        with capture_mails() as mails:
+            response = self.post(api_url, {"email": "newuser@example.com", "role": "editor"})
 
         assert201(response)
 
         assert response.json["kind"] == "invitation"
         assert response.json["email"] == "newuser@example.com"
         assert response.json["role"] == "editor"
+
+        # The address is the only channel there is: an in-app notification would need an
+        # account to hang on.
+        assert len(mails) == 1
+        assert mails[0].recipients == ["newuser@example.com"]
+        assert Notification.objects.count() == 0
 
         organization.reload()
         assert len(organization.requests) == 1
@@ -1143,6 +1402,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         organization.reload()
         assert len(organization.requests) == 1
+        assert organization.requests[0].user == existing_user
+        assert organization.requests[0].email is None
+
+    def test_invite_member_by_email_existing_user_ignores_case(self):
+        """An unlinked invitation is invisible to the user, who then asks to join instead."""
+        user = self.login()
+        existing_user = UserFactory(email="John.Doe@example.com")
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        response = self.post(
+            url_for("api.invite_member", org=organization),
+            {"email": "john.doe@example.com", "role": "editor"},
+        )
+        assert201(response)
+
+        organization.reload()
         assert organization.requests[0].user == existing_user
         assert organization.requests[0].email is None
 
@@ -1324,6 +1599,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
         notification = Notification(
             user=invited_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=invited_user
             ),
