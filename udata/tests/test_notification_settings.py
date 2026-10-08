@@ -1,25 +1,29 @@
 from datetime import UTC, datetime, timedelta
+from smtplib import SMTPRecipientsRefused
 from types import SimpleNamespace
 
 import pytest
 from bson import ObjectId
 from flask import url_for
-from mongoengine import DoesNotExist, NotUniqueError, ValidationError
+from mongoengine import NotUniqueError, ValidationError
 from mongoengine.connection import get_db
 
 import udata
-import udata.features.notifications.follow  # noqa: F401 -- connected by `init_app` in production
+import udata.features.notifications.follow
 import udata.models  # noqa: F401 -- registers every document before the imports below
+from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.core.dataservices.activities import UserUpdatedDataservice
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, ORG_ROLES
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import MembershipRequest
+from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
@@ -45,6 +49,7 @@ from udata.features.notifications.settings import (
 )
 from udata.features.notifications.tasks import send_notification_digests
 from udata.features.transfer.factories import TransferFactory
+from udata.mail import MailMessage
 from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import capture_mails
 
@@ -443,8 +448,8 @@ COMMENT = event_chain(NotificationType.DISCUSSION_COMMENT)
 BADGE = event_chain(NotificationType.ORGANIZATION_BADGE_CERTIFIED)
 
 
-def rule(scope=None, event=None, enabled=True):
-    return Rule(enabled=enabled, scope=scope.id if scope else None, event=event)
+def rule(scope=None, event=None, enabled=True, origin=FollowOrigin.FOLLOWED):
+    return Rule(enabled=enabled, scope=scope.id if scope else None, event=event, origin=origin)
 
 
 class ResolveTest:
@@ -516,6 +521,20 @@ class ResolveTest:
         ]
 
         assert resolve(rules, NEW, SCOPES, {NotificationReason.ORGANIZATION_ADMIN}) is True
+
+    def test_muting_an_organization_holds_against_what_one_edited_in_it(self):
+        """A follow made by udata itself was never chosen: a broader "no" beats it."""
+        rules = [
+            rule(scope=DATASET, origin=FollowOrigin.EDITED),
+            rule(scope=ORGANIZATION, enabled=False),
+        ]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.CONTRIBUTOR}) is False
+
+    def test_a_follow_set_by_hand_still_beats_a_broader_no(self):
+        rules = [rule(scope=DATASET), rule(scope=ORGANIZATION, enabled=False)]
+
+        assert resolve(rules, NEW, SCOPES, {NotificationReason.EXPLICIT_SUBSCRIBER}) is True
 
     def test_turning_a_type_off_holds_against_a_followed_subject(self):
         """Each rule is the more specific on one dimension: the "no" wins."""
@@ -689,7 +708,9 @@ class DispatchTest(APITestCase):
         assert Notification.objects(user=admin).first().mail_pending is False
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
-    def test_a_badge_mail_offers_its_organization_and_its_type(self):
+    def test_a_badge_mail_offers_its_organization_and_all_badges(self):
+        """It says "Badges of the organization": the next badge, of another kind, has to
+        stay out too."""
         admin = UserFactory()
         organization = OrganizationFactory(admins=[admin])
 
@@ -698,7 +719,7 @@ class DispatchTest(APITestCase):
 
         [mail] = mailed(mails, admin)
         assert f"scope=Organization%3A{organization.id}" in mail.body
-        assert "event=organization.badge.certified" in mail.body
+        assert "event=organization.badge\n" in mail.body
         assert "Stop following this discussion" not in mail.body
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
@@ -1107,21 +1128,23 @@ class DigestTest(PytestOnlyDBTestCase):
         assert digest.body.index(older.subject.title) < digest.body.index(newer.subject.title)
         assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
-    def test_one_failing_digest_does_not_deprive_the_others(self, caplog):
+    def test_one_failing_digest_does_not_deprive_the_others(self, caplog, monkeypatch):
         # Two broken users, whatever order the job meets them in: the second one is only
         # reached if the job carries on after the first failure.
         broken = [UserFactory(mail_cadence=MailCadence.WEEKLY) for _ in range(2)]
         healthy = UserFactory(mail_cadence=MailCadence.WEEKLY)
-        gone = [
+        for user in [*broken, healthy]:
             open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[user])))
-            for user in broken
-        ]
-        open_discussion(DatasetFactory(organization=OrganizationFactory(admins=[healthy])))
         for notification in Notification.objects:
             age(notification, days=8)
-        # Removed behind the signals' back, as a raw migration would: the digest can no
-        # longer read the discussion it is about.
-        Discussion._get_collection().delete_many({"_id": {"$in": [d.id for d in gone]}})
+        send = MailMessage.send
+
+        def refused_for_the_broken(message, recipient):
+            if recipient in broken:
+                raise SMTPRecipientsRefused({recipient.email: (550, b"Mailbox unavailable")})
+            send(message, recipient)
+
+        monkeypatch.setattr(MailMessage, "send", refused_for_the_broken)
 
         with capture_mails() as mails:
             send_notification_digests()
@@ -1132,7 +1155,10 @@ class DigestTest(PytestOnlyDBTestCase):
             assert Notification.objects(user=user, mail_pending=True).count() == 1
         # The trace has to reach the logs and Sentry, not only the exception message.
         failures = [record for record in caplog.records if record.levelname == "ERROR"]
-        assert [failure.exc_info[0] for failure in failures] == [DoesNotExist, DoesNotExist]
+        assert [failure.exc_info[0] for failure in failures] == [
+            SMTPRecipientsRefused,
+            SMTPRecipientsRefused,
+        ]
 
     def test_a_deleted_user_gets_no_digest(self):
         """Deleting an account leaves its queue behind, and its address now ends in
@@ -1146,6 +1172,30 @@ class DigestTest(PytestOnlyDBTestCase):
             send_notification_digests()
 
         assert mails == []
+
+    def test_a_subject_gone_does_not_hold_back_the_rest_of_the_digest(self):
+        """Deleting a post leaves its discussions, and their notifications, behind."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
+        post = PostFactory()
+        orphan = DiscussionFactory(subject=post)
+        Notification(
+            user=admin,
+            type=NotificationType.DISCUSSION_NEW,
+            details=DiscussionNotificationDetails(discussion=orphan),
+            mail_pending=True,
+        ).save()
+        open_discussion(dataset)
+        post.delete()
+        for notification in Notification.objects(user=admin):
+            age(notification, days=8)
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mailed(mails, admin)
+        assert dataset.title in mail.body
+        assert Notification.objects(user=admin, mail_pending=True).count() == 0
 
     def test_pausing_holds_back_what_was_already_queued(self):
         admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
@@ -1223,6 +1273,18 @@ class NotificationSettingsAPITest(APITestCase):
             "/api/1/notifications/settings/",
             {"scope": ref(scope) if scope else None, "event": event, "enabled": enabled, **keys},
         )
+
+    def test_a_rule_without_enabled_is_refused_rather_than_withdrawn(self):
+        user = self.login()
+        dataset = DatasetFactory()
+        ignore(user, dataset)
+
+        response = self.put(
+            "/api/1/notifications/settings/", {"scope": ref(dataset), "event": None}
+        )
+
+        self.assert400(response)
+        assert NotificationSetting.objects(user=user).count() == 1
 
     def test_deciding_again_replaces_the_previous_answer(self):
         user = self.login()
@@ -1401,6 +1463,17 @@ class NotificationResolvedAPITest(APITestCase):
         if event is not None:
             query.append(("event", event))
         return self.get("/api/1/notifications/resolved/", query_string=query)
+
+    def test_following_what_one_cannot_read_brings_nothing(self):
+        """As at dispatch, which leaves out the followers who may not read the subject."""
+        outsider = self.login()
+        private = DatasetFactory(organization=OrganizationFactory(), private=True)
+        follow(outsider, private)
+
+        [answer] = self.resolved([private], DISCUSSIONS).json
+
+        assert answer["heard"] is False
+        assert answer["reasons"] == []
 
     def test_the_pause_is_left_out_so_that_following_still_shows(self):
         """A follow button keeps telling, and changing, what one follows meanwhile."""
@@ -1896,6 +1969,30 @@ class FollowWhatOneWorksOnTest(APITestCase):
         with self.api_user(editor):
             self.assert200(self.edit(dataset))
 
+        assert NotificationSetting.objects.count() == 0
+
+    def test_a_script_publishing_with_an_oauth_token_follows_nothing(self):
+        editor = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
+        client = OAuth2Client.objects.create(
+            name="script",
+            owner=UserFactory(),
+            redirect_uris=["https://script.example.org/callback"],
+            secret="s3cr3t",
+        )
+        token = OAuth2Token.objects.create(
+            client=client, user=editor, access_token="access", refresh_token="refresh"
+        )
+        data = dataset.to_dict()
+        data["description"] = "new description"
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            data,
+            headers={"Authorization": f"Bearer {token.access_token}"},
+        )
+
+        self.assert200(response)
         assert NotificationSetting.objects.count() == 0
 
     def open_discussion_on(self, dataset):

@@ -114,6 +114,9 @@ class NotificationSettingsAPI(API):
         setting it again replaces the previous answer. Removing a follow udata made by
         itself (for editing a subject or answering about it) turns it into a "no", which
         comes back as a 200: removed, the next edit or answer would make it again."""
+        # Left out, it would read as `null` and withdraw the rule.
+        if "enabled" not in api.json_payload():
+            api.abort(400, errors={"enabled": "Expected true, false or null"})
         rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
         setting, created = set_rule(rule.user, rule.scope, rule.event, rule.enabled)
         if setting is None:

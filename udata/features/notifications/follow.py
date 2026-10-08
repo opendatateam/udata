@@ -40,10 +40,15 @@ def follow_worked_on(user: User, subject, origin: FollowOrigin) -> None:
 
 
 def follow_if_by_hand(subject, origin: FollowOrigin, user: User | None = None) -> None:
-    """Only a person working through the site: a script publishing with an API key has
-    not worked on each of the subjects it touches, and harvesting has no user. Whoever
+    """Only a person working through the site: a script publishing with an API key or an
+    OAuth token has not worked on each of the subjects it touches, and harvesting has no
+    user. The site itself authenticates with its session, never with these. Whoever
     worked is the current user, unless the change says who did it."""
-    if not has_request_context() or request.headers.get(HEADER_API_KEY):
+    if (
+        not has_request_context()
+        or request.headers.get(HEADER_API_KEY)
+        or request.headers.get("Authorization", "").lower().startswith("bearer ")
+    ):
         return
     if user is None:
         if not current_user or not current_user.is_authenticated:

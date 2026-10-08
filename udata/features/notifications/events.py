@@ -41,10 +41,15 @@ class Recipient:
 
     `user` is a bare address when the recipient has no account yet — an invitation
     reaches its recipient before they are a user.
+
+    `followed` is what the recipient follows that brought them in, when a follow did: the
+    thread, the dataset or the organization. The mail names it rather than the subject
+    of the event, which the recipient may never have followed as such.
     """
 
     user: User | str
     reasons: frozenset[NotificationReason] = field(default_factory=frozenset)
+    followed: Document | None = None
 
     @classmethod
     def from_member(cls, member) -> "Recipient":
@@ -68,7 +73,11 @@ def merge_recipients(recipients: Iterable[Recipient]) -> list[Recipient]:
     for recipient in recipients:
         existing = merged.get(recipient.key)
         merged[recipient.key] = (
-            Recipient(existing.user, existing.reasons | recipient.reasons)
+            Recipient(
+                existing.user,
+                existing.reasons | recipient.reasons,
+                existing.followed or recipient.followed,
+            )
             if existing
             else recipient
         )
@@ -303,11 +312,18 @@ class NotificationEvent:
         scopes = self.scopes()
         if self.requires_action or not self.reaches_subscribers or not scopes:
             return []
+        # The most specific first, so that a user following both a thread and its dataset
+        # is told about the thread.
+        rank = {scope.pk: index for index, scope in enumerate(scopes)}
+        settings = sorted(
+            follows(event_chain(self.type), scopes)
+            .only("user", "scope", "origin")
+            .select_related(),
+            key=lambda setting: rank[setting.scope.pk],
+        )
         return [
-            Recipient(setting.user, frozenset({REASON_BY_ORIGIN[setting.origin]}))
-            for setting in follows(event_chain(self.type), scopes)
-            .only("user", "origin")
-            .select_related()
+            Recipient(setting.user, frozenset({REASON_BY_ORIGIN[setting.origin]}), setting.scope)
+            for setting in settings
             if self.subject is None or readable_by(setting.user, self.subject)
         ]
 
@@ -315,7 +331,9 @@ class NotificationEvent:
         """Something one can turn off says why it was sent, and how to turn it off."""
         mail = self.via_mail(recipient.user)
         if mail is not None and not self.requires_action:
-            mail.footer = settings_footer(recipient.reasons, self.subject, self.ways_out())
+            mail.footer = settings_footer(
+                recipient.reasons, self.subject, self.ways_out(), followed=recipient.followed
+            )
         return mail
 
     def ways_out(self) -> list[MailCTA]:
@@ -329,8 +347,16 @@ class NotificationEvent:
                     scope=self.subject,
                 )
             )
-        ways_out.append(way_out(_("Stop receiving: %(type)s", type=self.label), event=self.type))
+        ways_out.append(
+            way_out(_("Stop receiving: %(type)s", type=self.label), event=self.labelled_event)
+        )
         return ways_out
+
+    @property
+    def labelled_event(self) -> str:
+        """What `label` names, and stopping it turns off: the type, or the family of types
+        an event class stands for (the five badges)."""
+        return self.type
 
     def _heard(self, recipients: list[Recipient]) -> set[ObjectId | str]:
         """The keys of the recipients their rules let hear about this event (see

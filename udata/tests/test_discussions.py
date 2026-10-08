@@ -2173,6 +2173,30 @@ class DiscussionExternalNotificationTest(APITestCase):
         [mail] = mails
         assert 'href="https://eco.example.com/bouquets/foo/"' in mail.html
 
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_a_digest_escapes_the_external_url(self):
+        """The URL is written by whoever opens the discussion: it cannot add markup."""
+        owner = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        user = UserFactory()
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[Message(content=faker.sentence(), posted_by=user)],
+            extras={"notification": {"external_url": 'https://eco.example.com/x"><b>injected</b>'}},
+        )
+        notify_new_discussion(discussion.id)
+        Notification.objects(user=owner).update(
+            set__created_at=datetime.now(UTC) - timedelta(days=8)
+        )
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mails
+        assert "<b>injected</b>" not in mail.html
+        assert 'href="https://eco.example.com/x&quot;&gt;&lt;b&gt;injected&lt;/b&gt;"' in mail.html
+
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_notify_topic_without_external_url_links_to_canonical_page(self):
         """A Topic discussion with no external_url still notifies: now that

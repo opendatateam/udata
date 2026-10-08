@@ -178,6 +178,11 @@ def resolve(
     anywhere; following the answers on a dataset, and ignoring one of its threads. The
     "no" wins: a way out offered to the user has to hold, whatever they follow.
 
+    A follow udata made by itself, for editing a subject or taking part in its
+    discussions, was never chosen: any "no" that applies beats it, however broad. Muting
+    an organization then also mutes the datasets of it one edited, which a follow set by
+    hand would keep.
+
     The defaults (`heard_by_default`) are only read where the user's rules say nothing:
     otherwise a precise default would beat a broad choice of the user.
 
@@ -211,6 +216,12 @@ def resolve(
         ]
         if not candidates:
             return heard_by_default(reason, events)
+        if any(not rule.enabled for rule in candidates):
+            candidates = [
+                rule
+                for rule in candidates
+                if not rule.enabled or rule.origin == FollowOrigin.FOLLOWED
+            ]
         unbeaten = [
             rule
             for rule in candidates
@@ -304,11 +315,14 @@ def resolved_for(
             for recipient in recipients
             if recipient.key == user.id
             for reason in recipient.reasons
-        } | {
-            REASON_BY_ORIGIN[rule.origin]
-            for rule in rules
-            if rule.enabled and rule.scope in scope_ids
         }
+        # As at dispatch: a follow only brings what its user may read.
+        if readable_by(user, subject):
+            held |= {
+                REASON_BY_ORIGIN[rule.origin]
+                for rule in rules
+                if rule.enabled and rule.scope in scope_ids
+            }
         resolutions.append(
             Resolution(
                 scope=subject,
