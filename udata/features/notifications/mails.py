@@ -52,7 +52,6 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
         paragraphs=[
             _("Here is what happened on what you follow since our last message."),
             *lines,
-            MailCTA(_("See all my notifications"), cdata_url("/admin/me/notifications")),
         ],
         footer=settings_footer(),
     )
@@ -102,10 +101,26 @@ def reason_sentence(reason: NotificationReason, subject) -> LazyString:
             return _("You receive this email because you administer the site.")
 
 
-def settings_footer(reasons=(), subject=None) -> list[LazyString | MailCTA]:
-    """Why one receives a mail, every reason of it, and the way out. Naming only one
-    reason would offer a way out that stops nothing: the most generous one wins."""
+def way_out(label: LazyString, scope=None, event: str | None = None) -> MailCTA:
+    """A link to the settings page, which offers to stop what the link names and only
+    does so once confirmed: a mail scanner opening the link must not unsubscribe anyone.
+    The keys are those of the rule to write, as `/notifications/resolved/` takes them."""
+    keys = {}
+    if scope is not None:
+        keys["scope"] = f"{scope.__class__.__name__}:{scope.id}"
+    if event is not None:
+        keys["event"] = event
+    return MailCTA(label, cdata_url("/admin/me/notifications", **keys))
+
+
+def settings_footer(
+    reasons=(), subject=None, ways_out: list[MailCTA] = ()
+) -> list[LazyString | MailCTA]:
+    """Why one receives a mail, every reason of it, and the ways out, the same as the
+    bell offers. Naming only one reason would offer a way out that stops nothing: the
+    most generous one wins."""
     return [
         *(reason_sentence(reason, subject) for reason in sorted(reasons)),
-        MailCTA(_("Manage or turn off these notifications"), cdata_url("/admin/me/notifications")),
+        *ways_out,
+        MailCTA(_("Manage your notifications"), cdata_url("/admin/me/notifications")),
     ]

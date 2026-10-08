@@ -38,12 +38,12 @@
 
     {% if message.footer %}
     <div style="margin-top: 30px; font-size: 12px; color: #666;">
+        {# `string` drops the `__html__` of LazyString, which would skip autoescaping the
+           titles it interpolates. #}
         {% for item in message.footer %}
             {% if item.__class__.__name__ == 'MailCTA' %}
-                <p style="margin: 0 0 5px;"><a href="{{ item.link }}" style="color: #666; text-decoration: underline;">{{ item.label }}</a></p>
+                <p style="margin: 0 0 5px;"><a href="{{ item.link }}" style="color: #666; text-decoration: underline;">{{ item.label|string }}</a></p>
             {% else %}
-                {# `string` drops the `__html__` of LazyString, which would skip autoescaping
-                   the titles it interpolates. #}
                 <p style="margin: 0 0 5px;">{{ item|string }}</p>
             {% endif %}
         {% endfor %}

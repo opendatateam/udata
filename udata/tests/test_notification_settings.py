@@ -619,6 +619,43 @@ class DispatchTest(APITestCase):
         assert "/admin/me/notifications" in mail.body
         assert f"you administer {organization.name}" in mail.body
 
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
+    def test_a_mail_offers_the_ways_out_of_the_bell(self):
+        """The thread, its subject and the type, each a link the settings page confirms."""
+        admin = UserFactory()
+        dataset = DatasetFactory(organization=OrganizationFactory(admins=[admin]))
+
+        with capture_mails() as mails:
+            discussion = open_discussion(dataset)
+
+        [mail] = mailed(mails, admin)
+        settings = "https://www.data.gouv.fr/admin/me/notifications"
+        assert (
+            f"Stop following this discussion: {settings}?scope=Discussion%3A{discussion.id}&event=discussion"
+            in mail.body
+        )
+        assert (
+            f"Receive nothing more about {dataset.title}: {settings}?scope=Dataset%3A{dataset.id}"
+            in mail.body
+        )
+        assert (
+            f"Stop receiving this type of notification: {settings}?event=discussion.new"
+            in mail.body
+        )
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
+    def test_a_badge_mail_offers_its_organization_and_its_type(self):
+        admin = UserFactory()
+        organization = OrganizationFactory(admins=[admin])
+
+        with capture_mails() as mails:
+            organization.add_badge(CERTIFIED)
+
+        [mail] = mailed(mails, admin)
+        assert f"scope=Organization%3A{organization.id}" in mail.body
+        assert "event=organization.badge.certified" in mail.body
+        assert "Stop following this discussion" not in mail.body
+
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_a_title_in_the_footer_is_escaped(self):
         """A title is chosen by whoever publishes, and the mail leaves from the platform."""
@@ -1041,7 +1078,7 @@ class DigestTest(PytestOnlyDBTestCase):
         assert len(pending) == 5
 
         message = notification_digest(pending)
-        assert len(message.paragraphs) == 3  # intro, one line, CTA
+        assert len(message.paragraphs) == 2  # intro, one line
         line = message.paragraphs[1]
         assert str(line) == f"{dataset.title}: 2 new discussions, 3 new comments"
         assert f'href="{dataset.self_web_url(append="/discussions")}"' in line.html

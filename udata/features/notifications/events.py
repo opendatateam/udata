@@ -15,14 +15,15 @@ from udata.features.notifications.constants import (
     NotificationReason,
     NotificationType,
 )
-from udata.features.notifications.mails import settings_footer
+from udata.features.notifications.mails import settings_footer, way_out
 from udata.features.notifications.settings import (
     readable_by,
     resolve,
     rules_for,
     subscribers_for,
 )
-from udata.mail import Link, MailMessage
+from udata.i18n import lazy_gettext as _
+from udata.mail import Link, MailCTA, MailMessage
 
 log = logging.getLogger(__name__)
 
@@ -281,11 +282,25 @@ class NotificationEvent:
         ]
 
     def _mail(self, recipient: Recipient) -> MailMessage | None:
-        """Something one can turn off says why it was sent, and where to turn it off."""
+        """Something one can turn off says why it was sent, and how to turn it off."""
         mail = self.via_mail(recipient.user)
         if mail is not None and not self.requires_action:
-            mail.footer = settings_footer(recipient.reasons, self.subject)
+            mail.footer = settings_footer(recipient.reasons, self.subject, self.ways_out())
         return mail
+
+    def ways_out(self) -> list[MailCTA]:
+        """What the mail offers to stop, the same as the menu of the notification in the
+        bell: its subject, then this type of notification anywhere."""
+        ways_out = []
+        if self.subject is not None:
+            ways_out.append(
+                way_out(
+                    _("Receive nothing more about %(subject)s", subject=str(self.subject)),
+                    scope=self.subject,
+                )
+            )
+        ways_out.append(way_out(_("Stop receiving this type of notification"), event=self.type))
+        return ways_out
 
     def _heard(self, recipients: list[Recipient]) -> set[ObjectId | str]:
         """The keys of the recipients their rules let hear about this event (see

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-10-08 10:09+0200\n"
+"POT-Creation-Date: 2026-10-08 10:12+0200\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
@@ -1002,21 +1002,25 @@ msgstr ""
 msgid "discussion"
 msgstr ""
 
-#: udata/core/discussions/notifications.py:88
+#: udata/core/discussions/notifications.py:80
+msgid "Stop following this discussion"
+msgstr ""
+
+#: udata/core/discussions/notifications.py:96
 #, python-format
 msgid "%(num)d new discussion"
 msgid_plural "%(num)d new discussions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/core/discussions/notifications.py:107
+#: udata/core/discussions/notifications.py:115
 #, python-format
 msgid "%(num)d new comment"
 msgid_plural "%(num)d new comments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/core/discussions/notifications.py:137
+#: udata/core/discussions/notifications.py:145
 #, python-format
 msgid "%(num)d closed discussion"
 msgid_plural "%(num)d closed discussions"
@@ -1750,6 +1754,15 @@ msgstr "Seiten-Moderator"
 msgid "chart"
 msgstr ""
 
+#: udata/features/notifications/events.py:298
+#, python-format
+msgid "Receive nothing more about %(subject)s"
+msgstr ""
+
+#: udata/features/notifications/events.py:302
+msgid "Stop receiving this type of notification"
+msgstr ""
+
 #: udata/features/notifications/mails.py:38
 #, python-format
 msgid "%(subject)s: %(counts)s"
@@ -1766,61 +1779,57 @@ msgstr[1] ""
 msgid "Here is what happened on what you follow since our last message."
 msgstr ""
 
-#: udata/features/notifications/mails.py:55
-msgid "See all my notifications"
-msgstr ""
-
-#: udata/features/notifications/mails.py:70
+#: udata/features/notifications/mails.py:69
 #, python-format
 msgid "You receive this email because you own %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:73
+#: udata/features/notifications/mails.py:72
 #, python-format
 msgid "You receive this email because you administer %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:78
+#: udata/features/notifications/mails.py:77
 #, python-format
 msgid "You receive this email because you are an editor of %(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:85
+#: udata/features/notifications/mails.py:84
 #, python-format
 msgid ""
 "You receive this email because you are a partial editor of "
 "%(organization)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:90
+#: udata/features/notifications/mails.py:89
 #, python-format
 msgid "You receive this email because %(subject)s is assigned to you."
 msgstr ""
 
-#: udata/features/notifications/mails.py:94
+#: udata/features/notifications/mails.py:93
 msgid "You receive this email because you take part in this discussion."
 msgstr ""
 
-#: udata/features/notifications/mails.py:96
+#: udata/features/notifications/mails.py:95
 #, python-format
 msgid "You receive this email because you follow %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:98
+#: udata/features/notifications/mails.py:97
 #, python-format
 msgid "You receive this email because you edited %(subject)s."
 msgstr ""
 
-#: udata/features/notifications/mails.py:100
+#: udata/features/notifications/mails.py:99
 msgid "You receive this email because you made this request."
 msgstr ""
 
-#: udata/features/notifications/mails.py:102
+#: udata/features/notifications/mails.py:101
 msgid "You receive this email because you administer the site."
 msgstr ""
 
-#: udata/features/notifications/mails.py:110
-msgid "Manage or turn off these notifications"
+#: udata/features/notifications/mails.py:125
+msgid "Manage your notifications"
 msgstr ""
 
 #: udata/flask_mongoengine/fields.py:85
@@ -2361,5 +2370,11 @@ msgstr ""
 #~ msgstr "Backend"
 
 #~ msgid "You receive this email because %(subject)s was assigned to you."
+#~ msgstr ""
+
+#~ msgid "See all my notifications"
+#~ msgstr ""
+
+#~ msgid "Manage or turn off these notifications"
 #~ msgstr ""
 

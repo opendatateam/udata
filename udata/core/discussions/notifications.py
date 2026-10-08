@@ -10,6 +10,8 @@ from udata.core.discussions.signals import on_discussion_deleted, on_discussion_
 from udata.core.user.models import User
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.events import NotificationEvent, subject_scopes
+from udata.features.notifications.mails import way_out
+from udata.i18n import lazy_gettext as _
 from udata.i18n import ngettext
 from udata.mail import Link
 
@@ -72,6 +74,12 @@ class DiscussionEvent(NotificationEvent):
 
     def via_app(self, recipient):
         return DiscussionNotificationDetails(discussion=self.discussion)
+
+    def ways_out(self):
+        return [
+            way_out(_("Stop following this discussion"), scope=self.discussion, event="discussion"),
+            *super().ways_out(),
+        ]
 
     @classmethod
     def digest_subject(cls, details):
