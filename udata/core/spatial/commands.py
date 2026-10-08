@@ -13,10 +13,18 @@ import slugify
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
 
+from udata.app import cache
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
 from udata.core.spatial import geoids
-from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
+from udata.core.spatial.models import (
+    GEOZONE_BBOXES_CACHE_KEY,
+    GeoLevel,
+    GeoZone,
+    SpatialCoverage,
+    get_zone_bboxes,
+)
+from udata.core.spatial.tasks import detect_and_write_zone
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +66,9 @@ def load_zones(col, json_geozones):
             "uri": geozone["uri"],
             "ancestors": geozone.get("ancestors", []),
         }
+        # optional, so that files without bboxes keep loading (and keep existing bboxes)
+        if geozone.get("bbox"):
+            params["bbox"] = geozone["bbox"]
         try:
             col.objects(id=geozone["_id"]).modify(
                 upsert=True, **{"set__{0}".format(k): v for k, v in params.items()}
@@ -152,6 +163,26 @@ def load(geozones_file, levels_file, drop=False):
     log.info("Clean removed geozones in datasets")
     count = fixup_removed_geozone()
     log.info(f"{count} geozones removed from datasets")
+
+    cache.delete(GEOZONE_BBOXES_CACHE_KEY)
+
+
+@grp.command("detect-zones")
+def detect_zones_command():
+    """
+    Detect zones for existing datasets that have a `spatial.geom`.
+    Each dataset is reindexed if its detected zones changed.
+    """
+    datasets = Dataset.objects(spatial__geom__ne=None).only("id").timeout(False)
+    total = datasets.count()
+    zones = get_zone_bboxes()
+    detected = 0
+    for i, dataset in enumerate(datasets, 1):
+        if detect_and_write_zone(str(dataset.id), zones):
+            detected += 1
+        if i % 1000 == 0:
+            log.info(f"Ran zone detection on {i}/{total} datasets")
+    log.info(f"Ran zone detection on {total} datasets: zones detected for {detected}")
 
 
 @grp.command()
