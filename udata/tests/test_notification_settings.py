@@ -40,7 +40,7 @@ from udata.features.notifications.constants import (
     is_event_name,
 )
 from udata.features.notifications.events import event_for_type
-from udata.features.notifications.mails import notification_digest, reason_sentence
+from udata.features.notifications.mails import reason_sentence
 from udata.features.notifications.models import SCOPE_MODELS, Notification
 from udata.features.notifications.settings import (
     HEARD_BY_EDITORS,
@@ -50,7 +50,7 @@ from udata.features.notifications.settings import (
     resolve,
     rules_for,
 )
-from udata.features.notifications.tasks import send_notification_digests
+from udata.features.notifications.tasks import notification_digest, send_notification_digests
 from udata.features.transfer.factories import TransferFactory
 from udata.mail import MailMessage
 from udata.tests.api import APITestCase, PytestOnlyDBTestCase

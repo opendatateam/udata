@@ -1,12 +1,18 @@
 import logging
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 
 from flask import current_app
+from mongoengine import DoesNotExist
 
 from udata import i18n
-from udata.features.notifications import mails
-from udata.features.notifications.constants import MailCadence
+from udata.features.notifications.constants import MailCadence, NotificationType
+from udata.features.notifications.events import event_for_type
+from udata.features.notifications.mails import settings_footer
 from udata.features.notifications.models import Notification
+from udata.i18n import lazy_gettext as _
+from udata.i18n import lazy_ngettext
+from udata.mail import Link, MailMessage, ParagraphWithLinks
 from udata.tasks import job
 
 log = logging.getLogger(__name__)
@@ -19,6 +25,57 @@ DIGEST_INTERVALS = {
     MailCadence.DAILY: timedelta(days=1),
     MailCadence.WEEKLY: timedelta(weeks=1),
 }
+
+
+def notification_digest(notifications: list[Notification]) -> MailMessage | None:
+    """What happened since the last digest, `None` when nothing of it is left to tell.
+
+    One line per subject rather than one per notification, because a busy thread would
+    otherwise fill the mail with the same title repeated. Each event says what its line
+    is about and how it counts (`digest_subject`, `digest_count`).
+
+    A notification whose subject is gone (a post deleted with its discussions left
+    behind) is left out: failing on it would hold back the whole digest, run after run.
+    """
+    # Insertion order keeps the oldest subject first, which is the order the queue was
+    # read in.
+    links: dict[object, Link] = {}
+    counts: dict[object, Counter[NotificationType]] = {}
+    for notification in notifications:
+        try:
+            key, link = event_for_type(notification.type).digest_subject(notification.details)
+        except DoesNotExist:
+            continue
+        links.setdefault(key, link)
+        counts.setdefault(key, Counter())[notification.type] += 1
+    if not counts:
+        return None
+
+    lines = [
+        ParagraphWithLinks(
+            _(
+                "%(subject)s: %(counts)s",
+                subject=links[key],
+                counts=", ".join(
+                    event_for_type(type).digest_count(count) for type, count in by_type.items()
+                ),
+            )
+        )
+        for key, by_type in counts.items()
+    ]
+
+    return MailMessage(
+        subject=lazy_ngettext(
+            "Updates on an item you follow",
+            "Updates on %(num)d items you follow",
+            len(lines),
+        ),
+        paragraphs=[
+            _("Here is what happened on what you follow since our last message."),
+            *lines,
+        ],
+        footer=settings_footer(),
+    )
 
 
 @job("send-notification-digests")
@@ -64,7 +121,7 @@ def send_notification_digests(self):
             # One failing digest must not deprive the others. Its queue is left as is, so
             # the next run tries again.
             try:
-                digest = mails.notification_digest(notifications)
+                digest = notification_digest(notifications)
                 if digest is not None:
                     digest.send(user)
                     sent += 1

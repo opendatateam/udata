@@ -1,72 +1,10 @@
-from collections import Counter
-from typing import TYPE_CHECKING
-
 from flask_babel import LazyString
-from mongoengine import DoesNotExist
 
 from udata.core.organization.models import Organization
-from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.constants import NotificationReason
 from udata.i18n import lazy_gettext as _
-from udata.i18n import lazy_ngettext
-from udata.mail import Link, MailCTA, MailMessage, ParagraphWithLinks
+from udata.mail import MailCTA
 from udata.uris import cdata_url
-
-if TYPE_CHECKING:
-    from udata.features.notifications.models import Notification
-
-
-def notification_digest(notifications: list["Notification"]) -> MailMessage | None:
-    """What happened since the last digest, `None` when nothing of it is left to tell.
-
-    One line per subject rather than one per notification, because a busy thread would
-    otherwise fill the mail with the same title repeated. Each event says what its line
-    is about and how it counts (`digest_subject`, `digest_count`).
-
-    A notification whose subject is gone (a post deleted with its discussions left
-    behind) is left out: failing on it would hold back the whole digest, run after run.
-    """
-    # `events` builds on this module, hence the import at call time.
-    from udata.features.notifications.events import event_for_type
-
-    # Insertion order keeps the oldest subject first, which is the order the queue was
-    # read in.
-    links: dict[object, Link] = {}
-    counts: dict[object, Counter[NotificationType]] = {}
-    for notification in notifications:
-        try:
-            key, link = event_for_type(notification.type).digest_subject(notification.details)
-        except DoesNotExist:
-            continue
-        links.setdefault(key, link)
-        counts.setdefault(key, Counter())[notification.type] += 1
-    if not counts:
-        return None
-
-    lines = [
-        ParagraphWithLinks(
-            _(
-                "%(subject)s: %(counts)s",
-                subject=links[key],
-                counts=", ".join(
-                    event_for_type(type).digest_count(count) for type, count in by_type.items()
-                ),
-            )
-        )
-        for key, by_type in counts.items()
-    ]
-
-    return MailMessage(
-        subject=lazy_ngettext(
-            "Updates on an item you follow",
-            "Updates on %(num)d items you follow",
-            len(lines),
-        ),
-        paragraphs=[
-            _("Here is what happened on what you follow since our last message."),
-            *lines,
-        ],
-        footer=settings_footer(),
-    )
 
 
 def reason_sentence(reason: NotificationReason, subject, followed=None) -> LazyString:
