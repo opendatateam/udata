@@ -21,6 +21,7 @@ from udata.utils import get_by
 
 from .auth import resolve_access_token
 from .client import (
+    DEFAULT_SRS,
     GeopfClient,
     GeopfError,
     GeopfReauthRequired,
@@ -39,8 +40,7 @@ from .models import (
     resource_offering_metadata,
     resource_push_metadata,
 )
-from .srs import DEFAULT_SRS
-from .validation import validate_gpkg
+from .validation import validate_and_detect_srs
 
 log = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ def _run_pipeline(
 
     try:
         with _open_resource_file(resource) as f:
-            srs = validate_gpkg(f) or DEFAULT_SRS
+            srs = validate_and_detect_srs(f, resource.format) or DEFAULT_SRS
 
             file_md5 = md5(f)
             f.seek(0)

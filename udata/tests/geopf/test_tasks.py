@@ -7,7 +7,7 @@ from flask_storage.errors import OperationNotSupported
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 from udata.core.user.factories import UserFactory
-from udata.geopf.client import GeopfError, GeopfTimeoutError
+from udata.geopf.client import DEFAULT_SRS, GeopfError, GeopfTimeoutError
 from udata.geopf.models import (
     GeopfDatasetMetadata,
     GeopfDatasetPullMetadata,
@@ -19,7 +19,6 @@ from udata.geopf.models import (
     dataset_push_metadata,
     resource_offering_metadata,
 )
-from udata.geopf.srs import DEFAULT_SRS
 from udata.geopf.tasks import (
     _copy_to_tempfile,
     _download_chunks,
@@ -405,7 +404,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         with (
             patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
         ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             _run_pipeline(dataset, resource, "ds-1", client)
@@ -440,7 +439,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         with (
             patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
         ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfTimeoutError):
@@ -460,7 +459,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         with (
             patch("udata.geopf.tasks._open_resource_file") as mock_open_file,
-            patch("udata.geopf.tasks.validate_gpkg", return_value=None),
+            patch("udata.geopf.tasks.validate_and_detect_srs", return_value=None),
         ):
             mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
             with pytest.raises(GeopfError):

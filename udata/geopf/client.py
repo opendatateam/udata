@@ -9,9 +9,10 @@ import requests
 from flask import current_app
 
 from udata.geopf.metadata import XML_NS
-from udata.geopf.srs import DEFAULT_SRS
 
 log = logging.getLogger(__name__)
+
+DEFAULT_SRS = "EPSG:4326"
 
 POLL_INTERVAL = 10  # seconds between status checks
 

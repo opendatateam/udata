@@ -4,7 +4,7 @@ import pytest
 from pyproj import CRS
 
 from udata.geopf.client import GeopfError
-from udata.geopf.validation import validate_gpkg
+from udata.geopf.validation import validate_and_detect_srs
 
 
 def make_gpkg(tmp_path, layers):
@@ -28,46 +28,51 @@ def make_gpkg(tmp_path, layers):
     return path.open("rb")
 
 
-class ValidateGpkgTest:
+class ValidateAndDetectSrsTest:
     def test_valid_gpkg(self, tmp_path):
         with make_gpkg(tmp_path, [("secteurs_pnc", 4326)]) as f:
-            validate_gpkg(f)
+            validate_and_detect_srs(f, "gpkg")
 
     def test_same_srs_across_layers(self, tmp_path):
         with make_gpkg(tmp_path, [("a", 2154), ("b", 2154)]) as f:
-            validate_gpkg(f)
+            validate_and_detect_srs(f, "gpkg")
 
     def test_invalid_table_name(self, tmp_path):
         with make_gpkg(tmp_path, [("secteurs-pnc", 4326)]) as f:
             with pytest.raises(GeopfError, match="nom de table invalide : secteurs-pnc"):
-                validate_gpkg(f)
+                validate_and_detect_srs(f, "gpkg")
 
     def test_mixed_srs(self, tmp_path):
         with make_gpkg(tmp_path, [("a", 4326), ("b", 2154)]) as f:
             with pytest.raises(GeopfError, match="systèmes de projection"):
-                validate_gpkg(f)
+                validate_and_detect_srs(f, "gpkg")
 
     def test_unreadable_gpkg(self, tmp_path):
         path = tmp_path / "bad.gpkg"
         path.write_bytes(b"this is not sqlite")
         with path.open("rb") as f:
             with pytest.raises(GeopfError, match="GeoPackage illisible"):
-                validate_gpkg(f)
+                validate_and_detect_srs(f, "gpkg")
+
+    def test_unsupported_format(self, tmp_path):
+        with make_gpkg(tmp_path, [("a", 4326)]) as f:
+            with pytest.raises(GeopfError, match="Unsupported format: csv"):
+                validate_and_detect_srs(f, "csv")
 
     def test_returns_srs(self, tmp_path):
         with make_gpkg(tmp_path, [("a", 2154)]) as f:
-            assert validate_gpkg(f) == "EPSG:2154"
+            assert validate_and_detect_srs(f, "gpkg") == "EPSG:2154"
 
     def test_returns_srs_4326(self, tmp_path):
         with make_gpkg(tmp_path, [("a", 4326)]) as f:
-            assert validate_gpkg(f) == "EPSG:4326"
+            assert validate_and_detect_srs(f, "gpkg") == "EPSG:4326"
 
     def test_undefined_definition_returns_none(self, tmp_path):
         with make_gpkg(tmp_path, [("a", 4326)]) as f:
             with sqlite3.connect(f.name) as conn:
                 conn.execute("UPDATE gpkg_spatial_ref_sys SET definition = 'undefined'")
-            assert validate_gpkg(f) is None
+            assert validate_and_detect_srs(f, "gpkg") is None
 
     def test_no_geometry_columns_returns_none(self, tmp_path):
         with make_gpkg(tmp_path, []) as f:
-            assert validate_gpkg(f) is None
+            assert validate_and_detect_srs(f, "gpkg") is None
