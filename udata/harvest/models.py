@@ -287,7 +287,7 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         checks=[check_config_matches_backend],
         description="The configuration as key-value pairs",
     )
-    periodic_task = ReferenceField(PeriodicTask,reverse_delete_rule=NULLIFY)
+    periodic_task = ReferenceField(PeriodicTask, reverse_delete_rule=NULLIFY)
     created_at = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
