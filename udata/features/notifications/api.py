@@ -112,13 +112,8 @@ class NotificationSettingsAPI(API):
 resolved_fields = api.model(
     "NotificationResolved",
     {
-        "scope": fields.Raw(
-            attribute=lambda resolution: (
-                {"class": resolution.scope.__class__.__name__, "id": str(resolution.scope.pk)}
-                if resolution.scope
-                else None
-            ),
-            description="The subject asked about, as `{class, id}`",
+        "scope": fields.Nested(
+            api.model_reference, allow_null=True, description="The subject asked about"
         ),
         "event": fields.String(allow_null=True, description="The event asked about"),
         "channels": fields.List(fields.String, description="Where the user is reached"),

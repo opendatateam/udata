@@ -1,6 +1,4 @@
-import importlib.util
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -22,6 +20,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import MembershipRequest
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.db.migrations import load_migration
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
     TYPES_REQUIRING_ACTION,
@@ -32,7 +31,7 @@ from udata.features.notifications.constants import (
     NotificationType,
 )
 from udata.features.notifications.events import event_for_type, is_event_name
-from udata.features.notifications.mails import notification_digest
+from udata.features.notifications.mails import notification_digest, reason_sentence
 from udata.features.notifications.models import SCOPE_MODELS, Notification
 from udata.features.notifications.settings import (
     DEFAULT_RULES,
@@ -379,6 +378,12 @@ class NotificationTablesTest:
     def test_every_organization_role_maps_to_a_reason(self):
         assert set(REASON_BY_ORGANIZATION_ROLE) == set(ORG_ROLES)
 
+    def test_every_reason_is_explained_in_a_mail(self):
+        """A reason with no sentence leaves the footer without its explanation."""
+        dataset = SimpleNamespace(organization=SimpleNamespace(name="Org"))
+        for reason in NotificationReason:
+            assert reason_sentence(reason, dataset) is not None, reason
+
     def test_every_default_rule_names_a_real_event(self):
         assert all(rule.event is None or is_event_name(rule.event) for rule in DEFAULT_RULES)
 
@@ -649,6 +654,17 @@ class DispatchTest(APITestCase):
             in mail.body
         )
         assert f"Stop receiving: New discussions: {settings}?event=discussion.new" in mail.body
+
+    def test_what_no_digest_summarizes_is_mailed_at_once(self):
+        """A badge has no line in a digest: a weekly recipient still gets its mail."""
+        admin = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        organization = OrganizationFactory(admins=[admin])
+
+        with capture_mails() as mails:
+            organization.add_badge(CERTIFIED)
+
+        assert len(mailed(mails, admin)) == 1
+        assert Notification.objects(user=admin).first().channels == [APP]
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr", DEFAULT_LANGUAGE="en")
     def test_a_badge_mail_offers_its_organization_and_its_type(self):
@@ -1677,6 +1693,18 @@ class FollowWhatOneWorksOnTest(APITestCase):
         assert listed["subject"]["title"] == dataset.title
         assert listed["subject"]["organization"]["id"] == str(organization.id)
 
+    def test_a_thread_is_listed_with_its_title_and_the_organization_of_its_subject(self):
+        user = self.login()
+        organization = OrganizationFactory()
+        discussion = DiscussionFactory(subject=DatasetFactory(organization=organization))
+        ignore(user, discussion, DISCUSSIONS)
+
+        [listed] = self.get("/api/1/notifications/settings/").json
+
+        assert listed["subject"]["title"] == discussion.title
+        assert listed["subject"]["page"] == discussion.self_web_url()
+        assert listed["subject"]["organization"]["id"] == str(organization.id)
+
     def test_a_subject_out_of_reach_is_listed_without_its_title(self):
         """Left the organization, and the dataset turned private since."""
         user = self.login()
@@ -1690,13 +1718,7 @@ class FollowWhatOneWorksOnTest(APITestCase):
 
 class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
     def migrate(self, db):
-        spec = importlib.util.spec_from_file_location(
-            "follow_worked_on_subjects",
-            Path(udata.__file__).parent / "migrations" / "2026-10-08-follow-worked-on-subjects.py",
-        )
-        migration = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(migration)
-        migration.migrate(db)
+        load_migration("2026-10-08-follow-worked-on-subjects.py").migrate(db)
 
     def follows(self):
         return [

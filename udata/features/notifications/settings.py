@@ -15,6 +15,8 @@ from mongoengine.fields import (
 from udata.api import api
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
+from udata.core.organization.models import Organization
+from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     FollowOrigin,
@@ -81,7 +83,7 @@ class NotificationSetting(UDataDocument):
     meta = {
         "indexes": [
             {"fields": ["user", "scope", "event"], "unique": True},
-            # `subscribers_for` looks across every user, once per configurable event.
+            # `follows` looks across every user, once per configurable event.
             ["scope", "event", "enabled"],
         ],
     }
@@ -231,23 +233,6 @@ def follows(events: Sequence[str], scopes: Sequence[Document], **filters):
     )
 
 
-def subscribers_for(
-    events: Sequence[str], scopes: Sequence[Document]
-) -> list[tuple[User, NotificationReason]]:
-    """Users who follow one of these subjects for this event, and the reason it gives.
-
-    The other direction of the table: `rules_for` filters people the event already
-    reaches, this one brings in those it would never have reached. Without it, somebody
-    outside an organization could follow a subject and never hear about it.
-    """
-    if not scopes:
-        return []
-    return [
-        (setting.user, REASON_BY_ORIGIN[setting.origin])
-        for setting in follows(events, scopes).only("user", "origin").select_related()
-    ]
-
-
 @dataclass(frozen=True)
 class Resolution:
     """What `user` gets for one combination of keys, echoed so that the caller can match
@@ -346,8 +331,6 @@ def readable_by(user: User, scope) -> bool:
     discussions. The permission is checked against the needs `user` would have once
     logged in, not against `current_user`, who is whoever triggered the event."""
     from udata.core.discussions.models import Discussion
-    from udata.core.organization.models import Organization
-    from udata.core.organization.permissions import OrganizationNeed
 
     subject = scope.subject if isinstance(scope, Discussion) else scope
     read = getattr(subject, "permissions", {}).get("read")
@@ -356,9 +339,7 @@ def readable_by(user: User, scope) -> bool:
     identity = Identity(user.id)
     identity.provides.add(UserNeed(user.fs_uniquifier))
     identity.provides.update(RoleNeed(role.name) for role in user.roles)
-    for organization in Organization.objects(members__user=user.id).only("members"):
-        membership = next(member for member in organization.members if member.user.id == user.id)
-        identity.provides.add(OrganizationNeed(membership.role, organization.id))
+    identity.provides.update(organization_needs(user))
     return read.allows(identity)
 
 
@@ -374,7 +355,6 @@ class SubjectSummary:
 
 def subject_summary(setting: NotificationSetting) -> SubjectSummary | None:
     from udata.core.discussions.models import Discussion
-    from udata.core.organization.models import Organization
 
     scope = setting.scope
     if scope is None:

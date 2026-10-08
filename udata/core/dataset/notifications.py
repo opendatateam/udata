@@ -1,9 +1,5 @@
 from udata.core.dataset.models import Dataset
-from udata.features.notifications.events import (
-    NotificationEvent,
-    responsible_recipients,
-    subject_scopes,
-)
+from udata.features.notifications.events import NotificationEvent, responsible_recipients
 
 
 class DatasetReusedEvent(NotificationEvent):
@@ -22,9 +18,6 @@ class DatasetReusedEvent(NotificationEvent):
 
     def recipients(self):
         return responsible_recipients(self.dataset)
-
-    def scopes(self):
-        return subject_scopes(self.dataset)
 
 
 def became_public(document, changed_fields, previous) -> bool:

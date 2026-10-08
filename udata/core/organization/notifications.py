@@ -127,9 +127,6 @@ class BadgeAdded(NotificationEvent):
     def recipients(self):
         return responsible_recipients(self.organization)
 
-    def scopes(self):
-        return [self.organization]
-
     def via_app(self, recipient):
         return NewBadgeNotificationDetails(organization=self.organization)
 
@@ -213,9 +210,6 @@ class MembershipAnswered(NotificationEvent):
 
     def recipients(self):
         return [Recipient(self.request.user, frozenset({NotificationReason.REQUESTER}))]
-
-    def scopes(self):
-        return [self.organization]
 
 
 class MembershipAccepted(MembershipAnswered):

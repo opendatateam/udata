@@ -7,6 +7,7 @@ from bson import ObjectId
 from flask_babel import LazyString
 from mongoengine import Document, EmbeddedDocument
 
+from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.features.notifications.constants import (
     REASON_BY_ORGANIZATION_ROLE,
@@ -18,10 +19,11 @@ from udata.features.notifications.constants import (
 )
 from udata.features.notifications.mails import settings_footer, way_out
 from udata.features.notifications.settings import (
+    REASON_BY_ORIGIN,
+    follows,
     readable_by,
     resolve,
     rules_for,
-    subscribers_for,
 )
 from udata.i18n import lazy_gettext as _
 from udata.mail import Link, MailCTA, MailMessage
@@ -85,7 +87,6 @@ def responsible_recipients(subject) -> list[Recipient]:
     # Not at the top: `Assignment` resolves the models it can point to when it is
     # declared, and `Reuse` is not registered yet when this module loads.
     from udata.core.organization.assignment import Assignment
-    from udata.core.organization.models import Organization
 
     if isinstance(subject, Organization):
         # The organization itself concerns all of its members, whatever was assigned to
@@ -180,7 +181,7 @@ class NotificationEvent:
         organization are three grains of the same setting. The global scope closes
         every chain and is implied, so it is not listed here.
         """
-        return []
+        return subject_scopes(self.subject) if self.subject is not None else []
 
     def excluded(self) -> list[User]:
         """Who must never hear about this event, whatever they subscribed to.
@@ -278,12 +279,21 @@ class NotificationEvent:
         ]
 
     def _subscribers(self) -> list[Recipient]:
-        if self.requires_action or not self.reaches_subscribers:
+        """Who follows one of the scopes of this event, with the reason their follow gives.
+
+        The other direction of the table: `rules_for` filters people the event already
+        reaches, this one brings in those it would never have reached. Without it,
+        somebody outside an organization could follow a subject and never hear about it.
+        """
+        scopes = self.scopes()
+        if self.requires_action or not self.reaches_subscribers or not scopes:
             return []
         return [
-            Recipient(user, frozenset({reason}))
-            for user, reason in subscribers_for(event_chain(self.type), self.scopes())
-            if self.subject is None or readable_by(user, self.subject)
+            Recipient(setting.user, frozenset({REASON_BY_ORIGIN[setting.origin]}))
+            for setting in follows(event_chain(self.type), scopes)
+            .only("user", "origin")
+            .select_related()
+            if self.subject is None or readable_by(setting.user, self.subject)
         ]
 
     def _mail(self, recipient: Recipient) -> MailMessage | None:
@@ -336,9 +346,10 @@ class NotificationEvent:
         )
 
     def already_notified(self, recipient: User, **details) -> bool:
-        """Whether the recipient was ever notified about the same thing, read or not.
-        Used by the announcements that must happen once, however often their trigger
-        comes back."""
+        """Whether the recipient was notified about the same thing, read or not, as long
+        as the notification is kept: a handled one goes after
+        `DAYS_AFTER_NOTIFICATION_EXPIRED` days, and an announcement can then come back.
+        Used by the announcements that must not repeat whenever their trigger does."""
         return self._notifications_about(recipient, details).first() is not None
 
     @staticmethod

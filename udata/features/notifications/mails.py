@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from flask_babel import LazyString
 
+from udata.core.organization.models import Organization
 from udata.features.notifications.constants import NotificationReason, NotificationType
 from udata.i18n import lazy_gettext as _
 from udata.i18n import lazy_ngettext
@@ -59,8 +60,6 @@ def notification_digest(notifications: list["Notification"]) -> MailMessage:
 
 def reason_sentence(reason: NotificationReason, subject) -> LazyString:
     """Why one receives a mail about `subject`, in the words of the reason."""
-    from udata.core.organization.models import Organization
-
     organization = (
         subject if isinstance(subject, Organization) else getattr(subject, "organization", None)
     )

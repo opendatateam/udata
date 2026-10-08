@@ -79,3 +79,58 @@ class SetNotificationTypeMigrationTest(PytestOnlyDBTestCase):
         self.run_migration()
 
         assert self.stored(notification) == first
+
+
+class DropNotificationStatusAndKindMigrationTest(PytestOnlyDBTestCase):
+    def insert(self, details):
+        return (
+            get_db()
+            .notification.insert_one({"user": UserFactory().id, "details": details})
+            .inserted_id
+        )
+
+    def stored(self, notification_id):
+        return get_db().notification.find_one({"_id": notification_id})["details"]
+
+    def test_the_old_discriminators_are_dropped_and_the_rest_kept(self):
+        organization = OrganizationFactory().id
+        discussion = self.insert(
+            {"_cls": "DiscussionNotificationDetails", "status": "closed", "discussion": None}
+        )
+        harvester = self.insert(
+            {"_cls": "ValidateHarvesterNotificationDetails", "status": "pending", "source": None}
+        )
+        request = self.insert(
+            {"_cls": "MembershipRequestNotificationDetails", "kind": "invitation"}
+        )
+        badge = self.insert(
+            {
+                "_cls": "NewBadgeNotificationDetails",
+                "kind": "certified",
+                "organization": organization,
+            }
+        )
+
+        load_migration("2026-10-07-drop-notification-status-and-kind.py").migrate(get_db())
+
+        assert self.stored(discussion) == {
+            "_cls": "DiscussionNotificationDetails",
+            "discussion": None,
+        }
+        assert self.stored(harvester) == {
+            "_cls": "ValidateHarvesterNotificationDetails",
+            "source": None,
+        }
+        assert self.stored(request) == {"_cls": "MembershipRequestNotificationDetails"}
+        assert self.stored(badge) == {
+            "_cls": "NewBadgeNotificationDetails",
+            "organization": organization,
+        }
+
+    def test_a_field_of_another_details_class_is_left_alone(self):
+        """`status` and `kind` are only dropped where they were discriminators."""
+        other = self.insert({"_cls": "TransferRequestNotificationDetails", "status": "kept"})
+
+        load_migration("2026-10-07-drop-notification-status-and-kind.py").migrate(get_db())
+
+        assert self.stored(other)["status"] == "kept"
