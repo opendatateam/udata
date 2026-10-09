@@ -299,9 +299,8 @@ class Organization(
             # max_size keeps the original alongside the capped served file.
             max_size=BANNER_MAX_DIMENSION,
         ),
-        # Read-only: the banner image is managed through the dedicated upload
-        # endpoint (POST /organizations/<id>/banner/). Left writable, patch()
-        # would set it from the raw URL echoed back by clients.
+        # Read-only: managed through the dedicated upload endpoint; writable,
+        # patch() would overwrite it with the URL echoed back by clients.
         readonly=True,
         description="The organization page banner image URL",
     )
