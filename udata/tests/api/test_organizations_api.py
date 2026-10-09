@@ -5,7 +5,6 @@ import pytest
 from flask import url_for
 from mongoengine.context_managers import query_counter
 
-import udata.core.organization.api as org_api
 import udata.core.organization.constants as org_constants
 from udata.core import csv, storages
 from udata.core.badges.factories import badge_factory
@@ -603,19 +602,6 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         response = self.upload_banner(org, image_format="webp")
         assert400(response)
-
-    def test_organization_banner_upload_rejects_too_small(self):
-        user = self.login()
-        org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        response = self.upload_banner(org, width=800, height=200)
-        assert400(response)
-
-    def test_organization_banner_upload_rejects_oversized_file(self, monkeypatch):
-        user = self.login()
-        org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        monkeypatch.setattr(org_api, "BANNER_MAX_BYTES", 100)
-        response = self.upload_banner(org)
-        assert_status(response, 413)
 
     def test_organization_banner_delete(self):
         """Deleting the banner image clears the field and removes the stored files"""

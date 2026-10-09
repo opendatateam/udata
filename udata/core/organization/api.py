@@ -42,8 +42,6 @@ from .api_fields import (
 from .assignment import Assignment
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
-    BANNER_MAX_BYTES,
-    BANNER_MIN_SIZE,
     DEFAULT_ROLE,
     ORG_ROLES,
 )
@@ -688,11 +686,7 @@ class OrganizationBannerAPI(API):
         previous = (
             {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
         )
-        parse_uploaded_image(
-            org.banner_image,
-            min_size=BANNER_MIN_SIZE,
-            max_bytes=BANNER_MAX_BYTES,
-        )
+        parse_uploaded_image(org.banner_image)
         org.save()
         current = {org.banner_image.filename, org.banner_image.original}
         for filename in previous - current:

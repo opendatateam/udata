@@ -41,11 +41,6 @@ LOGO_MAX_SIZE = 500
 LOGO_SIZES = [100, 60, 25]
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
-# Organization page banner (data.gouv.fr#2049)
-BANNER_MAX_BYTES = 4 * 1024 * 1024  # Upload cap from the issue: 4 Mo
-BANNER_MAX_DIMENSION = 1920  # Served image is capped at this many pixels (longest side)
-BANNER_MIN_SIZE = (1200, 300)  # Full-width `cover` display (#2049): floor against heavy upscaling
-
 PUBLIC_SERVICE = "public-service"
 CERTIFIED = "certified"
 ASSOCIATION = "association"

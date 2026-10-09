@@ -50,7 +50,6 @@ from udata.uris import cdata_url
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
     ASSOCIATION,
-    BANNER_MAX_DIMENSION,
     BIGGEST_LOGO_SIZE,
     CERTIFIED,
     COMPANY,
@@ -296,8 +295,6 @@ class Organization(
             fs=banners,
             basename=default_image_basename,
             # No thumbnails: they are square center-crops, wrong for a banner.
-            # max_size keeps the original alongside the capped served file.
-            max_size=BANNER_MAX_DIMENSION,
         ),
         # Read-only: managed through the dedicated upload endpoint; writable,
         # patch() would overwrite it with the URL echoed back by clients.
