@@ -39,7 +39,6 @@ from udata.tests.helpers import (
     assert_starts_with,
     assert_status,
     capture_mails,
-    create_sized_test_image,
     create_test_image,
 )
 from udata.utils import faker
@@ -536,15 +535,10 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 
 
 class OrganizationBannerAPITest(PytestOnlyAPITestCase):
-    def upload_banner(self, org, width=1300, height=400, image_format="png"):
+    def upload_banner(self, org, image_format="png"):
         return self.post(
             url_for("api.organization_banner", org=org),
-            {
-                "file": (
-                    create_sized_test_image(width, height, image_format),
-                    f"test.{image_format}",
-                )
-            },
+            {"file": (create_test_image(image_format), f"test.{image_format}")},
             json=False,
         )
 

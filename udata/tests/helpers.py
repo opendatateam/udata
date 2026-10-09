@@ -227,17 +227,13 @@ def assert_cors(response):
     assert "Access-Control-Allow-Origin" in response.headers
 
 
-def create_sized_test_image(width, height, image_format="png"):
+def create_test_image(image_format="png"):
     file = BytesIO()
-    image = Image.new("RGBA", size=(width, height), color=(155, 0, 0))
+    image = Image.new("RGBA", size=(50, 50), color=(155, 0, 0))
     image.save(file, image_format)
     file.name = f"test.{image_format}"
     file.seek(0)
     return file
-
-
-def create_test_image():
-    return create_sized_test_image(50, 50)
 
 
 def create_geozones_fixtures():
