@@ -708,9 +708,7 @@ class OrganizationBannerAPI(API):
     def delete(self, org):
         """Delete the custom banner image, restoring the default banner"""
         org.permissions["edit"].test()
-        # `original` falls back to `filename` when the upload was not resized:
-        # the set dedupes, and the membership check avoids a FileNotFoundError
-        # on the local backend for files already gone.
+        # `original` may equal `filename` (unresized upload): dedupe and skip missing files
         filenames = (
             {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
         )
