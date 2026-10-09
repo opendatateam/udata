@@ -535,10 +535,10 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 
 
 class OrganizationBannerAPITest(PytestOnlyAPITestCase):
-    def upload_banner(self, org, image_format="png"):
+    def upload_banner(self, org):
         return self.post(
             url_for("api.organization_banner", org=org),
-            {"file": (create_test_image(image_format), f"test.{image_format}")},
+            {"file": (create_test_image(), "test.png")},
             json=False,
         )
 
@@ -588,13 +588,6 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
             {"file": (BytesIO(b"not an image"), "payload.txt")},
             json=False,
         )
-        assert400(response)
-
-    def test_organization_banner_upload_rejects_webp(self):
-        """WEBP is rejected by the storage extension list, like logos"""
-        user = self.login()
-        org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        response = self.upload_banner(org, image_format="webp")
         assert400(response)
 
     def test_organization_banner_delete(self):

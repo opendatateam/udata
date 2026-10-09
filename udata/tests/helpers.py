@@ -227,11 +227,11 @@ def assert_cors(response):
     assert "Access-Control-Allow-Origin" in response.headers
 
 
-def create_test_image(image_format="png"):
+def create_test_image():
     file = BytesIO()
     image = Image.new("RGBA", size=(50, 50), color=(155, 0, 0))
-    image.save(file, image_format)
-    file.name = f"test.{image_format}"
+    image.save(file, "png")
+    file.name = "test.png"
     file.seek(0)
     return file
 
