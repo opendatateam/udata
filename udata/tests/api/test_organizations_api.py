@@ -596,14 +596,12 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         )
         assert400(response)
 
-    def test_organization_banner_upload_accepts_webp(self):
-        """WEBP is accepted, like every other supported image format"""
+    def test_organization_banner_upload_rejects_webp(self):
+        """WEBP is rejected by the storage extension list, like logos"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         response = self.upload_banner(org, image_format="webp")
-        assert200(response)
-        org.reload()
-        assert org.banner_image
+        assert400(response)
 
     def test_organization_banner_delete(self):
         """Deleting the banner image clears the field and removes the stored files"""
