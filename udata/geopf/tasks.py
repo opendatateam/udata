@@ -181,9 +181,12 @@ def _run_pipeline(
             dataset_id,
             resource_id,
         )
-        status = client.poll_upload(upload_id)
+        status, failed_checks = client.poll_upload(upload_id)
         if status != "CLOSED":
-            raise GeopfError(f"Upload checks failed with status {status}")
+            reason = client.failed_check_logs(failed_checks)
+            raise GeopfError(
+                f"Upload checks failed with status {status}" + (f":\n{reason}" if reason else "")
+            )
 
         client.tag_entity("uploads", upload_id, datasheet_name)
 

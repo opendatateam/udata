@@ -17,13 +17,17 @@ POLL_INTERVAL = 10  # seconds between status checks
 
 # Error response bodies are stored and re-exposed via the public status API ,
 # so bound how much of an untrusted upstream response we repeat (avoids sensitive tracebacks)
-ERROR_BODY_LIMIT = 500
+ERROR_BODY_LIMIT = 1000
 
 
 def _truncate_body(text: str) -> str:
     if len(text) > ERROR_BODY_LIMIT:
         return text[:ERROR_BODY_LIMIT] + "…"
     return text
+
+
+# Timestamped INFO/DEBUG/WARNING lines of a geopf check log, e.g. `2026-10-08 15:11:37,732INFO||cli||238||...`
+LOG_NOISE_RE = re.compile(r"^\d{4}-\d\d-\d\d .*?(INFO|DEBUG|WARNING)\|\|")
 
 
 # Community rights (per GET /users/me's communities_member[].rights) needed to
@@ -127,21 +131,37 @@ class GeopfClient:
         resp = self.session.post(self._url(f"uploads/{upload_id}/close"))
         self._raise(resp)
 
-    def poll_upload(self, upload_id: str) -> str:
-        """Poll /checks until all checks complete. Returns 'CLOSED' or 'UNSTABLE'."""
+    def poll_upload(self, upload_id: str) -> tuple[str, list[dict]]:
+        """Poll /checks until all checks complete.
+
+        Returns (status, failed check executions), status being 'CLOSED' or 'UNSTABLE'.
+        """
         deadline = time.time() + self.poll_timeout
         while time.time() < deadline:
             resp = self.session.get(self._url(f"uploads/{upload_id}/checks"))
             self._raise(resp)
             data = resp.json()
             if data.get("failed"):
-                return "UNSTABLE"
+                return "UNSTABLE", data["failed"]
             if not data.get("asked") and not data.get("in_progress"):
-                return "CLOSED"
+                return "CLOSED", []
             time.sleep(POLL_INTERVAL)
         raise GeopfTimeoutError(
             f"Upload {upload_id} checks did not complete within {self.poll_timeout}s"
         )
+
+    def failed_check_logs(self, executions: list[dict]) -> str:
+        """Best-effort logs of failed check executions, `""` if unavailable."""
+        try:
+            logs = []
+            for execution in executions:
+                resp = self.session.get(self._url(f"checks/executions/{execution['_id']}/logs"))
+                self._raise(resp)
+                logs.extend(line for line in resp.json() if not LOG_NOISE_RE.match(line))
+        except (GeopfError, ValueError, KeyError, TypeError):
+            return ""
+        # Failure reasons come last in a check log, so list newest first to keep them under truncation
+        return _truncate_body("\n".join(line for line in reversed(logs) if line))
 
     def delete_upload(self, upload_id: str) -> None:
         resp = self.session.delete(self._url(f"uploads/{upload_id}"))
