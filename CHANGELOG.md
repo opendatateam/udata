@@ -1,5 +1,10 @@
 # Changelog
 
+## 17.12.1 (2026-10-09)
+
+- feat(harvest): archive items with remote_id as None ([#4001](https://github.com/opendatateam/udata/pull/4001))
+
+
 ## 17.12.0 (2026-10-07)
 
 - chore(deps): update flask-storage to 2.0.3 so startup no longer depends on S3 ([#3998](https://github.com/opendatateam/udata/pull/3998))
