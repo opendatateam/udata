@@ -501,15 +501,23 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
 
 
 class OrganizationBannerAPITest(PytestOnlyAPITestCase):
+    def upload_banner(self, org, width=1300, height=400, image_format="png"):
+        return self.post(
+            url_for("api.organization_banner", org=org),
+            {
+                "file": (
+                    create_sized_test_image(width, height, image_format),
+                    f"test.{image_format}",
+                )
+            },
+            json=False,
+        )
+
     def test_organization_banner_upload(self):
         """An admin should upload a banner image"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        response = self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400), "test.png")},
-            json=False,
-        )
+        response = self.upload_banner(org)
         assert200(response)
         assert response.json["success"]
 
@@ -522,11 +530,7 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         """It should forbid a non-member from uploading a banner"""
         self.login()
         org = OrganizationFactory()
-        response = self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400), "test.png")},
-            json=False,
-        )
+        response = self.upload_banner(org)
         assert403(response)
 
     def test_organization_banner_upload_rejects_non_image(self):
@@ -543,43 +547,27 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         """The issue allows JPG/JPEG/PNG only, unlike logos which accept WEBP"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        response = self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400, "webp"), "test.webp")},
-            json=False,
-        )
+        response = self.upload_banner(org, image_format="webp")
         assert400(response)
 
     def test_organization_banner_upload_rejects_too_small(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        response = self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(800, 200), "test.png")},
-            json=False,
-        )
+        response = self.upload_banner(org, width=800, height=200)
         assert400(response)
 
     def test_organization_banner_upload_rejects_oversized_file(self, monkeypatch):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         monkeypatch.setattr(org_api, "BANNER_MAX_BYTES", 100)
-        response = self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400), "test.png")},
-            json=False,
-        )
+        response = self.upload_banner(org)
         assert_status(response, 413)
 
     def test_organization_banner_delete(self):
         """Deleting the banner image restores the default (no image)"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400), "test.png")},
-            json=False,
-        )
+        self.upload_banner(org)
         org.reload()
         assert org.banner_image
 
@@ -645,11 +633,7 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         regression as the logo, test_organization_api_update_preserves_logo)."""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
-        self.post(
-            url_for("api.organization_banner", org=org),
-            {"file": (create_sized_test_image(1300, 400), "test.png")},
-            json=False,
-        )
+        self.upload_banner(org)
         org.reload()
         filename = org.banner_image.filename
         original = org.banner_image.original
