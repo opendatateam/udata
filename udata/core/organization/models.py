@@ -296,8 +296,7 @@ class Organization(
             basename=default_image_basename,
             # No thumbnails: they are square center-crops, wrong for a banner.
         ),
-        # Read-only: managed through the dedicated upload endpoint; writable,
-        # patch() would overwrite it with the URL echoed back by clients.
+        # Read-only: managed through the dedicated upload endpoint
         readonly=True,
         description="The organization page banner image URL",
     )
