@@ -295,9 +295,8 @@ class Organization(
         ImageField(
             fs=banners,
             basename=default_image_basename,
-            # max_size caps the served file at 1920px on its longest side and
-            # keeps the original alongside. No `thumbnails`: they are square
-            # center-crops, wrong for a banner.
+            # No thumbnails: they are square center-crops, wrong for a banner.
+            # max_size keeps the original alongside the capped served file.
             max_size=BANNER_MAX_DIMENSION,
         ),
         # Read-only: the banner image is managed through the dedicated upload
