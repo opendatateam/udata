@@ -687,6 +687,12 @@ class OrganizationBannerAPI(API):
     def post(self, org):
         """Upload a new banner image"""
         org.permissions["edit"].test()
+        # Capture the stored files before the upload replaces them, so they can
+        # be removed once the save succeeded (removing them earlier would leave
+        # the org pointing at deleted files if the save failed).
+        previous = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
         parse_uploaded_image(
             org.banner_image,
             formats=BANNER_FORMATS,
@@ -694,6 +700,10 @@ class OrganizationBannerAPI(API):
             max_bytes=BANNER_MAX_BYTES,
         )
         org.save()
+        current = {org.banner_image.filename, org.banner_image.original}
+        for filename in previous - current:
+            if filename in banners:
+                banners.delete(filename)
         return {"image": org.banner_image}
 
     @api.secure

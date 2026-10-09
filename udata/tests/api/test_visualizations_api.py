@@ -3,6 +3,7 @@ from io import BytesIO
 
 from flask import url_for
 
+from udata.core import storages
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
@@ -360,6 +361,32 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
         )
         assert response.status_code == 200
         assert response.json["image"] is not None
+
+    def test_upload_image_replaces_previous_files(self):
+        """Re-uploading an image should delete the files it replaces"""
+        user = self.login()
+        visualization = ChartFactory(owner=user)
+
+        def upload():
+            return self.post(
+                url_for("api.visualization_image", visualization=visualization),
+                {"file": (create_test_image(), "test.png")},
+                json=False,
+            )
+
+        assert upload().status_code == 200
+        visualization.reload()
+        previous = {visualization.image.filename, visualization.image.original}
+
+        assert upload().status_code == 200
+        visualization.reload()
+        current = {visualization.image.filename, visualization.image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.images for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.images for filename in current)
 
     def test_upload_image_permission_denied(self):
         """It should deny upload for non-owner"""

@@ -526,6 +526,24 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         assert org.banner_image.filename in storages.banners
         assert org.banner_image.original in storages.banners
 
+    def test_organization_banner_reupload_removes_previous_files(self):
+        """Re-uploading a banner should delete the files it replaces"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        previous = {org.banner_image.filename, org.banner_image.original}
+
+        self.upload_banner(org)
+        org.reload()
+        current = {org.banner_image.filename, org.banner_image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.banners for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.banners for filename in current)
+
     def test_organization_banner_upload_forbidden_for_non_member(self):
         """It should forbid a non-member from uploading a banner"""
         self.login()
