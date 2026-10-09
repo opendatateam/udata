@@ -70,7 +70,7 @@ class TopicElement(Auditable, Document):
     element = field(
         # If modifying choices list below , also look at core/topic/parsers.py's
         # parse_filters for filtering support
-        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
+        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice", "Post"]),
         nested_fields=api.model_reference,
         allow_null=True,
         checks=[check_title_or_element_required],

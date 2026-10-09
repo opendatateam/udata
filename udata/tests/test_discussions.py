@@ -249,7 +249,7 @@ class DiscussionsTest(APITestCase):
         assert discussion.closed_by_organization == org
 
     def test_close_discussion_on_a_post(self):
-        """A `Post` has no owner in the permission sense, only sysadmins manage it:
+        """An editorial `Post` is only managed by sysadmins, whoever its `owner` is:
         closing stays open to the discussion author, and to nobody else.
         """
         author = UserFactory()
@@ -268,6 +268,22 @@ class DiscussionsTest(APITestCase):
 
         discussion.reload()
         assert discussion.closed is not None
+
+    def test_close_discussion_on_an_external_page(self):
+        """The owner of an external page manages it, so they can close its discussions."""
+        author = UserFactory()
+        post = PostFactory(owner=UserFactory(), kind="external_page", content=None)
+        discussion = DiscussionFactory(
+            subject=post,
+            user=author,
+            discussion=[Message(content="bla bla", posted_by=author)],
+        )
+
+        self.login(UserFactory())
+        self.assert403(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
+
+        self.login(post.owner)
+        self.assert200(self.post(url_for("api.discussion", id=discussion.id), {"close": True}))
 
     def test_write_endpoints_reject_a_non_object_payload(self):
         """A JSON body decoding to anything but an object must be a 400, not a 500."""

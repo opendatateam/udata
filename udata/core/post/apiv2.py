@@ -7,6 +7,7 @@ from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.user.models import User
 
+from .api_fields import post_permissions_fields
 from .models import Post
 from .search import PostSearch
 
@@ -19,6 +20,7 @@ apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("DatasetReference", dataset_fields)
 apiv2.inherit("ReuseReference", Reuse.__ref_fields__)
+apiv2.inherit("PostPermissions", post_permissions_fields)
 apiv2.inherit("Post (read)", Post.__read_fields__)
 post_page_fields = apiv2.model("PostPage", fields.search_pager(Post.__read_fields__))
 
