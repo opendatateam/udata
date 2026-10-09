@@ -564,16 +564,30 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         assert_status(response, 413)
 
     def test_organization_banner_delete(self):
-        """Deleting the banner image restores the default (no image)"""
+        """Deleting the banner image clears the field and removes the stored files"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         self.upload_banner(org)
         org.reload()
         assert org.banner_image
+        filenames = {org.banner_image.filename, org.banner_image.original}
+        assert all(filename in storages.banners for filename in filenames)
 
         response = self.delete(url_for("api.organization_banner", org=org))
         assert_status(response, 204)
 
+        org.reload()
+        assert not org.banner_image
+        assert not any(filename in storages.banners for filename in filenames), (
+            "the files should be removed from storage"
+        )
+
+    def test_organization_banner_delete_without_banner(self):
+        """Deleting when no banner is set is a no-op, not an error"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert_status(response, 204)
         org.reload()
         assert not org.banner_image
 

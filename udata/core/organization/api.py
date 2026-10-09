@@ -22,6 +22,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.reuse.models import Reuse
+from udata.core.storages import banners
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -701,8 +702,17 @@ class OrganizationBannerAPI(API):
     def delete(self, org):
         """Delete the custom banner image, restoring the default banner"""
         org.permissions["edit"].test()
+        # `original` falls back to `filename` when the upload was not resized:
+        # the set dedupes, and the membership check avoids a FileNotFoundError
+        # on the local backend for files already gone.
+        filenames = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
         org.banner_image = None
         org.save()
+        for filename in filenames:
+            if filename in banners:
+                banners.delete(filename)
         return "", 204
 
 
