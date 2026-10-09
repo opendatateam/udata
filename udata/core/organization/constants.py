@@ -45,7 +45,7 @@ BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 BANNER_FORMATS = ("JPEG", "PNG")  # The issue allows JPG/JPEG/PNG only (no WEBP)
 BANNER_MAX_BYTES = 4 * 1024 * 1024  # Upload cap from the issue: 4 Mo
 BANNER_MAX_DIMENSION = 1920  # Served image is capped at this many pixels (longest side)
-BANNER_MIN_SIZE = (1200, 300)  # Displayed ~1200px wide in `cover` mode; smaller would upscale
+BANNER_MIN_SIZE = (1200, 300)  # Full-width `cover` display (#2049): floor against heavy upscaling
 
 PUBLIC_SERVICE = "public-service"
 CERTIFIED = "certified"
