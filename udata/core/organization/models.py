@@ -288,10 +288,7 @@ class Organization(
     )
     banner_color = field(
         StringField(),
-        # Stored as a plain string with no model-level format check, exactly
-        # like LinkInBloc.color (udata/core/edito_blocs/models.py): any hex
-        # string the color picker produces is accepted. A shared hex validator
-        # can be introduced later (see data.gouv.fr#2049 follow-ups).
+        # No format check, like LinkInBloc.color — the color picker output is trusted
         description="Hex color code (e.g. #000091) for the organization page banner",
     )
     banner_image = field(
