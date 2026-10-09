@@ -125,6 +125,9 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(HarvestMetadata):
     uri = StringField()
     dct_identifier = StringField()
+    # The DOI the source declares for the dataset. Unlike `Dataset.doi`, it is not ours: the
+    # source owns its lifecycle and DataCite metadata.
+    doi = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
