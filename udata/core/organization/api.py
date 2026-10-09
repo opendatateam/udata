@@ -22,6 +22,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.reuse.models import Reuse
+from udata.core.storages import banners
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -39,7 +40,11 @@ from .api_fields import (
     request_fields,
 )
 from .assignment import Assignment
-from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
+from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
+    DEFAULT_ROLE,
+    ORG_ROLES,
+)
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
@@ -665,6 +670,46 @@ class AvatarAPI(API):
         org.permissions["edit"].test()
         parse_uploaded_image(org.logo)
         return {"image": org.logo}
+
+
+@ns.route("/<org:org>/banner/", endpoint="organization_banner")
+@api.doc(**common_doc)
+class OrganizationBannerAPI(API):
+    @api.secure
+    @api.doc("organization_banner_upload")
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, org):
+        """Upload a new banner image"""
+        org.permissions["edit"].test()
+        # Capture the stored files to delete the superseded ones
+        previous = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
+        parse_uploaded_image(org.banner_image)
+        org.save()
+        current = {org.banner_image.filename, org.banner_image.original}
+        for filename in previous - current:
+            if filename in banners:
+                banners.delete(filename)
+        return {"image": org.banner_image}
+
+    @api.secure
+    @api.doc("organization_banner_delete")
+    @api.response(204, "Banner image deleted")
+    def delete(self, org):
+        """Delete the custom banner image, restoring the default banner"""
+        org.permissions["edit"].test()
+        # `original` may equal `filename` (unresized upload): dedupe and skip missing files
+        filenames = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
+        org.banner_image = None
+        org.save()
+        for filename in filenames:
+            if filename in banners:
+                banners.delete(filename)
+        return "", 204
 
 
 dataset_parser = DatasetApiParser()

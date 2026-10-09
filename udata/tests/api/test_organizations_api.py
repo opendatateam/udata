@@ -534,6 +534,164 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert Organization.objects[0].deleted is None
 
 
+class OrganizationBannerAPITest(PytestOnlyAPITestCase):
+    def upload_banner(self, org):
+        return self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+
+    def test_organization_banner_upload(self):
+        """An admin should upload a banner image"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.upload_banner(org)
+        assert200(response)
+        assert response.json["success"]
+
+        org.reload()
+        assert org.banner_image
+        assert org.banner_image.filename in storages.banners
+        assert org.banner_image.original in storages.banners
+
+    def test_organization_banner_reupload_removes_previous_files(self):
+        """Re-uploading a banner should delete the files it replaces"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        previous = {org.banner_image.filename, org.banner_image.original}
+
+        self.upload_banner(org)
+        org.reload()
+        current = {org.banner_image.filename, org.banner_image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.banners for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.banners for filename in current)
+
+    def test_organization_banner_upload_forbidden_for_non_member(self):
+        """It should forbid a non-member from uploading a banner"""
+        self.login()
+        org = OrganizationFactory()
+        response = self.upload_banner(org)
+        assert403(response)
+
+    def test_organization_banner_upload_rejects_non_image(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)
+
+    def test_organization_banner_delete(self):
+        """Deleting the banner image clears the field and removes the stored files"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        assert org.banner_image
+        filenames = {org.banner_image.filename, org.banner_image.original}
+        assert all(filename in storages.banners for filename in filenames)
+
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert_status(response, 204)
+
+        org.reload()
+        assert not org.banner_image
+        assert not any(filename in storages.banners for filename in filenames), (
+            "the files should be removed from storage"
+        )
+
+    def test_organization_banner_delete_without_banner(self):
+        """Deleting when no banner is set is a no-op, not an error"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert_status(response, 204)
+        org.reload()
+        assert not org.banner_image
+
+    def test_organization_banner_delete_forbidden_for_non_member(self):
+        self.login()
+        org = OrganizationFactory()
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert403(response)
+
+    def test_organization_api_update_banner_color_and_position(self):
+        """banner_color and banner_image_position are writable via PUT"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        response = self.put(
+            url_for("api.organization", org=org),
+            {"banner_color": "#000091", "banner_image_position": 0},
+        )
+        assert200(response)
+        org.reload()
+        assert org.banner_color == "#000091"
+        assert org.banner_image_position == 0
+
+    def test_organization_api_update_banner_position_out_of_range(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 101})
+        assert400(response)
+
+    def test_organization_api_update_banner_color_null_clears(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")], banner_color="#000091")
+        response = self.put(url_for("api.organization", org=org), {"banner_color": None})
+        assert200(response)
+        org.reload()
+        assert org.banner_color is None
+
+    def test_organization_api_get_exposes_banner_fields(self):
+        org = OrganizationFactory(banner_color="#000091", banner_image_position=25)
+        response = self.get(url_for("api.organization", org=org))
+        assert200(response)
+        assert response.json["banner_color"] == "#000091"
+        assert response.json["banner_image_position"] == 25
+        assert response.json["banner_image"] is None
+
+    def test_organization_api_list_exposes_banner_fields(self):
+        org = OrganizationFactory(banner_color="#000091")
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        listed = next(o for o in response.json["data"] if o["id"] == str(org.id))
+        assert listed["banner_color"] == "#000091"
+        assert listed["banner_image_position"] == 50
+
+    def test_organization_api_update_preserves_banner_image(self):
+        """Updating an org via PUT must not touch its banner image when the
+        client echoes the banner image URL back in the payload (same
+        regression as the logo, test_organization_api_update_preserves_logo)."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        filename = org.banner_image.filename
+        original = org.banner_image.original
+
+        response = self.get(url_for("api.organization", org=org))
+        data = response.json
+        assert data["banner_image"], "The banner image URL should be in the GET payload"
+
+        data["banner_color"] = "#000091"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.banner_image.filename == filename
+        assert org.banner_image.original == original
+
+
 class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
     def test_blocs_hidden_by_default(self):
         """Blocs are an opt-in field — they should not appear in the default response."""

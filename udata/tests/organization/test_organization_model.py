@@ -87,6 +87,29 @@ class OrganizationModelTest(DBTestCase):
         with pytest.raises(ValidationError):
             OrganizationFactory(url="not-an-url")
 
+    def test_banner_defaults(self):
+        org = OrganizationFactory()
+        assert org.banner_color is None
+        assert not org.banner_image
+        assert org.banner_image_position == 50
+
+    def test_banner_color_is_plain_string(self):
+        """Like LinkInBloc.color: stored as-is, no model-level format check."""
+        org = OrganizationFactory(banner_color="#000091")
+        org.save()
+        org.reload()
+        assert org.banner_color == "#000091"
+
+    def test_banner_image_position_bounds(self):
+        org = OrganizationFactory(banner_image_position=0)
+        org.save()
+        org.reload()
+        assert org.banner_image_position == 0
+
+        org.banner_image_position = 101
+        with pytest.raises(ValidationError):
+            org.save()
+
 
 class OrganizationBadgeTest(DBTestCase):
     # Model badges can be extended in plugins, for example in our previous plugin udata-front

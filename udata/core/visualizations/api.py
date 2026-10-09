@@ -6,6 +6,7 @@ from flask_login import current_user
 
 from udata.api import API, api
 from udata.api_fields import patch
+from udata.core.storages import images
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -102,7 +103,17 @@ class VisualizationImageAPI(API):
             api.abort(410, "Visualization has been deleted")
 
         visualization.permissions["edit"].test()
+        # Capture the stored files to delete the superseded ones
+        previous = (
+            {visualization.image.filename, visualization.image.original}
+            if visualization.image
+            else set()
+        )
         parse_uploaded_image(visualization.image)
         visualization.save()
+        current = {visualization.image.filename, visualization.image.original}
+        for filename in previous - current:
+            if filename in images:
+                images.delete(filename)
 
         return visualization

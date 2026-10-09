@@ -312,6 +312,19 @@ class FakeWithRename(Document):
 
 
 @generate_fields()
+class FakeImageWithoutThumbnails(Document):
+    """An ImageField with neither model `thumbnails` nor `thumbnail_info`:
+    it must not yield a duplicate `<key>_thumbnail` API field."""
+
+    image = field(
+        ImageField(fs=images, basename=default_image_basename),
+        readonly=True,
+    )
+
+    meta = {"collection": "fake_image_without_thumbnails"}
+
+
+@generate_fields()
 class FakeWithGenericReference(Document):
     """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
 
@@ -754,6 +767,19 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         assert "picture" in read_fields
         assert "picture_thumbnail" in read_fields
         assert "image_thumbnail" not in read_fields
+
+    def test_image_field_without_thumbnails_has_no_thumbnail_api_field(self) -> None:
+        """No model thumbnails and no thumbnail_info: no `<key>_thumbnail` key,
+        which would only duplicate the main image URL."""
+        read_fields = FakeImageWithoutThumbnails.__read_fields__
+        assert "image" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_image_field_with_thumbnail_info_keeps_thumbnail_api_field(self) -> None:
+        """thumbnail_info alone (no model thumbnails) still yields the key —
+        this is the Fake/FakeWithRename configuration."""
+        read_fields = Fake.__read_fields__
+        assert "image_thumbnail" in read_fields
 
     def test_write_fields_use_the_api_key(self) -> None:
         """A writable renamed field is accepted under its API key. A readonly one is not

@@ -16,6 +16,7 @@ CONFIGURABLE_AUTHORIZED_TYPES = ConfigurableAuthorizedTypes()
 
 resources = fs.Storage("resources", CONFIGURABLE_AUTHORIZED_TYPES)
 avatars = fs.Storage("avatars", fs.IMAGES)
+banners = fs.Storage("banners", fs.IMAGES)
 logos = fs.Storage("logos", fs.IMAGES)
 images = fs.Storage("images", fs.IMAGES)
 chunks = fs.Storage("chunks", AUTHORIZED_TYPES)
@@ -30,4 +31,4 @@ def default_image_basename(*args, **kwargs):
 def init_app(app):
     if "BUCKETS_PREFIX" not in app.config:
         app.config["BUCKETS_PREFIX"] = "/s"
-    fs.init_app(app, resources, avatars, logos, images, chunks, references)
+    fs.init_app(app, resources, avatars, banners, logos, images, chunks, references)

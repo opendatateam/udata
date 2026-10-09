@@ -131,10 +131,11 @@ def qa(ctx):
 
 
 @task
-def serve(ctx, host="localhost", port="7000"):
-    """Run a development server"""
+def serve(ctx, host="localhost", port="7000", reload=True):
+    """Run a development server (pass --no-reload for e2e runs: the werkzeug
+    watchdog watches the repo root recursively, so storage writes restart it)"""
     with ctx.cd(ROOT):
-        ctx.run(f"python manage.py serve -d -r -h {host} -p {port}", pty=True)
+        ctx.run(f"python manage.py serve -d {'-r' if reload else '-nr'} -h {host} -p {port}", pty=True)
 
 
 @task
