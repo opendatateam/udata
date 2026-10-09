@@ -5,17 +5,11 @@ from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.models import Role, User
-from udata.features.notifications.actions import notifier
-from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.features.notifications.constants import NotificationReason, NotificationType
+from udata.features.notifications.events import NotificationEvent, Recipient
+from udata.i18n import lazy_gettext as _
 
-from .models import (
-    VALIDATION_ACCEPTED,
-    VALIDATION_PENDING,
-    VALIDATION_REFUSED,
-    VALIDATION_STATES,
-    HarvestSource,
-)
+from .models import HarvestSource
 from .signals import (
     harvest_source_created,
     harvest_source_deleted,
@@ -25,16 +19,14 @@ from .signals import (
 
 log = logging.getLogger(__name__)
 
-# Superseded by `Notification.type`, kept until the front reads the type instead.
-STATES_BY_TYPE = {
-    NotificationType.HARVEST_SOURCE_PENDING: VALIDATION_PENDING,
-    NotificationType.HARVEST_SOURCE_ACCEPTED: VALIDATION_ACCEPTED,
-    NotificationType.HARVEST_SOURCE_REFUSED: VALIDATION_REFUSED,
-}
-
 
 @generate_fields()
 class ValidateHarvesterNotificationDetails(EmbeddedDocument):
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    status = StringField()
+
     source = field(
         ReferenceField(HarvestSource),
         readonly=True,
@@ -43,23 +35,22 @@ class ValidateHarvesterNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    status = field(
-        StringField(choices=list(VALIDATION_STATES), default=VALIDATION_PENDING),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
 
 
 class HarvestSourceEvent(NotificationEvent):
     def __init__(self, source: HarvestSource):
         self.source = source
 
+    @property
+    def subject(self):
+        return self.source
+
+    def scopes(self):
+        # A source is not something a rule names: its organization is.
+        return [self.source.organization] if self.source.organization else []
+
     def via_app(self, recipient):
-        return ValidateHarvesterNotificationDetails(
-            source=self.source, status=STATES_BY_TYPE[self.type]
-        )
+        return ValidateHarvesterNotificationDetails(source=self.source)
 
 
 class HarvestSourcePending(HarvestSourceEvent):
@@ -71,26 +62,33 @@ class HarvestSourcePending(HarvestSourceEvent):
         admin_role = Role.objects(name="admin").first()
         if admin_role is None:
             return []
-        return list(User.objects(roles=admin_role, active=True))
+        return [Recipient(user) for user in User.objects(roles=admin_role, active=True)]
 
 
 class HarvestSourceReviewed(HarvestSourceEvent):
     """The outcome goes back to whoever declared the source."""
 
+    reaches_subscribers = False
+
     def recipients(self):
         if self.source.organization:
-            return [member.user for member in self.source.organization.by_role("admin")]
+            return [
+                Recipient.from_member(member)
+                for member in self.source.organization.by_role("admin")
+            ]
         if self.source.owner:
-            return [self.source.owner]
+            return [Recipient(self.source.owner, frozenset({NotificationReason.OWNER}))]
         return []
 
 
 class HarvestSourceValidated(HarvestSourceReviewed):
     type = NotificationType.HARVEST_SOURCE_ACCEPTED
+    label = _("Validated harvesters")
 
 
 class HarvestSourceRefused(HarvestSourceReviewed):
     type = NotificationType.HARVEST_SOURCE_REFUSED
+    label = _("Refused harvesters")
 
 
 def _handle_pending_notifications(source: HarvestSource):
@@ -117,33 +115,6 @@ def on_harvest_source_validated(source: HarvestSource, **kwargs):
 def on_harvest_source_refused(source: HarvestSource, **kwargs):
     _handle_pending_notifications(source)
     HarvestSourceRefused(source).dispatch()
-
-
-@notifier("validate_harvester")
-def validate_harvester_notifications(user):
-    """Notify admins about pending harvester validation"""
-    if not user.sysadmin:
-        return []
-
-    notifications = []
-
-    # Only fetch required fields for notification serialization
-    # Greatly improve performances and memory usage
-    qs = HarvestSource.objects(validation__state=VALIDATION_PENDING)
-    qs = qs.only("id", "created_at", "name")
-
-    for source in qs:
-        notifications.append(
-            (
-                source.created_at,
-                {
-                    "id": source.id,
-                    "name": source.name,
-                },
-            )
-        )
-
-    return notifications
 
 
 @harvest_source_deleted.connect

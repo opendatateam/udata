@@ -35,6 +35,39 @@ class NotificationType(StrEnum):
     HARVEST_SOURCE_REFUSED = "harvest.source.refused"
 
 
+# The family of the five badge types: a rule naming it covers them all.
+ORGANIZATION_BADGES = "organization.badge"
+
+
+def event_chain(event: str | None) -> list[str]:
+    """What a rule about this event can name, from the narrowest to the broadest: the
+    type itself, then each of its dotted prefixes. `discussion.comment` yields
+    `["discussion.comment", "discussion"]`; a rule naming no event covers them all.
+
+    Grouping by prefix rather than by class keeps what a rule means apart from how the
+    events share their code: refactoring a base class must not change who hears what.
+    """
+    if not event:
+        return []
+    parts = event.split(".")
+    return [".".join(parts[:length]) for length in range(len(parts), 0, -1)]
+
+
+def types_under(event: str | None) -> list[NotificationType]:
+    """The types a rule naming `event` covers: the type itself, or every type it is a
+    prefix of, all of them without an event."""
+    return [
+        type
+        for type in NotificationType
+        if event is None or type == event or type.startswith(f"{event}.")
+    ]
+
+
+def is_event_name(event: str) -> bool:
+    """Whether a rule can name `event`: a notification type, or a prefix of some."""
+    return bool(types_under(event))
+
+
 # Notifications that are resolved by acting on their subject (accepting a request,
 # validating a source) rather than by reading them. Exposed as `requires_action` so the
 # front doesn't offer to mark them as read; the API accepts it on any notification.
@@ -46,3 +79,58 @@ TYPES_REQUIRING_ACTION = frozenset(
         NotificationType.HARVEST_SOURCE_PENDING,
     }
 )
+
+
+class MailCadence(StrEnum):
+    """How often somebody agrees to be written to.
+
+    A property of the person, not of the subject: letting one organization be weekly
+    and another daily would turn every digest into a join over cadences before a single
+    mail could be composed, for a need nobody expressed. What is scoped is *whether*
+    something concerns you; this is only the rhythm it reaches you at.
+    """
+
+    IMMEDIATE = "immediate"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+
+
+class NotificationReason(StrEnum):
+    """Why this recipient is concerned by this event.
+
+    Carries the organization role rather than a bare "member" for two reasons: the
+    default a recipient falls back on depends on it, and the mail footer says
+    "because you administer X" instead of something the reader has to guess.
+    """
+
+    OWNER = "owner"
+    ORGANIZATION_ADMIN = "organization.admin"
+    ORGANIZATION_EDITOR = "organization.editor"
+    ORGANIZATION_PARTIAL_EDITOR = "organization.partial_editor"
+    DISCUSSION_PARTICIPANT = "discussion.participant"
+    # Asked for it on this very subject, without being concerned otherwise. The only
+    # way somebody outside an organization can follow a thread or a dataset.
+    EXPLICIT_SUBSCRIBER = "explicit_subscriber"
+    # Edited this very subject: followed without asking, for having worked on it.
+    CONTRIBUTOR = "contributor"
+    # Took part in the discussions of this very subject, as a member of its organization:
+    # followed without asking, for having answered about it.
+    DISCUSSANT = "discussant"
+    # Made the request this notification answers (a membership, a harvest source).
+    REQUESTER = "requester"
+
+
+class FollowOrigin(StrEnum):
+    """What made a user follow a subject, which decides the reason the follow gives."""
+
+    FOLLOWED = "followed"
+    EDITED = "edited"
+    DISCUSSED = "discussed"
+
+
+# `Organization.members` holds bare role strings, so the mapping is spelled out here.
+REASON_BY_ORGANIZATION_ROLE: dict[str, NotificationReason] = {
+    "admin": NotificationReason.ORGANIZATION_ADMIN,
+    "editor": NotificationReason.ORGANIZATION_EDITOR,
+    "partial_editor": NotificationReason.ORGANIZATION_PARTIAL_EDITOR,
+}

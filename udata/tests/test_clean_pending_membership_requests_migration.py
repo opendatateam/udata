@@ -25,7 +25,7 @@ def notify(recipient, organization, user, kind):
             else NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
         ),
         details=MembershipRequestNotificationDetails(
-            request_organization=organization, request_user=user, kind=kind
+            request_organization=organization, request_user=user
         ),
     )
     notification.save()
@@ -123,7 +123,7 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         notification = Notification.objects.get(user=user)
         assert notification.details.request_organization == organization
         assert notification.details.request_user == user
-        assert notification.details.kind == "invitation"
+        assert notification.type == NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
         assert notification.handled_at is None
         assert notification.created_at == organization.requests[0].created
 
@@ -148,7 +148,12 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         assert organization.requests[0].role == "partial_editor"
         request_notification.reload()
         assert request_notification.handled_at is not None
-        assert Notification.objects(user=user, details__kind="invitation").count() == 1
+        assert (
+            Notification.objects(
+                user=user, type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
+            ).count()
+            == 1
+        )
 
     def test_invitation_kept_over_an_earlier_request_of_the_same_user(self):
         admin = UserFactory()

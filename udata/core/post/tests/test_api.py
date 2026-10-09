@@ -11,6 +11,8 @@ from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
+from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
@@ -24,6 +26,7 @@ from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.settings import NotificationSetting
 from udata.tests.api import APITestCase
 from udata.tests.helpers import (
     assert200,
@@ -436,6 +439,24 @@ class PostsAPITest(APITestCase):
         response = self.delete(url_for("api.post", post=post))
         assert204(response)
         assert Post.objects.count() == 0
+
+    def test_deleting_a_post_deletes_its_discussions_and_the_rules_on_them(self):
+        """Left behind, a thread about nothing breaks the list of rules of whoever
+        followed it."""
+        post = PostFactory()
+        discussion = DiscussionFactory(subject=post)
+        follower = UserFactory()
+        NotificationSetting.objects.create(
+            user=follower, scope=discussion, event="discussion", enabled=True
+        )
+        self.login(AdminFactory())
+
+        assert204(self.delete(url_for("api.post", post=post)))
+
+        assert Discussion.objects.count() == 0
+        assert NotificationSetting.objects.count() == 0
+        self.login(follower)
+        assert200(self.get(url_for("api.notification_settings")))
 
     def test_post_api_publish(self):
         """It should update a post from the API"""

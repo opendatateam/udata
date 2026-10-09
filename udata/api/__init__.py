@@ -3,6 +3,7 @@ from functools import wraps
 
 import mongoengine
 from babel import Locale, UnknownLocaleError
+from bson import ObjectId
 from flask import (
     Blueprint,
     current_app,
@@ -21,6 +22,7 @@ from flask_storage import UnauthorizedFileType
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
+from udata.mongo import db
 
 from . import fields
 
@@ -150,6 +152,38 @@ class UDataApi(Api):
         if not isinstance(data, dict):
             self.abort(400, errors={"request": "expecting a JSON object"})
         return data
+
+    def resolve_reference(self, reference, field_name: str, allowed_classes):
+        """Resolve a `{"class": …, "id": …}` reference into a document, errors reported on
+        `field_name`.
+
+        Both parts come straight from the request, and both are checked before anything
+        reaches MongoDB. `class` is matched against `allowed_classes` rather than resolved
+        against the whole document registry, because a generic reference only validates its
+        choices on save — long after the lookup below has run. And `id` has to be an object
+        id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
+        arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
+        a `StringField` one.
+        """
+        if not isinstance(reference, dict):
+            self.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
+
+        class_name = reference.get("class")
+        if class_name not in allowed_classes:
+            expected = ", ".join(allowed_classes)
+            self.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+
+        object_id = reference.get("id")
+        if not ObjectId.is_valid(object_id):
+            self.abort(400, errors={field_name: "`id` must be an identifier"})
+
+        model = db.resolve_model(class_name)
+        try:
+            return model.objects.get(id=object_id)
+        except model.DoesNotExist:
+            self.abort(
+                400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
+            )
 
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""

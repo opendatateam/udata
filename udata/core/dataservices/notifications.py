@@ -5,11 +5,11 @@ from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
-from udata.core.owned import get_responsible_users
+from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -27,39 +27,51 @@ class DataserviceCreatedNotificationDetails(EmbeddedDocument):
     dataset = field(
         ReferenceField(Dataset),
         readonly=True,
-        nested_fields=dataset_fields,
+        nested_fields=dataset_ref_fields,
         auditable=False,
         allow_null=True,
         filterable={},
     )
 
 
-class DataserviceCreated(NotificationEvent):
-    """One event per exposed dataset: each set of dataset owners hears about their own."""
+class DataserviceCreated(DatasetReusedEvent):
+    """A dataservice became visible: one event per exposed dataset, so that each set of
+    dataset owners hears about their own."""
 
     type = NotificationType.DATASERVICE_CREATED
+    label = _("New APIs")
 
     def __init__(self, dataservice: Dataservice, dataset: Dataset):
         self.dataservice = dataservice
         self.dataset = dataset
 
-    @property
-    def occurred_at(self):
-        return self.dataservice.created_at
-
-    def recipients(self):
-        return [user for user in get_responsible_users(self.dataset) if user]
-
     def via_app(self, recipient):
+        if self.already_notified(recipient, dataservice=self.dataservice, dataset=self.dataset):
+            return None
         return DataserviceCreatedNotificationDetails(
             dataservice=self.dataservice, dataset=self.dataset
         )
 
 
+def announce_dataservice(dataservice: Dataservice) -> None:
+    for dataset in dataservice.datasets:
+        # `Dataservice.datasets` holds lazy references, which compare unequal to the
+        # datasets a setting is scoped to: the event needs the document itself.
+        DataserviceCreated(dataservice, dataset.fetch()).dispatch()
+
+
+# A private dataservice is announced when it is published, not when it is created:
+# until then, its existence is its owner's business only.
 @Dataservice.on_create.connect
 def on_dataservice_created(dataservice, **kwargs):
-    for dataset in dataservice.datasets:
-        DataserviceCreated(dataservice, dataset).dispatch()
+    if not dataservice.private:
+        announce_dataservice(dataservice)
+
+
+@Dataservice.on_update.connect
+def on_dataservice_published(dataservice, changed_fields, previous, **kwargs):
+    if became_public(dataservice, changed_fields, previous):
+        announce_dataservice(dataservice)
 
 
 @Dataservice.on_delete.connect

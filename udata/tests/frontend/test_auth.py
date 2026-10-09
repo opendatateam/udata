@@ -75,7 +75,7 @@ class AuthTest(APITestCase):
             user=admin,
             type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
             details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user, kind="request"
+                request_organization=organization, request_user=user
             ),
         )
         request_notification.save()
