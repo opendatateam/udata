@@ -1036,7 +1036,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ),
     )
     def test_get_item_existing(self, match_field, match_value):
-        source = HarvestSourceFactory()
+        source = HarvestSourceFactory(url="https://data.example.com/catalog")
         last_update = datetime(2026, 1, 1)
         dataset = DatasetFactory(
             harvest={
@@ -1059,7 +1059,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert item.id is None  # newly instantiated dataservice
 
         # different source/domain => new item
-        backend2 = MockBackend(HarvestSourceFactory())
+        backend2 = MockBackend(HarvestSourceFactory(url="https://other.example.com/catalog"))
         item = backend2.get_item(dataset.harvest.remote_id, Dataset)
         assert item.id is None  # newly instantiated dataset
 
