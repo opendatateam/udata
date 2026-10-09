@@ -687,9 +687,7 @@ class OrganizationBannerAPI(API):
     def post(self, org):
         """Upload a new banner image"""
         org.permissions["edit"].test()
-        # Capture the stored files before the upload replaces them, so they can
-        # be removed once the save succeeded (removing them earlier would leave
-        # the org pointing at deleted files if the save failed).
+        # Capture the stored files to delete the superseded ones
         previous = (
             {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
         )

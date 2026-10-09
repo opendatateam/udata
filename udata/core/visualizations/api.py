@@ -103,9 +103,7 @@ class VisualizationImageAPI(API):
             api.abort(410, "Visualization has been deleted")
 
         visualization.permissions["edit"].test()
-        # Capture the stored files before the upload replaces them, so they can
-        # be removed once the save succeeded (removing them earlier would leave
-        # the visualization pointing at deleted files if the save failed).
+        # Capture the stored files to delete the superseded ones
         previous = (
             {visualization.image.filename, visualization.image.original}
             if visualization.image
