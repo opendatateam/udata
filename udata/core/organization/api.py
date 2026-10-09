@@ -42,7 +42,6 @@ from .api_fields import (
 from .assignment import Assignment
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
-    BANNER_FORMATS,
     BANNER_MAX_BYTES,
     BANNER_MIN_SIZE,
     DEFAULT_ROLE,
@@ -691,7 +690,6 @@ class OrganizationBannerAPI(API):
         )
         parse_uploaded_image(
             org.banner_image,
-            formats=BANNER_FORMATS,
             min_size=BANNER_MIN_SIZE,
             max_bytes=BANNER_MAX_BYTES,
         )

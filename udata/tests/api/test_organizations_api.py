@@ -598,7 +598,7 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         assert400(response)
 
     def test_organization_banner_upload_rejects_webp(self):
-        """The issue allows JPG/JPEG/PNG only, unlike logos which accept WEBP"""
+        """WEBP is rejected by the storage extension list, like logos"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         response = self.upload_banner(org, image_format="webp")
