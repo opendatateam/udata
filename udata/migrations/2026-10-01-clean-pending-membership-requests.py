@@ -17,11 +17,17 @@ entries are dropped rather than marked as accepted or refused: they were superse
 import logging
 from datetime import UTC, datetime
 
-from udata.core.organization.models import MembershipRequest
-from udata.core.organization.notifications import _create_membership_notification
+from udata.core.organization.models import Organization
+from udata.core.organization.notifications import MembershipInvitationMatched
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
+
+NOTIFICATION_TYPES = {
+    "request": NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
+    "invitation": NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
+}
 
 
 def migrate(db):
@@ -113,24 +119,24 @@ def migrate(db):
                 }
             },
         )
-        # Notifications are keyed by user and kind: keep the one of the entry left pending.
-        # Request notifications created before invitations existed have no `kind`.
+        # Notifications are keyed by user and type: keep the one of the entry left pending.
         for user_id, kind in deleted_notified:
             if kept_kinds.get(user_id) == kind:
                 continue
             Notification.objects(
+                type=NOTIFICATION_TYPES[kind],
                 details__request_organization=org["_id"],
                 details__request_user=user_id,
-                details__kind__in=[kind, None] if kind == "request" else [kind],
                 handled_at=None,
-            ).update(set__handled_at=now)
+            ).mark_handled(at=now)
         # Unlinked invitations had no user to notify: notify them now, as on registration.
-        for req in linked_invitations:
-            _create_membership_notification(
-                MembershipRequest(user=req["user"], kind="invitation", created=req["created"]),
-                org["_id"],
-                req["user"],
-            )
+        if linked_invitations:
+            organization = Organization.objects.get(id=org["_id"])
+            linked_user_ids = {req["user"] for req in linked_invitations}
+            # Each linked user is left with this single pending entry.
+            for request in organization.pending_requests:
+                if request.user is not None and request.user.id in linked_user_ids:
+                    MembershipInvitationMatched(organization, request).dispatch()
 
     log.info(f"Linked {linked_count} email invitations to their account")
     log.info(f"Deleted {deleted_count} redundant pending requests and invitations")

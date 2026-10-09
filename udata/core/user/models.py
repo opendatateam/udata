@@ -457,6 +457,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         ApiToken.objects(user=self, revoked_at=None).update(
             set__revoked_at=datetime.now(timezone.utc)
         )
+        from udata.geopf.auth import revoke_token
+        from udata.geopf.models import GeopfToken
+
+        geopf_token = GeopfToken.objects(user=self).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self
@@ -568,7 +575,8 @@ def match_email_invitations(sender, **kwargs):
     invitation carries the role and assignments an admin chose.
     """
     from udata.core.organization.models import Organization
-    from udata.core.organization.notifications import _create_membership_notification
+    from udata.core.organization.notifications import MembershipInvitationMatched
+    from udata.features.notifications.constants import NotificationType
     from udata.features.notifications.models import Notification
 
     user = sender
@@ -587,19 +595,18 @@ def match_email_invitations(sender, **kwargs):
             continue
         if pending is not None:
             org.requests = [r for r in org.requests if r.id != pending.id]
-            # Request notifications created before invitations existed have no `kind`.
             Notification.objects(
+                type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
                 details__request_organization=org,
                 details__request_user=user,
-                details__kind__in=["request", None],
                 handled_at=None,
-            ).update(set__handled_at=datetime.now(UTC))
+            ).mark_handled()
         for req in matched_requests:
             req.user = user
             req.email = None
         org.save()
         for req in matched_requests:
-            _create_membership_notification(req, org, user)
+            MembershipInvitationMatched(org, req).dispatch()
 
 
 User.on_create.connect(match_email_invitations)

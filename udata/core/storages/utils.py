@@ -1,10 +1,10 @@
 import hashlib
-import mimetypes
 import os
 import zlib
 from datetime import UTC, datetime
 
 from flask import current_app
+from flask_storage import files
 from slugify import Slugify
 
 CHUNK_SIZE = 2**16
@@ -45,11 +45,6 @@ def crc32(file):
     """Perform a CRC digest on a file"""
     value = zlib.crc32(file.read())
     return "%08X" % (value & 0xFFFFFFFF)
-
-
-def mime(url):
-    """Get the mimetype from an url or a filename"""
-    return mimetypes.guess_type(url)[0]
 
 
 def extension(filename):
@@ -145,7 +140,8 @@ def stored_file_infos(storage, fs_filename, stream: MeasuredStream) -> dict:
         "filename": os.path.basename(fs_filename),
         "size": stream.size,
         CHECKSUM_TYPE: stream.checksum,
-        "mime": mime(fs_filename) or DEFAULT_MIME,
+        # The same guess as the one the backend stored the file with
+        "mime": files.mime(fs_filename, DEFAULT_MIME),
         "format": extension(fs_filename),
         "last_modified_internal": datetime.now(UTC),
     }

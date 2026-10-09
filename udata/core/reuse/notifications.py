@@ -8,6 +8,8 @@ from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
 from udata.core.owned import get_responsible_users
 from udata.core.reuse.models import Reuse
+from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import NotificationEvent
 
 log = logging.getLogger(__name__)
 
@@ -32,25 +34,30 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
     )
 
 
+class ReuseCreated(NotificationEvent):
+    """One event per reused dataset: each set of dataset owners hears about their own."""
+
+    type = NotificationType.REUSE_CREATED
+
+    def __init__(self, reuse: Reuse, dataset: Dataset):
+        self.reuse = reuse
+        self.dataset = dataset
+
+    @property
+    def occurred_at(self):
+        return self.reuse.created_at
+
+    def recipients(self):
+        return [user for user in get_responsible_users(self.dataset) if user]
+
+    def via_app(self, recipient):
+        return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)
+
+
 @Reuse.on_create.connect
 def on_reuse_created(reuse, **kwargs):
-    """Create notifications when a reuse is created"""
-    from udata.features.notifications.models import Notification
-
-    if not reuse.datasets:
-        return
     for dataset in reuse.datasets:
-        for owner in get_responsible_users(dataset):
-            if owner:
-                notification = Notification(
-                    user=owner,
-                    details=ReuseCreatedNotificationDetails(
-                        reuse=reuse,
-                        dataset=dataset,
-                    ),
-                )
-                notification.created_at = reuse.created_at
-                notification.save()
+        ReuseCreated(reuse, dataset).dispatch()
 
 
 @Reuse.on_delete.connect

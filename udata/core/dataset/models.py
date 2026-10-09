@@ -42,6 +42,7 @@ from udata.core.contact_point.models import (
 )
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
+from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -50,6 +51,7 @@ from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
+from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
@@ -120,34 +122,18 @@ def get_json_ld_extra(key, value):
 
 
 @generate_fields()
-class HarvestDatasetMetadata(EmbeddedDocument):
-    backend = StringField()
-    domain = StringField()
-
-    source_id = StringField()
-
-    remote_id = StringField()
-    remote_url = URLField()
-
+class HarvestDatasetMetadata(HarvestMetadata):
     uri = StringField()
-
-    created_at = DateTimeField()
-    issued_at = DateTimeField()
-    modified_at = DateTimeField()
-    last_update = DateTimeField()
-    archived_at = DateTimeField()
-    archived = StringField()
-
     dct_identifier = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
 
 class HarvestResourceMetadata(EmbeddedDocument):
+    uri = StringField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
     last_update = DateTimeField()
-    uri = StringField()
     dct_identifier = StringField()
 
     # How a backend recognizes an already harvested resource across runs, for the backends
@@ -445,6 +431,7 @@ class ResourceMixin(object):
         reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
+    geopf = EmbeddedDocumentField(GeopfResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
 
     created_at_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
@@ -664,7 +651,12 @@ class Dataset(
         ),
         auditable=False,
     )
-    harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
+    harvest = field(
+        EmbeddedDocumentField(HarvestDatasetMetadata),
+        readonly=True,
+        auditable=False,
+    )
+    geopf = field(EmbeddedDocumentField(GeopfDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)
 
@@ -756,6 +748,14 @@ class Dataset(
     verbose_name = _("dataset")
 
     missing_resources = False
+
+    @property
+    def archived_at(self):
+        return self.archived
+
+    @archived_at.setter
+    def archived_at(self, value: datetime | None):
+        self.archived = value  # type: ignore[assignment]
 
     def fields_to_check_for_spam(self):
         return {"title": self.title, "description": self.description}
@@ -1304,6 +1304,10 @@ class Dataset(
             Follow.objects(following=self), date_label="since"
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def set_harvested(self):
+        if not self.harvest:
+            self.harvest = HarvestDatasetMetadata()
 
 
 pre_init.connect(Dataset.pre_init, sender=Dataset)

@@ -74,7 +74,7 @@ class DecoupleResourceIdMigrationTest(PytestOnlyDBTestCase):
         assert resources_of(harvested)[0].harvest is None
 
     def test_dkan_resources_keep_their_id_as_remote_id(self):
-        """`DkanBackend` inherits `inner_process_dataset`, so it adopted remote ids too."""
+        """`DkanBackend` inherits `CkanBackend`, so it adopted remote ids too."""
         resource_id = str(uuid4())
         source = HarvestSourceFactory(backend="dkan")
         harvested = dataset([resource(resource_id)], backend=None, source_id=str(source.id))

@@ -7,6 +7,7 @@ from flask_security.utils import hash_data
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
@@ -72,6 +73,7 @@ class AuthTest(APITestCase):
         )
         request_notification = Notification(
             user=admin,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=user, kind="request"
             ),

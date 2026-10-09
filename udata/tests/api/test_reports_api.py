@@ -30,6 +30,14 @@ class ReportsReasonsAPITest(APITestCase):
 
 
 class ReportsAPITest(APITestCase):
+    def test_reports_api_create_with_non_object_body(self):
+        for body in ([1, 2, 3], 1, "report"):
+            response = self.post(url_for("api.reports"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(Report.objects.count(), 0)
+
     def test_reports_api_create(self):
         user = UserFactory()
 
@@ -311,6 +319,18 @@ class ReportsAPITest(APITestCase):
         report.reload()
         self.assertIsNotNone(report.dismissed_at)
         self.assertEqual(report.dismissed_by.id, admin.id)
+
+    def test_reports_api_dismiss_with_non_object_body(self):
+        report = Report(subject=DatasetFactory(), reason=REASON_SPAM).save()
+        self.login(AdminFactory())
+
+        for body in ([1, 2, 3], 1, "dismissed_at"):
+            response = self.patch(url_for("api.report", report=report), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        report.reload()
+        self.assertIsNone(report.dismissed_at)
 
     def test_reports_api_undismiss(self):
         user = UserFactory()
