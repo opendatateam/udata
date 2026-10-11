@@ -175,6 +175,18 @@ class Paginator(Paginable):
         self.total = total
 
 
+def _parse_date_precision(value: str) -> tuple[date, bool, bool]:
+    """Parse a date string and tell whether it gives a month and a day.
+
+    The string is parsed against two different default dates: a month or a day that
+    does not change between both results was given explicitly, whatever the separators.
+    """
+    year = date.today().year
+    first = parse_dt(value, default=datetime(year, 1, 1))
+    second = parse_dt(value, default=datetime(year, 3, 3))
+    return first.date(), first.month == second.month, first.day == second.day
+
+
 def daterange_start(value):
     """Parse a date range start boundary"""
     if not value:
@@ -184,12 +196,11 @@ def daterange_start(value):
     elif isinstance(value, date):
         return value
 
-    result = parse_dt(value).date()
-    dashes = value.count("-")
+    result, has_month, has_day = _parse_date_precision(value)
 
-    if dashes >= 2:
+    if has_day:
         return result
-    elif dashes == 1:
+    elif has_month:
         # Year/Month only
         return result.replace(day=1)
     else:
@@ -206,13 +217,12 @@ def daterange_end(value: date | datetime | str | None) -> date | None:
     elif isinstance(value, date):
         return value
 
-    result = parse_dt(value).date()
-    dashes = value.count("-")
+    result, has_month, has_day = _parse_date_precision(value)
 
-    if dashes >= 2:
+    if has_day:
         # Full date
         return result
-    elif dashes == 1:
+    elif has_month:
         # Year/Month
         return result + relativedelta(months=+1, days=-1, day=1)
     else:
