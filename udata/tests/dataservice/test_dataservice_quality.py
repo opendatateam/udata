@@ -1,6 +1,7 @@
 from udata.core.access_type.constants import AccessType
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import LicenseFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
@@ -209,3 +210,34 @@ class DataserviceQualityCacheTest(PytestOnlyAPITestCase):
         ds.save()
         ds.reload()
         assert ds.quality_cached["license"] is True
+
+    def test_quality_cache_is_refreshed_when_contact_point_is_deleted(self):
+        contact_point = ContactPointFactory()
+        ds = DataserviceFactory(
+            contact_points=[contact_point],
+            organization=contact_point.organization,
+            owner=contact_point.owner,
+        )
+        assert ds.quality_cached["has_contact_point"] is True
+
+        contact_point.delete()
+        ds.reload()
+
+        assert ds.quality_cached["has_contact_point"] is False
+        assert ds.quality["has_contact_point"] is False
+
+    def test_contact_point_deletion_does_not_create_partial_cache(self):
+        contact_point = ContactPointFactory()
+        ds = DataserviceFactory(
+            contact_points=[contact_point],
+            organization=contact_point.organization,
+            owner=contact_point.owner,
+        )
+        Dataservice.objects(id=ds.id).update(set__quality_cached={})
+
+        contact_point.delete()
+        ds.reload()
+
+        assert not ds.quality_cached
+        assert ds.quality["has_contact_point"] is False
+        assert ds.quality["has_description"] is not None

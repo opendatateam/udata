@@ -16,7 +16,7 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
-from mongoengine.signals import post_save
+from mongoengine.signals import post_save, pre_delete
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -491,5 +491,18 @@ class Dataservice(
         return score / total
 
 
+def refresh_quality_on_contact_point_delete(sender, document, **kwargs):
+    """Keep `quality_cached["has_contact_point"]` right when a contact point is deleted.
+
+    `reverse_delete_rule=PULL` is applied with a queryset update, which bypasses `clean()`.
+    """
+    # An empty cache is left alone: `quality` computes it on read, and a nested `$set` would
+    # turn it into a partial cache holding only this key.
+    for dataservice in Dataservice.objects(contact_points=document, quality_cached__ne={}):
+        has_contact_point = any(cp.id != document.id for cp in dataservice.contact_points)
+        dataservice.update(set__quality_cached__has_contact_point=has_contact_point)
+
+
+pre_delete.connect(refresh_quality_on_contact_point_delete, sender=ContactPoint)
 post_save.connect(Dataservice.post_save, sender=Dataservice)
 post_save.connect(SpamMixin.post_save, sender=Dataservice)
