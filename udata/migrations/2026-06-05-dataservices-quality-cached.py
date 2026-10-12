@@ -19,7 +19,7 @@ def migrate(db):
     ) as dataservices:
         for dataservice in dataservices:
             try:
-                dataservice.quality_cached = dataservice.compute_quality()
+                # `save()` runs `clean()`, which recomputes `quality_cached`
                 dataservice.save(signal_kwargs={"ignores": ["post_save"]})
             except Exception as err:
                 log.error(f"Cannot backfill quality_cached for dataservice {dataservice.id} {err}")
