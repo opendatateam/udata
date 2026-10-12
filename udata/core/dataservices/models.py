@@ -459,35 +459,27 @@ class Dataservice(
         return result
 
     def compute_quality_score(self, quality):
-        if quality.get("has_machine_documentation"):
-            weights = {
-                "has_machine_documentation": 3,
-                "has_description": 2,
-                "rate_limiting_documented": 2,
-                "has_base_api_url": 1,
-                "has_technical_documentation": 1,
-                "access_conditions_clear": 1,
-                "license": 1,
-                "availability_documented": 1,
-                "has_contact_point": 1,
-                "has_business_documentation": 1,
-            }
-        else:
-            # has_machine_documentation absent: when swagger is missing it contributes nothing,
-            # so base_api_url and technical_documentation take higher weight as fallbacks
-            weights = {
-                "has_description": 2,
-                "rate_limiting_documented": 2,
-                "has_base_api_url": 2,
-                "has_technical_documentation": 2,
-                "access_conditions_clear": 1,
-                "license": 1,
-                "availability_documented": 1,
-                "has_contact_point": 1,
-                "has_business_documentation": 1,
-            }
+        weights = {
+            "has_machine_documentation": 3,
+            "has_description": 2,
+            "rate_limiting_documented": 2,
+            "has_base_api_url": 1,
+            "has_technical_documentation": 1,
+            "access_conditions_clear": 1,
+            "license": 1,
+            "availability_documented": 1,
+            "has_contact_point": 1,
+            "has_business_documentation": 1,
+        }
+        # The total always includes the machine documentation weight, so a dataservice
+        # without one can never reach 100%.
         total = sum(weights.values())
-        score = sum(weights[k] for k, v in quality.items() if v is True and k in weights)
+        if not quality.get("has_machine_documentation"):
+            # Without it, the base API URL and technical documentation are the fallbacks
+            # and weigh more.
+            weights["has_base_api_url"] += 1
+            weights["has_technical_documentation"] += 1
+        score = sum(weight for key, weight in weights.items() if quality.get(key))
         return score / total
 
 

@@ -159,7 +159,7 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
 
         assert ds.compute_quality_score(only_swagger) > ds.compute_quality_score(only_description)
 
-    def test_fully_configured_without_swagger_scores_one(self):
+    def test_fully_configured_without_swagger_stays_below_one(self):
         ds = DataserviceFactory.build()
         no_swagger_all_others_true = {
             "has_machine_documentation": False,
@@ -173,7 +173,7 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             "has_contact_point": True,
             "has_business_documentation": True,
         }
-        assert ds.compute_quality_score(no_swagger_all_others_true) == 1.0
+        assert ds.compute_quality_score(no_swagger_all_others_true) == 13 / 14
 
 
 class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
