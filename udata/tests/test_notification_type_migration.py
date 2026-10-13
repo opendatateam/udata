@@ -1,9 +1,17 @@
+import pytest
 from mongoengine.connection import get_db
 
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import (
+    MembershipRequestNotificationDetails,
+    NewBadgeNotificationDetails,
+)
 from udata.core.user.factories import UserFactory
 from udata.db.migrations import load_migration
 from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.models import Notification
+from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.tests.api import PytestOnlyDBTestCase
 
 
@@ -79,3 +87,44 @@ class SetNotificationTypeMigrationTest(PytestOnlyDBTestCase):
         self.run_migration()
 
         assert self.stored(notification) == first
+
+
+class PreviousReleaseNotificationTest(PytestOnlyDBTestCase):
+    """While this release is deployed, workers still on the previous one keep writing
+    `details.status` and `details.kind`: the notifications they write must load."""
+
+    @pytest.mark.parametrize(
+        "notification_type,details,field_name,value",
+        [
+            (NotificationType.DISCUSSION_CLOSED, DiscussionNotificationDetails, "status", "closed"),
+            (
+                NotificationType.HARVEST_SOURCE_PENDING,
+                ValidateHarvesterNotificationDetails,
+                "status",
+                "pending",
+            ),
+            (
+                NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
+                MembershipRequestNotificationDetails,
+                "kind",
+                "invitation",
+            ),
+            (
+                NotificationType.ORGANIZATION_BADGE_CERTIFIED,
+                NewBadgeNotificationDetails,
+                "kind",
+                "certified",
+            ),
+        ],
+    )
+    def test_a_notification_written_by_the_previous_release_loads(
+        self, notification_type, details, field_name, value
+    ):
+        notification = Notification(
+            user=UserFactory(), type=notification_type, details=details()
+        ).save()
+        get_db().notification.update_one(
+            {"_id": notification.id}, {"$set": {f"details.{field_name}": value}}
+        )
+
+        assert Notification.objects.get(id=notification.id).type == notification_type

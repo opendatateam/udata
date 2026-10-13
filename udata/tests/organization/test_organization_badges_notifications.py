@@ -74,6 +74,4 @@ class NotifyBadgeTest(PytestOnlyAPITestCase):
         assert notification.details.organization.id == organization.id
         assert notification.details.organization.name == organization.name
         assert notification.type == BADGE_NOTIFICATION_TYPES[badge_type]
-        # Transitional: still written for the front, which reads it instead of `type`
-        assert notification.details.kind == badge_type
         assert notification.user == user
