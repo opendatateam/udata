@@ -800,14 +800,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         }
 
         try:
+            before = datetime.now(UTC)
             job = backend.harvest()
+            after = datetime.now(UTC)
 
             assert job.status == job_status
 
-            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
-            assert job.started == approx_date
-            assert job.ended == approx_date
-            assert job.started < job.ended
+            assert before <= job.started < job.ended <= after
 
             assert len(job.items) == nb_datasets + nb_dataservices + len(record_errors)
 
@@ -922,7 +921,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         try:
             remote_id = getattr(record, "remote_id", None)
+            before = datetime.now(UTC)
             backend.process_item(remote_id, backend.item_processor, record)
+            after = datetime.now(UTC)
 
             assert len(backend.job.items) == 1
             harvest_item = backend.job.items[0]
@@ -931,10 +932,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert harvest_item.remote_id == remote_id
             assert harvest_item.status == item_status
 
-            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
-            assert harvest_item.started == approx_date
-            assert harvest_item.ended == approx_date
-            assert harvest_item.started < harvest_item.ended
+            assert before <= harvest_item.started < harvest_item.ended <= after
 
             assert len(harvest_item.errors) == (1 if record_error else 0)
             if record_error:
@@ -1068,7 +1066,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend = MockBackend(source)
 
         metadata = HarvestMetadata()
+        before = datetime.now(UTC)
         m = backend.update_harvest_metadata(metadata, "test")
+        after = datetime.now(UTC)
 
         assert m is metadata
         assert m.backend == backend.display_name
@@ -1079,7 +1079,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert m.remote_url is None  # not set by update_harvest_metadata()
         assert m.created_at is None  # not set by update_harvest_metadata()
         assert m.modified_at is None  # not set by update_harvest_metadata()
-        assert m.last_update == pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
+        assert before <= m.last_update <= after
         assert m.archived_at is None  # set but None
         assert m.archived_reason is None  # set but None
 
