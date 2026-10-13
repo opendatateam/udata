@@ -93,12 +93,18 @@ class OrganizationModelTest(DBTestCase):
         assert not org.banner_image
         assert org.banner_image_position == 50
 
-    def test_banner_color_is_plain_string(self):
-        """Like LinkInBloc.color: stored as-is, no model-level format check."""
+    def test_banner_color_accepts_six_digit_hex(self):
         org = OrganizationFactory(banner_color="#000091")
         org.save()
         org.reload()
         assert org.banner_color == "#000091"
+
+    def test_banner_color_rejects_other_formats(self):
+        org = OrganizationFactory(banner_color="#000091")
+        for invalid in ("white", "#fff", "#00009100", "000091"):
+            org.banner_color = invalid
+            with pytest.raises(ValidationError):
+                org.save()
 
     def test_banner_image_position_bounds(self):
         org = OrganizationFactory(banner_image_position=0)

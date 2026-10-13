@@ -33,7 +33,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
-from udata.core.storages import avatars, banners, default_image_basename
+from udata.core.storages import avatars, default_image_basename, images
 from udata.core.user.models import User, user_with_email_ref_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -286,13 +286,12 @@ class Organization(
         },
     )
     banner_color = field(
-        StringField(),
-        # No format check, like LinkInBloc.color — the color picker output is trusted
+        StringField(regex=r"^#[0-9a-fA-F]{6}$"),
         description="Hex color code (e.g. #000091) for the organization page banner",
     )
     banner_image = field(
         ImageField(
-            fs=banners,
+            fs=images,
             basename=default_image_basename,
             # No thumbnails: they are square center-crops, wrong for a banner.
         ),

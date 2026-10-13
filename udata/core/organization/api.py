@@ -22,8 +22,9 @@ from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.reuse.models import Reuse
-from udata.core.storages import banners
+from udata.core.storages import images
 from udata.core.storages.api import (
+    get_file_size,
     image_parser,
     parse_uploaded_image,
     uploaded_image_fields,
@@ -42,6 +43,7 @@ from .api_fields import (
 from .assignment import Assignment
 from .constants import (
     ASSIGNABLE_OBJECT_TYPES,
+    BANNER_MAX_SIZE,
     DEFAULT_ROLE,
     ORG_ROLES,
 )
@@ -682,33 +684,37 @@ class OrganizationBannerAPI(API):
     def post(self, org):
         """Upload a new banner image"""
         org.permissions["edit"].test()
+        if get_file_size(image_parser.parse_args()["file"]) > BANNER_MAX_SIZE:
+            api.abort(413, "Image exceeds the maximum allowed size")
         # Capture the stored files to delete the superseded ones
         previous = (
             {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
         )
         parse_uploaded_image(org.banner_image)
+        org.banner_image_position = 50
         org.save()
         current = {org.banner_image.filename, org.banner_image.original}
         for filename in previous - current:
-            if filename in banners:
-                banners.delete(filename)
+            if filename in images:
+                images.delete(filename)
         return {"image": org.banner_image}
 
     @api.secure
     @api.doc("organization_banner_delete")
     @api.response(204, "Banner image deleted")
     def delete(self, org):
-        """Delete the custom banner image, restoring the default banner"""
+        """Delete the custom banner image"""
         org.permissions["edit"].test()
         # `original` may equal `filename` (unresized upload): dedupe and skip missing files
         filenames = (
             {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
         )
         org.banner_image = None
+        org.banner_image_position = 50
         org.save()
         for filename in filenames:
-            if filename in banners:
-                banners.delete(filename)
+            if filename in images:
+                images.delete(filename)
         return "", 204
 
 

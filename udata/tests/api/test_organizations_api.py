@@ -546,14 +546,19 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         """An admin should upload a banner image"""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 0})
+        assert200(response)
+
         response = self.upload_banner(org)
         assert200(response)
         assert response.json["success"]
 
         org.reload()
         assert org.banner_image
-        assert org.banner_image.filename in storages.banners
-        assert org.banner_image.original in storages.banners
+        assert org.banner_image.filename in storages.images
+        assert org.banner_image.original in storages.images
+        # The vertical crop belonged to the previous image
+        assert org.banner_image_position == 50
 
     def test_organization_banner_reupload_removes_previous_files(self):
         """Re-uploading a banner should delete the files it replaces"""
@@ -568,15 +573,22 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         current = {org.banner_image.filename, org.banner_image.original}
 
         assert not previous & current, "the re-upload should store new files"
-        assert not any(filename in storages.banners for filename in previous), (
+        assert not any(filename in storages.images for filename in previous), (
             "the replaced files should be removed from storage"
         )
-        assert all(filename in storages.banners for filename in current)
+        assert all(filename in storages.images for filename in current)
 
     def test_organization_banner_upload_forbidden_for_non_member(self):
         """It should forbid a non-member from uploading a banner"""
         self.login()
         org = OrganizationFactory()
+        response = self.upload_banner(org)
+        assert403(response)
+
+    def test_organization_banner_upload_forbidden_for_editor(self):
+        """An editor should not upload a banner: only admins can"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
         response = self.upload_banner(org)
         assert403(response)
 
@@ -590,6 +602,18 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         )
         assert400(response)
 
+    def test_organization_banner_upload_rejects_oversize(self):
+        """A banner above BANNER_MAX_SIZE should be refused before it is stored"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        oversized = BytesIO(b"\x00" * (org_constants.BANNER_MAX_SIZE + 1))
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (oversized, "big.png")},
+            json=False,
+        )
+        assert_status(response, 413)
+
     def test_organization_banner_delete(self):
         """Deleting the banner image clears the field and removes the stored files"""
         user = self.login()
@@ -598,14 +622,18 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         org.reload()
         assert org.banner_image
         filenames = {org.banner_image.filename, org.banner_image.original}
-        assert all(filename in storages.banners for filename in filenames)
+        assert all(filename in storages.images for filename in filenames)
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 0})
+        assert200(response)
 
         response = self.delete(url_for("api.organization_banner", org=org))
         assert_status(response, 204)
 
         org.reload()
         assert not org.banner_image
-        assert not any(filename in storages.banners for filename in filenames), (
+        # The vertical crop belonged to the deleted image
+        assert org.banner_image_position == 50
+        assert not any(filename in storages.images for filename in filenames), (
             "the files should be removed from storage"
         )
 
@@ -621,6 +649,12 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
     def test_organization_banner_delete_forbidden_for_non_member(self):
         self.login()
         org = OrganizationFactory()
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert403(response)
+
+    def test_organization_banner_delete_forbidden_for_editor(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
         response = self.delete(url_for("api.organization_banner", org=org))
         assert403(response)
 
@@ -649,6 +683,15 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")], banner_color="#000091")
         response = self.put(url_for("api.organization", org=org), {"banner_color": None})
         assert200(response)
+        org.reload()
+        assert org.banner_color is None
+
+    def test_organization_api_update_banner_color_invalid_format(self):
+        """Any API client can write this field: the format is validated"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_color": "white"})
+        assert400(response)
         org.reload()
         assert org.banner_color is None
 
