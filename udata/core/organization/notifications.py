@@ -12,9 +12,17 @@ from udata.core.organization.constants import (
 )
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
-from udata.features.notifications.actions import notifier
-from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.features.notifications.constants import (
+    ORGANIZATION_BADGES,
+    NotificationReason,
+    NotificationType,
+)
+from udata.features.notifications.events import (
+    NotificationEvent,
+    Recipient,
+    responsible_recipients,
+)
+from udata.i18n import lazy_gettext as _
 
 BADGE_NOTIFICATION_TYPES = {
     CERTIFIED: NotificationType.ORGANIZATION_BADGE_CERTIFIED,
@@ -35,6 +43,11 @@ BADGE_MAILS = {
 
 @generate_fields()
 class MembershipRequestNotificationDetails(EmbeddedDocument):
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    kind = StringField()
+
     request_organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -50,29 +63,17 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    kind = field(
-        StringField(default="request"),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
 
 
 @generate_fields()
 class NewBadgeNotificationDetails(EmbeddedDocument):
+    # See `MembershipRequestNotificationDetails.kind`.
+    kind = StringField()
+
     organization = field(
         ReferenceField(Organization),
         readonly=True,
         nested_fields=Organization.__ref_fields__,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    kind = field(
-        StringField(),
-        readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -110,16 +111,24 @@ class BadgeAdded(NotificationEvent):
     the email they send, both looked up from the badge kind.
     """
 
+    types = frozenset(BADGE_NOTIFICATION_TYPES.values())
+    label = _("Badges of the organization")
+    labelled_event = ORGANIZATION_BADGES
+
     def __init__(self, organization: Organization, kind: str):
         self.organization = organization
         self.kind = kind
         self.type = BADGE_NOTIFICATION_TYPES[kind]
 
+    @property
+    def subject(self):
+        return self.organization
+
     def recipients(self):
-        return [member.user for member in self.organization.members]
+        return responsible_recipients(self.organization)
 
     def via_app(self, recipient):
-        return NewBadgeNotificationDetails(organization=self.organization, kind=self.kind)
+        return NewBadgeNotificationDetails(organization=self.organization)
 
     def via_mail(self, recipient):
         return BADGE_MAILS[self.kind](self.organization)
@@ -139,7 +148,7 @@ class MembershipRequested(NotificationEvent):
         return self.request.created
 
     def recipients(self):
-        return [member.user for member in self.organization.by_role("admin")]
+        return [Recipient.from_member(member) for member in self.organization.by_role("admin")]
 
     def via_app(self, recipient):
         if self.already_pending(
@@ -151,7 +160,6 @@ class MembershipRequested(NotificationEvent):
         return MembershipRequestNotificationDetails(
             request_organization=self.organization,
             request_user=self.request.user,
-            kind=self.request.kind,
         )
 
     def via_mail(self, recipient):
@@ -166,7 +174,8 @@ class MembershipInvited(MembershipRequested):
     def recipients(self):
         # An invitation may target an address that has no account yet: it then has a
         # mail channel and no in-app one, since there is no user to notify.
-        return [self.request.user or self.request.email]
+        # No reason to carry: being the person invited is what the type already says.
+        return [Recipient(self.request.user or self.request.email)]
 
     def via_mail(self, recipient):
         return mails.membership_invitation(
@@ -189,16 +198,23 @@ class MembershipInvitationMatched(MembershipInvited):
 class MembershipAnswered(NotificationEvent):
     """The applicant hears back about their own request."""
 
+    reaches_subscribers = False
+
     def __init__(self, organization: Organization, request: MembershipRequest):
         self.organization = organization
         self.request = request
 
+    @property
+    def subject(self):
+        return self.organization
+
     def recipients(self):
-        return [self.request.user]
+        return [Recipient(self.request.user, frozenset({NotificationReason.REQUESTER}))]
 
 
 class MembershipAccepted(MembershipAnswered):
     type = NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED
+    label = _("Accepted memberships")
 
     def via_app(self, recipient):
         return MembershipAcceptedNotificationDetails(organization=self.organization)
@@ -209,6 +225,7 @@ class MembershipAccepted(MembershipAnswered):
 
 class MembershipRefused(MembershipAnswered):
     type = NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED
+    label = _("Refused memberships")
 
     def via_app(self, recipient):
         return MembershipRefusedNotificationDetails(organization=self.organization)
@@ -230,34 +247,3 @@ def on_handle_membership_request(request: MembershipRequest, **kwargs):
         details__request_organization=organization,
         details__request_user=request.user,
     ).mark_handled(at=request.handled_on)
-
-
-@notifier("membership_request")
-def membership_request_notifications(user):
-    """Notify user about pending membership requests"""
-    orgs = [o for o in user.organizations if o.is_admin(user)]
-    notifications = []
-
-    for org in orgs:
-        # Skip invitations: they are pending_requests too but the admin creates
-        # them and has nothing to handle. Email invitations also have user=None
-        # which would crash the field access below.
-        for request in org.pending_requests:
-            if request.kind != "request":
-                continue
-            notifications.append(
-                (
-                    request.created,
-                    {
-                        "id": request.id,
-                        "organization": org.id,
-                        "user": {
-                            "id": request.user.id,
-                            "fullname": request.user.fullname,
-                            "avatar": str(request.user.avatar),
-                        },
-                    },
-                )
-            )
-
-    return notifications

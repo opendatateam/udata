@@ -14,6 +14,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
+from udata.core.reuse.models import Reuse
 from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
@@ -97,7 +98,7 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         description="The post datasets",
     )
     reuses = field(
-        ListField(ReferenceField("Reuse", reverse_delete_rule=PULL)),
+        ListField(ReferenceField(Reuse, reverse_delete_rule=PULL)),
         description="The post reuses",
     )
 

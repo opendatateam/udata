@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from bson import DBRef, ObjectId
@@ -13,7 +13,7 @@ from udata.core.discussions.constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJ
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
-from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -38,8 +38,9 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.db.migrations import load_migration
-from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.constants import MailCadence, NotificationType
 from udata.features.notifications.models import Notification
+from udata.features.notifications.tasks import send_notification_digests
 from udata.models import Dataset, License, Member
 from udata.mongo import db
 from udata.tests.helpers import capture_mails
@@ -1949,8 +1950,6 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].type, NotificationType.DISCUSSION_NEW)
-        # Transitional: still written for the front, which reads it instead of `type`
-        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_DISCUSSION)
 
     def test_new_discussion_comment_mail(self):
         owner = UserFactory()
@@ -1982,8 +1981,6 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user=owner)
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].type, NotificationType.DISCUSSION_COMMENT)
-        # Transitional: still written for the front, which reads it instead of `type`
-        self.assertEqual(notifications[0].details.status, DiscussionStatus.NEW_COMMENT)
         self.assertEqual(notifications[0].details.message_id, new_message.id)
 
     def test_new_discussion_comment_handle_previous_notifications(self):
@@ -2040,8 +2037,6 @@ class NotifyDiscussionsTest(APITestCase):
         notifications = Notification.objects(user__in=[poster, commenter])
         assert len(notifications) == len(expected_recipients)
         assert notifications[0].type == NotificationType.DISCUSSION_CLOSED
-        # Transitional: still written for the front, which reads it instead of `type`
-        assert notifications[0].details.status == DiscussionStatus.CLOSED
 
     def test_new_discussion_closed_handle_previous_notifications(self):
         owner = UserFactory()
@@ -2153,6 +2148,54 @@ class DiscussionExternalNotificationTest(APITestCase):
         # The subject type label comes from the Topic's verbose_name.
         assert "collection" in mail.subject
         assert f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in mail.body
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_a_digest_links_to_the_external_page_too(self):
+        """Mailed in a digest rather than at once, the thread still leads to the platform
+        it is displayed on, at the subject level the digest groups by."""
+        owner = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        user = UserFactory()
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[Message(content=faker.sentence(), posted_by=user)],
+            extras={"notification": {"external_url": "https://eco.example.com/bouquets/foo/"}},
+        )
+        notify_new_discussion(discussion.id)
+        Notification.objects(user=owner).update(
+            set__created_at=datetime.now(UTC) - timedelta(days=8)
+        )
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mails
+        assert 'href="https://eco.example.com/bouquets/foo/"' in mail.html
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_a_digest_escapes_the_external_url(self):
+        """The URL is written by whoever opens the discussion: it cannot add markup."""
+        owner = UserFactory(mail_cadence=MailCadence.WEEKLY)
+        user = UserFactory()
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[Message(content=faker.sentence(), posted_by=user)],
+            extras={"notification": {"external_url": 'https://eco.example.com/x"><b>injected</b>'}},
+        )
+        notify_new_discussion(discussion.id)
+        Notification.objects(user=owner).update(
+            set__created_at=datetime.now(UTC) - timedelta(days=8)
+        )
+
+        with capture_mails() as mails:
+            send_notification_digests()
+
+        [mail] = mails
+        assert "<b>injected</b>" not in mail.html
+        assert 'href="https://eco.example.com/x&quot;&gt;&lt;b&gt;injected&lt;/b&gt;"' in mail.html
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_notify_topic_without_external_url_links_to_canonical_page(self):
