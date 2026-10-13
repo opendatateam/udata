@@ -11,12 +11,18 @@ left out, as it follows nothing at harvest time.
 Membership is read as it is now, not as it was then: someone who left the organization
 long ago does not start hearing about it again. Who is left out otherwise is the same
 as at edit time (see `follow_worked_on`).
+
+There are tens of millions of activities for about a hundred thousand pairs of a user and
+a subject: the pairs are grouped by MongoDB, and everything needed to decide about them
+is read once rather than per pair.
 """
 
 import logging
+from collections import defaultdict
 
-from bson import DBRef
+from bson import DBRef, ObjectId
 from flask import current_app
+from pymongo.errors import BulkWriteError
 
 from udata.core.activity.models import Activity
 from udata.core.dataservices.activities import UserCreatedDataservice, UserUpdatedDataservice
@@ -30,11 +36,12 @@ from udata.core.dataset.activities import (
 )
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion
+from udata.core.organization.models import Organization
 from udata.core.reuse.activities import UserCreatedReuse, UserUpdatedReuse
 from udata.core.reuse.models import Reuse
-from udata.core.user.models import User
+from udata.core.user.models import Role, User
 from udata.features.notifications.constants import FollowOrigin
-from udata.features.notifications.follow import follow_worked_on
+from udata.features.notifications.settings import NotificationSetting
 from udata.mongo import db as mongo
 
 log = logging.getLogger(__name__)
@@ -51,6 +58,8 @@ EDITS = {
     UserUpdatedDataservice: Dataservice,
 }
 
+DUPLICATE_KEY = 11000
+
 
 def ref_id(value):
     return value.id if isinstance(value, DBRef) else value
@@ -58,53 +67,124 @@ def ref_id(value):
 
 def migrate(db):
     model_by_cls = {activity._class_name: model for activity, model in EDITS.items()}
-    # Harvesting is attributed to this account, and harvesting follows nothing.
-    harvester = current_app.config["HARVEST_ACTIVITY_USER_ID"]
 
-    # (user, model, subject) -> origin. Having edited a subject says more than having
+    # (user id, model, subject id) -> origin. Having edited a subject says more than having
     # talked about it, so an edit wins.
     worked_on = {}
 
     log.info("Collecting who edited what from the activities...")
-    for activity in (
-        Activity.objects(_cls__in=list(model_by_cls))
-        .only("actor", "related_to")
-        .as_pymongo()
-        .batch_size(1000)
+    edits = {"_cls": {"$in": list(model_by_cls)}, "actor._cls": "User"}
+    # Harvesting is attributed to this account, and harvesting follows nothing.
+    if harvester := current_app.config["HARVEST_ACTIVITY_USER_ID"]:
+        edits["actor._ref"] = {"$ne": DBRef("user", ObjectId(harvester))}
+    for row in Activity._get_collection().aggregate(
+        [
+            {"$match": edits},
+            {
+                "$group": {
+                    "_id": {"user": "$actor._ref", "subject": "$related_to"},
+                    "cls": {"$first": "$_cls"},
+                }
+            },
+        ],
+        allowDiskUse=True,
     ):
-        actor = activity.get("actor")
-        if not isinstance(actor, dict) or actor.get("_cls") != "User":
-            continue
-        if harvester and str(ref_id(actor["_ref"])) == harvester:
-            continue
         key = (
-            ref_id(actor["_ref"]),
-            model_by_cls[activity["_cls"]],
-            ref_id(activity["related_to"]),
+            ref_id(row["_id"]["user"]),
+            model_by_cls[row["cls"]],
+            ref_id(row["_id"]["subject"]),
         )
         worked_on[key] = FollowOrigin.EDITED
 
     log.info("Collecting who took part in which discussions...")
-    for discussion in (
-        Discussion.objects.only("subject", "discussion.posted_by").as_pymongo().batch_size(1000)
+    for row in Discussion._get_collection().aggregate(
+        [
+            {"$unwind": "$discussion"},
+            {"$match": {"discussion.posted_by": {"$ne": None}}},
+            {
+                "$group": {
+                    "_id": {
+                        "user": "$discussion.posted_by",
+                        "cls": "$subject._cls",
+                        "subject": "$subject._ref",
+                    }
+                }
+            },
+        ],
+        allowDiskUse=True,
     ):
-        model = mongo.resolve_model(discussion["subject"]["_cls"])
-        for message in discussion.get("discussion", []):
-            if message.get("posted_by"):
-                key = (message["posted_by"], model, ref_id(discussion["subject"]["_ref"]))
-                worked_on.setdefault(key, FollowOrigin.DISCUSSED)
+        key = (
+            row["_id"]["user"],
+            mongo.resolve_model(row["_id"]["cls"]),
+            ref_id(row["_id"]["subject"]),
+        )
+        worked_on.setdefault(key, FollowOrigin.DISCUSSED)
     log.info(f"{len(worked_on)} distinct subjects worked on found")
 
-    before = db.notification_setting.count_documents({})
-    for (user_id, model, subject_id), origin in worked_on.items():
-        user = User.objects(id=user_id).first()
-        subject = model.objects(id=subject_id).first()
-        # Datasets and reuses say `deleted`, dataservices `deleted_at`.
-        subject_deleted = subject is not None and (
-            getattr(subject, "deleted", None) or getattr(subject, "deleted_at", None)
+    # Sysadmins edit and answer on behalf of the platform, not of the organizations they
+    # happen to belong to.
+    admin = Role.objects(name="admin").first()
+    eligible_users = {
+        user["_id"]
+        for user in User._get_collection().find(
+            {"_id": {"$in": list({user_id for user_id, _, _ in worked_on})}},
+            {"deleted": 1, "roles": 1},
         )
-        if user is None or user.deleted or subject is None or subject_deleted:
-            continue
-        follow_worked_on(user, subject, origin)
+        if not user.get("deleted") and (admin is None or admin.id not in user.get("roles", []))
+    }
 
-    log.info(f"Created {db.notification_setting.count_documents({}) - before} follows")
+    # Only the live subjects of an organization can be followed this way. Datasets and
+    # reuses say `deleted`, dataservices `deleted_at`.
+    subject_ids = defaultdict(set)
+    for _, model, subject_id in worked_on:
+        subject_ids[model].add(subject_id)
+    organization_of = {}
+    for model, ids in subject_ids.items():
+        for subject in model._get_collection().find(
+            {"_id": {"$in": list(ids)}, "organization": {"$ne": None}},
+            {"organization": 1, "deleted": 1, "deleted_at": 1},
+        ):
+            if not (subject.get("deleted") or subject.get("deleted_at")):
+                organization_of[(model, subject["_id"])] = subject["organization"]
+
+    members = {
+        organization["_id"]: {member["user"] for member in organization.get("members", [])}
+        for organization in Organization._get_collection().find(
+            {"_id": {"$in": list(set(organization_of.values()))}}, {"members.user": 1}
+        )
+    }
+
+    # A decision already taken about the subject is left as is, so that having worked on
+    # something one chose to ignore does not bring it back.
+    decided = {
+        (setting["user"], setting["scope"]["_ref"].id)
+        for setting in NotificationSetting._get_collection().find(
+            {"user": {"$in": list(eligible_users)}, "scope": {"$ne": None}},
+            {"user": 1, "scope": 1},
+        )
+    }
+
+    follows = [
+        NotificationSetting(
+            user=user_id, scope=model(pk=subject_id), enabled=True, origin=origin
+        ).to_mongo()
+        for (user_id, model, subject_id), origin in worked_on.items()
+        if user_id in eligible_users
+        and (model, subject_id) in organization_of
+        and user_id in members.get(organization_of[(model, subject_id)], ())
+        and (user_id, subject_id) not in decided
+    ]
+
+    created = len(follows)
+    if follows:
+        try:
+            NotificationSetting._get_collection().insert_many(follows, ordered=False)
+        except BulkWriteError as error:
+            # The application keeps running meanwhile: a member editing one of these
+            # subjects creates the same follow, which is then already there.
+            errors = error.details["writeErrors"]
+            if any(write_error["code"] != DUPLICATE_KEY for write_error in errors):
+                raise
+            created -= len(errors)
+
+    log.info(f"Created {created} follows")
