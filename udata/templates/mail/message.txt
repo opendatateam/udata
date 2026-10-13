@@ -14,3 +14,7 @@
 
 {{ _('Have a great day') }},
 {{ _('The %(site)s team', site=config.SITE_TITLE) }}
+{% if message.footer %}
+
+{% for item in message.footer %}{% if item.__class__.__name__ == 'MailCTA' %}{{ item.label }}: {{ item.link }}{% else %}{{ item }}{% endif %}
+{% endfor %}{% endif %}
