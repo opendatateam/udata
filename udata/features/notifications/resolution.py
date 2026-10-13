@@ -64,6 +64,10 @@ def can_concern(type: NotificationType, subject: Document) -> bool:
     """Whether a notification of this type can be about `subject`, that is have it among
     its scopes at dispatch: a badge is about an organization, never about one of its
     datasets. A type not listed here is about no subject a rule can name."""
+    # A thread was new once, when it was dispatched: whoever asks about it later can only
+    # hear about its comments and its closing.
+    if type == NotificationType.DISCUSSION_NEW:
+        return not isinstance(subject, Discussion)
     if type.startswith("discussion."):
         return True
     if type in (NotificationType.REUSE_CREATED, NotificationType.DATASERVICE_CREATED):

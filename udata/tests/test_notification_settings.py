@@ -1693,6 +1693,20 @@ class NotificationResolvedAPITest(APITestCase):
         assert answer["heard"] is False
         assert answer["reasons"] == []
 
+    def test_following_the_new_discussions_does_not_bring_an_existing_thread(self):
+        """A thread is never new again: following the new discussions of its dataset
+        brings none of its comments."""
+        user = self.login()
+        dataset = DatasetFactory()
+        discussion = DiscussionFactory(subject=dataset)
+        follow(user, dataset, NotificationType.DISCUSSION_NEW)
+
+        [answer] = self.resolved([discussion], DISCUSSIONS).json
+
+        assert answer["heard"] is False
+        assert answer["heard_types"] == []
+        assert answer["reasons"] == []
+
     def test_the_answers_to_membership_requests_concern_no_administrator(self):
         """They reach the requester alone: an administrator hears none of them."""
         admin = self.login()
@@ -1742,10 +1756,10 @@ class NotificationResolvedAPITest(APITestCase):
         threads = [DiscussionFactory(subject=dataset) for _ in range(3)]
         ignore(owner, threads[1])
 
-        answers = self.resolved(threads, NotificationType.DISCUSSION_NEW).json
+        answers = self.resolved(threads, DISCUSSIONS).json
 
         assert [(answer["scope"]["id"], answer["event"]) for answer in answers] == [
-            (str(thread.id), NotificationType.DISCUSSION_NEW) for thread in threads
+            (str(thread.id), DISCUSSIONS) for thread in threads
         ]
         assert [answer["heard"] for answer in answers] == [True, False, True]
 
