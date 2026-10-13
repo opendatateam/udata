@@ -1,5 +1,11 @@
 # Changelog
 
+## 17.13.0 (2026-10-13)
+
+- feat: add notification settings and mail digests ([#3956](https://github.com/opendatateam/udata/pull/3956))
+- fix(notifications): make the follow migration run on production volumes ([#4009](https://github.com/opendatateam/udata/pull/4009))
+
+
 ## 17.12.1 (2026-10-09)
 
 - feat(harvest): archive items with remote_id as None ([#4001](https://github.com/opendatateam/udata/pull/4001))
