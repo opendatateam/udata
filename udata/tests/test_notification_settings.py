@@ -2549,3 +2549,43 @@ class FollowWorkedOnSubjectsMigrationTest(PytestOnlyDBTestCase):
         self.migrate(get_db())
 
         assert self.follows() == []
+
+    def test_subjects_without_an_organization_are_not_followed(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        UserUpdatedDataset.objects.create(actor=owner, related_to=dataset)
+
+        self.migrate(get_db())
+
+        assert self.follows() == []
+
+    def test_a_decision_already_taken_is_left_as_is(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+        dataset = DatasetFactory(organization=organization)
+        UserUpdatedDataset.objects.create(
+            actor=editor, related_to=dataset, organization=organization
+        )
+        NotificationSetting.objects.create(
+            user=editor, scope=dataset, event="discussion", enabled=False
+        )
+
+        self.migrate(get_db())
+
+        [setting] = NotificationSetting.objects
+        assert (setting.event, setting.enabled) == ("discussion", False)
+
+    def test_running_it_again_follows_nothing_more(self):
+        editor = UserFactory()
+        organization = OrganizationFactory(editors=[editor])
+        dataset = DatasetFactory(organization=organization)
+        UserUpdatedDataset.objects.create(
+            actor=editor, related_to=dataset, organization=organization
+        )
+
+        self.migrate(get_db())
+        self.migrate(get_db())
+
+        assert self.follows() == [(editor, dataset, FollowOrigin.EDITED)]
+        # Stored as the application stores it, so that it finds it back
+        assert NotificationSetting.objects(user=editor, scope=dataset).count() == 1
