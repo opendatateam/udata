@@ -38,7 +38,7 @@ def update(ctx):
     header(msg)
     info("Updating Python dependencies")
     with ctx.cd(ROOT):
-        ctx.run('pip install -e ".[dev]"')
+        ctx.run("pip install --group dev -e .")
     info("Note: Dependencies are now managed in pyproject.toml")
 
 
@@ -149,19 +149,9 @@ def beat(ctx, loglevel="info"):
     ctx.run("celery -A udata.worker beat -l %s" % loglevel)
 
 
-@task(clean, i18nc, default=True)
+@task(clean, default=True)
 def dist(ctx):
     """Package for distribution"""
-    perform_dist(ctx)
-
-
-@task(i18nc)
-def pydist(ctx):
-    """Perform python packaging (without compiling assets)"""
-    perform_dist(ctx)
-
-
-def perform_dist(ctx):
     header("Building a distribuable package")
     ctx.run("uv build --wheel")
     success("Distribution is available in dist directory")

@@ -14,7 +14,7 @@ from mongoengine.signals import post_delete, post_save
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.api_fields import spatial_coverage_fields
@@ -42,7 +42,20 @@ def check_title_or_element_required(value, obj, data, **_kwargs):
         )
 
 
-check_title_or_element_required.run_even_if_missing = True
+check_title_or_element_required.always_run = True
+
+
+class TopicQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(private__ne=True)
+
+    def hidden(self):
+        return self(private=True)
+
+    def for_element(self, element):
+        """Filter topics containing the given element (Dataset, Dataservice...)."""
+        topic_ids = TopicElement.objects(element=element).no_dereference().distinct("topic")
+        return self(id__in=topic_ids)
 
 
 @generate_fields()
@@ -55,6 +68,8 @@ class TopicElement(Auditable, Document):
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
     element = field(
+        # If modifying choices list below , also look at core/topic/parsers.py's
+        # parse_filters for filtering support
         GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
         nested_fields=api.model_reference,
         allow_null=True,
@@ -67,7 +82,12 @@ class TopicElement(Auditable, Document):
         "indexes": [
             {
                 "fields": ["$title", "$description"],
-            }
+            },
+            # Used to reverse-lookup the topics an element belongs to.
+            "element",
+            # Used by Topic.elements and the per-topic element count (incl. the
+            # API's HATEOAS "elements" link), so it stays indexed even on huge topics.
+            "topic",
         ],
         "auto_create_index_on_save": True,
     }
@@ -85,7 +105,7 @@ class TopicElement(Auditable, Document):
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
         if document.topic:
-            reindex.delay(*as_task_param(document.topic))
+            document.topic.save()
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
@@ -94,7 +114,7 @@ class TopicElement(Auditable, Document):
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
             if document.topic:
-                reindex.delay(*as_task_param(document.topic))
+                document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
@@ -102,7 +122,7 @@ class TopicElement(Auditable, Document):
 
 
 @generate_fields()
-class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
+class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
     verbose_name = _("collection")
 
     name = field(StringField(required=True), show_as_ref=True)
@@ -118,7 +138,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
     tags = field(ListField(StringField()))
     color = field(IntField())
 
-    featured = field(BooleanField(default=False), auditable=False)
+    featured = field(BooleanField(default=False), readonly=True, auditable=False)
     private = field(BooleanField())
     extras = field(ExtrasField(), auditable=False)
 
@@ -139,7 +159,7 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
         + Owned.meta["indexes"],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
-        "queryset_class": OwnedQuerySet,
+        "queryset_class": TopicQuerySet,
     }
 
     after_save = Signal()
@@ -187,9 +207,13 @@ class Topic(Datetimed, Auditable, Linkable, Document[OwnedQuerySet], Owned):
             **self._self_api_url_kwargs(**kwargs),
         )
 
-    @field(description="The topic API URI")
+    @field(description="Link to the API endpoint for this topic", show_as_ref=True)
     def uri(self):
         return self.self_api_url()
+
+    @field(description="Link to the udata web page for this topic", show_as_ref=True)
+    def page(self):
+        return self.self_web_url()
 
 
 post_save.connect(Topic.post_save, sender=Topic)

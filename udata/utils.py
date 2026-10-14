@@ -4,10 +4,11 @@ import logging
 import math
 import re
 from collections import Counter
+from collections.abc import Hashable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
 from math import ceil
-from typing import Any, Hashable, overload
+from typing import Any, TypeVar, overload
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -513,3 +514,11 @@ def raise_if_redirect(response):
             f"Redirect ({response.status_code}) not allowed: {response.url} -> {response.headers.get('Location')}",
             response=response,
         )
+
+
+T = TypeVar("T", bound=Hashable)
+
+
+def uniquify(collection: Iterable[T]) -> list[T]:
+    """Return a list of unique values from the input collection, preserving order"""
+    return list(dict.fromkeys(collection))

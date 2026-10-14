@@ -5,7 +5,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.organization.models import Organization
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 
 from .constants import (
     CHECKSUM_TYPES,
@@ -42,6 +42,13 @@ dataset_harvest_fields = api.model(
     "HarvestDatasetMetadata",
     {
         "backend": fields.String(description="Harvest backend used", allow_null=True),
+        "domain": fields.String(description="The harvested domain", allow_null=True),
+        "source_id": fields.String(description="The harvester id", allow_null=True),
+        "source_url": fields.String(description="The harvester source url", allow_null=True),
+        "remote_id": fields.String(
+            description="The dataset remote id on the source portal", allow_null=True
+        ),
+        "remote_url": fields.String(description="The dataset remote url", allow_null=True),
         "created_at": fields.ISODateTime(
             description="The dataset harvested creation date", allow_null=True, readonly=True
         ),
@@ -51,22 +58,16 @@ dataset_harvest_fields = api.model(
         "modified_at": fields.ISODateTime(
             description="The dataset harvest last modification date", allow_null=True, readonly=True
         ),
-        "source_id": fields.String(description="The harvester id", allow_null=True),
-        "remote_id": fields.String(
-            description="The dataset remote id on the source portal", allow_null=True
-        ),
-        "domain": fields.String(description="The harvested domain", allow_null=True),
         "last_update": fields.ISODateTime(
             description="The dataset last harvest date", allow_null=True
         ),
-        "remote_url": fields.String(description="The dataset remote url", allow_null=True),
+        "archived_at": fields.ISODateTime(description="The archive date", allow_null=True),
+        "archived_reason": fields.String(
+            description="The reason the dataset has been archived", allow_null=True
+        ),
         "uri": fields.String(description="The dataset harveted uri", allow_null=True),
         "dct_identifier": fields.String(
             description="The dct:identifier property from the harvested dataset", allow_null=True
-        ),
-        "archived_at": fields.ISODateTime(description="The archive date", allow_null=True),
-        "archived": fields.String(
-            description="The reason the dataset has been archived", allow_null=True
         ),
     },
 )
@@ -74,6 +75,7 @@ dataset_harvest_fields = api.model(
 resource_harvest_fields = api.model(
     "HarvestResourceMetadata",
     {
+        "uri": fields.String(description="The resource harvest uri", allow_null=True),
         "issued_at": fields.ISODateTime(
             description="The resource harvested release date", allow_null=True, readonly=True
         ),
@@ -85,7 +87,39 @@ resource_harvest_fields = api.model(
         "last_update": fields.ISODateTime(
             description="The resource last harvest date", allow_null=True, readonly=True
         ),
-        "uri": fields.String(description="The resource harvest uri", allow_null=True),
+    },
+)
+
+dataset_geopf_fields = api.model(
+    "GeopfDatasetMetadata",
+    {
+        "datasheet_url": fields.String(
+            attribute="push.datasheet_url",
+            description="Public Géoplateforme fiche (dashboard) url, once pushed",
+            allow_null=True,
+            readonly=True,
+        ),
+    },
+)
+
+resource_geopf_fields = api.model(
+    "GeopfResourceMetadata",
+    {
+        "push_status": fields.String(
+            attribute="push.status",
+            description="Push status to Géoplateforme, if this resource has ever been pushed",
+            enum=["pending", "done", "error", "timeout"],
+            allow_null=True,
+            readonly=True,
+        ),
+        "offering_id": fields.String(
+            attribute="offering.id",
+            description=(
+                "Géoplateforme offering id, if this resource was created from a geopf offering pull"
+            ),
+            allow_null=True,
+            readonly=True,
+        ),
     },
 )
 
@@ -168,6 +202,13 @@ resource_fields = api.model(
             description="Harvest attributes metadata information",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            resource_geopf_fields,
+            allow_null=True,
+            readonly=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "preview_url": fields.String(
             description="An optional preview URL to be "
@@ -245,7 +286,7 @@ community_resource_fields = api.inherit(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "permissions": fields.Nested(community_resource_permissions_fields),
     },
@@ -286,6 +327,7 @@ DEFAULT_MASK = ",".join(
         "frequency_date",
         "extras",
         "harvest",
+        "geopf",
         "metrics",
         "organization",
         "owner",
@@ -302,6 +344,7 @@ DEFAULT_MASK = ",".join(
         "page",
         "last_update",
         "archived",
+        "doi",
         "quality",
         "internal",
         "contact_points",
@@ -352,6 +395,7 @@ dataset_fields = api.model(
         ),
         "deleted": fields.ISODateTime(description="The deletion date if deleted", readonly=True),
         "archived": fields.ISODateTime(description="The archival date if archived"),
+        "doi": fields.String(description="The DOI minted for this dataset", readonly=True),
         "featured": fields.Boolean(description="Is the dataset featured"),
         "private": fields.Boolean(
             description="Is the dataset private to the owner or the organization"
@@ -386,6 +430,13 @@ dataset_fields = api.model(
             description="Dataset harvest metadata attributes",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
@@ -394,7 +445,7 @@ dataset_fields = api.model(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"

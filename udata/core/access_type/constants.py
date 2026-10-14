@@ -187,7 +187,10 @@ class InspireLimitationCategory(StrEnum):
         return {member: member.label for member in cls}
 
     @classmethod
-    def get_category_from_localized_label(cls, label: str, country: str):
+    def lookup(cls, text: str, country: str | None = None):
+        normalized = slugify(text).lower()
         for member in cls:
-            if slugify(member.localized_label(country) or "") == slugify(label):
+            if member.url == text:
+                return member
+            if country and slugify(member.localized_label(country) or "").lower() == normalized:
                 return member

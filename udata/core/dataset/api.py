@@ -36,13 +36,13 @@ from udata.core.access_type.constants import AccessType
 from udata.core.badges import api as badges_api
 from udata.core.badges.models import Badge
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
+from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.core.suggest import mongo_suggest
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
@@ -65,6 +65,7 @@ from .api_fields import (
     upload_fields,
 )
 from .constants import RESOURCE_TYPES, UpdateFrequency
+from .doi import create_doi
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -90,6 +91,12 @@ DEFAULT_SORTING = "-created_at_internal"
 SUGGEST_SORTING = "-metrics.followers"
 
 
+# Declares filters by hand, in parallel with the generic system that derives them
+# from the model's `filterable=` fields. `owner` and `organization` (from `Owned`)
+# and `access_type` (from `WithAccessType`) are declared in both places and must be
+# kept in sync, or a filter silently works on one path only; the others have no
+# `filterable=` counterpart yet. Meant to disappear once the callers use
+# `Dataset.apply_sort_filters()`.
 class DatasetApiParser(ModelApiParser):
     sorts = {
         "title": "title",
@@ -429,7 +436,7 @@ class DatasetAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, dataset: Dataset):
         """Update a dataset given its identifier"""
-        request_deleted = request.json.get("deleted", True)
+        request_deleted = api.json_payload().get("deleted", True)
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
@@ -448,12 +455,31 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
+        if dataset.doi:
+            # A DOI is permanent and has to keep resolving, so the dataset page must survive.
+            api.abort(409, "Dataset has a DOI and can only be archived, not deleted")
         send_legal_notice_on_deletion(dataset, args)
 
         dataset.deleted = datetime.now(UTC)
         dataset.last_modified_internal = datetime.now(UTC)
         dataset.save()
         return "", 204
+
+
+@ns.route("/<dataset:dataset>/doi/", endpoint="dataset_doi")
+@api.doc(**common_doc)
+class DatasetDoiAPI(API):
+    @api.secure(admin_permission)
+    @api.doc("mint_dataset_doi")
+    @api.response(409, "Dataset already has a DOI")
+    @api.marshal_with(dataset_fields)
+    def post(self, dataset):
+        """Mint a DOI for the dataset and attach it"""
+        if dataset.doi:
+            api.abort(409, "Dataset already has a DOI")
+        dataset.doi = create_doi(dataset)
+        dataset.save()
+        return dataset
 
 
 @ns.route("/<dataset:dataset>/featured/", endpoint="dataset_featured")
@@ -604,10 +630,7 @@ class UploadMixin(object):
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
         infos["title"] = os.path.basename(infos["filename"])
-        checksum_type = next(
-            checksum_type for checksum_type in CHECKSUM_TYPES if checksum_type in infos
-        )
-        infos["checksum"] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
+        infos["checksum"] = Checksum(type=CHECKSUM_TYPE, value=infos.pop(CHECKSUM_TYPE))
         infos["filesize"] = infos.pop("size")
         del infos["filename"]
         return infos
@@ -671,6 +694,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         "upload_dataset_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         """Upload a file related to a given resource on a given dataset"""
@@ -698,6 +722,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         "upload_community_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
+    @api.expect(upload_parser)
     @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""

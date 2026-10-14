@@ -16,6 +16,8 @@
          xmlns:cnt="http://www.w3.org/2011/content#"
          xmlns:eli="http://data.europa.eu/eli/ontology">
    <rdf:Description rdf:about="https://sextant.ifremer.fr/geonetwork/srv/api/records/fc663284-e599-427e-9da6-9fe9519170f3#resource">
+      <!-- SEMIC sets both types on a series node, so the same subject matches twice -->
+      <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
       <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DatasetSeries"/>
       <dct:type>
          <skos:Concept rdf:about="http://purl.org/dc/dcmitype/Collection">

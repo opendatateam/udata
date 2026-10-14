@@ -56,6 +56,11 @@ class ModelSearchAdapter:
         return parser
 
     @classmethod
+    def prepare_filters(cls, params):
+        """Adjust filters in place before they reach the search backend (Elasticsearch or Mongo)"""
+        return params
+
+    @classmethod
     def parse_sort(cls, sort):
         if sort:
             if sort.startswith("-"):

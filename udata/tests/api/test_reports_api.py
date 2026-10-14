@@ -5,12 +5,13 @@ from flask import url_for
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import Dataset, License
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.discussions.models import Discussion, Message
 from udata.core.reports.constants import (
     REASON_AUTO_SPAM,
     REASON_ILLEGAL_CONTENT,
+    REASON_OTHERS,
     REASON_SPAM,
     reports_reasons_translations,
 )
@@ -29,6 +30,14 @@ class ReportsReasonsAPITest(APITestCase):
 
 
 class ReportsAPITest(APITestCase):
+    def test_reports_api_create_with_non_object_body(self):
+        for body in ([1, 2, 3], 1, "report"):
+            response = self.post(url_for("api.reports"), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(Report.objects.count(), 0)
+
     def test_reports_api_create(self):
         user = UserFactory()
 
@@ -311,6 +320,18 @@ class ReportsAPITest(APITestCase):
         self.assertIsNotNone(report.dismissed_at)
         self.assertEqual(report.dismissed_by.id, admin.id)
 
+    def test_reports_api_dismiss_with_non_object_body(self):
+        report = Report(subject=DatasetFactory(), reason=REASON_SPAM).save()
+        self.login(AdminFactory())
+
+        for body in ([1, 2, 3], 1, "dismissed_at"):
+            response = self.patch(url_for("api.report", report=report), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        report.reload()
+        self.assertIsNone(report.dismissed_at)
+
     def test_reports_api_undismiss(self):
         user = UserFactory()
         admin = AdminFactory()
@@ -580,3 +601,48 @@ class ReportsAPITest(APITestCase):
 
         report.reload()
         self.assertEqual(report.callbacks, {})
+
+
+class ReportsSubjectRequiredAPITest(APITestCase):
+    def test_reports_api_create_without_subject(self):
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "message": "This is spammy",
+                "reason": REASON_SPAM,
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Report.objects.count(), 0)
+
+
+class ReportsSubjectClassAPITest(APITestCase):
+    def test_reports_api_create_with_a_non_reportable_subject_class(self):
+        """`class` is resolved against the whole document registry, so a class outside
+        `REPORTABLE_MODELS` must be rejected before its collection is queried."""
+        License(id="fr-lo", title="Licence Ouverte").save()
+
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "reason": REASON_OTHERS,
+                "subject": {"class": "License", "id": "fr-lo"},
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Report.objects.count(), 0)
+
+    def test_reports_api_create_with_mongo_operators_as_subject_id(self):
+        """`License.id` being a `StringField`, the operators used to reach the database
+        and crash the query instead of being rejected as an invalid reference."""
+        License(id="fr-lo", title="Licence Ouverte").save()
+
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "reason": REASON_OTHERS,
+                "subject": {"class": "License", "id": {"$where": "return true"}},
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Report.objects.count(), 0)

@@ -55,7 +55,8 @@ class TestCaseMixin:
 
         Args:
             *args: Command and arguments (can be a single string with spaces or multiple args)
-            **kwargs: Additional arguments for the CLI runner (e.g., expect_error=True)
+            expect_error: Return the result of a failing command instead of raising
+            **kwargs: Additional arguments for the CLI runner
 
         Returns:
             The CLI result object
@@ -64,11 +65,13 @@ class TestCaseMixin:
 
         from udata.commands import cli as cli_cmd
 
+        expect_error = kwargs.pop("expect_error", False)
+
         if len(args) == 1 and " " in args[0]:
             args = shlex.split(args[0])
 
         result = self.app.test_cli_runner().invoke(cli_cmd, args, **kwargs)
-        if result.exit_code != 0 and kwargs.get("expect_error") is not True:
+        if result.exit_code != 0 and not expect_error:
             helpers.assert_command_ok(result)
         return result
 

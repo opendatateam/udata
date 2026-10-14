@@ -1,5 +1,3 @@
-import copy
-
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
     AccessAudienceType,
@@ -123,17 +121,14 @@ class BaseResourceForm(ModelForm):
 
     def populate_obj(self, obj):
         # Only protect existing hosted files: a brand new resource has no url
-        # yet and must be populated normally. `checksum` is deep-copied because
-        # populate_obj mutates the existing embedded document in place.
+        # yet and must be populated normally. The protected fields are skipped
+        # rather than written then restored: mongoengine keeps a field marked as
+        # changed once written, and those marks are what the activity records.
         protect = obj.filetype == "file" and obj.url
-        protected_values = (
-            {name: copy.deepcopy(getattr(obj, name)) for name in HOSTED_RESOURCE_PROTECTED_FIELDS}
-            if protect
-            else {}
-        )
-        super().populate_obj(obj)
-        for name, value in protected_values.items():
-            setattr(obj, name, value)
+        for name, field in self._fields.items():
+            if protect and name in HOSTED_RESOURCE_PROTECTED_FIELDS:
+                continue
+            field.populate_obj(obj, name)
 
 
 class ResourceForm(BaseResourceForm):
@@ -161,23 +156,6 @@ def unmarshal_frequency(form, field):
     # since the API will already have ensured incoming data matches the field definition,
     # which in our case is an enum of valid UpdateFrequency values.
     field.data = UpdateFrequency(field.data)
-
-
-def validate_contact_point(form, field):
-    """Validates contact point with dataset's org or owner"""
-    from udata.models import ContactPoint
-
-    for contact_point in field.data or []:
-        if form.organization.data:
-            contact_point = ContactPoint.objects(
-                id=contact_point.id, organization=form.organization.data
-            ).first()
-        elif form.owner.data:
-            contact_point = ContactPoint.objects(id=contact_point.id, owner=form.owner.data).first()
-        if not contact_point:
-            raise validators.ValidationError(
-                _("Wrong contact point id or contact point ownership mismatch")
-            )
 
 
 class AccessAudienceForm(ModelForm):
@@ -250,7 +228,7 @@ class DatasetForm(ModelForm):
     organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
-    contact_points = fields.ContactPointListField(validators=[validate_contact_point])
+    contact_points = fields.ContactPointListField()
 
 
 class ResourcesListForm(ModelForm):

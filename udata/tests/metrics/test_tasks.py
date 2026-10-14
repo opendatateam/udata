@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from udata.core.dataservices.factories import DataserviceFactory
@@ -172,4 +174,41 @@ class TasksMetricsTest(PytestOnlyTestCase):
         assert dataset_a_with_resources.resources[1].metrics.get("views") == 1337
         assert dataset_a_with_resources.resources[4].metrics.get("views") == 2
 
+        # The positional `$` operator has to land on the reported resource only
+        assert dataset_a_with_resources.resources[2].metrics.get("views") is None
+        assert dataset_a_with_resources.resources[3].metrics.get("views") is None
+
         assert dataset_b_with_resource.resources[0].metrics.get("views") == 1404
+
+    def test_update_resources_metrics_only_updates_the_reported_dataset(self, app, rmock):
+        """A resource id duplicated across datasets only updates the reported one
+
+        Nothing enforces the uniqueness of resource ids across datasets, and the update
+        used to match on the resource id alone, spreading the views to every dataset
+        holding that id.
+        """
+        shared_id = uuid4()
+        reported = DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        other = DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        mock_metrics_api(
+            app,
+            rmock,
+            "resources",
+            ["download_resource"],
+            [
+                {
+                    "resource_id": str(shared_id),
+                    "dataset_id": str(reported.id),
+                    "download_resource": 42,
+                },
+            ],
+        )
+
+        update_resources_and_community_resources()
+
+        reported.reload()
+        other.reload()
+
+        assert reported.resources[0].metrics.get("views") == 42
+        assert other.resources[0].metrics.get("views") is None

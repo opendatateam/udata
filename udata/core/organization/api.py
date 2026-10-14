@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 from flask import make_response, redirect, request, url_for
 
 from udata.api import API, api, errors
-from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission, current_user
 from udata.core import csv
@@ -12,18 +11,19 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.search import DataserviceApiParser
+from udata.core.dataservices.search import parse_dataservice_filters
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.reuse.models import Reuse
+from udata.core.storages import images
 from udata.core.storages.api import (
+    get_file_size,
     image_parser,
     parse_uploaded_image,
     uploaded_image_fields,
@@ -41,22 +41,33 @@ from .api_fields import (
     request_fields,
 )
 from .assignment import Assignment
-from .constants import ASSIGNABLE_OBJECT_TYPES, DEFAULT_ROLE, ORG_ROLES
+from .constants import (
+    ASSIGNABLE_OBJECT_TYPES,
+    BANNER_MAX_SIZE,
+    DEFAULT_ROLE,
+    ORG_ROLES,
+)
 from .models import Member, MembershipRequest, Organization
 from .rdf import build_org_catalog
 from .tasks import (
-    notify_membership_invitation,
     notify_membership_invitation_canceled,
     notify_membership_request,
     notify_membership_response,
 )
 
-DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
 
 
 def resolve_assignment_subjects(raw_assignments, org):
     """Resolve raw {class, id} dicts into model instances belonging to org."""
+    if not isinstance(raw_assignments, list) or not all(
+        isinstance(raw, dict) for raw in raw_assignments
+    ):
+        raise FieldValidationError(
+            field="assignments",
+            message="Expected a list of {class, id} objects",
+        )
+
     subjects = []
     for raw in raw_assignments:
         cls_name = raw.get("class")
@@ -80,59 +91,7 @@ def resolve_assignment_subjects(raw_assignments, org):
     return subjects
 
 
-class OrgApiParser(ModelApiParser):
-    sorts = {
-        "name": "name",
-        "reuses": "metrics.reuses",
-        "datasets": "metrics.datasets",
-        "followers": "metrics.followers",
-        "views": "metrics.views",
-        "created": "created_at",
-        "last_modified": "last_modified",
-    }
-
-    def __init__(self):
-        super().__init__()
-        # Uses __badges__ (not available_badges) so that users can still filter
-        # by any existing badge, even hidden ones.
-        self.parser.add_argument(
-            "badge",
-            type=str,
-            choices=list(Organization.__badges__),
-            location="args",
-        )
-        self.parser.add_argument(
-            "name",
-            type=str,
-            location="args",
-        )
-        self.parser.add_argument(
-            "business_number_id",
-            type=str,
-            location="args",
-        )
-
-    @staticmethod
-    def parse_filters(organizations, args):
-        if args.get("q"):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            organizations = organizations.search_text(phrase_query)
-        if args.get("badge"):
-            organizations = organizations.with_badge(args["badge"])
-        if args.get("name"):
-            organizations = organizations.filter(name__iexact=args["name"])
-        if args.get("business_number_id"):
-            organizations = organizations.filter(business_number_id=args["business_number_id"])
-        return organizations
-
-
 ns = api.namespace("organizations", "Organization related operations")
-
-organization_parser = OrgApiParser()
 
 common_doc = {"params": {"org": "The organization ID or slug"}}
 
@@ -142,16 +101,12 @@ class OrganizationListAPI(API):
     """Organizations collection endpoint"""
 
     @api.doc("list_organizations")
-    @api.expect(organization_parser.parser)
+    @api.expect(Organization.__index_parser__)
     @api.marshal_with(Organization.__page_fields__)
     def get(self):
         """List or search all organizations"""
-        args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
-        organizations = organization_parser.parse_filters(organizations, args)
-
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return organizations.order_by(sort).paginate(args["page"], args["page_size"])
+        return Organization.apply_pagination(Organization.apply_sort_filters(organizations))
 
     @api.secure
     @api.doc("create_organization", responses={400: "Validation error"})
@@ -195,7 +150,7 @@ class OrganizationAPI(API):
 
         :raises PermissionDenied:
         """
-        request_deleted = request.json.get("deleted", True)
+        request_deleted = api.json_payload().get("deleted", True)
         if org.deleted and request_deleted is not None:
             api.abort(410, "Organization has been deleted")
         org.permissions["edit"].test()
@@ -269,6 +224,7 @@ class DatasetsResourcesCsvAPI(API):
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
+    @api.expect(catalog_parser)
     def get(self, org):
         _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
@@ -291,7 +247,7 @@ class OrganizationRdfFormatAPI(API):
             Dataset.objects(organization=org).visible(), params
         )
         datasets = datasets.paginate(params["page"], params["page_size"])
-        dataservices = DataserviceApiParser.parse_filters(
+        dataservices = parse_dataservice_filters(
             Dataservice.objects(organization=org).visible(), params
         )
         dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
@@ -335,6 +291,7 @@ contact_point_parser = ContactPoint.__index_parser__
 @ns.route("/<org:org>/contacts/", endpoint="org_contact_points")
 class OrgContactAPI(API):
     @api.doc("get_organization_contact_point")
+    @api.expect(contact_point_parser)
     @api.marshal_with(ContactPoint.__page_fields__)
     def get(self, org):
         """List all organization contact points"""
@@ -395,19 +352,13 @@ class MembershipRequestAPI(API):
                     403,
                     "You can only access your own membership requests or the one of your organizations.",
                 )
-            if args["status"]:
-                return [
-                    r
-                    for r in org.requests
-                    if (
-                        r.status == args["status"]
-                        and r.user is not None
-                        and str(r.user.id) == args["user"]
-                    )
-                ]
-            return [
+            # Email invitations have no user attached, hence the `is not None` guard.
+            requests = [
                 r for r in org.requests if r.user is not None and str(r.user.id) == args["user"]
             ]
+            if args["status"]:
+                return [r for r in requests if r.status == args["status"]]
+            return requests
         org.permissions["members"].test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
@@ -415,12 +366,17 @@ class MembershipRequestAPI(API):
             return org.requests
 
     @api.secure
+    @api.response(400, "Already a member of or invited to this organization")
     @api.expect(MembershipRequest.__write_fields__)
     @api.marshal_with(request_fields)
     def post(self, org):
         """Apply for membership to a given organization."""
         user = current_user._get_current_object()
+        if org.is_member(user):
+            api.abort(400, "You are already a member of this organization")
         membership_request = org.pending_request(user)
+        if membership_request and membership_request.kind == "invitation":
+            api.abort(400, "You are already invited to this organization, accept the invitation")
         code = 200 if membership_request else 201
 
         if membership_request:
@@ -430,10 +386,11 @@ class MembershipRequestAPI(API):
 
         if code == 200:
             org.save()
+            # Updating a pending request creates nothing, so `after_create` does not
+            # fire: the admins are pinged from here instead.
+            notify_membership_request.delay(str(org.id), str(membership_request.id))
         else:
             org.add_membership_request(membership_request)
-
-        notify_membership_request.delay(str(org.id), str(membership_request.id))
 
         return membership_request, code
 
@@ -462,15 +419,9 @@ class MembershipAcceptAPI(MembershipAPI):
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
 
-        membership_request.status = "accepted"
-        membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now(UTC)
-        member = Member(user=membership_request.user, role="editor")
-
-        org.members.append(member)
-        org.count_members()
-        org.save()
-        MembershipRequest.after_handle.send(membership_request, org=org)
+        member = org.accept_membership_request(
+            membership_request, handled_by=current_user._get_current_object()
+        )
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
@@ -493,7 +444,7 @@ class MembershipRefuseAPI(MembershipAPI):
         # TODO: use patch() here. Currently blocked because the API payload uses
         # "comment" but the model field is "refusal_comment" — patch() would set
         # the wrong field. Requires changing the API contract to use "refusal_comment".
-        comment = (request.json or {}).get("comment")
+        comment = api.json_payload().get("comment")
         if not comment:
             raise FieldValidationError(field="comment", message="Comment is required")
 
@@ -551,7 +502,7 @@ class MemberInviteAPI(API):
         from udata.core.user.models import User
 
         org.permissions["members"].test()
-        data = request.json or {}
+        data = api.json_payload()
 
         user_id = data.get("user")
         user = None
@@ -573,8 +524,6 @@ class MemberInviteAPI(API):
             assignment_subjects=assignment_subjects,
         )
 
-        notify_membership_invitation.delay(str(org.id), str(invitation.id))
-
         return invitation, 201
 
 
@@ -588,6 +537,8 @@ class MemberAPI(API):
         """Update member status into a given organization."""
         org.permissions["members"].test()
         member = org.member(user)
+        if not member:
+            api.abort(404)
         old_role = member.role
         patch(member, request)
         org.save()
@@ -729,6 +680,50 @@ class AvatarAPI(API):
         return {"image": org.logo}
 
 
+@ns.route("/<org:org>/banner/", endpoint="organization_banner")
+@api.doc(**common_doc)
+class OrganizationBannerAPI(API):
+    @api.secure
+    @api.doc("organization_banner_upload")
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, org):
+        """Upload a new banner image"""
+        org.permissions["edit"].test()
+        if get_file_size(image_parser.parse_args()["file"]) > BANNER_MAX_SIZE:
+            api.abort(413, "Image exceeds the maximum allowed size")
+        # Capture the stored files to delete the superseded ones
+        previous = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
+        parse_uploaded_image(org.banner_image)
+        org.banner_image_position = 50
+        org.save()
+        current = {org.banner_image.filename, org.banner_image.original}
+        for filename in previous - current:
+            if filename in images:
+                images.delete(filename)
+        return {"image": org.banner_image}
+
+    @api.secure
+    @api.doc("organization_banner_delete")
+    @api.response(204, "Banner image deleted")
+    def delete(self, org):
+        """Delete the custom banner image"""
+        org.permissions["edit"].test()
+        # `original` may equal `filename` (unresized upload): dedupe and skip missing files
+        filenames = (
+            {org.banner_image.filename, org.banner_image.original} if org.banner_image else set()
+        )
+        org.banner_image = None
+        org.banner_image_position = 50
+        org.save()
+        for filename in filenames:
+            if filename in images:
+                images.delete(filename)
+        return "", 204
+
+
 dataset_parser = DatasetApiParser()
 
 
@@ -761,7 +756,7 @@ class OrgReusesAPI(API):
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
-    @api.marshal_list_with(discussion_fields)
+    @api.marshal_list_with(Discussion.__read_fields__)
     def get(self, org):
         """List organization discussions"""
         reuses = Reuse.objects(organization=org).only("id")
@@ -777,4 +772,7 @@ class OrgRolesAPI(API):
     @api.marshal_list_with(org_role_fields)
     def get(self):
         """List all possible organization roles"""
-        return [{"id": key, "label": value} for (key, value) in ORG_ROLES.items()]
+        return [
+            {"id": key, "label": role.label, "description": role.description}
+            for (key, role) in ORG_ROLES.items()
+        ]

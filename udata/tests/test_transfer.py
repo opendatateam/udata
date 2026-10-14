@@ -1,11 +1,17 @@
 import pytest
+from mongoengine.errors import ValidationError
 
 from udata.auth import PermissionDenied, login_user
+from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.contact_point.models import ContactPoint
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.metrics import (
     update_org_metrics,  # noqa needed to register signals
 )
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.metrics import (
     update_owner_metrics,  # noqa needed to register signals
@@ -13,7 +19,7 @@ from udata.core.user.metrics import (
 from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
-from udata.features.transfer.notifications import transfer_request_notifications
+from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
@@ -89,6 +95,17 @@ class TransferStartTest(PytestOnlyDBTestCase):
         login_user(user)
         with pytest.raises(ValueError):
             self.assert_transfer_started(dataset, user, user, comment)
+
+    def test_request_transfer_of_an_orphaned_subject(self):
+        # Purging an organization deletes it and leaves its datasets behind, with the
+        # `organization` reference nullified and no owner to fall back on.
+        dataset = DatasetFactory()
+        assert dataset.owner is None
+        assert dataset.organization is None
+
+        login_user(UserFactory())
+        with pytest.raises(PermissionDenied):
+            request_transfer(dataset, UserFactory(), faker.sentence())
 
     def test_request_transfer_to_same_organization(self):
         user = UserFactory()
@@ -176,50 +193,132 @@ class TransferAcceptTest(PytestOnlyDBTestCase):
             accept_transfer(transfer)
 
 
-class TransferNotificationsTest(PytestOnlyDBTestCase):
-    def test_pending_transfer_request_for_user(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
+class TransferContactPointsTest(PytestOnlyDBTestCase):
+    def test_dataset_contact_points_follow_the_recipient_organization(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert len(subject.contact_points) == 1
+        moved = subject.contact_points[0]
+        assert moved.organization == recipient
+        assert moved.owner is None
+        assert (moved.name, moved.email, moved.role) == (
+            contact_point.name,
+            contact_point.email,
+            contact_point.role,
+        )
+
+    def test_dataset_contact_points_follow_the_recipient_user(self):
+        org = OrganizationFactory()
         recipient = UserFactory()
-        comment = faker.sentence()
-        transfers = {}
+        contact_point = ContactPointFactory(organization=org, role="contact")
+        subject = DatasetFactory(organization=org, contact_points=[contact_point])
+        transfer = TransferFactory(owner=org, recipient=recipient, subject=subject)
 
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, recipient, comment)
-            transfers[transfer.id] = transfer
+        login_user(recipient)
+        accept_transfer(transfer)
 
-        assert len(transfer_request_notifications(user)) == 0
+        subject.reload()
+        moved = subject.contact_points[0]
+        assert moved.owner == recipient
+        assert moved.organization is None
 
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
+    def test_dataservice_contact_points_follow_the_recipient(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DataserviceFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
 
-    def test_pending_transfer_request_for_org(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
-        recipient = UserFactory()
-        member = Member(user=recipient, role="editor")
-        org = OrganizationFactory(members=[member])
-        comment = faker.sentence()
-        transfers = {}
+        login_user(owner)
+        accept_transfer(transfer)
 
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, org, comment)
-            transfers[transfer.id] = transfer
+        subject.reload()
+        assert subject.contact_points[0].organization == recipient
 
-        assert len(transfer_request_notifications(user)) == 0
+    def test_contact_point_is_copied_not_moved(self):
+        """A contact point is shared, so the datasets left behind must keep theirs."""
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        staying = DatasetFactory(owner=owner, contact_points=[contact_point])
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
 
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
+        login_user(owner)
+        accept_transfer(transfer)
+
+        staying.reload()
+        assert staying.contact_points == [contact_point]
+        contact_point.reload()
+        assert contact_point.owner == owner
+        assert contact_point.organization is None
+
+    def test_existing_contact_point_of_the_recipient_is_reused(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        already_there = ContactPointFactory(
+            organization=recipient,
+            role=contact_point.role,
+            name=contact_point.name,
+            email=contact_point.email,
+            contact_form=contact_point.contact_form,
+        )
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert subject.contact_points == [already_there]
+        assert ContactPoint.objects.count() == 2
+
+    def test_transfering_a_reuse_has_no_contact_points_to_move(self):
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        subject = ReuseFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        accept_transfer(transfer)
+
+        subject.reload()
+        assert subject.organization == recipient
+
+    def test_a_contact_point_that_cannot_be_carried_over_leaves_the_transfer_pending(self):
+        """The API refuses to respond twice to a transfer, so a failure here would leave it
+        accepted with the subject never transferred, and no way to retry."""
+        owner = UserFactory()
+        recipient = OrganizationFactory(members=[Member(user=owner, role="admin")])
+        contact_point = ContactPointFactory(owner=owner, role="contact")
+        subject = DatasetFactory(owner=owner, contact_points=[contact_point])
+        # A contact point the model rejects: a `contact` reaches nobody without an email nor a
+        # contact form. Reachable only by writing straight to the collection.
+        ContactPoint.objects(id=contact_point.id).update(
+            unset__email=True, unset__contact_form=True
+        )
+        transfer = TransferFactory(owner=owner, recipient=recipient, subject=subject)
+
+        login_user(owner)
+        with pytest.raises(ValidationError):
+            accept_transfer(Transfer.objects.get(id=transfer.id))
+
+        # No copy under the recipient: the transfer failed while carrying the contact point over,
+        # which is the only point where it can fail before being marked accepted.
+        assert ContactPoint.objects(organization=recipient).count() == 0
+        transfer.reload()
+        assert transfer.status == "pending"
+        subject.reload()
+        assert subject.owner == owner
 
 
 class TransferRequestNotificationTest(DBTestCase):
@@ -241,6 +340,31 @@ class TransferRequestNotificationTest(DBTestCase):
         assert notification.details.transfer_recipient == recipient
         assert notification.details.transfer_subject == dataset
         assert_equal_dates(notification.created_at, transfer.created)
+
+    def test_notification_created_for_every_transferable_subject(self):
+        """A notification describes a transfer, so it must accept every transferable class.
+
+        `on_transfer_created` swallows and logs its exceptions, so a subject the details
+        refuse costs the recipient its notification without failing the transfer — the
+        absence of the notification is the only observable symptom.
+        """
+        owner = UserFactory()
+        subjects = {
+            "Dataset": DatasetFactory(owner=owner),
+            "Reuse": ReuseFactory(owner=owner),
+            "Dataservice": DataserviceFactory(owner=owner),
+            "Topic": TopicFactory(owner=owner),
+        }
+        assert sorted(subjects) == sorted(TRANSFERABLE_SUBJECTS)
+
+        login_user(owner)
+        for class_name, subject in subjects.items():
+            recipient = UserFactory()
+            request_transfer(subject, recipient, faker.sentence())
+
+            notifications = Notification.objects(user=recipient)
+            assert len(notifications) == 1, f"no notification for a {class_name} transfer"
+            assert notifications[0].details.transfer_subject == subject
 
     def test_notification_created_for_org_admins_only(self):
         """Notifications are created for all admin users of recipient org, not editors"""

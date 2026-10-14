@@ -8,6 +8,7 @@ import click
 
 from udata.core.organization.models import Organization
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -27,6 +28,9 @@ def migrate(db):
 
             # Process each pending request
             for request in org.pending_requests:
+                if request.kind == "invitation":
+                    # An invitation is answered by the invited user, not by the admins.
+                    continue
                 # Create a notification for each admin user
                 for admin_user in admin_users:
                     try:
@@ -37,7 +41,10 @@ def migrate(db):
                             details__request_user=request.user,
                         ).first()
                         if not existing:
-                            notification = Notification(user=admin_user)
+                            notification = Notification(
+                                user=admin_user,
+                                type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
+                            )
                             notification.details = MembershipRequestNotificationDetails(
                                 request_organization=org, request_user=request.user
                             )

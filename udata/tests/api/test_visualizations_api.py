@@ -1,13 +1,15 @@
 from datetime import UTC, datetime
 from io import BytesIO
 
+import pytest
 from flask import url_for
 
+from udata.core import storages
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.core.visualizations.factories import ChartFactory, FilterFactory
-from udata.core.visualizations.models import AndFilters, Chart
+from udata.core.visualizations.models import AndFilters, Chart, Filter, OrFilters
 from udata.tests.helpers import create_test_image
 
 from . import PytestOnlyAPITestCase
@@ -103,6 +105,30 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
 
+    def test_visualization_api_create_with_non_object_embedded_document(self):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+
+        serie = chart.to_dict()["series"][0]
+        cases = [
+            ("x_axis", [1, 2, 3], "x_axis"),
+            ("series", 1, "series"),
+            ("series", [[1, 2, 3]], "series"),
+            ("series", [{**serie, "filters": [1]}], "filters"),
+            ("series", [{**serie, "filters": {"column": "a"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "Unknown"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "AndFilters", "filters": 1}}], "filters"),
+        ]
+        for key, value, error_field in cases:
+            data = chart.to_dict()
+            data[key] = value
+            response = self.post(url_for("api.visualizations"), data)
+            assert response.status_code == 400, (key, value)
+            assert error_field in response.json["errors"], (key, value)
+
+        assert Chart.objects.count() == 0
+
     def test_visualization_api_create_filter(self):
         """It should create a visualization"""
         user = self.login()
@@ -148,6 +174,96 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
         assert visualization.series[0].filters == filters
+
+    def test_visualization_api_create_or_filter(self):
+        """It should create a visualization with an OrFilters group"""
+        user = self.login()
+        filters = OrFilters(filters=[FilterFactory(), FilterFactory()])
+        chart = ChartFactory.build(owner=user, series__0__filters=filters)
+        chart.owner = str(user.id)
+        response = self.post(
+            url_for("api.visualizations"),
+            chart.to_dict(),
+        )
+        assert response.status_code == 201
+        assert Chart.objects.count() == 1
+
+        visualization = Chart.objects.first()
+        assert visualization.series[0].filters == filters
+
+        # GET should serialize the nested filter fields, not return empty dicts
+        response = self.get(url_for("api.visualization", visualization=visualization))
+        assert response.status_code == 200
+        filters_data = response.json["series"][0]["filters"]
+        assert filters_data["_cls"] == "OrFilters"
+        assert len(filters_data["filters"]) == 2
+        assert filters_data["filters"][0]["column"] == filters.filters[0].column
+
+    def test_visualization_api_create_nested_group_filters(self):
+        """AndFilters can contain OrFilters groups and vice versa"""
+        user = self.login()
+
+        def check_nested(filters, outer_type, inner_type):
+            chart = ChartFactory.build(owner=user, series__0__filters=filters)
+            chart.owner = str(user.id)
+            response = self.post(
+                url_for("api.visualizations"),
+                chart.to_dict(),
+            )
+            assert response.status_code == 201
+
+            visualization = Chart.objects.get(title=chart.title)
+            stored = visualization.series[0].filters
+            assert isinstance(stored, outer_type)
+            assert isinstance(stored.filters[0], Filter)
+            assert isinstance(stored.filters[1], inner_type)
+            assert len(stored.filters[1].filters) == 2
+
+            response = self.get(url_for("api.visualization", visualization=visualization))
+            assert response.status_code == 200
+            filters_data = response.json["series"][0]["filters"]
+            assert filters_data["filters"][1]["_cls"] == inner_type.__name__
+
+        check_nested(
+            AndFilters(
+                filters=[
+                    FilterFactory(),
+                    OrFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            AndFilters,
+            OrFilters,
+        )
+        check_nested(
+            OrFilters(
+                filters=[
+                    FilterFactory(),
+                    AndFilters(filters=[FilterFactory(), FilterFactory()]),
+                ]
+            ),
+            OrFilters,
+            AndFilters,
+        )
+
+    @pytest.mark.parametrize(
+        "filters",
+        [
+            {"column": "a", "condition": "exact", "value": "b"},
+            {"_cls": "MarkdownBloc", "content": "not a filter"},
+            # Nested list of generic filters.
+            {"_cls": "AndFilters", "filters": [{"column": "a"}]},
+            {"_cls": "AndFilters", "filters": [{"_cls": "MarkdownBloc"}]},
+        ],
+    )
+    def test_visualization_api_create_rejects_filter_without_valid_cls(self, filters):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        data = chart.to_dict()
+        data["series"][0]["filters"] = filters
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+        assert Chart.objects.count() == 0
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
@@ -290,6 +406,32 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
         )
         assert response.status_code == 200
         assert response.json["image"] is not None
+
+    def test_upload_image_replaces_previous_files(self):
+        """Re-uploading an image should delete the files it replaces"""
+        user = self.login()
+        visualization = ChartFactory(owner=user)
+
+        def upload():
+            return self.post(
+                url_for("api.visualization_image", visualization=visualization),
+                {"file": (create_test_image(), "test.png")},
+                json=False,
+            )
+
+        assert upload().status_code == 200
+        visualization.reload()
+        previous = {visualization.image.filename, visualization.image.original}
+
+        assert upload().status_code == 200
+        visualization.reload()
+        current = {visualization.image.filename, visualization.image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.images for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.images for filename in current)
 
     def test_upload_image_permission_denied(self):
         """It should deny upload for non-owner"""

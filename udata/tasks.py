@@ -162,6 +162,7 @@ def init_app(app):
     import udata.core.tags.tasks  # noqa
     import udata.core.activity.tasks  # noqa
     import udata.core.dataservices.tasks  # noqa
+    import udata.core.dataset.doi  # noqa
     import udata.core.dataset.tasks  # noqa
     import udata.core.dataset.transport  # noqa
     import udata.core.dataset.recommendations  # noqa
@@ -173,6 +174,7 @@ def init_app(app):
     import udata.core.discussions.tasks  # noqa
     import udata.core.badges.tasks  # noqa
     import udata.core.storages.tasks  # noqa
+    import udata.core.sitemap.tasks  # noqa
     import udata.core.visualizations.tasks  # noqa
     import udata.features.notifications.tasks  # noqa
     import udata.notifications.tchap  # noqa

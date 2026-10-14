@@ -14,8 +14,8 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
+from udata.core.reuse.models import Reuse
 from udata.core.storages import default_image_basename, images
-from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
@@ -25,13 +25,14 @@ from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
+from .permissions import PostReadPermission
 
 __all__ = ("Post",)
 
 
 class PostQuerySet(UDataQuerySet):
-    def published(self):
-        return self(published__ne=None).order_by("-published")
+    def visible(self):
+        return self(published__ne=None)
 
 
 @generate_fields(
@@ -97,13 +98,12 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         description="The post datasets",
     )
     reuses = field(
-        ListField(ReferenceField("Reuse", reverse_delete_rule=PULL)),
+        ListField(ReferenceField(Reuse, reverse_delete_rule=PULL)),
         description="The post reuses",
     )
 
     owner = field(
         ReferenceField("User"),
-        nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,
         description="The owner user",
@@ -140,6 +140,14 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     }
 
     verbose_name = _("post")
+
+    @property
+    def is_visible(self):
+        return self.published is not None
+
+    @property
+    def permissions(self):
+        return {"read": PostReadPermission(self)}
 
     def clean(self):
         if self.body_type != "blocs" and not self.content:

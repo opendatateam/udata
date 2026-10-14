@@ -1,19 +1,20 @@
-from flask import abort, request
+from bson import ObjectId
+from flask import abort
 
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.topic.models import Topic
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
 )
-from udata.models import Dataset, Reuse, User, db
+from udata.models import Dataset, Reuse, User
 from udata.utils import id_or_404
 
 from .actions import accept_transfer, refuse_transfer, request_transfer
-from .models import TRANSFER_STATUS, Transfer
+from .models import TRANSFER_PERSONS, TRANSFER_STATUS, TRANSFERABLE_SUBJECTS, Transfer
 
 RESPONSE_TYPES = ["accept", "refuse"]
 
@@ -45,7 +46,7 @@ transfer_response_fields = api.model(
 )
 
 person_mapping = {
-    User: user_ref_fields,
+    User: User.__ref_fields__,
     Organization: Organization.__ref_fields__,
 }
 
@@ -53,6 +54,7 @@ subject_mapping = {
     Dataservice: Dataservice.__ref_fields__,
     Dataset: dataset_ref_fields,
     Reuse: Reuse.__ref_fields__,
+    Topic: Topic.__ref_fields__,
 }
 
 transfer_fields = api.model(
@@ -60,7 +62,7 @@ transfer_fields = api.model(
     {
         "id": fields.String(readonly=True, description="The transfer unique identifier"),
         "user": fields.Nested(
-            user_ref_fields,
+            User.__ref_fields__,
             description="The user who requested the transfer",
             readonly=True,
             allow_null=True,
@@ -98,7 +100,11 @@ requests_parser.add_argument(
     "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
 )
 requests_parser.add_argument(
-    "subject_type", choices=["Dataset", "Reuse", "Dataservice"], type=str, help="", location="args"
+    "subject_type",
+    choices=TRANSFERABLE_SUBJECTS,
+    type=str,
+    help="Type of the transferred object",
+    location="args",
 )
 requests_parser.add_argument(
     "recipient", type=str, help="ID of user or organization", location="args"
@@ -106,8 +112,8 @@ requests_parser.add_argument(
 requests_parser.add_argument(
     "status",
     type=str,
-    choices=TRANSFER_STATUS.keys(),
-    help="ID of user or organization",
+    choices=list(TRANSFER_STATUS),
+    help="Status of the transfer request",
     location="args",
 )
 
@@ -115,16 +121,21 @@ requests_parser.add_argument(
 @ns.route("/", endpoint="transfers")
 class TransferRequestsAPI(API):
     @api.doc("list_transfers")
+    @api.expect(requests_parser)
     @api.marshal_list_with(transfer_fields)
     def get(self):
         args = requests_parser.parse_args()
 
         transfers = Transfer.objects
         if args["subject"]:
+            if not ObjectId.is_valid(args["subject"]):
+                api.abort(400, "`subject` must be an identifier")
             transfers = transfers.generic_in(subject=args["subject"])
         if args["subject_type"]:
             transfers = transfers.filter(__raw__={"subject._cls": args["subject_type"]})
         if args["recipient"]:
+            if not ObjectId.is_valid(args["recipient"]):
+                api.abort(400, "`recipient` must be an identifier")
             transfers = transfers.generic_in(recipient=args["recipient"])
         if args["status"]:
             transfers = transfers.filter(status=args["status"])
@@ -145,23 +156,10 @@ class TransferRequestsAPI(API):
     @api.marshal_with(transfer_fields)
     def post(self):
         """Initiate transfer request"""
-        data = request.json
+        data = api.json_payload()
 
-        subject_model = db.resolve_model(data["subject"])
-        subject_id = data["subject"]["id"]
-        try:
-            subject = subject_model.objects.get(id=subject_id)
-        except subject_model.DoesNotExist:
-            msg = 'Unkown subject id "{0}"'.format(subject_id)
-            ns.abort(400, errors={"subject": msg})
-
-        recipient_model = db.resolve_model(data["recipient"])
-        recipient_id = data["recipient"]["id"]
-        try:
-            recipient = recipient_model.objects.get(id=recipient_id)
-        except recipient_model.DoesNotExist:
-            msg = 'Unkown recipient id "{0}"'.format(recipient_id)
-            ns.abort(400, errors={"recipient": msg})
+        subject = api.resolve_reference(data.get("subject"), "subject", TRANSFERABLE_SUBJECTS)
+        recipient = api.resolve_reference(data.get("recipient"), "recipient", TRANSFER_PERSONS)
 
         comment = data.get("comment")
 
@@ -189,7 +187,7 @@ class TransferRequestAPI(API):
         if transfer.status != "pending":
             abort(400, "Cannot update transfer after accepting/refusing")
 
-        data = request.json
+        data = api.json_payload()
         comment = data.get("comment")
 
         if data["response"] == "accept":

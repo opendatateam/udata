@@ -10,11 +10,21 @@ from udata.utils import faker
 
 
 class JobsAPITest(APITestCase):
+    def test_schedulable_jobs_list_need_admin(self):
+        @celery.task(name="a-schedulable-job", schedulable=True)
+        def test_job():
+            pass
+
+        self.login()
+        response = self.get(url_for("api.schedulable_jobs"))
+        self.assert403(response)
+
     def test_schedulable_jobs_list(self):
         @celery.task(name="a-schedulable-job", schedulable=True)
         def test_job():
             pass
 
+        self.login(AdminFactory())
         response = self.get(url_for("api.schedulable_jobs"))
         self.assert200(response)
         self.assertIn("a-schedulable-job", response.json)
@@ -24,9 +34,15 @@ class JobsAPITest(APITestCase):
         def test_job():
             pass
 
+        self.login(AdminFactory())
         response = self.get(url_for("api.schedulable_jobs"))
         self.assert200(response)
         self.assertIn("a-job", response.json)
+
+    def test_scheduled_jobs_list_need_admin(self):
+        self.login()
+        response = self.get(url_for("api.jobs"))
+        self.assert403(response)
 
     def test_scheduled_jobs_list(self):
         @job("a-job")
@@ -41,6 +57,7 @@ class JobsAPITest(APITestCase):
                 params["interval"] = PeriodicTask.Interval(every=i, period="minutes")
             PeriodicTask.objects.create(**params)
 
+        self.login(AdminFactory())
         response = self.get(url_for("api.jobs"))
         self.assert200(response)
 
@@ -130,6 +147,22 @@ class JobsAPITest(APITestCase):
     def test_create_manual_job(self):
         pass
 
+    def test_get_job_need_admin(self):
+        @job("a-job")
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+
+        self.login()
+        response = self.get(url_for("api.job", id=task.id))
+        self.assert403(response)
+
     def test_get_job(self):
         @job("a-job")
         def test_job():
@@ -142,12 +175,35 @@ class JobsAPITest(APITestCase):
             crontab=PeriodicTask.Crontab(minute="5"),
         )
 
+        self.login(AdminFactory())
         response = self.get(url_for("api.job", id=task.id))
         self.assert200(response)
         self.assertEqual(response.json["id"], str(task.id))
         self.assertEqual(response.json["name"], task.name)
         self.assertEqual(response.json["description"], task.description)
         self.assertEqual(response.json["task"], task.task)
+
+    def test_create_and_update_job_with_non_object_body(self):
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task="a-job",
+            crontab=PeriodicTask.Crontab(minute="5"),
+        )
+        self.login(AdminFactory())
+
+        for url, method in (
+            (url_for("api.jobs"), self.post),
+            (url_for("api.job", id=task.id), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "crontab"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(PeriodicTask.objects.count(), 1)
+        task.reload()
+        self.assertEqual(task.crontab.minute, "5")
 
     def test_update_job_need_admin(self):
         @job("a-job")
@@ -273,6 +329,11 @@ class JobsAPITest(APITestCase):
 
         self.assertIsNone(PeriodicTask.objects(id=task.id).first())
 
+    def test_get_task_need_admin(self):
+        self.login()
+        response = self.get(url_for("api.task", id=faker.md5()))
+        self.assert403(response)
+
     @skip("Need to be mocked and more details")
     def test_get_task(self):
         @celery.task
@@ -281,6 +342,7 @@ class JobsAPITest(APITestCase):
 
         result = test_task.delay()  # Always eager so no async
 
+        self.login(AdminFactory())
         response = self.get(url_for("api.task", id=result.id))
         self.assert200(response)
         self.assertEqual(response.json["id"], result.id)

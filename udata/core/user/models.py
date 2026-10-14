@@ -11,6 +11,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    EnumField,
     GenericEmbeddedDocumentField,
     IntField,
     ListField,
@@ -21,15 +22,16 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core import storages
-from udata.core.discussions.models import Discussion
-from udata.core.followers.models import Follow
+from udata.core.checks import check_is_email, check_no_urls, only_creation
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
+from udata.features.notifications.constants import MailCadence
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -75,6 +77,16 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
+def _admin_or_self(name: str):
+    """An `attribute` giving the field `name` only to a sysadmin or to the user
+    themselves, `None` otherwise."""
+
+    def visible(user):
+        return getattr(user, name) if current_user_is_admin_or_self() else None
+
+    return visible
+
+
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
@@ -101,24 +113,47 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
         auditable=False,
+        readonly=True,
         show_as_ref=True,
     )
     email = field(
         StringField(max_length=255, required=True, unique=True),
-        show_as_ref=True,
-        attribute=_visible_email,
+        # Stricter than `_visible_email`, which always yields at least a domain: the user
+        # API (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all,
+        # whereas `_visible_email` serves the org contexts where members may reach out.
+        attribute=_admin_or_self("email"),
+        # The address is an identity: `Organization.create_invitation` resolves one into
+        # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
+        # the `/change-email` flow carries that proof over, by mailing a token to the new
+        # address. A plain `PUT` would let anyone claim an address they cannot read, while
+        # `confirmed_at` keeps saying it was verified.
+        checks=[check_is_email, only_creation],
     )
-    password = field(StringField())
-    active = field(BooleanField())
-    fs_uniquifier = field(StringField(max_length=64, unique=True, sparse=True))
-    roles = field(ListField(ReferenceField(Role), default=[]))
+    password = StringField()
+    # Admin-only writable, handled manually in the admin endpoints.
+    active = field(BooleanField(), readonly=True)
+    fs_uniquifier = StringField(max_length=64, unique=True, sparse=True)
+    # Admin-only writable, handled manually in the admin endpoints.
+    roles = field(ListField(ReferenceField(Role), default=list), readonly=True)
 
-    first_name = field(StringField(max_length=255, required=True), show_as_ref=True)
-    last_name = field(StringField(max_length=255, required=True), show_as_ref=True)
+    first_name = field(
+        StringField(max_length=255, required=True),
+        show_as_ref=True,
+        checks=[check_no_urls],
+    )
+    last_name = field(
+        StringField(max_length=255, required=True),
+        show_as_ref=True,
+        checks=[check_no_urls],
+    )
 
-    avatar_url = field(URLField())
+    avatar_url = URLField()
     avatar = field(
         ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
+        # Read-only: the avatar is managed through the dedicated upload endpoint
+        # (POST /me/avatar/). Consistent with the other ImageFields and guards
+        # against patch() overwriting it with a raw URL, wiping thumbnails.
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_AVATAR_SIZE,
@@ -130,18 +165,30 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         markdown=True,
     )
 
-    prefered_language = field(StringField())
+    prefered_language = StringField()
 
     created_at = field(
-        DateTimeField(default=lambda: datetime.now(UTC), required=True), auditable=False
+        DateTimeField(default=lambda: datetime.now(UTC), required=True),
+        auditable=False,
+        readonly=True,
+        rename="since",
     )
 
-    # The field below is required for Flask-security
-    # when SECURITY_CONFIRMABLE is True
-    confirmed_at = field(DateTimeField(), auditable=False)
+    # Required for Flask-security when SECURITY_CONFIRMABLE is True.
+    confirmed_at = DateTimeField()
 
-    password_rotation_demanded = field(DateTimeField(), auditable=False)
-    password_rotation_performed = field(DateTimeField(), auditable=False)
+    password_rotation_demanded = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        attribute=_admin_or_self("password_rotation_demanded"),
+    )
+    password_rotation_performed = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        attribute=_admin_or_self("password_rotation_performed"),
+    )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
     # Flask-Security's naming is counter-intuitive: `current_login_at` is the most recent
@@ -151,25 +198,44 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     last_login_at = field(
         DateTimeField(),
         auditable=False,
-        show_as_ref=True,
+        readonly=True,
         attribute=_visible_login_date,
     )
-    current_login_at = field(DateTimeField(), auditable=False)
-    last_login_ip = field(StringField(), auditable=False)
-    current_login_ip = field(StringField(), auditable=False)
-    login_count = field(IntField(), auditable=False)
+    current_login_at = DateTimeField()
+    last_login_ip = StringField()
+    current_login_ip = StringField()
+    login_count = IntField()
 
     # Two-Factor authentification fields
-    tf_primary_method = field(StringField(), auditable=False)
-    tf_totp_secret = field(StringField(), auditable=False)
+    tf_primary_method = StringField()
+    tf_totp_secret = StringField()
 
-    deleted = field(DateTimeField())
-    ext = field(MapField(GenericEmbeddedDocumentField()))
-    extras = field(ExtrasField(), auditable=False)
+    deleted = field(
+        DateTimeField(),
+        auditable=False,
+        readonly=True,
+        show_as_ref=True,
+        description="The date the account was deleted, null for a live account",
+    )
+    ext = MapField(GenericEmbeddedDocumentField())
+    extras = ExtrasField()
 
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
-    inactive_deletion_notified_at = field(DateTimeField(), auditable=False)
+    inactive_deletion_notified_at = DateTimeField()
+
+    # How often this user agrees to be mailed about what concerns them. What concerns
+    # them is decided by their `NotificationSetting` rules; this is only the rhythm.
+    mail_cadence = field(
+        EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
+        attribute=_admin_or_self("mail_cadence"),
+    )
+    # "Turn everything off": nothing reaches the user but what asks for an action. A
+    # field rather than a rule, so that no rule, however precise, can bring anything back.
+    notifications_paused = field(
+        BooleanField(default=False),
+        attribute=_admin_or_self("notifications_paused"),
+    )
 
     before_save = Signal()
     after_save = Signal()
@@ -395,12 +461,21 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         ApiToken.objects(user=self, revoked_at=None).update(
             set__revoked_at=datetime.now(timezone.utc)
         )
+        from udata.geopf.auth import revoke_token
+        from udata.geopf.models import GeopfToken
+
+        geopf_token = GeopfToken.objects(user=self).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self
             ]
             organization.save()
         if delete_comments:
+            from udata.core.discussions.models import Discussion
+
             for discussion in Discussion.objects(discussion__posted_by=self):
                 # Remove all discussions with current user as only participant
                 if all(message.posted_by == self for message in discussion.discussion):
@@ -411,6 +486,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                     if message.posted_by == self:
                         message.content = "DELETED"
                 discussion.save()
+        from udata.models import Follow  # Circular imports.
+
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
         # Remove related notifications
@@ -465,37 +542,82 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
 datastore = MongoEngineUserDatastore(db, User, Role)
 
+
+# Extended User reference exposing `email` and `last_login_at`, for the contexts where
+# org admins/editors are allowed to see member contact info — organization `members` and
+# `requests`. Both are kept off the default `__ref_fields__` so they don't leak in
+# activity/follow/post nested user references.
+#
+# `email` is declared here rather than reused from `__read_fields__` because the two
+# obey different rules: `_visible_email` grants org members a partial address, while the
+# user API hands third parties nothing (see `User.email`).
+user_with_email_ref_fields = api.inherit(
+    "UserReferenceWithEmail",
+    User.__ref_fields__,
+    {
+        "email": fields.String(
+            attribute=_visible_email,
+            description="The user email, obfuscated unless the caller may see it",
+            readonly=True,
+        ),
+        "last_login_at": User.__read_fields__["last_login_at"],
+    },
+)
+
+
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
 post_save.connect(SpamMixin.post_save, sender=User)
 
 
 def match_email_invitations(sender, **kwargs):
-    """Match pending email invitations when user registers."""
+    """Link pending email invitations to the user owning their address.
+
+    Runs on registration and on email change, keeping a single pending entry per organization.
+    An organization the user already belongs to, or is already invited to, keeps that state: the
+    email invitation is dropped. A pending request gives way to the invitation instead, since the
+    invitation carries the role and assignments an admin chose.
+    """
     from udata.core.organization.models import Organization
-    from udata.core.organization.notifications import _create_membership_notification
+    from udata.core.organization.notifications import MembershipInvitationMatched
+    from udata.features.notifications.constants import NotificationType
+    from udata.features.notifications.models import Notification
 
     user = sender
+    email = user.email.lower()
     for org in Organization.objects(
-        requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
+        requests__match={"kind": "invitation", "email": email, "status": "pending"}
     ):
-        modified = False
-        matched_requests = []
-        for req in org.requests:
-            if (
-                req.kind == "invitation"
-                and req.email
-                and req.email.lower() == user.email.lower()
-                and req.status == "pending"
-            ):
-                req.user = user
-                req.email = None
-                modified = True
-                matched_requests.append(req)
-        if modified:
+        pending = org.pending_request(user)
+        matched_requests = [
+            r for r in org.pending_requests if r.kind == "invitation" and r.email == email
+        ]
+        if org.is_member(user) or (pending is not None and pending.kind == "invitation"):
+            matched_ids = {r.id for r in matched_requests}
+            org.requests = [r for r in org.requests if r.id not in matched_ids]
             org.save()
-            for req in matched_requests:
-                _create_membership_notification(req, org, user)
+            continue
+        if pending is not None:
+            org.requests = [r for r in org.requests if r.id != pending.id]
+            Notification.objects(
+                type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
+                details__request_organization=org,
+                details__request_user=user,
+                handled_at=None,
+            ).mark_handled()
+        for req in matched_requests:
+            req.user = user
+            req.email = None
+        org.save()
+        for req in matched_requests:
+            MembershipInvitationMatched(org, req).dispatch()
 
 
 User.on_create.connect(match_email_invitations)
+
+
+@User.on_update.connect
+def match_email_invitations_on_email_change(user, **kwargs):
+    # Covers `/change-email` as well as sysadmins editing an address through the API.
+    if "email" in user._get_changed_fields():
+        match_email_invitations(user)

@@ -9,8 +9,9 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
-from udata.models import Discussion, Follow, Member, MembershipRequest
+from udata.models import Discussion, Follow, Member, MembershipRequest, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -262,6 +263,26 @@ class UserAPITest(APITestCase):
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
 
+    def test_embedded_user_exposes_deletion(self):
+        """A deleted user is only ever served embedded, so the reference carries the state.
+
+        The anonymised `first_name`, `last_name` and `slug` are not a reliable signal:
+        a live user named "Deleted Dupont" gets the slug `deleted-dupont`.
+        """
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        assert response.json["owner"]["deleted"] is None
+
+        owner.mark_as_deleted(notify=False)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+        owner.reload()
+        assert response.json["owner"]["deleted"] == owner.deleted.replace(tzinfo=UTC).isoformat()
+
     def test_get_inactive_user(self):
         """It should raise a 410"""
         user = UserFactory(active=False)
@@ -317,6 +338,26 @@ class UserAPITest(APITestCase):
         response = self.get(url_for("api.user", user=user))
         self.assert200(response)
 
+    def test_get_user_hides_email_from_a_third_party(self):
+        """A third party gets no email at all, not even an obfuscated one"""
+        user = UserFactory(email="john@example.org")
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+        self.login(UserFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertIsNone(response.json["email"])
+
+    def test_get_user_exposes_email_to_an_admin(self):
+        """A sysadmin still gets the full email"""
+        user = UserFactory(email="john@example.org")
+        self.login(AdminFactory())
+        response = self.get(url_for("api.user", user=user))
+        self.assert200(response)
+        self.assertEqual(response.json["email"], "john@example.org")
+
     def test_user_api_create_as_admin(self):
         """It should create a user"""
         self.login(AdminFactory())
@@ -339,6 +380,84 @@ class UserAPITest(APITestCase):
         response = self.post(url_for("api.users"), data=data)
         self.assert403(response)
 
+    def test_user_api_create_with_roles_and_active(self):
+        """An admin should be able to set roles and active when creating a user"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["admin"],
+            "active": False,
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert201(response)
+        self.assertEqual(response.json["roles"], ["admin"])
+        self.assertFalse(response.json["active"])
+
+    def test_user_api_create_with_a_non_boolean_active(self):
+        """A string must not be coerced into a boolean: "false" would enable the account"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "active": "false",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_with_an_invalid_email(self):
+        """It should raise a 400 when the email is malformed"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": "not-an-email",
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        assert "email" in response.json["errors"]
+
+    def test_user_api_create_without_a_required_field(self):
+        """It should raise a 400 when a required field is missing"""
+        self.login(AdminFactory())
+        data = {
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+        self.assertEqual(User.objects(email=data["email"]).count(), 0)
+
+    def test_user_api_create_with_a_non_existing_role(self):
+        """It should raise a 400 when creating a user with an unknown role"""
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email(),
+            "roles": ["non_existing_role"],
+        }
+        response = self.post(url_for("api.users"), data=data)
+        self.assert400(response)
+
+    def test_user_api_create_and_update_with_non_object_body(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+
+        for url, method in (
+            (url_for("api.users"), self.post),
+            (url_for("api.user", user=user), self.put),
+        ):
+            for body in ([1, 2, 3], 1, "email"):
+                response = method(url, body)
+                self.assert400(response)
+                self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        self.assertEqual(User.objects.count(), 2)
+
     def test_user_api_update(self):
         """It should update a user"""
         self.login(AdminFactory())
@@ -348,6 +467,34 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertFalse(response.json["active"])
+
+    def test_user_api_update_email_as_admin(self):
+        """A sysadmin still moves an address by hand, for the support cases the
+        `/change-email` flow cannot serve (a mailbox the user lost access to)"""
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data["email"] = "new.address@example.org"
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.email, "new.address@example.org")
+
+    def test_user_api_update_email_as_admin_links_pending_email_invitations(self):
+        self.login(AdminFactory())
+        user = UserFactory()
+        organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", email="new.address@example.org")]
+        )
+        data = user.to_dict()
+        data["email"] = "New.Address@example.org"
+
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+
+        organization.reload()
+        assert organization.requests[0].user == user
+        assert organization.requests[0].email is None
 
     def test_user_api_update_with_website(self):
         """It should raise a 400"""
@@ -378,6 +525,23 @@ class UserAPITest(APITestCase):
         response = self.put(url_for("api.user", user=user), data)
         self.assert200(response)
         self.assertEqual(response.json["roles"], ["admin"])
+        # Assert on the stored user, not only on the marshalled response: the role name
+        # has to be resolved into a `Role` reference for the grant to survive the save.
+        user.reload()
+        self.assertTrue(user.sysadmin)
+
+    def test_user_api_update_removing_roles(self):
+        """An admin should be able to demote a user with an empty roles list"""
+        self.login(AdminFactory())
+        user = AdminFactory()
+        self.assertTrue(user.sysadmin)
+        data = user.to_dict()
+        data["roles"] = []
+        response = self.put(url_for("api.user", user=user), data)
+        self.assert200(response)
+        user.reload()
+        self.assertEqual(user.roles, [])
+        self.assertFalse(user.sysadmin)
 
     def test_user_api_update_with_a_non_existing_role(self):
         """It should raise a 400"""
@@ -455,6 +619,7 @@ class UserAPITest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user_to_delete),
@@ -716,6 +881,7 @@ class OrgInvitationsAPITest(APITestCase):
         )
         notification = Notification(
             user=user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=user
             ),
@@ -739,6 +905,7 @@ class OrgInvitationsAPITest(APITestCase):
         )
         notification = Notification(
             user=user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
             details=MembershipRequestNotificationDetails(
                 request_organization=organization, request_user=user
             ),
@@ -774,7 +941,12 @@ class OrgInvitationsAPITest(APITestCase):
         )
 
         # Create user with the same email - should trigger match_email_invitations
-        new_user = UserFactory(email="newuser@example.com")
+        with capture_mails() as mails:
+            new_user = UserFactory(email="newuser@example.com")
+
+        # The invitation mail went out when the invitation was created: registering only
+        # makes it reachable in-app, it is not a second thing to announce.
+        assert mails == []
 
         organization.reload()
         assert organization.requests[0].user == new_user
@@ -784,7 +956,7 @@ class OrgInvitationsAPITest(APITestCase):
         notifications = Notification.objects(user=new_user)
         assert notifications.count() == 1
         assert notifications.first().details.request_organization == organization
-        assert notifications.first().details.kind == "invitation"
+        assert notifications.first().type == NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
 
         # Now the user should see the invitation
         self.login(new_user)

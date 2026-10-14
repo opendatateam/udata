@@ -43,6 +43,60 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         if migration_path.exists():
             migration_path.unlink()
 
+    @pytest.fixture
+    def failing_migration(self, db):
+        """A migration that always fails, and one scheduled after it.
+
+        Named so that they sort last, leaving the real migrations to run normally first.
+        """
+        migrations_dir = Path(__file__).parent.parent / "migrations"
+        failing = migrations_dir / "9999-01-01-failing-migration-temp.py"
+        following = migrations_dir / "9999-01-02-following-migration-temp.py"
+        failing.write_text(
+            dedent(
+                """\
+                '''A migration that fails'''
+
+                def migrate(db):
+                    raise KeyError("something the data did not have")
+                """
+            )
+        )
+        following.write_text(
+            dedent(
+                """\
+                '''The migration scheduled right after the failing one'''
+
+                def migrate(db):
+                    db.test_collection.insert_one({'test': 'value'})
+                """
+            )
+        )
+
+        yield failing.name, following.name
+
+        failing.unlink()
+        following.unlink()
+        db.migrations.delete_many({"filename": {"$in": [failing.name, following.name]}})
+        db.test_collection.delete_many({})
+
+    def test_migrate_exits_with_an_error_when_a_migration_fails(self, db, failing_migration):
+        """Otherwise the deployment that ran it carries on over an unmigrated database."""
+        result = self.cli("db migrate", expect_error=True)
+
+        assert result.exit_code != 0
+
+    def test_a_failed_migration_holds_back_the_ones_after_it(self, db, failing_migration):
+        """Running them out of order would apply transformations the failed one had to make
+        first, so they wait — which is exactly why the command has to report a failure."""
+        failing, following = failing_migration
+
+        self.cli("db migrate", expect_error=True)
+
+        assert db.migrations.find_one({"filename": failing})["ops"][-1]["success"] is False
+        assert db.migrations.find_one({"filename": following}) is None
+        assert db.test_collection.find_one() is None
+
     def test_list_available_migrations(self):
         """Test that we can list available migrations"""
         result = self.cli("db status")

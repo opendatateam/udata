@@ -27,6 +27,7 @@ services:
           - node.name=es01
           - cluster.name=es-docker-cluster
           - cluster.initial_master_nodes=es01
+          - cluster.routing.allocation.disk.threshold_enabled=false
           - ES_JAVA_OPTS=-Xms750m -Xmx750m
         volumes:
           - search-data:/usr/share/elasticsearch/data
@@ -42,6 +43,21 @@ services:
             /usr/local/bin/docker-entrypoint.sh eswrapper
           "
 
+    storage:
+        image: rustfs/rustfs:1.0.0
+        volumes:
+          # Not the `storage-data` volume left by MinIO: it is owned by root and
+          # RustFS, which runs unprivileged, fails to start on it
+          - rustfs-data:/data
+        expose:
+          - "9000"
+        ports:
+          - "9000:9000"
+          - "9001:9001"
+        environment:
+          RUSTFS_ACCESS_KEY: udata
+          RUSTFS_SECRET_KEY: udata-secret
+
     mailpit:
         image: axllent/mailpit
         ports:
@@ -55,3 +71,4 @@ volumes:
     db-data:
     broker-data:
     search-data:
+    rustfs-data:

@@ -1,9 +1,8 @@
 from flask import current_app
-from rdflib import RDF, BNode, Graph, Literal, URIRef
+from rdflib import RDF, BNode, Graph, Literal, Node, URIRef
 
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
@@ -28,7 +27,7 @@ from udata.rdf import (
 def dataservice_from_rdf(
     graph: Graph,
     dataservice: Dataservice,
-    node,
+    node: Node | None,
     all_datasets: list[Dataset],
     remote_url_prefix: str | None = None,
     dryrun: bool = False,
@@ -38,6 +37,8 @@ def dataservice_from_rdf(
     """
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.DataService)
+        if node is None:
+            raise RuntimeError("graph contains no service")
 
     d = graph.resource(node)
 
@@ -51,24 +52,48 @@ def dataservice_from_rdf(
     # TODO detect if it's human-readable or not?
     dataservice.machine_documentation_url = url_from_rdf(d, DCAT.endpointDescription)
 
+    owner = dataservice.organization or dataservice.owner
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataservice, dryrun=dryrun)
+        contact_points_from_rdf(d, rdf_entity, role, owner, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataservice.contact_points = [  # Flattened list of contact points
         contact_point for role in roles for contact_point in role
     ] or dataservice.contact_points
 
+    harvested_datasets = [dataset for dataset in all_datasets if dataset is not None]
+
     for dataset_node in d.objects(DCAT.servesDataset):
+        # This node references a dataset, it does not define it: the definition lives in
+        # another graph — always so for CSW, where each record is parsed as its own graph —
+        # and sometimes in another catalog entirely, in which case nothing can be attached.
+        # GeoDCAT-AP writes the reference either as a `DCT.identifier` or, when the source
+        # identifier is a URL, as the node URI alone.
         id = dataset_node.value(DCT.identifier)
-        dataset = next(
-            (d for d in all_datasets if d is not None and d.harvest.remote_id == id), None
+        uri = (
+            dataset_node.identifier.toPython()
+            if isinstance(dataset_node.identifier, URIRef)
+            else None
         )
 
-        if dataset is None:
+        dataset = next(
+            (
+                dataset
+                for dataset in harvested_datasets
+                if (id is not None and dataset.harvest.remote_id == id)
+                or (uri is not None and dataset.harvest.uri == uri)
+            ),
+            None,
+        )
+
+        if dataset is None and id is not None:
             # We try with `endswith` because Europe XSLT have problems with IDs. Sometimes they are prefixed with the domain of the catalog, sometimes not.
             dataset = next(
-                (d for d in all_datasets if d is not None and d.harvest.remote_id.endswith(id)),
+                (
+                    dataset
+                    for dataset in harvested_datasets
+                    if dataset.harvest.remote_id.endswith(id)
+                ),
                 None,
             )
 
@@ -80,16 +105,16 @@ def dataservice_from_rdf(
     if license is not None:
         dataservice.license = License.guess(license)
 
-    if not dataservice.harvest:
-        dataservice.harvest = HarvestDataserviceMetadata()
-
+    dataservice.set_harvested()
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     dataservice.harvest.remote_url = remote_url_from_rdf(
         d, graph, remote_url_prefix=remote_url_prefix
     )
     dataservice.harvest.created_at = rdf_value(d, DCT.created)
     dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
-    dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
+    dataservice.harvest.modified_at = rdf_value(d, DCT.modified)
+
+    dataservice.metadata_modified_at = dataservice.harvest.modified_at
 
     dataservice.tags = themes_from_rdf(d)
 

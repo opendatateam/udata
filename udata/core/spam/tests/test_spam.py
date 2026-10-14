@@ -260,6 +260,18 @@ class SpamTest(APITestCase):
         user = UserFactory(about="Normal bio", website="https://example.com")
         self.assertFalse(self.has_spam_report(user))
 
+    @pytest.mark.options(SPAM_WORDS=["spam"], SPAM_ALLOWED_LANGS=["fr"])
+    def test_user_website_is_not_a_forbidden_language(self):
+        """langdetect strips URLs before analysing, so a bare URL has nothing left to detect."""
+        user = UserFactory(website="https://example.com/organizations/centre-de-la-propriete")
+        self.assertFalse(self.has_spam_report(user))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"], SPAM_ALLOWED_LANGS=["fr"])
+    def test_text_without_detectable_language_is_not_flagged(self):
+        """A text made of digits only has no language, hence no forbidden one."""
+        dataset = DatasetFactory(title="Titre court", description="1234567890 " * 5)
+        self.assertFalse(self.has_spam_report(dataset))
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_certified_org_dataset_not_flagged(self):
         org = OrganizationFactory(badges=[OrganizationBadge(kind=CERTIFIED)])

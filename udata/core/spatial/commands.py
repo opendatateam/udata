@@ -21,8 +21,14 @@ from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
 log = logging.getLogger(__name__)
 
 
-DEFAULT_GEOZONES_FILE = "https://www.data.gouv.fr/datasets/r/a1bb263a-6cc7-4871-ab4f-2470235a67bf"
-DEFAULT_LEVELS_FILE = "https://www.data.gouv.fr/datasets/r/e0206442-78b3-4a00-b71c-c065d20561c8"
+# Zones 2026 https://www.data.gouv.fr/datasets/geozones?resource_id=2238e0eb-e48d-475c-9dd3-8eae3a86136b
+DEFAULT_GEOZONES_FILE = (
+    "https://www.data.gouv.fr/api/1/datasets/r/2238e0eb-e48d-475c-9dd3-8eae3a86136b"
+)
+# Levels 2026 https://www.data.gouv.fr/datasets/geozones?resource_id=c5194419-2ffd-4c04-a9de-713f3cf8b3a5
+DEFAULT_LEVELS_FILE = (
+    "https://www.data.gouv.fr/api/1/datasets/r/c5194419-2ffd-4c04-a9de-713f3cf8b3a5"
+)
 
 
 @cli.group("spatial")
@@ -50,6 +56,7 @@ def load_zones(col, json_geozones):
             "code": geozone["codeINSEE"],
             "name": geozone["nom"],
             "uri": geozone["uri"],
+            "ancestors": geozone.get("ancestors", []),
         }
         try:
             col.objects(id=geozone["_id"]).modify(
@@ -99,7 +106,11 @@ def load(geozones_file, levels_file, drop=False):
     """
     log.info("Loading GeoZones levels")
     if levels_file.startswith("http"):
-        json_levels = requests.get(levels_file).json()
+        response = requests.get(levels_file)
+        # Raise on HTTP errors so a transient error page from the remote server
+        # surfaces clearly instead of an opaque JSONDecodeError on the HTML body.
+        response.raise_for_status()
+        json_levels = response.json()
     else:
         with open(levels_file) as f:
             json_levels = json.load(f)
@@ -119,7 +130,9 @@ def load(geozones_file, levels_file, drop=False):
 
     log.info("Loading Zones")
     if geozones_file.startswith("http"):
-        json_geozones = requests.get(geozones_file).json()
+        response = requests.get(geozones_file)
+        response.raise_for_status()
+        json_geozones = response.json()
     else:
         with open(geozones_file) as f:
             json_geozones = json.load(f)

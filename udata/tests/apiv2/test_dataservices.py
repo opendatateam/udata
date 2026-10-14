@@ -12,3 +12,21 @@ class DataserviceSearchAPIV2Test(APITestCase):
 
         response = self.get("/api/2/dataservices/search/?model=malicious")
         self.assert200(response)
+
+    def test_dataservice_search_single_tag(self):
+        tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
+        DataserviceFactory(tags=["unrelated"])
+
+        response = self.get("/api/2/dataservices/search/?tag=my-tag")
+        self.assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
+    def test_dataservice_search_multiple_tags(self):
+        tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
+        DataserviceFactory(tags=["my-tag"])
+
+        response = self.get("/api/2/dataservices/search/?tag=my-tag&tag=other")
+        self.assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)

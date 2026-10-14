@@ -111,6 +111,42 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
             assert task.name in result.output
             assert task.schedule_display in result.output
 
+    def test_scheduled_jobs_flags_unknown_job(self):
+        PeriodicTask.objects.create(
+            task=JOB_NAME,
+            name="known",
+            description="I'm a scheduled job",
+            enabled=True,
+            crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
+        )
+        PeriodicTask.objects.create(
+            task="removed-job",
+            name="orphan",
+            description="My job has been removed from the code",
+            enabled=True,
+            crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
+        )
+        result = self.cli("job scheduled")
+
+        lines = {
+            line.split(":")[0]: line for line in result.output.splitlines() if "Tip" not in line
+        }
+        assert lines.keys() == {"known", "orphan"}
+        assert "unknown job" in lines["orphan"]
+        assert "unknown job" not in lines["known"]
+
+    def test_unschedule_unknown_job(self):
+        PeriodicTask.objects.create(
+            task="removed-job",
+            name="orphan",
+            description="My job has been removed from the code",
+            enabled=True,
+            crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
+        )
+        self.cli("job unschedule removed-job")
+
+        assert len(PeriodicTask.objects(task="removed-job")) == 0
+
     def test_unschedule_job(self):
         PeriodicTask.objects.create(
             task=JOB_NAME,

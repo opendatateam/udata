@@ -123,8 +123,15 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         topic_reuse = ReuseFactory(topic="transport_and_mobility", type="api")
         type_reuse = ReuseFactory(topic="health", type="application")
 
-        # filter on tag
+        # filter on single tag
         response = self.get(url_for("api.reuses", tag="my-tag"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_reuse.id)
+
+        # filter on multiple tags should exclude partial matches
+        ReuseFactory(tags=["my-tag"], topic="health", type="api")
+        response = self.get(url_for("api.reuses", tag=["my-tag", "other"]))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_reuse.id)
@@ -434,6 +441,24 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.reuses", dataset=other_dataset.id))
         assert200(response)
         assert response.json["total"] == 0
+
+    def test_reuse_api_write_endpoints_reject_a_non_object_body(self):
+        user = self.login()
+        reuse = ReuseFactory(owner=user)
+
+        for url, method in (
+            (url_for("api.reuse", reuse=reuse), self.put),
+            (url_for("api.reuse_add_dataset", reuse=reuse), self.post),
+            (url_for("api.reuse_add_dataservice", reuse=reuse), self.post),
+        ):
+            for body in ([1, 2, 3], 1, "id"):
+                response = method(url, body)
+                assert400(response)
+                assert response.json["errors"] == {"request": "expecting a JSON object"}
+
+        reuse.reload()
+        assert reuse.datasets == []
+        assert reuse.dataservices == []
 
     def test_reuse_api_add_dataset(self):
         """It should add a dataset to a reuse from the API"""

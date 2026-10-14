@@ -17,7 +17,6 @@ class UserModelTest(APITestCase):
         org = OrganizationFactory(editors=[user])
         discussion = DiscussionFactory(
             user=user,
-            subject=org,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=user),
@@ -55,6 +54,7 @@ class UserModelTest(APITestCase):
         )
         discussion_with_other = DiscussionFactory(
             user=other_user,
+            subject=dataset,
             discussion=[
                 MessageDiscussionFactory(posted_by=other_user),
                 MessageDiscussionFactory(posted_by=user),

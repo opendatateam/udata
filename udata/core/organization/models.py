@@ -13,6 +13,7 @@ from mongoengine.fields import (
     EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
+    IntField,
     ListField,
     MapField,
     ReferenceField,
@@ -24,15 +25,16 @@ from werkzeug.utils import cached_property
 from udata.api import api
 from udata.api import fields as api_fields
 from udata.api_fields import field, generate_fields, required_if
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.checks import check_is_email
 from udata.core.edito_blocs.base import Bloc
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
-from udata.core.storages import avatars, default_image_basename
-from udata.core.user.models import User
+from udata.core.storages import avatars, default_image_basename, images
+from udata.core.user.models import User, user_with_email_ref_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
@@ -107,14 +109,18 @@ class Team(EmbeddedDocument):
 
 @generate_fields()
 class Member(EmbeddedDocument):
-    user = field(ReferenceField(User), readonly=True)
+    user = field(
+        ReferenceField(User),
+        nested_fields=user_with_email_ref_fields,
+        readonly=True,
+    )
     role = field(StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE))
     since = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
 
     @property
     @field(readonly=True)
     def label(self):
-        return ORG_ROLES[self.role]
+        return ORG_ROLES[self.role].label
 
 
 @generate_fields()
@@ -135,7 +141,12 @@ class MembershipRequest(EmbeddedDocument):
     """
 
     id = field(AutoUUIDField(), readonly=True)
-    user = field(ReferenceField(User), allow_null=True, readonly=True)
+    user = field(
+        ReferenceField(User),
+        nested_fields=user_with_email_ref_fields,
+        allow_null=True,
+        readonly=True,
+    )
     status = field(StringField(choices=list(MEMBERSHIP_STATUS), default="pending"), readonly=True)
 
     created = field(DateTimeField(default=lambda: datetime.now(UTC), required=True), readonly=True)
@@ -194,7 +205,10 @@ class OrganizationBadge(Badge):
 
 class OrganizationBadgeMixin(BadgeMixin):
     badges = field(
-        BadgesList(OrganizationBadge), show_as_ref=True, **BadgeMixin.default_badges_list_params
+        BadgesList(OrganizationBadge),
+        show_as_ref=True,
+        filterable={"key": "badge"},
+        **BadgeMixin.default_badges_list_params,
     )
     __badges__ = BADGES
 
@@ -211,7 +225,22 @@ org_permissions_fields = api.model(
 )
 
 
-@generate_fields(read_mask_exclude=["presentation_blocs"])
+def filter_by_name(base_query, value):
+    # Case-insensitive so that the uniqueness check on organization creation
+    # catches names differing only by case.
+    return base_query.filter(name__iexact=value)
+
+
+@generate_fields(
+    searchable=True,
+    additional_sorts=[
+        {"key": "reuses", "value": "metrics.reuses"},
+        {"key": "datasets", "value": "metrics.datasets"},
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
+    read_mask_exclude=["presentation_blocs"],
+)
 class Organization(
     Auditable,
     SpamMixin,
@@ -221,7 +250,12 @@ class Organization(
     Datetimed,
     Document[OrganizationQuerySet],
 ):
-    name = field(StringField(required=True), show_as_ref=True)
+    name = field(
+        StringField(required=True),
+        show_as_ref=True,
+        sortable=True,
+        filterable={"query": filter_by_name},
+    )
     acronym = field(StringField(max_length=128), show_as_ref=True)
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -242,16 +276,47 @@ class Organization(
             max_size=LOGO_MAX_SIZE,
             thumbnails=LOGO_SIZES,
         ),
+        # Read-only: the logo is managed through the dedicated upload endpoint
+        # (POST /organizations/<id>/logo/). Left writable, patch() would set it
+        # from the raw URL echoed back by clients, wiping thumbnails/original.
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_LOGO_SIZE,
         },
     )
-    business_number_id = field(StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret])
+    banner_color = field(
+        StringField(regex=r"^#[0-9a-fA-F]{6}$"),
+        description="Hex color code (e.g. #000091) for the organization page banner",
+    )
+    banner_image = field(
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+            # No thumbnails: they are square center-crops, wrong for a banner.
+        ),
+        # Read-only: managed through the dedicated upload endpoint
+        readonly=True,
+        description="The organization page banner image URL",
+    )
+    banner_image_position = field(
+        IntField(min_value=0, max_value=100, default=50),
+        description=(
+            "Vertical position of the banner image, as a percentage matching "
+            "CSS background-position-y (0 = top, 50 = centered, 100 = bottom)"
+        ),
+    )
+    business_number_id = field(
+        StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret], filterable={}
+    )
 
     members = field(ListField(EmbeddedDocumentField(Member)), readonly=True)
     teams = field(ListField(EmbeddedDocumentField(Team)), readonly=True)
-    requests = field(ListField(EmbeddedDocumentField(MembershipRequest)), readonly=True)
+    # Deliberately not wrapped with `field()`: membership requests and invitations carry
+    # the identity of the applicants and free-text comments about them, so they are never
+    # part of the organization API payload. They are served by the dedicated, permission
+    # checked `/organizations/<org>/membership/` endpoint.
+    requests = ListField(EmbeddedDocumentField(MembershipRequest))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), readonly=True)
     zone = field(StringField(), readonly=True)
@@ -274,7 +339,7 @@ class Organization(
         ),
     )
 
-    deleted = field(DateTimeField(), readonly=True)
+    deleted = field(DateTimeField())
 
     meta = {
         "indexes": [
@@ -416,11 +481,7 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if (
-                request.user == user
-                and request.status == "pending"
-                and request.kind != "invitation"
-            ):
+            if request.user == user and request.status == "pending":
                 return request
         return None
 
@@ -479,6 +540,17 @@ class Organization(
     def views_count(self):
         return self.metrics.get("views", 0)
 
+    def accept_membership_request(self, membership_request, handled_by):
+        membership_request.status = "accepted"
+        membership_request.handled_by = handled_by
+        membership_request.handled_on = datetime.now(UTC)
+        member = Member(user=membership_request.user, role=membership_request.role)
+        self.members.append(member)
+        self.count_members()
+        self.save()
+        MembershipRequest.after_handle.send(membership_request, org=self)
+        return member
+
     def add_membership_request(self, membership_request):
         self.requests.append(membership_request)
         self.save()
@@ -504,8 +576,6 @@ class Organization(
             raise FieldValidationError(field="user", message="Either user or email is required")
 
         if email:
-            from udata.core.contact_point.models import check_is_email
-
             check_is_email(email, field="email")
 
         if role not in ORG_ROLES:
@@ -513,9 +583,8 @@ class Organization(
 
         # Resolve email to existing user
         if email and not user:
-            from udata.core.user.models import User
-
-            user = User.objects(email=email.lower()).first()
+            # Accounts keep the case of their email as typed at registration.
+            user = User.objects(email__iexact=email).first()
             if user:
                 email = None
 
@@ -575,7 +644,6 @@ class Organization(
             self.metrics["datasets_reuses_by_months"] = get_stock_metrics(
                 Reuse.objects(datasets__in=Dataset.objects(organization=self)).visible()
             )
-
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
@@ -594,9 +662,10 @@ class Organization(
         from udata.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
-        self.metrics["dataservices_by_months"] = get_stock_metrics(
-            Dataservice.objects(organization=self).visible(), date_label="created_at"
-        )
+        if self.compute_aggregate_metrics:
+            self.metrics["dataservices_by_months"] = get_stock_metrics(
+                Dataservice.objects(organization=self).visible(), date_label="created_at"
+            )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

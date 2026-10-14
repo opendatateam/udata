@@ -3,12 +3,12 @@ from flask import abort
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.organization.models import Organization
-from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 
-from .api import (
-    discussion_fields,
+from .models import (
+    Discussion,
+    Message,
     discussion_permissions_fields,
-    message_fields,
     message_permissions_fields,
 )
 from .search import DiscussionSearch
@@ -18,13 +18,15 @@ ns = apiv2.namespace("discussions", "Discussion related operations")
 search_parser = DiscussionSearch.as_request_parser(store_missing=False)
 
 # Register nested models in apiv2
-apiv2.inherit("UserReference", user_ref_fields)
+apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("DiscussionMessagePermissions", message_permissions_fields)
-apiv2.inherit("DiscussionMessage", message_fields)
+apiv2.inherit("Message (read)", Message.__read_fields__)
 apiv2.inherit("DiscussionPermissions", discussion_permissions_fields)
-apiv2.inherit("Discussion", discussion_fields)
-discussion_page_fields = apiv2.model("DiscussionPage", fields.search_pager(discussion_fields))
+apiv2.inherit("Discussion (read)", Discussion.__read_fields__)
+discussion_page_fields = apiv2.model(
+    "DiscussionPage", fields.search_pager(Discussion.__read_fields__)
+)
 
 
 @ns.route("/search/", endpoint="discussion_search")

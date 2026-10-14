@@ -4,7 +4,7 @@ from bson import DBRef
 from flask import url_for
 from flask_login import current_user
 from flask_restx import inputs
-from mongoengine import DO_NOTHING, NULLIFY, Q, signals
+from mongoengine import NULLIFY, Q, signals
 from mongoengine.fields import (
     DateTimeField,
     DictField,
@@ -15,7 +15,6 @@ from mongoengine.fields import (
 )
 
 from udata.api_fields import field, generate_fields
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
@@ -65,7 +64,6 @@ def filter_by_subject_type(base_query, filter_value):
 class Report(Document[ReportQuerySet]):
     by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
         description="Only set if a user was connected when reporting an element.",
         readonly=True,
         allow_null=True,
@@ -73,9 +71,7 @@ class Report(Document[ReportQuerySet]):
 
     # Here we use the lazy version of `GenericReferenceField` because we could point to a
     # non existant model (if it was deleted we want to keep the report data).
-    subject = field(
-        GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING, choices=REPORTABLE_MODELS)
-    )
+    subject = field(GenericLazyReferenceField(choices=REPORTABLE_MODELS, required=True))
 
     subject_deleted_at = field(
         DateTimeField(),
@@ -84,7 +80,6 @@ class Report(Document[ReportQuerySet]):
     )
     subject_deleted_by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
         allow_null=True,
         readonly=True,
     )
@@ -113,7 +108,6 @@ class Report(Document[ReportQuerySet]):
     )
     dismissed_by = field(
         ReferenceField(User, reverse_delete_rule=NULLIFY),
-        nested_fields=user_ref_fields,
         allow_null=True,
     )
 

@@ -1,16 +1,22 @@
 import pytest
+from bson import DBRef
+from flask import url_for
+from mongoengine.connection import get_db
 
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
+from udata.core.discussions.models import Discussion
 from udata.core.organization import constants as org_constants
 from udata.core.organization.constants import COMPANY, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.db.migrations import load_migration
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -385,6 +391,34 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "Question sur les données" in titles
 
+    def test_migration_unindexes_the_discussions_it_deletes(self):
+        """The migration deletes with raw queries, so `post_delete` never fires.
+
+        Without an explicit unindexing the deleted discussions would stay in the
+        index, making the search total count documents that no longer exist.
+        """
+        discussion = DiscussionFactory(title="Discussion sur un sujet obsolète", user=UserFactory())
+        license = LicenseFactory()
+
+        self.refresh_index()
+        response = self.get("/api/2/discussions/search/?q=obsolète")
+        self.assert200(response)
+        assert response.json["total"] == 1
+
+        # Turn it into a discussion the model now rejects, as those written
+        # before `Discussion.subject` was restricted.
+        Discussion._get_collection().update_one(
+            {"_id": discussion.id},
+            {"$set": {"subject": {"_cls": "License", "_ref": DBRef("license", license.id)}}},
+        )
+
+        load_migration("2026-07-29-delete-discussions-on-unsupported-subjects.py").migrate(get_db())
+
+        self.refresh_index()
+        response = self.get("/api/2/discussions/search/?q=obsolète")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
     def test_post_search(self):
         """Test post search endpoint."""
         PostFactory(name="Actualités open data", headline="Les dernières nouvelles")
@@ -396,6 +430,44 @@ class SearchIntegrationTest(APITestCase):
         assert response.json["total"] >= 1
         names = [p["name"] for p in response.json["data"]]
         assert "Actualités open data" in names
+
+    def test_post_search_follows_publication_state(self):
+        """A post should be searchable only while it is published."""
+        post = PostFactory(name="Draft not yet published", published=None)
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+        self.login(AdminFactory())
+        self.assert200(self.post(url_for("api.publish_post", post=post)))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(post.id)]
+
+        self.assert200(self.delete(url_for("api.publish_post", post=post)))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?q=draft")
+        self.assert200(response)
+        assert response.json["total"] == 0
+
+    def test_post_filter_by_tags(self):
+        both = PostFactory(tags=["transport", "environnement"])
+        PostFactory(tags=["transport"])
+        PostFactory(tags=["sante"])
+
+        self.refresh_index()
+
+        response = self.get("/api/2/posts/search/?tag=transport&tag=environnement")
+        self.assert200(response)
+        assert [p["id"] for p in response.json["data"]] == [str(both.id)]
 
     def test_dataset_filter_by_multiple_tags(self):
         """Test filtering datasets by multiple tags."""
@@ -533,6 +605,26 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "CC-BY" in titles
         assert "ODbL" not in titles
+
+    def test_dataset_filter_by_geozone_with_ancestors(self):
+        region = GeoZoneFactory(id="fr:region:53")
+        departement = GeoZoneFactory(id="fr:departement:29", ancestors=[region.id])
+        elsewhere = GeoZoneFactory(id="fr:departement:75")
+        DatasetFactory(title="Département", spatial=SpatialCoverageFactory(zones=[departement]))
+        DatasetFactory(title="Région", spatial=SpatialCoverageFactory(zones=[region]))
+        DatasetFactory(title="Ailleurs", spatial=SpatialCoverageFactory(zones=[elsewhere]))
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?geozone=fr:departement:29")
+        self.assert200(response)
+        assert {d["title"] for d in response.json["data"]} == {"Département"}
+
+        response = self.get(
+            "/api/2/datasets/search/?geozone=fr:departement:29&include_geozone_ancestors=true"
+        )
+        self.assert200(response)
+        assert {d["title"] for d in response.json["data"]} == {"Département", "Région"}
 
     def test_dataset_filter_by_organization(self):
         org = OrganizationFactory()

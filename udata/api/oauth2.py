@@ -318,6 +318,20 @@ def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
 
+def oauth_error_response(error: OAuth2Error):
+    """Render an `OAuth2Error` the way RFC 6749 §5.2 mandates: the error code in
+    a JSON body, under the error's own status code, with the headers authlib
+    prepared for it — §5.1 asks for `Cache-Control: no-store` on responses tied to
+    an OAuth session, and `get_body()` reflects back the client's `state`.
+
+    Returning `error.error` instead — as authlib's Flask example does — sends the
+    bare code as a 200 `text/html` body, which every client reads as a success:
+    the consent screen then renders an "undefined wants to access your account"
+    prompt instead of showing its error state.
+    """
+    return jsonify(dict(error.get_body())), error.status_code, error.get_headers()
+
+
 @blueprint.route("/client_info", methods=["GET"])
 def client_info(*args, **kwargs):
     if not current_user or not current_user.is_authenticated:
@@ -326,7 +340,7 @@ def client_info(*args, **kwargs):
     try:
         grant = oauth.get_consent_grant(end_user=current_user)
     except OAuth2Error as error:
-        return error.error
+        return oauth_error_response(error)
 
     return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
 
@@ -334,21 +348,7 @@ def client_info(*args, **kwargs):
 @blueprint.route("/authorize", methods=["GET", "POST"])
 @login_required
 def authorize(*args, **kwargs):
-    if request.method == "GET":
-        try:
-            grant = oauth.get_consent_grant(end_user=current_user)
-        except OAuth2Error as error:
-            return error.error
-        # Bypass authorization screen for internal clients
-        # It's not used right now…
-        if grant.client.internal:
-            return oauth.create_authorization_response(grant_user=current_user)
-
-        if wants_json():
-            return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
-
-        return render_template("api/oauth_authorize.html", grant=grant)
-    elif request.method == "POST":
+    if request.method == "POST":
         accept = "accept" in request.form
         decline = "decline" in request.form
         if accept and not decline:
@@ -357,15 +357,32 @@ def authorize(*args, **kwargs):
             grant_user = None
         return oauth.create_authorization_response(grant_user=grant_user)
 
+    # GET, and HEAD which Flask routes here too since it always adds HEAD
+    # alongside GET. RFC 9110 §9.3.2 requires HEAD to behave like GET, minus
+    # the response body, which Werkzeug strips for us.
+    try:
+        grant = oauth.get_consent_grant(end_user=current_user)
+    except OAuth2Error as error:
+        return oauth_error_response(error)
+    # Bypass authorization screen for internal clients
+    # It's not used right now…
+    if grant.client.internal:
+        return oauth.create_authorization_response(grant_user=current_user)
 
-@blueprint.route("/error")
-def oauth_error():
-    return render_template("api/oauth_error.html")
+    if wants_json():
+        return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
+
+    return render_template("api/oauth_authorize.html", grant=grant)
 
 
 def query_client(client_id):
     """Fetch client by ID"""
-    return OAuth2Client.objects(id=ObjectId(client_id)).first()
+    # `client_id` comes straight from the request (query string or POST body),
+    # so it can be anything. An unparseable one is an unknown client: return
+    # `None` and let authlib answer with an `invalid_client` OAuth error.
+    if not ObjectId.is_valid(client_id):
+        return None
+    return OAuth2Client.objects(id=client_id).first()
 
 
 def save_token(token, request):

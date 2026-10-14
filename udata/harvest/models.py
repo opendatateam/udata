@@ -1,6 +1,7 @@
 import logging
 from collections import Counter, OrderedDict
 from datetime import UTC, datetime
+from typing import NamedTuple
 from urllib.parse import urlparse
 
 from flask import url_for
@@ -15,22 +16,24 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
+from mongoengine.signals import post_save
 from werkzeug.utils import cached_property
 
 from udata.api import fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.slug_fields import SlugField
+from udata.mongo.url_field import URLField
 
 from .api_fields import source_permissions_fields
+from .signals import harvest_source_created
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +72,9 @@ HARVEST_ITEM_STATUS = OrderedDict(
 DEFAULT_HARVEST_FREQUENCY = "manual"
 DEFAULT_HARVEST_JOB_STATUS = "pending"
 DEFAULT_HARVEST_ITEM_STATUS = "pending"
+
+
+Harvestable = Dataset | Dataservice
 
 
 @generate_fields()
@@ -175,21 +181,111 @@ class HarvestSourceQuerySet(OwnedQuerySet):
         return self(deleted=None)
 
 
+# `udata.harvest.backends` imports this module, so the two checks below resolve
+# it lazily at call time rather than at import time.
+def check_backend_is_enabled(value, field, **_kwargs):
+    from .backends import get_enabled_backends
+
+    # An empty backend is what `required` on the field is for.
+    if not value:
+        return
+    if value not in get_enabled_backends():
+        raise FieldValidationError(f'Unknown backend "{value}"', field=field)
+
+
+class ConfigSection(NamedTuple):
+    """A list of `config` entries validated against specs declared by the backend."""
+
+    key: str
+    specs: list
+    label: str
+
+
+def check_config_matches_backend(_value, data, obj, **_kwargs):
+    """Validate `config` against the specs declared by the selected backend.
+
+    Registered on both `backend` and `config` because either one changing can
+    invalidate the pair, and a check only runs for the field that was modified.
+    """
+    from .backends import get_enabled_backends
+
+    backend = get_enabled_backends().get(data.get("backend", obj.backend))
+    config = data.get("config", obj.config)
+    if backend is None or not config:
+        return
+    if not isinstance(config, dict):
+        raise FieldValidationError("The configuration should be an object", field="config")
+
+    for section in (
+        ConfigSection("filters", backend.filters, "filter"),
+        ConfigSection("extra_configs", backend.extra_configs, "extra config"),
+    ):
+        for entry in config.get(section.key) or []:
+            if not isinstance(entry, dict) or not ("key" in entry and "value" in entry):
+                raise FieldValidationError(
+                    "A field should have both key and value properties", field="config"
+                )
+            specs = next((f for f in section.specs if f.key == entry["key"]), None)
+            if not specs:
+                raise FieldValidationError(
+                    f'Unknown {section.label} key "{entry["key"]}" for "{backend.name}" backend',
+                    field="config",
+                )
+            if not isinstance(entry["value"], specs.type):
+                raise FieldValidationError(
+                    f'"{specs.key}" {section.label} should be of type "{specs.type.__name__}"',
+                    field="config",
+                )
+
+    features = config.get("features") or {}
+    if not isinstance(features, dict):
+        raise FieldValidationError("Features should be an object", field="config")
+    for key, enabled in features.items():
+        if not isinstance(enabled, bool):
+            raise FieldValidationError("A feature should be a boolean", field="config")
+        if not any(f.key == key for f in backend.features):
+            raise FieldValidationError(
+                f'Unknown feature "{key}" for "{backend.name}" backend', field="config"
+            )
+
+
+# Both must run whatever the payload does with their field: an update can change the
+# backend without resending the config (and the other way around), and a stored backend
+# that is no longer enabled must keep being rejected.
+check_backend_is_enabled.always_run = True
+check_config_matches_backend.always_run = True
+
+
 @generate_fields(searchable=True)
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
-    name = field(StringField(max_length=255), description="The source display name")
+    name = field(
+        StringField(max_length=255, required=True),
+        description="The source display name",
+    )
     slug = field(
-        SlugField(max_length=255, required=True, unique=True, populate_from="name", update=True),
+        SlugField(
+            max_length=255,
+            required=True,
+            unique=True,
+            populate_from="name",
+            update=True,
+            follow=True,
+        ),
         readonly=True,
         description="The source permalink string",
     )
     description = field(StringField(), markdown=True, description="The source description")
-    url = field(StringField(required=True), description="The source base URL")
+    url = field(URLField(required=True), description="The source base URL")
     backend = field(
         StringField(required=True),
+        checks=[check_backend_is_enabled, check_config_matches_backend],
         description="The source backend",
     )
-    config = field(DictField(), description="The configuration as key-value pairs")
+    config = field(
+        DictField(),
+        checks=[check_config_matches_backend],
+        description="The configuration as key-value pairs",
+    )
     periodic_task = ReferenceField("PeriodicTask", reverse_delete_rule=NULLIFY)
     created_at = field(
         DateTimeField(default=lambda: datetime.now(UTC), required=True),
@@ -275,8 +371,16 @@ class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
         "queryset_class": HarvestSourceQuerySet,
     }
 
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        if kwargs.get("created"):
+            harvest_source_created.send(document)
+
     def __str__(self):
         return self.name or ""
+
+
+post_save.connect(HarvestSource.post_save, sender=HarvestSource)
 
 
 @generate_fields()
@@ -310,7 +414,7 @@ class HarvestJob(Document):
     items = field(
         ListField(EmbeddedDocumentField(HarvestItem)),
         readonly=True,
-        href=lambda o: url_for("api.harvest_job_items", ident=o.id),
+        href=lambda o: url_for("api.harvest_job_items", job=o.id),
         href_total=lambda o: o.items_total,
         href_extra=lambda o: {
             "by_status": o.items_by_status,
@@ -365,37 +469,18 @@ HarvestSource.__read_fields__["last_job"] = fields.Nested(
 )
 
 
-def archive_harvested_dataset(dataset, reason, dryrun=False):
+def archive_harvested(obj: Harvestable, reason: str, dryrun: bool = False):
     """
-    Archive an harvested dataset, setting extras accordingly.
-    If `dryrun` is True, the dataset is not saved but validated only.
+    Archive an harvested object, setting extras accordingly.
+    If `dryrun` is True, the object is not saved but validated only.
     """
-    log.debug("Archiving dataset %s", dataset.id)
+    log.debug(f"Archiving {obj.__class__.__name__.lower()} {obj.id}")
     archival_date = datetime.now(UTC)
-    dataset.archived = archival_date
-    if not dataset.harvest:
-        dataset.harvest = HarvestDatasetMetadata()
-    dataset.harvest.archived = reason
-    dataset.harvest.archived_at = archival_date
+    obj.archived_at = archival_date
+    obj.set_harvested()
+    obj.harvest.archived_at = archival_date
+    obj.harvest.archived_reason = reason
     if dryrun:
-        dataset.validate()
+        obj.validate()
     else:
-        dataset.save()
-
-
-def archive_harvested_dataservice(dataservice, reason, dryrun=False):
-    """
-    Archive an harvested dataservice, setting extras accordingly.
-    If `dryrun` is True, the dataservice is not saved but validated only.
-    """
-    log.debug("Archiving dataservice %s", dataservice.id)
-    archival_date = datetime.now(UTC)
-    dataservice.archived_at = archival_date
-    if not dataservice.harvest:
-        dataservice.harvest = HarvestDataserviceMetadata()
-    dataservice.harvest.archived_reason = reason
-    dataservice.harvest.archived_at = archival_date
-    if dryrun:
-        dataservice.validate()
-    else:
-        dataservice.save()
+        obj.save()

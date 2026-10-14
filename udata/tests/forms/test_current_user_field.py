@@ -203,10 +203,9 @@ class CurrentUserFieldTest(DBTestCase):
         self.assertIn(security_gettext("Password not provided"), form.errors["password"])
 
     def test_email_validation(self):
-        self.app.config["SECURITY_EMAIL_VALIDATOR_ARGS"] = None
         form = ExtendedRegisterForm.from_json(
             {
-                "email": "a@test.notreal",
+                "email": "a@example.invalid",
                 "password": "passpass",
                 "password_confirm": "passpass",
                 "first_name": "azeaezr",

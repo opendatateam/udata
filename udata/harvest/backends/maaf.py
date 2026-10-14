@@ -5,10 +5,13 @@ from collections import OrderedDict
 from urllib.parse import urljoin
 
 from lxml import etree, html
+from typing_extensions import override
 from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
 from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.models import Dataset
 from udata.harvest.backends import BaseBackend
+from udata.harvest.exceptions import HarvestValidationError
 from udata.harvest.filters import (
     boolean,
     email,
@@ -57,6 +60,14 @@ FREQUENCIES = {
 }
 
 XSD_PATH = os.path.join(os.path.dirname(__file__), "maaf.xsd")
+
+# Descriptors come from a remote, user-supplied URL: entities must never be resolved.
+# Relying on lxml's defaults is not enough, they only block *general* external entities:
+# a parameter entity declared in the internal subset used to be fetched anyway, which is
+# enough to read a local file and smuggle its content back into the document (XXE).
+XML_PARSER = etree.XMLParser(
+    resolve_entities=False, load_dtd=False, no_network=True, huge_tree=False
+)
 
 SSL_COMMENT = """
 Le site exposant les données est protégé par un certificat délivré par
@@ -135,6 +146,7 @@ class MaafBackend(BaseBackend):
     display_name = "MAAF"
     verify_ssl = False
 
+    @override
     def inner_harvest(self):
         """Parse the index pages HTML to find link to dataset descriptors"""
         directories = [self.source.url]
@@ -149,20 +161,18 @@ class MaafBackend(BaseBackend):
                 elif href.lower().endswith(".xml"):
                     # We use the URL as `remote_id` for now, we'll be replace at
                     # the beginning of the process
-                    self.process_dataset(urljoin(directory, href))
-                    if self.has_reached_max_items():
-                        return
+                    self.process_item(urljoin(directory, href), self.process_dataset)
                 else:
                     log.debug("Skip %s", href)
 
-    def inner_process_dataset(self, item: HarvestItem):
-        response = self.get(item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        response = self.get(harvest_item.remote_id)
         xml = self.parse_xml(response.content)
         metadata = xml["metadata"]
 
         # Replace the `remote_id` from the URL to `id`.
-        item.remote_id = metadata["id"]
-        dataset = self.get_dataset(item.remote_id)
+        harvest_item.remote_id = metadata["id"]
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         dataset.title = metadata["title"]
         dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
@@ -224,7 +234,12 @@ class MaafBackend(BaseBackend):
         return dataset
 
     def parse_xml(self, xml):
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml, parser=XML_PARSER)
+        # MAAF descriptors have no DTD: refuse the ones that do rather than import a descriptor
+        # silently stripped of its optional fields. `extract` drops unresolved entity references,
+        # and the optional fields of `schema` accept the resulting None without complaining.
+        if root.getroottree().docinfo.internalDTD is not None:
+            raise HarvestValidationError("Descriptor declares a DTD, which is not allowed")
         self.xsd.validate(root)
         _, tree = dictize(root)
         return self.validate(tree, schema)
@@ -233,6 +248,6 @@ class MaafBackend(BaseBackend):
     def xsd(self):
         if not getattr(self, "_xsd", None):
             with open(XSD_PATH) as f:
-                doc = etree.parse(f)
+                doc = etree.parse(f, parser=XML_PARSER)
             self._xsd = etree.XMLSchema(doc)
         return self._xsd

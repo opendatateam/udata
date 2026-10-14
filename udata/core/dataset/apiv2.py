@@ -8,12 +8,14 @@ from flask_restx import marshal
 
 from udata import search
 from udata.api import API, add_pagination_arguments, apiv2, fields
+from udata.auth import admin_permission
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
+from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
 
@@ -21,19 +23,20 @@ from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
     catalog_schema_fields,
     checksum_fields,
+    dataset_geopf_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
     dataset_permissions_fields,
     resource_fields,
+    resource_geopf_fields,
     resource_harvest_fields,
     resource_internal_fields,
     schema_fields,
     spatial_coverage_fields,
     temporal_coverage_fields,
-    user_ref_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource
+from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -73,8 +76,10 @@ DEFAULT_MASK_APIV2 = ",".join(
         "page",
         "last_update",
         "archived",
+        "doi",
         "quality",
         "harvest",
+        "geopf",
         "internal",
         "contact_points",
         "featured",
@@ -119,6 +124,7 @@ dataset_fields = apiv2.model(
         ),
         "deleted": fields.ISODateTime(description="The deletion date if deleted", readonly=True),
         "archived": fields.ISODateTime(description="The archival date if archived"),
+        "doi": fields.String(description="The DOI minted for this dataset", readonly=True),
         "featured": fields.Boolean(description="Is the dataset featured"),
         "private": fields.Boolean(
             description="Is the dataset private to the owner or the organization"
@@ -183,6 +189,13 @@ dataset_fields = apiv2.model(
             description="Dataset harvest metadata attributes",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
@@ -191,7 +204,7 @@ dataset_fields = apiv2.model(
             Organization.__ref_fields__, allow_null=True, description="The producer organization"
         ),
         "owner": fields.Nested(
-            user_ref_fields, allow_null=True, description="The user information"
+            User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
@@ -274,7 +287,7 @@ specific_resource_fields = apiv2.model(
 
 apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
-apiv2.inherit("UserReference", user_ref_fields)
+apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
 apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
@@ -283,6 +296,8 @@ apiv2.inherit("GeoJSON", geojson)
 apiv2.inherit("Checksum", checksum_fields)
 apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
 apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
+apiv2.inherit("GeopfDatasetMetadata", dataset_geopf_fields)
+apiv2.inherit("GeopfResourceMetadata", resource_geopf_fields)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
@@ -345,6 +360,21 @@ class DatasetAPI(API):
         return dataset
 
 
+def check_extras_are_writable(extras_field, keys) -> None:
+    """Reject a payload carrying a platform-reserved extra, never ignore it.
+
+    These endpoints write exactly the keys they are given — a partial merge for the
+    PUTs, a list of keys to drop for the DELETEs — so every key is an explicit write
+    intent. Silently dropping one would answer 200/204 to a caller whose write was
+    discarded, unlike the form path where a full-object update echoes what it read.
+    """
+    if admin_permission.can():
+        return
+    reserved = [key for key in keys if extras_field.is_reserved(key)]
+    if reserved:
+        apiv2.abort(400, f"Extras keys reserved to platform services: {', '.join(reserved)}")
+
+
 @ns.route("/<dataset:dataset>/extras/", endpoint="dataset_extras", doc=common_doc)
 @apiv2.response(400, "Wrong payload format, dict expected")
 @apiv2.response(400, "Wrong payload format, list expected")
@@ -370,12 +400,20 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit"].test()
+        check_extras_are_writable(Dataset.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             dataset.extras.pop(key, None)
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
+        # Deliberately a full save here, unlike the resource extras endpoints below,
+        # which go through the targeted Dataset.update_resource_extras(). A save is
+        # O(N) in the number of embedded resources (~3.4s on a 10k-resources dataset),
+        # but this endpoint sees 2 real calls per 50 days in production against 2.7M
+        # for the resource one: the cost is never paid in practice, and save() keeps
+        # the full extras validation and the search reindexing without us restating
+        # them by hand.
         dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
@@ -386,9 +424,12 @@ class DatasetExtrasAPI(API):
         data = request.json
         if not isinstance(data, list):
             apiv2.abort(400, "Wrong payload format, list expected")
+        if not all(isinstance(key, str) for key in data):
+            apiv2.abort(400, "Wrong payload format, extras keys must be strings")
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
+        check_extras_are_writable(Dataset.extras, data)
         for key in data:
             try:
                 del dataset.extras[key]
@@ -505,7 +546,7 @@ class DatasetSchemasAPI(API):
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
     def get(self, rid):
-        dataset = Dataset.objects(resources__id=rid).first()
+        dataset = get_dataset_by_resource_id(rid)
         if dataset:
             if not dataset.permissions["read"].can():
                 if not dataset.private and dataset.deleted:
@@ -557,13 +598,14 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
+        check_extras_are_writable(Resource.extras, data)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
             resource.extras.pop(key, None)
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras
 
     @apiv2.secure
@@ -573,14 +615,17 @@ class ResourceExtrasAPI(ResourceMixin, API):
         data = request.json
         if not isinstance(data, list):
             apiv2.abort(400, "Wrong payload format, list expected")
+        if not all(isinstance(key, str) for key in data):
+            apiv2.abort(400, "Wrong payload format, extras keys must be strings")
         if dataset.deleted:
             apiv2.abort(410, "Dataset has been deleted")
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
+        check_extras_are_writable(Resource.extras, data)
         try:
             for key in data:
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, "Key not found in existing extras")
-        resource.save(signal_kwargs={"ignores": ["post_save"]})
+        dataset.update_resource_extras(resource)
         return resource.extras, 204

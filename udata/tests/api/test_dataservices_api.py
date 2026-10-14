@@ -83,9 +83,16 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
         assert400(response)
 
-        # filter on tag
+        # filter on single tag
         tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
         response = self.get(url_for("api.dataservices", tag="my-tag"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
+        # filter on multiple tags should exclude partial matches
+        DataserviceFactory(tags=["my-tag"])
+        response = self.get(url_for("api.dataservices", tag=["my-tag", "other"]))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_dataservice.id)
@@ -303,6 +310,18 @@ class DataserviceAPITest(APITestCase):
         dataservice.reload()
         self.assertEqual(dataservice.title, "Undeleted title")
         self.assertIsNone(dataservice.deleted_at)
+
+    def test_dataservice_api_patch_deleted_with_non_object_body(self):
+        user = self.login()
+        dataservice = DataserviceFactory(owner=user, deleted_at=datetime.now(UTC))
+
+        for body in ([1, 2, 3], 1, "deleted_at"):
+            response = self.patch(url_for("api.dataservice", dataservice=dataservice), body)
+            self.assert400(response)
+            self.assertEqual(response.json["errors"], {"request": "expecting a JSON object"})
+
+        dataservice.reload()
+        self.assertIsNotNone(dataservice.deleted_at)
 
     def test_dataservice_api_list_owned(self) -> None:
         """Should filter out private dataservices if not owner"""

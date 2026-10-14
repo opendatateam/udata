@@ -6,15 +6,13 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.search import DataserviceApiParser
+from udata.core.dataservices.search import parse_dataservice_filters
 from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
-from udata.core.organization.api import OrgApiParser
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
-from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.tags.csv import TagCsvAdapter
 from udata.core.tags.models import Tag
@@ -22,10 +20,14 @@ from udata.harvest.csv import HarvestSourceCsvAdapter
 from udata.harvest.models import HarvestSource
 from udata.models import Dataset, Reuse
 from udata.rdf import CONTEXT, RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import multi_to_dict
 
 from .models import Site, current_site
 from .rdf import build_catalog
+
+# Left undeclared (no `@api.expect`): this parser describes the Elasticsearch filters while the
+# CSV endpoints below filter through `DatasetApiParser.parse_filters`, so publishing it would
+# document filters that do nothing and omit filters that work.
+dataset_search_parser = DatasetSearch.as_request_parser(store_missing=False)
 
 
 @api.route("/site/", endpoint="site")
@@ -79,7 +81,7 @@ class SiteRdfCatalogFormat(API):
         params = catalog_parser.parse_args()
         datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
         datasets = datasets.paginate(params["page"], params["page_size"])
-        dataservices = DataserviceApiParser.parse_filters(Dataservice.objects.visible(), params)
+        dataservices = parse_dataservice_filters(Dataservice.objects.visible(), params)
         dataservices = dataservices.filter_by_dataset_pagination(datasets, params["page"])
 
         catalog = build_catalog(
@@ -97,8 +99,7 @@ class SiteDatasetsCsv(API):
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "dataset" in exported_models:
             return redirect(get_export_url("dataset"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         adapter = csv.get_adapter(Dataset)
@@ -112,8 +113,7 @@ class SiteResourcesCsv(API):
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
         if not request.args and "resource" in exported_models:
             return redirect(get_export_url("resource"))
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        params = dataset_search_parser.parse_args()
         params["facets"] = False
         datasets = DatasetApiParser.parse_filters(get_csv_queryset(Dataset), params)
         return csv.stream(ResourcesCsvAdapter(datasets), "resources")
@@ -122,38 +122,32 @@ class SiteResourcesCsv(API):
 @api.route("/site/organizations.csv", endpoint="site_organizations_csv")
 class SiteOrganizationsCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "organization" in exported_models:
+        if not request.args and "organization" in exported_models:
             return redirect(get_export_url("organization"))
-        params["facets"] = False
-        organizations = OrgApiParser.parse_filters(get_csv_queryset(Organization), params)
+        organizations = Organization.apply_sort_filters(get_csv_queryset(Organization))
         return csv.stream(OrganizationCsvAdapter(organizations), "organizations")
 
 
 @api.route("/site/reuses.csv", endpoint="site_reuses_csv")
 class SiteReusesCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "reuse" in exported_models:
+        if not request.args and "reuse" in exported_models:
             return redirect(get_export_url("reuse"))
-        params["facets"] = False
-        reuses = ReuseApiParser.parse_filters(get_csv_queryset(Reuse), params)
+        reuses = Reuse.apply_sort_filters(get_csv_queryset(Reuse))
         return csv.stream(ReuseCsvAdapter(reuses), "reuses")
 
 
 @api.route("/site/dataservices.csv", endpoint="site_dataservices_csv")
 class SiteDataservicesCsv(API):
     def get(self):
-        params = multi_to_dict(request.args)
         # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
         exported_models = current_app.config.get("EXPORT_CSV_MODELS", [])
-        if not params and "dataservice" in exported_models:
+        if not request.args and "dataservice" in exported_models:
             return redirect(get_export_url("dataservice"))
-        params["facets"] = False
         dataservices = Dataservice.apply_sort_filters(get_csv_queryset(Dataservice))
         return csv.stream(DataserviceCsvAdapter(dataservices), "dataservices")
 

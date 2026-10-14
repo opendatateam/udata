@@ -34,7 +34,7 @@ class FixturesTest(PytestOnlyAPITestCase):
         org = OrganizationFactory(
             members=[Member(user=user, role="editor"), Member(user=admin, role="admin")]
         )
-        contact_point = ContactPointFactory(role="contact")
+        contact_point = ContactPointFactory(role="contact", organization=org)
         # Set the same slug we're 'exporting' from the FIXTURE_DATASET_SLUG config, see the
         # @pytest.mark.options above.
         dataset = DatasetFactory(

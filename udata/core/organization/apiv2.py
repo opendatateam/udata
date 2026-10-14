@@ -3,15 +3,16 @@ from flask import request
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.contact_point.models import ContactPoint
+from udata.core.user.models import user_with_email_ref_fields
 
-from .models import Member, MembershipRequest, Organization, Team, org_permissions_fields
+from .models import Member, Organization, Team, org_permissions_fields
 from .search import OrganizationSearch
 
+apiv2.inherit("UserReferenceWithEmail", user_with_email_ref_fields)
 apiv2.inherit("Organization (read)", Organization.__read_fields__)
 apiv2.inherit("OrganizationPage", Organization.__page_fields__)
 apiv2.inherit("Team (read)", Team.__read_fields__)
 apiv2.inherit("Member (read)", Member.__read_fields__)
-apiv2.inherit("MembershipRequest (read)", MembershipRequest.__read_fields__)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
 apiv2.inherit("OrganizationPermissions", org_permissions_fields)
 

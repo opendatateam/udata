@@ -55,6 +55,12 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties["level"], zone.level)
             self.assertEqual(properties["uri"], zone.uri)
 
+    def test_zones_api_unknown_id(self):
+        zone = GeoZoneFactory()
+
+        response = self.get(url_for("api.zones", ids=[zone.id, "unknown"]))
+        self.assert404(response)
+
     def test_suggest_zones_on_name(self):
         """It should suggest zones based on its name"""
         for i in range(4):

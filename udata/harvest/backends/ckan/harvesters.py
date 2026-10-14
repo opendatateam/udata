@@ -6,10 +6,11 @@ from uuid import UUID
 
 from dateutil.parser import ParserError
 from mongoengine import Q
+from typing_extensions import override
 
 from udata import uris
 from udata.core.dataset.constants import UpdateFrequency
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import Dataset, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
@@ -27,6 +28,30 @@ log = logging.getLogger(__name__)
 
 # dkan is a dummy value for dkan that does not provide resource_type
 ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
+
+
+def find_resource(dataset: Dataset, remote_id: str) -> Resource | None:
+    """The resource a previous run created for this remote one, if any.
+
+    Until this backend stopped adopting the remote id as `Resource.id`, that id *was* the
+    remote one. A migration copies it into `harvest.remote_id` where the harvest metadata
+    survived, but resources harvested before udata stored any have nothing to copy it into,
+    and no dataset has it before the migration runs. Their id is the only link left.
+    """
+    # `get_by` cannot look into `harvest`: it reads a single top-level attribute.
+    resource = next(
+        (r for r in dataset.resources if r.harvest and r.harvest.remote_id == remote_id), None
+    )
+    if resource:
+        return resource
+    try:
+        # A remote id is an opaque string, but when it is a UUID the portal may spell it in
+        # any case or without dashes: comparing `UUID` compares the value, as the code that
+        # adopted those ids did.
+        adopted_id = UUID(remote_id)
+    except ValueError:
+        return None
+    return get_by(dataset.resources, id=adopted_id)
 
 
 class CkanBackend(BaseBackend):
@@ -95,6 +120,7 @@ class CkanBackend(BaseBackend):
         response = self.get(url)
         return response.json()
 
+    @override
     def inner_harvest(self):
         """List all datasets for a given ..."""
         fix = False  # Fix should be True for CKAN < '1.8'
@@ -121,12 +147,10 @@ class CkanBackend(BaseBackend):
 
         for name in names:
             # We use `name` as `remote_id` for now, we'll be replace at the beginning of the process
-            self.process_dataset(name)
-            if self.has_reached_max_items():
-                return
+            self.process_item(name, self.process_dataset)
 
-    def inner_process_dataset(self, item: HarvestItem):
-        response = self.get_action("package_show", id=item.remote_id)
+    def process_dataset(self, harvest_item: HarvestItem) -> Dataset:
+        response = self.get_action("package_show", id=harvest_item.remote_id)
 
         result = response["result"]
         # DKAN returns a list where CKAN returns an object
@@ -136,7 +160,7 @@ class CkanBackend(BaseBackend):
 
         # Replace the `remote_id` from `name` to `id`.
         if result.get("id"):
-            item.remote_id = result["id"]
+            harvest_item.remote_id = result["id"]
 
         data = self.validate(result, self.schema)
 
@@ -144,10 +168,7 @@ class CkanBackend(BaseBackend):
         if not len(data.get("resources", [])):
             raise HarvestSkipException(f"Dataset {data['name']} has no record")
 
-        dataset = self.get_dataset(item.remote_id)
-
-        if not dataset.harvest:
-            dataset.harvest = HarvestDatasetMetadata()
+        dataset = self.get_item(harvest_item.remote_id, Dataset)
 
         # Core attributes
         if not dataset.slug:
@@ -261,13 +282,10 @@ class CkanBackend(BaseBackend):
         for res in data["resources"]:
             if res["resource_type"] not in ALLOWED_RESOURCE_TYPES:
                 continue
-            try:
-                resource = get_by(dataset.resources, id=UUID(res["id"]))
-            except Exception:
-                log.error("Unable to parse resource ID %s", res["id"])
-                continue
+            remote_id = res["id"]
+            resource = find_resource(dataset, remote_id)
             if not resource:
-                resource = Resource(id=res["id"])
+                resource = Resource()
                 dataset.resources.append(resource)
             if not resource.harvest:
                 resource.harvest = HarvestResourceMetadata()
@@ -278,6 +296,7 @@ class CkanBackend(BaseBackend):
             resource.format = res.get("format")
             resource.mime = res.get("mimetype")
             resource.hash = res.get("hash")
+            resource.harvest.remote_id = remote_id
             resource.harvest.issued_at = res["created"]
             resource.harvest.modified_at = res["last_modified"]
             resource.harvest.last_update = datetime.now(UTC)

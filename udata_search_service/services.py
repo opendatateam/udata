@@ -146,3 +146,6 @@ class DiscussionService(BaseService):
 class PostService(BaseService):
     entity_class = Post
     entity_name = "post"
+    filter_renames = {
+        "tag": "tags",
+    }

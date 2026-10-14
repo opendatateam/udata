@@ -33,14 +33,16 @@ from udata.app import cache
 from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
-from udata.core.activity.models import Auditable
+from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
+    validate_contact_points_ownership,
 )
 from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
+from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -49,6 +51,7 @@ from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
+from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
@@ -58,6 +61,7 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
 from udata.mongo.uuid_fields import AutoUUIDField
+from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -118,30 +122,25 @@ def get_json_ld_extra(key, value):
 
 
 @generate_fields()
-class HarvestDatasetMetadata(EmbeddedDocument):
-    backend = StringField()
-    created_at = DateTimeField()
-    issued_at = DateTimeField()
-    modified_at = DateTimeField()
-    source_id = StringField()
-    remote_id = StringField()
-    domain = StringField()
-    last_update = DateTimeField()
-    remote_url = URLField()
+class HarvestDatasetMetadata(HarvestMetadata):
     uri = StringField()
     dct_identifier = StringField()
-    archived_at = DateTimeField()
-    archived = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
 
 class HarvestResourceMetadata(EmbeddedDocument):
+    uri = StringField()
     issued_at = DateTimeField()
     modified_at = DateTimeField()
     last_update = DateTimeField()
-    uri = StringField()
     dct_identifier = StringField()
+
+    # How a backend recognizes an already harvested resource across runs, for the backends
+    # whose remote gives its resources an id. Only has to be unique inside its dataset,
+    # unlike `Resource.id` which is resolved platform-wide by the `/datasets/r/<id>`
+    # permalink.
+    remote_id = StringField()
 
 
 @generate_fields()
@@ -384,6 +383,14 @@ class Checksum(EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
+# Resource fields the platform maintains on its own: they say nothing about what the
+# author edited, so they are kept out of the recorded activity. `fs_filename` is the
+# storage key of a hosted file, already reflected by `url` when a new file is uploaded.
+# The equivalent for documents is the `auditable` flag of `field()`, which a plain
+# `EmbeddedDocument` such as `Resource` does not carry.
+RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
+
+
 class ResourceMixin(object):
     id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)
@@ -402,9 +409,29 @@ class ResourceMixin(object):
             "check:available": BooleanField,
             "check:status": IntField,
             "check:date": DateTimeField,
-        }
+            # These extras hold URLs the frontend renders as download links or
+            # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
+            # datafairOrigin as previews). Typing them rejects the dangerous
+            # schemes (javascript:, data:) at the model level, on every write
+            # path, guarding against stored XSS.
+            "analysis:parsing:parquet_url": URLField,
+            "analysis:parsing:geojson_url": URLField,
+            "analysis:parsing:pmtiles_url": URLField,
+            "apidocUrl": URLField,
+            "datafairOrigin": URLField,
+        },
+        # Written by the platform services on resources (hydra analysis and
+        # availability checks, validata, DCAT harvesting, CSV exports), and trusted
+        # as-is by the frontend: letting users write them enables stored XSS (e.g. a
+        # `javascript:` value in `analysis:parsing:*_url`, rendered as a download
+        # link) and forged "platform-generated" metadata. `csv-export:model` is not
+        # rendered but resolves which resource the export job overwrites, so a forged
+        # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
+        # writable, hence their URL type above.
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
+    geopf = EmbeddedDocumentField(GeopfResourceMetadata)
     schema = EmbeddedDocumentField(Schema)
 
     created_at_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
@@ -538,7 +565,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
                 "Weakly referenced object for resource.dataset no longer exists, "
                 "using a poor performance query instead."
             )
-            return Dataset.objects(resources__id=self.id).first()
+            return get_dataset_by_resource_id(self.id)
 
     def save(self, *args, **kwargs):
         if not self.dataset:
@@ -608,8 +635,28 @@ class Dataset(
     schema = field(EmbeddedDocumentField(Schema))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)
-    extras = field(ExtrasField(), auditable=False)
-    harvest = field(EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
+    # datafairOrigin can live on the dataset too (the frontend reads it from the
+    # resource or its dataset) and feeds an <iframe> src, so validate it as a URL
+    # here as well. transport:url is reserved below, but it is rendered as a plain
+    # anchor by the frontend just like the analysis URLs, so it gets the same
+    # model-level scheme check rather than relying on its producer.
+    # See Resource.extras for the rationale.
+    # The reserved patterns differ from the resource ones: transport, the
+    # recommendations job and the DCAT harvester write on the dataset, while hydra
+    # and validata write on its resources.
+    extras = field(
+        ExtrasField(
+            {"datafairOrigin": URLField, "transport:url": URLField},
+            reserved=("transport:*", "recommendations*", "dcat"),
+        ),
+        auditable=False,
+    )
+    harvest = field(
+        EmbeddedDocumentField(HarvestDatasetMetadata),
+        readonly=True,
+        auditable=False,
+    )
+    geopf = field(EmbeddedDocumentField(GeopfDatasetMetadata), auditable=False)
 
     quality_cached = field(DictField(), auditable=False)
 
@@ -644,6 +691,13 @@ class Dataset(
     )
     deleted = field(DateTimeField(), auditable=False)
     archived = field(DateTimeField())
+    doi = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The DOI minted for this dataset, set by the DOI endpoint. A dataset that "
+        "has one can no longer be deleted, only archived.",
+    )
 
     def __str__(self):
         return self.title or ""
@@ -695,6 +749,14 @@ class Dataset(
 
     missing_resources = False
 
+    @property
+    def archived_at(self):
+        return self.archived
+
+    @archived_at.setter
+    def archived_at(self, value: datetime | None):
+        self.archived = value  # type: ignore[assignment]
+
     def fields_to_check_for_spam(self):
         return {"title": self.title, "description": self.description}
 
@@ -730,11 +792,30 @@ class Dataset(
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
 
+    def validate(self, clean=True):
+        super().validate(clean=clean)
+        validate_contact_points_ownership(self)
+
     def clean(self):
         super(Dataset, self).clean()
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        if self.doi:
+            # A DOI is permanent and has to keep resolving to a public page. Archiving is the
+            # way out, not deletion nor unpublishing. Enforced here, and not only in the delete
+            # endpoint, because `deleted` is also written by the dataset form and by the
+            # harvester.
+            if self.deleted:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be deleted, it can only be archived"),
+                    field="deleted",
+                )
+            if self.private:
+                raise FieldValidationError(
+                    _("A dataset with a DOI cannot be made private"), field="private"
+                )
 
         self.last_update = self.compute_last_update()
 
@@ -999,6 +1080,33 @@ class Dataset(
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def _atomic_resources_update(self, match_resource=None, **kwargs):
+        """Apply an atomic update to a dataset whose in-memory resources just changed.
+
+        Refreshes what Dataset.clean() would recompute on a full save, in memory
+        and in database: last_update first, because compute_quality() reads
+        next_update, which derives from it. `match_resource` scopes the query to a
+        single resource, so that callers can target it with the positional `$`
+        operator.
+
+        The search reindexing is asked for explicitly: an atomic update emits no
+        post_save, which is what used to reindex the dataset through save(). Only
+        that receiver is called back — re-emitting post_save would also run spam
+        detection and ownership handling, which a resource change does not concern.
+        """
+        query = Dataset.objects(id=self.id)
+        if match_resource is not None:
+            query = query.filter(resources__id=match_resource.id)
+
+        self.last_update = self.compute_last_update()
+        self.quality_cached = self.compute_quality()
+        query.update_one(
+            set__last_update=self.last_update,
+            set__quality_cached=self.quality_cached,
+            **kwargs,
+        )
+        reindex_model_on_save(Dataset, self)
+
     def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
@@ -1009,42 +1117,91 @@ class Dataset(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources.insert(0, resource)
+        self.last_modified_internal = datetime.now(UTC)
 
-        self.update(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
-        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_added.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
 
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Read before the write: this is the only point where the fields the caller
+        # actually touched are known, and the recorded activity reports them.
+        # mongoengine only marks a field as changed when its value really differs, so a
+        # form repopulating every field does not inflate this list.
+        changed_fields = [
+            field
+            for field in resource._get_changed_fields()
+            if field not in RESOURCE_NON_AUDITABLE_FIELDS
+        ]
+
+        # Keep the in-memory document consistent with what we persist below, so we
+        # don't need a self.reload() afterwards. reload() would re-read and
+        # re-deserialize every embedded resource (O(N), ~1.3s on a 15k-resource
+        # dataset) for nothing: nothing downstream consumes a fully-reloaded object
+        # (the endpoint returns `resource`, and the on_resource_updated handlers only
+        # read document.resources / document.organization, all up to date here).
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
+        self.last_modified_internal = datetime.now(UTC)
 
-        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
+            match_resource=resource,
             set__resources__S=resource,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
-        self.reload()
-        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_updated.send(
+            self.__class__,
+            document=self,
+            resource_id=resource.id,
+            resource_title=resource.title,
+            changed_fields=changed_fields,
+        )
+
+    def update_resource_extras(self, resource):
+        """Persist a single resource's extras with a targeted positional update.
+
+        `resource` must be the in-memory instance held in `self.resources` (its
+        extras are already mutated by the caller). This is on Hydra's hot callback
+        path (run for every resource, on datasets with 15k+ resources): a full
+        resource.save() -> dataset.save() re-serializes and rewrites the whole
+        document, O(N) in embedded resources, whereas this re-ships only the
+        changed extras subdocument.
+
+        Unlike update_resource, it does not emit on_resource_updated: the caller of
+        this path is Hydra itself, so the signal would publish its own check back to
+        the resources analyser and record a user activity for a change no user made.
+        """
+        # An atomic update runs no document validation, so the types registered on
+        # the extras field (check:available, check:status, check:date) would accept
+        # anything. Only the extras are validated: validating the whole resource
+        # would reject unrelated invalid legacy fields and lock Hydra out of the
+        # very resources it has to keep checking.
+        Resource.extras.validate(resource.extras)
+        self._atomic_resources_update(
+            match_resource=resource,
+            set__resources__S__extras=resource.extras,
+        )
 
     def remove_resource(self, resource):
-        # only useful for compute_quality(), we will reload to have a clean object
+        # Update the in-memory document to match what we persist, avoiding a costly
+        # self.reload() (see update_resource).
         self.resources = [r for r in self.resources if r.id != resource.id]
+        self.last_modified_internal = datetime.now(UTC)
 
-        self.update(
-            set__quality_cached=self.compute_quality(),
+        self._atomic_resources_update(
             pull__resources__id=resource.id,
-            set__last_modified_internal=datetime.now(UTC),
+            set__last_modified_internal=self.last_modified_internal,
         )
 
         # Deletes resource's file from file storage
@@ -1056,8 +1213,9 @@ class Dataset(
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.reload()
-        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
+        self.on_resource_removed.send(
+            self.__class__, document=self, resource_id=resource.id, resource_title=resource.title
+        )
 
     @property
     def community_resources(self):
@@ -1146,6 +1304,10 @@ class Dataset(
             Follow.objects(following=self), date_label="since"
         )
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def set_harvested(self):
+        if not self.harvest:
+            self.harvest = HarvestDatasetMetadata()
 
 
 pre_init.connect(Dataset.pre_init, sender=Dataset)
@@ -1249,9 +1411,25 @@ class ResourceSchema(object):
         return None
 
 
+def get_dataset_by_resource_id(id):
+    """Fetch the dataset holding a resource, given the resource UUID
+
+    Resource ids are resolved globally (see the `/datasets/r/<id>` permalink), but nothing
+    enforces their uniqueness across datasets. An ambiguous id resolves to nothing rather
+    than letting an arbitrary dataset answer for another one's resource.
+    """
+    datasets = list(Dataset.objects(resources__id=id).limit(2))
+    if len(datasets) > 1:
+        # Corrupted data that no API path should be able to produce: report it instead of
+        # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
+        log.error(f"Resource #{id} is duplicated across several datasets")
+        return None
+    return datasets[0] if datasets else None
+
+
 def get_resource(id):
     """Fetch a resource given its UUID"""
-    dataset = Dataset.objects(resources__id=id).first()
+    dataset = get_dataset_by_resource_id(id)
     if dataset:
         return get_by(dataset.resources, id=id)
     else:

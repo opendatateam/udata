@@ -1,7 +1,6 @@
 from celery import states
 from celery.result import AsyncResult
 from celery.utils import get_full_cls_name
-from flask import request
 from kombu.utils.encoding import safe_repr
 
 from udata.api import API, api, fields
@@ -81,6 +80,7 @@ task_fields = api.model(
 
 @ns.route("/jobs/", endpoint="jobs")
 class JobsAPI(API):
+    @api.secure(admin_permission)
     @api.doc(id="list_jobs")
     @api.marshal_list_with(job_fields)
     def get(self):
@@ -92,9 +92,10 @@ class JobsAPI(API):
     @api.marshal_with(job_fields)
     def post(self):
         """Create a new scheduled job"""
-        if "crontab" in request.json and "interval" in request.json:
+        payload = api.json_payload()
+        if "crontab" in payload and "interval" in payload:
             api.abort(400, "Cannot define both interval and crontab schedule")
-        if "crontab" in request.json:
+        if "crontab" in payload:
             form = api.validate(CrontabTaskForm)
         else:
             form = api.validate(IntervalTaskForm)
@@ -110,6 +111,7 @@ class JobAPI(API):
             api.abort(404)
         return task
 
+    @api.secure(admin_permission)
     @api.marshal_with(job_fields)
     def get(self, id):
         """Fetch a single scheduled job"""
@@ -120,7 +122,7 @@ class JobAPI(API):
     def put(self, id):
         """Update a single scheduled job"""
         task = self.get_or_404(id_or_404(id))
-        if "crontab" in request.json:
+        if "crontab" in api.json_payload():
             task.interval = None
             task.crontab = PeriodicTask.Crontab()
             form = api.validate(CrontabTaskForm, task)
@@ -141,6 +143,7 @@ class JobAPI(API):
 
 @ns.route("/tasks/<string:id>/", endpoint="task")
 class TaskAPI(API):
+    @api.secure(admin_permission)
     @api.marshal_with(task_fields)
     def get(self, id):
         """Get a tasks status given its ID"""
@@ -161,6 +164,7 @@ class TaskAPI(API):
 
 @ns.route("/jobs/schedulables/", endpoint="schedulable_jobs")
 class JobsReferenceAPI(API):
+    @api.secure(admin_permission)
     @api.doc(model=[str])
     def get(self):
         """List all schedulable jobs"""

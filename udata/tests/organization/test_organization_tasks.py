@@ -3,9 +3,10 @@ from flask import url_for
 from udata.api.oauth2 import OAuth2Client
 from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization import tasks
 from udata.core.user.factories import AdminFactory
-from udata.models import ContactPoint, Dataset, Member, Organization, Transfer
+from udata.models import ContactPoint, Dataset, Discussion, Member, Organization, Transfer
 from udata.tests.api import APITestCase
 from udata.tests.helpers import create_test_image
 
@@ -38,6 +39,13 @@ class OrganizationTasksTest(APITestCase):
         )
         self.assert200(response)
 
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+
         transfer_to_org = Transfer.objects.create(
             owner=user,
             recipient=org,
@@ -58,6 +66,17 @@ class OrganizationTasksTest(APITestCase):
             redirect_uris=["https://test.org/callback"],
         )
 
+        discussion = DiscussionFactory(subject=dataset, organization=org)
+        discussion_with_message = DiscussionFactory(
+            subject=dataset,
+            discussion=[
+                MessageDiscussionFactory(),
+                MessageDiscussionFactory(posted_by_organization=org),
+                MessageDiscussionFactory(posted_by_organization=org),
+            ],
+        )
+        discussion_closed_by_org = DiscussionFactory(subject=dataset, closed_by_organization=org)
+
         # Delete organization
         response = self.delete(url_for("api.organization", org=org))
         self.assert204(response)
@@ -73,11 +92,24 @@ class OrganizationTasksTest(APITestCase):
         # Check organization's logo is deleted
         self.assertEqual(list(storages.avatars.list_files()), [])
 
+        self.assertEqual(list(storages.images.list_files()), [])
+
         # Check organization's contact points are deleted
         self.assertEqual(ContactPoint.objects().count(), 0)
 
         dataset = Dataset.objects(id=dataset.id).first()
         self.assertIsNone(dataset.organization)
+
+        discussion = Discussion.objects(id=discussion.id).first()
+        self.assertIsNone(discussion)
+
+        discussion_with_message.reload()
+        self.assertEqual(len(discussion_with_message.discussion), 3)
+        self.assertIsNone(discussion_with_message.discussion[1].posted_by_organization)
+        self.assertIsNone(discussion_with_message.discussion[2].posted_by_organization)
+
+        discussion_closed_by_org.reload()
+        self.assertIsNone(discussion_closed_by_org.closed_by_organization)
 
         organization = Organization.objects(name="delete me").first()
         self.assertIsNone(organization)

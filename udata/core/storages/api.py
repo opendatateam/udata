@@ -1,7 +1,9 @@
+import io
 import os
 from datetime import UTC, datetime
 
 from flask import json
+from PIL import Image, UnidentifiedImageError
 from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
@@ -10,7 +12,7 @@ from . import chunks, utils
 
 META = "meta.json"
 
-IMAGES_MIMETYPES = ("image/jpeg", "image/png", "image/webp")
+IMAGES_FORMATS = ("JPEG", "PNG", "WEBP")
 
 
 uploaded_image_fields = api.model(
@@ -27,18 +29,59 @@ chunk_status_fields = api.model("UploadStatus", {"success": fields.Boolean, "err
 
 
 image_parser = api.parser()
-image_parser.add_argument("file", type=FileStorage, location="files")
-image_parser.add_argument("bbox", type=str, location="form")
+image_parser.add_argument(
+    "file", type=FileStorage, location="files", required=True, help="The image to upload"
+)
+image_parser.add_argument(
+    "bbox",
+    type=str,
+    location="form",
+    help="An optional crop box, as `left,upper,right,lower` pixel coordinates",
+)
 
 
 upload_parser = api.parser()
-upload_parser.add_argument("file", type=FileStorage, location="files")
-upload_parser.add_argument("uuid", type=str, location="form")
-upload_parser.add_argument("filename", type=str, location="form")
-upload_parser.add_argument("partindex", type=int, location="form")
-upload_parser.add_argument("partbyteoffset", type=int, location="form")
-upload_parser.add_argument("totalparts", type=int, location="form")
-upload_parser.add_argument("chunksize", type=int, location="form")
+upload_parser.add_argument(
+    "file",
+    type=FileStorage,
+    location="files",
+    help="The file to upload, or the part to upload when the file is sent in chunks. "
+    "Only the request assembling a chunked upload omits it.",
+)
+upload_parser.add_argument(
+    "uuid",
+    type=str,
+    location="form",
+    help="Chunked uploads only: an identifier chosen by the client, shared by every "
+    "request of the same upload",
+)
+upload_parser.add_argument(
+    "filename",
+    type=str,
+    location="form",
+    help="Chunked uploads only: the name of the assembled file. A single-request upload "
+    "takes it from the uploaded file itself.",
+)
+upload_parser.add_argument(
+    "partindex",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the zero-based index of the part being sent",
+)
+upload_parser.add_argument(
+    "totalparts",
+    type=int,
+    location="form",
+    help="The number of parts the file is split into. Above 1, the upload is chunked: "
+    "send each part, then a last request without `file` to assemble them.",
+)
+upload_parser.add_argument(
+    "chunksize",
+    type=int,
+    location="form",
+    help="Chunked uploads only: the size in bytes of the part being sent, checked "
+    "against the received one",
+)
 
 
 class UploadStatus(Exception):
@@ -111,25 +154,38 @@ def save_chunk(file, args):
     raise UploadProgress()
 
 
-def combine_chunks(storage, args, prefix=None):
+class ChunksReader(io.RawIOBase):
+    """A read-only stream over the parts of a chunked upload, in order.
+
+    Parts are fetched one at a time so a single chunk sits in memory at any
+    point: the destination storage pulls from this stream instead of being
+    handed the whole reassembled file.
     """
-    Combine a chunked file into a whole file again.
-    Goes through each part, in order,
-    and appends that part's bytes to another destination file.
-    Chunks are stored in the chunks storage.
-    """
-    uuid = args["uuid"]
-    # Normalize filename including extension
-    target = utils.normalize(args["filename"])
-    if prefix:
-        target = os.path.join(prefix, target)
-    with storage.open(target, "wb") as out:
-        for i in range(args["totalparts"]):
-            partname = chunk_filename(uuid, i)
-            out.write(chunks.read(partname))
-            chunks.delete(partname)
+
+    def __init__(self, uuid, totalparts):
+        self.uuid = uuid
+        self.totalparts = totalparts
+        self.next_part = 0
+        self.buffer = b""
+
+    def readable(self):
+        return True
+
+    def readinto(self, target):
+        while not self.buffer and self.next_part < self.totalparts:
+            self.buffer = chunks.read(chunk_filename(self.uuid, self.next_part))
+            self.next_part += 1
+
+        size = min(len(target), len(self.buffer))
+        target[:size] = self.buffer[:size]
+        self.buffer = self.buffer[size:]
+        return size
+
+
+def discard_chunks(uuid, totalparts):
+    for part in range(totalparts):
+        chunks.delete(chunk_filename(uuid, part))
     chunks.delete(chunk_filename(uuid, META))
-    return target
 
 
 def handle_upload(storage, prefix=None):
@@ -139,24 +195,47 @@ def handle_upload(storage, prefix=None):
 
     if is_chunk:
         if uploaded_file:
+            # Raises UploadProgress: a part was stored, the file is incomplete.
             save_chunk(uploaded_file, args)
-        else:
-            fs_filename = combine_chunks(storage, args, prefix=prefix)
+        # Normalize filename including extension
+        filename = utils.normalize(args["filename"])
+        source = io.BufferedReader(ChunksReader(args["uuid"], args["totalparts"]))
     elif not uploaded_file:
         raise UploadError("Missing file parameter")
     else:
         # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
-        fs_filename = storage.save(uploaded_file, prefix=prefix, filename=filename)
+        source = uploaded_file
 
-    metadata = storage.metadata(fs_filename)
-    metadata["last_modified_internal"] = metadata.pop("modified")
-    metadata["fs_filename"] = fs_filename
-    checksum = metadata.pop("checksum")
-    algo, checksum = checksum.split(":", 1)
-    metadata[algo] = checksum
-    metadata["format"] = utils.extension(fs_filename)
-    return metadata
+    infos = utils.save_upload(storage, source, filename, prefix=prefix)
+
+    if is_chunk:
+        # Chunks are dropped once the whole file made it to its destination, so
+        # a failed combination can be retried instead of losing the upload.
+        discard_chunks(args["uuid"], args["totalparts"])
+
+    return infos
+
+
+def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
+    """Parse a crop box given by the client as `left,upper,right,lower` pixel coordinates"""
+    coordinates = raw.split(",")
+    if len(coordinates) != 4:
+        api.abort(400, "Invalid bounding box")
+    try:
+        # `float` accepts values that `int` then refuses, such as `nan` or `1e400`.
+        left, upper, right, lower = (int(float(coordinate)) for coordinate in coordinates)
+    except (ValueError, OverflowError):
+        api.abort(400, "Invalid bounding box")
+
+    width, height = image_size
+    # Pillow crops outside of the image instead of failing, padding the result: a box a
+    # few digits wider than the source is enough to allocate hundreds of megabytes, then
+    # to raise a decompression bomb error once past its pixel limit.
+    if not (0 <= left < right <= width and 0 <= upper < lower <= height):
+        api.abort(400, "Bounding box outside of the image")
+
+    return [left, upper, right, lower]
 
 
 def parse_uploaded_image(field):
@@ -164,9 +243,25 @@ def parse_uploaded_image(field):
     args = image_parser.parse_args()
 
     image = args["file"]
-    if image.mimetype not in IMAGES_MIMETYPES:
+    # The mimetype is declared by the client and may not match the content at all
+    # (an SVG announced as `image/png` for instance): decode the file to know what
+    # it really is, otherwise Pillow raises further down and the request 500s.
+    try:
+        uploaded = Image.open(image)
+    except UnidentifiedImageError:
         api.abort(400, "Unsupported image format")
-    bbox = args.get("bbox", None)
-    if bbox:
-        bbox = [int(float(c)) for c in bbox.split(",")]
+    except Image.DecompressionBombError:
+        # A valid image whose header announces more pixels than Pillow accepts to decode.
+        # A few dozen bytes are enough to declare a huge size, so this must be refused
+        # here: every other decoding (resize, optimize, thumbnails) would raise too.
+        api.abort(400, "Image is too large")
+    if uploaded.format not in IMAGES_FORMATS:
+        api.abort(400, "Unsupported image format")
+
+    bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
+
+    # `Image.open` left the cursor right after the header it read. `field.save` may store
+    # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
+    # would silently truncate the stored file.
+    image.seek(0)
     field.save(image, bbox=bbox)

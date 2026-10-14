@@ -61,7 +61,8 @@ class TransportTasksTest(PytestOnlyDBTestCase):
         """
         We should not erase existing transport:url extras if the job fails
         """
-        ds1 = DatasetFactory(id="61fd29da29ea95c7bc0e1211", extras={"transport:url": "dummy"})
+        stored_url = "https://transport.data.gouv.fr/datasets/already-mapped"
+        ds1 = DatasetFactory(id="61fd29da29ea95c7bc0e1211", extras={"transport:url": stored_url})
         ds2 = DatasetFactory(id="5f23d4b3d39755210a04a99c")
 
         with requests_mock.Mocker() as m:
@@ -71,5 +72,5 @@ class TransportTasksTest(PytestOnlyDBTestCase):
         ds1.reload()
         ds2.reload()
 
-        assert ds1.extras["transport:url"] == "dummy"
+        assert ds1.extras["transport:url"] == stored_url
         assert "transport:url" not in ds2.extras

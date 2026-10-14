@@ -1,33 +1,19 @@
-from udata.api import api, base_reference, fields
-from udata.core.user.models import _visible_email
+from udata.api import api, fields
+from udata.core.organization.models import Organization
+from udata.core.user.models import User, _visible_email
 
 from .constants import BIGGEST_AVATAR_SIZE
 
-user_ref_fields = api.inherit(
-    "UserReference",
-    base_reference,
-    {
-        "first_name": fields.String(description="The user first name", readonly=True),
-        "last_name": fields.String(description="The user larst name", readonly=True),
-        "slug": fields.String(description="The user permalink string", readonly=True),
-        "uri": fields.String(
-            attribute=lambda u: u.self_api_url(),
-            description="The API URI for this user",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda u: u.self_web_url(),
-            description="The user web page URL",
-            readonly=True,
-        ),
-        "avatar": fields.ImageField(original=True, description="The user avatar URL"),
-        "avatar_thumbnail": fields.ImageField(
-            attribute="avatar",
-            size=BIGGEST_AVATAR_SIZE,
-            description="The user avatar thumbnail URL. This is the square "
-            "({0}x{0}) and cropped version.".format(BIGGEST_AVATAR_SIZE),
-        ),
-    },
+# `organizations` cannot be declared with `field()` on the model for two reasons: the
+# getter loop of `generate_fields` only builds a `Nested` or a scalar, never a
+# `List(Nested(…))`, and `user/models.py` cannot import `Organization` at module level
+# since `organization/models.py` already imports it. Hence the post-decoration here,
+# where importing `Organization` is safe.
+User.__read_fields__["organizations"] = fields.List(
+    fields.Nested(Organization.__ref_fields__),
+    attribute=lambda u: list(u.organizations),
+    description="The organizations the user belongs to",
+    readonly=True,
 )
 
 me_metrics_fields = api.model(

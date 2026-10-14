@@ -19,6 +19,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.url_field import URLField
 from udata.tests import PytestOnlyTestCase
+from udata.tests.helpers import argvalues
 
 
 class ExtrasFieldTest(PytestOnlyTestCase):
@@ -134,30 +135,28 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         }
 
     @pytest.mark.parametrize(
-        "dbfield,value,type,expected",
-        [
-            pytest.param(*p, id=p[0].__name__)
-            for p in [
-                (
-                    DateTimeField,
-                    "2018-05-29T13:15:04.397603",
-                    datetime,
-                    datetime(2018, 5, 29, 13, 15, 4, 397603),
-                ),
-                (DateField, "2018-05-29", date, date(2018, 5, 29)),
-                (BooleanField, "true", bool, True),
-                (IntField, 42, int, 42),
-                (StringField, "42", str, "42"),
-                (FloatField, "42.0", float, 42.0),
-                (URLField, "http://test.com", str, "http://test.com"),
-                (
-                    UUIDField,
-                    "e3b06d6d-90c0-4407-adc0-de81d327f181",
-                    UUID,
-                    UUID("e3b06d6d-90c0-4407-adc0-de81d327f181"),
-                ),
-            ]
-        ],
+        "dbfield, value, type, expected",
+        argvalues(
+            (
+                DateTimeField,
+                "2018-05-29T13:15:04.397603",
+                datetime,
+                datetime(2018, 5, 29, 13, 15, 4, 397603),
+            ),
+            (DateField, "2018-05-29", date, date(2018, 5, 29)),
+            (BooleanField, "true", bool, True),
+            (IntField, 42, int, 42),
+            (StringField, "42", str, "42"),
+            (FloatField, "42.0", float, 42.0),
+            (URLField, "http://test.com", str, "http://test.com"),
+            (
+                UUIDField,
+                "e3b06d6d-90c0-4407-adc0-de81d327f181",
+                UUID,
+                UUID("e3b06d6d-90c0-4407-adc0-de81d327f181"),
+            ),
+            ids=lambda t: t[0].__name__,
+        ),
     )
     def test_can_parse_registered_data(self, dbfield, value, type, expected):
         Fake, FakeForm = self.factory()
@@ -176,19 +175,18 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         assert fake.extras["my:extra"] == expected
 
     @pytest.mark.parametrize(
-        "dbfield,value",
-        [
-            pytest.param(*p, id=p[0].__name__)
-            for p in [
-                (DateTimeField, "xxxx"),
-                (DateField, "xxxx"),
-                (IntField, "xxxx"),
-                (StringField, 42),
-                (FloatField, "xxxx"),
-                (URLField, "not-an-url"),
-                (UUIDField, "not-a-uuid"),
-            ]
-        ],
+        "dbfield, value",
+        argvalues(
+            (DateTimeField, "xxxx"),
+            (DateField, "xxxx"),
+            (IntField, "xxxx"),
+            (StringField, 42),
+            (FloatField, "xxxx"),
+            (URLField, "not-an-url"),
+            (URLField, 42),
+            (UUIDField, "not-a-uuid"),
+            ids=lambda t: t[0].__name__,
+        ),
     )
     def test_fail_bad_registered_data(self, dbfield, value):
         Fake, FakeForm = self.factory()
@@ -200,3 +198,28 @@ class ExtrasFieldTest(PytestOnlyTestCase):
         form.validate()
         assert "extras" in form.errors
         assert "my:extra" in form.errors["extras"]
+
+    @pytest.mark.parametrize(
+        "key, reserved",
+        (
+            ("analysis:parsing:parquet_url", True),
+            ("analysis:", True),
+            ("analysis", False),
+            ("recommendations", True),
+            ("recommendations:sources", True),
+            ("recommendations_note", True),
+            ("dcat", True),
+            ("dcatIdentifier", False),
+            ("custom:key", False),
+        ),
+    )
+    def test_reserved_patterns_are_globs(self, key, reserved):
+        """`dcat` is an exact key while `analysis:*` and `recommendations*` are namespaces.
+
+        The three shapes coexist in the dataset and resource registries, and a
+        stray `*` is the kind of typo that silently freezes user keys: `dcat*`
+        would swallow `dcatIdentifier`, which the DCAT harvester does not own.
+        """
+        field = ExtrasField(reserved=("analysis:*", "recommendations*", "dcat"))
+
+        assert field.is_reserved(key) is reserved

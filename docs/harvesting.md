@@ -16,27 +16,45 @@ and storing them into udata to be able to search and find them.
 After a harvester for a given source has been created and validated,
 it will run either on demand or periodically.
 
-Running an harvester for a given source follow this pseudo-code in specific backends:
+Running an harvester for a given source follows this pseudo-code in specific backends:
 ```
-def inner_harvest():
-    datasets = get_datasets_from_source()
-    for dataset in datasets:
-        self.process_dataset(some_id, args1, args2, args3)
+class MyHarvester(BaseBackend):
+    @override
+    def inner_harvest(self):
+        for record in self.get_records_from_source():
+            # Assuming all items are Datasets (otherwise use specialized processors)
+            self.process_item(record.id, self.dataset_processor, ...)
 
-def inner_process_dataset(item: HarvestItem, args1, args2, args3):
-    dataset = self.get_dataset(item.remote_id)
+    def get_records_from_source(self) -> Iterator:
+        # Fetch and yield record ids (or full records) from the source
+        yield record from ...
 
-    update_dataset(dataset, args1, args2)
+    def dataset_processor(self, harvest_item: HarvestItem, ...) -> Dataset:
+        remote_id = harvest_item.remote_id  # record id on source
 
-    return dataset
+        # Get source record metadata for `remote_id` (from source or previously cached data)
+        record = ...
+
+        # Get (or create) datagouv item for `remote_id`
+        dataset = self.get_item(remote_id, Dataset)
+
+        # Update datagouv item with metadata from source record
+        dataset.title = record.get("title")
+        ...
+
+        return dataset
 ```
 
-The call to `process_dataset` is a wrapper:
-1. Create the `HarvestItem`
-2. Call the `inner_process_dataset` (backend dependent update of the `Dataset` object // without saving! See step 5.)
-3. Catch errors to save the logs inside the `HarvestItem`
-4. Update the `HarvestMetadata` inside the `Dataset` with domain, source, last_update, etc.
-5. Save the updated `Dataset` (if not in dryrun mode)
+The call to `process_item` is a wrapper that, for a given record, performs the following steps:
+1. Create a new `HarvestItem` in the running job for the record.
+2. Call the processor function (`dataset_processor` in pseudo-code above) on the record.
+   That backend/type-specific processor function is responsible for:
+   1. Calling `get_item` to retrieve/create the corresponding datagouv item.
+   2. Updating (without saving!, see step 5) the datagouv item with the contents of the record.
+   3. Returning the updated datagouv item.
+3. Update the datagouv item `HarvestMetadata` with domain, source, last_update, etc.,
+4. Catch any warning/error and record them in `HarvestItem`.
+5. Save the updated datagouv item (except in "dry run" mode).
 
 | Property            | Meaning                                                          |
 |---------------------|------------------------------------------------------------------|
@@ -194,11 +212,11 @@ Datasets are written to MongoDB incrementally as the harvest progresses. You can
 they're arriving:
 
 ```shell
-curl 'http://localhost:7000/api/1/datasets/'
+curl 'http://dev.local:7000/api/1/datasets/'
 ```
 
-However, full-text search uses a separate index (Elasticsearch/Meilisearch via
-`udata-search-service`) which is not updated automatically by the harvest. After the harvest
+However, full-text search uses a separate Elasticsearch index (configured with
+`ELASTICSEARCH_URL`) which is not updated automatically by the harvest. After the harvest
 completes, rebuild the index:
 
 ```shell
@@ -208,18 +226,29 @@ udata search index
 Once indexed, search queries return results:
 
 ```shell
-curl 'http://localhost:7000/api/1/datasets/?q=transport'
+curl 'http://dev.local:7000/api/1/datasets/?q=transport'
 ```
 
 ## Backends
 
-`udata` comes with 3 harvest backends (listed below) but you can implement your own backend.
-In order for `udata` to be able to use any of those backends, they first need to be enabled
-in the `udata.cfg` `HARVESTER_BACKENDS` section, like so:
+`udata` ships with six harvest backends, and you can implement your own. None of them is
+active by default: they must be listed in the `udata.cfg` `HARVESTER_BACKENDS` setting, where
+`*` acts as a glob:
 
 ```cfg
-HARVESTER_BACKENDS = ['dcat', 'csw*']
+HARVESTER_BACKENDS = ['dcat', 'csw*', 'ckan']
 ```
+
+| Name              | Harvests                                             |
+|-------------------|------------------------------------------------------|
+| `dcat`            | any [DCAT][] endpoint — the recommended one          |
+| `csw-dcat`        | a CSW catalog service, returning DCAT records        |
+| `csw-iso-19139`   | a CSW catalog service, returning ISO 19139 records   |
+| `ckan`            | a CKAN portal, through its API                       |
+| `dkan`            | a DKAN portal, through its API                       |
+| `maaf`            | the french Ministry of Agriculture custom format     |
+
+`udata harvest backends` lists the ones currently enabled on your instance.
 
 ### DCAT
 
@@ -290,15 +319,12 @@ If none matches, no license is set on the dataset.
 
 ### CKAN
 
-This backend harvests CKAN repositories/portals through their API
-and [is available as a udata extension](https://github.com/opendatateam/udata-ckan).
-
-### OpenDataSoft
-
-This backend harvests OpenDataSoft repositories/portals through their API (v1)
-and [is available as a udata extension](https://github.com/opendatateam/udata-ods).
+This backend harvests CKAN repositories/portals through their API. It is bundled with udata,
+along with its `dkan` variant — enable them with `HARVESTER_BACKENDS = ['ckan', 'dkan']`.
 
 ### Custom
+
+**WARNING: This section is outdated.**
 
 You can implement your own backends by extending `udata.harvest.backends.BaseBackend`
 and implementing the `initialize()` and `process()` methods.

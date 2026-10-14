@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import factory
 import mongoengine
 import pytest
@@ -17,8 +19,10 @@ from mongoengine.fields import (
 )
 from werkzeug.exceptions import BadRequest
 
-from udata.api_fields import field, generate_fields, patch, patch_and_save
+from udata.api import api
+from udata.api_fields import field, generate_fields, patch, patch_and_save, required_if
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import License
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
@@ -44,11 +48,21 @@ BADGES: dict[str, str] = {
 URL_RAISE_ERROR: str = "/raise/validation/error"
 URL_EXISTS_ERROR_MESSAGE: str = "Url exists"
 
+FORBIDDEN_VALUE: str = "forbidden"
+FORBIDDEN_MESSAGE: str = "Forbidden value"
+
 
 def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
     return
+
+
+def check_not_forbidden(value: str = "", field: str = "", **_kwargs) -> None:
+    """Fail on a sentinel value, reporting the field key it was handed, so a test can
+    assert the error is keyed on what the caller sent rather than on the attribute."""
+    if value == FORBIDDEN_VALUE:
+        raise FieldValidationError(FORBIDDEN_MESSAGE, field=field)
 
 
 class FakeBadge(Badge):
@@ -76,6 +90,42 @@ class FakeEmbedded(EmbeddedDocument):
     status = field(
         StringField(choices=[("active", "Active"), ("inactive", "Inactive")]),
     )
+
+
+@generate_fields()
+class FakeWithRequiredIf(Document):
+    """Exercises `required_if`: `comment` is mandatory as soon as `kind` is a request.
+    A Document (not an EmbeddedDocument) so a test can persist one and patch it back
+    as an update, where `_created` is False."""
+
+    kind = field(StringField(choices=["request", "invitation"], default="request"))
+    comment = field(StringField(), checks=[required_if(kind="request")])
+
+    meta = {"collection": "fake_with_required_if_api_fields"}
+
+
+def check_is_set(value: str = "", field: str = "", **_kwargs) -> None:
+    """A plain check (not `always_run`) that rejects the field's own default, so a test
+    can tell whether a creation writing that default still goes through its checks."""
+    if not value:
+        raise FieldValidationError("Value is required", field=field)
+
+
+@generate_fields()
+class FakeWithDefaultRejectingCheck(EmbeddedDocument):
+    kind = field(StringField(), checks=[check_is_set])
+
+
+def check_code_needs_coded_kind(value: str = "", obj=None, field: str = "", **_kwargs) -> None:
+    """Reads the other field on `obj`, not in the payload."""
+    if value and obj.kind != "coded":
+        raise FieldValidationError("A code needs the coded kind", field=field)
+
+
+@generate_fields()
+class FakeWithCrossFieldCheck(EmbeddedDocument):
+    kind = field(StringField())
+    code = field(StringField(), checks=[check_code_needs_coded_kind])
 
 
 @generate_fields(
@@ -226,6 +276,90 @@ class FakeWithHrefFallback(Document):
     meta = {"collection": "fake_with_href_fallback_api_fields"}
 
 
+@generate_fields()
+class FakeWithRename(Document):
+    """Exercises `rename` on every kind of field it can apply to: the API key differs
+    from the Python attribute on read, on write (patch must assign the attribute, not
+    the API key), on validation errors, on getters and on image thumbnails."""
+
+    label = field(
+        StringField(),
+        rename="name",
+        checks=[check_not_forbidden],
+    )
+    created_at = field(
+        DateTimeField(),
+        readonly=True,
+        rename="since",
+    )
+    image = field(
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+        ),
+        readonly=True,
+        rename="picture",
+        thumbnail_info={
+            "size": BIGGEST_IMAGE_SIZE,
+        },
+    )
+
+    meta = {"collection": "fake_with_rename_api_fields"}
+
+    @field(description="Link to the API endpoint for this fake", rename="api_url")
+    def uri(self) -> str:
+        return "fake-with-rename/foobar/endpoint/"
+
+
+@generate_fields()
+class FakeImageWithoutThumbnails(Document):
+    """An ImageField with neither model `thumbnails` nor `thumbnail_info`:
+    it must not yield a duplicate `<key>_thumbnail` API field."""
+
+    image = field(
+        ImageField(fs=images, basename=default_image_basename),
+        readonly=True,
+    )
+
+    meta = {"collection": "fake_image_without_thumbnails"}
+
+
+@generate_fields()
+class FakeWithGenericReference(Document):
+    """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
+
+    A `GenericReferenceField` stores a resolved document, which the default
+    `LazyReference` model cannot serialize (it reads `document_type`, an attribute only
+    a `LazyReference` has). `nested_fields` is what lets the caller opt out of it, and
+    it must be honoured whether or not `choices` constrains the allowed classes.
+    """
+
+    subject = field(
+        mongoengine.fields.GenericReferenceField(),
+        nested_fields=api.model_reference,
+    )
+
+    meta = {"collection": "fake_with_generic_reference_api_fields"}
+
+
+@generate_fields()
+class FakeWithFilteredList(Document):
+    """Exercises `attribute` on a list of embedded documents: the list is read through a
+    property of the document that filters it."""
+
+    embeddeds = field(
+        ListField(EmbeddedDocumentField(FakeEmbedded)),
+        readonly=True,
+        attribute="visible_embeddeds",
+    )
+
+    meta = {"collection": "fake_with_filtered_list_api_fields"}
+
+    @property
+    def visible_embeddeds(self) -> list[FakeEmbedded]:
+        return [embedded for embedded in self.embeddeds if embedded.status == "active"]
+
+
 class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
@@ -337,6 +471,23 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
+
+    @pytest.mark.parametrize("param", ["filter_field_name", "tag", "standalone"])
+    def test_empty_filter_is_ignored(self, app, param) -> None:
+        """An empty filter value leaves the filter unset instead of matching ""."""
+        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["tag-a"])
+        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string={param: ""}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert set(results) == {fake1, fake2}
+
+    def test_empty_list_filter_values_are_dropped(self, app) -> None:
+        """Empty values of a repeated list filter are dropped, the others still apply."""
+        fake1: Fake = FakeFactory(tags=["tag-a"])
+        FakeFactory(tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string=[("tag", "tag-a"), ("tag", "")]):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert list(results) == [fake1]
 
     def test_nested_filters(self, app) -> None:
         """Filtering on an nested filter filters the results."""
@@ -459,6 +610,85 @@ class PatchChoicesValidationTest(PytestOnlyDBTestCase):
         assert embedded.status is None
 
 
+class RequiredIfTest(PytestOnlyDBTestCase):
+    def test_absent_field_is_rejected(self) -> None:
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf(), {})
+
+    def test_empty_value_is_rejected(self) -> None:
+        """A blank string is blanked to None by patch(), which on a field already
+        holding None leaves the value unmodified. The check must run all the same,
+        otherwise `{"comment": ""}` is a way to bypass the constraint entirely."""
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithRequiredIf(), {"comment": value})
+
+    def test_value_is_accepted(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"comment": "a reason"}).comment == "a reason"
+
+    def test_not_required_when_the_condition_is_not_met(self) -> None:
+        assert patch(FakeWithRequiredIf(), {"kind": "invitation", "comment": ""}).comment is None
+
+    def test_unchanged_empty_value_is_rejected_on_update(self) -> None:
+        """What `always_run` buys over the creation case: on a stored object that
+        already breaks the constraint, echoing the offending value back must not be a
+        way through — an update has no `_created` to fall back on."""
+        stored = FakeWithRequiredIf.objects.create(kind="request", comment=None)
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRequiredIf.objects.get(pk=stored.pk), {"comment": ""})
+
+
+class ChecksOnCreationTest(PytestOnlyDBTestCase):
+    """An unchanged value skips its checks so that resending an object as-is stays
+    idempotent. A creation has no previous value to be idempotent with — only a field
+    default — so writing that default must still be validated."""
+
+    def test_default_value_is_checked_on_creation(self) -> None:
+        for value in ["", "   ", None]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithDefaultRejectingCheck(), {"kind": value})
+
+    def test_valid_value_is_accepted_on_creation(self) -> None:
+        assert patch(FakeWithDefaultRejectingCheck(), {"kind": "a value"}).kind == "a value"
+
+    def test_unchanged_value_is_not_rechecked_on_update(self) -> None:
+        """A check that rejects the value already stored (uniqueness, immutability)
+        must not fire on an update that merely echoes it back."""
+        stored = FakeWithRename.objects.create(label=FORBIDDEN_VALUE)
+        patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+    def test_changed_value_is_still_checked_on_update(self) -> None:
+        stored = FakeWithRename.objects.create(label="a fine label")
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
+
+
+class CrossFieldCheckTest(PytestOnlyDBTestCase):
+    """A check sees the object with every field of the payload written, whatever the
+    order of the keys in the payload."""
+
+    def test_other_field_is_written_before_the_check(self) -> None:
+        for payload in [{"code": "x", "kind": "coded"}, {"kind": "coded", "code": "x"}]:
+            assert patch(FakeWithCrossFieldCheck(), payload).code == "x"
+
+    def test_other_field_value_is_checked(self) -> None:
+        for payload in [{"code": "x", "kind": "plain"}, {"kind": "plain", "code": "x"}]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithCrossFieldCheck(), payload)
+
+
+class PatchBlankStringTest(PytestOnlyDBTestCase):
+    def test_blank_string_is_stored_as_none(self) -> None:
+        """A string field only made of whitespace holds no value, so `required=True`
+        rejects it at save() instead of storing spaces."""
+        for value in ["", "   ", "\n\t "]:
+            assert patch(Fake(), {"title": value}).title is None
+
+    def test_surrounding_whitespace_is_kept(self) -> None:
+        """Only fully blank strings are emptied: the value itself is never trimmed."""
+        assert patch(Fake(), {"title": "  a title  "}).title == "  a title  "
+
+
 class HrefFieldTest(PytestOnlyDBTestCase):
     def test_href_total_and_extra(self, app) -> None:
         """`href_total` provides the link total (instead of len(value)) and
@@ -478,3 +708,125 @@ class HrefFieldTest(PytestOnlyDBTestCase):
         with app.test_request_context("/"):
             link = marshal(obj, FakeWithHrefFallback.__read_fields__)["things"]
         assert link["total"] == 3
+
+
+class GenericReferenceFieldTest(PytestOnlyDBTestCase):
+    def test_nested_fields_is_honoured_without_choices(self, app) -> None:
+        """`choices` restricts the referenced classes, `nested_fields` describes how the
+        reference is serialized: the two are independent. Reading a reference through the
+        default `LazyReference` model raises on the resolved document a
+        `GenericReferenceField` stores, so ignoring `nested_fields` here is a 500."""
+        organization = OrganizationFactory()
+        obj = FakeWithGenericReference(subject=organization)
+
+        with app.test_request_context("/"):
+            subject = marshal(obj, FakeWithGenericReference.__read_fields__)["subject"]
+
+        assert subject == {"class": "Organization", "id": str(organization.id)}
+
+    def test_write_field_takes_a_class_and_id_reference(self) -> None:
+        """Writing stays keyed on `{class, id}` whatever the read model is."""
+        organization = OrganizationFactory()
+        obj = patch(
+            FakeWithGenericReference(),
+            {"subject": {"class": "Organization", "id": str(organization.id)}},
+        )
+        assert obj.subject == organization
+
+    @pytest.mark.parametrize("operators", [{"$where": "return true"}, {"$ne": "nope"}, {"$gt": ""}])
+    def test_write_field_rejects_mongo_operators_as_id(self, operators: dict) -> None:
+        """An id made of Mongo operators would select an arbitrary document instead of
+        the requested one. MongoEngine catches it on an `ObjectId` primary key, but
+        `License.id` is a `StringField`, so the operators would reach the database."""
+        License(id="fr-lo", title="Licence Ouverte").save()
+
+        with pytest.raises(FieldValidationError):
+            patch(FakeWithGenericReference(), {"subject": {"class": "License", "id": operators}})
+
+
+class RenameFieldTest(PytestOnlyDBTestCase):
+    def test_read_fields_use_the_api_key(self) -> None:
+        """Renamed fields are exposed under their API key, and their Python attribute
+        name disappears from the read model."""
+        read_fields = FakeWithRename.__read_fields__
+        assert set(["name", "since", "picture", "api_url"]).issubset(read_fields.keys())
+        for attribute in ["label", "created_at", "image", "uri"]:
+            assert attribute not in read_fields
+
+    def test_read_field_resolves_the_python_attribute(self, app) -> None:
+        """Without an explicit `attribute`, flask-restx would look the value up under the
+        renamed key on the document and marshal null."""
+        obj = FakeWithRename(label="a label")
+        with app.test_request_context("/"):
+            assert marshal(obj, FakeWithRename.__read_fields__)["name"] == "a label"
+
+    def test_thumbnail_does_not_overwrite_its_image_field(self) -> None:
+        """An image field yields a thumbnail alongside it: the thumbnail must derive its
+        own API key from the rename instead of inheriting it and taking its place."""
+        read_fields = FakeWithRename.__read_fields__
+        assert "picture" in read_fields
+        assert "picture_thumbnail" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_image_field_without_thumbnails_has_no_thumbnail_api_field(self) -> None:
+        """No model thumbnails and no thumbnail_info: no `<key>_thumbnail` key,
+        which would only duplicate the main image URL."""
+        read_fields = FakeImageWithoutThumbnails.__read_fields__
+        assert "image" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_image_field_with_thumbnail_info_keeps_thumbnail_api_field(self) -> None:
+        """thumbnail_info alone (no model thumbnails) still yields the key —
+        this is the Fake/FakeWithRename configuration."""
+        read_fields = Fake.__read_fields__
+        assert "image_thumbnail" in read_fields
+
+    def test_write_fields_use_the_api_key(self) -> None:
+        """A writable renamed field is accepted under its API key. A readonly one is not
+        writable at all, whatever the key."""
+        write_fields = FakeWithRename.__write_fields__
+        assert "name" in write_fields
+        assert "label" not in write_fields
+        assert "since" not in write_fields
+        assert "created_at" not in write_fields
+
+    def test_patch_assigns_the_python_attribute(self) -> None:
+        """The payload is keyed on the API name, the assignment targets the attribute."""
+        obj = patch(FakeWithRename(), {"name": "a label"})
+        assert obj.label == "a label"
+
+    def test_patch_ignores_a_renamed_readonly_field(self) -> None:
+        created_at = datetime(2026, 1, 1, tzinfo=UTC)
+        obj = patch(FakeWithRename(created_at=created_at), {"since": datetime(2026, 6, 1)})
+        assert obj.created_at == created_at
+
+    def test_check_error_is_keyed_on_the_api_key(self) -> None:
+        """The error must name the key the caller sent, otherwise the client cannot map
+        it back to the field of its payload."""
+        with pytest.raises(FieldValidationError) as excinfo:
+            patch(FakeWithRename(), {"name": FORBIDDEN_VALUE})
+        assert excinfo.value.field == "name"
+        assert "name" in excinfo.value.errors
+
+    def test_reverse_mapping_only_holds_writable_fields(self) -> None:
+        """`patch()` reads the mapping after finding the key in `__write_fields__`, so
+        an entry for anything else could never be reached."""
+        assert FakeWithRename.__api_key_to_attribute__ == {"name": "label"}
+
+
+class ListAttributeFieldTest(PytestOnlyDBTestCase):
+    def test_list_attribute_is_resolved_on_the_document(self, app) -> None:
+        """`attribute` on a list points to a property of the document, and the items are
+        still serialized in full: it must not be propagated to the inner field, or each
+        item would look that attribute up on itself and marshal to null."""
+        obj = FakeWithFilteredList(
+            embeddeds=[
+                FakeEmbedded(title="shown", description="a description", status="active"),
+                FakeEmbedded(title="filtered out", description="a description", status="inactive"),
+            ]
+        )
+        with app.test_request_context("/"):
+            embeddeds = marshal(obj, FakeWithFilteredList.__read_fields__)["embeddeds"]
+        assert len(embeddeds) == 1
+        assert embeddeds[0]["title"] == "shown"
+        assert embeddeds[0]["description"] == "a description"
