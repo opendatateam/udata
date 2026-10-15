@@ -1438,11 +1438,11 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization = OrganizationFactory(members=[member], requests=[membership_request])
 
         api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
-        response = self.post(api_url, {})
-        assert400(response)
+        response = self.post(api_url, {"comment": ""})
+        assert200(response)
 
         organization.reload()
-        assert organization.requests[0].status == "pending"
+        assert organization.requests[0].status == "refused"
         assert organization.requests[0].refusal_comment is None
 
     def test_refuse_membership_and_invite_member_with_non_object_body(self):
