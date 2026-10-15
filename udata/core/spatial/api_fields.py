@@ -1,17 +1,4 @@
-from udata.api import api, fields
-
-GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
-
-
-geojson = api.model(
-    "GeoJSON",
-    {
-        "type": fields.String(description="The GeoJSON Type", required=True, enum=GEOM_TYPES),
-        "coordinates": fields.List(
-            fields.Raw(), description="The geometry as coordinates lists", required=True
-        ),
-    },
-)
+from udata.api import api, fields, geojson
 
 feature_fields = api.model(
     "GeoJSONFeature",

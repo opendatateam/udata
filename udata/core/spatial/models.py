@@ -14,7 +14,6 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
 
 from . import geoids
-from .api_fields import geojson as geojson_fields
 from .api_fields import granularity_fields
 from .constants import ADMIN_LEVEL_MAX, ADMIN_LEVEL_MIN, BASE_GRANULARITIES
 
@@ -151,7 +150,6 @@ class SpatialCoverage(EmbeddedDocument):
 
     geom = field(
         MultiPolygonField(),
-        nested_fields=geojson_fields,
         allow_null=True,
         description="A multipolygon for the whole coverage",
     )

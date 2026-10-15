@@ -7,14 +7,13 @@ from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
-from udata.api import API, add_pagination_arguments, apiv2, fields
+from udata.api import API, add_pagination_arguments, apiv2, fields, geojson
 from udata.auth import admin_permission
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
-from udata.core.spatial.api_fields import geojson
 from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list

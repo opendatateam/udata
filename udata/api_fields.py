@@ -41,7 +41,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import add_pagination_arguments, api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference, geojson
 from udata.core.dataset.constants import FULL_OBJECTS_HEADER
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
@@ -460,13 +460,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             )
 
     elif isinstance(field, mongo_fields.MultiPolygonField):
-        geometry_fields = info.get("nested_fields")
-        if geometry_fields is None:
-            constructor = restx_fields.Raw
-        else:
 
-            def constructor(**kwargs):
-                return restx_fields.Nested(geometry_fields, **kwargs)
+        def constructor(**kwargs):
+            return restx_fields.Nested(geojson, **kwargs)
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
