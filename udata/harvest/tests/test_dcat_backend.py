@@ -910,7 +910,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
 
-    def test_unsupported_mime_type(self, rmock):
+    def test_unsupported_mime_type(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": "text/html; charset=utf-8"})
         org = OrganizationFactory()
@@ -927,8 +927,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         error = job.errors[0]
         assert error.message == 'Unsupported mime type "text/html"'
+        # A misconfigured source is not a udata bug: harvest report only, no Sentry event
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
-    def test_unable_to_detect_format(self, rmock):
+    def test_unable_to_detect_format(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": ""})
         org = OrganizationFactory()
@@ -946,6 +948,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         error = job.errors[0]
         expected = "Unable to detect format from extension or mime type"
         assert error.message == expected
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
     def test_use_replaced_uris(self, rmock, mocker):
         # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
