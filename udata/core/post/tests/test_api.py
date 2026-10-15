@@ -538,15 +538,20 @@ class PostsAPITest(APITestCase):
         post.reload()
         assert post.slug == "cgu"
 
-    def test_post_api_slug_cannot_look_like_an_identifier(self):
-        """A UUID slug would be published suffixed with `-uuid`, a URL nobody asked for"""
+    def test_post_api_reclaim_the_previous_slug_of_another_post(self):
+        """A previous slug can be given to a new post (a new version of /cgu): it then
+        serves this post instead of redirecting to the old one"""
+        old = PostFactory(name="CGU 2025", slug="cgu")
         self.login(AdminFactory())
+        assert200(self.put(url_for("api.post", post=old), {"slug": "cgu-2025"}))
 
-        response = self.post(
-            url_for("api.posts"), {"name": "CGU", "content": "x", "slug": str(uuid4())}
-        )
-        assert400(response)
-        assert Post.objects.count() == 0
+        response = self.post(url_for("api.posts"), {"name": "CGU", "content": "x", "slug": "cgu"})
+        assert201(response)
+        new_id = response.json["id"]
+
+        response = self.get(url_for("api.post", post="cgu"))
+        assert200(response)
+        assert response.json["id"] == new_id
 
     def test_post_api_rename_keeps_the_slug(self):
         """Renaming a post keeps its URL, whether the slug is resent as-is or left out"""
