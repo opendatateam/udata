@@ -67,9 +67,10 @@ class SearchIntegrationTest(APITestCase):
         assert "Données spectaculaires sur les transports" in titles
 
     def test_dataset_punctuation_search(self):
-        """Dots vs spaces in titles should match in both directions."""
+        """Dots and underscores vs spaces in titles should match in both directions."""
         DatasetFactory(title="Catalogue data.gouv.fr")
         DatasetFactory(title="Portail data gouv")
+        DatasetFactory(title="Export data_gouv")
 
         self.refresh_index()
 
@@ -78,12 +79,14 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "Catalogue data.gouv.fr" in titles
         assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
 
         response = self.get("/api/2/datasets/search/?q=data.gouv")
         self.assert200(response)
         titles = [d["title"] for d in response.json["data"]]
         assert "Catalogue data.gouv.fr" in titles
         assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
 
     def test_dataset_decimal_not_split(self):
         """q=2.5 matches a decimal, not a title that only has 2 and 5 apart."""
