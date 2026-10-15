@@ -523,6 +523,31 @@ class PostsAPITest(APITestCase):
         assert "slug" in response.json["errors"]
         assert Post.objects.count() == 0
 
+    def test_post_api_slug_must_be_a_string(self):
+        """A slug that is not a string is rejected, at creation as on update"""
+        post = PostFactory(slug="cgu")
+        self.login(AdminFactory())
+
+        for slug in (123, True, ["cgu"]):
+            response = self.post(
+                url_for("api.posts"), {"name": "CGU", "content": "x", "slug": slug}
+            )
+            assert400(response)
+            assert400(self.put(url_for("api.post", post=post), {"slug": slug}))
+        assert Post.objects.count() == 1
+        post.reload()
+        assert post.slug == "cgu"
+
+    def test_post_api_slug_cannot_look_like_an_identifier(self):
+        """A UUID slug would be published suffixed with `-uuid`, a URL nobody asked for"""
+        self.login(AdminFactory())
+
+        response = self.post(
+            url_for("api.posts"), {"name": "CGU", "content": "x", "slug": str(uuid4())}
+        )
+        assert400(response)
+        assert Post.objects.count() == 0
+
     def test_post_api_rename_keeps_the_slug(self):
         """Renaming a post keeps its URL, whether the slug is resent as-is or left out"""
         post = PostFactory(name="CGU", slug="cgu")

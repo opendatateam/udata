@@ -5,6 +5,7 @@ from mongoengine.fields import StringField
 from mongoengine.signals import post_delete, pre_save
 
 from udata.mongo.document import UDataDocument
+from udata.mongo.errors import FieldValidationError
 from udata.utils import is_uuid
 
 from .queryset import UDataQuerySet
@@ -77,6 +78,15 @@ class SlugField(StringField):
         return slugify.slugify(
             value, max_length=self.max_length, separator=self.separator, to_lower=self.lower_case
         )
+
+    def from_input(self, value):
+        """
+        Normalize a slug written through the API, before `patch()` compares it with the
+        stored one and runs the field checks on it.
+        """
+        if value is not None and not isinstance(value, str):
+            raise FieldValidationError("Expected a string", field=self.name)
+        return self.slugify(value)
 
     def latest(self, value):
         """
@@ -191,7 +201,6 @@ def populate_slug(instance, field):
     old_slug = getattr(previous, field.db_field, None)
 
     if slug == old_slug:
-        setattr(instance, field.db_field, slug)
         return slug
 
     # Ensure uniqueness
