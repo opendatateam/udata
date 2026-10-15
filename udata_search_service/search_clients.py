@@ -67,7 +67,7 @@ dgv_analyzer = analyzer(
 punct_to_space = char_filter(
     "punct_to_space",
     type="pattern_replace",
-    pattern=r"[._]+",
+    pattern=r"(?<=\p{L})[._]+(?=\p{L})",
     replacement=" ",
 )
 dgv_analyzer_punct = analyzer(
