@@ -376,12 +376,7 @@ class ElasticClient:
                                 query.MultiMatch(
                                     query=query_text,
                                     type="cross_fields",
-                                    fields=[
-                                        "id^15",
-                                        "name^7",
-                                        "acronym^7",
-                                        "description^4",
-                                    ],
+                                    fields=["id^15", "name^7", "acronym^7", "description^4"],
                                     operator="and",
                                 )
                             ]
@@ -805,10 +800,7 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=[
-                            "title",
-                            "organization_name",
-                        ],
+                        fields=["title", "organization_name"],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
@@ -1492,11 +1484,7 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=[
-                            "title",
-                            "organization_name",
-                            "documentation_content",
-                        ],
+                        fields=["title", "organization_name", "documentation_content"],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
