@@ -15,6 +15,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
+from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
@@ -32,7 +33,6 @@ from .api_fields import (
     resource_harvest_fields,
     resource_internal_fields,
     schema_fields,
-    spatial_coverage_fields,
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
@@ -210,7 +210,7 @@ dataset_fields = apiv2.model(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
         ),
         "spatial": fields.Nested(
-            spatial_coverage_fields, allow_null=True, description="The spatial coverage"
+            SpatialCoverage.__read_fields__, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.Raw(
             attribute=lambda d: (
@@ -290,7 +290,8 @@ apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
-apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
+apiv2.inherit("SpatialCoverage (read)", SpatialCoverage.__read_fields__)
+apiv2.inherit("SpatialCoverage (write)", SpatialCoverage.__write_fields__)
 apiv2.inherit("TemporalCoverage", temporal_coverage_fields)
 apiv2.inherit("GeoJSON", geojson)
 apiv2.inherit("Checksum", checksum_fields)
