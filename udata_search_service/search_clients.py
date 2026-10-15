@@ -61,7 +61,9 @@ dgv_analyzer = analyzer(
 )
 
 # Normalize "." / "_" to spaces so "data.gouv" and "data gouv" tokenize the same.
-# Used on a subfield so the main french_dgv ranking is unchanged.
+# Indexed on a subfield only (main french_dgv fields unchanged). Queried via
+# cross_fields on *.punct, not most_fields (most_fields sums per-field scores and
+# would double-count when title and title.punct tokenize identically).
 punct_to_space = char_filter(
     "punct_to_space",
     type="pattern_replace",
@@ -817,9 +819,7 @@ class ElasticClient:
                         operator="and",
                         fields=[
                             "title",
-                            "title.punct",
                             "organization_name",
-                            "organization_name.punct",
                         ],
                         fuzziness="AUTO:4,6",
                     ),
@@ -1221,9 +1221,7 @@ class ElasticClient:
                         operator="and",
                         fields=[
                             "title",
-                            "title.punct",
                             "organization_name",
-                            "organization_name.punct",
                         ],
                         fuzziness="AUTO:4,6",
                     ),
@@ -1512,9 +1510,7 @@ class ElasticClient:
                         operator="and",
                         fields=[
                             "title",
-                            "title.punct",
                             "organization_name",
-                            "organization_name.punct",
                             "documentation_content",
                         ],
                         fuzziness="AUTO:4,6",
