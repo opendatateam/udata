@@ -504,6 +504,17 @@ class PostsAPITest(APITestCase):
         assert201(response)
         assert response.json["slug"] == "conditions-generales-dutilisation"
 
+    def test_post_api_update_with_empty_slug(self):
+        """Clearing the slug regenerates it from the name"""
+        post = PostFactory(name="Mentions légales", slug="cgu")
+        self.login(AdminFactory())
+
+        response = self.put(url_for("api.post", post=post), {"slug": ""})
+        assert200(response)
+        assert response.json["slug"] == "mentions-legales"
+        post.reload()
+        assert post.slug == "mentions-legales"
+
     def test_post_api_update_slug_requires_admin(self):
         """A non-sysadmin cannot change a post slug"""
         post = PostFactory()
