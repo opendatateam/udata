@@ -5,7 +5,7 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import FOAF, RDF, RDFS, XSD, Namespace
+from rdflib.namespace import FOAF, OWL, RDF, RDFS, XSD, Namespace
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
@@ -576,6 +576,113 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert dataset.description == "a description"
+
+    @pytest.mark.parametrize(
+        "identifier,expected",
+        [
+            ("10.15148/762d02eb-82dc", "10.15148/762d02eb-82dc"),
+            ("https://doi.org/10.25519/HYHX-NE30", "10.25519/HYHX-NE30"),
+            ("http://dx.doi.org/10.12770/0d177ff9", "10.12770/0d177ff9"),
+            ("doi:10.5281/zenodo.123", "10.5281/zenodo.123"),
+            ("info:doi/10.1109/5.771073", "10.1109/5.771073"),
+            (" 10.15148/762d02eb-82dc\n", "10.15148/762d02eb-82dc"),
+            ("0437a976-cff1-4fa6-807a-c23006df2f8f", None),
+            ("https://example.org/dataset/10.15148/762d02eb", None),
+            ("FR-330-715-368-00362_IFR_DOI_SPECTRHABENT_MNT", None),
+        ],
+    )
+    def test_doi_from_identifier(self, identifier, expected):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(identifier)))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == expected
+
+    def test_doi_from_adms_identifier(self):
+        # The form DCAT 3 recommends for external identifiers (§8, example 15).
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        local_id = BNode()
+        g.add((local_id, RDF.type, ADMS.Identifier))
+        g.add((local_id, SKOS.notation, Literal("https://www.example.org/datasets/42")))
+        g.add((node, ADMS.identifier, local_id))
+        doi_id = BNode()
+        g.add((doi_id, RDF.type, ADMS.Identifier))
+        g.add(
+            (
+                doi_id,
+                SKOS.notation,
+                Literal("https://doi.org/10.5281/zenodo.1486279", datatype=XSD.anyURI),
+            )
+        )
+        g.add((doi_id, ADMS.schemaAgency, Literal("International DOI Foundation")))
+        g.add((node, ADMS.identifier, doi_id))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == "10.5281/zenodo.1486279"
+
+    @pytest.mark.parametrize(
+        "adms_identifier",
+        [
+            Literal("https://doi.org/10.5281/zenodo.1486279"),
+            URIRef("https://doi.org/10.5281/zenodo.1486279"),
+        ],
+    )
+    def test_doi_from_adms_identifier_without_identifier_node(self, adms_identifier):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, ADMS.identifier, adms_identifier))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == "10.5281/zenodo.1486279"
+
+    def test_doi_from_owl_same_as(self):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, OWL.sameAs, URIRef("https://doi.org/10.5281/zenodo.1486279")))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == "10.5281/zenodo.1486279"
+
+    def test_same_doi_in_several_places_is_kept(self):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal("10.25519/5S7X-X334")))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, OWL.sameAs, URIRef("https://doi.org/10.25519/5s7x-x334")))
+
+        dataset = dataset_from_rdf(g)
+
+        assert dataset.harvest.doi == "10.25519/5S7X-X334"
+
+    def test_doi_removed_from_source(self):
+        node = BNode()
+        g = Graph()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        existing = DatasetFactory.build(harvest=HarvestDatasetMetadata(doi="10.15148/762d02eb"))
+
+        dataset = dataset_from_rdf(g, existing)
+
+        assert dataset.harvest.doi is None
 
     def test_future_modified_at(self):
         node = BNode()
