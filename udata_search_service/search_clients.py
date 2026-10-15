@@ -60,7 +60,8 @@ dgv_analyzer = analyzer(
     filter=["icu_folding", french_elision, french_synonym, french_stemmer, french_stop],
 )
 
-# Normalize "." / "_" to spaces so "data.gouv" and "data gouv" tokenize the same.
+# Normalize "." / "_" between letters so "data.gouv" and "data gouv" tokenize the same.
+# Digits stay intact (2.5, PM2.5).
 # Indexed on a subfield only (main french_dgv fields unchanged). Queried via
 # cross_fields on *.punct, not most_fields (most_fields sums per-field scores and
 # would double-count when title and title.punct tokenize identically).
