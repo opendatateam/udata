@@ -90,6 +90,22 @@ class SitemapGeneratorTest(PytestOnlyDBTestCase):
         assert len(parse_xml(uploaded["sitemaps/reuses_1.xml"])) == 1
         assert len(parse_xml(uploaded["sitemaps/dataservices_1.xml"])) == 1
 
+    def test_pages_are_listed_under_their_path(self):
+        elections = PostFactory(kind="page", slug="elections")
+        PostFactory(kind="page", slug="municipales", parent=elections)
+        PostFactory(kind="news", slug="actualite")
+
+        result, uploaded = self._generate()
+
+        assert result is True
+        root = parse_xml(uploaded["sitemaps/posts_1.xml"])
+        locs = {url.find(f"{{{SITEMAP_NS}}}loc").text for url in root}
+        assert locs == {
+            "https://data.gouv.fr/pages/elections",
+            "https://data.gouv.fr/pages/elections/municipales",
+            "https://data.gouv.fr/posts/actualite",
+        }
+
     @pytest.mark.options(SITEMAP_URLS_PER_FILE=2)
     def test_chunking(self):
         DatasetFactory.create_batch(3)

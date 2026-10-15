@@ -1,6 +1,6 @@
 from flask import url_for
 from flask_storage.mongo import ImageField
-from mongoengine import PULL
+from mongoengine import DENY, PULL
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
@@ -24,6 +24,7 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
+from .api_fields import post_ancestor_fields
 from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 from .permissions import PostReadPermission
 
@@ -125,11 +126,21 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         description="Post kind (news or page)",
     )
 
+    parent = field(
+        # DENY: otherwise sub-pages would keep a dangling reference and every read of them
+        # would fail. The API checks it first, this covers the deletions made elsewhere.
+        ReferenceField("self", reverse_delete_rule=DENY),
+        nested_fields=post_ancestor_fields,
+        allow_null=True,
+        description="The parent page, only for pages",
+    )
+
     meta = {
         "ordering": ["-created_at"],
         "indexes": [
             "-created_at",
             "-published",
+            "parent",
             {
                 "fields": ["$name", "$headline", "$content"],
                 "default_language": "french",
@@ -149,14 +160,64 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     def permissions(self):
         return {"read": PostReadPermission(self)}
 
+    @property
+    @field(
+        nested_fields=post_ancestor_fields,
+        as_list=True,
+        description="The ancestor pages, from the root page to the parent",
+    )
+    def ancestors(self) -> list["Post"]:
+        ancestors = []
+        seen = set()
+        ancestor = self.parent
+        # Stops on an id already met: `clean()` rejects cycles, but two concurrent updates
+        # (A under B, B under A) each pass it against the other's previous parent. Without
+        # this, every read of these posts would loop forever.
+        while ancestor and ancestor.id not in seen:
+            seen.add(ancestor.id)
+            ancestors.insert(0, ancestor)
+            ancestor = ancestor.parent
+        return ancestors
+
+    @property
+    @field(description="The page path, made of the slugs of its ancestors and its own")
+    def path(self) -> str:
+        return "/".join(post.slug for post in [*self.ancestors, self])
+
     def clean(self):
         if self.body_type != "blocs" and not self.content:
             raise ValidationError("content is required when body_type is 'markdown' or 'html'")
+
+        if self.parent:
+            if self.kind != "page" or self.parent.kind != "page":
+                raise ValidationError(
+                    "Only a page can have a parent, and its parent must be a page",
+                    field_name="parent",
+                )
+            if any(ancestor.id == self.id for ancestor in self.ancestors):
+                raise ValidationError("A page cannot be its own ancestor", field_name="parent")
+            # A published page exposes its ancestors (name, slug in its path): a draft
+            # parent would leak through it.
+            if self.published and not self.parent.published:
+                raise ValidationError(
+                    "A published page cannot be under an unpublished page", field_name="parent"
+                )
+
+        if self.id:
+            children = Post.objects(parent=self.id)
+            if self.kind != "page" and children.count():
+                raise ValidationError("A page with sub-pages must stay a page", field_name="kind")
+            if not self.published and children.visible().count():
+                raise ValidationError(
+                    "A page with published sub-pages cannot be unpublished", field_name="published"
+                )
 
     def __str__(self):
         return self.name or ""
 
     def self_web_url(self, **kwargs):
+        if self.kind == "page":
+            return cdata_url(f"/pages/{self.path}", **kwargs)
         return cdata_url(f"/posts/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
