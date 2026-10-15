@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from bson import ObjectId
@@ -108,7 +108,7 @@ class SchedulerTest(PytestOnlyDBTestCase):
             task="a-job",
             enabled=True,
             interval=PeriodicTask.Interval(every=1, period="hours"),
-            last_run_at=datetime.utcnow() - timedelta(minutes=1),
+            last_run_at=datetime.now(UTC) - timedelta(minutes=1),
         )
 
         scheduler.tick()
@@ -121,7 +121,7 @@ class SchedulerTest(PytestOnlyDBTestCase):
             task="a-job",
             enabled=True,
             interval=PeriodicTask.Interval(every=5, period="minutes"),
-            last_run_at=datetime.utcnow() - timedelta(minutes=10),
+            last_run_at=datetime.now(UTC) - timedelta(minutes=10),
         )
         scheduler = Scheduler(app=celery)
         assert scheduler.schedule["a due job"].is_due().is_due
@@ -129,7 +129,7 @@ class SchedulerTest(PytestOnlyDBTestCase):
         scheduler.reserve(scheduler.schedule["a due job"])
 
         task.reload()
-        assert task.last_run_at > datetime.utcnow() - timedelta(minutes=1)
+        assert task.last_run_at > datetime.now(UTC).replace(tzinfo=None) - timedelta(minutes=1)
         assert not Scheduler(app=celery).schedule["a due job"].is_due().is_due
 
     def test_a_job_that_never_ran_keeps_its_starting_point_across_restarts(self):
