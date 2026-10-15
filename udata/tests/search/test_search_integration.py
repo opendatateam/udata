@@ -88,6 +88,19 @@ class SearchIntegrationTest(APITestCase):
         assert "Portail data gouv" in titles
         assert "Export data_gouv" in titles
 
+    def test_dataset_punctuation_search_across_description(self):
+        """A dotted title and a description word match in the same query."""
+        DatasetFactory(title="Catalogue data.gouv.fr", description="statistiques nationales")
+        DatasetFactory(title="Autre catalogue", description="statistiques nationales")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv statistiques")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Autre catalogue" not in titles
+
     def test_dataset_decimal_not_split(self):
         """q=2.5 matches a decimal, not a title that only has 2 and 5 apart."""
         DatasetFactory(title="Indice 2.5", description="air")
