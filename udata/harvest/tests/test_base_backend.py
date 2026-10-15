@@ -491,6 +491,48 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_at" not in dataservice.harvest
         assert "archived_reason" not in dataservice.harvest
 
+    @pytest.mark.parametrize(
+        ("factory", "mock_factory", "key", "archived_field"),
+        [
+            (DatasetFactory, DatasetFactory, "dataset", "archived"),
+            (DataserviceFactory, DataserviceFactory, "dataservice", "archived_at"),
+        ],
+    )
+    def test_autoarchive_archive_without_remote_id(
+        self, app, factory, mock_factory, key, archived_field
+    ):
+        grace_days = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
+        source = HarvestSourceFactory()
+        last_update = datetime.now(UTC) - timedelta(days=grace_days + 1)
+
+        # an object with a None remote_id (e.g. removed due to the `attach` command),
+        # older than the grace period, so it should be eligible for archiving
+        item_arch = factory(
+            harvest={
+                "domain": source.domain,
+                "source_id": str(source.id),
+                "remote_id": None,
+                "last_update": last_update,
+            }
+        )
+
+        # process an item with remote_id missing so that `None` lands in
+        # `remote_ids` inside `autoarchive`
+        backend = MockBackend(
+            source,
+            mock_items=[mock_factory.build(remote_id=None)],
+        )
+        job = backend.harvest()
+
+        archived_items = [i for i in job.items if i.status == "archived"]
+        assert len(archived_items) == 1
+        assert getattr(archived_items[0], key) == item_arch
+
+        item_arch.reload()
+        assert getattr(item_arch, archived_field) is not None
+        assert "archived_at" in item_arch.harvest
+        assert "archived_reason" in item_arch.harvest
+
     def test_harvest_datasets_get_deleted(self):
         backend = MockBackend(
             HarvestSourceFactory(),
@@ -758,14 +800,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         }
 
         try:
+            before = datetime.now(UTC)
             job = backend.harvest()
+            after = datetime.now(UTC)
 
             assert job.status == job_status
 
-            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
-            assert job.started == approx_date
-            assert job.ended == approx_date
-            assert job.started < job.ended
+            assert before <= job.started < job.ended <= after
 
             assert len(job.items) == nb_datasets + nb_dataservices + len(record_errors)
 
@@ -880,7 +921,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
         try:
             remote_id = getattr(record, "remote_id", None)
+            before = datetime.now(UTC)
             backend.process_item(remote_id, backend.item_processor, record)
+            after = datetime.now(UTC)
 
             assert len(backend.job.items) == 1
             harvest_item = backend.job.items[0]
@@ -889,10 +932,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert harvest_item.remote_id == remote_id
             assert harvest_item.status == item_status
 
-            approx_date = pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
-            assert harvest_item.started == approx_date
-            assert harvest_item.ended == approx_date
-            assert harvest_item.started < harvest_item.ended
+            assert before <= harvest_item.started < harvest_item.ended <= after
 
             assert len(harvest_item.errors) == (1 if record_error else 0)
             if record_error:
@@ -994,7 +1034,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         ),
     )
     def test_get_item_existing(self, match_field, match_value):
-        source = HarvestSourceFactory()
+        source = HarvestSourceFactory(url="https://data.example.com/catalog")
         last_update = datetime(2026, 1, 1)
         dataset = DatasetFactory(
             harvest={
@@ -1017,7 +1057,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert item.id is None  # newly instantiated dataservice
 
         # different source/domain => new item
-        backend2 = MockBackend(HarvestSourceFactory())
+        backend2 = MockBackend(HarvestSourceFactory(url="https://other.example.com/catalog"))
         item = backend2.get_item(dataset.harvest.remote_id, Dataset)
         assert item.id is None  # newly instantiated dataset
 
@@ -1026,7 +1066,9 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend = MockBackend(source)
 
         metadata = HarvestMetadata()
+        before = datetime.now(UTC)
         m = backend.update_harvest_metadata(metadata, "test")
+        after = datetime.now(UTC)
 
         assert m is metadata
         assert m.backend == backend.display_name
@@ -1037,7 +1079,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert m.remote_url is None  # not set by update_harvest_metadata()
         assert m.created_at is None  # not set by update_harvest_metadata()
         assert m.modified_at is None  # not set by update_harvest_metadata()
-        assert m.last_update == pytest.approx(datetime.now(UTC), abs=timedelta(seconds=1))
+        assert before <= m.last_update <= after
         assert m.archived_at is None  # set but None
         assert m.archived_reason is None  # set but None
 

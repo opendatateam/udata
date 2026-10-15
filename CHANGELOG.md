@@ -1,5 +1,25 @@
 # Changelog
 
+## 17.14.0 (2026-10-15)
+
+- feat(organization): add banner ([#4003](https://github.com/opendatateam/udata/pull/4003))
+- fix(geopf): better error display ([#4002](https://github.com/opendatateam/udata/pull/4002))
+- fix: give test_get_item_existing sources distinct domains to stop random Faker collisions ([#3990](https://github.com/opendatateam/udata/pull/3990))
+- fix: report unsupported or missing DCAT mime type in the harvest job instead of Sentry ([#3995](https://github.com/opendatateam/udata/pull/3995))
+- test: bracket harvest timestamps instead of comparing to a 1s window after the run ([#4000](https://github.com/opendatateam/udata/pull/4000))
+
+
+## 17.13.0 (2026-10-13)
+
+- feat: add notification settings and mail digests ([#3956](https://github.com/opendatateam/udata/pull/3956))
+- fix(notifications): make the follow migration run on production volumes ([#4009](https://github.com/opendatateam/udata/pull/4009))
+
+
+## 17.12.1 (2026-10-09)
+
+- feat(harvest): archive items with remote_id as None ([#4001](https://github.com/opendatateam/udata/pull/4001))
+
+
 ## 17.12.0 (2026-10-07)
 
 - chore(deps): update flask-storage to 2.0.3 so startup no longer depends on S3 ([#3998](https://github.com/opendatateam/udata/pull/3998))

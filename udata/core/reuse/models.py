@@ -19,6 +19,7 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field, generate_fields
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -149,7 +150,7 @@ class Reuse(
     )
     dataservices = field(
         ListField(
-            field(ReferenceField("Dataservice", reverse_delete_rule=PULL)),
+            field(ReferenceField(Dataservice, reverse_delete_rule=PULL)),
         ),
         filterable={
             "key": "dataservice",

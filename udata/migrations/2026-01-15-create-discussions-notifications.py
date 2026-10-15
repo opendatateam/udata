@@ -8,8 +8,9 @@ from datetime import datetime
 import click
 
 from udata.core.discussions.models import Discussion
-from udata.core.discussions.notifications import DiscussionNotificationDetails, DiscussionStatus
+from udata.core.discussions.notifications import DiscussionNotificationDetails
 from udata.features.notifications.constants import NotificationType
+from udata.features.notifications.events import discussion_recipients
 from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
@@ -31,41 +32,30 @@ def migrate(db):
             try:
                 existing = Notification.objects(details__discussion=discussion).first()
                 if not existing:
-                    # Add NEW_COMMENT notifications for the last message
                     if len(discussion.discussion) > 1:
+                        # Add NEW_COMMENT notifications for the last message
                         last_comment = discussion.discussion[-1]
-
-                        recipients = discussion.owner_recipients(sender=last_comment.posted_by)
-
-                        for user in recipients:
-                            notification = Notification(
-                                user=user,
-                                type=NotificationType.DISCUSSION_COMMENT,
-                                details=DiscussionNotificationDetails(
-                                    # Superseded by `type`, kept until the front reads it
-                                    status=DiscussionStatus.NEW_COMMENT,
-                                    message_id=str(last_comment.id),
-                                    discussion=discussion,
-                                ),
-                            )
-                            notification.save()
-                            created_count += 1
+                        sender = last_comment.posted_by
+                        notification_type = NotificationType.DISCUSSION_COMMENT
+                        message_id = str(last_comment.id)
                     else:
                         # Add NEW_DISCUSSION notifications if no reply yet
-                        recipients = discussion.owner_recipients(sender=discussion.user)
+                        sender = discussion.user
+                        notification_type = NotificationType.DISCUSSION_NEW
+                        message_id = None
 
-                        for user in recipients:
-                            notification = Notification(
-                                user=user,
-                                type=NotificationType.DISCUSSION_NEW,
-                                details=DiscussionNotificationDetails(
-                                    # Superseded by `type`, kept until the front reads it
-                                    status=DiscussionStatus.NEW_DISCUSSION,
-                                    discussion=discussion,
-                                ),
-                            )
-                            notification.save()
-                            created_count += 1
+                    for recipient in discussion_recipients(discussion):
+                        if sender and recipient.key == sender.id:
+                            continue
+                        Notification(
+                            user=recipient.user,
+                            type=notification_type,
+                            reasons=sorted(recipient.reasons),
+                            details=DiscussionNotificationDetails(
+                                message_id=message_id, discussion=discussion
+                            ),
+                        ).save()
+                        created_count += 1
             except Exception as e:
                 log.error(f"Error creating notification for discussion {discussion.id}: {e}")
 

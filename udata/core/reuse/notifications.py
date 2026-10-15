@@ -4,12 +4,12 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
-from udata.core.owned import get_responsible_users
+from udata.core.dataset.notifications import DatasetReusedEvent, became_public
 from udata.core.reuse.models import Reuse
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -27,37 +27,47 @@ class ReuseCreatedNotificationDetails(EmbeddedDocument):
     dataset = field(
         ReferenceField(Dataset),
         readonly=True,
-        nested_fields=dataset_fields,
+        nested_fields=dataset_ref_fields,
         auditable=False,
         allow_null=True,
         filterable={},
     )
 
 
-class ReuseCreated(NotificationEvent):
-    """One event per reused dataset: each set of dataset owners hears about their own."""
+class ReuseCreated(DatasetReusedEvent):
+    """A reuse became visible: one event per reused dataset, so that each set of
+    dataset owners hears about their own."""
 
     type = NotificationType.REUSE_CREATED
+    label = _("New reuses")
 
     def __init__(self, reuse: Reuse, dataset: Dataset):
         self.reuse = reuse
         self.dataset = dataset
 
-    @property
-    def occurred_at(self):
-        return self.reuse.created_at
-
-    def recipients(self):
-        return [user for user in get_responsible_users(self.dataset) if user]
-
     def via_app(self, recipient):
+        if self.already_notified(recipient, reuse=self.reuse, dataset=self.dataset):
+            return None
         return ReuseCreatedNotificationDetails(reuse=self.reuse, dataset=self.dataset)
 
 
-@Reuse.on_create.connect
-def on_reuse_created(reuse, **kwargs):
+def announce_reuse(reuse: Reuse) -> None:
     for dataset in reuse.datasets:
         ReuseCreated(reuse, dataset).dispatch()
+
+
+# A private reuse is announced when it is published, not when it is created: until
+# then, its existence is its owner's business only.
+@Reuse.on_create.connect
+def on_reuse_created(reuse, **kwargs):
+    if not reuse.private:
+        announce_reuse(reuse)
+
+
+@Reuse.on_update.connect
+def on_reuse_published(reuse, changed_fields, previous, **kwargs):
+    if became_public(reuse, changed_fields, previous):
+        announce_reuse(reuse)
 
 
 @Reuse.on_delete.connect

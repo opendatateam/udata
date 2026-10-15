@@ -398,7 +398,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.return_value = ("SUCCESS", "sd-1")
         client.upload_metadata.return_value = "meta-1"
@@ -431,7 +431,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.return_value = "exec-1"
         client.poll_execution.side_effect = GeopfTimeoutError("still running")
 
@@ -449,7 +449,7 @@ class RunPipelineTest(PytestOnlyDBTestCase):
 
         client = MagicMock(datastore="ds-1")
         client.create_upload.return_value = "upload-1"
-        client.poll_upload.return_value = "CLOSED"
+        client.poll_upload.return_value = ("CLOSED", [])
         client.launch_processing.side_effect = GeopfError("boom")
 
         with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
@@ -458,6 +458,26 @@ class RunPipelineTest(PytestOnlyDBTestCase):
                 _run_pipeline(dataset, resource, "ds-1", client)
 
         client.delete_upload.assert_called_once_with("upload-1")
+
+    def test_failed_checks_error_includes_logs_and_cleans_up(self):
+        resource = ResourceFactory.build(format="csv", url="http://files.example.com/f.csv")
+        dataset = DatasetFactory(resources=[resource])
+        resource = dataset.resources[0]
+
+        failed = [{"_id": "e1"}]
+        client = MagicMock(datastore="ds-1")
+        client.create_upload.return_value = "upload-1"
+        client.poll_upload.return_value = ("UNSTABLE", failed)
+        client.failed_check_logs.return_value = "table invalide"
+
+        with patch("udata.geopf.tasks._open_resource_file") as mock_open_file:
+            mock_open_file.return_value.__enter__.return_value = io.BytesIO(b"fake-bytes")
+            with pytest.raises(GeopfError, match="UNSTABLE:\ntable invalide"):
+                _run_pipeline(dataset, resource, "ds-1", client)
+
+        client.failed_check_logs.assert_called_once_with(failed)
+        client.delete_upload.assert_called_once_with("upload-1")
+        client.launch_processing.assert_not_called()
 
 
 @TEST_GEOPF_CONF

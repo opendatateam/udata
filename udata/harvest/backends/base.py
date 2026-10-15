@@ -449,7 +449,11 @@ class BaseBackend(ABC):
         log.debug("Running autoarchive")
         limit_days = current_app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
         limit_date = date.today() - timedelta(days=limit_days)
-        remote_ids = [i.remote_id for i in self.job.items if i.status != "archived"]
+        remote_ids = [
+            i.remote_id
+            for i in self.job.items
+            if i.status != "archived" and i.remote_id is not None
+        ]
         q = {
             "harvest__source_id": str(self.source.id),
             "harvest__remote_id__nin": remote_ids,
