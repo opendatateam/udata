@@ -19,6 +19,7 @@ from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
@@ -28,6 +29,13 @@ from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 from .permissions import PostReadPermission
 
 __all__ = ("Post",)
+
+
+def check_slug_is_available(slug, obj, **_kwargs):
+    """A chosen slug is rejected when taken: the uniqueness suffix `SlugField` adds
+    would publish the post under a URL nobody asked for."""
+    if slug and Post.objects(slug=Post.slug.slugify(slug), id__ne=obj.id).count():
+        raise FieldValidationError(_("This slug is already used by another post"), field="slug")
 
 
 class PostQuerySet(UDataQuerySet):
@@ -52,7 +60,7 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     )
     slug = field(
         SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
-        readonly=True,
+        checks=[check_slug_is_available],
     )
     headline = field(
         StringField(),

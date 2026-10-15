@@ -191,6 +191,7 @@ def populate_slug(instance, field):
     old_slug = getattr(previous, field.db_field, None)
 
     if slug == old_slug:
+        setattr(instance, field.db_field, slug)
         return slug
 
     # Ensure uniqueness
