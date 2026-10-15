@@ -31,10 +31,20 @@ from .permissions import PostReadPermission
 __all__ = ("Post",)
 
 
-def check_slug_is_available(slug, obj, **_kwargs):
-    """A chosen slug is rejected when taken: the uniqueness suffix `SlugField` adds
-    would publish the post under a URL nobody asked for."""
-    if slug and Post.objects(slug=Post.slug.slugify(slug), id__ne=obj.id).count():
+def check_chosen_slug(slug, obj, is_update, **_kwargs):
+    if not slug:
+        # Left empty at creation, the slug is derived from the name. Cleared on update, it
+        # would be saved empty: `SlugField` is exempted from the `required` check.
+        if is_update:
+            raise FieldValidationError(_("The slug is required"), field="slug")
+        return
+
+    normalized = Post.slug.slugify(slug)
+    if not normalized:
+        raise FieldValidationError(_("The slug must contain letters or digits"), field="slug")
+    # Rejected rather than suffixed like a derived slug: the post would otherwise be
+    # published under a URL nobody asked for.
+    if Post.objects(slug=normalized, id__ne=obj.id).count():
         raise FieldValidationError(_("This slug is already used by another post"), field="slug")
 
 
@@ -59,8 +69,9 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         show_as_ref=True,
     )
     slug = field(
-        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
-        checks=[check_slug_is_available],
+        # No `update`: a renamed post keeps its URL, which only changes when the slug is set
+        SlugField(max_length=255, required=True, populate_from="name", follow=True),
+        checks=[check_chosen_slug],
     )
     headline = field(
         StringField(),

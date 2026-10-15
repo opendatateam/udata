@@ -163,9 +163,6 @@ def populate_slug(instance, field):
 
     # Field value has changed
     changed = field.db_field in instance._get_changed_fields()
-    # A cleared slug is regenerated from its source instead of being saved empty
-    if changed and not value and field.populate_from:
-        value = getattr(instance, field.populate_from)
     # Field initial value has been manually set
     manual = not previous and value or changed
 

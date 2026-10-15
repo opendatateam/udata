@@ -505,15 +505,38 @@ class PostsAPITest(APITestCase):
         assert response.json["slug"] == "conditions-generales-dutilisation"
 
     def test_post_api_update_with_empty_slug(self):
-        """Clearing the slug regenerates it from the name"""
-        post = PostFactory(name="Mentions légales", slug="cgu")
+        """Clearing the slug on update is rejected, instead of saving a post without slug"""
+        post = PostFactory(name="faq", slug="faq")
         self.login(AdminFactory())
 
-        response = self.put(url_for("api.post", post=post), {"slug": ""})
-        assert200(response)
-        assert response.json["slug"] == "mentions-legales"
+        assert400(self.put(url_for("api.post", post=post), {"slug": ""}))
         post.reload()
-        assert post.slug == "mentions-legales"
+        assert post.slug == "faq"
+
+    def test_post_api_create_with_slug_without_letters_or_digits(self):
+        """A slug that normalizes to nothing is rejected, instead of saving an empty slug"""
+        self.login(AdminFactory())
+        data = {"name": "Conditions générales d'utilisation", "content": "CGU", "slug": "!!!"}
+
+        response = self.post(url_for("api.posts"), data)
+        assert400(response)
+        assert "slug" in response.json["errors"]
+        assert Post.objects.count() == 0
+
+    def test_post_api_rename_keeps_the_slug(self):
+        """Renaming a post keeps its URL, whether the slug is resent as-is or left out"""
+        post = PostFactory(name="CGU", slug="cgu")
+        self.login(AdminFactory())
+
+        response = self.put(
+            url_for("api.post", post=post), {"name": "Conditions générales", "slug": "cgu"}
+        )
+        assert200(response)
+        assert response.json["slug"] == "cgu"
+
+        response = self.put(url_for("api.post", post=post), {"name": "Conditions d'utilisation"})
+        assert200(response)
+        assert response.json["slug"] == "cgu"
 
     def test_post_api_update_slug_requires_admin(self):
         """A non-sysadmin cannot change a post slug"""

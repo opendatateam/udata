@@ -237,6 +237,15 @@ class SlugFieldTest(PytestOnlyDBTestCase):
         obj.save()
         assert obj.slug == "a-slug"
 
+    def test_manually_set_to_current_slug_unnormalized(self):
+        """A manual value that normalizes to the current slug is saved normalized"""
+        obj = SlugTester(title="A title", slug="a-slug")
+        obj.save()
+        obj.slug = "A Slug"
+        obj.save()
+        obj.reload()
+        assert obj.slug == "a-slug"
+
     def test_populate_when_slug_is_taken_between_populate_and_insert(self):
         """SlugField should pick another suffix when a concurrent writer took the computed one"""
         SlugTester.objects.create(title="A Title")
