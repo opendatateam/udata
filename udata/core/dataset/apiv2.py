@@ -14,7 +14,8 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
-from udata.core.spatial.models import SpatialCoverage
+from udata.core.spatial.api_fields import granularity_fields
+from udata.core.spatial.models import GeoZone, SpatialCoverage
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
@@ -291,6 +292,8 @@ apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
 apiv2.inherit("SpatialCoverage (read)", SpatialCoverage.__read_fields__)
 apiv2.inherit("SpatialCoverage (write)", SpatialCoverage.__write_fields__)
+apiv2.inherit("GeoZoneReference", GeoZone.__ref_fields__)
+apiv2.inherit("GeoGranularity", granularity_fields)
 apiv2.inherit("TemporalCoverage", temporal_coverage_fields)
 apiv2.inherit("GeoJSON", geojson)
 apiv2.inherit("Checksum", checksum_fields)

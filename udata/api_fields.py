@@ -136,28 +136,35 @@ class PrefetchingList(restx_fields.List):
         return super().format(value)
 
 
-class FullObject(restx_fields.Raw):
+class FullObject(restx_fields.List):
     """Render identifiers by default, and `full` when the client sets `FULL_OBJECTS_HEADER`.
 
     Identifiers keep API responses light for clients that only need to match values, while
     the header lets a client display them without one more request per value.
+
+    It is a `List` holding `full` as its container, even for a single value, because that
+    is what flask-restx walks: `Mask.apply` clones it with an `X-Fields` mask applied to the
+    container (any other `Raw` subclass is rejected with a 400), and the Swagger generation
+    registers the models the container nests.
     """
 
     def __init__(self, full, **kwargs):
-        super().__init__(**kwargs)
-        self.full = full
+        super().__init__(full, **kwargs)
 
     def output(self, key, obj, *args, **kwargs):
         if request.headers.get(FULL_OBJECTS_HEADER, False, bool):
-            return self.full.output(key, obj, *args, **kwargs)
-        return super().output(key, obj, *args, **kwargs)
+            return self.container.output(key, obj, *args, **kwargs)
+        return restx_fields.Raw.output(self, key, obj, *args, **kwargs)
 
     def format(self, value):
         if isinstance(value, list):
-            return [self.format(item) for item in value if not isinstance(item, DBRef)]
+            return [self.format(item) for item in value]
         if isinstance(value, mongoengine.Document):
             return str(value.pk)
         return value
+
+    def schema(self):
+        return restx_fields.Raw.schema(self)
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -474,8 +481,13 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
     )
     full_object = info.get("full_object")
     if full_object is not None:
-        # References already render as nested objects, which is their full form.
-        read = FullObject(read if full_object is True else full_object, **read_params)
+        # References already render as nested objects, which is their full form. The
+        # identifiers are read like the generated field reads them, e.g. without the
+        # dangling references a list of references leaves out.
+        read = FullObject(
+            read if full_object is True else full_object,
+            **{**read_params, "attribute": read.attribute},
+        )
     if write_params.get("readonly", False) or (constructor_write is None and constructor is None):
         write: Callable | None = None
     else:
@@ -965,9 +977,11 @@ def field(
         convert_to: Custom converter for RestX
         allow_null: If True, field can be null
         full_object: Render the identifier(s) by default, and the full object(s) when
-            the client sets `X-Get-Datasets-Full-Objects`. `True` on a reference uses
-            its nested reference model as full object; otherwise pass the RestX field
-            rendering it (e.g. an `{id, label}` object for a value with a label).
+            the client sets `X-Get-Datasets-Full-Objects`. Two forms only: `True` on a
+            `ReferenceField` or a `ListField(ReferenceField)`, whose nested reference
+            model is the full object, or the RestX field rendering the full object of a
+            scalar field (e.g. an `{id, label}` object for a value with a label). Not
+            supported with `rename`, lazy or generic references.
         **kwargs: Any additional parameters not explicitly defined
 
     Returns:
