@@ -167,8 +167,13 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     )
     def ancestors(self) -> list["Post"]:
         ancestors = []
+        seen = set()
         ancestor = self.parent
-        while ancestor:
+        # Stops on an id already met: `clean()` rejects cycles, but two concurrent updates
+        # (A under B, B under A) each pass it against the other's previous parent. Without
+        # this, every read of these posts would loop forever.
+        while ancestor and ancestor.id not in seen:
+            seen.add(ancestor.id)
             ancestors.insert(0, ancestor)
             ancestor = ancestor.parent
         return ancestors
@@ -190,9 +195,21 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
                 )
             if any(ancestor.id == self.id for ancestor in self.ancestors):
                 raise ValidationError("A page cannot be its own ancestor", field_name="parent")
+            # A published page exposes its ancestors (name, slug in its path): a draft
+            # parent would leak through it.
+            if self.published and not self.parent.published:
+                raise ValidationError(
+                    "A published page cannot be under an unpublished page", field_name="parent"
+                )
 
-        if self.kind != "page" and self.id and Post.objects(parent=self.id).count():
-            raise ValidationError("A page with sub-pages must stay a page", field_name="kind")
+        if self.id:
+            children = Post.objects(parent=self.id)
+            if self.kind != "page" and children.count():
+                raise ValidationError("A page with sub-pages must stay a page", field_name="kind")
+            if not self.published and children.visible().count():
+                raise ValidationError(
+                    "A page with published sub-pages cannot be unpublished", field_name="published"
+                )
 
     def __str__(self):
         return self.name or ""

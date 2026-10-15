@@ -452,7 +452,6 @@ class PostsAPITest(APITestCase):
         assert response.json["parent"] == {
             "id": str(municipales.id),
             "name": "Municipales",
-            "slug": "municipales",
             "path": "elections/municipales",
         }
         assert [ancestor["path"] for ancestor in response.json["ancestors"]] == [
@@ -497,12 +496,49 @@ class PostsAPITest(APITestCase):
         """A page cannot be moved under one of its own descendants, nor under itself"""
         root = PostFactory(kind="page")
         child = PostFactory(kind="page", parent=root)
+        grandchild = PostFactory(kind="page", parent=child)
         self.login(AdminFactory())
 
         assert400(self.put(url_for("api.post", post=root), {"parent": str(child.id)}))
+        assert400(self.put(url_for("api.post", post=root), {"parent": str(grandchild.id)}))
         assert400(self.put(url_for("api.post", post=root), {"parent": str(root.id)}))
         root.reload()
         assert root.parent is None
+
+    def test_post_api_get_page_in_a_cycle(self):
+        """A cycle written behind `clean()` (two concurrent moves) must not hang the reads"""
+        first = PostFactory(kind="page", slug="first")
+        second = PostFactory(kind="page", slug="second", parent=first)
+        Post.objects(id=first.id).update_one(set__parent=second)
+
+        response = self.get(url_for("api.post", post=second))
+        assert200(response)
+        assert response.json["path"] == "second/first/second"
+
+    def test_post_api_published_page_cannot_be_under_a_draft(self):
+        """A published sub-page would expose the name and slug of its draft parent"""
+        draft = PostFactory(kind="page", published=None)
+        child = PostFactory(kind="page", published=None, parent=draft)
+        self.login(AdminFactory())
+
+        assert400(self.post(url_for("api.publish_post", post=child)))
+        child.reload()
+        assert child.published is None
+
+        published = PostFactory(kind="page")
+        assert400(self.put(url_for("api.post", post=published), {"parent": str(draft.id)}))
+        published.reload()
+        assert published.parent is None
+
+    def test_post_api_unpublish_page_with_published_children(self):
+        """Unpublishing a parent would turn it into a draft exposed by its sub-pages"""
+        parent = PostFactory(kind="page")
+        PostFactory(kind="page", parent=parent)
+        self.login(AdminFactory())
+
+        assert400(self.delete(url_for("api.publish_post", post=parent)))
+        parent.reload()
+        assert parent.published is not None
 
     def test_post_api_page_with_children_must_stay_a_page(self):
         """Turning a page with sub-pages into a news would leave them under a news"""
