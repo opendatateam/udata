@@ -1,18 +1,53 @@
-import logging
-
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
+from udata.core.organization import mails
+from udata.core.organization.constants import (
+    ASSOCIATION,
+    CERTIFIED,
+    COMPANY,
+    LOCAL_AUTHORITY,
+    PUBLIC_SERVICE,
+)
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.models import User
-from udata.features.notifications.actions import notifier
+from udata.features.notifications.constants import (
+    ORGANIZATION_BADGES,
+    NotificationReason,
+    NotificationType,
+)
+from udata.features.notifications.events import (
+    NotificationEvent,
+    Recipient,
+    responsible_recipients,
+)
+from udata.i18n import lazy_gettext as _
 
-log = logging.getLogger(__name__)
+BADGE_NOTIFICATION_TYPES = {
+    CERTIFIED: NotificationType.ORGANIZATION_BADGE_CERTIFIED,
+    PUBLIC_SERVICE: NotificationType.ORGANIZATION_BADGE_PUBLIC_SERVICE,
+    COMPANY: NotificationType.ORGANIZATION_BADGE_COMPANY,
+    ASSOCIATION: NotificationType.ORGANIZATION_BADGE_ASSOCIATION,
+    LOCAL_AUTHORITY: NotificationType.ORGANIZATION_BADGE_LOCAL_AUTHORITY,
+}
+
+BADGE_MAILS = {
+    CERTIFIED: mails.badge_added_certified,
+    PUBLIC_SERVICE: mails.badge_added_public_service,
+    COMPANY: mails.badge_added_company,
+    ASSOCIATION: mails.badge_added_association,
+    LOCAL_AUTHORITY: mails.badge_added_local_authority,
+}
 
 
 @generate_fields()
 class MembershipRequestNotificationDetails(EmbeddedDocument):
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    kind = StringField()
+
     request_organization = field(
         ReferenceField(Organization),
         readonly=True,
@@ -28,27 +63,17 @@ class MembershipRequestNotificationDetails(EmbeddedDocument):
         allow_null=True,
         filterable={},
     )
-    kind = field(
-        StringField(default="request"),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
 
 
 @generate_fields()
 class NewBadgeNotificationDetails(EmbeddedDocument):
+    # See `MembershipRequestNotificationDetails.kind`.
+    kind = StringField()
+
     organization = field(
         ReferenceField(Organization),
         readonly=True,
         nested_fields=Organization.__ref_fields__,
-        auditable=False,
-        allow_null=True,
-        filterable={},
-    )
-    kind = field(
-        StringField(),
-        readonly=True,
         auditable=False,
         allow_null=True,
         filterable={},
@@ -79,52 +104,134 @@ class MembershipRefusedNotificationDetails(EmbeddedDocument):
     )
 
 
-def _create_membership_notification(request, organization, recipient):
-    from udata.features.notifications.models import Notification
+class BadgeAdded(NotificationEvent):
+    """The whole organization hears about a badge it was awarded.
 
-    existing = Notification.objects(
-        user=recipient,
-        handled_at=None,
-        details__request_organization=organization,
-        details__request_user=request.user,
-    ).first()
+    One class for the five badge types: they differ only by the type they carry and
+    the email they send, both looked up from the badge kind.
+    """
 
-    if not existing:
-        notification = Notification(
-            user=recipient,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization,
-                request_user=request.user,
-                kind=request.kind,
-            ),
+    types = frozenset(BADGE_NOTIFICATION_TYPES.values())
+    label = _("Badges of the organization")
+    labelled_event = ORGANIZATION_BADGES
+
+    def __init__(self, organization: Organization, kind: str):
+        self.organization = organization
+        self.kind = kind
+        self.type = BADGE_NOTIFICATION_TYPES[kind]
+
+    @property
+    def subject(self):
+        return self.organization
+
+    def recipients(self):
+        return responsible_recipients(self.organization)
+
+    def via_app(self, recipient):
+        return NewBadgeNotificationDetails(organization=self.organization)
+
+    def via_mail(self, recipient):
+        return BADGE_MAILS[self.kind](self.organization)
+
+
+class MembershipRequested(NotificationEvent):
+    """Only admins can answer a membership request, so only they are asked to."""
+
+    type = NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
+
+    def __init__(self, organization: Organization, request: MembershipRequest):
+        self.organization = organization
+        self.request = request
+
+    @property
+    def occurred_at(self):
+        return self.request.created
+
+    def recipients(self):
+        return [Recipient.from_member(member) for member in self.organization.by_role("admin")]
+
+    def via_app(self, recipient):
+        if self.already_pending(
+            recipient,
+            request_organization=self.organization,
+            request_user=self.request.user,
+        ):
+            return None
+        return MembershipRequestNotificationDetails(
+            request_organization=self.organization,
+            request_user=self.request.user,
         )
-        notification.created_at = request.created
-        notification.save()
+
+    def via_mail(self, recipient):
+        return mails.new_membership_request(self.organization, self.request)
 
 
-@MembershipRequest.after_create.connect
-def on_new_membership_request(request: MembershipRequest, **kwargs):
-    """Create notification when a new membership request or invitation is created"""
-    organization = kwargs.get("org")
+class MembershipInvited(MembershipRequested):
+    """An invitation is answered by the invited user, not by the admins."""
 
-    if organization is None:
-        return
+    type = NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
 
-    if request.kind == "invitation":
-        if request.user is None:
-            return
-        recipients = [request.user]
-    else:
-        recipients = [member.user for member in organization.members if member.role == "admin"]
+    def recipients(self):
+        # An invitation may target an address that has no account yet: it then has a
+        # mail channel and no in-app one, since there is no user to notify.
+        # No reason to carry: being the person invited is what the type already says.
+        return [Recipient(self.request.user or self.request.email)]
 
-    for recipient in recipients:
-        try:
-            _create_membership_notification(request, organization, recipient)
-        except Exception as e:
-            log.error(
-                f"Error creating notification for user {recipient.id} "
-                f"and organization {organization.id}: {e}"
-            )
+    def via_mail(self, recipient):
+        return mails.membership_invitation(
+            self.organization, self.request, user_exists=isinstance(recipient, User)
+        )
+
+
+class MembershipInvitationMatched(MembershipInvited):
+    """A pending email invitation just got attached to an account owning its address.
+
+    The invitation mail went out when it was created, to an address that had no account
+    to hang a notification on: registering or changing one's email only makes the
+    invitation reachable in-app.
+    """
+
+    def via_mail(self, recipient):
+        return None
+
+
+class MembershipAnswered(NotificationEvent):
+    """The applicant hears back about their own request."""
+
+    reaches_subscribers = False
+
+    def __init__(self, organization: Organization, request: MembershipRequest):
+        self.organization = organization
+        self.request = request
+
+    @property
+    def subject(self):
+        return self.organization
+
+    def recipients(self):
+        return [Recipient(self.request.user, frozenset({NotificationReason.REQUESTER}))]
+
+
+class MembershipAccepted(MembershipAnswered):
+    type = NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED
+    label = _("Accepted memberships")
+
+    def via_app(self, recipient):
+        return MembershipAcceptedNotificationDetails(organization=self.organization)
+
+    def via_mail(self, recipient):
+        return mails.membership_accepted(self.organization)
+
+
+class MembershipRefused(MembershipAnswered):
+    type = NotificationType.ORGANIZATION_MEMBERSHIP_REFUSED
+    label = _("Refused memberships")
+
+    def via_app(self, recipient):
+        return MembershipRefusedNotificationDetails(organization=self.organization)
+
+    def via_mail(self, recipient):
+        return mails.membership_refused(self.organization)
 
 
 @MembershipRequest.after_handle.connect
@@ -136,42 +243,7 @@ def on_handle_membership_request(request: MembershipRequest, **kwargs):
     if organization is None:
         return
 
-    notifications = Notification.objects(
+    Notification.objects(
         details__request_organization=organization,
         details__request_user=request.user,
-    )
-
-    for notification in notifications:
-        notification.handled_at = request.handled_on
-        notification.save()
-
-
-@notifier("membership_request")
-def membership_request_notifications(user):
-    """Notify user about pending membership requests"""
-    orgs = [o for o in user.organizations if o.is_admin(user)]
-    notifications = []
-
-    for org in orgs:
-        # Skip invitations: they are pending_requests too but the admin creates
-        # them and has nothing to handle. Email invitations also have user=None
-        # which would crash the field access below.
-        for request in org.pending_requests:
-            if request.kind != "request":
-                continue
-            notifications.append(
-                (
-                    request.created,
-                    {
-                        "id": request.id,
-                        "organization": org.id,
-                        "user": {
-                            "id": request.user.id,
-                            "fullname": request.user.fullname,
-                            "avatar": str(request.user.avatar),
-                        },
-                    },
-                )
-            )
-
-    return notifications
+    ).mark_handled(at=request.handled_on)

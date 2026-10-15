@@ -7,12 +7,12 @@ from udata.api import API, api, fields
 from udata.api_fields import patch, patch_and_save, wrap_primary_key
 from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
-from udata.core.owned import check_organization_is_valid_for_current_user
 from udata.utils import id_or_404
 
 from .models import (
     Discussion,
     Message,
+    check_organization_voice,
 )
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -104,8 +104,7 @@ class DiscussionAPI(API):
         organization = wrap_primary_key(
             "organization", Discussion.organization, data.get("organization")
         )
-        if organization:
-            check_organization_is_valid_for_current_user(organization)
+        check_organization_voice(organization, discussion)
 
         message = patch(
             Message(posted_by=current_user.id, posted_by_organization=organization),

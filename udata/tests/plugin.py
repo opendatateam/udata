@@ -1,7 +1,10 @@
 import os
+import re
 from uuid import uuid4
 
 import pytest
+
+from udata.tests.fakes import DataCiteFake
 
 # The storages the resources migration is about. The others keep their own
 # tests on the local backend.
@@ -27,6 +30,15 @@ def rmock():
     with requests_mock.Mocker() as m:
         m.ANY = requests_mock.ANY
         yield m
+
+
+@pytest.fixture
+def datacite(app, rmock):
+    """An in-memory DataCite, wired behind every call to the configured platform."""
+    fake = DataCiteFake()
+    platform_uri = app.config["DOI_PLATFORM_URI"]
+    rmock.put(re.compile(f"^{re.escape(platform_uri)}/dois/"), json=fake.handle_put)
+    return fake
 
 
 @pytest.fixture
@@ -76,6 +88,7 @@ def s3_storages(app, instance_path):
     app.config["FS_S3_REGION"] = os.environ.get("UDATA_TEST_S3_REGION", "us-east-1")
     app.config["FS_S3_ACCESS_KEY"] = os.environ["UDATA_TEST_S3_ACCESS_KEY"]
     app.config["FS_S3_SECRET_KEY"] = os.environ["UDATA_TEST_S3_SECRET_KEY"]
+    app.config["FS_S3_CREATE_BUCKET"] = True
 
     # A bucket set per test: the suite runs on parallel xdist workers, and the
     # backend never removes the buckets it creates.

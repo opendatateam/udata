@@ -23,12 +23,10 @@ from udata.api import fields
 from udata.api_fields import field, generate_fields, required_if
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.models import Dataset
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.slug_fields import SlugField
@@ -74,6 +72,9 @@ HARVEST_ITEM_STATUS = OrderedDict(
 DEFAULT_HARVEST_FREQUENCY = "manual"
 DEFAULT_HARVEST_JOB_STATUS = "pending"
 DEFAULT_HARVEST_ITEM_STATUS = "pending"
+
+
+Harvestable = Dataset | Dataservice
 
 
 @generate_fields()
@@ -468,37 +469,18 @@ HarvestSource.__read_fields__["last_job"] = fields.Nested(
 )
 
 
-def archive_harvested_dataset(dataset, reason, dryrun=False):
+def archive_harvested(obj: Harvestable, reason: str, dryrun: bool = False):
     """
-    Archive an harvested dataset, setting extras accordingly.
-    If `dryrun` is True, the dataset is not saved but validated only.
+    Archive an harvested object, setting extras accordingly.
+    If `dryrun` is True, the object is not saved but validated only.
     """
-    log.debug("Archiving dataset %s", dataset.id)
+    log.debug(f"Archiving {obj.__class__.__name__.lower()} {obj.id}")
     archival_date = datetime.now(UTC)
-    dataset.archived = archival_date
-    if not dataset.harvest:
-        dataset.harvest = HarvestDatasetMetadata()
-    dataset.harvest.archived = reason
-    dataset.harvest.archived_at = archival_date
+    obj.archived_at = archival_date
+    obj.set_harvested()
+    obj.harvest.archived_at = archival_date
+    obj.harvest.archived_reason = reason
     if dryrun:
-        dataset.validate()
+        obj.validate()
     else:
-        dataset.save()
-
-
-def archive_harvested_dataservice(dataservice, reason, dryrun=False):
-    """
-    Archive an harvested dataservice, setting extras accordingly.
-    If `dryrun` is True, the dataservice is not saved but validated only.
-    """
-    log.debug("Archiving dataservice %s", dataservice.id)
-    archival_date = datetime.now(UTC)
-    dataservice.archived_at = archival_date
-    if not dataservice.harvest:
-        dataservice.harvest = HarvestDataserviceMetadata()
-    dataservice.harvest.archived_reason = reason
-    dataservice.harvest.archived_at = archival_date
-    if dryrun:
-        dataservice.validate()
-    else:
-        dataservice.save()
+        obj.save()

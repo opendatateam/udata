@@ -47,8 +47,9 @@ class ReportAPI(API):
     @api.expect(Report.__write_fields__)
     @api.marshal_with(Report.__read_fields__, code=200)
     def patch(self, report):
+        payload = api.json_payload()
         dismiss_has_changed = (
-            "dismissed_at" in request.json and request.json["dismissed_at"] != report.dismissed_at
+            "dismissed_at" in payload and payload["dismissed_at"] != report.dismissed_at
         )
 
         report = patch(report, request)

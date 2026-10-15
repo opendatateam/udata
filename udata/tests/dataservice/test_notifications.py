@@ -1,15 +1,66 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.notifications import MembershipAcceptedNotificationDetails
 from udata.core.user.factories import UserFactory
+from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 
 
 class DataserviceNotificationsTest(PytestOnlyDBTestCase):
+    def test_a_private_dataservice_notifies_nobody(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        DataserviceFactory(datasets=[dataset], private=True)
+
+        assert Notification.objects(user=owner).count() == 0
+
+    def test_publishing_a_private_dataservice_notifies_as_of_its_publication(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(
+            datasets=[dataset], private=True, created_at=datetime.now(UTC) - timedelta(days=90)
+        )
+
+        before = datetime.now(UTC)
+        dataservice.private = False
+        dataservice.save()
+
+        notifications = Notification.objects(user=owner)
+        assert notifications.count() == 1
+        assert notifications.first().details.dataservice == dataservice
+        assert notifications.first().created_at.replace(tzinfo=UTC) >= before
+
+    def test_editing_a_public_dataservice_does_not_notify_again(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(datasets=[dataset])
+
+        dataservice.title = "Another title"
+        dataservice.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
+    def test_publishing_a_dataservice_again_does_not_announce_it_again(self):
+        """Hidden for a fix and published back, even once the first announcement was
+        read: it is the same dataservice."""
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        dataservice = DataserviceFactory(datasets=[dataset])
+        Notification.objects(user=owner).mark_handled()
+
+        dataservice.private = True
+        dataservice.save()
+        dataservice.private = False
+        dataservice.save()
+
+        assert Notification.objects(user=owner).count() == 1
+
     def test_dataservice_creation_notifies_dataset_owner_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
@@ -52,7 +103,11 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         assert notification is not None
 
         # Create an unrelated notification that should not be cleaned up
-        Notification(user=other_user).save()
+        Notification(
+            user=other_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED,
+            details=MembershipAcceptedNotificationDetails(organization=OrganizationFactory()),
+        ).save()
 
         dataservice.deleted_at = datetime.now(UTC)
         dataservice.save()
@@ -98,7 +153,11 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         assert Notification.objects.count() == 2
 
         # Create an unrelated notification that should not be cleaned up
-        Notification(user=other_user).save()
+        Notification(
+            user=other_user,
+            type=NotificationType.ORGANIZATION_MEMBERSHIP_ACCEPTED,
+            details=MembershipAcceptedNotificationDetails(organization=OrganizationFactory()),
+        ).save()
         assert Notification.objects.count() == 3
 
         # Delete the dataservice
@@ -108,3 +167,15 @@ class DataserviceNotificationsTest(PytestOnlyDBTestCase):
         # Only the unrelated notification should remain
         assert Notification.objects.count() == 1
         assert Notification.objects(user=other_user).count() == 1
+
+
+class DataserviceNotificationsAPITest(APITestCase):
+    def test_the_bell_names_the_dataset_without_its_content(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        DataserviceFactory(datasets=[dataset])
+
+        [notification] = self.get("/api/1/notifications/").json["data"]
+
+        assert notification["details"]["dataset"]["title"] == dataset.title
+        assert "resources" not in notification["details"]["dataset"]

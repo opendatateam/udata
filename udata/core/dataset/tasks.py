@@ -42,7 +42,8 @@ def flatten(iterable):
 
 @job("purge-datasets")
 def purge_datasets(self):
-    for dataset in Dataset.objects(deleted__ne=None):
+    # A dataset carrying a DOI is never purged: the DOI is permanent and has to keep resolving.
+    for dataset in Dataset.objects(deleted__ne=None, doi=None):
         log.info(f"Purging dataset {dataset}")
         # Remove followers
         Follow.objects(following=dataset).delete()

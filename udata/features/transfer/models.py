@@ -19,12 +19,19 @@ TRANSFER_STATUS = {
     "refused": _("Refused"),
 }
 
+# Class names rather than the classes themselves, to keep this module free of imports from
+# every transferable model. These lists are the single source of truth for what a transfer
+# accepts: the API reads them back to reject a class before it queries with it, because a
+# generic reference is only validated on save, long after that lookup ran.
+TRANSFERABLE_SUBJECTS = ["Dataset", "Reuse", "Dataservice", "Topic"]
+TRANSFER_PERSONS = ["User", "Organization"]
+
 
 class Transfer(Document):
     user = ReferenceField("User")
-    owner = GenericReferenceField(required=True)
-    recipient = GenericReferenceField(required=True)
-    subject = GenericReferenceField(required=True)
+    owner = GenericReferenceField(required=True, choices=TRANSFER_PERSONS)
+    recipient = GenericReferenceField(required=True, choices=TRANSFER_PERSONS)
+    subject = GenericReferenceField(required=True, choices=TRANSFERABLE_SUBJECTS)
     comment = StringField()
     status = StringField(choices=list(TRANSFER_STATUS), default="pending")
 
@@ -36,7 +43,6 @@ class Transfer(Document):
 
     on_create = Signal()
     after_handle = Signal()
-    after_delete = Signal()
 
     meta = {
         "indexes": [
@@ -53,12 +59,6 @@ class Transfer(Document):
         # Only trigger on_create signal on creation, not on every save
         if kwargs.get("created"):
             cls.on_create.send(document)
-
-    def delete(self, *args, **kwargs):
-        """Delete the transfer and ensure after_delete signal is triggered"""
-        result = super().delete(*args, **kwargs)
-        self.after_delete.send(self)
-        return result
 
 
 # Connect the post_save signal

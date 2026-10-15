@@ -3,7 +3,12 @@ from importlib.metadata import entry_points
 
 from flask import current_app
 
-from .base import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter  # noqa
+from .base import (  # noqa
+    BaseBackend,
+    HarvestExtraConfig,
+    HarvestFeature,
+    HarvestFilter,
+)
 
 
 def get_backend(name: str) -> type[BaseBackend]:

@@ -14,14 +14,14 @@ from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
 from mongoengine.errors import ValidationError
-from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, Node, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.constants import HVD
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
 from udata.mongo.datetime_fields import DateRange
@@ -937,8 +937,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> R
 
 def dataset_from_rdf(
     graph: Graph,
-    dataset=None,
-    node=None,
+    dataset: Dataset | None = None,
+    node: Node | None = None,
     remote_url_prefix: str | None = None,
     dryrun: bool = False,
 ):
@@ -949,6 +949,8 @@ def dataset_from_rdf(
 
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
+        if node is None:
+            raise RuntimeError("graph contains no dataset")
 
     d = graph.resource(node)
 
@@ -1057,8 +1059,7 @@ def dataset_from_rdf(
     issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
-    if not dataset.harvest:
-        dataset.harvest = HarvestDatasetMetadata()
+    dataset.set_harvested()
     dataset.harvest.dct_identifier = identifier
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url

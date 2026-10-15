@@ -1,3 +1,4 @@
+import gzip
 from io import BytesIO
 from uuid import uuid4
 
@@ -86,6 +87,24 @@ class S3ResourceUploadTest(APITestCase):
             "type": "sha1",
             "value": "7e240de74fb1ed08fa08d38063f6a6a91462a815",
         }
+
+    def test_upload_stores_a_compressed_file_as_an_archive(self):
+        # Stored as `text/csv`, a `.csv.gz` is compressed a second time by a
+        # proxy compressing text on the fly.
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        response = self.post(
+            url_for("api.upload_new_dataset_resource", dataset=dataset),
+            {"file": (BytesIO(gzip.compress(b"a;b\n1;2\n")), "test.csv.gz")},
+            json=False,
+        )
+
+        self.assert201(response)
+        dataset.reload()
+        resource = dataset.resources[0]
+        assert storages.resources.metadata(resource.fs_filename)["mime"] == "application/gzip"
+        assert response.json["mime"] == "application/gzip"
 
     def test_chunked_upload_stores_the_combined_file(self):
         user = self.login()

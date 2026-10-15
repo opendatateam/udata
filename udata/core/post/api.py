@@ -8,6 +8,7 @@ from udata.api import API, api
 from udata.api_fields import patch, patch_and_save
 from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
+from udata.core.discussions.models import Discussion
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -120,6 +121,7 @@ class PostAPI(API):
     @api.response(204, "Object deleted")
     def delete(self, post):
         """Delete a given post"""
+        Discussion.objects(subject=post).delete()
         post.delete()
         return "", 204
 

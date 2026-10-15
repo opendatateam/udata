@@ -6,8 +6,7 @@ import logging
 
 from mongoengine.errors import ValidationError
 
-from udata.harvest.actions import archive_harvested_dataset
-from udata.harvest.models import HarvestSource
+from udata.harvest.models import HarvestSource, archive_harvested
 from udata.models import Dataset
 
 log = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ def migrate(db):
 
     for dataset in dangling_datasets:
         try:
-            archive_harvested_dataset(dataset, reason="harvester-inactive", dryrun=False)
+            archive_harvested(dataset, reason="harvester-inactive", dryrun=False)
         except ValidationError as e:
             log.error(f"Error on dataset {dataset.id}: {e}")
 

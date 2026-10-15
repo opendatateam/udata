@@ -118,7 +118,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
-            assert d.harvest.archived is None
+            assert d.harvest.archived_reason is None
 
         # First dataset
         dataset = datasets["1"]
@@ -134,6 +134,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         dataset = datasets["3"]
         assert dataset.tags == ["tag-1", "tag-2"]
         assert len(dataset.resources) == 1
+
+        assert job.data["graphs"] is not None
 
     def test_flat_with_blank_nodes(self, rmock):
         filename = "bnodes.jsonld"
@@ -420,8 +422,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         actions.run(source)
 
+        job = source.get_last_job()
+        assert job.status == "done"
+        assert len(job.items) == 2
+        assert len(job.data["graphs"]) == 1
         assert Dataset.objects.count() == 2
-        assert HarvestJob.objects.first().status == "done"
 
     def test_harvest_spatial(self, rmock):
         filename = "bnodes.xml"
@@ -905,7 +910,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
 
-    def test_unsupported_mime_type(self, rmock):
+    def test_unsupported_mime_type(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": "text/html; charset=utf-8"})
         org = OrganizationFactory()
@@ -922,8 +927,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         error = job.errors[0]
         assert error.message == 'Unsupported mime type "text/html"'
+        # A misconfigured source is not a udata bug: harvest report only, no Sentry event
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
-    def test_unable_to_detect_format(self, rmock):
+    def test_unable_to_detect_format(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": ""})
         org = OrganizationFactory()
@@ -941,6 +948,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         error = job.errors[0]
         expected = "Unable to detect format from extension or mime type"
         assert error.message == expected
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
     def test_use_replaced_uris(self, rmock, mocker):
         # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
@@ -1199,6 +1207,35 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
+
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items(self, rmock):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        source = HarvestSourceFactory(
+            backend="csw-dcat", url=url, organization=OrganizationFactory()
+        )
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 2
+
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
+    def test_max_items_errors(self, rmock, mocker):
+        mock_xslt(rmock)
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{page}.xml"
+        )
+        backend = CswDcatBackend(HarvestSourceFactory(url=url))
+
+        backend.as_dcat = mocker.Mock(side_effect=Exception("boom"))
+
+        job = backend.harvest()
+        assert len(job.items) == 2
 
     def test_csw_error(self, rmock):
         exception_report = """<?xml version="1.0" encoding="UTF-8"?>

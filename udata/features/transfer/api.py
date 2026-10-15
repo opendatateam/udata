@@ -1,19 +1,20 @@
 from bson import ObjectId
-from flask import abort, request
+from flask import abort
 
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.models import Organization
+from udata.core.topic.models import Topic
 from udata.features.transfer.permissions import (
     TransferPermission,
     TransferResponsePermission,
 )
-from udata.models import Dataset, Reuse, User, db
+from udata.models import Dataset, Reuse, User
 from udata.utils import id_or_404
 
 from .actions import accept_transfer, refuse_transfer, request_transfer
-from .models import TRANSFER_STATUS, Transfer
+from .models import TRANSFER_PERSONS, TRANSFER_STATUS, TRANSFERABLE_SUBJECTS, Transfer
 
 RESPONSE_TYPES = ["accept", "refuse"]
 
@@ -53,6 +54,7 @@ subject_mapping = {
     Dataservice: Dataservice.__ref_fields__,
     Dataset: dataset_ref_fields,
     Reuse: Reuse.__ref_fields__,
+    Topic: Topic.__ref_fields__,
 }
 
 transfer_fields = api.model(
@@ -99,7 +101,7 @@ requests_parser.add_argument(
 )
 requests_parser.add_argument(
     "subject_type",
-    choices=["Dataset", "Reuse", "Dataservice"],
+    choices=TRANSFERABLE_SUBJECTS,
     type=str,
     help="Type of the transferred object",
     location="args",
@@ -154,23 +156,10 @@ class TransferRequestsAPI(API):
     @api.marshal_with(transfer_fields)
     def post(self):
         """Initiate transfer request"""
-        data = request.json
+        data = api.json_payload()
 
-        subject_model = db.resolve_model(data["subject"])
-        subject_id = data["subject"]["id"]
-        try:
-            subject = subject_model.objects.get(id=subject_id)
-        except subject_model.DoesNotExist:
-            msg = 'Unkown subject id "{0}"'.format(subject_id)
-            ns.abort(400, errors={"subject": msg})
-
-        recipient_model = db.resolve_model(data["recipient"])
-        recipient_id = data["recipient"]["id"]
-        try:
-            recipient = recipient_model.objects.get(id=recipient_id)
-        except recipient_model.DoesNotExist:
-            msg = 'Unkown recipient id "{0}"'.format(recipient_id)
-            ns.abort(400, errors={"recipient": msg})
+        subject = api.resolve_reference(data.get("subject"), "subject", TRANSFERABLE_SUBJECTS)
+        recipient = api.resolve_reference(data.get("recipient"), "recipient", TRANSFER_PERSONS)
 
         comment = data.get("comment")
 
@@ -198,7 +187,7 @@ class TransferRequestAPI(API):
         if transfer.status != "pending":
             abort(400, "Cannot update transfer after accepting/refusing")
 
-        data = request.json
+        data = api.json_payload()
         comment = data.get("comment")
 
         if data["response"] == "accept":

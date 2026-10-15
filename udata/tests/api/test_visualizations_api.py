@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
 from io import BytesIO
 
+import pytest
 from flask import url_for
 
+from udata.core import storages
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
@@ -102,6 +104,30 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.title == chart.title
         assert visualization.description == chart.description
         assert visualization.owner == user
+
+    def test_visualization_api_create_with_non_object_embedded_document(self):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+
+        serie = chart.to_dict()["series"][0]
+        cases = [
+            ("x_axis", [1, 2, 3], "x_axis"),
+            ("series", 1, "series"),
+            ("series", [[1, 2, 3]], "series"),
+            ("series", [{**serie, "filters": [1]}], "filters"),
+            ("series", [{**serie, "filters": {"column": "a"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "Unknown"}}], "filters"),
+            ("series", [{**serie, "filters": {"_cls": "AndFilters", "filters": 1}}], "filters"),
+        ]
+        for key, value, error_field in cases:
+            data = chart.to_dict()
+            data[key] = value
+            response = self.post(url_for("api.visualizations"), data)
+            assert response.status_code == 400, (key, value)
+            assert error_field in response.json["errors"], (key, value)
+
+        assert Chart.objects.count() == 0
 
     def test_visualization_api_create_filter(self):
         """It should create a visualization"""
@@ -218,6 +244,26 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
             OrFilters,
             AndFilters,
         )
+
+    @pytest.mark.parametrize(
+        "filters",
+        [
+            {"column": "a", "condition": "exact", "value": "b"},
+            {"_cls": "MarkdownBloc", "content": "not a filter"},
+            # Nested list of generic filters.
+            {"_cls": "AndFilters", "filters": [{"column": "a"}]},
+            {"_cls": "AndFilters", "filters": [{"_cls": "MarkdownBloc"}]},
+        ],
+    )
+    def test_visualization_api_create_rejects_filter_without_valid_cls(self, filters):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        data = chart.to_dict()
+        data["series"][0]["filters"] = filters
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+        assert Chart.objects.count() == 0
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""
@@ -360,6 +406,32 @@ class VisualizationImageAPITest(PytestOnlyAPITestCase):
         )
         assert response.status_code == 200
         assert response.json["image"] is not None
+
+    def test_upload_image_replaces_previous_files(self):
+        """Re-uploading an image should delete the files it replaces"""
+        user = self.login()
+        visualization = ChartFactory(owner=user)
+
+        def upload():
+            return self.post(
+                url_for("api.visualization_image", visualization=visualization),
+                {"file": (create_test_image(), "test.png")},
+                json=False,
+            )
+
+        assert upload().status_code == 200
+        visualization.reload()
+        previous = {visualization.image.filename, visualization.image.original}
+
+        assert upload().status_code == 200
+        visualization.reload()
+        current = {visualization.image.filename, visualization.image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.images for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.images for filename in current)
 
     def test_upload_image_permission_denied(self):
         """It should deny upload for non-owner"""

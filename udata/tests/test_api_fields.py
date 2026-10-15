@@ -116,6 +116,18 @@ class FakeWithDefaultRejectingCheck(EmbeddedDocument):
     kind = field(StringField(), checks=[check_is_set])
 
 
+def check_code_needs_coded_kind(value: str = "", obj=None, field: str = "", **_kwargs) -> None:
+    """Reads the other field on `obj`, not in the payload."""
+    if value and obj.kind != "coded":
+        raise FieldValidationError("A code needs the coded kind", field=field)
+
+
+@generate_fields()
+class FakeWithCrossFieldCheck(EmbeddedDocument):
+    kind = field(StringField())
+    code = field(StringField(), checks=[check_code_needs_coded_kind])
+
+
 @generate_fields(
     searchable=True,
     additional_sorts=[
@@ -300,6 +312,19 @@ class FakeWithRename(Document):
 
 
 @generate_fields()
+class FakeImageWithoutThumbnails(Document):
+    """An ImageField with neither model `thumbnails` nor `thumbnail_info`:
+    it must not yield a duplicate `<key>_thumbnail` API field."""
+
+    image = field(
+        ImageField(fs=images, basename=default_image_basename),
+        readonly=True,
+    )
+
+    meta = {"collection": "fake_image_without_thumbnails"}
+
+
+@generate_fields()
 class FakeWithGenericReference(Document):
     """Exercises `nested_fields` on a `GenericReferenceField` declared without `choices`.
 
@@ -446,6 +471,23 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
+
+    @pytest.mark.parametrize("param", ["filter_field_name", "tag", "standalone"])
+    def test_empty_filter_is_ignored(self, app, param) -> None:
+        """An empty filter value leaves the filter unset instead of matching ""."""
+        fake1: Fake = FakeFactory(title="foo", filter_field="test filter", tags=["tag-a"])
+        fake2: Fake = FakeFactory(title="bar", filter_field="other filter", tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string={param: ""}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert set(results) == {fake1, fake2}
+
+    def test_empty_list_filter_values_are_dropped(self, app) -> None:
+        """Empty values of a repeated list filter are dropped, the others still apply."""
+        fake1: Fake = FakeFactory(tags=["tag-a"])
+        FakeFactory(tags=["tag-b"])
+        with app.test_request_context("/foobar", query_string=[("tag", "tag-a"), ("tag", "")]):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert list(results) == [fake1]
 
     def test_nested_filters(self, app) -> None:
         """Filtering on an nested filter filters the results."""
@@ -621,6 +663,20 @@ class ChecksOnCreationTest(PytestOnlyDBTestCase):
             patch(FakeWithRename.objects.get(pk=stored.pk), {"name": FORBIDDEN_VALUE})
 
 
+class CrossFieldCheckTest(PytestOnlyDBTestCase):
+    """A check sees the object with every field of the payload written, whatever the
+    order of the keys in the payload."""
+
+    def test_other_field_is_written_before_the_check(self) -> None:
+        for payload in [{"code": "x", "kind": "coded"}, {"kind": "coded", "code": "x"}]:
+            assert patch(FakeWithCrossFieldCheck(), payload).code == "x"
+
+    def test_other_field_value_is_checked(self) -> None:
+        for payload in [{"code": "x", "kind": "plain"}, {"kind": "plain", "code": "x"}]:
+            with pytest.raises(FieldValidationError):
+                patch(FakeWithCrossFieldCheck(), payload)
+
+
 class PatchBlankStringTest(PytestOnlyDBTestCase):
     def test_blank_string_is_stored_as_none(self) -> None:
         """A string field only made of whitespace holds no value, so `required=True`
@@ -711,6 +767,19 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         assert "picture" in read_fields
         assert "picture_thumbnail" in read_fields
         assert "image_thumbnail" not in read_fields
+
+    def test_image_field_without_thumbnails_has_no_thumbnail_api_field(self) -> None:
+        """No model thumbnails and no thumbnail_info: no `<key>_thumbnail` key,
+        which would only duplicate the main image URL."""
+        read_fields = FakeImageWithoutThumbnails.__read_fields__
+        assert "image" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_image_field_with_thumbnail_info_keeps_thumbnail_api_field(self) -> None:
+        """thumbnail_info alone (no model thumbnails) still yields the key —
+        this is the Fake/FakeWithRename configuration."""
+        read_fields = Fake.__read_fields__
+        assert "image_thumbnail" in read_fields
 
     def test_write_fields_use_the_api_key(self) -> None:
         """A writable renamed field is accepted under its API key. A readonly one is not

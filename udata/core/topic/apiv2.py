@@ -14,6 +14,7 @@ from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
+from udata.features.transfer.models import Transfer
 from udata.mongo.errors import FieldValidationError
 
 apiv2.inherit("ModelReference", api.model_reference)
@@ -183,6 +184,8 @@ class TopicAPI(API):
             apiv2.abort(403, "Forbidden")
         # Remove discussions linked to the topic
         Discussion.objects(subject=topic).delete()
+        # Remove associated Transfers
+        Transfer.objects(subject=topic).delete()
         topic.delete()
         return "", 204
 
