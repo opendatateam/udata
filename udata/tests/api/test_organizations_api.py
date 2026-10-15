@@ -18,7 +18,10 @@ from udata.core.edito_blocs.models import (
     DatasetsListBloc,
     MarkdownBloc,
 )
-from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
@@ -1788,8 +1791,6 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
     def test_cancel_invitation_marks_notification_as_handled(self):
         """Test that canceling an invitation marks the related notification as handled."""
-        from udata.core.organization.notifications import MembershipRequestNotificationDetails
-
         user = self.login()
         invited_user = UserFactory()
         invitation = MembershipRequest(
@@ -1798,14 +1799,12 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=invited_user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=invited_user
-            ),
+            request_organization=organization,
+            request_user=invited_user,
+            invitation=True,
         )
-        notification.save()
 
         api_url = url_for("api.cancel_membership", org=organization, id=invitation.id)
         self.post(api_url)

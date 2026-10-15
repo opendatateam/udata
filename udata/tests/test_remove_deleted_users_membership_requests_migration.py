@@ -2,11 +2,12 @@ from datetime import UTC, datetime
 
 from mongoengine.connection import get_db
 
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.user.factories import UserFactory
 from udata.db import migrations
-from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import PytestOnlyDBTestCase
@@ -16,22 +17,6 @@ MIGRATION = "2026-10-15-remove-deleted-users-membership-requests.py"
 
 def migrate():
     migrations.get(MIGRATION).migrate(get_db())
-
-
-def notify(recipient, organization, user, kind):
-    notification = Notification(
-        user=recipient,
-        type=(
-            NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
-            if kind == "invitation"
-            else NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
-        ),
-        details=MembershipRequestNotificationDetails(
-            request_organization=organization, request_user=user
-        ),
-    )
-    notification.save()
-    return notification
 
 
 class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
@@ -75,14 +60,21 @@ class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin")],
             requests=[MembershipRequest(user=user_a, comment="Please add me")],
         )
-        # An account can only have one pending entry per organization, so the
-        # invitation lives in another one.
         inviting_organization = OrganizationFactory(
             requests=[MembershipRequest(kind="invitation", user=user_a, role="editor")]
         )
-        request_notification = notify(admin, organization, user_a, "request")
-        invitation_notification = notify(admin, inviting_organization, user_a, "invitation")
-        surviving_notification = notify(admin, organization, user_b, "request")
+        request_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user_a
+        )
+        invitation_notification = MembershipRequestNotificationFactory(
+            user=admin,
+            request_organization=inviting_organization,
+            request_user=user_a,
+            invitation=True,
+        )
+        surviving_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user_b
+        )
         user_a.deleted = datetime.now(UTC)
         user_a.save()
 
@@ -122,8 +114,12 @@ class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
                 pending_b,
             ],
         )
-        notification = notify(admin, organization, user_a, "request")
-        surviving_notification = notify(admin, organization, user_b, "request")
+        notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user_a
+        )
+        surviving_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user_b
+        )
         user_a.deleted = datetime.now(UTC)
         user_a.save()
 

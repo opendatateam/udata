@@ -6,8 +6,10 @@ from flask import url_for
 from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
@@ -906,14 +908,12 @@ class OrgInvitationsAPITest(APITestCase):
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user
-            ),
+            request_organization=organization,
+            request_user=user,
+            invitation=True,
         )
-        notification.save()
 
         self.post(url_for("api.accept_org_invitation", id=invitation.id))
 
@@ -930,14 +930,12 @@ class OrgInvitationsAPITest(APITestCase):
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user
-            ),
+            request_organization=organization,
+            request_user=user,
+            invitation=True,
         )
-        notification.save()
 
         self.post(url_for("api.refuse_org_invitation", id=invitation.id))
 
