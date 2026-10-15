@@ -118,6 +118,9 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "reuses",
         "owner",
         "permissions",
+        "parent",
+        "ancestors",
+        "path",
     ],
     "site": [
         "version",

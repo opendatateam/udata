@@ -121,6 +121,10 @@ class PostAPI(API):
     @api.response(204, "Object deleted")
     def delete(self, post):
         """Delete a given post"""
+        # Checked before anything is deleted: the DENY rule on `parent` only fires on
+        # `post.delete()`, after the discussions would already be gone.
+        if Post.objects(parent=post).count():
+            api.abort(400, _("This page has sub-pages: move or delete them first"))
         Discussion.objects(subject=post).delete()
         post.delete()
         return "", 204

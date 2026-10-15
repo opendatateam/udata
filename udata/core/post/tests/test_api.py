@@ -2,6 +2,7 @@ from io import BytesIO
 from unittest import mock
 from uuid import uuid4
 
+import pytest
 from flask import url_for
 from mongoengine.context_managers import query_counter
 
@@ -431,6 +432,121 @@ class PostsAPITest(APITestCase):
 
         assert len(response.json["datasets"]) == 1
         assert len(response.json["reuses"]) == 1
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    def test_post_api_create_page_with_parent(self):
+        """A sub-page exposes its path, its ancestors, and lives under /pages/<path>"""
+        elections = PostFactory(kind="page", name="Élections", slug="elections")
+        municipales = PostFactory(
+            kind="page", name="Municipales", slug="municipales", parent=elections
+        )
+        self.login(AdminFactory())
+
+        response = self.post(
+            url_for("api.posts"),
+            {"name": "2026", "content": "x", "kind": "page", "parent": str(municipales.id)},
+        )
+        assert201(response)
+        assert response.json["path"] == "elections/municipales/2026"
+        assert response.json["page"] == "https://www.data.gouv.fr/pages/elections/municipales/2026"
+        assert response.json["parent"] == {
+            "id": str(municipales.id),
+            "name": "Municipales",
+            "slug": "municipales",
+            "path": "elections/municipales",
+        }
+        assert [ancestor["path"] for ancestor in response.json["ancestors"]] == [
+            "elections",
+            "elections/municipales",
+        ]
+
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
+    def test_post_api_news_page_url(self):
+        """A news stays under /posts/<slug>, a root page goes under /pages/<slug>"""
+        news = PostFactory(kind="news", slug="actualite")
+        page = PostFactory(kind="page", slug="cgu")
+
+        assert self.get(url_for("api.post", post=news)).json["page"] == (
+            "https://www.data.gouv.fr/posts/actualite"
+        )
+        response = self.get(url_for("api.post", post=page)).json
+        assert response["page"] == "https://www.data.gouv.fr/pages/cgu"
+        assert response["path"] == "cgu"
+        assert response["parent"] is None
+        assert response["ancestors"] == []
+
+    def test_post_api_parent_must_be_a_page(self):
+        """Only a page can have a parent, and that parent must be a page"""
+        news = PostFactory(kind="news")
+        page = PostFactory(kind="page")
+        self.login(AdminFactory())
+
+        response = self.post(
+            url_for("api.posts"),
+            {"name": "Sous-page", "content": "x", "kind": "page", "parent": str(news.id)},
+        )
+        assert400(response)
+        response = self.post(
+            url_for("api.posts"),
+            {"name": "Actualité", "content": "x", "kind": "news", "parent": str(page.id)},
+        )
+        assert400(response)
+        assert Post.objects.count() == 2
+
+    def test_post_api_parent_cannot_create_a_cycle(self):
+        """A page cannot be moved under one of its own descendants, nor under itself"""
+        root = PostFactory(kind="page")
+        child = PostFactory(kind="page", parent=root)
+        self.login(AdminFactory())
+
+        assert400(self.put(url_for("api.post", post=root), {"parent": str(child.id)}))
+        assert400(self.put(url_for("api.post", post=root), {"parent": str(root.id)}))
+        root.reload()
+        assert root.parent is None
+
+    def test_post_api_page_with_children_must_stay_a_page(self):
+        """Turning a page with sub-pages into a news would leave them under a news"""
+        root = PostFactory(kind="page")
+        PostFactory(kind="page", parent=root)
+        self.login(AdminFactory())
+
+        assert400(self.put(url_for("api.post", post=root), {"kind": "news"}))
+        root.reload()
+        assert root.kind == "page"
+
+    def test_post_api_move_page_to_root(self):
+        """Removing the parent moves the page back to the root"""
+        root = PostFactory(kind="page", slug="elections")
+        child = PostFactory(kind="page", slug="municipales", parent=root)
+        self.login(AdminFactory())
+
+        response = self.put(url_for("api.post", post=child), {"parent": None})
+        assert200(response)
+        assert response.json["path"] == "municipales"
+        child.reload()
+        assert child.parent is None
+
+    def test_post_api_resend_parent_as_object(self):
+        """A client resending the parent as it reads it must keep it unchanged"""
+        root = PostFactory(kind="page")
+        child = PostFactory(kind="page", parent=root)
+        self.login(AdminFactory())
+        data = self.get(url_for("api.post", post=child)).json
+
+        response = self.put(url_for("api.post", post=child), {"parent": data["parent"]})
+        assert200(response)
+        assert response.json["parent"]["id"] == str(root.id)
+
+    def test_post_api_delete_page_with_children(self):
+        """A page with sub-pages cannot be deleted, and nothing of it is deleted"""
+        root = PostFactory(kind="page")
+        PostFactory(kind="page", parent=root)
+        DiscussionFactory(subject=root)
+        self.login(AdminFactory())
+
+        assert400(self.delete(url_for("api.post", post=root)))
+        assert Post.objects(id=root.id).count() == 1
+        assert Discussion.objects(subject=root).count() == 1
 
     def test_post_api_delete(self):
         """It should delete a post from the API"""
