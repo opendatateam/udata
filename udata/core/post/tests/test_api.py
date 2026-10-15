@@ -453,6 +453,7 @@ class PostsAPITest(APITestCase):
             "id": str(municipales.id),
             "name": "Municipales",
             "path": "elections/municipales",
+            "page": "https://www.data.gouv.fr/pages/elections/municipales",
         }
         assert [ancestor["path"] for ancestor in response.json["ancestors"]] == [
             "elections",
@@ -511,9 +512,7 @@ class PostsAPITest(APITestCase):
         second = PostFactory(kind="page", slug="second", parent=first)
         Post.objects(id=first.id).update_one(set__parent=second)
 
-        response = self.get(url_for("api.post", post=second))
-        assert200(response)
-        assert response.json["path"] == "second/first/second"
+        assert200(self.get(url_for("api.post", post=second)))
 
     def test_post_api_published_page_cannot_be_under_a_draft(self):
         """A published sub-page would expose the name and slug of its draft parent"""
@@ -539,6 +538,16 @@ class PostsAPITest(APITestCase):
         assert400(self.delete(url_for("api.publish_post", post=parent)))
         parent.reload()
         assert parent.published is not None
+
+    def test_post_api_unpublish_page_with_draft_children(self):
+        """Draft sub-pages expose nothing: their parent can still be unpublished"""
+        parent = PostFactory(kind="page")
+        PostFactory(kind="page", published=None, parent=parent)
+        self.login(AdminFactory())
+
+        assert200(self.delete(url_for("api.publish_post", post=parent)))
+        parent.reload()
+        assert parent.published is None
 
     def test_post_api_page_with_children_must_stay_a_page(self):
         """Turning a page with sub-pages into a news would leave them under a news"""

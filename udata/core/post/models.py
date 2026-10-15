@@ -127,7 +127,8 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     )
 
     parent = field(
-        # DENY: deleting a page would otherwise silently change the URL of its sub-pages
+        # DENY: otherwise sub-pages would keep a dangling reference and every read of them
+        # would fail. The API checks it first, this covers the deletions made elsewhere.
         ReferenceField("self", reverse_delete_rule=DENY),
         nested_fields=post_ancestor_fields,
         allow_null=True,
