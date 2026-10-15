@@ -3495,6 +3495,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             archived_reason="not-on-remote",
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
+            doi="10.15148/762d02eb-82dc-46f4-b231-b67f3819a8ad",
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
@@ -3515,6 +3516,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             "archived_reason": "not-on-remote",
             "uri": "http://domain.gouv.fr/dataset/uri",
             "dct_identifier": "http://domain.gouv.fr/dataset/identifier",
+            "doi": "10.15148/762d02eb-82dc-46f4-b231-b67f3819a8ad",
         }
 
     def test_dataset_with_resource_harvest_metadata(self):
