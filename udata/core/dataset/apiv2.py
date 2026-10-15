@@ -16,27 +16,31 @@ from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
 from udata.core.user.models import User
+from udata.geopf.models import GeopfResourceMetadata
 from udata.mongo.queryset import paginate_embedded_list
 from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
     catalog_schema_fields,
-    checksum_fields,
     dataset_geopf_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
     dataset_permissions_fields,
-    resource_fields,
-    resource_geopf_fields,
-    resource_harvest_fields,
-    resource_internal_fields,
-    schema_fields,
     spatial_coverage_fields,
-    temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
+from .models import (
+    Checksum,
+    CommunityResource,
+    Dataset,
+    HarvestResourceMetadata,
+    Resource,
+    Schema,
+    get_dataset_by_resource_id,
+    resource_internal_fields,
+    temporal_coverage_fields,
+)
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -259,7 +263,9 @@ dataset_fields = apiv2.model(
 resource_page_fields = apiv2.model(
     "ResourcePage",
     {
-        "data": fields.List(fields.Nested(resource_fields, description="The dataset resources")),
+        "data": fields.List(
+            fields.Nested(Resource.__read_fields__, description="The dataset resources")
+        ),
         "next_page": fields.String(),
         "previous_page": fields.String(),
         "page": fields.Integer(),
@@ -280,7 +286,7 @@ dataset_search_page_fields = apiv2.model(
 specific_resource_fields = apiv2.model(
     "SpecificResource",
     {
-        "resource": fields.Nested(resource_fields, description="The dataset resources"),
+        "resource": fields.Nested(Resource.__read_fields__, description="The dataset resources"),
         "dataset_id": fields.String(),
     },
 )
@@ -289,19 +295,19 @@ apiv2.inherit("Badge (read)", Badge.__read_fields__)
 apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
-apiv2.inherit("Resource", resource_fields)
+apiv2.inherit("Resource (read)", Resource.__read_fields__)
 apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
 apiv2.inherit("TemporalCoverage", temporal_coverage_fields)
 apiv2.inherit("GeoJSON", geojson)
-apiv2.inherit("Checksum", checksum_fields)
+apiv2.inherit("Checksum (read)", Checksum.__read_fields__)
 apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
-apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
+apiv2.inherit("HarvestResourceMetadata (read)", HarvestResourceMetadata.__read_fields__)
 apiv2.inherit("GeopfDatasetMetadata", dataset_geopf_fields)
-apiv2.inherit("GeopfResourceMetadata", resource_geopf_fields)
+apiv2.inherit("GeopfResourceMetadata (read)", GeopfResourceMetadata.__read_fields__)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
-apiv2.inherit("Schema", schema_fields)
+apiv2.inherit("Schema (read)", Schema.__read_fields__)
 apiv2.inherit("CatalogSchema", catalog_schema_fields)
 apiv2.inherit("DatasetPermissions", dataset_permissions_fields)
 
@@ -503,7 +509,7 @@ class ResourcesAPI(API):
 @apiv2.response(410, "Dataset has been deleted")
 class DatasetSchemasAPI(API):
     @apiv2.doc("get_dataset_schemas")
-    @apiv2.marshal_with(schema_fields)
+    @apiv2.marshal_with(Schema.__read_fields__)
     def get(self, dataset):
         """Get a dataset schemas given its identifier"""
         if not dataset.permissions["read"].can():

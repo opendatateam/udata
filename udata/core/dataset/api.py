@@ -59,7 +59,6 @@ from .api_fields import (
     dataset_suggestion_fields,
     frequency_fields,
     license_fields,
-    resource_fields,
     resource_type_fields,
     upload_community_fields,
     upload_fields,
@@ -578,8 +577,8 @@ class ResourceRedirectAPI(API):
 class ResourcesAPI(API):
     @api.secure
     @api.doc("create_resource", **common_doc, responses={400: "Validation error"})
-    @api.expect(resource_fields)
-    @api.marshal_with(resource_fields, code=201)
+    @api.expect(Resource.__write_fields__)
+    @api.marshal_with(Resource.__read_fields__, code=201)
     def post(self, dataset):
         """Create a new resource for a given dataset"""
         dataset.permissions["edit_resources"].test()
@@ -594,8 +593,9 @@ class ResourcesAPI(API):
 
     @api.secure
     @api.doc("update_resources", **common_doc, responses={400: "Validation error"})
-    @api.expect([resource_fields])
-    @api.marshal_list_with(resource_fields)
+    # The read model documents the `id` each resource must carry to be reordered.
+    @api.expect([Resource.__read_fields__])
+    @api.marshal_list_with(Resource.__read_fields__)
     def put(self, dataset):
         """Reorder resources"""
         dataset.permissions["edit_resources"].test()
@@ -743,7 +743,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
 @api.param("rid", "The resource unique identifier")
 class ResourceAPI(ResourceMixin, API):
     @api.doc("get_resource")
-    @api.marshal_with(resource_fields)
+    @api.marshal_with(Resource.__read_fields__)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
         if not dataset.permissions["read"].can():
@@ -755,8 +755,8 @@ class ResourceAPI(ResourceMixin, API):
 
     @api.secure
     @api.doc("update_resource", responses={400: "Validation error"})
-    @api.expect(resource_fields)
-    @api.marshal_with(resource_fields)
+    @api.expect(Resource.__write_fields__)
+    @api.marshal_with(Resource.__read_fields__)
     def put(self, dataset, rid):
         """Update a given resource on a given dataset"""
         dataset.permissions["edit_resources"].test()

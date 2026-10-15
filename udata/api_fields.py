@@ -49,6 +49,7 @@ PYTHON_TYPE_TO_RESTX_FIELD = {
     int: restx_fields.Integer,
     float: restx_fields.Float,
     bool: restx_fields.Boolean,
+    datetime: custom_restx_fields.ISODateTime,
 }
 
 

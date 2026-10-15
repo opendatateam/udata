@@ -7,36 +7,8 @@ from udata.core.organization.models import Organization
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.models import User
 
-from .constants import (
-    CHECKSUM_TYPES,
-    DEFAULT_CHECKSUM_TYPE,
-    DEFAULT_LICENSE,
-    RESOURCE_FILETYPES,
-    RESOURCE_TYPES,
-    UpdateFrequency,
-)
-
-checksum_fields = api.model(
-    "Checksum",
-    {
-        "type": fields.String(
-            description="The hashing algorithm used to compute the checksum",
-            default=DEFAULT_CHECKSUM_TYPE,
-            enum=CHECKSUM_TYPES,
-        ),
-        "value": fields.String(description="The resulting checksum/hash", required=True),
-    },
-)
-
-# Use for schema inside Dataset or Resource
-schema_fields = api.model(
-    "Schema",
-    {
-        "name": fields.String(),
-        "version": fields.String(),
-        "url": fields.String(),
-    },
-)
+from .constants import DEFAULT_LICENSE, UpdateFrequency
+from .models import Resource, Schema, temporal_coverage_fields
 
 dataset_harvest_fields = api.model(
     "HarvestDatasetMetadata",
@@ -78,51 +50,12 @@ dataset_harvest_fields = api.model(
     },
 )
 
-resource_harvest_fields = api.model(
-    "HarvestResourceMetadata",
-    {
-        "uri": fields.String(description="The resource harvest uri", allow_null=True),
-        "issued_at": fields.ISODateTime(
-            description="The resource harvested release date", allow_null=True, readonly=True
-        ),
-        "modified_at": fields.ISODateTime(
-            description="The resource harvest last modification date",
-            allow_null=True,
-            readonly=True,
-        ),
-        "last_update": fields.ISODateTime(
-            description="The resource last harvest date", allow_null=True, readonly=True
-        ),
-    },
-)
-
 dataset_geopf_fields = api.model(
     "GeopfDatasetMetadata",
     {
         "datasheet_url": fields.String(
             attribute="push.datasheet_url",
             description="Public Géoplateforme fiche (dashboard) url, once pushed",
-            allow_null=True,
-            readonly=True,
-        ),
-    },
-)
-
-resource_geopf_fields = api.model(
-    "GeopfResourceMetadata",
-    {
-        "push_status": fields.String(
-            attribute="push.status",
-            description="Push status to Géoplateforme, if this resource has ever been pushed",
-            enum=["pending", "done", "error", "timeout"],
-            allow_null=True,
-            readonly=True,
-        ),
-        "offering_id": fields.String(
-            attribute="offering.id",
-            description=(
-                "Géoplateforme offering id, if this resource was created from a geopf offering pull"
-            ),
             allow_null=True,
             readonly=True,
         ),
@@ -154,88 +87,9 @@ frequency_fields = api.model(
     },
 )
 
-resource_internal_fields = api.model(
-    "ResourceInternals",
-    {
-        "created_at_internal": fields.ISODateTime(
-            description="The resource's internal creation date on the site", required=True
-        ),
-        "last_modified_internal": fields.ISODateTime(
-            description="The resource's internal last modification date", required=True
-        ),
-    },
-)
-
-resource_fields = api.model(
-    "Resource",
-    {
-        "id": fields.String(description="The resource unique ID", readonly=True),
-        "title": fields.String(description="The resource title", required=True),
-        "description": fields.Markdown(description="The resource markdown description"),
-        "filetype": fields.String(
-            description=("Whether the resource is an uploaded file, a remote file or an API"),
-            required=True,
-            enum=list(RESOURCE_FILETYPES),
-        ),
-        "type": fields.String(
-            description=("Resource type (documentation, API...)"),
-            required=True,
-            enum=list(RESOURCE_TYPES),
-        ),
-        "format": fields.String(description="The resource format", required=True),
-        "url": fields.String(description="The resource URL", required=True),
-        "latest": fields.String(
-            description="The permanent URL redirecting to "
-            "the latest version of the resource. When the "
-            "resource data is updated, the URL will "
-            "change, the latest URL won't.",
-            readonly=True,
-        ),
-        "checksum": fields.Nested(
-            checksum_fields, allow_null=True, description="A checksum to validate file validity"
-        ),
-        "filesize": fields.Integer(description="The resource file size in bytes"),
-        "mime": fields.String(description="The resource mime type"),
-        "created_at": fields.ISODateTime(readonly=True, description="The resource creation date"),
-        "last_modified": fields.ISODateTime(
-            readonly=True, description="The resource last modification date"
-        ),
-        "metrics": fields.Raw(description="The resource metrics", readonly=True),
-        "harvest": fields.Nested(
-            resource_harvest_fields,
-            allow_null=True,
-            readonly=True,
-            description="Harvest attributes metadata information",
-            skip_none=True,
-        ),
-        "geopf": fields.Nested(
-            resource_geopf_fields,
-            allow_null=True,
-            readonly=True,
-            description="Géoplateforme sync status metadata",
-            skip_none=True,
-        ),
-        "extras": fields.Raw(description="Extra attributes as key-value pairs"),
-        "preview_url": fields.String(
-            description="An optional preview URL to be "
-            "loaded as a standalone page (ie. iframe or "
-            "new page)",
-            readonly=True,
-        ),
-        "schema": fields.Nested(
-            schema_fields, allow_null=True, description="Reference to the associated schema"
-        ),
-        "internal": fields.Nested(
-            resource_internal_fields,
-            readonly=True,
-            description="Site internal and specific object's data",
-        ),
-    },
-)
-
 upload_fields = api.inherit(
     "UploadedResource",
-    resource_fields,
+    Resource.__read_fields__,
     {
         "success": fields.Boolean(
             description="Whether the upload succeeded or not.", readonly=True, default=True
@@ -244,14 +98,6 @@ upload_fields = api.inherit(
 )
 
 resources_order = api.as_list(fields.String(description="Resource ID"))
-
-temporal_coverage_fields = api.model(
-    "TemporalCoverage",
-    {
-        "start": fields.ISODateTime(description="The temporal coverage start date", required=True),
-        "end": fields.ISODateTime(description="The temporal coverage end date"),
-    },
-)
 
 dataset_ref_fields = api.inherit(
     "DatasetReference",
@@ -283,7 +129,7 @@ community_resource_permissions_fields = api.model(
 
 community_resource_fields = api.inherit(
     "CommunityResource",
-    resource_fields,
+    Resource.__read_fields__,
     {
         "dataset": fields.Nested(
             dataset_ref_fields, allow_null=True, description="Reference to the associated dataset"
@@ -411,7 +257,7 @@ dataset_fields = api.model(
             fields.Nested(Badge.__read_fields__), description="The dataset badges", readonly=True
         ),
         "resources": fields.List(
-            fields.Nested(resource_fields, description="The dataset resources")
+            fields.Nested(Resource.__read_fields__, description="The dataset resources")
         ),
         "community_resources": fields.List(
             fields.Nested(
@@ -454,7 +300,9 @@ dataset_fields = api.model(
             User.__ref_fields__, allow_null=True, description="The user information"
         ),
         "temporal_coverage": fields.Nested(
-            temporal_coverage_fields, allow_null=True, description="The temporal coverage"
+            temporal_coverage_fields,
+            allow_null=True,
+            description="The temporal coverage",
         ),
         "spatial": fields.Nested(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
@@ -482,7 +330,9 @@ dataset_fields = api.model(
             description="The resources last modification date", required=True
         ),
         "schema": fields.Nested(
-            schema_fields, allow_null=True, description="Reference to the associated schema"
+            Schema.__read_fields__,
+            allow_null=True,
+            description="Reference to the associated schema",
         ),
         "internal": fields.Nested(
             dataset_internal_fields,
