@@ -599,14 +599,18 @@ class UserAPITest(APITestCase):
         self.login(user)
         applicant = UserFactory()
         pending_request = MembershipRequest(user=applicant, comment="please")
-        pending_invitation = MembershipRequest(kind="invitation", user=applicant)
         refused_request = MembershipRequest(
             user=applicant, comment="old", status="refused", refusal_comment="no"
         )
         other_request = MembershipRequest(user=UserFactory(), comment="mine")
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin")],
-            requests=[pending_request, pending_invitation, refused_request, other_request],
+            requests=[pending_request, refused_request, other_request],
+        )
+        # An account can only have one pending entry per organization, so the
+        # invitation lives in another one.
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=applicant)]
         )
 
         response = self.delete(url_for("api.user", user=applicant))
@@ -614,6 +618,8 @@ class UserAPITest(APITestCase):
 
         organization.reload()
         assert [r.id for r in organization.requests] == [refused_request.id, other_request.id]
+        inviting_organization.reload()
+        assert inviting_organization.requests == []
 
     def test_delete_user_without_notify(self):
         user = AdminFactory()

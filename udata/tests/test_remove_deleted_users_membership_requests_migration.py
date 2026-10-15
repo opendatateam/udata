@@ -5,7 +5,6 @@ from mongoengine.connection import get_db
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.factories import UserFactory
-from udata.core.user.models import User
 from udata.db import migrations
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
@@ -36,7 +35,7 @@ def notify(recipient, organization, user, kind):
 
 
 class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
-    def test_pending_requests_of_deleted_user_are_removed(self):
+    def test_pending_request_and_invitation_of_deleted_user_are_removed(self):
         user_a = UserFactory()
         user_b = UserFactory()
         admin = UserFactory()
@@ -46,10 +45,14 @@ class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin")],
             requests=[
                 MembershipRequest(user=user_a, comment="Please add me"),
-                MembershipRequest(kind="invitation", user=user_a, role="editor"),
                 refused,
                 pending_b,
             ],
+        )
+        # An account can only have one pending entry per organization, so the
+        # invitation lives in another one.
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=user_a, role="editor")]
         )
         # Simulate an account deleted before the `mark_as_deleted` fix: flag it directly,
         # calling `mark_as_deleted` would remove the pending requests itself.
@@ -61,44 +64,32 @@ class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
         organization.reload()
         assert [r.id for r in organization.requests] == [refused.id, pending_b.id]
         assert [r.status for r in organization.requests] == ["refused", "pending"]
+        inviting_organization.reload()
+        assert inviting_organization.requests == []
 
-    def test_pending_request_of_removed_user_is_removed(self):
-        user_c = UserFactory()
-        organization = OrganizationFactory(
-            requests=[MembershipRequest(user=user_c, comment="Please add me")]
-        )
-        # `User.delete` is overridden to raise: remove the document directly.
-        User._get_collection().delete_one({"_id": user_c.id})
-
-        migrate()
-
-        organization.reload()
-        assert organization.requests == []
-
-    def test_notifications_of_removed_requests_are_marked_handled(self):
+    def test_notifications_about_deleted_user_are_removed(self):
         admin = UserFactory()
         user_a = UserFactory()
         user_b = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")],
-            requests=[
-                MembershipRequest(user=user_a, comment="Please add me"),
-                MembershipRequest(kind="invitation", user=user_a, role="editor"),
-                MembershipRequest(user=user_b, comment="Please add me too"),
-            ],
+            requests=[MembershipRequest(user=user_a, comment="Please add me")],
+        )
+        # An account can only have one pending entry per organization, so the
+        # invitation lives in another one.
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=user_a, role="editor")]
         )
         request_notification = notify(admin, organization, user_a, "request")
-        invitation_notification = notify(admin, organization, user_a, "invitation")
+        invitation_notification = notify(admin, inviting_organization, user_a, "invitation")
         surviving_notification = notify(admin, organization, user_b, "request")
         user_a.deleted = datetime.now(UTC)
         user_a.save()
 
         migrate()
 
-        request_notification.reload()
-        assert request_notification.handled_at is not None
-        invitation_notification.reload()
-        assert invitation_notification.handled_at is not None
+        assert Notification.objects(id=request_notification.id).first() is None
+        assert Notification.objects(id=invitation_notification.id).first() is None
         surviving_notification.reload()
         assert surviving_notification.handled_at is None
 
@@ -132,19 +123,17 @@ class RemoveDeletedUsersMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             ],
         )
         notification = notify(admin, organization, user_a, "request")
+        surviving_notification = notify(admin, organization, user_b, "request")
         user_a.deleted = datetime.now(UTC)
         user_a.save()
 
         migrate()
         organization.reload()
         first_requests = [r.id for r in organization.requests]
-        notification.reload()
-        assert notification.handled_at is not None
+        assert Notification.objects(id=notification.id).first() is None
 
         migrate()
 
         organization.reload()
         assert [r.id for r in organization.requests] == first_requests == [pending_b.id]
-        notification.reload()
-        assert notification.handled_at is not None
-        assert Notification.objects(details__request_organization=organization).count() == 1
+        assert Notification.objects(id=surviving_notification.id).count() == 1

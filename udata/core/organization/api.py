@@ -449,8 +449,7 @@ class MembershipRefuseAPI(MembershipAPI):
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
         membership_request.handled_on = datetime.now(UTC)
-        if comment:
-            membership_request.refusal_comment = comment
+        membership_request.refusal_comment = comment or None
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)

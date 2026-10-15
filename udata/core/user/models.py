@@ -473,19 +473,12 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                 member for member in organization.members if member.user != self
             ]
             organization.save()
-        # The account must not keep looming over organizations the user merely
-        # applied to: drop its pending requests and pending invitations.
+        # A deleted account must not leave pending requests or invitations behind in organizations.
         from udata.core.organization.models import Organization
 
-        for organization in Organization.objects(requests__user=self, deleted__exists=False):
-            requests = [
-                request
-                for request in organization.requests
-                if request.user != self or request.status != "pending"
-            ]
-            if len(requests) != len(organization.requests):
-                organization.requests = requests
-                organization.save()
+        Organization.objects(requests__user=self, deleted__exists=False).update(
+            __raw__={"$pull": {"requests": {"user": self.id, "status": "pending"}}}
+        )
         if delete_comments:
             from udata.core.discussions.models import Discussion
 
