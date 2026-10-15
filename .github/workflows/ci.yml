@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.13"]
+        python-version: ["3.11", "3.13", "3.14"]
         mongo-version: ["7.0.28"]
         elasticsearch-version: ["7.17.28", "8.19.13"]
     env:
