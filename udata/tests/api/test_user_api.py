@@ -594,6 +594,27 @@ class UserAPITest(APITestCase):
         assert len(discussion.discussion) == 2
         assert discussion.discussion[1].content != "DELETED"
 
+    def test_delete_user_removes_pending_membership_requests(self):
+        user = AdminFactory()
+        self.login(user)
+        applicant = UserFactory()
+        pending_request = MembershipRequest(user=applicant, comment="please")
+        pending_invitation = MembershipRequest(kind="invitation", user=applicant)
+        refused_request = MembershipRequest(
+            user=applicant, comment="old", status="refused", refusal_comment="no"
+        )
+        other_request = MembershipRequest(user=UserFactory(), comment="mine")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+            requests=[pending_request, pending_invitation, refused_request, other_request],
+        )
+
+        response = self.delete(url_for("api.user", user=applicant))
+        self.assert204(response)
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [refused_request.id, other_request.id]
+
     def test_delete_user_without_notify(self):
         user = AdminFactory()
         self.login(user)
