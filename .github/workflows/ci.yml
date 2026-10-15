@@ -95,10 +95,10 @@ jobs:
         run: uv sync --frozen
 
       - name: Lint and format code and sort imports
-        # ruff check --extend-select I . : check linting and imports sorting without fixing (to fix, use --fix)
+        # ruff check . : lint and sort imports without fixing (to fix, use --fix)
         # ruff format --check . : check code formatting without fixing (to fix, remove --check)
         run: |
-          uv run ruff check --extend-select I .
+          uv run ruff check .
           uv run ruff format --check .
 
       - name: Initialize Elasticsearch indices
