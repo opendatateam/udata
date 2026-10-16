@@ -36,7 +36,11 @@ from udata.core.dataset.factories import (
     ResourceFactory,
     ResourceSchemaMockData,
 )
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import (
+    HarvestDatasetMetadata,
+    HarvestResourceMetadata,
+    get_dataset_and_resource_by_id,
+)
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
@@ -708,6 +712,34 @@ class ResourceModelTest(PytestOnlyDBTestCase):
 
         with pytest.raises(RuntimeError):
             resource.save()
+
+
+class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
+    def test_found(self):
+        """The dataset comes back without its resources list, plus the matching resource"""
+        resource = ResourceFactory(id="817204ac-2202-8b4a-98e7-4284d154d10c")
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found_dataset, found_resource = get_dataset_and_resource_by_id(resource.id)
+
+        assert found_dataset.id == dataset.id
+        assert found_resource.id == resource.id
+        assert found_resource.title == resource.title
+        # The whole resources list isn't loaded, so a heavy dataset isn't fetched whole
+        assert found_dataset.resources == []
+
+    def test_not_found(self):
+        assert get_dataset_and_resource_by_id(uuid4()) == (None, None)
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_dataset_and_resource_by_id(shared_id) == (None, None)
+        assert str(shared_id) in caplog.text
 
 
 class LicenseModelTest(PytestOnlyDBTestCase):

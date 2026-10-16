@@ -57,6 +57,7 @@ from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.queryset import paginate_embedded_list
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
@@ -1428,6 +1429,29 @@ def get_dataset_by_resource_id(id):
         log.error(f"Resource #{id} is duplicated across several datasets")
         return None
     return datasets[0] if datasets else None
+
+
+def get_dataset_and_resource_by_id(id):
+    """Fetch the dataset holding a resource, together with the resource, given the resource UUID"""
+    datasets = list(Dataset.objects(resources__id=id).exclude("resources").limit(2))
+    if len(datasets) > 1:
+        # Corrupted data that no API path should be able to produce: report it instead of
+        # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
+        log.error(f"Resource #{id} is duplicated across several datasets")
+        return None, None
+    if not datasets:
+        return None, None
+    dataset = datasets[0]
+    resources, _ = paginate_embedded_list(
+        Dataset,
+        dataset.id,
+        "resources",
+        Resource,
+        page=1,
+        page_size=1,
+        condition={"$eq": ["$$item._id", str(id)]},
+    )
+    return dataset, resources[0] if resources else None
 
 
 def get_resource(id):

@@ -17,7 +17,6 @@ from udata.core.organization.models import Member, Organization
 from udata.core.spatial.api_fields import geojson
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
-from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
@@ -36,7 +35,7 @@ from .api_fields import (
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
+from .models import CommunityResource, Dataset, Resource, get_dataset_and_resource_by_id
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -546,13 +545,12 @@ class DatasetSchemasAPI(API):
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
     def get(self, rid):
-        dataset = get_dataset_by_resource_id(rid)
+        dataset, resource = get_dataset_and_resource_by_id(rid)
         if dataset:
             if not dataset.permissions["read"].can():
                 if not dataset.private and dataset.deleted:
                     apiv2.abort(410, "Dataset has been deleted")
                 apiv2.abort(404)
-            resource = get_by(dataset.resources, id=rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
             if resource:
