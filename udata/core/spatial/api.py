@@ -5,6 +5,7 @@ from mongoengine.queryset.visitor import Q
 
 from udata.api import API, api
 from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.suggest import normalize, sorted_suggestions
 from udata.i18n import _
 from udata.models import Dataset
 
@@ -13,6 +14,12 @@ from .api_fields import (
     granularity_fields,
     level_fields,
     zone_suggestion_fields,
+)
+from .constants import (
+    DEFAULT_LEVEL_PRIORITY,
+    DEFAULT_SUGGEST_LEVELS,
+    LEVEL_PRIORITY,
+    SUGGESTABLE_LEVELS,
 )
 from .models import GeoLevel, GeoZone, spatial_granularities
 
@@ -25,7 +32,12 @@ ns = api.namespace("spatial", "Spatial references")
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    "q", type=str, help="The string to autocomplete/suggest", location="args", required=True
+    "q",
+    type=str,
+    help="The string to autocomplete/suggest (empty returns default zones)",
+    location="args",
+    required=False,
+    default="",
 )
 suggest_parser.add_argument(
     "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
@@ -52,25 +64,57 @@ class SuggestZonesAPI(API):
     @api.expect(suggest_parser)
     @api.doc("suggest_zones")
     def get(self):
-        """Geospatial zones suggest endpoint using mongoDB contains"""
-        args = suggest_parser.parse_args()
-        geozones = GeoZone.objects(
-            Q(name__icontains=args["q"]) | Q(code__icontains=args["q"]) | Q(id__icontains=args["q"])
-        )
+        """Geospatial zones autocomplete.
 
-        # We're manually sorting based on zone level int (cause we don't have the int value directly in mongo document)
-        level_id_to_int_level = {level.id: level.admin_level for level in GeoLevel.objects()}
-        geozones = sorted(geozones, key=lambda zone: level_id_to_int_level[zone.level])
+        Only well-populated levels are proposed (:data:`SUGGESTABLE_LEVELS`:
+        communes, departments, regions, EPCI, ...); detail levels such as
+        arrondissements are excluded. Matching is accent-insensitive; results
+        are ranked by match quality (exact > prefix > word > substring), then by
+        level relevance (:data:`LEVEL_PRIORITY`), so the city of Paris comes
+        before its department and the "Grand Paris" intercommunalities, and
+        "Val Parisis" (a mere substring) is relegated. An empty query returns
+        broad default zones (regions and departments).
+        """
+        args = suggest_parser.parse_args()
+        query = args["q"]
+        size = args["size"]
+
+        norm = normalize(query)
+        if not norm:
+            zones = GeoZone.objects(level__in=DEFAULT_SUGGEST_LEVELS).order_by("name").limit(size)
+        else:
+            # Candidates are a superset restricted to suggestable levels: match
+            # the name (accent-sensitive) and the accent-folded slug (so
+            # "orleans" finds "Orléans"), plus raw code/id. Match quality is then
+            # refined in Python on the name.
+            candidates = GeoZone.objects(
+                Q(name__icontains=query)
+                | Q(slug__icontains=norm)
+                | Q(code__icontains=query)
+                | Q(id__icontains=query),
+                level__in=SUGGESTABLE_LEVELS,
+            )
+            zones = sorted_suggestions(
+                candidates,
+                query,
+                get_texts=lambda zone: zone.name,
+                secondary=lambda zone: (
+                    LEVEL_PRIORITY.get(zone.level, DEFAULT_LEVEL_PRIORITY),
+                    zone.name,
+                ),
+                size=size,
+            )
 
         return [
             {
-                "id": geozone.id,
-                "name": payload_name(geozone.name),
-                "code": geozone.code,
-                "level": geozone.level,
-                "uri": geozone.uri,
+                "id": zone.id,
+                "name": payload_name(zone.name),
+                "code": zone.code,
+                "level": zone.level,
+                "level_name": zone.level_i18n_name,
+                "uri": zone.uri,
             }
-            for geozone in geozones[: args["size"]]
+            for zone in zones
         ]
 
 
