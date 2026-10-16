@@ -103,6 +103,7 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
 
     tags = field(
         ListField(StringField()),
+        filterable={"key": "tag"},
         description="Some keywords to help in search",
     )
     datasets = field(
