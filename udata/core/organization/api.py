@@ -445,13 +445,11 @@ class MembershipRefuseAPI(MembershipAPI):
         # "comment" but the model field is "refusal_comment" — patch() would set
         # the wrong field. Requires changing the API contract to use "refusal_comment".
         comment = api.json_payload().get("comment")
-        if not comment:
-            raise FieldValidationError(field="comment", message="Comment is required")
 
         membership_request.status = "refused"
         membership_request.handled_by = current_user._get_current_object()
         membership_request.handled_on = datetime.now(UTC)
-        membership_request.refusal_comment = comment
+        membership_request.refusal_comment = comment or None
 
         org.save()
         MembershipRequest.after_handle.send(membership_request, org=org)

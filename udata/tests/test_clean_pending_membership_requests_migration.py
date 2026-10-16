@@ -1,7 +1,9 @@
 from mongoengine.connection import get_db
 
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.user.factories import UserFactory
 from udata.db import migrations
 from udata.features.notifications.constants import NotificationType
@@ -14,22 +16,6 @@ MIGRATION = "2026-10-01-clean-pending-membership-requests.py"
 
 def migrate():
     migrations.get(MIGRATION).migrate(get_db())
-
-
-def notify(recipient, organization, user, kind):
-    notification = Notification(
-        user=recipient,
-        type=(
-            NotificationType.ORGANIZATION_MEMBERSHIP_INVITED
-            if kind == "invitation"
-            else NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED
-        ),
-        details=MembershipRequestNotificationDetails(
-            request_organization=organization, request_user=user
-        ),
-    )
-    notification.save()
-    return notification
 
 
 class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
@@ -56,7 +42,9 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
             requests=[MembershipRequest(user=user, comment="Please add me")],
         )
-        notification = notify(admin, organization, user, "request")
+        notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
+        )
         get_db().organization.update_one(
             {"_id": organization.id}, {"$unset": {"requests.0.kind": ""}}
         )
@@ -138,7 +126,9 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin")],
             requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
         )
-        request_notification = notify(admin, organization, user, "request")
+        request_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
+        )
 
         migrate()
 
@@ -163,8 +153,12 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin")],
             requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
         )
-        request_notification = notify(admin, organization, user, "request")
-        invitation_notification = notify(user, organization, user, "invitation")
+        request_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
+        )
+        invitation_notification = MembershipRequestNotificationFactory(
+            user=user, request_organization=organization, request_user=user, invitation=True
+        )
 
         migrate()
 
@@ -184,7 +178,9 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
                 invitation,
             ]
         )
-        notification = notify(user, organization, user, "invitation")
+        notification = MembershipRequestNotificationFactory(
+            user=user, request_organization=organization, request_user=user, invitation=True
+        )
 
         migrate()
 
@@ -223,8 +219,12 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
             requests=[MembershipRequest(user=user, comment="Please add me"), other_request],
         )
-        notification = notify(admin, organization, user, "request")
-        other_notification = notify(admin, organization, other, "request")
+        notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
+        )
+        other_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=other
+        )
 
         migrate()
 
@@ -243,7 +243,9 @@ class CleanPendingMembershipRequestsMigrationTest(PytestOnlyDBTestCase):
             members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
             requests=[MembershipRequest(user=user, comment="Please add me")],
         )
-        notification = notify(admin, organization, user, "request")
+        notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
+        )
         Notification._get_collection().update_one(
             {"_id": notification.id}, {"$unset": {"details.kind": ""}}
         )
