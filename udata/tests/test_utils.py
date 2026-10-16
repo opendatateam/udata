@@ -110,6 +110,16 @@ class DateRangeTest:
         assert daterange_start("1860") == date(1860, 1, 1)
         assert daterange_end("1860") == date(1860, 12, 31)
 
+    def test_parse_daterange_full_without_dashes(self):
+        for value in ("1984/06/07", "19840607", "1984.06.07"):
+            assert daterange_start(value) == date(1984, 6, 7), value
+            assert daterange_end(value) == date(1984, 6, 7), value
+
+    def test_parse_daterange_month_without_dashes(self):
+        for value in ("1984/06", "June 1984"):
+            assert daterange_start(value) == date(1984, 6, 1), value
+            assert daterange_end(value) == date(1984, 6, 30), value
+
 
 class ToBoolTest:
     def test_bool_values(self):
