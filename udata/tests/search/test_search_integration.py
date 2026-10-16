@@ -66,6 +66,52 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "Données spectaculaires sur les transports" in titles
 
+    def test_dataset_punctuation_search(self):
+        """Dots and underscores vs spaces in titles should match in both directions."""
+        DatasetFactory(title="Catalogue data.gouv.fr")
+        DatasetFactory(title="Portail data gouv")
+        DatasetFactory(title="Export data_gouv")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
+
+        response = self.get("/api/2/datasets/search/?q=data.gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
+
+    def test_dataset_punctuation_search_across_description(self):
+        """A dotted title and a description word match in the same query."""
+        DatasetFactory(title="Catalogue data.gouv.fr", description="statistiques nationales")
+        DatasetFactory(title="Autre catalogue", description="statistiques nationales")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv statistiques")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Autre catalogue" not in titles
+
+    def test_dataset_decimal_not_split(self):
+        """q=2.5 matches a decimal, not a title that only has 2 and 5 apart."""
+        DatasetFactory(title="Indice 2.5", description="air")
+        DatasetFactory(title="Pollution PM2.5", description="air")
+        DatasetFactory(title="Ligne 2 et 5", description="air")
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=2.5")
+        self.assert200(response)
+        assert [d["title"] for d in response.json["data"]] == ["Indice 2.5"]
+
     def test_dataset_filter_by_format_family(self):
         """Test filtering datasets by format_family."""
         csv_resource = ResourceFactory(format="csv")

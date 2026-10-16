@@ -12,6 +12,7 @@ from elasticsearch_dsl import (
     Keyword,
     Text,
     analyzer,
+    char_filter,
     query,
     token_filter,
     tokenizer,
@@ -53,9 +54,18 @@ french_synonym = token_filter(
 )
 
 
+# Turn "." / "_" between letters into spaces so "data.gouv" and "data gouv" tokenize the same.
+# Digits stay intact (2.5, PM2.5).
+punct_to_space = char_filter(
+    "punct_to_space",
+    type="pattern_replace",
+    pattern=r"(?<=\p{L})[._]+(?=\p{L})",
+    replacement=" ",
+)
 dgv_analyzer = analyzer(
     "french_dgv",
     tokenizer=tokenizer("icu_tokenizer"),
+    char_filter=[punct_to_space],
     filter=["icu_folding", french_elision, french_synonym, french_stemmer, french_stop],
 )
 
@@ -1187,7 +1197,10 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=["title", "organization_name"],
+                        fields=[
+                            "title",
+                            "organization_name",
+                        ],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
