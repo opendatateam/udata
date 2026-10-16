@@ -296,7 +296,7 @@ class Defaults(object):
         "plaintext",
     ]
 
-    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps"]
+    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps", "mailto"]
 
     # Tags constraints
     TAG_MIN_LENGTH = 3
