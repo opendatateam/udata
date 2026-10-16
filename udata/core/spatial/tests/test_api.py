@@ -1,5 +1,7 @@
+import pytest
 from flask import url_for
 
+from udata.core.dataset.constants import FULL_OBJECTS_HEADER
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -9,10 +11,11 @@ from udata.core.spatial.factories import (
     GeoZoneFactory,
     SpatialCoverageFactory,
 )
-from udata.core.spatial.models import spatial_granularities
+from udata.core.spatial.models import GeoZone, spatial_granularities
 from udata.core.spatial.tasks import compute_geozones_metrics
-from udata.tests.api import APITestCase
-from udata.tests.helpers import create_geozones_fixtures
+from udata.core.topic.factories import TopicFactory
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
+from udata.tests.helpers import assert200, create_geozones_fixtures
 from udata.utils import faker
 
 
@@ -310,3 +313,107 @@ class DatasetsSpatialAPITest(APITestCase):
         response = self.post(url_for("api.datasets"), data)
         self.assert400(response)
         self.assertEqual(Dataset.objects.count(), 0)
+
+
+SPATIAL_ENDPOINTS = [
+    ("api.dataset", "dataset", DatasetFactory),
+    ("apiv2.dataset", "dataset", DatasetFactory),
+    ("apiv2.topic", "topic", TopicFactory),
+]
+
+
+class SpatialCoverageOutputTest(PytestOnlyAPITestCase):
+    @pytest.mark.parametrize("endpoint,arg,factory", SPATIAL_ENDPOINTS)
+    def test_zones_as_ids_by_default(self, endpoint, arg, factory):
+        level = GeoLevelFactory(id="country", name="Pays")
+        zone = GeoZoneFactory(level=level.id)
+        obj = factory(spatial=SpatialCoverageFactory(zones=[zone.id], granularity=level.id))
+
+        response = self.get(url_for(endpoint, **{arg: obj}))
+
+        assert200(response)
+        assert response.json["spatial"] == {
+            "geom": None,
+            "zones": [zone.id],
+            "granularity": "country",
+        }
+
+    @pytest.mark.parametrize("endpoint,arg,factory", SPATIAL_ENDPOINTS)
+    def test_zones_as_objects_with_full_objects_header(self, endpoint, arg, factory):
+        level = GeoLevelFactory(id="country", name="Pays")
+        zone = GeoZoneFactory(level=level.id)
+        obj = factory(spatial=SpatialCoverageFactory(zones=[zone.id], granularity=level.id))
+
+        response = self.get(url_for(endpoint, **{arg: obj}), headers={FULL_OBJECTS_HEADER: "True"})
+
+        assert200(response)
+        assert response.json["spatial"] == {
+            "geom": None,
+            "zones": [
+                {
+                    "id": zone.id,
+                    "class": "GeoZone",
+                    "name": zone.name,
+                    "slug": zone.slug,
+                    "code": zone.code,
+                    "level": "country",
+                    "uri": zone.uri,
+                }
+            ],
+            "granularity": {"id": "country", "name": "Pays"},
+        }
+
+    @pytest.mark.parametrize("endpoint,arg,factory", SPATIAL_ENDPOINTS)
+    @pytest.mark.parametrize(
+        "headers,granularity",
+        [({}, "other"), ({FULL_OBJECTS_HEADER: "True"}, {"id": "other", "name": "Autre"})],
+    )
+    def test_geom_without_granularity(self, endpoint, arg, factory, headers, granularity):
+        obj = factory(spatial=SpatialCoverageFactory(geom=SAMPLE_GEOM, zones=[], granularity=None))
+
+        response = self.get(url_for(endpoint, **{arg: obj}), headers=headers)
+
+        assert200(response)
+        assert response.json["spatial"] == {
+            "geom": SAMPLE_GEOM,
+            "zones": [],
+            "granularity": granularity,
+        }
+
+    @pytest.mark.parametrize("endpoint,arg,factory", SPATIAL_ENDPOINTS)
+    def test_fields_mask_on_full_objects(self, endpoint, arg, factory):
+        level = GeoLevelFactory(id="country", name="Pays")
+        zone = GeoZoneFactory(level=level.id)
+        obj = factory(spatial=SpatialCoverageFactory(zones=[zone.id], granularity=level.id))
+
+        response = self.get(
+            url_for(endpoint, **{arg: obj}),
+            headers={
+                FULL_OBJECTS_HEADER: "True",
+                "X-Fields": "spatial{zones{id,name},granularity{name}}",
+            },
+        )
+
+        assert200(response)
+        assert response.json == {
+            "spatial": {
+                "zones": [{"id": zone.id, "name": zone.name}],
+                "granularity": {"name": "Pays"},
+            }
+        }
+
+    @pytest.mark.parametrize("endpoint,arg,factory", SPATIAL_ENDPOINTS)
+    @pytest.mark.parametrize("headers", [{}, {FULL_OBJECTS_HEADER: "True"}])
+    def test_deleted_zones_are_left_out(self, endpoint, arg, factory, headers):
+        # `udata spatial load --drop` replaces the GeoZone collection, leaving references
+        # to zones that no longer exist, and nothing cleans them up on topics.
+        kept = GeoZoneFactory()
+        gone = GeoZoneFactory()
+        obj = factory(spatial=SpatialCoverageFactory(zones=[kept.id, gone.id]))
+        GeoZone.objects(id=gone.id).delete()
+
+        response = self.get(url_for(endpoint, **{arg: obj}), headers=headers)
+
+        assert200(response)
+        zones = response.json["spatial"]["zones"]
+        assert [zone if isinstance(zone, str) else zone["id"] for zone in zones] == [kept.id]

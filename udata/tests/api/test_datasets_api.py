@@ -45,7 +45,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
-from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -546,24 +546,15 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
 
     def test_dataset_api_get_with_full_objects(self):
-        """It should fetch a private dataset from the API if user is authorized"""
+        """It should render frequency and license as objects with the full objects header"""
         license = LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
-        paca, bdr, arles = create_geozones_fixtures()
-        country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
-        other = GeoLevelFactory(id="other", name="Autre")
 
-        dataset = DatasetFactory(
-            frequency=UpdateFrequency.MONTHLY,
-            license=license,
-            spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
-        )
+        dataset = DatasetFactory(frequency=UpdateFrequency.MONTHLY, license=license)
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
         assert response.json["frequency"] == UpdateFrequency.MONTHLY.id
         assert response.json["license"] == "lov2"
-        assert response.json["spatial"]["zones"][0] == paca.id
-        assert response.json["spatial"]["granularity"] == "country"
 
         response = self.get(
             url_for("apiv2.dataset", dataset=dataset),
@@ -576,16 +567,8 @@ class DatasetAPITest(APITestCase):
         assert response.json["frequency"]["label"] == UpdateFrequency.MONTHLY.label
         assert response.json["license"]["id"] == "lov2"
         assert response.json["license"]["title"] == license.title
-        assert response.json["spatial"]["zones"][0]["id"] == paca.id
-        assert response.json["spatial"]["zones"][0]["name"] == paca.name
-        assert response.json["spatial"]["granularity"]["id"] == "country"
-        assert response.json["spatial"]["granularity"]["name"] == country.name
 
-        dataset_without_anything = DatasetFactory(
-            frequency=None,
-            license=None,
-            spatial=SpatialCoverageFactory(zones=[], granularity=None),
-        )
+        dataset_without_anything = DatasetFactory(frequency=None, license=None)
 
         response = self.get(
             url_for("apiv2.dataset", dataset=dataset_without_anything),
@@ -598,9 +581,6 @@ class DatasetAPITest(APITestCase):
         assert response.json["frequency"]["label"] == UpdateFrequency.UNKNOWN.label
         assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
         assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
-        assert len(response.json["spatial"]["zones"]) == 0
-        assert response.json["spatial"]["granularity"]["id"] == "other"
-        assert response.json["spatial"]["granularity"]["name"] == other.name
 
     def test_dataset_api_create(self):
         """It should create a dataset from the API"""

@@ -17,7 +17,6 @@ from udata.api_fields import field, generate_fields
 from udata.core.auditable import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
@@ -144,7 +143,6 @@ class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
 
     spatial = field(
         EmbeddedDocumentField(SpatialCoverage),
-        nested_fields=spatial_coverage_fields,
         allow_null=True,
     )
 
