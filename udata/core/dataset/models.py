@@ -28,6 +28,7 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.app import cache
 from udata.core import storages
@@ -40,7 +41,6 @@ from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
     validate_contact_points_ownership,
 )
-from udata.core.dataset.api_fields import temporal_coverage_fields
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
@@ -69,6 +69,7 @@ from udata.utils import get_by, hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DEFAULT_CHECKSUM_TYPE,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     INSPIRE,
@@ -110,6 +111,26 @@ NON_ASSIGNABLE_SCHEMA_TYPES = ["datapackage"]
 
 log = logging.getLogger(__name__)
 
+temporal_coverage_fields = api.model(
+    "TemporalCoverage",
+    {
+        "start": fields.ISODateTime(description="The temporal coverage start date", required=True),
+        "end": fields.ISODateTime(description="The temporal coverage end date"),
+    },
+)
+
+resource_internal_fields = api.model(
+    "ResourceInternals",
+    {
+        "created_at_internal": fields.ISODateTime(
+            description="The resource's internal creation date on the site", required=True
+        ),
+        "last_modified_internal": fields.ISODateTime(
+            description="The resource's internal last modification date", required=True
+        ),
+    },
+)
+
 
 def get_json_ld_extra(key, value):
     """Serialize an extras key, value pair into JSON-LD"""
@@ -132,11 +153,27 @@ class HarvestDatasetMetadata(HarvestMetadata):
     ckan_source = StringField()
 
 
+@generate_fields()
 class HarvestResourceMetadata(EmbeddedDocument):
-    uri = StringField()
-    issued_at = DateTimeField()
-    modified_at = DateTimeField()
-    last_update = DateTimeField()
+    uri = field(StringField(), allow_null=True, description="The resource harvest uri")
+    issued_at = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="The resource harvested release date",
+    )
+    modified_at = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="The resource harvest last modification date",
+    )
+    last_update = field(
+        DateTimeField(),
+        readonly=True,
+        allow_null=True,
+        description="The resource last harvest date",
+    )
     dct_identifier = StringField()
 
     # How a backend recognizes an already harvested resource across runs, for the backends
@@ -154,9 +191,9 @@ class Schema(EmbeddedDocument):
     - Unknown schema: url is set, name and version are maybe set
     """
 
-    url = URLField()
-    name = StringField()
-    version = StringField()
+    url = field(URLField())
+    name = field(StringField())
+    version = field(StringField())
 
     def __bool__(self):
         """
@@ -377,9 +414,14 @@ class DatasetQuerySet(OwnedQuerySet):
         return self(badges__kind=kind)
 
 
+@generate_fields()
 class Checksum(EmbeddedDocument):
-    type = StringField(choices=CHECKSUM_TYPES, required=True)
-    value = StringField(required=True)
+    type = field(
+        StringField(choices=CHECKSUM_TYPES, required=True),
+        default=DEFAULT_CHECKSUM_TYPE,
+        description="The hashing algorithm used to compute the checksum",
+    )
+    value = field(StringField(required=True), description="The resulting checksum/hash")
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
@@ -395,53 +437,91 @@ RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filena
 
 
 class ResourceMixin(object):
-    id = AutoUUIDField(primary_key=True)
-    title = StringField(verbose_name="Title", required=True)
-    description = StringField()
-    filetype = StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
-    type = StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
-    url = URLField(required=True)
-    urlhash = StringField()
-    checksum = EmbeddedDocumentField(Checksum)
-    format = StringField()
-    mime = StringField()
-    filesize = IntField()  # `size` is a reserved keyword for mongoengine.
-    fs_filename = StringField()
-    extras = ExtrasField(
-        {
-            "check:available": BooleanField,
-            "check:status": IntField,
-            "check:date": DateTimeField,
-            # These extras hold URLs the frontend renders as download links or
-            # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
-            # datafairOrigin as previews). Typing them rejects the dangerous
-            # schemes (javascript:, data:) at the model level, on every write
-            # path, guarding against stored XSS.
-            "analysis:parsing:parquet_url": URLField,
-            "analysis:parsing:geojson_url": URLField,
-            "analysis:parsing:pmtiles_url": URLField,
-            "apidocUrl": URLField,
-            "datafairOrigin": URLField,
-        },
-        # Written by the platform services on resources (hydra analysis and
-        # availability checks, validata, DCAT harvesting, CSV exports), and trusted
-        # as-is by the frontend: letting users write them enables stored XSS (e.g. a
-        # `javascript:` value in `analysis:parsing:*_url`, rendered as a download
-        # link) and forged "platform-generated" metadata. `csv-export:model` is not
-        # rendered but resolves which resource the export job overwrites, so a forged
-        # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
-        # writable, hence their URL type above.
-        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
+    id = field(AutoUUIDField(primary_key=True), readonly=True, description="The resource unique ID")
+    title = field(
+        StringField(verbose_name="Title", required=True), description="The resource title"
     )
-    harvest = EmbeddedDocumentField(HarvestResourceMetadata)
-    geopf = EmbeddedDocumentField(GeopfResourceMetadata)
-    schema = EmbeddedDocumentField(Schema)
+    description = field(
+        StringField(), markdown=True, description="The resource markdown description"
+    )
+    filetype = field(
+        StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True),
+        description="Whether the resource is an uploaded file, a remote file or an API",
+    )
+    type = field(
+        StringField(choices=list(RESOURCE_TYPES), default="main", required=True),
+        description="Resource type (documentation, API...)",
+    )
+    url = field(URLField(required=True), description="The resource URL")
+    urlhash = StringField()
+    checksum = field(
+        EmbeddedDocumentField(Checksum),
+        allow_null=True,
+        description="A checksum to validate file validity",
+    )
+    format = field(StringField(), description="The resource format")
+    mime = field(StringField(), description="The resource mime type")
+    # `size` is a reserved keyword for mongoengine.
+    filesize = field(IntField(), description="The resource file size in bytes")
+    fs_filename = StringField()
+    extras = field(
+        ExtrasField(
+            {
+                "check:available": BooleanField,
+                "check:status": IntField,
+                "check:date": DateTimeField,
+                # These extras hold URLs the frontend renders as download links or
+                # embeds them (analysis:parsing:*_url as native anchors, apidocUrl /
+                # datafairOrigin as previews). Typing them rejects the dangerous
+                # schemes (javascript:, data:) at the model level, on every write
+                # path, guarding against stored XSS.
+                "analysis:parsing:parquet_url": URLField,
+                "analysis:parsing:geojson_url": URLField,
+                "analysis:parsing:pmtiles_url": URLField,
+                "apidocUrl": URLField,
+                "datafairOrigin": URLField,
+            },
+            # Written by the platform services on resources (hydra analysis and
+            # availability checks, validata, DCAT harvesting, CSV exports), and trusted
+            # as-is by the frontend: letting users write them enables stored XSS (e.g. a
+            # `javascript:` value in `analysis:parsing:*_url`, rendered as a download
+            # link) and forged "platform-generated" metadata. `csv-export:model` is not
+            # rendered but resolves which resource the export job overwrites, so a forged
+            # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
+            # writable, hence their URL type above.
+            reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
+        ),
+        description="Extra attributes as key-value pairs",
+    )
+    harvest = field(
+        EmbeddedDocumentField(HarvestResourceMetadata),
+        readonly=True,
+        allow_null=True,
+        skip_none=True,
+        description="Harvest attributes metadata information",
+    )
+    geopf = field(
+        EmbeddedDocumentField(GeopfResourceMetadata),
+        readonly=True,
+        allow_null=True,
+        skip_none=True,
+        description="Géoplateforme sync status metadata",
+    )
+    schema = field(
+        EmbeddedDocumentField(Schema),
+        allow_null=True,
+        description="Reference to the associated schema",
+    )
 
     created_at_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     last_modified_internal = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     deleted = DateTimeField()
 
     @property
+    @field(
+        nested_fields=resource_internal_fields,
+        description="Site internal and specific object's data",
+    )
     def internal(self):
         return {
             "created_at_internal": self.created_at_internal,
@@ -449,13 +529,15 @@ class ResourceMixin(object):
         }
 
     @property
-    def created_at(self):
+    @field(description="The resource creation date")
+    def created_at(self) -> datetime:
         if self.harvest:
             return self.harvest.issued_at or self.created_at_internal
         return self.created_at_internal
 
     @property
-    def last_modified(self):
+    @field(description="The resource last modification date")
+    def last_modified(self) -> datetime:
         if (
             self.harvest
             and self.harvest.modified_at
@@ -472,7 +554,10 @@ class ResourceMixin(object):
             self.urlhash = hash_url(self.url)
 
     @property
-    def preview_url(self):
+    @field(
+        description="An optional preview URL to be loaded as a standalone page (ie. iframe or new page)"
+    )
+    def preview_url(self) -> str | None:
         return TabularAPIPreview().preview_url(self)
 
     @property
@@ -493,7 +578,11 @@ class ResourceMixin(object):
         return self.extras.get("check:available", "unknown")
 
     @property
-    def latest(self):
+    @field(
+        description="The permanent URL redirecting to the latest version of the resource. "
+        "When the resource data is updated, the URL will change, the latest URL won't."
+    )
+    def latest(self) -> str:
         """
         Permanent link to the latest version of this resource.
 

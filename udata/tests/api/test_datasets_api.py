@@ -39,9 +39,11 @@ from udata.core.dataset.factories import (
     ResourceSchemaMockData,
 )
 from udata.core.dataset.models import (
+    Checksum,
     HarvestDatasetMetadata,
     HarvestResourceMetadata,
     ResourceMixin,
+    Schema,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
@@ -3617,3 +3619,138 @@ class GeopfMetadataAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["geopf"] == {"offering_id": "offering-1"}
+
+
+class ResourceOutputTest(PytestOnlyAPITestCase):
+    def test_a_resource_renders_the_same_on_every_endpoint(self):
+        issued_at = datetime(2022, 2, 22, tzinfo=UTC)
+        modified_at = datetime(2022, 3, 19, tzinfo=UTC)
+        created_at_internal = datetime(2024, 1, 1, tzinfo=UTC)
+        last_modified_internal = datetime(2024, 6, 1, tzinfo=UTC)
+        resource = ResourceFactory(
+            title="My resource",
+            description="Some **markdown**",
+            filetype="remote",
+            type="main",
+            url="https://example.org/data.csv",
+            format="csv",
+            mime="text/csv",
+            filesize=42,
+            checksum=Checksum(type="sha256", value="abc"),
+            extras={"check:available": True},
+            harvest=HarvestResourceMetadata(
+                uri="https://example.org/resource",
+                issued_at=issued_at,
+                modified_at=modified_at,
+                last_update=modified_at,
+                dct_identifier="not-exposed",
+                remote_id="not-exposed",
+            ),
+            geopf=GeopfResourceMetadata(
+                push=GeopfResourcePushMetadata(status="done"),
+                offering=GeopfResourceOfferingMetadata(id="offering-1"),
+            ),
+            schema=Schema(name="etalab/schema-irve", version="2.0.0"),
+            metrics={"views": 3},
+            created_at_internal=created_at_internal,
+            last_modified_internal=last_modified_internal,
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        expected = {
+            "id": str(resource.id),
+            "title": "My resource",
+            "description": "Some **markdown**",
+            "filetype": "remote",
+            "type": "main",
+            "format": "csv",
+            "url": "https://example.org/data.csv",
+            "latest": url_for("api.resource_redirect", id=resource.id, _external=True),
+            "checksum": {"type": "sha256", "value": "abc"},
+            "filesize": 42,
+            "mime": "text/csv",
+            "created_at": issued_at.isoformat(),
+            "last_modified": modified_at.isoformat(),
+            "metrics": {"views": 3},
+            "harvest": {
+                "uri": "https://example.org/resource",
+                "issued_at": issued_at.isoformat(),
+                "modified_at": modified_at.isoformat(),
+                "last_update": modified_at.isoformat(),
+            },
+            "geopf": {"push_status": "done", "offering_id": "offering-1"},
+            "extras": {"check:available": True},
+            "preview_url": None,
+            "schema": {"name": "etalab/schema-irve", "version": "2.0.0", "url": None},
+            "internal": {
+                "created_at_internal": created_at_internal.isoformat(),
+                "last_modified_internal": last_modified_internal.isoformat(),
+            },
+        }
+
+        response = self.get(url_for("api.resource", dataset=dataset, rid=resource.id))
+        assert200(response)
+        assert response.json == expected
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"] == [expected]
+
+        response = self.get(url_for("apiv2.resources", dataset=dataset))
+        assert200(response)
+        assert response.json["data"] == [expected]
+
+        response = self.get(url_for("apiv2.resource", rid=resource.id))
+        assert200(response)
+        assert response.json["resource"] == expected
+
+    def test_a_resource_without_optional_metadata(self):
+        resource = ResourceFactory(checksum=None, harvest=None, geopf=None, schema=None)
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.resource", dataset=dataset, rid=resource.id))
+
+        assert200(response)
+        assert response.json["checksum"] is None
+        assert response.json["harvest"] is None
+        assert response.json["geopf"] is None
+        assert response.json["schema"] is None
+
+    def test_a_community_resource_renders_the_resource_fields(self):
+        dataset = DatasetFactory()
+        community_resource = CommunityResourceFactory(
+            dataset=dataset, title="My community resource", format="csv"
+        )
+
+        response = self.get(url_for("api.community_resource", community=community_resource))
+
+        assert200(response)
+        assert response.json["title"] == "My community resource"
+        assert response.json["format"] == "csv"
+        assert response.json["dataset"]["id"] == str(dataset.id)
+        assert set(response.json) == {
+            "id",
+            "title",
+            "description",
+            "filetype",
+            "type",
+            "format",
+            "url",
+            "latest",
+            "checksum",
+            "filesize",
+            "mime",
+            "created_at",
+            "last_modified",
+            "metrics",
+            "harvest",
+            "geopf",
+            "extras",
+            "preview_url",
+            "schema",
+            "internal",
+            "dataset",
+            "organization",
+            "owner",
+            "permissions",
+        }
