@@ -94,6 +94,7 @@ class MarkdownTest(PytestOnlyAPITestCase):
         [
             ("/", "http://local.test/"),
             ("bar", "http://local.test/bar"),
+            ("http:spam.com", "http://local.test/spam.com"),
             ("/?tag=test&sort=-followers", "http://local.test/?tag=test&sort=-followers"),
         ],
     )

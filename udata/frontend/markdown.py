@@ -40,8 +40,8 @@ def nofollow_callback(attrs, new=False):
     if (None, "href") not in attrs:
         return attrs
     parsed_url = urlparse(attrs[(None, "href")])
-    # Non-web URLs without authority (mailto:, tel:, ...) have no host to rewrite
-    if parsed_url.scheme and not parsed_url.netloc:
+    # mailto: links have no host to rewrite
+    if parsed_url.scheme == "mailto":
         return attrs
     if parsed_url.netloc in ("", current_app.config["SERVER_NAME"]):
         path = parsed_url.path
