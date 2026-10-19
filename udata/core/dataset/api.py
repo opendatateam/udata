@@ -863,7 +863,11 @@ class CommunityResourceAPI(API):
         """Update a given community resource"""
         community.permissions["edit"].test()
         patch(community, resource_input(community, api.json_payload()))
-        if not community.organization and not community.owner:
+        if community.organization:
+            # The client echoes back the uploading user it read when it moves the resource
+            # to an organization (see `only_creation_or_first_organization`).
+            community.owner = None
+        elif not community.owner:
             community.owner = current_user._get_current_object()
         community.last_modified_internal = datetime.now(UTC)
         community.save()

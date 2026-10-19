@@ -36,7 +36,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
-from udata.core.checks import max_length
+from udata.core.checks import max_length, only_creation
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
@@ -47,10 +47,17 @@ from udata.core.harvest import HarvestMetadata
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
-from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.organization.models import Organization
+from udata.core.owned import (
+    Owned,
+    OwnedQuerySet,
+    check_organization_is_valid_for_current_user,
+    check_owner_is_current_user,
+)
 from udata.core.spam.models import SpamMixin
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
+from udata.core.user.models import User
 from udata.frontend.markdown import mdstrip
 from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
 from udata.i18n import lazy_gettext as _
@@ -1463,12 +1470,49 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 post_save.connect(SpamMixin.post_save, sender=Dataset)
 
 
+def only_creation_or_first_organization(value, obj, field, is_update, **kwargs):
+    """`only_creation`, except for giving an organization to a community resource that has none.
+
+    Workaround for the two-request creation of a hosted file: the upload endpoint only
+    takes the file, so it creates the resource owned by the uploading user, and the client
+    sets the metadata, including the publishing organization, with a PUT right after. That
+    PUT is still part of the creation, but it is an update to `only_creation`.
+
+    To be removed once the upload endpoints accept the metadata along with the file, so
+    that the resource is created at once with its final values (and without the
+    provisional title, type and owner that the activity and the analyser get today), and
+    cdata sends them there.
+    """
+    moves_to_organization = obj.organization and (field != "owner" or value is None)
+    if is_update and moves_to_organization:
+        stored = type(obj).objects.only("organization").get(pk=obj.pk)
+        if stored.organization is None:
+            return
+    only_creation(value, is_update=is_update, field=field, **kwargs)
+
+
 @generate_fields()
 class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySet]):
     """
     Local file, remote file or API added by the community of the users to the
     original dataset
     """
+
+    # Same as `Owned`, except for `only_creation_or_first_organization`.
+    owner = field(
+        ReferenceField(User, reverse_delete_rule=NULLIFY),
+        description="Only present if organization is not set. Can only be set to the current authenticated user.",
+        checks=[check_owner_is_current_user, only_creation_or_first_organization],
+        allow_null=True,
+        filterable={},
+    )
+    organization = field(
+        ReferenceField(Organization, reverse_delete_rule=NULLIFY),
+        description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
+        checks=[check_organization_is_valid_for_current_user, only_creation_or_first_organization],
+        allow_null=True,
+        filterable={},
+    )
 
     dataset = field(
         ReferenceField(Dataset, reverse_delete_rule=NULLIFY),

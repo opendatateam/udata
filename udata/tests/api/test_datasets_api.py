@@ -3261,6 +3261,57 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.organization, org)
         self.assertIsNone(community_resource.owner)
 
+    def test_community_resource_api_create_as_org_clearing_owner(self):
+        """The PUT cdata sends after the upload moves the resource to the organization"""
+        dataset = DatasetFactory()
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.upload_new_community_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert201(response)
+        response = self.put(
+            url_for("api.community_resource", community=response.json["id"]),
+            {
+                "title": "A title",
+                "type": "main",
+                "dataset": str(dataset.id),
+                "organization": str(org.id),
+                "owner": None,
+            },
+        )
+        self.assert200(response)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.organization, org)
+        self.assertIsNone(community_resource.owner)
+
+    def test_community_resource_api_update_cannot_change_organization(self):
+        """Once published by an organization, a community resource keeps it"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        other_org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        community_resource = CommunityResourceFactory(organization=org)
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"organization": str(other_org.id)},
+        )
+        self.assert400(response)
+        self.assertEqual(CommunityResource.objects.first().organization, org)
+
+    def test_community_resource_api_update_cannot_move_back_to_user(self):
+        """Once published by an organization, a community resource cannot go back to a user"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        community_resource = CommunityResourceFactory(organization=org)
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"owner": str(user.id), "organization": None},
+        )
+        self.assert400(response)
+        self.assertEqual(CommunityResource.objects.first().organization, org)
+
     def test_community_resource_api_update(self):
         """It should update a community resource from the API"""
         user = self.login()
