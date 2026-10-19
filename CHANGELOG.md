@@ -1,5 +1,20 @@
 # Changelog
 
+## 17.15.0 (2026-10-19)
+
+- chore(deps): update actions/download-artifact action to v8.0.2 ([#3997](https://github.com/opendatateam/udata/pull/3997))
+- chore(deps): update actions/upload-artifact action to v7.0.2 ([#3999](https://github.com/opendatateam/udata/pull/3999))
+- chore(deps): update astral-sh/setup-uv action to v10.3.0 ([#4005](https://github.com/opendatateam/udata/pull/4005))
+- chore(deps): update dependency faker to >=40.43, <40.44 ([#4004](https://github.com/opendatateam/udata/pull/4004))
+- ci: drop redundant ruff --extend-select I ([#4013](https://github.com/opendatateam/udata/pull/4013))
+- feat: add dataservices suggest endpoint for search autocomplete ([#3939](https://github.com/opendatateam/udata/pull/3939))
+- feat: extract the DOI a harvest source declares as dct:identifier ([#3993](https://github.com/opendatateam/udata/pull/3993))
+- feat: migrate jobs api fields ([#3901](https://github.com/opendatateam/udata/pull/3901))
+- feat(post): let sysadmins choose the slug of a post ([#4010](https://github.com/opendatateam/udata/pull/4010))
+- feat: support Python 3.14 ([#4012](https://github.com/opendatateam/udata/pull/4012))
+- fix(deps): update dependency cryptography to v50 [security] ([#3996](https://github.com/opendatateam/udata/pull/3996))
+
+
 ## 17.14.0 (2026-10-15)
 
 - feat(organization): add banner ([#4003](https://github.com/opendatateam/udata/pull/4003))
