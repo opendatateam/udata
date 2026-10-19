@@ -4,11 +4,11 @@ from unittest import mock
 from flask import current_app, url_for
 from flask_security.utils import hash_data
 
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
 
@@ -71,14 +71,9 @@ class AuthTest(APITestCase):
             members=[Member(user=admin, role="admin")],
             requests=[MembershipRequest(user=user, comment="Please add me"), invitation],
         )
-        request_notification = Notification(
-            user=admin,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_REQUESTED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user
-            ),
+        request_notification = MembershipRequestNotificationFactory(
+            user=admin, request_organization=organization, request_user=user
         )
-        request_notification.save()
 
         self.get(self.change_email_link(user, "new@example.com"))
 
