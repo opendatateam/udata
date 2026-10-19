@@ -1282,7 +1282,12 @@ def wrap_primary_key(
 
     # Get the foreign document from MongoDB because the othewise it fails during read
     # Also useful to get a DBRef for non ObjectId references (see below)
-    foreign_document = document_type.objects(**{id_field_name: value}).first()
+    try:
+        foreign_document = document_type.objects(**{id_field_name: value}).first()
+    except mongoengine.errors.ValidationError:
+        # A malformed id (e.g. not an ObjectId) names no document either, and the error
+        # MongoEngine raises carries no field name.
+        foreign_document = None
     if foreign_document is None:
         raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
 

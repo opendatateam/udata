@@ -563,6 +563,16 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["errors"]["license"], "Unknown reference 'unwkown-license'")
         self.assertEqual(Dataservice.objects.count(), 0)
 
+    def test_dataservice_api_create_with_malformed_organization_id(self):
+        self.login()
+        response = self.post(
+            url_for("api.dataservices"),
+            {"title": "My title", "base_api_url": "https://example.org", "organization": "xxx"},
+        )
+        self.assert400(response)
+        self.assertEqual(response.json["errors"]["organization"], "Unknown reference 'xxx'")
+        self.assertEqual(Dataservice.objects.count(), 0)
+
     def test_dataservice_api_create_with_unkwown_contact_point(self):
         self.login()
 
