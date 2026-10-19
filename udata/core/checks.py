@@ -13,6 +13,23 @@ def check_no_urls(value, field, **_kwargs):
         raise FieldValidationError(_("URLs not allowed in this field"), field=field)
 
 
+def max_length(limit: int):
+    """Limit the length of a value written through the API.
+
+    A check rather than the model's `max_length`, so that documents written by other
+    paths (harvesting, imports) with longer values can still be saved.
+    """
+
+    def check(value, field, **_kwargs):
+        if value and len(value) > limit:
+            raise FieldValidationError(
+                _("Field cannot be longer than {limit} characters").format(limit=limit),
+                field=field,
+            )
+
+    return check
+
+
 def only_creation(_value, is_update, field, **_kwargs):
     from udata.auth import admin_permission, current_user
 

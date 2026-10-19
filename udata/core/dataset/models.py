@@ -36,6 +36,7 @@ from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.checks import max_length
 from udata.core.constants import HVD
 from udata.core.contact_point.models import (
     ContactPoint,  # noqa: F401 — must be registered before Dataset
@@ -72,6 +73,7 @@ from .constants import (
     DEFAULT_CHECKSUM_TYPE,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
+    DESCRIPTION_SIZE_LIMIT,
     INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -81,6 +83,7 @@ from .constants import (
     SL,
     SPD,
     SR,
+    TITLE_SIZE_LIMIT,
     UpdateFrequency,
 )
 from .exceptions import (
@@ -435,14 +438,57 @@ class Checksum(EmbeddedDocument):
 # `EmbeddedDocument` such as `Resource` does not carry.
 RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
 
+# Fields computed by the server at upload time for resources hosted on our
+# file storage (see `handle_upload`). They must not be overridden by API
+# clients: a client sending stale metadata (e.g. fetched before a new file
+# upload) would otherwise overwrite the values describing the currently hosted
+# file. None of these fields are editable from the admin front for a hosted
+# file: they are only sent for `remote` resources.
+# Same reasoning as the `url` protection from
+# https://github.com/opendatateam/udata/issues/2544
+HOSTED_RESOURCE_PROTECTED_FIELDS = (
+    "filetype",
+    "url",
+    "checksum",
+    "filesize",
+    "mime",
+    "format",
+)
+
+
+def normalize_format(value: str | None) -> str | None:
+    if value:
+        return value.strip().lower()
+    return None
+
+
+class FormatField(StringField):
+    def from_input(self, value):
+        return normalize_format(value)
+
+
+def check_schema_in_catalog(value, field, **_kwargs):
+    # The catalog is only enforced on what a client writes: harvested resources keep
+    # whatever schema their source declares.
+    if value:
+        try:
+            value.clean(check_schema_in_catalog=True)
+        except FieldValidationError as err:
+            raise FieldValidationError(err.raw_message, field=field)
+
 
 class ResourceMixin(object):
     id = field(AutoUUIDField(primary_key=True), readonly=True, description="The resource unique ID")
     title = field(
-        StringField(verbose_name="Title", required=True), description="The resource title"
+        StringField(verbose_name="Title", required=True),
+        checks=[max_length(TITLE_SIZE_LIMIT)],
+        description="The resource title",
     )
     description = field(
-        StringField(), markdown=True, description="The resource markdown description"
+        StringField(),
+        markdown=True,
+        checks=[max_length(DESCRIPTION_SIZE_LIMIT)],
+        description="The resource markdown description",
     )
     filetype = field(
         StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True),
@@ -459,7 +505,7 @@ class ResourceMixin(object):
         allow_null=True,
         description="A checksum to validate file validity",
     )
-    format = field(StringField(), description="The resource format")
+    format = field(FormatField(), description="The resource format")
     mime = field(StringField(), description="The resource mime type")
     # `size` is a reserved keyword for mongoengine.
     filesize = field(IntField(), description="The resource file size in bytes")
@@ -510,6 +556,7 @@ class ResourceMixin(object):
     schema = field(
         EmbeddedDocumentField(Schema),
         allow_null=True,
+        checks=[check_schema_in_catalog],
         description="Reference to the associated schema",
     )
 
@@ -547,6 +594,14 @@ class ResourceMixin(object):
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
             return to_naive_datetime(self.extras.get("analysis:last-modified-at"))
         return to_naive_datetime(self.last_modified_internal)
+
+    @property
+    def has_hosted_file(self) -> bool:
+        """Whether the file is hosted on our storage, see `HOSTED_RESOURCE_PROTECTED_FIELDS`.
+
+        A brand new resource has no url yet: there is no hosted file to protect.
+        """
+        return self.filetype == "file" and bool(self.url)
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -1408,13 +1463,17 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 post_save.connect(SpamMixin.post_save, sender=Dataset)
 
 
+@generate_fields()
 class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySet]):
     """
     Local file, remote file or API added by the community of the users to the
     original dataset
     """
 
-    dataset = ReferenceField(Dataset, reverse_delete_rule=NULLIFY)
+    dataset = field(
+        ReferenceField(Dataset, reverse_delete_rule=NULLIFY),
+        description="The associated dataset",
+    )
 
     __metrics_keys__ = [
         "views",
