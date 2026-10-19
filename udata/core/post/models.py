@@ -3,6 +3,7 @@ from flask_storage.mongo import ImageField
 from mongoengine import DENY, PULL
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     EmbeddedDocumentListField,
     ListField,
@@ -141,6 +142,11 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         StringField(choices=list(POST_KINDS), default="news", required=False),
         filterable={},
         description="Post kind (news or page)",
+    )
+
+    sidemenu = field(
+        BooleanField(default=False),
+        description="Display a side menu linking to the headings of the post",
     )
 
     parent = field(
