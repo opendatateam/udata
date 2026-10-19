@@ -837,18 +837,13 @@ class ExtrasField(Field):
         self.data = self.parse({key: value for key, value in data.items() if self.can_write(key)})
 
     def populate_obj(self, obj, name):
-        """Restore the reserved extras dropped from a non-sysadmin payload.
-
-        An update replaces the whole dict, so a payload that does not echo a stored
-        reserved key would erase it. Unlike the apiv2 extras endpoints, where every
-        key is an explicit write intent and a reserved one is rejected, a full-object
-        update legitimately echoes the extras it just read, hence a silent restore.
-        """
+        # Unlike the apiv2 extras endpoints, where every key is an explicit write intent
+        # and a reserved one is rejected, a full-object update silently keeps them.
         stored = getattr(obj, name, None) or {}
         setattr(
             obj,
             name,
-            (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
+            self.extras.merge_input(stored, self.data or {}, admin_permission.can),
         )
 
     def validate(self, form, extra_validators=tuple()):

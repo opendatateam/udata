@@ -20,32 +20,16 @@ from .constants import (
     UpdateFrequency,
 )
 from .models import (
+    HOSTED_RESOURCE_PROTECTED_FIELDS,
     Checksum,
-    CommunityResource,
     Dataset,
     License,
     Resource,
     Schema,
+    normalize_format,
 )
 
-__all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
-
-# Fields computed by the server at upload time for resources hosted on our
-# file storage (see `handle_upload`). They must not be overridden by API
-# clients: a client sending stale metadata (e.g. fetched before a new file
-# upload) would otherwise overwrite the values describing the currently hosted
-# file. None of these fields are editable from the admin front for a hosted
-# file: they are only sent for `remote` resources.
-# Same reasoning as the `url` protection from
-# https://github.com/opendatateam/udata/issues/2544
-HOSTED_RESOURCE_PROTECTED_FIELDS = (
-    "filetype",
-    "url",
-    "checksum",
-    "filesize",
-    "mime",
-    "format",
-)
+__all__ = ("DatasetForm", "ResourceForm")
 
 
 class ChecksumForm(ModelForm):
@@ -53,12 +37,6 @@ class ChecksumForm(ModelForm):
     choices = list(zip(CHECKSUM_TYPES, CHECKSUM_TYPES))
     type = fields.SelectField(choices=choices, default="sha1")
     value = fields.StringField(_("Checksum value"), [validators.DataRequired()])
-
-
-def normalize_format(data):
-    """Normalize format field: strip and lowercase"""
-    if data:
-        return data.strip().lower()
 
 
 class SchemaForm(ModelForm):
@@ -120,11 +98,10 @@ class BaseResourceForm(ModelForm):
     schema = fields.FormField(SchemaForm)
 
     def populate_obj(self, obj):
-        # Only protect existing hosted files: a brand new resource has no url
-        # yet and must be populated normally. The protected fields are skipped
-        # rather than written then restored: mongoengine keeps a field marked as
-        # changed once written, and those marks are what the activity records.
-        protect = obj.filetype == "file" and obj.url
+        # The protected fields are skipped rather than written then restored: mongoengine
+        # keeps a field marked as changed once written, and those marks are what the
+        # activity records.
+        protect = obj.has_hosted_file
         for name, field in self._fields.items():
             if protect and name in HOSTED_RESOURCE_PROTECTED_FIELDS:
                 continue
@@ -135,18 +112,6 @@ class ResourceForm(BaseResourceForm):
     model_class = Resource
 
     id = fields.UUIDField()
-
-
-class ResourceFormWithoutId(BaseResourceForm):
-    model_class = Resource
-
-
-class CommunityResourceForm(BaseResourceForm):
-    model_class = CommunityResource
-
-    dataset = fields.DatasetField(_("Related dataset"))
-    owner = fields.CurrentUserField()
-    organization = fields.PublishAsField(_("Publish as"))
 
 
 def unmarshal_frequency(form, field):
@@ -229,9 +194,3 @@ class DatasetForm(ModelForm):
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
     contact_points = fields.ContactPointListField()
-
-
-class ResourcesListForm(ModelForm):
-    model_class = Dataset
-
-    resources = fields.NestedModelList(ResourceForm)

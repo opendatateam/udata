@@ -1,6 +1,7 @@
 import logging
 from datetime import date, datetime
 from fnmatch import fnmatchcase
+from typing import Callable
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import BaseField, DictField
@@ -33,6 +34,37 @@ class ExtrasField(DictField):
         previous value.
         """
         return any(fnmatchcase(key, pattern) for pattern in self.reserved)
+
+    def merge_input(
+        self, stored: dict, payload: dict, can_write_reserved: Callable[[], bool]
+    ) -> dict:
+        """The extras a full-object update writes, given the ones already stored.
+
+        A caller who may not write the reserved keys has them dropped from its payload,
+        and keeps the stored ones: a full-object update replaces the whole dict, and
+        legitimately echoes the reserved extras it just read (or omits them).
+        `can_write_reserved` is only called when a reserved key is involved, so that
+        writing plain extras does not depend on an authenticated request.
+        """
+        if not any(self.is_reserved(key) for key in (*stored, *payload)):
+            return payload
+        if can_write_reserved():
+            return payload
+        writable = {key: value for key, value in payload.items() if not self.is_reserved(key)}
+        return writable | {key: value for key, value in stored.items() if self.is_reserved(key)}
+
+    def from_input(self, value):
+        """Convert the registered keys of an API payload to their type (e.g. a date string)."""
+        if not isinstance(value, dict):
+            return value
+        return {
+            key: (
+                self.registered[key]().to_mongo(item)
+                if issubclass(self.registered.get(key, EmbeddedDocument), BaseField)
+                else item
+            )
+            for key, item in value.items()
+        }
 
     def validate(self, values):
         super(ExtrasField, self).validate(values)

@@ -26,8 +26,10 @@ from udata.core.badges.factories import badge_factory
 from udata.core.dataset.activities import UserUpdatedResource
 from udata.core.dataset.constants import (
     DEFAULT_LICENSE,
+    DESCRIPTION_SIZE_LIMIT,
     FULL_OBJECTS_HEADER,
     RESOURCE_TYPES,
+    TITLE_SIZE_LIMIT,
     UpdateFrequency,
 )
 from udata.core.dataset.factories import (
@@ -39,9 +41,11 @@ from udata.core.dataset.factories import (
     ResourceSchemaMockData,
 )
 from udata.core.dataset.models import (
+    Checksum,
     HarvestDatasetMetadata,
     HarvestResourceMetadata,
     ResourceMixin,
+    Schema,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
@@ -2659,6 +2663,125 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.resources[0].filetype, "file")
 
+    def test_create_without_type_is_other(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        del data["type"]
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.dataset.reload()
+        assert self.dataset.resources[0].type == "other"
+
+    def test_create_without_title(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        del data["title"]
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
+        assert "title" in response.json["errors"]
+        self.dataset.reload()
+        assert self.dataset.resources == []
+
+    def test_create_with_too_long_title(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["title"] = "a" * (TITLE_SIZE_LIMIT + 1)
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
+        assert "title" in response.json["errors"]
+
+    def test_create_with_too_long_description(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["description"] = "a" * (DESCRIPTION_SIZE_LIMIT + 1)
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
+        assert "description" in response.json["errors"]
+
+    def test_create_with_invalid_url(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["url"] = "not an url"
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
+        assert "url" in response.json["errors"]
+
+    def test_create_checksum_without_type_is_sha1(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["checksum"] = {"value": "0" * 40}
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.dataset.reload()
+        assert self.dataset.resources[0].checksum.type == "sha1"
+        assert self.dataset.resources[0].checksum.value == "0" * 40
+
+    def test_update_normalize_format(self):
+        resource = ResourceFactory(filetype="remote")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {"format": " CSV "},
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        assert self.dataset.resources[0].format == "csv"
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
+    @requests_mock.Mocker(kw="rmock")
+    def test_update_with_a_schema_unknown_to_the_catalog(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+        resource = ResourceFactory(filetype="remote")
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {"schema": {"name": "unknown-schema"}},
+        )
+        self.assert400(response)
+        assert "schema" in response.json["errors"]
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {"schema": {"name": "etalab/schema-irve-statique", "version": "2.2.0"}},
+        )
+        self.assert200(response)
+        self.dataset.reload()
+        assert self.dataset.resources[0].schema.name == "etalab/schema-irve-statique"
+        assert self.dataset.resources[0].schema.version == "2.2.0"
+
+    def test_update_ignores_reserved_extra(self):
+        resource = ResourceFactory(filetype="remote", extras={"check:status": 200})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {"extras": {"analysis:parsing:parquet_url": "https://example.org/f.parquet"}},
+        )
+
+        self.assert200(response)
+        self.dataset.reload()
+        # The forged reserved key is dropped, the stored one is kept although omitted.
+        assert self.dataset.resources[0].extras == {"check:status": 200}
+
+    def test_update_as_admin_writes_reserved_extra(self):
+        self.login(AdminFactory())
+        resource = ResourceFactory(filetype="remote", extras={"check:status": 200})
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=str(resource.id)),
+            {"extras": {"check:date": "2024-04-14T08:42:00"}},
+        )
+
+        self.assert200(response)
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras == {"check:date": datetime(2024, 4, 14, 8, 42)}
+
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)
@@ -3138,6 +3261,57 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.organization, org)
         self.assertIsNone(community_resource.owner)
 
+    def test_community_resource_api_create_as_org_clearing_owner(self):
+        """The PUT cdata sends after the upload moves the resource to the organization"""
+        dataset = DatasetFactory()
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.upload_new_community_resource", dataset=dataset),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert201(response)
+        response = self.put(
+            url_for("api.community_resource", community=response.json["id"]),
+            {
+                "title": "A title",
+                "type": "main",
+                "dataset": str(dataset.id),
+                "organization": str(org.id),
+                "owner": None,
+            },
+        )
+        self.assert200(response)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.organization, org)
+        self.assertIsNone(community_resource.owner)
+
+    def test_community_resource_api_update_cannot_change_organization(self):
+        """Once published by an organization, a community resource keeps it"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        other_org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        community_resource = CommunityResourceFactory(organization=org)
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"organization": str(other_org.id)},
+        )
+        self.assert400(response)
+        self.assertEqual(CommunityResource.objects.first().organization, org)
+
+    def test_community_resource_api_update_cannot_move_back_to_user(self):
+        """Once published by an organization, a community resource cannot go back to a user"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        community_resource = CommunityResourceFactory(organization=org)
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"owner": str(user.id), "organization": None},
+        )
+        self.assert400(response)
+        self.assertEqual(CommunityResource.objects.first().organization, org)
+
     def test_community_resource_api_update(self):
         """It should update a community resource from the API"""
         user = self.login()
@@ -3272,6 +3446,45 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.dataset, dataset)
         self.assertEqual(community_resource.owner, user)
         self.assertIsNone(community_resource.organization)
+
+    def test_community_resource_api_create_normalizes_and_defaults(self):
+        self.login()
+        dataset = DatasetFactory()
+        attrs = CommunityResourceFactory.as_dict()
+        attrs["filetype"] = "remote"
+        attrs["dataset"] = str(dataset.id)
+        attrs["format"] = " CSV "
+        del attrs["type"]
+        response = self.post(url_for("api.community_resources"), attrs)
+        self.assert201(response)
+        community_resource = CommunityResource.objects.first()
+        assert community_resource.format == "csv"
+        assert community_resource.type == "other"
+
+    def test_community_resource_api_create_without_title(self):
+        self.login()
+        dataset = DatasetFactory()
+        attrs = CommunityResourceFactory.as_dict()
+        attrs["filetype"] = "remote"
+        attrs["dataset"] = str(dataset.id)
+        del attrs["title"]
+        response = self.post(url_for("api.community_resources"), attrs)
+        self.assert400(response)
+        assert "title" in response.json["errors"]
+        assert CommunityResource.objects.count() == 0
+
+    def test_community_resource_api_update_ignores_reserved_extra(self):
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            owner=user, filetype="remote", extras={"check:status": 200}
+        )
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"extras": {"analysis:parsing:parquet_url": "https://example.org/f.parquet"}},
+        )
+        self.assert200(response)
+        community_resource.reload()
+        assert community_resource.extras == {"check:status": 200}
 
     def test_community_resource_api_unallowed_create_filetype_file(self):
         """It should create a remote community resource from the API"""
@@ -3617,3 +3830,138 @@ class GeopfMetadataAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["geopf"] == {"offering_id": "offering-1"}
+
+
+class ResourceOutputTest(PytestOnlyAPITestCase):
+    def test_a_resource_renders_the_same_on_every_endpoint(self):
+        issued_at = datetime(2022, 2, 22, tzinfo=UTC)
+        modified_at = datetime(2022, 3, 19, tzinfo=UTC)
+        created_at_internal = datetime(2024, 1, 1, tzinfo=UTC)
+        last_modified_internal = datetime(2024, 6, 1, tzinfo=UTC)
+        resource = ResourceFactory(
+            title="My resource",
+            description="Some **markdown**",
+            filetype="remote",
+            type="main",
+            url="https://example.org/data.csv",
+            format="csv",
+            mime="text/csv",
+            filesize=42,
+            checksum=Checksum(type="sha256", value="abc"),
+            extras={"check:available": True},
+            harvest=HarvestResourceMetadata(
+                uri="https://example.org/resource",
+                issued_at=issued_at,
+                modified_at=modified_at,
+                last_update=modified_at,
+                dct_identifier="not-exposed",
+                remote_id="not-exposed",
+            ),
+            geopf=GeopfResourceMetadata(
+                push=GeopfResourcePushMetadata(status="done"),
+                offering=GeopfResourceOfferingMetadata(id="offering-1"),
+            ),
+            schema=Schema(name="etalab/schema-irve", version="2.0.0"),
+            metrics={"views": 3},
+            created_at_internal=created_at_internal,
+            last_modified_internal=last_modified_internal,
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        expected = {
+            "id": str(resource.id),
+            "title": "My resource",
+            "description": "Some **markdown**",
+            "filetype": "remote",
+            "type": "main",
+            "format": "csv",
+            "url": "https://example.org/data.csv",
+            "latest": url_for("api.resource_redirect", id=resource.id, _external=True),
+            "checksum": {"type": "sha256", "value": "abc"},
+            "filesize": 42,
+            "mime": "text/csv",
+            "created_at": issued_at.isoformat(),
+            "last_modified": modified_at.isoformat(),
+            "metrics": {"views": 3},
+            "harvest": {
+                "uri": "https://example.org/resource",
+                "issued_at": issued_at.isoformat(),
+                "modified_at": modified_at.isoformat(),
+                "last_update": modified_at.isoformat(),
+            },
+            "geopf": {"push_status": "done", "offering_id": "offering-1"},
+            "extras": {"check:available": True},
+            "preview_url": None,
+            "schema": {"name": "etalab/schema-irve", "version": "2.0.0", "url": None},
+            "internal": {
+                "created_at_internal": created_at_internal.isoformat(),
+                "last_modified_internal": last_modified_internal.isoformat(),
+            },
+        }
+
+        response = self.get(url_for("api.resource", dataset=dataset, rid=resource.id))
+        assert200(response)
+        assert response.json == expected
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"] == [expected]
+
+        response = self.get(url_for("apiv2.resources", dataset=dataset))
+        assert200(response)
+        assert response.json["data"] == [expected]
+
+        response = self.get(url_for("apiv2.resource", rid=resource.id))
+        assert200(response)
+        assert response.json["resource"] == expected
+
+    def test_a_resource_without_optional_metadata(self):
+        resource = ResourceFactory(checksum=None, harvest=None, geopf=None, schema=None)
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.resource", dataset=dataset, rid=resource.id))
+
+        assert200(response)
+        assert response.json["checksum"] is None
+        assert response.json["harvest"] is None
+        assert response.json["geopf"] is None
+        assert response.json["schema"] is None
+
+    def test_a_community_resource_renders_the_resource_fields(self):
+        dataset = DatasetFactory()
+        community_resource = CommunityResourceFactory(
+            dataset=dataset, title="My community resource", format="csv"
+        )
+
+        response = self.get(url_for("api.community_resource", community=community_resource))
+
+        assert200(response)
+        assert response.json["title"] == "My community resource"
+        assert response.json["format"] == "csv"
+        assert response.json["dataset"]["id"] == str(dataset.id)
+        assert set(response.json) == {
+            "id",
+            "title",
+            "description",
+            "filetype",
+            "type",
+            "format",
+            "url",
+            "latest",
+            "checksum",
+            "filesize",
+            "mime",
+            "created_at",
+            "last_modified",
+            "metrics",
+            "harvest",
+            "geopf",
+            "extras",
+            "preview_url",
+            "schema",
+            "internal",
+            "dataset",
+            "organization",
+            "owner",
+            "permissions",
+        }

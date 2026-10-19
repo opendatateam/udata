@@ -116,9 +116,29 @@ class GeopfResourceOfferingMetadata(EmbeddedDocument):
     )
 
 
+@generate_fields()
 class GeopfResourceMetadata(EmbeddedDocument):
     push = EmbeddedDocumentField(GeopfResourcePushMetadata)
     offering = EmbeddedDocumentField(GeopfResourceOfferingMetadata)
+
+    @property
+    @field(
+        description="Push status to Géoplateforme, if this resource has ever been pushed",
+        enum=["pending", "done", "error", "timeout"],
+        allow_null=True,
+    )
+    def push_status(self) -> str | None:
+        return self.push.status if self.push else None
+
+    @property
+    @field(
+        description=(
+            "Géoplateforme offering id, if this resource was created from a geopf offering pull"
+        ),
+        allow_null=True,
+    )
+    def offering_id(self) -> str | None:
+        return self.offering.id if self.offering else None
 
 
 def dataset_push_metadata(dataset) -> GeopfDatasetPushMetadata:

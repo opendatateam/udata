@@ -31,6 +31,7 @@ from mongoengine.queryset.visitor import Q
 
 from udata.api import API, add_pagination_arguments, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch
 from udata.auth import admin_permission
 from udata.core import storages
 from udata.core.access_type.constants import AccessType
@@ -59,24 +60,19 @@ from .api_fields import (
     dataset_suggestion_fields,
     frequency_fields,
     license_fields,
-    resource_fields,
     resource_type_fields,
     upload_community_fields,
     upload_fields,
 )
-from .constants import RESOURCE_TYPES, UpdateFrequency
+from .constants import DEFAULT_CHECKSUM_TYPE, RESOURCE_TYPES, UpdateFrequency
 from .doi import create_doi
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import (
-    CommunityResourceForm,
-    DatasetForm,
-    ResourceFormWithoutId,
-    ResourcesListForm,
-)
+from .forms import DatasetForm
 from .models import (
+    HOSTED_RESOURCE_PROTECTED_FIELDS,
     Checksum,
     CommunityResource,
     Dataset,
@@ -574,28 +570,51 @@ class ResourceRedirectAPI(API):
         return redirect(resource.url.strip()) if resource else abort(404, "Resource not found")
 
 
+def resource_input(resource: Resource | CommunityResource, data: dict) -> dict:
+    """The part of a client payload that may be written on `resource`.
+
+    Clients send back the resource they read: the upload-computed fields of a hosted
+    file and the platform-reserved extras they cannot write stay as stored.
+    """
+    if resource.has_hosted_file:
+        data = {
+            key: value for key, value in data.items() if key not in HOSTED_RESOURCE_PROTECTED_FIELDS
+        }
+    if isinstance(data.get("extras"), dict):
+        extras = type(resource).extras.merge_input(
+            resource.extras or {}, data["extras"], admin_permission.can
+        )
+        data = {**data, "extras": extras}
+    if isinstance(data.get("checksum"), dict):
+        data = {**data, "checksum": {"type": DEFAULT_CHECKSUM_TYPE, **data["checksum"]}}
+    return data
+
+
 @ns.route("/<dataset:dataset>/resources/", endpoint="resources")
 class ResourcesAPI(API):
     @api.secure
     @api.doc("create_resource", **common_doc, responses={400: "Validation error"})
-    @api.expect(resource_fields)
-    @api.marshal_with(resource_fields, code=201)
+    @api.expect(Resource.__write_fields__)
+    @api.marshal_with(Resource.__read_fields__, code=201)
     def post(self, dataset):
         """Create a new resource for a given dataset"""
         dataset.permissions["edit_resources"].test()
-        form = api.validate(ResourceFormWithoutId)
-        resource = Resource()
-
-        if form._fields.get("filetype").data != "remote":
+        # Resources created through the API are of type "other" unless told otherwise,
+        # unlike the "main" default of the model that harvesters rely on.
+        resource = Resource(type="other")
+        data = resource_input(resource, api.json_payload())
+        if data.get("filetype") != "remote":
             api.abort(400, "This endpoint only supports remote resources")
-        form.populate_obj(resource)
+        patch(resource, data)
+        resource.validate()
         dataset.add_resource(resource)
         return resource, 201
 
     @api.secure
     @api.doc("update_resources", **common_doc, responses={400: "Validation error"})
-    @api.expect([resource_fields])
-    @api.marshal_list_with(resource_fields)
+    # The read model documents the `id` each resource must carry to be reordered.
+    @api.expect([Resource.__read_fields__])
+    @api.marshal_list_with(Resource.__read_fields__)
     def put(self, dataset):
         """Reorder resources"""
         dataset.permissions["edit_resources"].test()
@@ -615,14 +634,18 @@ class ResourcesAPI(API):
                 400,
                 f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
             )
-        data = {"resources": resources}
-        form = ResourcesListForm.from_json(
-            data, obj=dataset, instance=dataset, meta={"csrf": False}
-        )
-        if not form.validate():
-            api.abort(400, errors=form.errors["resources"])
-
-        dataset = form.save()
+        existing = {str(resource.id): resource for resource in dataset.resources}
+        reordered = []
+        for item in resources:
+            if isinstance(item, dict):
+                resource = existing[item["id"]]
+                patch(resource, resource_input(resource, item))
+                resource.validate()
+            else:
+                resource = existing[item]
+            reordered.append(resource)
+        dataset.resources = reordered
+        dataset.save()
         return dataset.resources, 200
 
 
@@ -743,7 +766,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
 @api.param("rid", "The resource unique identifier")
 class ResourceAPI(ResourceMixin, API):
     @api.doc("get_resource")
-    @api.marshal_with(resource_fields)
+    @api.marshal_with(Resource.__read_fields__)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
         if not dataset.permissions["read"].can():
@@ -755,41 +778,21 @@ class ResourceAPI(ResourceMixin, API):
 
     @api.secure
     @api.doc("update_resource", responses={400: "Validation error"})
-    @api.expect(resource_fields)
-    @api.marshal_with(resource_fields)
+    @api.expect(Resource.__write_fields__)
+    @api.marshal_with(Resource.__read_fields__)
     def put(self, dataset, rid):
         """Update a given resource on a given dataset"""
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
-        form = api.validate(ResourceFormWithoutId, resource)
-
-        # ensure filetype is not modified after creation
-        if (
-            form._fields.get("filetype").data
-            and form._fields.get("filetype").data != resource.filetype
-        ):
+        data = api.json_payload()
+        # Checked on the raw payload: `resource_input` silently drops the filetype of a
+        # hosted file, while changing it must be rejected whatever the resource.
+        if data.get("filetype") and data["filetype"] != resource.filetype:
             abort(400, "Cannot modify filetype after creation")
 
-        # populate_obj populates existing resource object with the content of the form.
-        # Server-computed fields (url, checksum, filesize…) of hosted resources are
-        # protected from client override in BaseResourceForm.populate_obj.
-        # update_resource saves the updated resource dict to the database
-        form.populate_obj(resource)
+        patch(resource, resource_input(resource, data))
         resource.last_modified_internal = datetime.now(UTC)
-
-        # populate_obj is bugged when sending a None value we want to remove the existing
-        # value. We don't want to remove the existing value if no "schema" is sent.
-        # Will be fixed when we switch to the new API Fields.
-        body = request.get_json()
-        if "schema" in body and form._fields.get("schema").data is None:
-            resource.schema = None
-        if (
-            resource.filetype != "file"
-            and "checksum" in body
-            and form._fields.get("checksum").data is None
-        ):
-            resource.checksum = None
-
+        resource.validate()
         dataset.update_resource(resource)
         return resource
 
@@ -824,15 +827,16 @@ class CommunityResourcesAPI(API):
 
     @api.secure
     @api.doc("create_community_resource", responses={400: "Validation error"})
-    @api.expect(community_resource_fields)
+    @api.expect(CommunityResource.__write_fields__)
     @api.marshal_with(community_resource_fields, code=201)
     def post(self):
         """Create a new community resource"""
-        form = api.validate(CommunityResourceForm)
-        if form._fields.get("filetype").data != "remote":
+        # Same "other" default as the resources of a dataset created through the API.
+        resource = CommunityResource(type="other")
+        data = resource_input(resource, api.json_payload())
+        patch(resource, data)
+        if data.get("filetype") != "remote":
             api.abort(400, "This endpoint only supports remote community resources")
-        resource = CommunityResource()
-        form.populate_obj(resource)
         if not resource.dataset:
             api.abort(400, errors={"dataset": "A dataset identifier is required"})
         if not resource.organization:
@@ -853,16 +857,17 @@ class CommunityResourceAPI(API):
 
     @api.secure
     @api.doc("update_community_resource", responses={400: "Validation error"})
-    @api.expect(community_resource_fields)
+    @api.expect(CommunityResource.__write_fields__)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         """Update a given community resource"""
         community.permissions["edit"].test()
-        form = api.validate(CommunityResourceForm, community)
-        # Server-computed fields (url, checksum, filesize…) of hosted resources are
-        # protected from client override in BaseResourceForm.populate_obj.
-        form.populate_obj(community)
-        if not community.organization and not community.owner:
+        patch(community, resource_input(community, api.json_payload()))
+        if community.organization:
+            # The client echoes back the uploading user it read when it moves the resource
+            # to an organization (see `only_creation_or_first_organization`).
+            community.owner = None
+        elif not community.owner:
             community.owner = current_user._get_current_object()
         community.last_modified_internal = datetime.now(UTC)
         community.save()
