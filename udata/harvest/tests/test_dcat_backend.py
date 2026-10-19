@@ -781,6 +781,24 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
+    def test_conflicting_dois_are_reported_in_the_harvest_logs(self, rmock):
+        url = mock_dcat(rmock, "conflicting-dois.xml")
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        actions.run(source)
+
+        # The source error must not cost the dataset: it is harvested, without a DOI.
+        item = source.get_last_job().items[0]
+        assert item.status == "done"
+        assert item.dataset.harvest.doi is None
+        assert [(entry.level, entry.message) for entry in item.logs] == [
+            (
+                "WARNING",
+                "Several DOIs identify this dataset, none is kept: "
+                "10.15148/0e999ffc, 10.15148/762d02eb",
+            )
+        ]
+
     def test_datara_extended_roles_foaf(self, rmock):
         # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
         url = mock_dcat(rmock, "datara--5a26b0f6-0ccf-46ad-ac58-734054b91977.rdf.xml")

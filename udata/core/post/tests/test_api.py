@@ -593,6 +593,152 @@ class PostsAPITest(APITestCase):
         assert Post.objects(id=root.id).count() == 1
         assert Discussion.objects(subject=root).count() == 1
 
+    def test_post_api_create_with_slug(self):
+        """A sysadmin should choose the slug instead of deriving it from the name"""
+        self.login(AdminFactory())
+        data = {"name": "Conditions générales d'utilisation", "content": "CGU", "slug": "cgu"}
+
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert response.json["slug"] == "cgu"
+        assert Post.objects.get().slug == "cgu"
+
+    def test_post_api_create_with_taken_slug(self):
+        """A chosen slug already used by another post is rejected, not silently suffixed"""
+        PostFactory(slug="cgu")
+        self.login(AdminFactory())
+        data = {"name": "Conditions générales d'utilisation", "content": "CGU", "slug": "CGU"}
+
+        response = self.post(url_for("api.posts"), data)
+        assert400(response)
+        assert "slug" in response.json["errors"]
+        assert Post.objects.count() == 1
+
+    def test_post_api_update_with_taken_slug(self):
+        """Taking the slug of another post on update is rejected"""
+        PostFactory(slug="cgu")
+        post = PostFactory(slug="mentions-legales")
+        self.login(AdminFactory())
+
+        assert400(self.put(url_for("api.post", post=post), {"slug": "cgu"}))
+        post.reload()
+        assert post.slug == "mentions-legales"
+
+    def test_post_api_update_with_own_slug(self):
+        """Resending the post's own slug, even unnormalized, is not a conflict"""
+        post = PostFactory(slug="cgu")
+        self.login(AdminFactory())
+
+        response = self.put(url_for("api.post", post=post), {"slug": "CGU", "content": "new"})
+        assert200(response)
+        assert response.json["slug"] == "cgu"
+
+    def test_post_api_create_with_slug_derived_from_taken_name(self):
+        """A slug derived from the name still gets a uniqueness suffix"""
+        PostFactory(slug="cgu")
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.posts"), {"name": "CGU", "content": "CGU"})
+        assert201(response)
+        assert response.json["slug"] == "cgu-1"
+
+    def test_post_api_update_slug(self):
+        """Changing the slug keeps the old one redirecting to the post"""
+        post = PostFactory(name="Conditions générales d'utilisation")
+        old_slug = post.slug
+        self.login(AdminFactory())
+
+        response = self.put(url_for("api.post", post=post), {"slug": "Mes CGU"})
+        assert200(response)
+        assert response.json["slug"] == "mes-cgu"
+
+        response = self.get(url_for("api.post", post=old_slug))
+        assert response.status_code == 308
+        assert response.location.endswith(url_for("api.post", post="mes-cgu"))
+
+    def test_post_api_create_with_empty_slug(self):
+        """An empty slug falls back to the one derived from the name"""
+        self.login(AdminFactory())
+        data = {"name": "Conditions générales d'utilisation", "content": "CGU", "slug": ""}
+
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert response.json["slug"] == "conditions-generales-dutilisation"
+
+    def test_post_api_update_with_empty_slug(self):
+        """Clearing the slug on update is rejected, instead of saving a post without slug"""
+        post = PostFactory(name="faq", slug="faq")
+        self.login(AdminFactory())
+
+        assert400(self.put(url_for("api.post", post=post), {"slug": ""}))
+        post.reload()
+        assert post.slug == "faq"
+
+    def test_post_api_create_with_slug_without_letters_or_digits(self):
+        """A slug that normalizes to nothing is rejected, instead of saving an empty slug"""
+        self.login(AdminFactory())
+        data = {"name": "Conditions générales d'utilisation", "content": "CGU", "slug": "!!!"}
+
+        response = self.post(url_for("api.posts"), data)
+        assert400(response)
+        assert "slug" in response.json["errors"]
+        assert Post.objects.count() == 0
+
+    def test_post_api_slug_must_be_a_string(self):
+        """A slug that is not a string is rejected, at creation as on update"""
+        post = PostFactory(slug="cgu")
+        self.login(AdminFactory())
+
+        for slug in (123, True, ["cgu"]):
+            response = self.post(
+                url_for("api.posts"), {"name": "CGU", "content": "x", "slug": slug}
+            )
+            assert400(response)
+            assert400(self.put(url_for("api.post", post=post), {"slug": slug}))
+        assert Post.objects.count() == 1
+        post.reload()
+        assert post.slug == "cgu"
+
+    def test_post_api_reclaim_the_previous_slug_of_another_post(self):
+        """A previous slug can be given to a new post (a new version of /cgu): it then
+        serves this post instead of redirecting to the old one"""
+        old = PostFactory(name="CGU 2025", slug="cgu")
+        self.login(AdminFactory())
+        assert200(self.put(url_for("api.post", post=old), {"slug": "cgu-2025"}))
+
+        response = self.post(url_for("api.posts"), {"name": "CGU", "content": "x", "slug": "cgu"})
+        assert201(response)
+        new_id = response.json["id"]
+
+        response = self.get(url_for("api.post", post="cgu"))
+        assert200(response)
+        assert response.json["id"] == new_id
+
+    def test_post_api_rename_keeps_the_slug(self):
+        """Renaming a post keeps its URL, whether the slug is resent as-is or left out"""
+        post = PostFactory(name="CGU", slug="cgu")
+        self.login(AdminFactory())
+
+        response = self.put(
+            url_for("api.post", post=post), {"name": "Conditions générales", "slug": "cgu"}
+        )
+        assert200(response)
+        assert response.json["slug"] == "cgu"
+
+        response = self.put(url_for("api.post", post=post), {"name": "Conditions d'utilisation"})
+        assert200(response)
+        assert response.json["slug"] == "cgu"
+
+    def test_post_api_update_slug_requires_admin(self):
+        """A non-sysadmin cannot change a post slug"""
+        post = PostFactory()
+        slug = post.slug
+        self.login(UserFactory())
+
+        assert403(self.put(url_for("api.post", post=post), {"slug": "cgu"}))
+        post.reload()
+        assert post.slug == slug
+
     def test_post_api_delete(self):
         """It should delete a post from the API"""
         post = PostFactory()

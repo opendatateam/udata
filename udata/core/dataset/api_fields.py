@@ -4,7 +4,7 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.organization.models import Organization
-from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.models import User
 
 from .constants import (
@@ -68,6 +68,12 @@ dataset_harvest_fields = api.model(
         "uri": fields.String(description="The dataset harveted uri", allow_null=True),
         "dct_identifier": fields.String(
             description="The dct:identifier property from the harvested dataset", allow_null=True
+        ),
+        "doi": fields.String(
+            description="The DOI the source declares for the dataset (dct:identifier, "
+            "adms:identifier or owl:sameAs)",
+            allow_null=True,
+            readonly=True,
         ),
     },
 )
@@ -451,7 +457,7 @@ dataset_fields = api.model(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
         ),
         "spatial": fields.Nested(
-            spatial_coverage_fields, allow_null=True, description="The spatial coverage"
+            SpatialCoverage.__read_fields__, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"

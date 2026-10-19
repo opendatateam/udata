@@ -48,7 +48,6 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spam.models import SpamMixin
-from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
 from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
@@ -125,6 +124,9 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(HarvestMetadata):
     uri = StringField()
     dct_identifier = StringField()
+    # The DOI the source declares for the dataset. Unlike `Dataset.doi`, it is not ours: the
+    # source owns its lifecycle and DataCite metadata.
+    doi = StringField()
     ckan_name = StringField()
     ckan_source = StringField()
 
@@ -628,10 +630,7 @@ class Dataset(
         EmbeddedDocumentField(DateRange),
         nested_fields=temporal_coverage_fields,
     )
-    spatial = field(
-        EmbeddedDocumentField(SpatialCoverage),
-        nested_fields=spatial_coverage_fields,
-    )
+    spatial = field(EmbeddedDocumentField(SpatialCoverage))
     schema = field(EmbeddedDocumentField(Schema))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)

@@ -5,6 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
+import re
 from collections.abc import Collection
 from datetime import UTC, date, datetime
 from fractions import Fraction
@@ -15,7 +16,7 @@ from flask import current_app
 from geomet import wkt
 from mongoengine.errors import ValidationError
 from rdflib import BNode, Graph, Literal, Node, URIRef
-from rdflib.namespace import RDF
+from rdflib.namespace import OWL, RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
@@ -147,6 +148,11 @@ QUDT_TO_UDATA = {
     QUDT.KiloM: DistanceUom.KILOMETER,
     QUDT.M: DistanceUom.METER,
 }
+
+# A DOI as sources write it: bare, as a `doi:` or `info:doi/` URI, or as a resolver URL.
+DOI_IDENTIFIER_RE = re.compile(
+    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I
+)
 
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -935,6 +941,32 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False) -> R
     return resource
 
 
+def doi_from_rdf(d: RdfResource) -> str | None:
+    """The DOI identifying the dataset, from the properties DCAT gives for identifiers.
+
+    Sources also publish DOIs as distributions, but most of them point to related objects
+    (cruises, papers, other datasets), with nothing generic to tell the dataset's own DOI apart.
+    """
+    candidates = [
+        *rdf_unique_values(d, DCT.identifier),
+        *rdf_unique_values(d, ADMS.identifier, unwrap=[SKOS.notation]),
+        *rdf_unique_values(d, OWL.sameAs),
+    ]
+    # DOIs are case-insensitive: the same DOI written twice must not look like a conflict.
+    dois: dict[str, str] = {}
+    for candidate in candidates:
+        if match := DOI_IDENTIFIER_RE.match(str(candidate).strip()):
+            dois.setdefault(match.group(1).lower(), match.group(1))
+    if len(dois) > 1:
+        # A dataset has a single DOI, so several of them is a source error. Picking one would
+        # depend on the RDF parsing order and could change from one harvest to the next.
+        log.warning(
+            f"Several DOIs identify this dataset, none is kept: {', '.join(sorted(dois.values()))}"
+        )
+        return None
+    return next(iter(dois.values()), None)
+
+
 def dataset_from_rdf(
     graph: Graph,
     dataset: Dataset | None = None,
@@ -1061,6 +1093,7 @@ def dataset_from_rdf(
 
     dataset.set_harvested()
     dataset.harvest.dct_identifier = identifier
+    dataset.harvest.doi = doi_from_rdf(d)
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
