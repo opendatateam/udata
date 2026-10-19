@@ -379,6 +379,18 @@ base_reference = api.model(
     description="Base model for reference field, aka. inline model reference",
 )
 
+GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
+
+geojson = api.model(
+    "GeoJSON",
+    {
+        "type": fields.String(description="The GeoJSON Type", required=True, enum=GEOM_TYPES),
+        "coordinates": fields.List(
+            fields.Raw(), description="The geometry as coordinates lists", required=True
+        ),
+    },
+)
+
 
 def marshal_page(page, page_fields):
     return api.marshal(page, fields.pager(page_fields))
