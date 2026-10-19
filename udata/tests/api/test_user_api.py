@@ -623,6 +623,29 @@ class UserAPITest(APITestCase):
         inviting_organization.reload()
         assert inviting_organization.requests == []
 
+    def test_delete_user_removes_pending_membership_requests_in_deleted_organization(self):
+        """Ensure account deletion removes pending requests/invitations even when the org is deleted."""
+        user = AdminFactory()
+        self.login(user)
+        applicant = UserFactory()
+        pending_request = MembershipRequest(user=applicant, comment="please")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+            requests=[pending_request],
+        )
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=applicant)],
+            deleted=datetime.now(UTC),
+        )
+
+        response = self.delete(url_for("api.user", user=applicant))
+        self.assert204(response)
+
+        organization.reload()
+        assert organization.requests == []
+        inviting_organization.reload()
+        assert inviting_organization.requests == []
+
     def test_delete_user_without_notify(self):
         user = AdminFactory()
         self.login(user)

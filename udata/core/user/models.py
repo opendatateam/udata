@@ -476,7 +476,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         # A deleted account must not leave pending requests or invitations behind in organizations.
         from udata.core.organization.models import Organization
 
-        Organization.objects(requests__user=self, deleted__exists=False).update(
+        Organization.objects(requests__user=self).update(
             __raw__={"$pull": {"requests": {"user": self.id, "status": "pending"}}}
         )
         if delete_comments:
