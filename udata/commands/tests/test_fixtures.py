@@ -62,6 +62,7 @@ class FixturesTest(PytestOnlyAPITestCase):
             owner=user,
             content="Some content",
         )
+        sub_page = PostFactory(kind="page", parent=PostFactory(kind="page"))
         SiteFactory(
             id=self.app.config["SITE_ID"],
             title="Test Site",
@@ -130,9 +131,9 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert result_dataservice.organization == org
         assert result_dataservice.contact_points == [contact_point]
 
-        assert models.Post.objects.count() > 0
-        result_post = models.Post.objects.first()
-        assert result_post.name == "Test Post"
+        assert models.Post.objects(name="Test Post").count() == 1
+        # The parent is not exported, so the pages tree is flattened on import
+        assert models.Post.objects.get(id=sub_page.id).parent is None
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
