@@ -787,6 +787,15 @@ class GetResourceTest(PytestOnlyDBTestCase):
 
         assert get_resource(com_resource.id).id == com_resource.id
 
+    def test_dataset_property_falls_back_to_query(self):
+        """The fetched resource isn't attached to its dataset, `.dataset` resolves it anyway"""
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+
+        found = get_resource(resource.id)
+
+        assert found.dataset.id == dataset.id
+
     def test_not_found(self):
         assert get_resource(uuid4()) is None
 
