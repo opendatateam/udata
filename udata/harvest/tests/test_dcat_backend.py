@@ -781,6 +781,24 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
+    def test_conflicting_dois_are_reported_in_the_harvest_logs(self, rmock):
+        url = mock_dcat(rmock, "conflicting-dois.xml")
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        actions.run(source)
+
+        # The source error must not cost the dataset: it is harvested, without a DOI.
+        item = source.get_last_job().items[0]
+        assert item.status == "done"
+        assert item.dataset.harvest.doi is None
+        assert [(entry.level, entry.message) for entry in item.logs] == [
+            (
+                "WARNING",
+                "Several DOIs identify this dataset, none is kept: "
+                "10.15148/0e999ffc, 10.15148/762d02eb",
+            )
+        ]
+
     def test_datara_extended_roles_foaf(self, rmock):
         # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
         url = mock_dcat(rmock, "datara--5a26b0f6-0ccf-46ad-ac58-734054b91977.rdf.xml")
@@ -910,7 +928,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
 
-    def test_unsupported_mime_type(self, rmock):
+    def test_unsupported_mime_type(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": "text/html; charset=utf-8"})
         org = OrganizationFactory()
@@ -927,8 +945,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         error = job.errors[0]
         assert error.message == 'Unsupported mime type "text/html"'
+        # A misconfigured source is not a udata bug: harvest report only, no Sentry event
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
-    def test_unable_to_detect_format(self, rmock):
+    def test_unable_to_detect_format(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.head(url, headers={"Content-Type": ""})
         org = OrganizationFactory()
@@ -946,6 +966,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         error = job.errors[0]
         expected = "Unable to detect format from extension or mime type"
         assert error.message == expected
+        assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
     def test_use_replaced_uris(self, rmock, mocker):
         # Create a mock URL that will be replaced, but use an embedded context to avoid external requests

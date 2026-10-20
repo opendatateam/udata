@@ -28,7 +28,7 @@ For field-specific metadata, see the `field()` function documentation.
 import functools
 import typing
 from datetime import datetime
-from typing import Any, Callable, Iterable, TypedDict, TypeVar, Unpack, overload
+from typing import Any, Callable, Iterable, Literal, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -41,7 +41,8 @@ from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import add_pagination_arguments, api, base_reference
+from udata.api import add_pagination_arguments, api, base_reference, geojson
+from udata.core.dataset.constants import FULL_OBJECTS_HEADER
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
 
@@ -133,6 +134,37 @@ class PrefetchingList(restx_fields.List):
     def format(self, value):
         self.prefetch(value or [])
         return super().format(value)
+
+
+class FullObject(restx_fields.List):
+    """Render identifiers by default, and `full` when the client sets `FULL_OBJECTS_HEADER`.
+
+    Identifiers keep API responses light for clients that only need to match values, while
+    the header lets a client display them without one more request per value.
+
+    It is a `List` holding `full` as its container, even for a single value, because that
+    is what flask-restx walks: `Mask.apply` clones it with an `X-Fields` mask applied to the
+    container (any other `Raw` subclass is rejected with a 400), and the Swagger generation
+    registers the models the container nests.
+    """
+
+    def __init__(self, full, **kwargs):
+        super().__init__(full, **kwargs)
+
+    def output(self, key, obj, *args, **kwargs):
+        if request.headers.get(FULL_OBJECTS_HEADER, False, bool):
+            return self.container.output(key, obj, *args, **kwargs)
+        return restx_fields.Raw.output(self, key, obj, *args, **kwargs)
+
+    def format(self, value):
+        if isinstance(value, list):
+            return [self.format(item) for item in value]
+        if isinstance(value, mongoengine.Document):
+            return str(value.pk)
+        return value
+
+    def schema(self):
+        return restx_fields.Raw.schema(self)
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -255,9 +287,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
         # `attribute` says where to read the list on the parent document. Propagating it
         # to the inner field would make every item look that same attribute up on itself
-        # (and serialize as null), so it stays on the list.
+        # (and serialize as null), so it stays on the list. So does `full_object`, which
+        # picks the representation of the whole list.
         nested_info = {
-            **{k: v for k, v in info.items() if k != "attribute"},
+            **{k: v for k, v in info.items() if k not in ("attribute", "full_object")},
             **inner_info,
             **info.get("inner_field_info", {}),
         }
@@ -296,6 +329,10 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             # the model before `output()` (see `flask_restx.marshalling.marshal`), so it
             # costs nothing on responses that don't include the list.
             prefetch = getattr(parent, "__prefetch__", None)
+        elif field.field is None:
+            # An untyped `ListField()` holds arbitrary values, so there is no inner
+            # field to convert — expose them as-is, like `DictField` does.
+            field_read = field_write = restx_fields.Raw()
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -430,7 +467,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             )
 
     elif isinstance(field, mongo_fields.MultiPolygonField):
-        constructor = restx_fields.Raw
+
+        def constructor(**kwargs):
+            return restx_fields.Nested(geojson, **kwargs)
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
@@ -440,6 +479,15 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
     read: Callable = (
         constructor_read(**read_params) if constructor_read else constructor(**read_params)
     )
+    full_object = info.get("full_object")
+    if full_object is not None:
+        # References already render as nested objects, which is their full form. The
+        # identifiers are read like the generated field reads them, e.g. without the
+        # dangling references a list of references leaves out.
+        read = FullObject(
+            read if full_object is True else full_object,
+            **{**read_params, "attribute": read.attribute},
+        )
     if write_params.get("readonly", False) or (constructor_write is None and constructor is None):
         write: Callable | None = None
     else:
@@ -825,6 +873,7 @@ class _FieldKwargs(TypedDict, total=False):
     generic_key: str | None
     convert_to: Callable | None
     allow_null: bool | None
+    full_object: Literal[True] | restx_fields.Raw | None
 
 
 @overload
@@ -880,6 +929,7 @@ def field(
     generic_key: str | None = None,
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
+    full_object: Literal[True] | restx_fields.Raw | None = None,
     **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.
@@ -926,6 +976,12 @@ def field(
         generic_key: Key for generic type discrimination
         convert_to: Custom converter for RestX
         allow_null: If True, field can be null
+        full_object: Render the identifier(s) by default, and the full object(s) when
+            the client sets `X-Get-Datasets-Full-Objects`. Two forms only: `True` on a
+            `ReferenceField` or a `ListField(ReferenceField)`, whose nested reference
+            model is the full object, or the RestX field rendering the full object of a
+            scalar field (e.g. an `{id, label}` object for a value with a label). Not
+            supported with `rename`, lazy or generic references.
         **kwargs: Any additional parameters not explicitly defined
 
     Returns:

@@ -19,6 +19,7 @@ from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
@@ -28,6 +29,21 @@ from .constants import BODY_TYPES, IMAGE_SIZES, POST_KINDS
 from .permissions import PostReadPermission
 
 __all__ = ("Post",)
+
+
+def check_chosen_slug(slug, obj, is_update, **_kwargs):
+    """Runs on the slug already normalized by `SlugField.from_input`."""
+    # Left empty at creation, the slug is derived from the name
+    if slug is None and not is_update:
+        return
+    # Cleared on update, or with nothing left once normalized, it would be saved empty:
+    # `SlugField` is exempted from the `required` check.
+    if not slug:
+        raise FieldValidationError(_("The slug must contain letters or digits"), field="slug")
+    # Rejected rather than suffixed like a derived slug: the post would be published under
+    # a URL nobody asked for.
+    if Post.objects(slug=slug, id__ne=obj.id).count():
+        raise FieldValidationError(_("This slug is already used by another post"), field="slug")
 
 
 class PostQuerySet(UDataQuerySet):
@@ -51,8 +67,9 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         show_as_ref=True,
     )
     slug = field(
-        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
-        readonly=True,
+        # No `update`: a renamed post keeps its URL, which only changes when the slug is set
+        SlugField(max_length=255, required=True, populate_from="name", follow=True),
+        checks=[check_chosen_slug],
     )
     headline = field(
         StringField(),
