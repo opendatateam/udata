@@ -65,7 +65,7 @@ from udata.mongo.uuid_fields import AutoUUIDField
 from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
-from udata.utils import get_by, hash_url, to_naive_datetime
+from udata.utils import hash_url, to_naive_datetime
 
 from .constants import (
     CHECKSUM_TYPES,
@@ -1415,14 +1415,21 @@ class ResourceSchema(object):
         return None
 
 
-def get_dataset_by_resource_id(id):
+def get_dataset_by_resource_id(id, exclude_resources=False):
     """Fetch the dataset holding a resource, given the resource UUID
 
     Resource ids are resolved globally (see the `/datasets/r/<id>` permalink), but nothing
     enforces their uniqueness across datasets. An ambiguous id resolves to nothing rather
     than letting an arbitrary dataset answer for another one's resource.
+
+    With ``exclude_resources``, the dataset comes back without its resources list
+    (`dataset.resources` is empty), so a heavy dataset isn't fetched whole to serve
+    a single resource.
     """
-    datasets = list(Dataset.objects(resources__id=id).limit(2))
+    datasets = Dataset.objects(resources__id=id)
+    if exclude_resources:
+        datasets = datasets.exclude("resources")
+    datasets = list(datasets.limit(2))
     if len(datasets) > 1:
         # Corrupted data that no API path should be able to produce: report it instead of
         # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
@@ -1432,16 +1439,14 @@ def get_dataset_by_resource_id(id):
 
 
 def get_dataset_and_resource_by_id(id):
-    """Fetch the dataset holding a resource, together with the resource, given the resource UUID"""
-    datasets = list(Dataset.objects(resources__id=id).exclude("resources").limit(2))
-    if len(datasets) > 1:
-        # Corrupted data that no API path should be able to produce: report it instead of
-        # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
-        log.error(f"Resource #{id} is duplicated across several datasets")
+    """Fetch the dataset holding a resource, together with the resource, given the resource UUID
+
+    The dataset is loaded without its resources list (`dataset.resources` is empty), so a
+    heavy dataset isn't fetched whole to serve a single resource.
+    """
+    dataset = get_dataset_by_resource_id(id, exclude_resources=True)
+    if not dataset:
         return None, None
-    if not datasets:
-        return None, None
-    dataset = datasets[0]
     resources, _ = paginate_embedded_list(
         Dataset,
         dataset.id,
@@ -1456,8 +1461,8 @@ def get_dataset_and_resource_by_id(id):
 
 def get_resource(id):
     """Fetch a resource given its UUID"""
-    dataset = get_dataset_by_resource_id(id)
-    if dataset:
-        return get_by(dataset.resources, id=id)
+    _, resource = get_dataset_and_resource_by_id(id)
+    if resource:
+        return resource
     else:
         return CommunityResource.objects(id=id).first()

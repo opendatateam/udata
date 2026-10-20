@@ -40,6 +40,8 @@ from udata.core.dataset.models import (
     HarvestDatasetMetadata,
     HarvestResourceMetadata,
     get_dataset_and_resource_by_id,
+    get_dataset_by_resource_id,
+    get_resource,
 )
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
@@ -716,20 +718,14 @@ class ResourceModelTest(PytestOnlyDBTestCase):
 
 class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
     def test_found(self):
-        """The dataset comes back without its resources list, plus the matching resource"""
+        """The dataset comes back without its resources list, so a heavy dataset isn't fetched whole"""
         resource = ResourceFactory(id="817204ac-2202-8b4a-98e7-4284d154d10c")
         dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
 
-        found_dataset, found_resource = get_dataset_and_resource_by_id(resource.id)
+        found_dataset, _ = get_dataset_and_resource_by_id(resource.id)
 
         assert found_dataset.id == dataset.id
-        assert found_resource.id == resource.id
-        assert found_resource.title == resource.title
-        # The whole resources list isn't loaded, so a heavy dataset isn't fetched whole
         assert found_dataset.resources == []
-
-    def test_not_found(self):
-        assert get_dataset_and_resource_by_id(uuid4()) == (None, None)
 
     def test_ambiguous_id(self, caplog):
         """A resource id duplicated across datasets resolves to nothing and is reported"""
@@ -739,6 +735,69 @@ class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
 
         with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
             assert get_dataset_and_resource_by_id(shared_id) == (None, None)
+        assert str(shared_id) in caplog.text
+
+
+class GetDatasetByResourceIdTest(PytestOnlyDBTestCase):
+    def test_found(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+
+        found = get_dataset_by_resource_id(resource.id)
+
+        assert found.id == dataset.id
+
+    def test_not_found(self):
+        assert get_dataset_by_resource_id(uuid4()) is None
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_dataset_by_resource_id(shared_id) is None
+        assert str(shared_id) in caplog.text
+
+    def test_exclude_resources(self):
+        """The dataset comes back without its resources list, so a heavy dataset isn't fetched whole"""
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found = get_dataset_by_resource_id(resource.id, exclude_resources=True)
+
+        assert found.id == dataset.id
+        assert found.resources == []
+
+
+class GetResourceTest(PytestOnlyDBTestCase):
+    def test_dataset_resource(self):
+        """The resource is fetched without loading the whole dataset"""
+        resource = ResourceFactory()
+        DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found = get_resource(resource.id)
+
+        assert found.id == resource.id
+        assert found.title == resource.title
+
+    def test_community_resource(self):
+        com_resource = CommunityResourceFactory()
+
+        assert get_resource(com_resource.id).id == com_resource.id
+
+    def test_not_found(self):
+        assert get_resource(uuid4()) is None
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_resource(shared_id) is None
         assert str(shared_id) in caplog.text
 
 

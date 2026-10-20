@@ -544,6 +544,7 @@ class DatasetSchemasAPI(API):
 @ns.route("/resources/<uuid:rid>/", endpoint="resource")
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
+    @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
         dataset, resource = get_dataset_and_resource_by_id(rid)
         if dataset:
@@ -558,12 +559,7 @@ class ResourceAPI(API):
         if not resource:
             apiv2.abort(404, "Resource does not exist")
 
-        # Manually marshalling to make sure resource.dataset is in the scope.
-        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
-        return marshal(
-            {"resource": resource, "dataset_id": dataset.id if dataset else None},
-            specific_resource_fields,
-        )
+        return {"resource": resource, "dataset_id": dataset.id if dataset else None}
 
 
 @ns.route(

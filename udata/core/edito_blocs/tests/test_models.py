@@ -1,13 +1,16 @@
+from uuid import uuid4
+
 import pytest
 
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
     DataservicesListBloc,
     DatasetsListBloc,
     ReusesListBloc,
+    check_resource_exists,
     purge_blocs_references,
 )
 from udata.core.post.factories import PostFactory
@@ -15,6 +18,7 @@ from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.site.factories import SiteFactory
 from udata.core.site.models import Site
+from udata.mongo.errors import FieldValidationError
 from udata.tests.api import PytestOnlyDBTestCase
 
 # (ref_field, factory, bloc_cls, site_blocs_field): one entry per referenceable type
@@ -61,3 +65,19 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
         assert [r.id for r in getattr(post_inner, ref_field)] == [keep.id]
         site_inner = getattr(Site.objects.get(id="test-site"), site_field)[0].items[0].content[0]
         assert [r.id for r in getattr(site_inner, ref_field)] == [keep.id]
+
+
+class CheckResourceExistsTest(PytestOnlyDBTestCase):
+    def test_existing_resource(self):
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+
+        check_resource_exists(str(resource.id), field="resource_id")
+
+    def test_unknown_resource(self):
+        with pytest.raises(FieldValidationError, match="Unknown resource"):
+            check_resource_exists(str(uuid4()), field="resource_id")
+
+    def test_invalid_uuid(self):
+        with pytest.raises(FieldValidationError, match="not a valid UUID"):
+            check_resource_exists("not-a-uuid", field="resource_id")
