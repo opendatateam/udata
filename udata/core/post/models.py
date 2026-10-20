@@ -197,7 +197,6 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         return ancestors
 
     @property
-    @field(description="The page path, made of the slugs of its ancestors and its own")
     def path(self) -> str:
         return "/".join(post.slug for post in [*self.ancestors, self])
 

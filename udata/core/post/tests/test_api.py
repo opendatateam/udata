@@ -435,7 +435,7 @@ class PostsAPITest(APITestCase):
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_post_api_create_page_with_parent(self):
-        """A sub-page exposes its path, its ancestors, and lives under /pages/<path>"""
+        """A sub-page exposes its ancestors, and lives under /pages/<path>"""
         elections = PostFactory(kind="page", name="Élections", slug="elections")
         municipales = PostFactory(
             kind="page", name="Municipales", slug="municipales", parent=elections
@@ -447,17 +447,15 @@ class PostsAPITest(APITestCase):
             {"name": "2026", "content": "x", "kind": "page", "parent": str(municipales.id)},
         )
         assert201(response)
-        assert response.json["path"] == "elections/municipales/2026"
         assert response.json["page"] == "https://www.data.gouv.fr/pages/elections/municipales/2026"
         assert response.json["parent"] == {
             "id": str(municipales.id),
             "name": "Municipales",
-            "path": "elections/municipales",
             "page": "https://www.data.gouv.fr/pages/elections/municipales",
         }
-        assert [ancestor["path"] for ancestor in response.json["ancestors"]] == [
-            "elections",
-            "elections/municipales",
+        assert [ancestor["page"] for ancestor in response.json["ancestors"]] == [
+            "https://www.data.gouv.fr/pages/elections",
+            "https://www.data.gouv.fr/pages/elections/municipales",
         ]
 
     @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
@@ -471,7 +469,6 @@ class PostsAPITest(APITestCase):
         )
         response = self.get(url_for("api.post", post=page)).json
         assert response["page"] == "https://www.data.gouv.fr/pages/cgu"
-        assert response["path"] == "cgu"
         assert response["parent"] is None
         assert response["ancestors"] == []
 
@@ -559,6 +556,7 @@ class PostsAPITest(APITestCase):
         root.reload()
         assert root.kind == "page"
 
+    @pytest.mark.options(CDATA_BASE_URL="https://www.data.gouv.fr")
     def test_post_api_move_page_to_root(self):
         """Removing the parent moves the page back to the root"""
         root = PostFactory(kind="page", slug="elections")
@@ -567,7 +565,7 @@ class PostsAPITest(APITestCase):
 
         response = self.put(url_for("api.post", post=child), {"parent": None})
         assert200(response)
-        assert response.json["path"] == "municipales"
+        assert response.json["page"] == "https://www.data.gouv.fr/pages/municipales"
         child.reload()
         assert child.parent is None
 
