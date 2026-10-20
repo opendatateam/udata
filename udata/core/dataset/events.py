@@ -51,6 +51,12 @@ def payload_for_resource(document: Any, resource_id: str | None) -> dict | None:
     }
 
 
+def analyser_headers() -> dict:
+    if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
+        return {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
+    return {}
+
+
 @task(route="high.resource")
 def publish(url: str, document: Any, resource_id: str, action: str) -> None:
     method: Callable
@@ -62,10 +68,19 @@ def publish(url: str, document: Any, resource_id: str, action: str) -> None:
         case EventMessageType.DELETED:
             method = requests.delete
     payload: dict | None = payload_for_resource(document, resource_id)
-    headers = {}
-    if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
-        headers = {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
-    r = method(url, json=payload, headers=headers)
+    r = method(url, json=payload, headers=analyser_headers())
+    r.raise_for_status()
+
+
+@task(route="high.resource")
+def force_resource_analysis(resource_id: str) -> None:
+    # Hydra crawls the resource before answering, which can take as long as the
+    # download itself: this call must never run inside a web request.
+    r = requests.post(
+        f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/checks",
+        json={"resource_id": resource_id, "force_analysis": True},
+        headers=analyser_headers(),
+    )
     r.raise_for_status()
 
 

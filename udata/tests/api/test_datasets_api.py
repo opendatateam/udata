@@ -3048,6 +3048,67 @@ class DatasetArchivedAPITest(APITestCase):
         self.assert200(response)
 
 
+@pytest.mark.options(
+    PUBLISH_ON_RESOURCE_EVENTS=True,
+    RESOURCES_ANALYSER_URI="http://hydra.test",
+    RESOURCES_ANALYSER_API_KEY="hydra-api-key",
+)
+class ResourceAnalysisAPITest(APITestCase):
+    @requests_mock.Mocker(kw="rmock")
+    def test_admin_forces_analysis(self, rmock):
+        rmock.post("http://hydra.test/api/checks", status_code=201, json={})
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
+        assert rmock.call_count == 1
+        assert rmock.last_request.json() == {
+            "resource_id": str(resource.id),
+            "force_analysis": True,
+        }
+        assert rmock.last_request.headers["Authorization"] == "Bearer hydra-api-key"
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_dataset_owner_cannot_force_analysis(self, rmock):
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assert403(response)
+        assert rmock.call_count == 0
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_unknown_resource(self, rmock):
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=uuid4()))
+
+        self.assert404(response)
+        assert rmock.call_count == 0
+
+
+# pytest-flask applies class-level `options` after method-level ones, so the
+# analyser can't be switched off from a method of the class above.
+@pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=False)
+class ResourceAnalysisWithoutAnalyserAPITest(APITestCase):
+    @requests_mock.Mocker(kw="rmock")
+    def test_no_analyser_configured(self, rmock):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 503)
+        assert rmock.call_count == 0
+
+
 class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_get(self):
         """It should fetch a community resource from the API"""

@@ -66,6 +66,7 @@ from .api_fields import (
 )
 from .constants import RESOURCE_TYPES, UpdateFrequency
 from .doi import create_doi
+from .events import force_resource_analysis
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -801,6 +802,26 @@ class ResourceAPI(ResourceMixin, API):
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
         return "", 204
+
+
+@ns.route(
+    "/<dataset:dataset>/resources/<uuid:rid>/analysis/",
+    endpoint="resource_analysis",
+    doc=common_doc,
+)
+@api.param("rid", "The resource unique identifier")
+class ResourceAnalysisAPI(ResourceMixin, API):
+    @api.secure(admin_permission)
+    @api.doc("force_resource_analysis")
+    @api.response(202, "Analysis requested")
+    @api.response(503, "No resources analyser configured")
+    def post(self, dataset, rid):
+        """Force the resources analyser to check and analyse a resource again"""
+        resource = self.get_resource_or_404(dataset, rid)
+        if not current_app.config["PUBLISH_ON_RESOURCE_EVENTS"]:
+            api.abort(503, "No resources analyser configured")
+        force_resource_analysis.delay(str(resource.id))
+        return "", 202
 
 
 @ns.route("/community_resources/", endpoint="community_resources")
