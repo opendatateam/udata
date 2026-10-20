@@ -22,6 +22,7 @@ import os
 from datetime import UTC, datetime
 
 import mongoengine
+import requests
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
@@ -66,7 +67,7 @@ from .api_fields import (
 )
 from .constants import RESOURCE_TYPES, UpdateFrequency
 from .doi import create_doi
-from .events import force_resource_analysis
+from .events import analyser_enabled, analyser_headers
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -813,14 +814,35 @@ class ResourceAPI(ResourceMixin, API):
 class ResourceAnalysisAPI(ResourceMixin, API):
     @api.secure(admin_permission)
     @api.doc("force_resource_analysis")
-    @api.response(202, "Analysis requested")
+    @api.response(202, "Analysis queued")
+    @api.response(502, "The analyser failed or could not reach the resource")
     @api.response(503, "No resources analyser configured")
     def post(self, dataset, rid):
         """Force the resources analyser to check and analyse a resource again"""
         resource = self.get_resource_or_404(dataset, rid)
-        if not current_app.config["PUBLISH_ON_RESOURCE_EVENTS"]:
+        if not analyser_enabled():
             api.abort(503, "No resources analyser configured")
-        force_resource_analysis.delay(str(resource.id))
+        try:
+            # Hydra only probes the resource (HEAD, GET and CORS requests, 5 s each) before
+            # answering, the download and the analysis itself are queued on its side.
+            r = requests.post(
+                f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/checks",
+                json={"resource_id": str(resource.id), "force_analysis": True},
+                headers=analyser_headers(),
+                timeout=20,
+            )
+            r.raise_for_status()
+        except requests.RequestException as e:
+            api.abort(502, f"The resources analyser failed: {e}")
+        # Hydra answers with the check it just made, and only queues the analysis when
+        # the resource answered: a timeout or an error means nothing will be analysed.
+        check = r.json()
+        if check["timeout"]:
+            api.abort(502, "The resource did not answer in time, it will not be analysed")
+        if check["error"]:
+            api.abort(
+                502, f"The resource could not be reached, it will not be analysed: {check['error']}"
+            )
         return "", 202
 
 
