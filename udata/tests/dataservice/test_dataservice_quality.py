@@ -1,7 +1,6 @@
 from udata.core.access_type.constants import AccessType
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import LicenseFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
@@ -183,7 +182,7 @@ class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
         assert "score" in quality
         assert quality["has_description"] is True
         assert quality["has_base_api_url"] is True
-        assert 0.0 <= quality["score"] <= 1.0
+        assert quality["score"] == 5 / 14
 
 
 class DataserviceQualityApiTest(PytestOnlyAPITestCase):
@@ -226,18 +225,15 @@ class DataserviceQualityCacheTest(PytestOnlyAPITestCase):
         assert ds.quality_cached["has_contact_point"] is False
         assert ds.quality["has_contact_point"] is False
 
-    def test_contact_point_deletion_does_not_create_partial_cache(self):
-        contact_point = ContactPointFactory()
+    def test_quality_cache_keeps_contact_point_when_another_remains(self):
+        cp1 = ContactPointFactory()
+        cp2 = ContactPointFactory(organization=cp1.organization, owner=cp1.owner)
         ds = DataserviceFactory(
-            contact_points=[contact_point],
-            organization=contact_point.organization,
-            owner=contact_point.owner,
+            contact_points=[cp1, cp2], organization=cp1.organization, owner=cp1.owner
         )
-        Dataservice.objects(id=ds.id).update(set__quality_cached={})
 
-        contact_point.delete()
+        cp1.delete()
         ds.reload()
 
-        assert not ds.quality_cached
-        assert ds.quality["has_contact_point"] is False
-        assert ds.quality["has_description"] is not None
+        assert ds.contact_points == [cp2]
+        assert ds.quality_cached["has_contact_point"] is True

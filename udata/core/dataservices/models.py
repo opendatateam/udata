@@ -16,7 +16,7 @@ from mongoengine.fields import (
     ReferenceField,
     StringField,
 )
-from mongoengine.signals import post_save, pre_delete
+from mongoengine.signals import post_delete, post_save
 
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
@@ -435,28 +435,20 @@ class Dataservice(
 
     def compute_quality(self):
         """Return a dict of boolean metadata-quality criteria for this dataservice."""
-        result = {}
-
-        result["has_description"] = len(self.description or "") > current_app.config.get(
-            "QUALITY_DESCRIPTION_LENGTH"
-        )
-        result["has_machine_documentation"] = bool(self.machine_documentation_url)
-        result["has_technical_documentation"] = bool(self.technical_documentation_url)
-        result["has_business_documentation"] = bool(self.business_documentation_url)
-        result["license"] = bool(self.license)
-        result["has_contact_point"] = bool(self.contact_points)
-        result["has_base_api_url"] = bool(self.base_api_url)
-        result["availability_documented"] = self.availability is not None or bool(
-            self.availability_url
-        )
-        result["rate_limiting_documented"] = bool(self.rate_limiting or self.rate_limiting_url)
-
-        if self.access_type == AccessType.OPEN:
-            result["access_conditions_clear"] = True
-        else:
-            result["access_conditions_clear"] = bool(self.authorization_request_url)
-
-        return result
+        return {
+            "has_description": len(self.description or "")
+            > current_app.config.get("QUALITY_DESCRIPTION_LENGTH"),
+            "has_machine_documentation": bool(self.machine_documentation_url),
+            "has_technical_documentation": bool(self.technical_documentation_url),
+            "has_business_documentation": bool(self.business_documentation_url),
+            "license": bool(self.license),
+            "has_contact_point": bool(self.contact_points),
+            "has_base_api_url": bool(self.base_api_url),
+            "availability_documented": self.availability is not None or bool(self.availability_url),
+            "rate_limiting_documented": bool(self.rate_limiting or self.rate_limiting_url),
+            "access_conditions_clear": self.access_type == AccessType.OPEN
+            or bool(self.authorization_request_url),
+        }
 
     def compute_quality_score(self, quality):
         weights = {
@@ -484,17 +476,12 @@ class Dataservice(
 
 
 def refresh_quality_on_contact_point_delete(sender, document, **kwargs):
-    """Keep `quality_cached["has_contact_point"]` right when a contact point is deleted.
-
-    `reverse_delete_rule=PULL` is applied with a queryset update, which bypasses `clean()`.
-    """
-    # An empty cache is left alone: `quality` computes it on read, and a nested `$set` would
-    # turn it into a partial cache holding only this key.
-    for dataservice in Dataservice.objects(contact_points=document, quality_cached__ne={}):
-        has_contact_point = any(cp.id != document.id for cp in dataservice.contact_points)
-        dataservice.update(set__quality_cached__has_contact_point=has_contact_point)
+    """`reverse_delete_rule=PULL` is applied with a queryset update, which bypasses `clean()`."""
+    Dataservice.objects(contact_points__size=0, quality_cached__has_contact_point=True).update(
+        set__quality_cached__has_contact_point=False
+    )
 
 
-pre_delete.connect(refresh_quality_on_contact_point_delete, sender=ContactPoint)
+post_delete.connect(refresh_quality_on_contact_point_delete, sender=ContactPoint)
 post_save.connect(Dataservice.post_save, sender=Dataservice)
 post_save.connect(SpamMixin.post_save, sender=Dataservice)
