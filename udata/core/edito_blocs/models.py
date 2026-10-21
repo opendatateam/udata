@@ -1,3 +1,5 @@
+import copy
+import logging
 import uuid
 
 from mongoengine import EmbeddedDocument
@@ -18,6 +20,8 @@ from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.uuid_fields import AutoUUIDField
+
+log = logging.getLogger(__name__)
 
 
 class BlocWithTitleMixin:
@@ -218,20 +222,23 @@ BLOCS_CONTAINER_PATHS = (
 
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
+# Times the purge reads a blocs field again when an edit was saved in between.
+PURGE_ATTEMPTS = 3
 
-def _blocs_reference_fields(document_type) -> tuple[set, set]:
-    """Names of the bloc fields referencing `document_type`: single references, and
-    lists of references (the legacy `*ListBloc`)."""
+
+def blocs_reference_fields(document_type=None) -> tuple[set, set]:
+    """Names of the bloc fields referencing `document_type` (any document without it):
+    single references, and lists of references (the legacy `*ListBloc`)."""
     single, many = set(), set()
     for bloc_class in classes_by_parents.get(Bloc, set()):
         for name, mongo_field in bloc_class._fields.items():
             if isinstance(mongo_field, ReferenceField):
-                if mongo_field.document_type is document_type:
+                if document_type is None or mongo_field.document_type is document_type:
                     single.add(name)
             elif isinstance(mongo_field, ListField) and isinstance(
                 mongo_field.field, ReferenceField
             ):
-                if mongo_field.field.document_type is document_type:
+                if document_type is None or mongo_field.field.document_type is document_type:
                     many.add(name)
     return single, many
 
@@ -246,7 +253,7 @@ def _without_reference(items: list, obj_id, single: set, many: set) -> list:
             if not isinstance(value, list) or not value:
                 continue
             if key in many:
-                # A legacy list keeps its bloc even once empty, as it always did.
+                # Unlike a container, a legacy list bloc carries its own title: it stays.
                 item[key] = [ref for ref in value if ref != obj_id]
             elif isinstance(value[0], dict):
                 item[key] = _without_reference(value, obj_id, single, many)
@@ -265,7 +272,7 @@ def purge_blocs_references(obj):
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
-    single, many = _blocs_reference_fields(type(obj))
+    single, many = blocs_reference_fields(type(obj))
 
     def purge(collection, blocs_field):
         query = {
@@ -276,8 +283,21 @@ def purge_blocs_references(obj):
             ]
         }
         for doc in collection.find(query, {blocs_field: 1}):
-            blocs = _without_reference(doc[blocs_field], obj.id, single, many)
-            collection.update_one({"_id": doc["_id"]}, {"$set": {blocs_field: blocs}})
+            for _ in range(PURGE_ATTEMPTS):
+                read = doc[blocs_field]
+                blocs = _without_reference(copy.deepcopy(read), obj.id, single, many)
+                # Written only if nobody saved the field since it was read: the whole field
+                # is rewritten, an edit made in between would be lost.
+                result = collection.update_one(
+                    {"_id": doc["_id"], blocs_field: read}, {"$set": {blocs_field: blocs}}
+                )
+                if result.matched_count:
+                    break
+                doc = collection.find_one({"_id": doc["_id"]}, {blocs_field: 1})
+                if doc is None:
+                    break
+            else:
+                log.warning(f"Could not purge {obj!r} from {collection.name} {doc['_id']}")
 
     purge(Post._get_collection(), "blocs")
     purge(Organization._get_collection(), "presentation_blocs")

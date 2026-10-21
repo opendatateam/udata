@@ -1,7 +1,10 @@
 from mongoengine.connection import get_db
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
 from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
     DatasetBloc,
     DatasetsListBloc,
     GridBloc,
@@ -67,6 +70,34 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
             assert [cell.blocs[0].dataset.id for cell in grid.cells] == [d.id for d in datasets]
         # The content did not change for readers: the post is not marked as modified.
         assert post.last_modified == last_modified
+
+    def test_deleted_objects_of_the_lists_are_dropped(self):
+        """A dataset hard-deleted before the purge reached it does not become a bloc, whose
+        reference is required: the page could no longer be saved."""
+        kept, deleted = DatasetFactory.create_batch(2)
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                DatasetsListBloc(title="Featured", datasets=[deleted, kept]),
+                AccordionListBloc(
+                    items=[
+                        AccordionItemBloc(
+                            title="Item", content=[DatasetsListBloc(datasets=[deleted])]
+                        )
+                    ]
+                ),
+            ],
+        )
+        Dataset._get_collection().delete_one({"_id": deleted.id})
+
+        migrate()
+
+        post.reload()
+        featured, accordion = post.blocs
+        title, grid = featured.blocs
+        assert [cell.blocs[0].dataset.id for cell in grid.cells] == [kept.id]
+        # The list only held the deleted dataset: nothing left of it in the accordion
+        assert accordion.blocs[0].items[0].content == []
 
     def test_running_twice_gives_the_same_result(self):
         post = PostFactory(

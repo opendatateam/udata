@@ -1,7 +1,10 @@
+from unittest import mock
+
 import pytest
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.edito_blocs import models
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
@@ -166,3 +169,66 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
             assert [r.id for r in getattr(top_level, legacy_ref)] == [keep.id]
             nested = accordion.items[0].content[0]
             assert [r.id for r in getattr(nested, legacy_ref)] == [keep.id]
+
+    def test_keeps_a_legacy_list_left_empty(self):
+        """Unlike a container, a legacy list bloc carries its own title."""
+        remove = DatasetFactory()
+        self.store(lambda: [DatasetsListBloc(title="t", datasets=[remove])])
+
+        purge_blocs_references(remove)
+
+        for blocs in reload_blocs():
+            assert [(bloc.title, list(bloc.datasets)) for bloc in blocs] == [("t", [])]
+
+    def test_removes_the_accordion_item_left_empty(self):
+        keep, remove = DatasetFactory(), DatasetFactory()
+
+        def grid(dataset):
+            return GridBloc(cells=[GridCell(width="1/2", blocs=[DatasetBloc(dataset=dataset)])])
+
+        self.store(
+            lambda: [
+                SectionBloc(
+                    blocs=[
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(title="alone", content=[grid(remove)]),
+                                AccordionItemBloc(title="kept", content=[grid(keep)]),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+
+        purge_blocs_references(remove)
+
+        for blocs in reload_blocs():
+            assert [item.title for item in blocs[0].blocs[0].items] == ["kept"]
+
+    def test_keeps_an_edit_saved_while_purging(self):
+        """The purge rewrites the whole blocs field: an edit saved between its read and its
+        write must not be lost."""
+        remove = DatasetFactory()
+        post = PostFactory(
+            body_type="blocs", blocs=[SectionBloc(blocs=[DatasetBloc(dataset=remove)])]
+        )
+        without_reference = models._without_reference
+        edited = []
+
+        def edit_while_purging(*args, **kwargs):
+            if not edited:
+                # An editor saves the page right after the purge read it
+                post.blocs = [
+                    SectionBloc(blocs=[TitleBloc(title="Edited"), DatasetBloc(dataset=remove)])
+                ]
+                post.save()
+                edited.append(True)
+            return without_reference(*args, **kwargs)
+
+        with mock.patch.object(models, "_without_reference", side_effect=edit_while_purging):
+            purge_blocs_references(remove)
+
+        post.reload()
+        assert [type(bloc).__name__ for bloc in post.blocs[0].blocs] == ["TitleBloc"]
+        assert post.blocs[0].blocs[0].title == "Edited"

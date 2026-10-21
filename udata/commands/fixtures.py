@@ -23,8 +23,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.edito_blocs.base import Bloc
-from udata.core.edito_blocs.legacy import upgrade_legacy_blocs
-from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, blocs_reference_fields
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.owned import ownership_filter
@@ -117,9 +116,6 @@ UNWANTED_KEYS: dict[str, list[str]] = {
     ],
 }
 
-SINGLE_REFERENCE_FIELDS = ("dataset", "reuse", "dataservice")
-LIST_REFERENCE_FIELDS = ("datasets", "reuses", "dataservices")
-
 
 def remove_unwanted_keys(obj: dict, filter_type: str) -> dict:
     """Remove UNWANTED_KEYS from a dict."""
@@ -146,18 +142,23 @@ def fix_dates(obj: dict) -> dict:
 def clean_blocs_for_generate(blocs: list[dict]) -> list[dict]:
     """Strip the references from blocs: the fixtures don't hold the objects they point to.
 
-    A bloc showing a single object goes with it.
+    As the purge of a deleted object does, a bloc showing a single object goes with it, and
+    so does a container (cell, grid, section, accordion item) left empty.
     """
+    single, many = blocs_reference_fields()
     kept = []
     for bloc in blocs:
-        if any(ref_field in bloc for ref_field in SINGLE_REFERENCE_FIELDS):
+        if any(ref_field in bloc for ref_field in single):
             continue
-        for ref_field in LIST_REFERENCE_FIELDS:
+        for ref_field in many:
             bloc.pop(ref_field, None)
+        emptied = False
         for key, value in bloc.items():
             if isinstance(value, list) and value and isinstance(value[0], dict):
                 bloc[key] = clean_blocs_for_generate(value)
-        kept.append(bloc)
+                emptied = emptied or not bloc[key]
+        if not emptied:
+            kept.append(bloc)
     return kept
 
 
@@ -171,8 +172,7 @@ def to_son(value):
 
 
 def create_blocs_from_dicts(dicts: list[dict]) -> list[Bloc]:
-    # Fixture files exported before the blocs moved to sections hold the legacy format.
-    return [Bloc._from_son(son) for son in upgrade_legacy_blocs(to_son(dicts))]
+    return [Bloc._from_son(son) for son in to_son(dicts)]
 
 
 @cli.command()

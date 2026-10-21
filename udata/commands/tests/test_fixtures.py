@@ -15,6 +15,8 @@ from udata.core.dataset.factories import (
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.edito_blocs.models import (
     DatasetBloc,
+    GridBloc,
+    GridCell,
     HeroBloc,
     LinkInBloc,
     LinksListBloc,
@@ -85,6 +87,15 @@ class FixturesTest(PytestOnlyAPITestCase):
                         DatasetBloc(dataset=dataset),
                     ]
                 ),
+                SectionBloc(
+                    blocs=[
+                        TitleBloc(title="Grid"),
+                        # So does the cell holding it, then the grid left empty.
+                        GridBloc(
+                            cells=[GridCell(width="1/2", blocs=[DatasetBloc(dataset=dataset)])]
+                        ),
+                    ]
+                ),
             ],
         )
 
@@ -150,11 +161,12 @@ class FixturesTest(PytestOnlyAPITestCase):
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        hero, section = result_site.datasets_blocs
+        hero, section, grid_section = result_site.datasets_blocs
         assert hero.title == "Test Hero"
         title, links = section.blocs
         assert title.title == "Test Links"
         assert links.links[0].url == "https://example.com"
+        assert [bloc.title for bloc in grid_section.blocs] == ["Grid"]
 
     def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
@@ -169,3 +181,11 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert models.Dataservice.objects.count() > 0
         assert models.Post.objects.count() > 0
         assert models.Site.objects.count() > 0
+        # The edito pages of the site, their lists stripped at export
+        first, *_ = models.Site.objects.get().datasets_blocs
+        title, *rest = first.blocs
+        assert (title.title, title.subtitle) == (
+            "Jeux de données populaires",
+            "Découvrez quelques-uns des jeux de données les plus populaires sur la plateforme.",
+        )
+        assert rest == []

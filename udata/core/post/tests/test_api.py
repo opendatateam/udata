@@ -32,7 +32,7 @@ from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.settings import NotificationSetting
-from udata.tests.api import APITestCase
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -358,11 +358,11 @@ class PostsAPITest(APITestCase):
         dataset_ids = [d["id"] for d in response.json["datasets"]]
         assert dataset_ids == [str(kept.id)]
 
-    def test_post_api_get_with_dangling_dataset_in_bloc(self):
-        """Getting a post should not crash when a `DatasetBloc` references a
-        hard-deleted dataset: the bloc reads as null. Bloc references live in
-        `EmbeddedDocument`s, which MongoEngine never cleans through
-        `reverse_delete_rule`, so dangling references are expected there."""
+    def make_post_with_dangling_dataset_blocs(self):
+        """A post showing a dataset that is then hard-deleted, at the top of a grid and in a
+        grid of an accordion. Bloc references live in `EmbeddedDocument`s, which MongoEngine
+        never cleans through `reverse_delete_rule`, so dangling references are expected there.
+        """
         kept = DatasetFactory()
         deleted = DatasetFactory()
         nested = AccordionListBloc(
@@ -377,13 +377,31 @@ class PostsAPITest(APITestCase):
                 SectionBloc(blocs=[nested]),
             ],
         )
-
         DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
+        return post, kept
+
+    def test_post_api_get_with_dangling_dataset_in_bloc(self):
+        """A bloc showing a hard-deleted dataset is left out, wherever it is."""
+        post, kept = self.make_post_with_dangling_dataset_blocs()
 
         response = self.get(url_for("api.post", post=post))
         assert200(response)
         cards = list(object_cards(response.json["blocs"]))
-        assert [card and card["id"] for card in cards] == [str(kept.id), None, None]
+        assert [card["id"] for card in cards] == [str(kept.id)]
+
+    def test_post_api_blocs_with_dangling_dataset_can_be_saved_back(self):
+        """The editor sends back the blocs it read: a dangling reference must not make the
+        page impossible to save."""
+        post, kept = self.make_post_with_dangling_dataset_blocs()
+        self.login(AdminFactory())
+
+        blocs = self.get(url_for("api.post", post=post)).json["blocs"]
+        response = self.put(url_for("api.post", post=post), {"blocs": blocs})
+
+        assert200(response)
+        post.reload()
+        assert [card["id"] for card in object_cards(response.json["blocs"])] == [str(kept.id)]
+        assert post.blocs[0].blocs[0].cells[0].blocs[0].dataset.id == kept.id
 
     def test_post_api_create(self):
         """It should create a post from the API"""
@@ -931,128 +949,6 @@ class PostsAPITest(APITestCase):
             assert400(response)
         assert Post.objects.count() == 0
 
-    def test_post_api_rejects_blocs_out_of_layout(self):
-        self.login(AdminFactory())
-        for case in [
-            pytest.param([{"class": "TitleBloc", "title": "T"}], id="leaf-at-top-level"),
-            pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "SectionBloc", "blocs": []}]}],
-                id="section-in-section",
-            ),
-            pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "HeroBloc", "title": "H"}]}],
-                id="hero-in-section",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "GridBloc",
-                                "cells": [
-                                    {"width": "1", "blocs": [{"class": "GridBloc", "cells": []}]}
-                                ],
-                            }
-                        ],
-                    }
-                ],
-                id="grid-in-grid",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "AccordionListBloc",
-                                "items": [
-                                    {
-                                        "title": "I",
-                                        "content": [{"class": "AccordionListBloc", "items": []}],
-                                    }
-                                ],
-                            }
-                        ],
-                    }
-                ],
-                id="accordion-in-accordion",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "AccordionListBloc",
-                                "items": [
-                                    {
-                                        "title": "I",
-                                        "content": [
-                                            {
-                                                "class": "GridBloc",
-                                                "cells": [
-                                                    {
-                                                        "width": "1",
-                                                        "blocs": [
-                                                            {
-                                                                "class": "ExploreBloc",
-                                                                "resource_id": str(uuid4()),
-                                                            }
-                                                        ],
-                                                    }
-                                                ],
-                                            }
-                                        ],
-                                    }
-                                ],
-                            }
-                        ],
-                    }
-                ],
-                id="explore-in-accordion-grid",
-            ),
-            pytest.param(
-                [{"class": "DatasetsListBloc", "datasets": []}], id="legacy-list-at-top-level"
-            ),
-            pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "ReusesListBloc", "reuses": []}]}],
-                id="legacy-list-in-section",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "MarkdownBloc", "title": "T", "content": "C"}],
-                    }
-                ],
-                id="legacy-title",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "AccordionListBloc", "description": "D", "items": []}],
-                    }
-                ],
-                id="legacy-accordion-description",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "GridBloc", "cells": [{"width": "1/5", "blocs": []}]}],
-                    }
-                ],
-                id="unknown-width",
-            ),
-        ]:
-            (blocs,) = case.values
-            data = {"name": "Test blocs post", "body_type": "blocs", "blocs": blocs}
-            response = self.post(url_for("api.posts"), data)
-            assert response.status_code == 400, case.id
-        assert Post.objects.count() == 0
-
     def test_post_api_get_with_blocs(self):
         """It should return blocs directly on the post"""
         dataset = DatasetFactory()
@@ -1171,3 +1067,129 @@ class PostsAPITest(APITestCase):
             json=False,
         )
         assert400(response)
+
+
+class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
+    @pytest.mark.parametrize(
+        "blocs",
+        [
+            pytest.param([{"class": "TitleBloc", "title": "T"}], id="leaf-at-top-level"),
+            pytest.param(
+                [{"class": "SectionBloc", "blocs": [{"class": "SectionBloc", "blocs": []}]}],
+                id="section-in-section",
+            ),
+            pytest.param(
+                [{"class": "SectionBloc", "blocs": [{"class": "HeroBloc", "title": "H"}]}],
+                id="hero-in-section",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [
+                            {
+                                "class": "GridBloc",
+                                "cells": [
+                                    {"width": "1", "blocs": [{"class": "GridBloc", "cells": []}]}
+                                ],
+                            }
+                        ],
+                    }
+                ],
+                id="grid-in-grid",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [
+                            {
+                                "class": "AccordionListBloc",
+                                "items": [
+                                    {
+                                        "title": "I",
+                                        "content": [{"class": "AccordionListBloc", "items": []}],
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+                id="accordion-in-accordion",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [
+                            {
+                                "class": "AccordionListBloc",
+                                "items": [
+                                    {
+                                        "title": "I",
+                                        "content": [
+                                            {
+                                                "class": "GridBloc",
+                                                "cells": [
+                                                    {
+                                                        "width": "1",
+                                                        "blocs": [
+                                                            {
+                                                                "class": "ExploreBloc",
+                                                                "resource_id": str(uuid4()),
+                                                            }
+                                                        ],
+                                                    }
+                                                ],
+                                            }
+                                        ],
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+                id="explore-in-accordion-grid",
+            ),
+            pytest.param(
+                [{"class": "DatasetsListBloc", "datasets": []}], id="legacy-list-at-top-level"
+            ),
+            pytest.param(
+                [{"class": "SectionBloc", "blocs": [{"class": "ReusesListBloc", "reuses": []}]}],
+                id="legacy-list-in-section",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "MarkdownBloc", "title": "T", "content": "C"}],
+                    }
+                ],
+                id="legacy-title",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "AccordionListBloc", "description": "D", "items": []}],
+                    }
+                ],
+                id="legacy-accordion-description",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "GridBloc", "cells": [{"width": "1/5", "blocs": []}]}],
+                    }
+                ],
+                id="unknown-width",
+            ),
+        ],
+    )
+    def test_post_api_rejects_blocs_out_of_layout(self, blocs):
+        self.login(AdminFactory())
+        data = {"name": "Test blocs post", "body_type": "blocs", "blocs": blocs}
+        response = self.post(url_for("api.posts"), data)
+        assert response.status_code == 400
+        assert Post.objects.count() == 0

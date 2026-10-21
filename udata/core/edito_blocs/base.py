@@ -49,21 +49,25 @@ def prefetch_blocs_references(blocs):
     so we stop paying to deserialize data that isn't serialized — the dominant cost on
     real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
+    A bloc showing a single object that no longer exists (hard-deleted before
+    `purge_blocs_references` ran) is left out of its list: served as null, the editor would
+    send it back, and the required reference would make the page impossible to save.
+
     This runs once per marshalled bloc list — including the nested ones, since a
     section's `blocs` or a grid cell's `blocs` is a bloc list of its own. The top-level
-    call already walked the whole tree and marked the blocs it went through, so their
-    lists are skipped when their own field is marshalled in turn.
+    call already walked the whole tree and marked the blocs it went through, so they are
+    skipped when their own list is marshalled in turn.
     """
-    if all(getattr(bloc, "_blocs_prefetched", False) for bloc in blocs):
-        return
-
     # (bloc, attr, model, [referenced ids]) for every bloc holding a list of references.
     collected: list[tuple] = []
-    # (bloc, attr, model, referenced id) for every bloc holding a single reference.
+    # (list holding the bloc, bloc, attr, model, referenced id) for every bloc holding a
+    # single reference.
     collected_single: list[tuple] = []
 
     def walk(blocs):
         for bloc in blocs:
+            if getattr(bloc, "_blocs_prefetched", False):
+                continue
             bloc._blocs_prefetched = True
             for attr, mongo_field in type(bloc)._fields.items():
                 if isinstance(mongo_field, ReferenceField):
@@ -71,19 +75,18 @@ def prefetch_blocs_references(blocs):
                     # organization/owner) when the blocs list holding it was read.
                     ref = bloc._data.get(attr)
                     if ref is not None:
-                        collected_single.append((bloc, attr, mongo_field.document_type, ref.id))
+                        collected_single.append(
+                            (blocs, bloc, attr, mongo_field.document_type, ref.id)
+                        )
                 elif isinstance(mongo_field, ListField) and isinstance(
                     mongo_field.field, ReferenceField
                 ):
                     # A `ListField(ReferenceField)`: read the raw references from `_data`
                     # to avoid a per-bloc dereference (we batch them across all blocs).
                     refs = bloc._data.get(attr)
-                    if not refs or getattr(refs, "_dereferenced", False):
-                        # Nothing to load, or a nested list an outer call already
-                        # resolved (see the docstring on re-entrance).
-                        continue
-                    model = mongo_field.field.document_type
-                    collected.append((bloc, attr, model, [ref.id for ref in refs]))
+                    if refs:
+                        model = mongo_field.field.document_type
+                        collected.append((bloc, attr, model, [ref.id for ref in refs]))
                 elif isinstance(mongo_field, EmbeddedDocumentListField):
                     # Recurse into nested blocs (e.g. grid cells -> blocs). Read from `_data`:
                     # reading the attribute would dereference the list's references on its
@@ -95,7 +98,7 @@ def prefetch_blocs_references(blocs):
     ids_by_model: dict = {}
     for _, _, model, ids in collected:
         ids_by_model.setdefault(model, set()).update(ids)
-    for _, _, model, ref_id in collected_single:
+    for _, _, _, model, ref_id in collected_single:
         ids_by_model.setdefault(model, set()).add(ref_id)
 
     docs_by_model = {}
@@ -112,9 +115,13 @@ def prefetch_blocs_references(blocs):
         resolved._dereferenced = True
         bloc._data[attr] = resolved
 
-    for bloc, attr, model, ref_id in collected_single:
-        # A reference to a hard-deleted document is serialized as null.
-        bloc._data[attr] = docs_by_model[model].get(ref_id)
+    for holder, bloc, attr, model, ref_id in collected_single:
+        document = docs_by_model[model].get(ref_id)
+        if document is None:
+            # By identity: two blocs can be equal (same object shown twice).
+            del holder[next(i for i, held in enumerate(holder) if held is bloc)]
+        else:
+            bloc._data[attr] = document
 
 
 # `Bloc` lives in its own module (separate from sibling subclasses like
