@@ -54,18 +54,28 @@ french_synonym = token_filter(
 )
 
 
-# Turn "." / "_" between letters into spaces so "data.gouv" and "data gouv" tokenize the same.
-# Digits stay intact (2.5, PM2.5).
+# Join a dotted acronym before the stop filter sees it. Otherwise C.C.A.S. is split
+# into c/c/a/s, _french_ drops c and s, and the query is the leftover letter "a".
+# Each "X." is its own match, so one pass turns C.C.A.S. and M.E.N. into CCAS and MEN.
+# Digits are not letters, so 2.5 and PM2.5 stay as they are.
+glue_acronyms = char_filter(
+    "glue_acronyms",
+    type="pattern_replace",
+    pattern=r"(?<!\p{L})(\p{L})[._]+(?=\p{L}(?!\p{L}))",
+    replacement="$1",
+)
+# A dot or underscore between longer words becomes a space (data.gouv, data_gouv).
+# Both sides need two letters, so a single-letter acronym is left for glue_acronyms.
 punct_to_space = char_filter(
     "punct_to_space",
     type="pattern_replace",
-    pattern=r"(?<=\p{L})[._]+(?=\p{L})",
+    pattern=r"(?<=\p{L}{2})[._]+(?=\p{L}{2})",
     replacement=" ",
 )
 dgv_analyzer = analyzer(
     "french_dgv",
     tokenizer=tokenizer("icu_tokenizer"),
-    char_filter=[punct_to_space],
+    char_filter=[glue_acronyms, punct_to_space],
     filter=["icu_folding", french_elision, french_synonym, french_stemmer, french_stop],
 )
 
