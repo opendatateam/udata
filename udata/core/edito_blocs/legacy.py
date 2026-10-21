@@ -30,15 +30,21 @@ LEGACY_LISTS = {
     "ReusesListBloc": LegacyList("reuses", "ReuseBloc", "reuse", "1/3"),
 }
 
-# Legacy bloc -> (title field, secondary text field)
+
+class LegacyTitle(NamedTuple):
+    title_field: str
+    # The text under the title: the subtitle of the `TitleBloc` replacing them
+    secondary_field: str
+
+
 LEGACY_TITLES = {
-    "DatasetsListBloc": ("title", "subtitle"),
-    "DataservicesListBloc": ("title", "subtitle"),
-    "ReusesListBloc": ("title", "subtitle"),
-    "MarkdownBloc": ("title", "subtitle"),
-    "LinksListBloc": ("title", "subtitle"),
-    "ExploreBloc": ("title", "subtitle"),
-    "AccordionListBloc": ("title", "description"),
+    "DatasetsListBloc": LegacyTitle("title", "subtitle"),
+    "DataservicesListBloc": LegacyTitle("title", "subtitle"),
+    "ReusesListBloc": LegacyTitle("title", "subtitle"),
+    "MarkdownBloc": LegacyTitle("title", "subtitle"),
+    "LinksListBloc": LegacyTitle("title", "subtitle"),
+    "ExploreBloc": LegacyTitle("title", "subtitle"),
+    "AccordionListBloc": LegacyTitle("title", "description"),
 }
 
 
@@ -52,9 +58,9 @@ def _upgrade_content(bloc: dict, keep_reference: Callable[[object], bool]) -> li
     upgraded = []
 
     if cls in LEGACY_TITLES:
-        title_field, secondary_field = LEGACY_TITLES[cls]
-        title = bloc.pop(title_field, None)
-        secondary = bloc.pop(secondary_field, None)
+        legacy_title = LEGACY_TITLES[cls]
+        title = bloc.pop(legacy_title.title_field, None)
+        secondary = bloc.pop(legacy_title.secondary_field, None)
         has_title = bool(title and title.strip())
         has_secondary = bool(secondary and secondary.strip())
         if has_title:

@@ -1,6 +1,7 @@
 import copy
 import logging
 import uuid
+from collections.abc import Callable
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
@@ -88,8 +89,6 @@ class DatasetBloc(Bloc):
     dataset = field(
         ReferenceField("Dataset", required=True),
         nested_fields=dataset_card_fields,
-        # A dataset hard-deleted before `purge_blocs_references` ran reads as null.
-        allow_null=True,
     )
 
 
@@ -98,7 +97,6 @@ class ReuseBloc(Bloc):
     reuse = field(
         ReferenceField("Reuse", required=True),
         nested_fields=reuse_card_fields,
-        allow_null=True,
     )
 
 
@@ -107,7 +105,6 @@ class DataserviceBloc(Bloc):
     dataservice = field(
         ReferenceField("Dataservice", required=True),
         nested_fields=dataservice_card_fields,
-        allow_null=True,
     )
 
 
@@ -208,16 +205,13 @@ class SectionBloc(Bloc):
     blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
-# Where a bloc can sit inside a blocs field, following the layout checked by
-# `check_blocs_layout`. The last one is the legacy accordion at the top level, until the
-# `2026-10-21-blocs-sections` migration ran.
+# Where a bloc showing an object can sit inside a blocs field, following the layout checked
+# by `check_blocs_layout`.
 BLOCS_CONTAINER_PATHS = (
-    "",
     "blocs.",
     "blocs.cells.blocs.",
     "blocs.items.content.",
     "blocs.items.content.cells.blocs.",
-    "items.content.",
 )
 
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
@@ -226,66 +220,65 @@ SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 PURGE_ATTEMPTS = 3
 
 
-def blocs_reference_fields(document_type=None) -> tuple[set, set]:
-    """Names of the bloc fields referencing `document_type` (any document without it):
-    single references, and lists of references (the legacy `*ListBloc`)."""
-    single, many = set(), set()
-    for bloc_class in classes_by_parents.get(Bloc, set()):
-        for name, mongo_field in bloc_class._fields.items():
-            if isinstance(mongo_field, ReferenceField):
-                if document_type is None or mongo_field.document_type is document_type:
-                    single.add(name)
-            elif isinstance(mongo_field, ListField) and isinstance(
-                mongo_field.field, ReferenceField
-            ):
-                if document_type is None or mongo_field.field.document_type is document_type:
-                    many.add(name)
-    return single, many
+def blocs_reference_fields(document_type=None) -> set[str]:
+    """Names of the bloc fields referencing a `document_type` (any document without it).
+
+    The lists of references of the legacy `*ListBloc`s are left out: blocs still in that
+    format are only read, and the read leaves out the objects that no longer exist.
+    """
+    return {
+        name
+        for bloc_class in classes_by_parents.get(Bloc, set())
+        for name, mongo_field in bloc_class._fields.items()
+        if isinstance(mongo_field, ReferenceField)
+        and (document_type is None or mongo_field.document_type is document_type)
+    }
 
 
-def _without_reference(items: list, obj_id, single: set, many: set) -> list:
+def without_blocs(items: list[dict], removed: Callable[[dict], bool]) -> list[dict]:
+    """Blocs as stored or serialized, without the `removed` ones, at any depth.
+
+    A container (grid, cell, section, accordion item) left empty only held removed blocs:
+    it goes with them.
+    """
     kept = []
     for item in items:
-        if any(item.get(name) == obj_id for name in single):
+        if removed(item):
             continue
         emptied = False
         for key, value in item.items():
-            if not isinstance(value, list) or not value:
-                continue
-            if key in many:
-                # Unlike a container, a legacy list bloc carries its own title: it stays.
-                item[key] = [ref for ref in value if ref != obj_id]
-            elif isinstance(value[0], dict):
-                item[key] = _without_reference(value, obj_id, single, many)
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                item[key] = without_blocs(value, removed)
                 emptied = emptied or not item[key]
-        # A container (grid, cell, section, accordion item) left empty by the purge only
-        # held the removed object: it goes with it.
         if not emptied:
             kept.append(item)
     return kept
 
 
 def purge_blocs_references(obj):
-    """Remove the blocs (or legacy list entries) referencing a deleted object from all
-    the blocs fields of Post, Site and Organization."""
+    """Remove the blocs referencing a deleted object from all the blocs fields of Post,
+    Site and Organization."""
     from udata.core.organization.models import Organization
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
-    single, many = blocs_reference_fields(type(obj))
+    names = blocs_reference_fields(type(obj))
+
+    def references_obj(bloc: dict) -> bool:
+        return any(bloc.get(name) == obj.id for name in names)
 
     def purge(collection, blocs_field):
         query = {
             "$or": [
                 {f"{blocs_field}.{path}{name}": obj.id}
                 for path in BLOCS_CONTAINER_PATHS
-                for name in single | many
+                for name in names
             ]
         }
         for doc in collection.find(query, {blocs_field: 1}):
             for _ in range(PURGE_ATTEMPTS):
                 read = doc[blocs_field]
-                blocs = _without_reference(copy.deepcopy(read), obj.id, single, many)
+                blocs = without_blocs(copy.deepcopy(read), references_obj)
                 # Written only if nobody saved the field since it was read: the whole field
                 # is rewritten, an edit made in between would be lost.
                 result = collection.update_one(

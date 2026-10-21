@@ -19,6 +19,7 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataserviceBloc,
     DatasetBloc,
+    DatasetsListBloc,
     ExploreBloc,
     GridBloc,
     GridCell,
@@ -381,13 +382,15 @@ class PostsAPITest(APITestCase):
         return post, kept
 
     def test_post_api_get_with_dangling_dataset_in_bloc(self):
-        """A bloc showing a hard-deleted dataset is left out, wherever it is."""
+        """A bloc showing a hard-deleted dataset is left out, wherever it is, with the
+        containers it leaves empty: the cell, then everything up to the second section."""
         post, kept = self.make_post_with_dangling_dataset_blocs()
 
         response = self.get(url_for("api.post", post=post))
         assert200(response)
-        cards = list(object_cards(response.json["blocs"]))
-        assert [card["id"] for card in cards] == [str(kept.id)]
+        (section,) = response.json["blocs"]
+        (grid_bloc,) = section["blocs"]
+        assert [cell["blocs"][0]["dataset"]["id"] for cell in grid_bloc["cells"]] == [str(kept.id)]
 
     def test_post_api_blocs_with_dangling_dataset_can_be_saved_back(self):
         """The editor sends back the blocs it read: a dangling reference must not make the
@@ -400,8 +403,37 @@ class PostsAPITest(APITestCase):
 
         assert200(response)
         post.reload()
-        assert [card["id"] for card in object_cards(response.json["blocs"])] == [str(kept.id)]
-        assert post.blocs[0].blocs[0].cells[0].blocs[0].dataset.id == kept.id
+        (section,) = post.blocs
+        (grid_bloc,) = section.blocs
+        assert [cell.blocs[0].dataset.id for cell in grid_bloc.cells] == [kept.id]
+
+    def test_post_api_get_legacy_blocs_with_dangling_dataset(self):
+        """Blocs not migrated yet to sections are still read, without the hard-deleted
+        datasets of their lists, at the top level and in an accordion."""
+        kept = DatasetFactory()
+        deleted = DatasetFactory()
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                DatasetsListBloc(title="T", datasets=[kept, deleted]),
+                AccordionListBloc(
+                    items=[
+                        AccordionItemBloc(
+                            title="i", content=[DatasetsListBloc(datasets=[kept, deleted])]
+                        )
+                    ]
+                ),
+            ],
+        )
+        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
+
+        response = self.get(url_for("api.post", post=post))
+
+        assert200(response)
+        top_level, accordion = response.json["blocs"]
+        assert [d["id"] for d in top_level["datasets"]] == [str(kept.id)]
+        nested = accordion["items"][0]["content"][0]
+        assert [d["id"] for d in nested["datasets"]] == [str(kept.id)]
 
     def test_post_api_create(self):
         """It should create a post from the API"""

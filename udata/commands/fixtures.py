@@ -12,6 +12,7 @@ import click
 import requests
 from flask import current_app
 
+from udata.api_fields import patch
 from udata.commands import cli
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
@@ -22,8 +23,11 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.base import Bloc
-from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS, blocs_reference_fields
+from udata.core.edito_blocs.models import (
+    SITE_BLOCS_FIELDS,
+    blocs_reference_fields,
+    without_blocs,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.owned import ownership_filter
@@ -140,39 +144,9 @@ def fix_dates(obj: dict) -> dict:
 
 
 def clean_blocs_for_generate(blocs: list[dict]) -> list[dict]:
-    """Strip the references from blocs: the fixtures don't hold the objects they point to.
-
-    As the purge of a deleted object does, a bloc showing a single object goes with it, and
-    so does a container (cell, grid, section, accordion item) left empty.
-    """
-    single, many = blocs_reference_fields()
-    kept = []
-    for bloc in blocs:
-        if any(ref_field in bloc for ref_field in single):
-            continue
-        for ref_field in many:
-            bloc.pop(ref_field, None)
-        emptied = False
-        for key, value in bloc.items():
-            if isinstance(value, list) and value and isinstance(value[0], dict):
-                bloc[key] = clean_blocs_for_generate(value)
-                emptied = emptied or not bloc[key]
-        if not emptied:
-            kept.append(bloc)
-    return kept
-
-
-def to_son(value):
-    """Rename the keys of blocs serialized by the API to the ones they are stored with."""
-    if isinstance(value, list):
-        return [to_son(item) for item in value]
-    if isinstance(value, dict):
-        return {{"class": "_cls", "id": "_id"}.get(k, k): to_son(v) for k, v in value.items()}
-    return value
-
-
-def create_blocs_from_dicts(dicts: list[dict]) -> list[Bloc]:
-    return [Bloc._from_son(son) for son in to_son(dicts)]
+    """Remove the blocs showing an object: the fixtures don't hold the objects they show."""
+    names = blocs_reference_fields()
+    return without_blocs(blocs, lambda bloc: any(name in bloc for name in names))
 
 
 @cli.command()
@@ -322,16 +296,6 @@ def import_fixtures(source):
         with open(source) as f:
             json_fixtures = json.load(f)
 
-    # Import site
-    site_data = json_fixtures.get("site")
-    if site_data:
-        site_data = remove_unwanted_keys(site_data, "site")
-        for blocs_field in SITE_BLOCS_FIELDS:
-            if blocs_field in site_data:
-                site_data[blocs_field] = create_blocs_from_dicts(site_data.pop(blocs_field))
-        if not Site.objects(id=site_data["id"]).first():
-            SiteFactory(**site_data)
-
     # Import datasets
     with click.progressbar(json_fixtures["datasets"], label="Importing datasets") as bar:
         for fixture in bar:
@@ -398,11 +362,12 @@ def import_fixtures(source):
                     **dataservice, datasets=[dataset], **ownership_filter(dataservice_owner)
                 )
 
-    # Import posts
+    # Import posts and the site last: their blocs are checked as the API would, and an
+    # explorer bloc requires the resource it explores.
     for post_data in json_fixtures.get("posts", []):
         post_data = remove_unwanted_keys(post_data, "post")
         user = UserFactory()
-        blocs = create_blocs_from_dicts(post_data.pop("blocs", []))
+        blocs = patch(Post(), {"blocs": post_data.pop("blocs", [])}).blocs
         if not Post.objects(id=post_data["id"]).first():
             PostFactory(
                 **post_data,
@@ -411,3 +376,11 @@ def import_fixtures(source):
                 datasets=[],
                 reuses=[],
             )
+
+    site_data = json_fixtures.get("site")
+    if site_data:
+        site_data = remove_unwanted_keys(site_data, "site")
+        blocs = {field: site_data.pop(field) for field in SITE_BLOCS_FIELDS if field in site_data}
+        site = patch(Site(), blocs)
+        if not Site.objects(id=site_data["id"]).first():
+            SiteFactory(**site_data, **{field: getattr(site, field) for field in blocs})

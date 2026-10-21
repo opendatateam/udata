@@ -9,13 +9,10 @@ from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
     DataserviceBloc,
-    DataservicesListBloc,
     DatasetBloc,
-    DatasetsListBloc,
     GridBloc,
     GridCell,
     ReuseBloc,
-    ReusesListBloc,
     SectionBloc,
     TitleBloc,
     purge_blocs_references,
@@ -29,12 +26,12 @@ from udata.core.site.factories import SiteFactory
 from udata.core.site.models import Site
 from udata.tests.api import PytestOnlyDBTestCase
 
-# (factory, bloc class, its reference field, legacy list bloc class, its list field): one entry
-# per referenceable type, so the purge is checked exhaustively.
+# (factory, bloc class, its reference field): one entry per referenceable type, so the purge
+# is checked exhaustively.
 CASES = [
-    (DatasetFactory, DatasetBloc, "dataset", DatasetsListBloc, "datasets"),
-    (ReuseFactory, ReuseBloc, "reuse", ReusesListBloc, "reuses"),
-    (DataserviceFactory, DataserviceBloc, "dataservice", DataservicesListBloc, "dataservices"),
+    (DatasetFactory, DatasetBloc, "dataset"),
+    (ReuseFactory, ReuseBloc, "reuse"),
+    (DataserviceFactory, DataserviceBloc, "dataservice"),
 ]
 
 
@@ -53,8 +50,8 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
         SiteFactory(id="test-site", datasets_blocs=make_blocs())
         OrganizationFactory(presentation_blocs=make_blocs())
 
-    @pytest.mark.parametrize("factory,bloc_cls,ref,_legacy_cls,_legacy_ref", CASES)
-    def test_removes_the_bloc_in_a_section(self, factory, bloc_cls, ref, _legacy_cls, _legacy_ref):
+    @pytest.mark.parametrize("factory,bloc_cls,ref", CASES)
+    def test_removes_the_bloc_in_a_section(self, factory, bloc_cls, ref):
         keep, remove = factory(), factory()
         self.store(
             lambda: [
@@ -75,10 +72,34 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
             assert title.title == "t"
             assert getattr(kept, ref).id == keep.id
 
-    @pytest.mark.parametrize("factory,bloc_cls,ref,_legacy_cls,_legacy_ref", CASES)
-    def test_removes_the_grid_cell_left_empty(
-        self, factory, bloc_cls, ref, _legacy_cls, _legacy_ref
-    ):
+    @pytest.mark.parametrize("factory,bloc_cls,ref", CASES)
+    def test_removes_the_bloc_in_an_accordion_item(self, factory, bloc_cls, ref):
+        keep, remove = factory(), factory()
+        self.store(
+            lambda: [
+                SectionBloc(
+                    blocs=[
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="i",
+                                    content=[bloc_cls(**{ref: remove}), bloc_cls(**{ref: keep})],
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+
+        purge_blocs_references(remove)
+
+        for blocs in reload_blocs():
+            content = blocs[0].blocs[0].items[0].content
+            assert [getattr(bloc, ref).id for bloc in content] == [keep.id]
+
+    @pytest.mark.parametrize("factory,bloc_cls,ref", CASES)
+    def test_removes_the_grid_cell_left_empty(self, factory, bloc_cls, ref):
         keep, remove = factory(), factory()
 
         def grid(*objects):
@@ -144,42 +165,6 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
         for blocs in reload_blocs():
             assert [bloc.dataset.id for bloc in blocs[0].blocs] == [dataset.id]
 
-    @pytest.mark.parametrize("factory,_bloc_cls,_ref,legacy_cls,legacy_ref", CASES)
-    def test_purges_legacy_blocs(self, factory, _bloc_cls, _ref, legacy_cls, legacy_ref):
-        """Blocs not migrated yet to sections are purged too."""
-        keep, remove = factory(), factory()
-        self.store(
-            lambda: [
-                legacy_cls(title="t", **{legacy_ref: [remove, keep]}),
-                AccordionListBloc(
-                    title="a",
-                    items=[
-                        AccordionItemBloc(
-                            title="i", content=[legacy_cls(**{legacy_ref: [remove, keep]})]
-                        )
-                    ],
-                ),
-            ]
-        )
-
-        purge_blocs_references(remove)
-
-        for blocs in reload_blocs():
-            top_level, accordion = blocs
-            assert [r.id for r in getattr(top_level, legacy_ref)] == [keep.id]
-            nested = accordion.items[0].content[0]
-            assert [r.id for r in getattr(nested, legacy_ref)] == [keep.id]
-
-    def test_keeps_a_legacy_list_left_empty(self):
-        """Unlike a container, a legacy list bloc carries its own title."""
-        remove = DatasetFactory()
-        self.store(lambda: [DatasetsListBloc(title="t", datasets=[remove])])
-
-        purge_blocs_references(remove)
-
-        for blocs in reload_blocs():
-            assert [(bloc.title, list(bloc.datasets)) for bloc in blocs] == [("t", [])]
-
     def test_removes_the_accordion_item_left_empty(self):
         keep, remove = DatasetFactory(), DatasetFactory()
 
@@ -213,7 +198,7 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
         post = PostFactory(
             body_type="blocs", blocs=[SectionBloc(blocs=[DatasetBloc(dataset=remove)])]
         )
-        without_reference = models._without_reference
+        without_blocs = models.without_blocs
         edited = []
 
         def edit_while_purging(*args, **kwargs):
@@ -224,9 +209,9 @@ class PurgeBlocsReferencesTest(PytestOnlyDBTestCase):
                 ]
                 post.save()
                 edited.append(True)
-            return without_reference(*args, **kwargs)
+            return without_blocs(*args, **kwargs)
 
-        with mock.patch.object(models, "_without_reference", side_effect=edit_while_purging):
+        with mock.patch.object(models, "without_blocs", side_effect=edit_while_purging):
             purge_blocs_references(remove)
 
         post.reload()

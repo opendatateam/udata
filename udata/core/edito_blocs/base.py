@@ -1,3 +1,6 @@
+from typing import NamedTuple
+
+from bson import ObjectId
 from mongoengine import EmbeddedDocument
 from mongoengine.base.datastructures import BaseList
 from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField
@@ -28,6 +31,25 @@ CARD_UNUSED_HEAVY_FIELDS = (
 )
 
 
+class SingleReference(NamedTuple):
+    """A bloc showing a single object, as collected by `prefetch_blocs_references`."""
+
+    holder: list
+    bloc: EmbeddedDocument
+    attr: str
+    model: type
+    id: ObjectId
+
+
+class ListOfReferences(NamedTuple):
+    """A legacy bloc listing several objects, as collected by `prefetch_blocs_references`."""
+
+    bloc: EmbeddedDocument
+    attr: str
+    model: type
+    ids: list[ObjectId]
+
+
 def prefetch_blocs_references(blocs):
     """Batch-load the datasets/reuses/dataservices referenced by a list of blocs.
 
@@ -49,20 +71,19 @@ def prefetch_blocs_references(blocs):
     so we stop paying to deserialize data that isn't serialized — the dominant cost on
     real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
-    A bloc showing a single object that no longer exists (hard-deleted before
-    `purge_blocs_references` ran) is left out of its list: served as null, the editor would
-    send it back, and the required reference would make the page impossible to save.
+    A bloc showing a single object that no longer exists (hard-deleted while
+    `purge_blocs_references` ran) is left out, as the purge would have done: with the
+    container it leaves empty (cell, grid, section, accordion item).
 
     This runs once per marshalled bloc list — including the nested ones, since a
     section's `blocs` or a grid cell's `blocs` is a bloc list of its own. The top-level
     call already walked the whole tree and marked the blocs it went through, so they are
     skipped when their own list is marshalled in turn.
     """
-    # (bloc, attr, model, [referenced ids]) for every bloc holding a list of references.
-    collected: list[tuple] = []
-    # (list holding the bloc, bloc, attr, model, referenced id) for every bloc holding a
-    # single reference.
-    collected_single: list[tuple] = []
+    collected: list[ListOfReferences] = []
+    collected_single: list[SingleReference] = []
+    # The list holding each container, by the id of the list it contains
+    containers: dict[int, tuple[list, object]] = {}
 
     def walk(blocs):
         for bloc in blocs:
@@ -76,7 +97,7 @@ def prefetch_blocs_references(blocs):
                     ref = bloc._data.get(attr)
                     if ref is not None:
                         collected_single.append(
-                            (blocs, bloc, attr, mongo_field.document_type, ref.id)
+                            SingleReference(blocs, bloc, attr, mongo_field.document_type, ref.id)
                         )
                 elif isinstance(mongo_field, ListField) and isinstance(
                     mongo_field.field, ReferenceField
@@ -86,20 +107,31 @@ def prefetch_blocs_references(blocs):
                     refs = bloc._data.get(attr)
                     if refs:
                         model = mongo_field.field.document_type
-                        collected.append((bloc, attr, model, [ref.id for ref in refs]))
+                        collected.append(
+                            ListOfReferences(bloc, attr, model, [ref.id for ref in refs])
+                        )
                 elif isinstance(mongo_field, EmbeddedDocumentListField):
                     # Recurse into nested blocs (e.g. grid cells -> blocs). Read from `_data`:
                     # reading the attribute would dereference the list's references on its
                     # own, one query per list.
-                    walk(bloc._data.get(attr) or [])
+                    nested = bloc._data.get(attr)
+                    if nested:
+                        containers[id(nested)] = (blocs, bloc)
+                        walk(nested)
+
+    def remove(holder: list, item):
+        # By identity: two blocs can be equal (same object shown twice).
+        del holder[next(i for i, held in enumerate(holder) if held is item)]
+        if not holder and id(holder) in containers:
+            remove(*containers[id(holder)])
 
     walk(blocs)
 
     ids_by_model: dict = {}
-    for _, _, model, ids in collected:
-        ids_by_model.setdefault(model, set()).update(ids)
-    for _, _, _, model, ref_id in collected_single:
-        ids_by_model.setdefault(model, set()).add(ref_id)
+    for references in collected:
+        ids_by_model.setdefault(references.model, set()).update(references.ids)
+    for reference in collected_single:
+        ids_by_model.setdefault(reference.model, set()).add(reference.id)
 
     docs_by_model = {}
     for model, ids in ids_by_model.items():
@@ -107,21 +139,24 @@ def prefetch_blocs_references(blocs):
         queryset = model.objects(id__in=list(ids)).exclude(*unused).select_related()
         docs_by_model[model] = {doc.id: doc for doc in queryset}
 
-    for bloc, attr, model, ids in collected:
-        by_id = docs_by_model[model]
+    for references in collected:
+        by_id = docs_by_model[references.model]
         # Mark the list as already dereferenced so marshalling reads it as-is instead
         # of dereferencing each reference (and its organization) again.
-        resolved = BaseList([by_id[ref_id] for ref_id in ids if ref_id in by_id], bloc, attr)
+        resolved = BaseList(
+            [by_id[ref_id] for ref_id in references.ids if ref_id in by_id],
+            references.bloc,
+            references.attr,
+        )
         resolved._dereferenced = True
-        bloc._data[attr] = resolved
+        references.bloc._data[references.attr] = resolved
 
-    for holder, bloc, attr, model, ref_id in collected_single:
-        document = docs_by_model[model].get(ref_id)
+    for reference in collected_single:
+        document = docs_by_model[reference.model].get(reference.id)
         if document is None:
-            # By identity: two blocs can be equal (same object shown twice).
-            del holder[next(i for i, held in enumerate(holder) if held is bloc)]
+            remove(reference.holder, reference.bloc)
         else:
-            bloc._data[attr] = document
+            reference.bloc._data[reference.attr] = document
 
 
 # `Bloc` lives in its own module (separate from sibling subclasses like
