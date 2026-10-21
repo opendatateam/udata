@@ -35,7 +35,9 @@ _SITEMAP_CONFIGS = [
         "organizations", Organization, "visible", ["slug", "last_modified"], "last_modified"
     ),
     SitemapConfig("reuses", Reuse, "visible", ["slug", "last_modified"], "last_modified"),
-    SitemapConfig("posts", Post, "visible", ["slug", "last_modified"], "last_modified"),
+    SitemapConfig(
+        "posts", Post, "visible", ["slug", "kind", "parent", "last_modified"], "last_modified"
+    ),
     SitemapConfig(
         "dataservices",
         Dataservice,
