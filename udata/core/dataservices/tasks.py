@@ -39,7 +39,7 @@ def purge_dataservices(self):
         Assignment.objects(subject=dataservice).delete()
         # Remove dataservices references in Topics
         TopicElement.objects(element=dataservice).update(element=None)
-        purge_blocs_references("dataservices", dataservice.id)
+        purge_blocs_references(dataservice)
         # Remove dataservice
         dataservice.delete()
 

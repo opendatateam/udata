@@ -22,19 +22,9 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.models import (
-    SITE_BLOCS_FIELDS,
-    AccordionItemBloc,
-    AccordionListBloc,
-    DataservicesListBloc,
-    DatasetsListBloc,
-    ExploreBloc,
-    HeroBloc,
-    LinkInBloc,
-    LinksListBloc,
-    MarkdownBloc,
-    ReusesListBloc,
-)
+from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.legacy import upgrade_legacy_blocs
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.owned import ownership_filter
@@ -127,16 +117,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
     ],
 }
 
-BLOC_CLASSES = {
-    "DatasetsListBloc": DatasetsListBloc,
-    "ReusesListBloc": ReusesListBloc,
-    "DataservicesListBloc": DataservicesListBloc,
-    "LinksListBloc": LinksListBloc,
-    "HeroBloc": HeroBloc,
-    "MarkdownBloc": MarkdownBloc,
-    "ExploreBloc": ExploreBloc,
-    "AccordionListBloc": AccordionListBloc,
-}
+SINGLE_REFERENCE_FIELDS = ("dataset", "reuse", "dataservice")
+LIST_REFERENCE_FIELDS = ("datasets", "reuses", "dataservices")
 
 
 def remove_unwanted_keys(obj: dict, filter_type: str) -> dict:
@@ -161,38 +143,36 @@ def fix_dates(obj: dict) -> dict:
     return obj
 
 
-def clean_bloc_for_generate(bloc: dict) -> dict:
-    """Strip expanded reference objects from blocs, keep only structural content."""
-    for ref_field in ("datasets", "reuses", "dataservices"):
-        bloc.pop(ref_field, None)
-    if bloc.get("items"):
-        for item in bloc["items"]:
-            for sub_bloc in item.get("content", []):
-                clean_bloc_for_generate(sub_bloc)
-    return bloc
+def clean_blocs_for_generate(blocs: list[dict]) -> list[dict]:
+    """Strip the references from blocs: the fixtures don't hold the objects they point to.
+
+    A bloc showing a single object goes with it.
+    """
+    kept = []
+    for bloc in blocs:
+        if any(ref_field in bloc for ref_field in SINGLE_REFERENCE_FIELDS):
+            continue
+        for ref_field in LIST_REFERENCE_FIELDS:
+            bloc.pop(ref_field, None)
+        for key, value in bloc.items():
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                bloc[key] = clean_blocs_for_generate(value)
+        kept.append(bloc)
+    return kept
 
 
-def create_bloc_from_dict(data: dict):
-    """Convert a bloc dict from the fixture JSON into a MongoEngine EmbeddedDocument."""
-    cls_name = data.pop("class", None)
-    bloc_class = BLOC_CLASSES.get(cls_name)
-    if not bloc_class:
-        return None
-
-    if cls_name == "LinksListBloc" and "links" in data:
-        data["links"] = [LinkInBloc(**link) for link in data["links"]]
-    elif cls_name == "AccordionListBloc" and "items" in data:
-        items = []
-        for item in data["items"]:
-            content = create_blocs_from_dicts(item.get("content", []))
-            items.append(AccordionItemBloc(title=item["title"], content=content))
-        data["items"] = items
-
-    return bloc_class(**data)
+def to_son(value):
+    """Rename the keys of blocs serialized by the API to the ones they are stored with."""
+    if isinstance(value, list):
+        return [to_son(item) for item in value]
+    if isinstance(value, dict):
+        return {{"class": "_cls", "id": "_id"}.get(k, k): to_son(v) for k, v in value.items()}
+    return value
 
 
-def create_blocs_from_dicts(dicts):
-    return [b for b in (create_bloc_from_dict(d) for d in dicts) if b is not None]
+def create_blocs_from_dicts(dicts: list[dict]) -> list[Bloc]:
+    # Fixture files exported before the blocs moved to sections hold the legacy format.
+    return [Bloc._from_son(son) for son in upgrade_legacy_blocs(to_son(dicts))]
 
 
 @cli.command()
@@ -273,8 +253,8 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     for post_summary in json_posts_list:
         post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
         remove_unwanted_keys(post_detail, "post")
-        for bloc in post_detail.get("blocs", []):
-            clean_bloc_for_generate(bloc)
+        if "blocs" in post_detail:
+            post_detail["blocs"] = clean_blocs_for_generate(post_detail["blocs"])
         json_posts.append(post_detail)
 
     # Fetch site (with blocs via X-Fields)
@@ -282,8 +262,8 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
     remove_unwanted_keys(json_site, "site")
     for blocs_field in SITE_BLOCS_FIELDS:
-        for bloc in json_site.get(blocs_field, []):
-            clean_bloc_for_generate(bloc)
+        if blocs_field in json_site:
+            json_site[blocs_field] = clean_blocs_for_generate(json_site[blocs_field])
 
     json_output = {
         "datasets": json_datasets,

@@ -1,7 +1,6 @@
 import uuid
 
 from mongoengine import EmbeddedDocument
-from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     EmbeddedDocumentListField,
     ListField,
@@ -11,18 +10,20 @@ from mongoengine.fields import (
 )
 
 from udata.api import api
-from udata.api_fields import field, generate_fields
+from udata.api_fields import classes_by_parents, field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import get_dataset_by_resource_id
 from udata.core.edito_blocs.base import Bloc
 from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.uuid_fields import AutoUUIDField
 
 
 class BlocWithTitleMixin:
-    # Optional: a list bloc nested in an accordion item (or following a markdown bloc that
-    # already introduces it) would otherwise repeat the heading right above it.
+    # Legacy: titles now live in their own `TitleBloc`. Only kept so that blocs saved
+    # before the `2026-10-21-blocs-sections` migration still load and serialize;
+    # `check_blocs_layout` rejects them on write.
     title = field(StringField())
     subtitle = field(StringField())
 
@@ -39,6 +40,9 @@ dataservice_card_fields = api.model(
 )
 
 
+# Legacy: the `*ListBloc` became a `GridBloc` of `DatasetBloc`/`ReuseBloc`/`DataserviceBloc`.
+# Only kept so that blocs saved before the `2026-10-21-blocs-sections` migration still load
+# and serialize; `check_blocs_layout` rejects them on write.
 @generate_fields()
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
@@ -73,6 +77,40 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
             )
         )
     )
+
+
+@generate_fields()
+class DatasetBloc(Bloc):
+    dataset = field(
+        ReferenceField("Dataset", required=True),
+        nested_fields=dataset_card_fields,
+        # A dataset hard-deleted before `purge_blocs_references` ran reads as null.
+        allow_null=True,
+    )
+
+
+@generate_fields()
+class ReuseBloc(Bloc):
+    reuse = field(
+        ReferenceField("Reuse", required=True),
+        nested_fields=reuse_card_fields,
+        allow_null=True,
+    )
+
+
+@generate_fields()
+class DataserviceBloc(Bloc):
+    dataservice = field(
+        ReferenceField("Dataservice", required=True),
+        nested_fields=dataservice_card_fields,
+        allow_null=True,
+    )
+
+
+@generate_fields()
+class TitleBloc(Bloc):
+    title = field(StringField(required=True))
+    subtitle = field(StringField())
 
 
 @generate_fields()
@@ -128,63 +166,114 @@ class ExploreBloc(BlocWithTitleMixin, Bloc):
     )
 
 
-BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc", "ExploreBloc")
-
-
-def check_no_recursive_blocs(blocs, **kwargs):
-    for bloc in blocs:
-        if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
-            raise ValidationError(f"{bloc.__class__.__name__} cannot be nested inside an accordion")
-
-
 @generate_fields()
 class AccordionItemBloc(EmbeddedDocument):
     title = field(StringField(required=True))
-    content = field(
-        EmbeddedDocumentListField(Bloc),
-        generic=True,
-        checks=[check_no_recursive_blocs],
-    )
+    content = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
 @generate_fields()
 class AccordionListBloc(Bloc):
+    # Legacy, see `BlocWithTitleMixin`.
     title = field(StringField())
     description = field(StringField())
     items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 
+GRID_CELL_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4", "1")
+
+
+@generate_fields()
+class GridCell(EmbeddedDocument):
+    id = field(AutoUUIDField(primary_key=True))
+    width = field(StringField(required=True, choices=GRID_CELL_WIDTHS))
+    blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+
+
+@generate_fields()
+class GridBloc(Bloc):
+    cells = field(EmbeddedDocumentListField(GridCell))
+
+
+@generate_fields()
+class SectionBloc(Bloc):
+    blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+
+
+# Where a bloc can sit inside a blocs field, following the layout checked by
+# `check_blocs_layout`. The last one is the legacy accordion at the top level, until the
+# `2026-10-21-blocs-sections` migration ran.
+BLOCS_CONTAINER_PATHS = (
+    "",
+    "blocs.",
+    "blocs.cells.blocs.",
+    "blocs.items.content.",
+    "blocs.items.content.cells.blocs.",
+    "items.content.",
+)
+
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
 
 
-def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post, Site and Organization.
+def _blocs_reference_fields(document_type) -> tuple[set, set]:
+    """Names of the bloc fields referencing `document_type`: single references, and
+    lists of references (the legacy `*ListBloc`)."""
+    single, many = set(), set()
+    for bloc_class in classes_by_parents.get(Bloc, set()):
+        for name, mongo_field in bloc_class._fields.items():
+            if isinstance(mongo_field, ReferenceField):
+                if mongo_field.document_type is document_type:
+                    single.add(name)
+            elif isinstance(mongo_field, ListField) and isinstance(
+                mongo_field.field, ReferenceField
+            ):
+                if mongo_field.field.document_type is document_type:
+                    many.add(name)
+    return single, many
 
-    A reference can live both at the top level of a blocs field and nested inside an
-    accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
-    Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
-    two levels are enough.
-    """
+
+def _without_reference(items: list, obj_id, single: set, many: set) -> list:
+    kept = []
+    for item in items:
+        if any(item.get(name) == obj_id for name in single):
+            continue
+        emptied = False
+        for key, value in item.items():
+            if not isinstance(value, list) or not value:
+                continue
+            if key in many:
+                # A legacy list keeps its bloc even once empty, as it always did.
+                item[key] = [ref for ref in value if ref != obj_id]
+            elif isinstance(value[0], dict):
+                item[key] = _without_reference(value, obj_id, single, many)
+                emptied = emptied or not item[key]
+        # A container (grid, cell, section, accordion item) left empty by the purge only
+        # held the removed object: it goes with it.
+        if not emptied:
+            kept.append(item)
+    return kept
+
+
+def purge_blocs_references(obj):
+    """Remove the blocs (or legacy list entries) referencing a deleted object from all
+    the blocs fields of Post, Site and Organization."""
     from udata.core.organization.models import Organization
     from udata.core.post.models import Post
     from udata.core.site.models import Site
 
+    single, many = _blocs_reference_fields(type(obj))
+
     def purge(collection, blocs_field):
-        # Top-level blocs: <blocs_field>[].<ref_field>
-        collection.update_many(
-            {f"{blocs_field}.{ref_field}": obj_id},
-            {"$pull": {f"{blocs_field}.$[b].{ref_field}": obj_id}},
-            array_filters=[{f"b.{ref_field}": obj_id}],
-        )
-        # Blocs nested in an accordion: <blocs_field>[].items[].content[].<ref_field>
-        collection.update_many(
-            {f"{blocs_field}.items.content.{ref_field}": obj_id},
-            {"$pull": {f"{blocs_field}.$[b].items.$[].content.$[c].{ref_field}": obj_id}},
-            array_filters=[
-                {f"b.items.content.{ref_field}": obj_id},
-                {f"c.{ref_field}": obj_id},
-            ],
-        )
+        query = {
+            "$or": [
+                {f"{blocs_field}.{path}{name}": obj.id}
+                for path in BLOCS_CONTAINER_PATHS
+                for name in single | many
+            ]
+        }
+        for doc in collection.find(query, {blocs_field: 1}):
+            blocs = _without_reference(doc[blocs_field], obj.id, single, many)
+            collection.update_one({"_id": doc["_id"]}, {"$set": {blocs_field: blocs}})
 
     purge(Post._get_collection(), "blocs")
     purge(Organization._get_collection(), "presentation_blocs")

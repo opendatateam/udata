@@ -27,7 +27,7 @@ def purge_reuses(self) -> None:
         Assignment.objects(subject=reuse).delete()
         # Remove reuses references in Topics
         TopicElement.objects(element=reuse).update(element=None)
-        purge_blocs_references("reuses", reuse.id)
+        purge_blocs_references(reuse)
         # Remove reuse's logo in all sizes
         if reuse.image.filename is not None:
             storage = storages.images

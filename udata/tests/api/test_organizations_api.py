@@ -15,8 +15,12 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
-    DatasetsListBloc,
+    DatasetBloc,
+    GridBloc,
+    GridCell,
     MarkdownBloc,
+    SectionBloc,
+    TitleBloc,
 )
 from udata.core.organization.factories import (
     MembershipRequestNotificationFactory,
@@ -738,17 +742,30 @@ class OrganizationBannerAPITest(PytestOnlyAPITestCase):
         assert org.banner_image.original == original
 
 
+def welcome_section():
+    return SectionBloc(blocs=[TitleBloc(title="Welcome"), MarkdownBloc(content="Hello")])
+
+
+WELCOME_SECTION_PAYLOAD = {
+    "class": "SectionBloc",
+    "blocs": [
+        {"class": "TitleBloc", "title": "Welcome"},
+        {"class": "MarkdownBloc", "content": "Hi"},
+    ],
+}
+
+
 class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
     def test_blocs_hidden_by_default(self):
         """Blocs are an opt-in field — they should not appear in the default response."""
-        org = OrganizationFactory(presentation_blocs=[MarkdownBloc(content="Hello")])
+        org = OrganizationFactory(presentation_blocs=[welcome_section()])
         response = self.get(url_for("api.organization", org=org))
         assert200(response)
         assert "presentation_blocs" not in response.json
 
     def test_blocs_returned_with_x_fields(self):
         org = OrganizationFactory(
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
             presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self.get(
@@ -757,9 +774,9 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
         assert len(response.json["presentation_blocs"]) == 1
-        assert response.json["presentation_blocs"][0]["class"] == "MarkdownBloc"
-        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
-        assert response.json["presentation_blocs"][0]["content"] == "Hello"
+        title, markdown = response.json["presentation_blocs"][0]["blocs"]
+        assert (title["class"], title["title"]) == ("TitleBloc", "Welcome")
+        assert (markdown["class"], markdown["content"]) == ("MarkdownBloc", "Hello")
 
     def test_blocs_references_are_batched(self):
         """The cards embedded in an organization's blocs must not be dereferenced one
@@ -767,13 +784,18 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
         def query_count(nb_cards):
             owners = [UserFactory() for _ in range(4)]
+            datasets = [DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)]
             org = OrganizationFactory(
                 presentation_blocs=[
-                    DatasetsListBloc(
-                        title="Featured",
-                        datasets=[
-                            DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)
-                        ],
+                    SectionBloc(
+                        blocs=[
+                            GridBloc(
+                                cells=[
+                                    GridCell(width="1/2", blocs=[DatasetBloc(dataset=d)])
+                                    for d in datasets
+                                ]
+                            )
+                        ]
                     )
                 ],
                 presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
@@ -785,7 +807,10 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                 response = self.get(url, headers=headers)
                 count = int(counter)
             assert200(response)
-            assert len(response.json["presentation_blocs"][0]["datasets"]) == nb_cards
+            cells = response.json["presentation_blocs"][0]["blocs"][0]["cells"]
+            assert [cell["blocs"][0]["dataset"]["id"] for cell in cells] == [
+                str(d.id) for d in datasets
+            ]
             return count
 
         many, few = query_count(20), query_count(2)
@@ -796,9 +821,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
     def test_draft_blocs_hidden_from_public(self):
         """Without a publication date, blocs are a draft and never shown to the public."""
-        org = OrganizationFactory(
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")]
-        )
+        org = OrganizationFactory(presentation_blocs=[welcome_section()])
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
@@ -811,7 +834,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="admin")],
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
         )
         response = self.get(
             url_for("api.organization", org=org),
@@ -819,7 +842,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
         assert len(response.json["presentation_blocs"]) == 1
-        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
+        assert response.json["presentation_blocs"][0]["blocs"][0]["title"] == "Welcome"
 
     def test_draft_blocs_hidden_from_editor(self):
         """Only organization administrators see draft blocs: an editor (who cannot edit
@@ -827,7 +850,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="editor")],
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
         )
         response = self.get(
             url_for("api.organization", org=org),
@@ -841,7 +864,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
-            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"}
+            {"class": "SectionBloc", "blocs": [{"class": "MarkdownBloc", "content": "**Hi**"}]}
         ]
         data["presentation_blocs_published_at"] = "2020-01-01T00:00:00+00:00"
         response = self.put(url_for("api.organization", org=org), data)
@@ -855,28 +878,33 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
-            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"},
             {
-                "class": "LinksListBloc",
-                "title": "Useful links",
-                "links": [{"title": "Doc", "url": "https://example.com"}],
-            },
+                "class": "SectionBloc",
+                "blocs": [
+                    {"class": "TitleBloc", "title": "Edito"},
+                    {"class": "MarkdownBloc", "content": "**Hi**"},
+                    {
+                        "class": "LinksListBloc",
+                        "links": [{"title": "Doc", "url": "https://example.com"}],
+                    },
+                ],
+            }
         ]
         response = self.put(url_for("api.organization", org=org), data)
         assert200(response)
 
         org.reload()
-        assert len(org.presentation_blocs) == 2
-        assert org.presentation_blocs[0].__class__.__name__ == "MarkdownBloc"
-        assert org.presentation_blocs[0].title == "Edito"
-        assert org.presentation_blocs[1].__class__.__name__ == "LinksListBloc"
-        assert org.presentation_blocs[1].links[0].title == "Doc"
+        title, markdown, links = org.presentation_blocs[0].blocs
+        assert (title.__class__.__name__, title.title) == ("TitleBloc", "Edito")
+        assert (markdown.__class__.__name__, markdown.content) == ("MarkdownBloc", "**Hi**")
+        assert links.__class__.__name__ == "LinksListBloc"
+        assert links.links[0].title == "Doc"
 
     def test_editor_cannot_update_blocs(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="editor")])
         data = org.to_dict()
-        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [WELCOME_SECTION_PAYLOAD]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
@@ -886,7 +914,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         self.login()
         org = OrganizationFactory()
         data = org.to_dict()
-        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [WELCOME_SECTION_PAYLOAD]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
@@ -894,19 +922,22 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
     def test_accordion_blocs_serialized_recursively(self):
         """A generic bloc nested inside an accordion item must serialize with its concrete
-        class and fields. This exercises the generic resolution at two levels
-        (`Organization.blocs` -> `AccordionItemBloc.content`), which is the path most
-        affected by resolving the allowed subclasses at marshalling time."""
+        class and fields. This exercises the generic resolution at three levels
+        (`Organization.blocs` -> `SectionBloc.blocs` -> `AccordionItemBloc.content`), the
+        path most affected by resolving the allowed subclasses at marshalling time."""
         org = OrganizationFactory(
             presentation_blocs=[
-                AccordionListBloc(
-                    title="FAQ",
-                    items=[
-                        AccordionItemBloc(
-                            title="Question",
-                            content=[MarkdownBloc(title="Answer", content="**Hello**")],
+                SectionBloc(
+                    blocs=[
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="Question",
+                                    content=[MarkdownBloc(content="**Hello**")],
+                                )
+                            ],
                         )
-                    ],
+                    ]
                 )
             ],
             presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
@@ -916,28 +947,32 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        accordion = response.json["presentation_blocs"][0]
+        accordion = response.json["presentation_blocs"][0]["blocs"][0]
         assert accordion["class"] == "AccordionListBloc"
-        assert accordion["title"] == "FAQ"
         item = accordion["items"][0]
         assert item["title"] == "Question"
         nested = item["content"][0]
         assert nested["class"] == "MarkdownBloc"
-        assert nested["title"] == "Answer"
         assert nested["content"] == "**Hello**"
 
-    def test_accordion_rejects_disallowed_nested_blocs(self):
-        """`check_no_recursive_blocs` forbids nesting an accordion (or hero) inside an
-        accordion item, both on the model and through the API write path."""
+    def test_rejects_blocs_out_of_layout(self):
+        """`check_blocs_layout` runs on the organization blocs too."""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
             {
-                "class": "AccordionListBloc",
-                "title": "FAQ",
-                "items": [
-                    {"title": "Question", "content": [{"class": "HeroBloc", "title": "nope"}]}
+                "class": "SectionBloc",
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "items": [
+                            {
+                                "title": "Question",
+                                "content": [{"class": "HeroBloc", "title": "nope"}],
+                            }
+                        ],
+                    }
                 ],
             }
         ]

@@ -4,16 +4,24 @@ from mongoengine.context_managers import query_counter
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.edito_blocs.models import (
-    DataservicesListBloc,
-    DatasetsListBloc,
+    DataserviceBloc,
+    DatasetBloc,
+    GridBloc,
+    GridCell,
     HeroBloc,
-    ReusesListBloc,
+    ReuseBloc,
+    SectionBloc,
+    TitleBloc,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.site.models import Site
 from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
+
+
+def grid_section(blocs):
+    return SectionBloc(blocs=[GridBloc(cells=[GridCell(width="1/2", blocs=[b]) for b in blocs])])
 
 
 class SiteAPITest(APITestCase):
@@ -62,23 +70,24 @@ class SiteAPITest(APITestCase):
             # prefetched (a batch query per type), adding several useless queries.
             self._set_site_blocs(
                 datasets_blocs=[
-                    DatasetsListBloc(
-                        title="Heavy",
-                        datasets=[DatasetFactory(organization=org) for _ in range(nb_cards)],
+                    grid_section(
+                        [
+                            DatasetBloc(dataset=DatasetFactory(organization=org))
+                            for _ in range(nb_cards)
+                        ]
                     )
                 ],
                 reuses_blocs=[
-                    ReusesListBloc(
-                        title="Heavy",
-                        reuses=[ReuseFactory(organization=org) for _ in range(nb_cards)],
+                    grid_section(
+                        [ReuseBloc(reuse=ReuseFactory(organization=org)) for _ in range(nb_cards)]
                     )
                 ],
                 dataservices_blocs=[
-                    DataservicesListBloc(
-                        title="Heavy",
-                        dataservices=[
-                            DataserviceFactory(organization=org) for _ in range(nb_cards)
-                        ],
+                    grid_section(
+                        [
+                            DataserviceBloc(dataservice=DataserviceFactory(organization=org))
+                            for _ in range(nb_cards)
+                        ]
                     )
                 ],
             )
@@ -93,9 +102,9 @@ class SiteAPITest(APITestCase):
             assert "datasets_blocs" not in response.json
             return count
 
-        # Compared against empty blocs, not smaller ones: a prefetch that ignores the
+        # Compared against empty grids, not smaller ones: a prefetch that ignores the
         # mask costs a constant batch query per type, which a "20 vs 2 cards"
-        # comparison would not see. Empty blocs have nothing to load, so they give
+        # comparison would not see. Empty grids have nothing to load, so they give
         # the baseline count.
         filled, empty = query_count(20), query_count(0)
         assert filled == empty, (
@@ -109,16 +118,9 @@ class SiteAPITest(APITestCase):
         headers = {"X-Fields": "{*}"}
 
         def query_count(nb_cards):
+            datasets = [DatasetFactory(organization=orgs[i % len(orgs)]) for i in range(nb_cards)]
             self._set_site_blocs(
-                datasets_blocs=[
-                    DatasetsListBloc(
-                        title="Featured",
-                        datasets=[
-                            DatasetFactory(organization=orgs[i % len(orgs)])
-                            for i in range(nb_cards)
-                        ],
-                    )
-                ]
+                datasets_blocs=[grid_section([DatasetBloc(dataset=d) for d in datasets])]
             )
 
             self.assert200(self.get(url_for("api.site"), headers=headers))  # warm up
@@ -128,7 +130,10 @@ class SiteAPITest(APITestCase):
                 response = self.get(url_for("api.site"), headers=headers)
                 count = int(counter)
             self.assert200(response)
-            assert len(response.json["datasets_blocs"][0]["datasets"]) == nb_cards
+            cells = response.json["datasets_blocs"][0]["blocs"][0]["cells"]
+            assert [cell["blocs"][0]["dataset"]["id"] for cell in cells] == [
+                str(d.id) for d in datasets
+            ]
             return count
 
         many, few = query_count(20), query_count(2)
@@ -138,15 +143,18 @@ class SiteAPITest(APITestCase):
         )
 
     def test_set_site_blocs(self):
+        dataset = DatasetFactory()
         self.login(AdminFactory())
         response = self.patch(
             url_for("api.site"),
             {
                 "datasets_blocs": [
                     {
-                        "class": "DatasetsListBloc",
-                        "title": "Featured",
-                        "datasets": [],
+                        "class": "SectionBloc",
+                        "blocs": [
+                            {"class": "TitleBloc", "title": "Featured"},
+                            {"class": "DatasetBloc", "dataset": str(dataset.id)},
+                        ],
                     }
                 ],
             },
@@ -154,6 +162,15 @@ class SiteAPITest(APITestCase):
         self.assert200(response)
 
         site = Site.objects.get(id=self.app.config["SITE_ID"])
-        assert len(site.datasets_blocs) == 1
-        assert isinstance(site.datasets_blocs[0], DatasetsListBloc)
-        assert site.datasets_blocs[0].title == "Featured"
+        title, dataset_bloc = site.datasets_blocs[0].blocs
+        assert isinstance(title, TitleBloc)
+        assert title.title == "Featured"
+        assert dataset_bloc.dataset.id == dataset.id
+
+    def test_set_site_blocs_checks_layout(self):
+        self.login(AdminFactory())
+        response = self.patch(
+            url_for("api.site"),
+            {"datasets_blocs": [{"class": "DatasetsListBloc", "datasets": []}]},
+        )
+        self.assert400(response)

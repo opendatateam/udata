@@ -64,7 +64,7 @@ def purge_datasets(self):
             {"$set": {"items.$[item].dataset": None}},
             array_filters=[{"item.dataset": dataset.id}],
         )
-        purge_blocs_references("datasets", dataset.id)
+        purge_blocs_references(dataset)
         # Remove associated Transfers
         Transfer.objects(subject=dataset).delete()
         # Remove assignments

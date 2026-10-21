@@ -13,7 +13,7 @@ from werkzeug.local import LocalProxy
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.models import Dataset
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout
 from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -42,9 +42,13 @@ class Site(WithMetrics, Document):
     configs = DictField()
     themes = DictField()
     settings = EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
-    reuses_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
-    dataservices_blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+    datasets_blocs = field(
+        EmbeddedDocumentListField(Bloc), generic=True, checks=[check_blocs_layout]
+    )
+    reuses_blocs = field(EmbeddedDocumentListField(Bloc), generic=True, checks=[check_blocs_layout])
+    dataservices_blocs = field(
+        EmbeddedDocumentListField(Bloc), generic=True, checks=[check_blocs_layout]
+    )
 
     __metrics_keys__ = [
         "max_dataset_followers",

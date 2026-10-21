@@ -13,7 +13,14 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.models import HeroBloc, LinkInBloc, LinksListBloc
+from udata.core.edito_blocs.models import (
+    DatasetBloc,
+    HeroBloc,
+    LinkInBloc,
+    LinksListBloc,
+    SectionBloc,
+    TitleBloc,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.post.factories import PostFactory
@@ -68,9 +75,15 @@ class FixturesTest(PytestOnlyAPITestCase):
             title="Test Site",
             datasets_blocs=[
                 HeroBloc(title="Test Hero", description="A test hero bloc"),
-                LinksListBloc(
-                    title="Test Links",
-                    links=[LinkInBloc(title="Example", url="https://example.com")],
+                SectionBloc(
+                    blocs=[
+                        TitleBloc(title="Test Links"),
+                        LinksListBloc(
+                            links=[LinkInBloc(title="Example", url="https://example.com")],
+                        ),
+                        # The fixtures don't hold the dataset: the bloc showing it goes.
+                        DatasetBloc(dataset=dataset),
+                    ]
                 ),
             ],
         )
@@ -137,9 +150,11 @@ class FixturesTest(PytestOnlyAPITestCase):
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        assert len(result_site.datasets_blocs) == 2
-        assert result_site.datasets_blocs[0].title == "Test Hero"
-        assert result_site.datasets_blocs[1].title == "Test Links"
+        hero, section = result_site.datasets_blocs
+        assert hero.title == "Test Hero"
+        title, links = section.blocs
+        assert title.title == "Test Links"
+        assert links.links[0].url == "https://example.com"
 
     def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""

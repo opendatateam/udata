@@ -3,6 +3,7 @@ from mongoengine.base.datastructures import BaseList
 from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField
 
 from udata.api_fields import field, generate_fields
+from udata.mongo.errors import FieldValidationError
 from udata.mongo.uuid_fields import AutoUUIDField
 
 # List fields (references or embedded documents) that no bloc card displays (the card masks
@@ -48,18 +49,30 @@ def prefetch_blocs_references(blocs):
     so we stop paying to deserialize data that isn't serialized — the dominant cost on
     real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
-    This runs once per marshalled bloc list — including the nested ones, since an
-    accordion item's `content` is a bloc list of its own. The top-level call already
-    walked the whole tree, so lists it resolved are skipped when their own field is
-    marshalled in turn.
+    This runs once per marshalled bloc list — including the nested ones, since a
+    section's `blocs` or a grid cell's `blocs` is a bloc list of its own. The top-level
+    call already walked the whole tree and marked the blocs it went through, so their
+    lists are skipped when their own field is marshalled in turn.
     """
-    # (bloc, attr, model, [referenced ids]) for every bloc holding references.
+    if all(getattr(bloc, "_blocs_prefetched", False) for bloc in blocs):
+        return
+
+    # (bloc, attr, model, [referenced ids]) for every bloc holding a list of references.
     collected: list[tuple] = []
+    # (bloc, attr, model, referenced id) for every bloc holding a single reference.
+    collected_single: list[tuple] = []
 
     def walk(blocs):
         for bloc in blocs:
+            bloc._blocs_prefetched = True
             for attr, mongo_field in type(bloc)._fields.items():
-                if isinstance(mongo_field, ListField) and isinstance(
+                if isinstance(mongo_field, ReferenceField):
+                    # A `DBRef`, or a document MongoEngine already dereferenced (without its
+                    # organization/owner) when the blocs list holding it was read.
+                    ref = bloc._data.get(attr)
+                    if ref is not None:
+                        collected_single.append((bloc, attr, mongo_field.document_type, ref.id))
+                elif isinstance(mongo_field, ListField) and isinstance(
                     mongo_field.field, ReferenceField
                 ):
                     # A `ListField(ReferenceField)`: read the raw references from `_data`
@@ -72,14 +85,18 @@ def prefetch_blocs_references(blocs):
                     model = mongo_field.field.document_type
                     collected.append((bloc, attr, model, [ref.id for ref in refs]))
                 elif isinstance(mongo_field, EmbeddedDocumentListField):
-                    # Recurse into nested blocs (e.g. accordion items -> content).
-                    walk(getattr(bloc, attr) or [])
+                    # Recurse into nested blocs (e.g. grid cells -> blocs). Read from `_data`:
+                    # reading the attribute would dereference the list's references on its
+                    # own, one query per list.
+                    walk(bloc._data.get(attr) or [])
 
     walk(blocs)
 
     ids_by_model: dict = {}
     for _, _, model, ids in collected:
         ids_by_model.setdefault(model, set()).update(ids)
+    for _, _, model, ref_id in collected_single:
+        ids_by_model.setdefault(model, set()).add(ref_id)
 
     docs_by_model = {}
     for model, ids in ids_by_model.items():
@@ -95,9 +112,13 @@ def prefetch_blocs_references(blocs):
         resolved._dereferenced = True
         bloc._data[attr] = resolved
 
+    for bloc, attr, model, ref_id in collected_single:
+        # A reference to a hard-deleted document is serialized as null.
+        bloc._data[attr] = docs_by_model[model].get(ref_id)
+
 
 # `Bloc` lives in its own module (separate from sibling subclasses like
-# `DatasetsListBloc`) so that `organization.models` can depend on the abstract
+# `DatasetBloc`) so that `organization.models` can depend on the abstract
 # base without dragging in `dataservices`/`dataset`/`reuse` at import time —
 # which would create a circular import via `dataset.api_fields → Organization`.
 @generate_fields(prefetch=prefetch_blocs_references)
@@ -105,3 +126,53 @@ class Bloc(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
     id = field(AutoUUIDField(primary_key=True))
+
+
+# The layout of a blocs field, from the top: sections (and heroes) hold grids, accordions
+# and leaves; grid cells only hold leaves, accordion items leaves and grids. Bounding the
+# depth is what lets `BLOCS_CONTAINER_PATHS` enumerate where a reference can live.
+LEAF_BLOCS = {
+    "TitleBloc",
+    "MarkdownBloc",
+    "LinksListBloc",
+    "ExploreBloc",
+    "DatasetBloc",
+    "ReuseBloc",
+    "DataserviceBloc",
+}
+TOP_LEVEL_BLOCS = {"HeroBloc", "SectionBloc"}
+SECTION_BLOCS = LEAF_BLOCS | {"GridBloc", "AccordionListBloc"}
+# The explorer is too wide for an accordion.
+ACCORDION_BLOCS = (LEAF_BLOCS - {"ExploreBloc"}) | {"GridBloc"}
+
+# Fields of the legacy format that must stay empty (see `BlocWithTitleMixin`).
+LEGACY_TITLE_FIELDS = ("title", "subtitle", "description")
+BLOCS_WITH_LEGACY_TITLE = {"MarkdownBloc", "LinksListBloc", "ExploreBloc", "AccordionListBloc"}
+
+
+def _check_layout(blocs, allowed: set, field: str):
+    for bloc in blocs:
+        name = bloc.__class__.__name__
+        if name not in allowed:
+            raise FieldValidationError(
+                field=field,
+                message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
+            )
+        if name in BLOCS_WITH_LEGACY_TITLE and any(
+            getattr(bloc, f, None) for f in LEGACY_TITLE_FIELDS
+        ):
+            raise FieldValidationError(
+                field=field, message=f"{name} cannot have a title, use a TitleBloc"
+            )
+        if name == "SectionBloc":
+            _check_layout(bloc.blocs, SECTION_BLOCS, field)
+        elif name == "GridBloc":
+            for cell in bloc.cells:
+                _check_layout(cell.blocs, allowed & LEAF_BLOCS, field)
+        elif name == "AccordionListBloc":
+            for item in bloc.items:
+                _check_layout(item.content, ACCORDION_BLOCS, field)
+
+
+def check_blocs_layout(blocs, field, **_kwargs):
+    _check_layout(blocs or [], TOP_LEVEL_BLOCS, field)
