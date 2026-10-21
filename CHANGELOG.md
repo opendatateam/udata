@@ -1,5 +1,14 @@
 # Changelog
 
+## 17.16.0 (2026-10-21)
+
+- feat(post): nest pages under a parent page and serve them under /pages/<path> ([#4011](https://github.com/opendatateam/udata/pull/4011))
+- fix: allow mailto links in server-rendered markdown (recent.atom feeds) ([#4017](https://github.com/opendatateam/udata/pull/4017))
+- fix: delete membership request for deleted user in a deleted org ([#4023](https://github.com/opendatateam/udata/pull/4023))
+- fix: membership requests deleted user ([#4014](https://github.com/opendatateam/udata/pull/4014))
+- refactor: migrate spatial coverage to the api_fields system ([#4015](https://github.com/opendatateam/udata/pull/4015))
+
+
 ## 17.15.0 (2026-10-19)
 
 - chore(deps): update actions/download-artifact action to v8.0.2 ([#3997](https://github.com/opendatateam/udata/pull/3997))
