@@ -1197,10 +1197,7 @@ class ElasticClient:
                         query=query_text,
                         type="most_fields",
                         operator="and",
-                        fields=[
-                            "title",
-                            "organization_name",
-                        ],
+                        fields=["title", "organization_name"],
                         fuzziness="AUTO:4,6",
                     ),
                 ],
