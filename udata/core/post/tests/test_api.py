@@ -887,6 +887,32 @@ class PostsAPITest(APITestCase):
         assert isinstance(explore, ExploreBloc)
         assert explore.resource_id == resource_id
 
+    def test_post_api_grid_cell_width_is_optional(self):
+        """A cell without a width shares what the cells with one leave."""
+        self.login(AdminFactory())
+        data = {
+            "name": "Fluid cells",
+            "body_type": "blocs",
+            "blocs": [
+                {
+                    "class": "SectionBloc",
+                    "blocs": [
+                        {
+                            "class": "GridBloc",
+                            "cells": [
+                                {"width": "2/3", "blocs": [{"class": "TitleBloc", "title": "A"}]},
+                                {"blocs": [{"class": "TitleBloc", "title": "B"}]},
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        cells = response.json["blocs"][0]["blocs"][0]["cells"]
+        assert [cell["width"] for cell in cells] == ["2/3", None]
+
     def test_post_api_create_with_explore_bloc_unknown_resource(self):
         """An ExploreBloc must point to an existing resource"""
         self.login(AdminFactory())

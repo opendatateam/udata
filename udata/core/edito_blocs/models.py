@@ -186,7 +186,11 @@ GRID_CELL_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4", "1")
 @generate_fields()
 class GridCell(EmbeddedDocument):
     id = field(AutoUUIDField(primary_key=True))
-    width = field(StringField(required=True, choices=GRID_CELL_WIDTHS))
+    width = field(
+        StringField(choices=GRID_CELL_WIDTHS),
+        description="Share of the row taken by the cell. Without it, the cell takes what the "
+        "cells with a width leave, shared with the other cells without one.",
+    )
     blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
