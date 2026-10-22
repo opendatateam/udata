@@ -7,15 +7,9 @@ from udata.core.dataset import tasks
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.edito_blocs.models import DatasetBloc, SectionBloc
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Organization
 from udata.core.post.factories import PostFactory
-from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
-from udata.core.site.factories import SiteFactory
-from udata.core.site.models import Site
 from udata.core.tags.csv import TagCsvAdapter  # noqa
 from udata.core.topic.models import TopicElement
 from udata.core.user.factories import UserFactory
@@ -91,28 +85,6 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert job.items[0].dataset is None
         assert job.items[1].dataset == dataset_keep
         assert job.items[2].dataset is None
-
-    def test_purge_datasets_cleans_blocs_in_post_site_and_organization(self):
-        dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
-        dataset_keep = Dataset.objects.create(title="keep me")
-
-        def section():
-            return SectionBloc(
-                blocs=[DatasetBloc(dataset=dataset_to_delete), DatasetBloc(dataset=dataset_keep)]
-            )
-
-        PostFactory(body_type="blocs", blocs=[section()])
-        SiteFactory(id="test-site", datasets_blocs=[section()])
-        org = OrganizationFactory(presentation_blocs=[section()])
-
-        tasks.purge_datasets()
-
-        for blocs in (
-            Post.objects.first().blocs,
-            Site.objects.get(id="test-site").datasets_blocs,
-            Organization.objects.get(id=org.id).presentation_blocs,
-        ):
-            assert [bloc.dataset.id for bloc in blocs[0].blocs] == [dataset_keep.id]
 
     def test_purge_datasets_cleans_post_datasets_reference(self):
         """Purging a dataset must pull it from `Post.datasets` (and `Post.reuses`)

@@ -6,8 +6,6 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.edito_blocs.models import (
     DataserviceBloc,
     DatasetBloc,
-    GridBloc,
-    GridCell,
     HeroBloc,
     ReuseBloc,
     SectionBloc,
@@ -18,10 +16,6 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.site.models import Site
 from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
-
-
-def grid_section(blocs):
-    return SectionBloc(blocs=[GridBloc(cells=[GridCell(width="1/2", blocs=[b]) for b in blocs])])
 
 
 class SiteAPITest(APITestCase):
@@ -70,21 +64,23 @@ class SiteAPITest(APITestCase):
             # prefetched (a batch query per type), adding several useless queries.
             self._set_site_blocs(
                 datasets_blocs=[
-                    grid_section(
-                        [
+                    SectionBloc(
+                        blocs=[
                             DatasetBloc(dataset=DatasetFactory(organization=org))
                             for _ in range(nb_cards)
                         ]
                     )
                 ],
                 reuses_blocs=[
-                    grid_section(
-                        [ReuseBloc(reuse=ReuseFactory(organization=org)) for _ in range(nb_cards)]
+                    SectionBloc(
+                        blocs=[
+                            ReuseBloc(reuse=ReuseFactory(organization=org)) for _ in range(nb_cards)
+                        ]
                     )
                 ],
                 dataservices_blocs=[
-                    grid_section(
-                        [
+                    SectionBloc(
+                        blocs=[
                             DataserviceBloc(dataservice=DataserviceFactory(organization=org))
                             for _ in range(nb_cards)
                         ]
@@ -102,9 +98,9 @@ class SiteAPITest(APITestCase):
             assert "datasets_blocs" not in response.json
             return count
 
-        # Compared against empty grids, not smaller ones: a prefetch that ignores the
+        # Compared against empty sections, not smaller ones: a prefetch that ignores the
         # mask costs a constant batch query per type, which a "20 vs 2 cards"
-        # comparison would not see. Empty grids have nothing to load, so they give
+        # comparison would not see. Empty sections have nothing to load, so they give
         # the baseline count.
         filled, empty = query_count(20), query_count(0)
         assert filled == empty, (
@@ -120,7 +116,7 @@ class SiteAPITest(APITestCase):
         def query_count(nb_cards):
             datasets = [DatasetFactory(organization=orgs[i % len(orgs)]) for i in range(nb_cards)]
             self._set_site_blocs(
-                datasets_blocs=[grid_section([DatasetBloc(dataset=d) for d in datasets])]
+                datasets_blocs=[SectionBloc(blocs=[DatasetBloc(dataset=d) for d in datasets])]
             )
 
             self.assert200(self.get(url_for("api.site"), headers=headers))  # warm up
@@ -130,10 +126,8 @@ class SiteAPITest(APITestCase):
                 response = self.get(url_for("api.site"), headers=headers)
                 count = int(counter)
             self.assert200(response)
-            cells = response.json["datasets_blocs"][0]["blocs"][0]["cells"]
-            assert [cell["blocs"][0]["dataset"]["id"] for cell in cells] == [
-                str(d.id) for d in datasets
-            ]
+            blocs = response.json["datasets_blocs"][0]["blocs"]
+            assert [bloc["dataset"]["id"] for bloc in blocs] == [str(d.id) for d in datasets]
             return count
 
         many, few = query_count(20), query_count(2)

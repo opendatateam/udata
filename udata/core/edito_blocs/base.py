@@ -3,7 +3,7 @@ from typing import NamedTuple
 from bson import ObjectId
 from mongoengine import EmbeddedDocument
 from mongoengine.base.datastructures import BaseList
-from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField
+from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.mongo.errors import FieldValidationError
@@ -41,6 +41,13 @@ class SingleReference(NamedTuple):
     id: ObjectId
 
 
+class Container(NamedTuple):
+    """A bloc (section, accordion item) holding a list of blocs, and the list holding it."""
+
+    holder: list
+    bloc: EmbeddedDocument
+
+
 class ListOfReferences(NamedTuple):
     """A legacy bloc listing several objects, as collected by `prefetch_blocs_references`."""
 
@@ -71,19 +78,19 @@ def prefetch_blocs_references(blocs):
     so we stop paying to deserialize data that isn't serialized — the dominant cost on
     real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
-    A bloc showing a single object that no longer exists (hard-deleted while
-    `purge_blocs_references` ran) is left out, as the purge would have done: with the
-    container it leaves empty (cell, grid, section, accordion item).
+    A bloc showing a single object that no longer exists is left out, with the containers
+    it leaves empty (section, accordion item). Nothing purges the blocs of a hard-deleted
+    object from storage: they go when the page is saved again, from what it read.
 
     This runs once per marshalled bloc list — including the nested ones, since a
-    section's `blocs` or a grid cell's `blocs` is a bloc list of its own. The top-level
+    section's `blocs` or an accordion item's `content` is a bloc list of its own. The top-level
     call already walked the whole tree and marked the blocs it went through, so they are
     skipped when their own list is marshalled in turn.
     """
     collected: list[ListOfReferences] = []
     collected_single: list[SingleReference] = []
-    # The list holding each container, by the id of the list it contains
-    containers: dict[int, tuple[list, object]] = {}
+    # Each container, by the id of the list it contains
+    containers: dict[int, Container] = {}
 
     def walk(blocs):
         for bloc in blocs:
@@ -111,19 +118,20 @@ def prefetch_blocs_references(blocs):
                             ListOfReferences(bloc, attr, model, [ref.id for ref in refs])
                         )
                 elif isinstance(mongo_field, EmbeddedDocumentListField):
-                    # Recurse into nested blocs (e.g. grid cells -> blocs). Read from `_data`:
+                    # Recurse into nested blocs (e.g. accordion items -> content). Read from `_data`:
                     # reading the attribute would dereference the list's references on its
                     # own, one query per list.
                     nested = bloc._data.get(attr)
                     if nested:
-                        containers[id(nested)] = (blocs, bloc)
+                        containers[id(nested)] = Container(blocs, bloc)
                         walk(nested)
 
-    def remove(holder: list, item):
+    def remove(holder: list, item: EmbeddedDocument):
         # By identity: two blocs can be equal (same object shown twice).
         del holder[next(i for i, held in enumerate(holder) if held is item)]
         if not holder and id(holder) in containers:
-            remove(*containers[id(holder)])
+            container = containers[id(holder)]
+            remove(container.holder, container.bloc)
 
     walk(blocs)
 
@@ -159,6 +167,9 @@ def prefetch_blocs_references(blocs):
             reference.bloc._data[reference.attr] = document
 
 
+BLOC_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4", "1")
+
+
 # `Bloc` lives in its own module (separate from sibling subclasses like
 # `DatasetBloc`) so that `organization.models` can depend on the abstract
 # base without dragging in `dataservices`/`dataset`/`reuse` at import time —
@@ -168,11 +179,15 @@ class Bloc(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
     id = field(AutoUUIDField(primary_key=True))
+    width = field(
+        StringField(choices=BLOC_WIDTHS),
+        description="Share of the row taken by the bloc inside a section or an accordion item, "
+        "the next blocs wrapping to a new row when it is full. Without it, the whole row.",
+    )
 
 
-# The layout of a blocs field, from the top: sections (and heroes) hold grids, accordions
-# and leaves; grid cells only hold leaves, accordion items leaves and grids. Bounding the
-# depth is what lets `BLOCS_CONTAINER_PATHS` enumerate where a reference can live.
+# The layout of a blocs field, from the top: heroes and sections; sections hold accordions
+# and leaves, accordion items only hold leaves.
 LEAF_BLOCS = {
     "TitleBloc",
     "MarkdownBloc",
@@ -183,9 +198,9 @@ LEAF_BLOCS = {
     "DataserviceBloc",
 }
 TOP_LEVEL_BLOCS = {"HeroBloc", "SectionBloc"}
-SECTION_BLOCS = LEAF_BLOCS | {"GridBloc", "AccordionListBloc"}
+SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc"}
 # The explorer is too wide for an accordion.
-ACCORDION_BLOCS = (LEAF_BLOCS - {"ExploreBloc"}) | {"GridBloc"}
+ACCORDION_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
 
 # Fields of the legacy format that must stay empty (see `BlocWithTitleMixin`).
 LEGACY_TITLE_FIELDS = ("title", "subtitle", "description")
@@ -206,11 +221,12 @@ def _check_layout(blocs, allowed: set, field: str):
             raise FieldValidationError(
                 field=field, message=f"{name} cannot have a title, use a TitleBloc"
             )
+        if allowed is TOP_LEVEL_BLOCS and bloc.width:
+            raise FieldValidationError(
+                field=field, message=f"{name} spans the whole page, it cannot have a width"
+            )
         if name == "SectionBloc":
             _check_layout(bloc.blocs, SECTION_BLOCS, field)
-        elif name == "GridBloc":
-            for cell in bloc.cells:
-                _check_layout(cell.blocs, allowed & LEAF_BLOCS, field)
         elif name == "AccordionListBloc":
             for item in bloc.items:
                 _check_layout(item.content, ACCORDION_BLOCS, field)

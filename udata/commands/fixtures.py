@@ -7,12 +7,14 @@ When "importing" the fixtures, massage them so they can be loaded properly.
 import json
 import logging
 import pathlib
+from collections.abc import Callable
 
 import click
 import requests
 from flask import current_app
+from mongoengine.fields import ReferenceField
 
-from udata.api_fields import patch
+from udata.api_fields import classes_by_parents, patch
 from udata.commands import cli
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
@@ -23,11 +25,8 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.models import (
-    SITE_BLOCS_FIELDS,
-    blocs_reference_fields,
-    without_blocs,
-)
+from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.owned import ownership_filter
@@ -143,10 +142,42 @@ def fix_dates(obj: dict) -> dict:
     return obj
 
 
-def clean_blocs_for_generate(blocs: list[dict]) -> list[dict]:
-    """Remove the blocs showing an object: the fixtures don't hold the objects they show."""
-    names = blocs_reference_fields()
-    return without_blocs(blocs, lambda bloc: any(name in bloc for name in names))
+def without_blocs(items: list[dict], removed: Callable[[dict], bool]) -> list[dict]:
+    """Serialized blocs without the `removed` ones, at any depth.
+
+    A container (section, accordion item) left empty only held removed blocs: it goes with
+    them.
+    """
+    kept = []
+    for item in items:
+        if removed(item):
+            continue
+        emptied = False
+        for key, value in item.items():
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                item[key] = without_blocs(value, removed)
+                emptied = emptied or not item[key]
+        if not emptied:
+            kept.append(item)
+    return kept
+
+
+def clean_blocs_for_generate(blocs: list[dict], resource_ids: set[str]) -> list[dict]:
+    """Remove the blocs the fixtures could not import: those showing an object, as the
+    fixtures don't hold them, and the explorers of a resource of a dataset not exported."""
+    object_fields = {
+        name
+        for bloc_class in classes_by_parents.get(Bloc, set())
+        for name, mongo_field in bloc_class._fields.items()
+        if isinstance(mongo_field, ReferenceField)
+    }
+
+    def removed(bloc: dict) -> bool:
+        if "resource_id" in bloc and bloc["resource_id"] not in resource_ids:
+            return True
+        return any(name in bloc for name in object_fields)
+
+    return without_blocs(blocs, removed)
 
 
 @cli.command()
@@ -220,6 +251,10 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
             json_datasets.append(json_fixture)
 
+    resource_ids = {
+        resource["id"] for fixture in json_datasets for resource in fixture["resources"]
+    }
+
     # Fetch posts (detail endpoint to get blocs)
     print("Fetching posts...")
     json_posts_list = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
@@ -228,7 +263,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
         post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
         remove_unwanted_keys(post_detail, "post")
         if "blocs" in post_detail:
-            post_detail["blocs"] = clean_blocs_for_generate(post_detail["blocs"])
+            post_detail["blocs"] = clean_blocs_for_generate(post_detail["blocs"], resource_ids)
         json_posts.append(post_detail)
 
     # Fetch site (with blocs via X-Fields)
@@ -237,7 +272,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     remove_unwanted_keys(json_site, "site")
     for blocs_field in SITE_BLOCS_FIELDS:
         if blocs_field in json_site:
-            json_site[blocs_field] = clean_blocs_for_generate(json_site[blocs_field])
+            json_site[blocs_field] = clean_blocs_for_generate(json_site[blocs_field], resource_ids)
 
     json_output = {
         "datasets": json_datasets,

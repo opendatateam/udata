@@ -14,9 +14,10 @@ from udata.core.dataset.factories import (
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
     DatasetBloc,
-    GridBloc,
-    GridCell,
+    ExploreBloc,
     HeroBloc,
     LinkInBloc,
     LinksListBloc,
@@ -51,6 +52,8 @@ class FixturesTest(PytestOnlyAPITestCase):
         )
         res = ResourceFactory()
         dataset.add_resource(res)
+        # Not exported: neither is the resource an explorer shows
+        not_exported = DatasetFactory(resources=[ResourceFactory()])
         ReuseFactory(datasets=[dataset], owner=user)
         CommunityResourceFactory(dataset=dataset, owner=user)
         DiscussionFactory(
@@ -85,14 +88,21 @@ class FixturesTest(PytestOnlyAPITestCase):
                         ),
                         # The fixtures don't hold the dataset: the bloc showing it goes.
                         DatasetBloc(dataset=dataset),
+                        ExploreBloc(resource_id=res.id),
+                        # Nor the resource: the explorer goes, it would not import.
+                        ExploreBloc(resource_id=not_exported.resources[0].id),
                     ]
                 ),
                 SectionBloc(
                     blocs=[
-                        TitleBloc(title="Grid"),
-                        # So does the cell holding it, then the grid left empty.
-                        GridBloc(
-                            cells=[GridCell(width="1/2", blocs=[DatasetBloc(dataset=dataset)])]
+                        TitleBloc(title="Accordion"),
+                        # So does the item holding it, then the accordion left empty.
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="Item", content=[DatasetBloc(dataset=dataset)]
+                                )
+                            ]
                         ),
                     ]
                 ),
@@ -161,12 +171,13 @@ class FixturesTest(PytestOnlyAPITestCase):
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        hero, section, grid_section = result_site.datasets_blocs
+        hero, section, accordion_section = result_site.datasets_blocs
         assert hero.title == "Test Hero"
-        title, links = section.blocs
+        title, links, explore = section.blocs
         assert title.title == "Test Links"
         assert links.links[0].url == "https://example.com"
-        assert [bloc.title for bloc in grid_section.blocs] == ["Grid"]
+        assert explore.resource_id == res.id
+        assert [bloc.title for bloc in accordion_section.blocs] == ["Accordion"]
 
     def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""

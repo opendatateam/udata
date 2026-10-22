@@ -16,8 +16,6 @@ from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
     DatasetBloc,
-    GridBloc,
-    GridCell,
     MarkdownBloc,
     SectionBloc,
     TitleBloc,
@@ -787,16 +785,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
             datasets = [DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)]
             org = OrganizationFactory(
                 presentation_blocs=[
-                    SectionBloc(
-                        blocs=[
-                            GridBloc(
-                                cells=[
-                                    GridCell(width="1/2", blocs=[DatasetBloc(dataset=d)])
-                                    for d in datasets
-                                ]
-                            )
-                        ]
-                    )
+                    SectionBloc(blocs=[DatasetBloc(dataset=d, width="1/2") for d in datasets])
                 ],
                 presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
             )
@@ -807,10 +796,8 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                 response = self.get(url, headers=headers)
                 count = int(counter)
             assert200(response)
-            cells = response.json["presentation_blocs"][0]["blocs"][0]["cells"]
-            assert [cell["blocs"][0]["dataset"]["id"] for cell in cells] == [
-                str(d.id) for d in datasets
-            ]
+            blocs = response.json["presentation_blocs"][0]["blocs"]
+            assert [bloc["dataset"]["id"] for bloc in blocs] == [str(d.id) for d in datasets]
             return count
 
         many, few = query_count(20), query_count(2)
