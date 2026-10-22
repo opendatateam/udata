@@ -93,6 +93,10 @@ def upgrade_content(bloc: dict) -> list[dict]:
         upgraded.append({**bloc, "width": width} if width else bloc)
         if button:
             upgraded.append({**button, "width": width} if width else button)
+    elif cls == "HeroBloc":
+        # A hero inside an accordion item, which the API accepted for a few days (v14.7.0 and
+        # v14.7.1): its title and its button, an item having no background of its own.
+        upgraded.extend(hero_blocs(bloc))
     elif cls == "AccordionListBloc":
         for item in bloc.get("items") or []:
             item.setdefault("_id", new_id())
@@ -115,6 +119,16 @@ def button_bloc(title: str | None, url: str | None) -> dict | None:
     return {"_id": new_id(), "_cls": "ButtonBloc", "title": title, "url": url}
 
 
+def hero_blocs(hero: dict) -> list[dict]:
+    """The title of a hero, its description as subtitle, and its button."""
+    blocs = [{"_id": new_id(), "_cls": "TitleBloc", "title": hero["title"]}]
+    if (description := hero.get("description")) and description.strip():
+        blocs[0]["subtitle"] = description
+    if button := button_bloc(hero.get("main_link_title"), hero.get("main_link_url")):
+        blocs.append(button)
+    return blocs
+
+
 def upgrade_hero(hero: dict, colored: bool) -> dict:
     """A hero becomes a section of its color holding its title and its button.
 
@@ -122,12 +136,7 @@ def upgrade_hero(hero: dict, colored: bool) -> dict:
     colored section (`check_no_colored_sections`): there, the section keeps a neutral
     background.
     """
-    blocs = [{"_id": new_id(), "_cls": "TitleBloc", "title": hero["title"]}]
-    if (description := hero.get("description")) and description.strip():
-        blocs[0]["subtitle"] = description
-    if button := button_bloc(hero.get("main_link_title"), hero.get("main_link_url")):
-        blocs.append(button)
-    section = {"_id": hero["_id"], "_cls": "SectionBloc", "blocs": blocs}
+    section = {"_id": hero["_id"], "_cls": "SectionBloc", "blocs": hero_blocs(hero)}
     if colored:
         section["color"] = hero.get("color") or "primary"
     return section
