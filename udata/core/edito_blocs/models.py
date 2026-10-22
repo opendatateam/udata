@@ -116,7 +116,7 @@ def check_resource_exists(resource_id, field, **_kwargs):
         resource_id = uuid.UUID(str(resource_id))
     except ValueError:
         raise FieldValidationError(field=field, message=f"'{resource_id}' is not a valid UUID")
-    if not get_dataset_by_resource_id(resource_id):
+    if not get_dataset_by_resource_id(resource_id, exclude_resources=True):
         raise FieldValidationError(field=field, message=f"Unknown resource '{resource_id}'")
 
 
