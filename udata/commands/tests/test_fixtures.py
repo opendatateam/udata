@@ -13,7 +13,17 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.models import HeroBloc, LinkInBloc, LinksListBloc
+from udata.core.edito_blocs.models import (
+    AccordionItemBloc,
+    AccordionListBloc,
+    ButtonBloc,
+    DatasetBloc,
+    ExploreBloc,
+    LinkInBloc,
+    LinksListBloc,
+    SectionBloc,
+    TitleBloc,
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.post.factories import PostFactory
@@ -42,6 +52,8 @@ class FixturesTest(PytestOnlyAPITestCase):
         )
         res = ResourceFactory()
         dataset.add_resource(res)
+        # Not exported: neither is the resource an explorer shows
+        not_exported = DatasetFactory(resources=[ResourceFactory()])
         ReuseFactory(datasets=[dataset], owner=user)
         CommunityResourceFactory(dataset=dataset, owner=user)
         DiscussionFactory(
@@ -67,10 +79,39 @@ class FixturesTest(PytestOnlyAPITestCase):
             id=self.app.config["SITE_ID"],
             title="Test Site",
             datasets_blocs=[
-                HeroBloc(title="Test Hero", description="A test hero bloc"),
-                LinksListBloc(
-                    title="Test Links",
-                    links=[LinkInBloc(title="Example", url="https://example.com")],
+                SectionBloc(
+                    color="green",
+                    blocs=[
+                        TitleBloc(title="Test Hero", subtitle="A colored section"),
+                        ButtonBloc(title="Go", url="https://example.com"),
+                    ],
+                ),
+                SectionBloc(
+                    blocs=[
+                        TitleBloc(title="Test Links"),
+                        LinksListBloc(
+                            links=[LinkInBloc(title="Example", url="https://example.com")],
+                        ),
+                        # The fixtures hold the dataset and its resource: their blocs stay.
+                        DatasetBloc(dataset=dataset),
+                        ExploreBloc(resource_id=res.id),
+                        # Not the others: their blocs go, they would not import.
+                        DatasetBloc(dataset=not_exported),
+                        ExploreBloc(resource_id=not_exported.resources[0].id),
+                    ]
+                ),
+                SectionBloc(
+                    blocs=[
+                        TitleBloc(title="Accordion"),
+                        # So does the item holding one, then the accordion left empty.
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="Item", content=[DatasetBloc(dataset=not_exported)]
+                                )
+                            ]
+                        ),
+                    ]
                 ),
             ],
         )
@@ -137,9 +178,17 @@ class FixturesTest(PytestOnlyAPITestCase):
 
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
-        assert len(result_site.datasets_blocs) == 2
-        assert result_site.datasets_blocs[0].title == "Test Hero"
-        assert result_site.datasets_blocs[1].title == "Test Links"
+        hero, section, accordion_section = result_site.datasets_blocs
+        assert hero.color == "green"
+        hero_title, button = hero.blocs
+        assert hero_title.title == "Test Hero"
+        assert (button.title, button.url) == ("Go", "https://example.com")
+        title, links, dataset_bloc, explore = section.blocs
+        assert title.title == "Test Links"
+        assert links.links[0].url == "https://example.com"
+        assert dataset_bloc.dataset.id == dataset.id
+        assert explore.resource_id == res.id
+        assert [bloc.title for bloc in accordion_section.blocs] == ["Accordion"]
 
     def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
@@ -154,3 +203,11 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert models.Dataservice.objects.count() > 0
         assert models.Post.objects.count() > 0
         assert models.Site.objects.count() > 0
+        # The edito pages of the site, their lists stripped at export
+        first, *_ = models.Site.objects.get().datasets_blocs
+        title, *rest = first.blocs
+        assert (title.title, title.subtitle) == (
+            "Jeux de données populaires",
+            "Découvrez quelques-uns des jeux de données les plus populaires sur la plateforme.",
+        )
+        assert rest == []
