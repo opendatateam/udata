@@ -77,3 +77,23 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         client = self.make_client(base_url="https://override.example.com", timeout=3)
         assert client.get_profile(RESOURCE_ID) == {"ok": True}
+
+    def test_none_timeout_falls_back_to_bounded_default(self, requests_mock):
+        self.app.config["TABULAR_SQL_TIMEOUT"] = None
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
+            json={"ok": True},
+        )
+        client = self.make_client()
+        assert client.get_profile(RESOURCE_ID) == {"ok": True}
+        assert requests_mock.request_history[0].timeout == 30
+
+    def test_non_positive_timeout_falls_back_to_bounded_default(self, requests_mock):
+        self.app.config["TABULAR_SQL_TIMEOUT"] = 0
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
+            json={"ok": True},
+        )
+        client = self.make_client(timeout=-1)
+        assert client.get_profile(RESOURCE_ID) == {"ok": True}
+        assert requests_mock.request_history[0].timeout == 30
