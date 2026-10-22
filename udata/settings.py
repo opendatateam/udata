@@ -662,6 +662,19 @@ class Defaults(object):
     TABULAR_EXPLORE_URL = None
     TABULAR_ALLOW_REMOTE = True
 
+    # AI assistant settings (Albert + tabular SQL)
+    ###########################################################################
+    ASSISTANT_ENABLED = False
+    ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1"
+    ALBERT_API_KEY = None
+    ALBERT_MODEL = "openai/gpt-oss-120b"
+    ASSISTANT_MAX_STEPS = 5
+    ASSISTANT_MAX_SQL_PER_QUESTION = 3
+    ASSISTANT_TURN_TIMEOUT = 120
+    TABULAR_SQL_URL = None
+    TABULAR_SQL_TIMEOUT = 30
+    ASSISTANT_QUOTA_PER_USER = 20
+
     # JSON-LD settings
     ###########################################################################
     MAX_RESOURCES_IN_JSON_LD = 20
