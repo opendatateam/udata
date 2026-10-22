@@ -29,8 +29,8 @@ def migrate():
     migrations.get(MIGRATION).migrate(get_db())
 
 
-def upgrade(blocs):
-    return migrations.get(MIGRATION).module.upgrade_legacy_blocs(blocs)
+def upgrade(blocs, colored=True):
+    return migrations.get(MIGRATION).module.upgrade_legacy_blocs(blocs, colored)
 
 
 def without_ids(value):
@@ -45,16 +45,102 @@ def without_ids(value):
 def test_each_legacy_bloc_gets_its_own_section():
     blocs = upgrade(
         [
-            {"_id": "hero", "_cls": "HeroBloc", "title": "Hero"},
             {"_id": "md", "_cls": "MarkdownBloc", "content": "A"},
             {"_id": "links", "_cls": "LinksListBloc", "links": []},
         ]
     )
 
-    assert blocs[0] == {"_id": "hero", "_cls": "HeroBloc", "title": "Hero"}
-    assert [bloc["_cls"] for bloc in blocs[1:]] == ["SectionBloc", "SectionBloc"]
-    assert blocs[1]["blocs"] == [{"_id": "md", "_cls": "MarkdownBloc", "content": "A"}]
-    assert blocs[2]["blocs"] == [{"_id": "links", "_cls": "LinksListBloc", "links": []}]
+    assert [bloc["_cls"] for bloc in blocs] == ["SectionBloc", "SectionBloc"]
+    assert blocs[0]["blocs"] == [{"_id": "md", "_cls": "MarkdownBloc", "content": "A"}]
+    assert blocs[1]["blocs"] == [{"_id": "links", "_cls": "LinksListBloc", "links": []}]
+
+
+def test_hero_becomes_a_colored_section():
+    hero = {
+        "_id": "hero",
+        "_cls": "HeroBloc",
+        "title": "Hero",
+        "description": "Description",
+        "color": "green",
+        "main_link_title": "Go",
+        "main_link_url": "https://example.com",
+    }
+
+    (section,) = upgrade([hero])
+
+    assert without_ids(section) == {
+        "_cls": "SectionBloc",
+        "color": "green",
+        "blocs": [
+            {"_cls": "TitleBloc", "title": "Hero", "subtitle": "Description"},
+            {"_cls": "ButtonBloc", "title": "Go", "url": "https://example.com"},
+        ],
+    }
+    # The section keeps the id of the hero it replaces.
+    assert section["_id"] == "hero"
+
+
+def test_hero_without_color_was_drawn_in_the_primary_one():
+    (section,) = upgrade([{"_id": "hero", "_cls": "HeroBloc", "title": "Hero"}])
+
+    assert without_ids(section) == {
+        "_cls": "SectionBloc",
+        "color": "primary",
+        "blocs": [{"_cls": "TitleBloc", "title": "Hero"}],
+    }
+
+
+def test_hero_of_an_organization_gets_a_neutral_section():
+    (section,) = upgrade([{"_id": "h", "_cls": "HeroBloc", "title": "H", "color": "green"}], False)
+
+    assert "color" not in section
+
+
+def test_hero_button_needs_a_title_and_a_url():
+    """A main link was only shown with both, a button requires both."""
+    hero = {"_id": "h", "_cls": "HeroBloc", "title": "H", "main_link_url": "https://e.com"}
+
+    (section,) = upgrade([hero])
+
+    assert [bloc["_cls"] for bloc in section["blocs"]] == ["TitleBloc"]
+
+
+def test_links_list_with_a_paragraph_is_split_in_place():
+    """The paragraph stays on the left of the links, with the button under it."""
+    links = {
+        "_id": "links",
+        "_cls": "LinksListBloc",
+        "paragraph": "P",
+        "main_link_title": "Go",
+        "main_link_url": "https://example.com",
+        "links": [],
+    }
+
+    (section,) = upgrade([links])
+
+    assert without_ids(section["blocs"]) == [
+        {"_cls": "MarkdownBloc", "width": "1/2", "content": "P"},
+        {"_cls": "LinksListBloc", "width": "1/2", "links": []},
+        {"_cls": "ButtonBloc", "width": "1/2", "title": "Go", "url": "https://example.com"},
+    ]
+
+
+def test_links_list_without_paragraph_keeps_its_button_under_the_links():
+    links = {
+        "_id": "links",
+        "_cls": "LinksListBloc",
+        "paragraph": None,
+        "main_link_title": "Go",
+        "main_link_url": "https://example.com",
+        "links": [],
+    }
+
+    (section,) = upgrade([links])
+
+    assert without_ids(section["blocs"]) == [
+        {"_cls": "LinksListBloc", "links": []},
+        {"_cls": "ButtonBloc", "title": "Go", "url": "https://example.com"},
+    ]
 
 
 def test_title_becomes_a_title_bloc():
@@ -199,6 +285,16 @@ def test_accordion_content_is_converted():
     ]
 
 
+def test_accordion_items_get_an_id():
+    blocs = upgrade(
+        [{"_id": "acc", "_cls": "AccordionListBloc", "items": [{"title": "A"}, {"title": "B"}]}]
+    )
+
+    items = blocs[0]["blocs"][0]["items"]
+    assert all(item["_id"] for item in items)
+    assert items[0]["_id"] != items[1]["_id"]
+
+
 def test_upgrading_twice_gives_the_same_result():
     blocs = upgrade(
         [
@@ -216,7 +312,7 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
 
         def legacy_blocs():
             return [
-                HeroBloc(title="Hero"),
+                HeroBloc(title="Hero", color="green"),
                 MarkdownBloc(title="Intro", content="Hello"),
                 DatasetsListBloc(title="Featured", datasets=datasets),
             ]
@@ -232,10 +328,16 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
         post.reload()
         organization.reload()
         site = Site.objects.get(id="test-site")
-        for blocs in (post.blocs, organization.presentation_blocs, site.reuses_blocs):
+        # Only the sections of an organization keep a neutral background.
+        for blocs, color in (
+            (post.blocs, "green"),
+            (organization.presentation_blocs, None),
+            (site.reuses_blocs, "green"),
+        ):
             hero, intro, featured = blocs
-            assert isinstance(hero, HeroBloc)
-            assert hero.title == "Hero"
+            assert isinstance(hero, SectionBloc)
+            assert hero.color == color
+            assert [bloc.title for bloc in hero.blocs] == ["Hero"]
 
             assert isinstance(intro, SectionBloc)
             title, markdown = intro.blocs

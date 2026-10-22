@@ -968,6 +968,22 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org.reload()
         assert org.presentation_blocs == []
 
+    def test_rejects_colored_sections(self):
+        """The organization page sits under the organization's own banner: its sections keep
+        neutral backgrounds, unlike the sections of a post or of the site."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data = org.to_dict()
+        section = {"class": "SectionBloc", "blocs": [{"class": "TitleBloc", "title": "T"}]}
+
+        data["presentation_blocs"] = [{**section, "color": "green"}]
+        assert400(self.put(url_for("api.organization", org=org), data))
+
+        data["presentation_blocs"] = [section]
+        assert200(self.put(url_for("api.organization", org=org), data))
+        org.reload()
+        assert org.presentation_blocs[0].color is None
+
     @pytest.mark.parametrize(
         "bloc",
         [

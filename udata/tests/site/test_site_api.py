@@ -6,7 +6,6 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.edito_blocs.models import (
     DataserviceBloc,
     DatasetBloc,
-    HeroBloc,
     ReuseBloc,
     SectionBloc,
     TitleBloc,
@@ -46,13 +45,15 @@ class SiteAPITest(APITestCase):
         g.site = None
 
     def test_get_site_with_x_fields_shows_blocs(self):
-        self._set_site_blocs(datasets_blocs=[HeroBloc(title="Test hero")])
+        self._set_site_blocs(
+            datasets_blocs=[SectionBloc(color="green", blocs=[TitleBloc(title="Test")])]
+        )
 
         response = self.get(url_for("api.site"), headers={"X-Fields": "{*}"})
         self.assert200(response)
         assert "datasets_blocs" in response.json
-        assert len(response.json["datasets_blocs"]) == 1
-        assert response.json["datasets_blocs"][0]["class"] == "HeroBloc"
+        (section,) = response.json["datasets_blocs"]
+        assert (section["class"], section["color"]) == ("SectionBloc", "green")
 
     def test_get_site_does_not_prefetch_masked_blocs(self):
         """Blocs are masked out of the default `/site/` response, so their references

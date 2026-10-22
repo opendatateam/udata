@@ -4,8 +4,9 @@ Move the blocs of posts, organizations and the site to sections and title blocs.
 Blocs used to sit directly in a blocs field, each with an optional title, and list several
 datasets/reuses/dataservices at once. Each top-level bloc now goes into its own section, its
 title (or description for an accordion) becomes a `TitleBloc`, and a list becomes one bloc per
-object, side by side through their width. cdata reads the legacy format the same way until
-this migration ran (`normalizeBlocs`), so both must stay in sync.
+object, side by side through their width. A hero becomes a colored section, and a list of
+links is split into a text, the links and a button. cdata reads the legacy format the same
+way until this migration ran (`normalizeBlocs`), so both must stay in sync.
 
 Works on blocs as stored in MongoDB (`_cls`, `_id`), so that it does not depend on the legacy
 classes it replaces. An object deleted since it was listed becomes a bloc all the same: the
@@ -40,21 +41,9 @@ LEGACY_LISTS = {
 }
 
 
-class LegacyTitle(NamedTuple):
-    title_field: str
-    # The text under the title: the subtitle of the `TitleBloc` replacing them
-    secondary_field: str
-
-
-LEGACY_TITLES = {
-    "DatasetsListBloc": LegacyTitle("title", "subtitle"),
-    "DataservicesListBloc": LegacyTitle("title", "subtitle"),
-    "ReusesListBloc": LegacyTitle("title", "subtitle"),
-    "MarkdownBloc": LegacyTitle("title", "subtitle"),
-    "LinksListBloc": LegacyTitle("title", "subtitle"),
-    "ExploreBloc": LegacyTitle("title", "subtitle"),
-    "AccordionListBloc": LegacyTitle("title", "description"),
-}
+# The blocs holding a `title`, with a text under it: their `subtitle`, or the `description`
+# of an accordion. Both become a `TitleBloc`.
+LEGACY_TITLED = {*LEGACY_LISTS, "MarkdownBloc", "LinksListBloc", "ExploreBloc", "AccordionListBloc"}
 
 
 def new_id() -> str:
@@ -66,10 +55,9 @@ def upgrade_content(bloc: dict) -> list[dict]:
     cls = bloc["_cls"]
     upgraded = []
 
-    if cls in LEGACY_TITLES:
-        legacy_title = LEGACY_TITLES[cls]
-        title = bloc.pop(legacy_title.title_field, None)
-        secondary = bloc.pop(legacy_title.secondary_field, None)
+    if cls in LEGACY_TITLED:
+        title = bloc.pop("title", None)
+        secondary = bloc.pop("description" if cls == "AccordionListBloc" else "subtitle", None)
         has_title = bool(title and title.strip())
         has_secondary = bool(secondary and secondary.strip())
         if has_title:
@@ -92,8 +80,22 @@ def upgrade_content(bloc: dict) -> list[dict]:
             }
             for ref in bloc.get(legacy.list_field) or []
         )
+    elif cls == "LinksListBloc":
+        # Split into a text, the links and a button, which keep their places: the paragraph
+        # on the left of the links with the button under it, or the button under the links.
+        paragraph = bloc.pop("paragraph", None)
+        button = button_bloc(bloc.pop("main_link_title", None), bloc.pop("main_link_url", None))
+        width = "1/2" if paragraph and paragraph.strip() else None
+        if width:
+            upgraded.append(
+                {"_id": new_id(), "_cls": "MarkdownBloc", "width": width, "content": paragraph}
+            )
+        upgraded.append({**bloc, "width": width} if width else bloc)
+        if button:
+            upgraded.append({**button, "width": width} if width else button)
     elif cls == "AccordionListBloc":
         for item in bloc.get("items") or []:
+            item.setdefault("_id", new_id())
             item["content"] = [
                 upgraded_bloc
                 for content_bloc in item.get("content") or []
@@ -106,16 +108,44 @@ def upgrade_content(bloc: dict) -> list[dict]:
     return upgraded
 
 
-def upgrade_legacy_blocs(blocs: list[dict]) -> list[dict]:
+def button_bloc(title: str | None, url: str | None) -> dict | None:
+    """The button of a legacy main link, which was only shown with both a title and a URL."""
+    if not (title and title.strip() and url and url.strip()):
+        return None
+    return {"_id": new_id(), "_cls": "ButtonBloc", "title": title, "url": url}
+
+
+def upgrade_hero(hero: dict, colored: bool) -> dict:
+    """A hero becomes a section of its color holding its title and its button.
+
+    Without a color, the hero was drawn in the primary one. An organization page has no
+    colored section (`check_no_colored_sections`): there, the section keeps a neutral
+    background.
+    """
+    blocs = [{"_id": new_id(), "_cls": "TitleBloc", "title": hero["title"]}]
+    if (description := hero.get("description")) and description.strip():
+        blocs[0]["subtitle"] = description
+    if button := button_bloc(hero.get("main_link_title"), hero.get("main_link_url")):
+        blocs.append(button)
+    section = {"_id": hero["_id"], "_cls": "SectionBloc", "blocs": blocs}
+    if colored:
+        section["color"] = hero.get("color") or "primary"
+    return section
+
+
+def upgrade_legacy_blocs(blocs: list[dict], colored: bool = True) -> list[dict]:
     """Return the blocs of a blocs field in the current format.
 
     Each legacy bloc gets its own section: they were each drawn on their own background band,
     which is now the section's. Blocs already in the current format are left untouched, so
-    upgrading twice gives the same result.
+    upgrading twice gives the same result. `colored` tells whether the sections of the field
+    can have a color.
     """
     return [
         bloc
-        if bloc["_cls"] in ("HeroBloc", "SectionBloc")
+        if bloc["_cls"] == "SectionBloc"
+        else upgrade_hero(bloc, colored)
+        if bloc["_cls"] == "HeroBloc"
         else {"_id": new_id(), "_cls": "SectionBloc", "blocs": upgrade_content(bloc)}
         for bloc in blocs
     ]
@@ -129,11 +159,11 @@ def migrate(db):
     ):
         collection = model._get_collection()
         for blocs_field in blocs_fields:
-            # Already upgraded blocs fields only hold sections and heroes.
-            legacy = {blocs_field: {"$elemMatch": {"_cls": {"$nin": ["SectionBloc", "HeroBloc"]}}}}
+            # Already upgraded blocs fields only hold sections.
+            legacy = {blocs_field: {"$elemMatch": {"_cls": {"$ne": "SectionBloc"}}}}
             count = 0
             for doc in collection.find(legacy, {blocs_field: 1}):
-                blocs = upgrade_legacy_blocs(doc[blocs_field])
+                blocs = upgrade_legacy_blocs(doc[blocs_field], colored=model is not Organization)
                 collection.update_one({"_id": doc["_id"]}, {"$set": {blocs_field: blocs}})
                 count += 1
             log.info(f"Upgraded {model.__name__}.{blocs_field} on {count} documents")

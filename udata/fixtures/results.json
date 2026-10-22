@@ -20010,9 +20010,14 @@
                 "url": "https://www.data.gouv.fr/pages/donnees-energie/"
               }
             ],
-            "main_link_title": "Voir toutes les thématiques",
-            "main_link_url": "https://www.data.gouv.fr/pages/thematiques-a-la-une",
-            "paragraph": null
+            "width": null
+          },
+          {
+            "class": "ButtonBloc",
+            "id": "81bdf13b-cadd-4ced-862c-ad1e4e441ef4",
+            "width": null,
+            "title": "Voir toutes les thématiques",
+            "url": "https://www.data.gouv.fr/pages/thematiques-a-la-une"
           }
         ]
       },
@@ -20078,6 +20083,12 @@
             "subtitle": "Retrouvez ici une sélection de guides concernant les APIs regroupés par sujet."
           },
           {
+            "class": "MarkdownBloc",
+            "id": "488c4542-4295-4323-a411-178235c71bc6",
+            "width": "1/2",
+            "content": "Nos guides ont été crée afin de vous permettre d'explorer des cas pratiques d'utilisation des APIs  mises à votre disposition pour vous accompagner dans leur utilisation. "
+          },
+          {
             "class": "LinksListBloc",
             "id": "fa21b583-8565-494d-a708-e16cb545504b",
             "links": [
@@ -20097,9 +20108,14 @@
                 "url": "https://doc.transport.data.gouv.fr/reutilisations-des-donnees/reutilisation-des-donnees"
               }
             ],
-            "main_link_title": "Voir l’ensemble des guides thématiques",
-            "main_link_url": "https://guides.data.gouv.fr/reutiliser-des-donnees",
-            "paragraph": "Nos guides ont été crée afin de vous permettre d'explorer des cas pratiques d'utilisation des APIs  mises à votre disposition pour vous accompagner dans leur utilisation. "
+            "width": "1/2"
+          },
+          {
+            "class": "ButtonBloc",
+            "id": "9bcb3e51-afeb-4a7d-b8f1-65c5a9a4504c",
+            "width": "1/2",
+            "title": "Voir l’ensemble des guides thématiques",
+            "url": "https://guides.data.gouv.fr/reutiliser-des-donnees"
           }
         ]
       }

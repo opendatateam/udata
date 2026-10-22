@@ -901,7 +901,14 @@ class PostsAPITest(APITestCase):
             "name": "Test blocs post",
             "body_type": "blocs",
             "blocs": [
-                {"class": "HeroBloc", "title": "Hero"},
+                {
+                    "class": "SectionBloc",
+                    "color": "purple",
+                    "blocs": [
+                        {"class": "TitleBloc", "title": "Hero"},
+                        {"class": "ButtonBloc", "title": "Go", "url": "https://example.com"},
+                    ],
+                },
                 {
                     "class": "SectionBloc",
                     "blocs": [
@@ -920,7 +927,11 @@ class PostsAPITest(APITestCase):
         post = Post.objects.first()
         assert post.body_type == "blocs"
         hero, section = post.blocs
-        assert hero.title == "Hero"
+        assert hero.color == "purple"
+        hero_title, button = hero.blocs
+        assert hero_title.title == "Hero"
+        assert (button.title, button.url) == ("Go", "https://example.com")
+        assert section.color is None
         title, *objects, explore = section.blocs
         assert (title.title, title.subtitle) == ("Featured datasets", "Sub")
         assert [bloc.width for bloc in objects] == ["1/3", "1/3"]
@@ -1098,9 +1109,48 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 [{"class": "SectionBloc", "blocs": [{"class": "HeroBloc", "title": "H"}]}],
                 id="hero-in-section",
             ),
+            pytest.param([{"class": "HeroBloc", "title": "H"}], id="legacy-hero"),
             pytest.param(
-                [{"class": "SectionBloc", "width": "1/2", "blocs": []}],
-                id="width-at-top-level",
+                [{"class": "SectionBloc", "color": "red", "blocs": []}], id="unknown-color"
+            ),
+            pytest.param(
+                [{"class": "SectionBloc", "blocs": [{"class": "ButtonBloc", "title": "B"}]}],
+                id="button-without-url",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [
+                            {
+                                "class": "LinksListBloc",
+                                "links": [],
+                                "main_link_title": "B",
+                                "main_link_url": "https://example.com",
+                            }
+                        ],
+                    }
+                ],
+                id="legacy-links-main-link",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "LinksListBloc", "links": [], "paragraph": "P"}],
+                    }
+                ],
+                id="legacy-links-paragraph",
+            ),
+            pytest.param(
+                [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "TitleBloc", "title": "T", "width": "1"}],
+                    }
+                ],
+                # The whole row is stored as no width at all
+                id="whole-row-width",
             ),
             pytest.param(
                 [
@@ -1211,6 +1261,8 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         response = self.post(url_for("api.posts"), data)
 
         assert response.status_code == 201
+        # Items get an id, which the editor tells them apart by
+        assert response.json["blocs"][0]["blocs"][0]["items"][0]["id"]
         title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
         assert title.title == "T"
         assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")

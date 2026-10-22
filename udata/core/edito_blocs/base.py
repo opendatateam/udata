@@ -34,18 +34,10 @@ CARD_UNUSED_HEAVY_FIELDS = (
 class SingleReference(NamedTuple):
     """A bloc showing a single object, as collected by `prefetch_blocs_references`."""
 
-    holder: list
     bloc: EmbeddedDocument
     attr: str
     model: type
     id: ObjectId
-
-
-class Container(NamedTuple):
-    """A bloc (section, accordion item) holding a list of blocs, and the list holding it."""
-
-    holder: list
-    bloc: EmbeddedDocument
 
 
 class ListOfReferences(NamedTuple):
@@ -89,14 +81,15 @@ def prefetch_blocs_references(blocs):
     """
     collected: list[ListOfReferences] = []
     collected_single: list[SingleReference] = []
-    # Each container, by the id of the list it contains
-    containers: dict[int, Container] = {}
 
-    def walk(blocs):
+    def walk(blocs) -> bool:
+        """Collect the references of the blocs not walked yet, telling whether there were."""
+        walked = False
         for bloc in blocs:
             if getattr(bloc, "_blocs_prefetched", False):
                 continue
             bloc._blocs_prefetched = True
+            walked = True
             for attr, mongo_field in type(bloc)._fields.items():
                 if isinstance(mongo_field, ReferenceField):
                     # A `DBRef`, or a document MongoEngine already dereferenced (without its
@@ -104,7 +97,7 @@ def prefetch_blocs_references(blocs):
                     ref = bloc._data.get(attr)
                     if ref is not None:
                         collected_single.append(
-                            SingleReference(blocs, bloc, attr, mongo_field.document_type, ref.id)
+                            SingleReference(bloc, attr, mongo_field.document_type, ref.id)
                         )
                 elif isinstance(mongo_field, ListField) and isinstance(
                     mongo_field.field, ReferenceField
@@ -123,17 +116,30 @@ def prefetch_blocs_references(blocs):
                     # own, one query per list.
                     nested = bloc._data.get(attr)
                     if nested:
-                        containers[id(nested)] = Container(blocs, bloc)
                         walk(nested)
+        return walked
 
-    def remove(holder: list, item: EmbeddedDocument):
-        # By identity: two blocs can be equal (same object shown twice).
-        del holder[next(i for i, held in enumerate(holder) if held is item)]
-        if not holder and id(holder) in containers:
-            container = containers[id(holder)]
-            remove(container.holder, container.bloc)
+    # Blocs whose object no longer exists, by identity: two blocs can be equal (same object
+    # shown twice).
+    missing: set[int] = set()
 
-    walk(blocs)
+    def keep(item) -> bool:
+        """Prune the lists of blocs `item` holds, telling whether it stays: not when its
+        object no longer exists, nor when it is a container they left empty."""
+        if id(item) in missing:
+            return False
+        for attr, mongo_field in type(item)._fields.items():
+            if isinstance(mongo_field, EmbeddedDocumentListField):
+                nested = item._data.get(attr)
+                if nested:
+                    nested[:] = [nested_item for nested_item in nested if keep(nested_item)]
+                    if not nested:
+                        return False
+        return True
+
+    # The nested lists marshalled in turn were walked already: nothing more to do.
+    if not walk(blocs):
+        return
 
     ids_by_model: dict = {}
     for references in collected:
@@ -162,12 +168,26 @@ def prefetch_blocs_references(blocs):
     for reference in collected_single:
         document = docs_by_model[reference.model].get(reference.id)
         if document is None:
-            remove(reference.holder, reference.bloc)
+            missing.add(id(reference.bloc))
         else:
             reference.bloc._data[reference.attr] = document
 
+    if missing:
+        blocs[:] = [bloc for bloc in blocs if keep(bloc)]
 
-BLOC_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4", "1")
+
+# Without a width, a bloc takes the whole row.
+BLOC_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4")
+
+
+class SizedMixin:
+    """For the blocs laid out side by side in a section or an accordion item."""
+
+    width = field(
+        StringField(choices=BLOC_WIDTHS),
+        description="Share of the row taken by the bloc, the next blocs wrapping to a new row "
+        "when it is full. Without it, the whole row.",
+    )
 
 
 # `Bloc` lives in its own module (separate from sibling subclasses like
@@ -179,32 +199,36 @@ class Bloc(EmbeddedDocument):
     meta = {"allow_inheritance": True}
 
     id = field(AutoUUIDField(primary_key=True))
-    width = field(
-        StringField(choices=BLOC_WIDTHS),
-        description="Share of the row taken by the bloc inside a section or an accordion item, "
-        "the next blocs wrapping to a new row when it is full. Without it, the whole row.",
-    )
 
 
-# The layout of a blocs field, from the top: heroes and sections; sections hold accordions
-# and leaves, accordion items only hold leaves.
+# The layout of a blocs field, from the top: sections; sections hold accordions and leaves,
+# accordion items only hold leaves.
 LEAF_BLOCS = {
     "TitleBloc",
     "MarkdownBloc",
     "LinksListBloc",
+    "ButtonBloc",
     "ExploreBloc",
     "DatasetBloc",
     "ReuseBloc",
     "DataserviceBloc",
 }
-TOP_LEVEL_BLOCS = {"HeroBloc", "SectionBloc"}
+TOP_LEVEL_BLOCS = {"SectionBloc"}
 SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc"}
 # The explorer is too wide for an accordion.
 ACCORDION_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
 
-# Fields of the legacy format that must stay empty (see `BlocWithTitleMixin`).
-LEGACY_TITLE_FIELDS = ("title", "subtitle", "description")
-BLOCS_WITH_LEGACY_TITLE = {"MarkdownBloc", "LinksListBloc", "ExploreBloc", "AccordionListBloc"}
+# Fields of the legacy format that must stay empty, and the blocs that replaced them (see
+# `BlocWithTitleMixin`).
+LEGACY_FIELDS = {
+    "MarkdownBloc": (("title", "subtitle"), "a TitleBloc"),
+    "ExploreBloc": (("title", "subtitle"), "a TitleBloc"),
+    "AccordionListBloc": (("title", "description"), "a TitleBloc"),
+    "LinksListBloc": (
+        ("title", "subtitle", "paragraph", "main_link_url", "main_link_title"),
+        "a TitleBloc, a MarkdownBloc and a ButtonBloc",
+    ),
+}
 
 
 def _check_layout(blocs, allowed: set, field: str):
@@ -215,15 +239,11 @@ def _check_layout(blocs, allowed: set, field: str):
                 field=field,
                 message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
             )
-        if name in BLOCS_WITH_LEGACY_TITLE and any(
-            getattr(bloc, f, None) for f in LEGACY_TITLE_FIELDS
-        ):
+        legacy_fields, replacements = LEGACY_FIELDS.get(name, ((), ""))
+        if set_fields := [f for f in legacy_fields if getattr(bloc, f, None)]:
             raise FieldValidationError(
-                field=field, message=f"{name} cannot have a title, use a TitleBloc"
-            )
-        if allowed is TOP_LEVEL_BLOCS and bloc.width:
-            raise FieldValidationError(
-                field=field, message=f"{name} spans the whole page, it cannot have a width"
+                field=field,
+                message=f"{name} cannot have {', '.join(set_fields)}, use {replacements}",
             )
         if name == "SectionBloc":
             _check_layout(bloc.blocs, SECTION_BLOCS, field)
@@ -234,3 +254,10 @@ def _check_layout(blocs, allowed: set, field: str):
 
 def check_blocs_layout(blocs, field, **_kwargs):
     _check_layout(blocs or [], TOP_LEVEL_BLOCS, field)
+
+
+def check_no_colored_sections(blocs, field, **_kwargs):
+    """An organization page sits under the organization's own banner: its sections keep
+    neutral backgrounds."""
+    if any(getattr(bloc, "color", None) for bloc in blocs or []):
+        raise FieldValidationError(field=field, message="A section cannot have a color here")

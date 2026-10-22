@@ -16,9 +16,9 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
+    ButtonBloc,
     DatasetBloc,
     ExploreBloc,
-    HeroBloc,
     LinkInBloc,
     LinksListBloc,
     SectionBloc,
@@ -79,7 +79,13 @@ class FixturesTest(PytestOnlyAPITestCase):
             id=self.app.config["SITE_ID"],
             title="Test Site",
             datasets_blocs=[
-                HeroBloc(title="Test Hero", description="A test hero bloc"),
+                SectionBloc(
+                    color="green",
+                    blocs=[
+                        TitleBloc(title="Test Hero", subtitle="A colored section"),
+                        ButtonBloc(title="Go", url="https://example.com"),
+                    ],
+                ),
                 SectionBloc(
                     blocs=[
                         TitleBloc(title="Test Links"),
@@ -172,7 +178,10 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert models.Site.objects.count() > 0
         result_site = models.Site.objects.first()
         hero, section, accordion_section = result_site.datasets_blocs
-        assert hero.title == "Test Hero"
+        assert hero.color == "green"
+        hero_title, button = hero.blocs
+        assert hero_title.title == "Test Hero"
+        assert (button.title, button.url) == ("Go", "https://example.com")
         title, links, explore = section.blocs
         assert title.title == "Test Links"
         assert links.links[0].url == "https://example.com"

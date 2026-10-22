@@ -28,7 +28,7 @@ from udata.api_fields import field, generate_fields, required_if
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.checks import check_is_email
-from udata.core.edito_blocs.base import Bloc, check_blocs_layout
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout, check_no_colored_sections
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -325,7 +325,7 @@ class Organization(
     presentation_blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
-        checks=[check_blocs_layout],
+        checks=[check_blocs_layout, check_no_colored_sections],
         # Read through `public_presentation_blocs` so the API hides unpublished blocs from
         # the public. Writes still target the real `presentation_blocs` attribute (patch()
         # addresses fields by key).

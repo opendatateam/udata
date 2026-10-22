@@ -14,9 +14,10 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import get_dataset_by_resource_id
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, SizedMixin
 from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.uuid_fields import AutoUUIDField
 
 
 class BlocWithTitleMixin:
@@ -79,7 +80,7 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
-class DatasetBloc(Bloc):
+class DatasetBloc(SizedMixin, Bloc):
     dataset = field(
         ReferenceField("Dataset", required=True),
         nested_fields=dataset_card_fields,
@@ -87,7 +88,7 @@ class DatasetBloc(Bloc):
 
 
 @generate_fields()
-class ReuseBloc(Bloc):
+class ReuseBloc(SizedMixin, Bloc):
     reuse = field(
         ReferenceField("Reuse", required=True),
         nested_fields=reuse_card_fields,
@@ -95,7 +96,7 @@ class ReuseBloc(Bloc):
 
 
 @generate_fields()
-class DataserviceBloc(Bloc):
+class DataserviceBloc(SizedMixin, Bloc):
     dataservice = field(
         ReferenceField("Dataservice", required=True),
         nested_fields=dataservice_card_fields,
@@ -103,7 +104,7 @@ class DataserviceBloc(Bloc):
 
 
 @generate_fields()
-class TitleBloc(Bloc):
+class TitleBloc(SizedMixin, Bloc):
     title = field(StringField(required=True))
     subtitle = field(StringField())
 
@@ -116,7 +117,9 @@ class LinkInBloc(EmbeddedDocument):
 
 
 @generate_fields()
-class LinksListBloc(BlocWithTitleMixin, Bloc):
+class LinksListBloc(SizedMixin, BlocWithTitleMixin, Bloc):
+    # Legacy: the paragraph is now a `MarkdownBloc` and the main link a `ButtonBloc`, see
+    # `BlocWithTitleMixin`.
     paragraph = field(StringField())
     main_link_url = field(StringField())
     main_link_title = field(StringField())
@@ -124,20 +127,28 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
     links = field(EmbeddedDocumentListField(LinkInBloc))
 
 
-HERO_COLORS = ("primary", "green", "purple")
+@generate_fields()
+class ButtonBloc(SizedMixin, Bloc):
+    title = field(StringField(required=True))
+    url = field(StringField(required=True))
 
 
+SECTION_COLORS = ("primary", "green", "purple")
+
+
+# Legacy: a hero is now a colored `SectionBloc` holding a `TitleBloc` and a `ButtonBloc`,
+# see `BlocWithTitleMixin`.
 @generate_fields()
 class HeroBloc(Bloc):
     title = field(StringField(required=True))
     description = field(StringField())
-    color = field(StringField(choices=HERO_COLORS))
+    color = field(StringField(choices=SECTION_COLORS))
     main_link_url = field(StringField())
     main_link_title = field(StringField())
 
 
 @generate_fields()
-class MarkdownBloc(BlocWithTitleMixin, Bloc):
+class MarkdownBloc(SizedMixin, BlocWithTitleMixin, Bloc):
     content = field(
         StringField(required=True),
         markdown=True,
@@ -154,7 +165,7 @@ def check_resource_exists(resource_id, field, **_kwargs):
 
 
 @generate_fields()
-class ExploreBloc(BlocWithTitleMixin, Bloc):
+class ExploreBloc(SizedMixin, BlocWithTitleMixin, Bloc):
     resource_id = field(
         UUIDField(required=True, binary=False),
         checks=[check_resource_exists],
@@ -163,12 +174,15 @@ class ExploreBloc(BlocWithTitleMixin, Bloc):
 
 @generate_fields()
 class AccordionItemBloc(EmbeddedDocument):
+    # Generated when an item without one is loaded (`AutoUUIDField`): the editor tells items
+    # apart by it as they move.
+    id = field(AutoUUIDField(primary_key=True))
     title = field(StringField(required=True))
     content = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
 @generate_fields()
-class AccordionListBloc(Bloc):
+class AccordionListBloc(SizedMixin, Bloc):
     # Legacy, see `BlocWithTitleMixin`.
     title = field(StringField())
     description = field(StringField())
@@ -177,6 +191,11 @@ class AccordionListBloc(Bloc):
 
 @generate_fields()
 class SectionBloc(Bloc):
+    color = field(
+        StringField(choices=SECTION_COLORS),
+        description="Background of the section. Without it, the sections of a page alternate "
+        "their neutral backgrounds.",
+    )
     blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
