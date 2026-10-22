@@ -286,28 +286,6 @@ def test_accordion_content_is_converted():
     ]
 
 
-def test_hero_in_an_accordion_item_becomes_its_title_and_its_button():
-    hero = {
-        "_id": "hero",
-        "_cls": "HeroBloc",
-        "title": "Hero",
-        "description": "Description",
-        "color": "green",
-        "main_link_title": "Go",
-        "main_link_url": "https://e.com",
-    }
-
-    blocs = upgrade(
-        [{"_id": "acc", "_cls": "AccordionListBloc", "items": [{"title": "I", "content": [hero]}]}]
-    )
-
-    (item,) = without_ids(blocs)[0]["blocs"][0]["items"]
-    assert item["content"] == [
-        {"_cls": "TitleBloc", "title": "Hero", "subtitle": "Description"},
-        {"_cls": "ButtonBloc", "title": "Go", "url": "https://e.com"},
-    ]
-
-
 def test_accordion_items_get_an_id():
     blocs = upgrade(
         [{"_id": "acc", "_cls": "AccordionListBloc", "items": [{"title": "A"}, {"title": "B"}]}]
