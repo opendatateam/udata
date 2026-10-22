@@ -139,16 +139,18 @@ def upgrade_legacy_blocs(blocs: list[dict], colored: bool = True) -> list[dict]:
     Each legacy bloc gets its own section: they were each drawn on their own background band,
     which is now the section's. Blocs already in the current format are left untouched, so
     upgrading twice gives the same result. `colored` tells whether the sections of the field
-    can have a color.
+    can have a color. A legacy bloc showing nothing (an empty list without a title) is dropped:
+    a section cannot be empty.
     """
-    return [
-        bloc
-        if bloc["_cls"] == "SectionBloc"
-        else upgrade_hero(bloc, colored)
-        if bloc["_cls"] == "HeroBloc"
-        else {"_id": new_id(), "_cls": "SectionBloc", "blocs": upgrade_content(bloc)}
-        for bloc in blocs
-    ]
+    upgraded = []
+    for bloc in blocs:
+        if bloc["_cls"] == "SectionBloc":
+            upgraded.append(bloc)
+        elif bloc["_cls"] == "HeroBloc":
+            upgraded.append(upgrade_hero(bloc, colored))
+        elif content := upgrade_content(bloc):
+            upgraded.append({"_id": new_id(), "_cls": "SectionBloc", "blocs": content})
+    return upgraded
 
 
 def migrate(db):

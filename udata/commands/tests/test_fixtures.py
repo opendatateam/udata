@@ -92,21 +92,22 @@ class FixturesTest(PytestOnlyAPITestCase):
                         LinksListBloc(
                             links=[LinkInBloc(title="Example", url="https://example.com")],
                         ),
-                        # The fixtures don't hold the dataset: the bloc showing it goes.
+                        # The fixtures hold the dataset and its resource: their blocs stay.
                         DatasetBloc(dataset=dataset),
                         ExploreBloc(resource_id=res.id),
-                        # Nor the resource: the explorer goes, it would not import.
+                        # Not the others: their blocs go, they would not import.
+                        DatasetBloc(dataset=not_exported),
                         ExploreBloc(resource_id=not_exported.resources[0].id),
                     ]
                 ),
                 SectionBloc(
                     blocs=[
                         TitleBloc(title="Accordion"),
-                        # So does the item holding it, then the accordion left empty.
+                        # So does the item holding one, then the accordion left empty.
                         AccordionListBloc(
                             items=[
                                 AccordionItemBloc(
-                                    title="Item", content=[DatasetBloc(dataset=dataset)]
+                                    title="Item", content=[DatasetBloc(dataset=not_exported)]
                                 )
                             ]
                         ),
@@ -182,9 +183,10 @@ class FixturesTest(PytestOnlyAPITestCase):
         hero_title, button = hero.blocs
         assert hero_title.title == "Test Hero"
         assert (button.title, button.url) == ("Go", "https://example.com")
-        title, links, explore = section.blocs
+        title, links, dataset_bloc, explore = section.blocs
         assert title.title == "Test Links"
         assert links.links[0].url == "https://example.com"
+        assert dataset_bloc.dataset.id == dataset.id
         assert explore.resource_id == res.id
         assert [bloc.title for bloc in accordion_section.blocs] == ["Accordion"]
 

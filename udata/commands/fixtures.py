@@ -162,9 +162,12 @@ def without_blocs(items: list[dict], removed: Callable[[dict], bool]) -> list[di
     return kept
 
 
-def clean_blocs_for_generate(blocs: list[dict], resource_ids: set[str]) -> list[dict]:
-    """Remove the blocs the fixtures could not import: those showing an object, as the
-    fixtures don't hold them, and the explorers of a resource of a dataset not exported."""
+def clean_blocs_for_generate(
+    blocs: list[dict], object_ids: set[str], resource_ids: set[str]
+) -> list[dict]:
+    """Remove the blocs the fixtures could not import: those showing an object not exported
+    (the exported ones keep their id), and the explorers of a resource of a dataset not
+    exported."""
     object_fields = {
         name
         for bloc_class in classes_by_parents.get(Bloc, set())
@@ -175,7 +178,7 @@ def clean_blocs_for_generate(blocs: list[dict], resource_ids: set[str]) -> list[
     def removed(bloc: dict) -> bool:
         if "resource_id" in bloc and bloc["resource_id"] not in resource_ids:
             return True
-        return any(name in bloc for name in object_fields)
+        return any(name in bloc and bloc[name]["id"] not in object_ids for name in object_fields)
 
     return without_blocs(blocs, removed)
 
@@ -251,6 +254,11 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
             json_datasets.append(json_fixture)
 
+    object_ids = {
+        obj["id"]
+        for fixture in json_datasets
+        for obj in [fixture["dataset"], *fixture["reuses"], *fixture["dataservices"]]
+    }
     resource_ids = {
         resource["id"] for fixture in json_datasets for resource in fixture["resources"]
     }
@@ -263,7 +271,9 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
         post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
         remove_unwanted_keys(post_detail, "post")
         if "blocs" in post_detail:
-            post_detail["blocs"] = clean_blocs_for_generate(post_detail["blocs"], resource_ids)
+            post_detail["blocs"] = clean_blocs_for_generate(
+                post_detail["blocs"], object_ids, resource_ids
+            )
         json_posts.append(post_detail)
 
     # Fetch site (with blocs via X-Fields)
@@ -272,7 +282,9 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     remove_unwanted_keys(json_site, "site")
     for blocs_field in SITE_BLOCS_FIELDS:
         if blocs_field in json_site:
-            json_site[blocs_field] = clean_blocs_for_generate(json_site[blocs_field], resource_ids)
+            json_site[blocs_field] = clean_blocs_for_generate(
+                json_site[blocs_field], object_ids, resource_ids
+            )
 
     json_output = {
         "datasets": json_datasets,

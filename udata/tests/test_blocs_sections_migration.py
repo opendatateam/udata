@@ -221,6 +221,8 @@ def test_lists_become_one_bloc_per_object_keeping_their_columns():
 
 
 def test_empty_list_keeps_only_its_title():
+    """Without a title, an empty list shows nothing: it gets no section, a section cannot be
+    empty."""
     blocs = upgrade(
         [
             {"_id": "1", "_cls": "DatasetsListBloc", "title": "Soon", "datasets": []},
@@ -230,7 +232,6 @@ def test_empty_list_keeps_only_its_title():
 
     assert without_ids(blocs) == [
         {"_cls": "SectionBloc", "blocs": [{"_cls": "TitleBloc", "title": "Soon"}]},
-        {"_cls": "SectionBloc", "blocs": []},
     ]
 
 

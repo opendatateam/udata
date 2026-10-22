@@ -11,7 +11,7 @@ from udata.core.access_type.constants import AccessAudienceCondition, AccessAudi
 from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
@@ -1096,144 +1096,118 @@ class PostsAPITest(APITestCase):
         assert400(response)
 
 
+def section(*blocs, **fields):
+    return {"class": "SectionBloc", "blocs": list(blocs), **fields}
+
+
+def accordion(*content):
+    return {"class": "AccordionListBloc", "items": [{"title": "I", "content": list(content)}]}
+
+
+TITLE = {"class": "TitleBloc", "title": "T"}
+
+
 class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
+    # Each case with the reason it is rejected for, so that none passes for another one.
     @pytest.mark.parametrize(
-        "blocs",
+        "blocs,reason",
         [
-            pytest.param([{"class": "TitleBloc", "title": "T"}], id="leaf-at-top-level"),
+            pytest.param([TITLE], "TitleBloc is not allowed here", id="leaf-at-top-level"),
             pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "SectionBloc", "blocs": []}]}],
+                [section(section(TITLE))],
+                "SectionBloc is not allowed here",
                 id="section-in-section",
             ),
+            pytest.param([section()], "SectionBloc cannot be empty", id="empty-section"),
             pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "HeroBloc", "title": "H"}]}],
+                [section({"class": "HeroBloc", "title": "H"})],
+                "HeroBloc is not allowed here",
                 id="hero-in-section",
             ),
-            pytest.param([{"class": "HeroBloc", "title": "H"}], id="legacy-hero"),
             pytest.param(
-                [{"class": "SectionBloc", "color": "red", "blocs": []}], id="unknown-color"
+                [{"class": "HeroBloc", "title": "H"}],
+                "HeroBloc is not allowed here",
+                id="legacy-hero",
             ),
+            pytest.param([section(TITLE, color="red")], "color", id="unknown-color"),
             pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "ButtonBloc", "title": "B"}]}],
-                id="button-without-url",
+                [section({"class": "ButtonBloc", "title": "B"})], "url", id="button-without-url"
             ),
             pytest.param(
                 [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "LinksListBloc",
-                                "links": [],
-                                "main_link_title": "B",
-                                "main_link_url": "https://example.com",
-                            }
-                        ],
-                    }
+                    section(
+                        {
+                            "class": "LinksListBloc",
+                            "links": [],
+                            "main_link_title": "B",
+                            "main_link_url": "https://example.com",
+                        }
+                    )
                 ],
+                "LinksListBloc cannot have main_link_url, main_link_title",
                 id="legacy-links-main-link",
             ),
             pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "LinksListBloc", "links": [], "paragraph": "P"}],
-                    }
-                ],
+                [section({"class": "LinksListBloc", "links": [], "paragraph": "P"})],
+                "LinksListBloc cannot have paragraph",
                 id="legacy-links-paragraph",
             ),
+            # The whole row is stored as no width at all
+            pytest.param([section({**TITLE, "width": "1"})], "width", id="whole-row-width"),
+            pytest.param([section({**TITLE, "width": "1/5"})], "width", id="unknown-width"),
             pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "TitleBloc", "title": "T", "width": "1"}],
-                    }
-                ],
-                # The whole row is stored as no width at all
-                id="whole-row-width",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "AccordionListBloc",
-                                "items": [
-                                    {
-                                        "title": "I",
-                                        "content": [{"class": "AccordionListBloc", "items": []}],
-                                    }
-                                ],
-                            }
-                        ],
-                    }
-                ],
+                [section(accordion(accordion()))],
+                "AccordionListBloc is not allowed here",
                 id="accordion-in-accordion",
             ),
             pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [
-                            {
-                                "class": "AccordionListBloc",
-                                "items": [
-                                    {
-                                        "title": "I",
-                                        "content": [
-                                            {"class": "ExploreBloc", "resource_id": str(uuid4())}
-                                        ],
-                                    }
-                                ],
-                            }
-                        ],
-                    }
-                ],
-                id="explore-in-accordion",
+                [{"class": "DatasetsListBloc", "datasets": []}],
+                "DatasetsListBloc is not allowed here",
+                id="legacy-list-at-top-level",
             ),
             pytest.param(
-                [{"class": "DatasetsListBloc", "datasets": []}], id="legacy-list-at-top-level"
-            ),
-            pytest.param(
-                [{"class": "SectionBloc", "blocs": [{"class": "ReusesListBloc", "reuses": []}]}],
+                [section({"class": "ReusesListBloc", "reuses": []})],
+                "ReusesListBloc is not allowed here",
                 id="legacy-list-in-section",
             ),
             pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "MarkdownBloc", "title": "T", "content": "C"}],
-                    }
-                ],
+                [section({"class": "MarkdownBloc", "title": "T", "content": "C"})],
+                "MarkdownBloc cannot have title",
                 id="legacy-title",
             ),
             pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "AccordionListBloc", "description": "D", "items": []}],
-                    }
-                ],
+                [section({"class": "AccordionListBloc", "description": "D", "items": []})],
+                "AccordionListBloc cannot have description",
                 id="legacy-accordion-description",
-            ),
-            pytest.param(
-                [
-                    {
-                        "class": "SectionBloc",
-                        "blocs": [{"class": "TitleBloc", "title": "T", "width": "1/5"}],
-                    }
-                ],
-                id="unknown-width",
             ),
         ],
     )
-    def test_post_api_rejects_blocs_out_of_layout(self, blocs):
+    def test_post_api_rejects_blocs_out_of_layout(self, blocs, reason):
         self.login(AdminFactory())
         data = {"name": "Test blocs post", "body_type": "blocs", "blocs": blocs}
         response = self.post(url_for("api.posts"), data)
         assert response.status_code == 400
+        assert reason in response.get_data(as_text=True)
         assert Post.objects.count() == 0
+
+    def test_post_api_rejects_the_explorer_in_an_accordion(self):
+        """The explorer is too wide for an accordion, even of an existing resource."""
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
+        self.login(AdminFactory())
+
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [section(accordion(explorer))],
+        }
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 400
+        assert "ExploreBloc is not allowed here" in response.get_data(as_text=True)
+        # The same explorer is accepted in a section
+        data["blocs"] = [section(explorer)]
+        assert self.post(url_for("api.posts"), data).status_code == 201
 
     def test_post_api_accepts_blocs_in_an_accordion(self):
         """The layout the editor and the migration produce: objects side by side, under a

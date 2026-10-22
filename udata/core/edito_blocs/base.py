@@ -82,14 +82,11 @@ def prefetch_blocs_references(blocs):
     collected: list[ListOfReferences] = []
     collected_single: list[SingleReference] = []
 
-    def walk(blocs) -> bool:
-        """Collect the references of the blocs not walked yet, telling whether there were."""
-        walked = False
+    def walk(blocs):
         for bloc in blocs:
             if getattr(bloc, "_blocs_prefetched", False):
                 continue
             bloc._blocs_prefetched = True
-            walked = True
             for attr, mongo_field in type(bloc)._fields.items():
                 if isinstance(mongo_field, ReferenceField):
                     # A `DBRef`, or a document MongoEngine already dereferenced (without its
@@ -117,7 +114,6 @@ def prefetch_blocs_references(blocs):
                     nested = bloc._data.get(attr)
                     if nested:
                         walk(nested)
-        return walked
 
     # Blocs whose object no longer exists, by identity: two blocs can be equal (same object
     # shown twice).
@@ -137,9 +133,7 @@ def prefetch_blocs_references(blocs):
                         return False
         return True
 
-    # The nested lists marshalled in turn were walked already: nothing more to do.
-    if not walk(blocs):
-        return
+    walk(blocs)
 
     ids_by_model: dict = {}
     for references in collected:
@@ -246,6 +240,10 @@ def _check_layout(blocs, allowed: set, field: str):
                 message=f"{name} cannot have {', '.join(set_fields)}, use {replacements}",
             )
         if name == "SectionBloc":
+            # An empty section only exists in the editor, where blocs are added to it: no
+            # reader would see it.
+            if not bloc.blocs:
+                raise FieldValidationError(field=field, message="SectionBloc cannot be empty")
             _check_layout(bloc.blocs, SECTION_BLOCS, field)
         elif name == "AccordionListBloc":
             for item in bloc.items:
