@@ -51,6 +51,19 @@ def payload_for_resource(document: Any, resource_id: str | None) -> dict | None:
     }
 
 
+def analyser_enabled() -> bool:
+    return bool(
+        current_app.config.get("PUBLISH_ON_RESOURCE_EVENTS")
+        and current_app.config.get("RESOURCES_ANALYSER_URI")
+    )
+
+
+def analyser_headers() -> dict[str, str]:
+    if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
+        return {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
+    return {}
+
+
 @task(route="high.resource")
 def publish(url: str, document: Any, resource_id: str, action: str) -> None:
     method: Callable
@@ -62,18 +75,13 @@ def publish(url: str, document: Any, resource_id: str, action: str) -> None:
         case EventMessageType.DELETED:
             method = requests.delete
     payload: dict | None = payload_for_resource(document, resource_id)
-    headers = {}
-    if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
-        headers = {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
-    r = method(url, json=payload, headers=headers)
+    r = method(url, json=payload, headers=analyser_headers())
     r.raise_for_status()
 
 
 @Dataset.on_resource_added.connect
 def publish_added_resource_message(sender, document, **kwargs) -> None:
-    if current_app.config.get("PUBLISH_ON_RESOURCE_EVENTS") and current_app.config.get(
-        "RESOURCES_ANALYSER_URI"
-    ):
+    if analyser_enabled():
         publish.delay(
             f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/",
             document,
@@ -84,9 +92,7 @@ def publish_added_resource_message(sender, document, **kwargs) -> None:
 
 @Dataset.on_resource_updated.connect
 def publish_updated_resource_message(sender, document, **kwargs) -> None:
-    if current_app.config.get("PUBLISH_ON_RESOURCE_EVENTS") and current_app.config.get(
-        "RESOURCES_ANALYSER_URI"
-    ):
+    if analyser_enabled():
         resource_id: str = kwargs["resource_id"]
         publish.delay(
             f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/{resource_id}",
@@ -98,9 +104,7 @@ def publish_updated_resource_message(sender, document, **kwargs) -> None:
 
 @Dataset.on_resource_removed.connect
 def publish_removed_resource_message(sender, document, **kwargs) -> None:
-    if current_app.config.get("PUBLISH_ON_RESOURCE_EVENTS") and current_app.config.get(
-        "RESOURCES_ANALYSER_URI"
-    ):
+    if analyser_enabled():
         resource_id: str = kwargs["resource_id"]
         publish.delay(
             f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/{resource_id}",
