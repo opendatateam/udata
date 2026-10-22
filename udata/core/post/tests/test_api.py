@@ -275,7 +275,9 @@ class PostsAPITest(APITestCase):
 
         def query_count(nb_cards):
             datasets = [DatasetFactory(organization=org) for _ in range(nb_cards)]
-            post.blocs = [SectionBloc(blocs=[DatasetBloc(dataset=d) for d in datasets])]
+            post.blocs = (
+                [SectionBloc(blocs=[DatasetBloc(dataset=d) for d in datasets])] if datasets else []
+            )
             post.save()
 
             url = url_for("api.posts")
@@ -288,9 +290,9 @@ class PostsAPITest(APITestCase):
             assert "blocs" not in response.json["data"][0]
             return count
 
-        # Compared against an empty section, not a smaller one: a prefetch that ignores
-        # the mask costs a constant batch query, which a "20 vs 2 cards" comparison
-        # would not see. An empty section has nothing to load, so it gives the baseline.
+        # Compared against no blocs, not fewer cards: a prefetch that ignores the mask
+        # costs a constant batch query, which a "20 vs 2 cards" comparison would not see.
+        # Without blocs, there is nothing to load, so it gives the baseline.
         filled, empty = query_count(20), query_count(0)
         assert filled == empty, (
             f"the query count grows with the bloc contents ({filled} with cards, "

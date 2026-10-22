@@ -212,13 +212,19 @@ SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc"}
 # The explorer is too wide for an accordion.
 ACCORDION_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
 
+
 # Fields of the legacy format that must stay empty, and the blocs that replaced them (see
 # `BlocWithTitleMixin`).
+class LegacyFields(NamedTuple):
+    fields: tuple[str, ...]
+    replacements: str
+
+
 LEGACY_FIELDS = {
-    "MarkdownBloc": (("title", "subtitle"), "a TitleBloc"),
-    "ExploreBloc": (("title", "subtitle"), "a TitleBloc"),
-    "AccordionListBloc": (("title", "description"), "a TitleBloc"),
-    "LinksListBloc": (
+    "MarkdownBloc": LegacyFields(("title", "subtitle"), "a TitleBloc"),
+    "ExploreBloc": LegacyFields(("title", "subtitle"), "a TitleBloc"),
+    "AccordionListBloc": LegacyFields(("title", "description"), "a TitleBloc"),
+    "LinksListBloc": LegacyFields(
         ("title", "subtitle", "paragraph", "main_link_url", "main_link_title"),
         "a TitleBloc, a MarkdownBloc and a ButtonBloc",
     ),
@@ -233,11 +239,11 @@ def _check_layout(blocs, allowed: set, field: str):
                 field=field,
                 message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
             )
-        legacy_fields, replacements = LEGACY_FIELDS.get(name, ((), ""))
-        if set_fields := [f for f in legacy_fields if getattr(bloc, f, None)]:
+        legacy = LEGACY_FIELDS.get(name, LegacyFields((), ""))
+        if set_fields := [f for f in legacy.fields if getattr(bloc, f, None)]:
             raise FieldValidationError(
                 field=field,
-                message=f"{name} cannot have {', '.join(set_fields)}, use {replacements}",
+                message=f"{name} cannot have {', '.join(set_fields)}, use {legacy.replacements}",
             )
         if name == "SectionBloc":
             # An empty section only exists in the editor, where blocs are added to it: no

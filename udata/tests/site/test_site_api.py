@@ -63,30 +63,22 @@ class SiteAPITest(APITestCase):
         def query_count(nb_cards):
             # Fill all three bloc fields: without the mask guard, every one would be
             # prefetched (a batch query per type), adding several useless queries.
+            def sections(blocs):
+                return [SectionBloc(blocs=blocs)] if blocs else []
+
             self._set_site_blocs(
-                datasets_blocs=[
-                    SectionBloc(
-                        blocs=[
-                            DatasetBloc(dataset=DatasetFactory(organization=org))
-                            for _ in range(nb_cards)
-                        ]
-                    )
-                ],
-                reuses_blocs=[
-                    SectionBloc(
-                        blocs=[
-                            ReuseBloc(reuse=ReuseFactory(organization=org)) for _ in range(nb_cards)
-                        ]
-                    )
-                ],
-                dataservices_blocs=[
-                    SectionBloc(
-                        blocs=[
-                            DataserviceBloc(dataservice=DataserviceFactory(organization=org))
-                            for _ in range(nb_cards)
-                        ]
-                    )
-                ],
+                datasets_blocs=sections(
+                    [DatasetBloc(dataset=DatasetFactory(organization=org)) for _ in range(nb_cards)]
+                ),
+                reuses_blocs=sections(
+                    [ReuseBloc(reuse=ReuseFactory(organization=org)) for _ in range(nb_cards)]
+                ),
+                dataservices_blocs=sections(
+                    [
+                        DataserviceBloc(dataservice=DataserviceFactory(organization=org))
+                        for _ in range(nb_cards)
+                    ]
+                ),
             )
 
             self.assert200(self.get(url_for("api.site")))  # warm up one-time queries
@@ -99,10 +91,9 @@ class SiteAPITest(APITestCase):
             assert "datasets_blocs" not in response.json
             return count
 
-        # Compared against empty sections, not smaller ones: a prefetch that ignores the
-        # mask costs a constant batch query per type, which a "20 vs 2 cards"
-        # comparison would not see. Empty sections have nothing to load, so they give
-        # the baseline count.
+        # Compared against no blocs, not fewer cards: a prefetch that ignores the mask
+        # costs a constant batch query per type, which a "20 vs 2 cards" comparison would
+        # not see. Without blocs, there is nothing to load, so it gives the baseline count.
         filled, empty = query_count(20), query_count(0)
         assert filled == empty, (
             f"the query count grows with the bloc contents ({filled} with cards, "

@@ -2,22 +2,27 @@ from bson import ObjectId
 from flask import url_for
 from mongoengine.connection import get_db
 
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
     DatasetBloc,
     DatasetsListBloc,
+    ExploreBloc,
     HeroBloc,
+    LinkInBloc,
+    LinksListBloc,
     MarkdownBloc,
     SectionBloc,
     TitleBloc,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Member
 from udata.core.post.factories import PostFactory
 from udata.core.site.factories import SiteFactory
 from udata.core.site.models import Site
+from udata.core.user.factories import AdminFactory
 from udata.db import migrations
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200
@@ -376,7 +381,70 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
         assert post.blocs[1].blocs[0].title == "Already upgraded"
 
 
+def every_legacy_bloc() -> list:
+    """A legacy bloc of each kind the migration converts, with all their fields set."""
+    dataset = DatasetFactory(resources=[ResourceFactory()])
+    return [
+        HeroBloc(
+            title="Hero",
+            description="Description",
+            color="green",
+            main_link_title="Go",
+            main_link_url="https://e.com",
+        ),
+        MarkdownBloc(title="Intro", subtitle="Sub", content="Hello"),
+        LinksListBloc(
+            title="Links",
+            subtitle="Sub",
+            paragraph="Text",
+            main_link_title="All",
+            main_link_url="https://e.com/all",
+            links=[LinkInBloc(title="Link", url="https://e.com/link")],
+        ),
+        ExploreBloc(title="Explore", resource_id=dataset.resources[0].id),
+        AccordionListBloc(
+            title="FAQ",
+            description="Questions",
+            items=[
+                AccordionItemBloc(
+                    title="Item",
+                    content=[
+                        DatasetsListBloc(title="In item", datasets=[dataset]),
+                        MarkdownBloc(title="Answer", content="A"),
+                    ],
+                )
+            ],
+        ),
+    ]
+
+
 class BlocsSectionsMigrationAPITest(PytestOnlyAPITestCase):
+    def test_migrated_post_blocs_can_be_saved_back(self):
+        """The editor sends back the blocs it read: whatever the migration writes must pass
+        the checks of the API."""
+        post = PostFactory(body_type="blocs", blocs=every_legacy_bloc())
+
+        migrate()
+        self.login(AdminFactory())
+        blocs = self.get(url_for("api.post", post=post)).json["blocs"]
+
+        assert200(self.put(url_for("api.post", post=post), {"blocs": blocs}))
+
+    def test_migrated_organization_blocs_can_be_saved_back(self):
+        """Same on an organization, whose hero becomes a section of a neutral background."""
+        user = self.login()
+        org = OrganizationFactory(
+            members=[Member(user=user, role="admin")], presentation_blocs=every_legacy_bloc()
+        )
+
+        migrate()
+        data = org.to_dict()
+        data["presentation_blocs"] = self.get(
+            url_for("api.organization", org=org), headers={"X-Fields": "{presentation_blocs}"}
+        ).json["presentation_blocs"]
+
+        assert200(self.put(url_for("api.organization", org=org), data))
+
     def test_deleted_objects_of_the_lists_are_left_out_at_read(self):
         """A dataset hard-deleted while listed becomes a bloc like the others: the API leaves
         it out, with the containers it leaves empty."""
