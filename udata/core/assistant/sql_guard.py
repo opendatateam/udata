@@ -30,14 +30,28 @@ _WRITE_KEYWORDS = (
     "do",
     "merge",
     "call",
+    "comment",
+    "vacuum",
+    "analyze",
+    "set",
+    "reset",
 )
 
 # Conservative: any read_*/*_scan-style file function, plus known Postgres
-# file functions. False positives are acceptable for a read-only guard.
+# file/sequence functions. False positives are acceptable for a read-only guard.
 _FORBIDDEN_FUNCTION_RE = re.compile(
-    r"\b(?:read_\w+|\w+_scan|glob|pg_read_file|pg_write_file|sqlite_attach)\s*\(",
+    r"\b(?:read_\w+|\w+_scan|glob|pg_\w*(?:read|write)\w*|pg_ls_\w+"
+    r"|lo_import|lo_from_bytea|sqlite_attach|setval|nextval)\s*\(",
     re.IGNORECASE,
 )
+
+_SELECT_INTO_RE = re.compile(r"\binto\b", re.IGNORECASE)
+_FOR_UPDATE_RE = re.compile(
+    r"\bfor\s+(?:no\s+key\s+)?update\b|\bfor\s+(?:key\s+)?share\b", re.IGNORECASE
+)
+_EXPLAIN_RE = re.compile(r"explain\b", re.IGNORECASE)
+_EXPLAIN_ANALYZE_RE = re.compile(r"\banalyze\b", re.IGNORECASE)
+_SELECT_OR_WITH_RE = re.compile(r"(?:select|with)\b", re.IGNORECASE)
 
 _DOLLAR_QUOTE_RE = re.compile(r"\$\$|\$[A-Za-z_][A-Za-z0-9_]*\$")
 
@@ -143,8 +157,12 @@ def _parse_ctes(rest: str) -> str:
         return rest
 
 
-def _check_statement(statement: str) -> None:
-    """Validate a single (string/comment-free) statement."""
+def _check_statement(statement: str, *, top_level: bool = False) -> None:
+    """Validate a single (string/comment-free) statement.
+
+    ``top_level`` is True only for the statement as a whole; nested paren
+    group inners may legitimately be blank (e.g. a lone string literal).
+    """
     pos = 0
     while pos < len(statement):
         if statement[pos] == "(":
@@ -155,6 +173,8 @@ def _check_statement(statement: str) -> None:
             pos += 1
     if _FORBIDDEN_FUNCTION_RE.search(statement):
         raise UnsafeSQLError("Forbidden file function call")
+    if _FOR_UPDATE_RE.search(statement):
+        raise UnsafeSQLError("Locking clause is not allowed")
     rest = statement.strip()
     if _WITH_RE.match(rest):
         rest = _parse_ctes(rest)
@@ -162,9 +182,30 @@ def _check_statement(statement: str) -> None:
         _, rest = _take_group(rest)
         rest = rest.lstrip()
     if not rest:
-        raise UnsafeSQLError("Empty statement body")
+        if top_level:
+            raise UnsafeSQLError("Empty statement body")
+        return
     if _WRITE_START_RE.match(rest):
         raise UnsafeSQLError("Write keyword at statement start")
+    if _EXPLAIN_RE.match(rest):
+        _check_explain(rest, top_level=top_level)
+        return
+    if rest.lower().startswith("select"):
+        if _SELECT_INTO_RE.search(rest):
+            raise UnsafeSQLError("SELECT INTO creates a table")
+
+
+def _check_explain(rest: str, *, top_level: bool) -> None:
+    """Validate an EXPLAIN statement: no ANALYZE, and only SELECT/WITH inside."""
+    if _EXPLAIN_ANALYZE_RE.search(rest):
+        raise UnsafeSQLError("EXPLAIN ANALYZE executes the statement")
+    remainder = _EXPLAIN_RE.sub("", rest, count=1).lstrip()
+    if remainder.startswith("("):
+        _, remainder = _take_group(remainder)
+        remainder = remainder.lstrip()
+    if not _SELECT_OR_WITH_RE.match(remainder):
+        raise UnsafeSQLError("EXPLAIN is only allowed on SELECT/WITH")
+    _check_statement(remainder, top_level=top_level)
 
 
 def assert_read_only(sql: str) -> None:
@@ -175,4 +216,4 @@ def assert_read_only(sql: str) -> None:
         raise UnsafeSQLError("Multiple SQL statements are not allowed")
     if not statements:
         raise UnsafeSQLError("Empty SQL statement")
-    _check_statement(statements[0])
+    _check_statement(statements[0], top_level=True)

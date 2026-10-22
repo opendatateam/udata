@@ -12,6 +12,13 @@ from udata.core.assistant.sql_guard import UnsafeSQLError, assert_read_only
         "SELECT a FROM t -- ; comment\n",
         'SELECT "drop" FROM t',  # mot-clé en identifiant quoté : OK
         "SELECT 1;",  # point-virgule terminal unique : OK
+        "SELECT count('x') FROM t",
+        "SELECT upper('abc')",
+        "SELECT date('2024-01-01')",
+        "SELECT concat('a', 'b')",
+        "EXPLAIN SELECT * FROM t",
+        "EXPLAIN (COSTS FALSE) SELECT * FROM t",
+        "EXPLAIN WITH x AS (SELECT 1) SELECT * FROM x",
     ],
 )
 def test_accepts_read_only(sql):
@@ -53,6 +60,32 @@ def test_accepts_read_only(sql):
         "   \n\t ",
         "/* unterminated comment",
         "SELECT 'unterminated",
+        # N1: EXPLAIN ANALYZE executes the statement
+        "EXPLAIN ANALYZE DELETE FROM t",
+        "EXPLAIN (ANALYZE) DELETE FROM t",
+        "EXPLAIN (ANALYZE, COSTS OFF) DELETE FROM t",
+        "EXPLAIN INSERT INTO t VALUES (1)",
+        # N3: SELECT INTO creates a table
+        "SELECT * INTO newtab FROM data",
+        # N4: catalog/stats writes and sequence mutation
+        "COMMENT ON TABLE t IS 'x'",
+        "VACUUM t",
+        "ANALYZE t",
+        "SELECT setval('seq', 42)",
+        "SELECT nextval('seq')",
+        # N5: pg_-prefixed file functions (non-string args so N2 can't mask them)
+        "SELECT pg_read_server_files('/etc/passwd')",
+        "SELECT pg_read_binary_file('/etc/passwd')",
+        "SELECT pg_ls_dir('.')",
+        "SELECT pg_ls_waldir()",
+        "SELECT lo_import('/etc/passwd')",
+        "SELECT lo_from_bytea(0, '\\x00')",
+        # N6: session writes and locking clauses
+        "SET search_path TO public",
+        "RESET search_path",
+        "SELECT * FROM t FOR UPDATE",
+        "SELECT * FROM t FOR SHARE",
+        "SELECT * FROM t FOR NO KEY UPDATE",
     ],
 )
 def test_rejects_unsafe(sql):
