@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import feedparser
 import pytest
+import requests
 import requests_mock
 from flask import url_for
 from mongoengine.fields import BooleanField
@@ -3026,6 +3027,127 @@ class DatasetArchivedAPITest(APITestCase):
         dataset = DatasetFactory(archived=datetime.now(UTC))
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
+
+
+@pytest.mark.options(
+    PUBLISH_ON_RESOURCE_EVENTS=True,
+    RESOURCES_ANALYSER_URI="http://hydra.test",
+    RESOURCES_ANALYSER_API_KEY="hydra-api-key",
+)
+class ResourceAnalysisAPITest(APITestCase):
+    def force_analysis(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+        return self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_admin_forces_analysis(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks", status_code=201, json={"timeout": False, "error": None}
+        )
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
+        assert rmock.call_count == 1
+        assert rmock.last_request.json() == {
+            "resource_id": str(resource.id),
+            "force_analysis": True,
+        }
+        assert rmock.last_request.headers["Authorization"] == "Bearer hydra-api-key"
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_resource_timed_out(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks", status_code=201, json={"timeout": True, "error": None}
+        )
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "did not answer in time" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_resource_unreachable(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks",
+            status_code=201,
+            json={"timeout": False, "error": "404, message='Not Found'"},
+        )
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "404, message='Not Found'" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_analyser_answers_an_error(self, rmock):
+        rmock.post("http://hydra.test/api/checks", status_code=404)
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "The resources analyser failed" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_analyser_unreachable(self, rmock):
+        rmock.post("http://hydra.test/api/checks", exc=requests.ConnectionError)
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "The resources analyser failed" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_dataset_owner_cannot_force_analysis(self, rmock):
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assert403(response)
+        assert rmock.call_count == 0
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_unknown_resource(self, rmock):
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=uuid4()))
+
+        self.assert404(response)
+        assert rmock.call_count == 0
+
+
+# pytest-flask applies class-level `options` after method-level ones, so the
+# analyser can't be switched off from a method of the class above.
+class ResourceAnalysisWithoutAnalyserAPITest(APITestCase):
+    def force_analysis(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+        return self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+    @requests_mock.Mocker(kw="rmock")
+    @pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=False)
+    def test_events_not_published(self, rmock):
+        response = self.force_analysis()
+
+        self.assertStatus(response, 503)
+        assert rmock.call_count == 0
+
+    @requests_mock.Mocker(kw="rmock")
+    @pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=True, RESOURCES_ANALYSER_URI="")
+    def test_no_analyser_uri(self, rmock):
+        response = self.force_analysis()
+
+        self.assertStatus(response, 503)
+        assert rmock.call_count == 0
 
 
 class CommunityResourceAPITest(APITestCase):
