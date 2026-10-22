@@ -26,10 +26,25 @@ class AssistantDeps:
 
     tabular: TabularClient
     sql_count: int = 0
+    tool_count: int = 0
 
 
 def _max_sql_per_question() -> int:
     return current_app.config["ASSISTANT_MAX_SQL_PER_QUESTION"]
+
+
+def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
+    """Enforce ASSISTANT_MAX_STEPS as a per-turn tool-call cap.
+
+    pydantic-ai v2 has no step-cap parameter, so the step budget is proxied
+    by counting tool calls per agent run. Returns a French refusal message
+    once the budget is exhausted, None otherwise.
+    """
+    limit = current_app.config["ASSISTANT_MAX_STEPS"]
+    if ctx.deps.tool_count >= limit:
+        return f"Action refusée : la limite de {limit} appels d'outils par tour est atteinte."
+    ctx.deps.tool_count += 1
+    return None
 
 
 def _render_profile(profile: dict) -> str:
@@ -73,6 +88,8 @@ def register_tools(agent: Agent) -> None:
     @agent.tool
     def get_dataset_metadata(ctx: RunContext[AssistantDeps], dataset_id: str) -> str:
         """Récupère les métadonnées d'un dataset : titre, licence, organisation et ressources."""
+        if refusal := _consume_tool_budget(ctx):
+            return refusal
         try:
             dataset = Dataset.objects.get(id=dataset_id)
         except (DoesNotExist, ValidationError):
@@ -92,6 +109,8 @@ def register_tools(agent: Agent) -> None:
     @agent.tool
     def inspect_schema(ctx: RunContext[AssistantDeps], resource_id: str) -> str:
         """Inspecte le schéma d'une ressource tabulaire : colonnes, types et nombre de lignes."""
+        if refusal := _consume_tool_budget(ctx):
+            return refusal
         try:
             profile = ctx.deps.tabular.get_profile(resource_id)
         except TabularError as error:
@@ -101,6 +120,8 @@ def register_tools(agent: Agent) -> None:
     @agent.tool
     def execute_sql(ctx: RunContext[AssistantDeps], resource_id: str, sql: str) -> str:
         """Exécute une requête SQL en lecture seule sur une ressource tabulaire."""
+        if refusal := _consume_tool_budget(ctx):
+            return refusal
         try:
             assert_read_only(sql)
         except UnsafeSQLError:
@@ -123,6 +144,8 @@ def register_tools(agent: Agent) -> None:
         ctx: RunContext[AssistantDeps], question: str, choices: list[str]
     ) -> str:
         """Demande une clarification à l'utilisateur en proposant une liste de choix numérotés."""
+        if refusal := _consume_tool_budget(ctx):
+            return refusal
         lines = [question, ""]
         for index, choice in enumerate(choices, start=1):
             lines.append(f"{index}. {choice}")

@@ -138,6 +138,43 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "échoué" in result
         assert "boom" in result
 
+    def test_tool_budget_refuses_beyond_assistant_max_steps(self, mocker):
+        """ASSISTANT_MAX_STEPS caps tool calls per agent run (steps proxy)."""
+        self.app.config["ASSISTANT_MAX_STEPS"] = 3
+        deps = self.make_deps()
+        mock = mocker.patch.object(
+            deps.tabular, "execute_sql", return_value={"columns": ["a"], "rows": [[1]]}
+        )
+        for _ in range(3):
+            result = self.call("execute_sql", deps, resource_id=RESOURCE_ID, sql=SQL)
+            assert "refusée" not in result
+        result = self.call("execute_sql", deps, resource_id=RESOURCE_ID, sql=SQL)
+        assert "refusée" in result
+        assert mock.call_count == 3
+        assert deps.tool_count == 3
+
+    def test_tool_budget_is_shared_across_tools(self, mocker):
+        """Every tool call counts against the same per-run budget."""
+        self.app.config["ASSISTANT_MAX_STEPS"] = 2
+        deps = self.make_deps()
+        mocker.patch.object(deps.tabular, "get_profile", return_value={"nb_rows": 1})
+        self.call("inspect_schema", deps, resource_id=RESOURCE_ID)
+        self.call("get_dataset_metadata", deps, dataset_id="0" * 24)
+        result = self.call("execute_sql", deps, resource_id=RESOURCE_ID, sql=SQL)
+        assert "refusée" in result
+
+    def test_tool_budget_resets_per_run(self, mocker):
+        """A fresh AssistantDeps (a new agent run) starts with a clean budget."""
+        self.app.config["ASSISTANT_MAX_STEPS"] = 1
+        first = self.make_deps()
+        self.call("inspect_schema", first, resource_id=RESOURCE_ID)
+        result = self.call("inspect_schema", first, resource_id=RESOURCE_ID)
+        assert "refusée" in result
+        second = self.make_deps()
+        mocker.patch.object(second.tabular, "get_profile", return_value={"nb_rows": 1})
+        result = self.call("inspect_schema", second, resource_id=RESOURCE_ID)
+        assert "refusée" not in result
+
     def test_request_clarification_numbers_choices(self):
         result = self.call(
             "request_clarification",
