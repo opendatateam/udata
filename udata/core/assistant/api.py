@@ -44,18 +44,19 @@ class AssistantChatAPI(API):
                 503,
             )
 
-        try:
-            check_and_consume_quota(str(current_user.id))
-        except QuotaExceeded:
-            api.abort(429, "Quota quotidien de l'assistant atteint.")
-
         # Client-submitted system messages are untrusted: the system prompt is
         # owned by the server, so strip them before building the run input.
+        # Validation runs before the quota so a malformed body never consumes it.
         try:
             run_input = VercelAIAdapter.build_run_input(request.get_data())
         except ValidationError:
             api.abort(400, "Corps de requête invalide.")
         run_input.messages = [m for m in run_input.messages if m.role != "system"]
+
+        try:
+            check_and_consume_quota(str(current_user.id))
+        except QuotaExceeded:
+            api.abort(429, "Quota quotidien de l'assistant atteint.")
 
         agent = get_agent()
         adapter = VercelAIAdapter(agent, run_input, accept=SSE_CONTENT_TYPE)

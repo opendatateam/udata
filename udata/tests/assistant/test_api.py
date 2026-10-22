@@ -97,3 +97,23 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         self.login()
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 503
+
+    def test_chat_malformed_body_does_not_consume_quota(self, mocker):
+        """Body validation (400) must happen before the quota is consumed."""
+        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.login()
+        quota = mocker.patch("udata.core.assistant.api.check_and_consume_quota")
+        response = self.post(url_for("api.assistant_chat"), data={"not": "a chat payload"})
+        assert response.status_code == 400
+        quota.assert_not_called()
+
+    def test_chat_error_paths_do_not_consume_quota(self, mocker):
+        """401/404/503 responses must not consume the daily quota."""
+        quota = mocker.patch("udata.core.assistant.api.check_and_consume_quota")
+        assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 401
+        self.login()
+        assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 404
+        self.app.config["ASSISTANT_ENABLED"] = True
+        assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 503
+        quota.assert_not_called()
