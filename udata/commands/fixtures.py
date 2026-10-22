@@ -12,9 +12,8 @@ from collections.abc import Callable
 import click
 import requests
 from flask import current_app
-from mongoengine.fields import ReferenceField
 
-from udata.api_fields import classes_by_parents, patch
+from udata.api_fields import patch
 from udata.commands import cli
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
@@ -25,7 +24,6 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.base import Bloc
 from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
@@ -168,17 +166,14 @@ def clean_blocs_for_generate(
     """Remove the blocs the fixtures could not import: those showing an object not exported
     (the exported ones keep their id), and the explorers of a resource of a dataset not
     exported."""
-    object_fields = {
-        name
-        for bloc_class in classes_by_parents.get(Bloc, set())
-        for name, mongo_field in bloc_class._fields.items()
-        if isinstance(mongo_field, ReferenceField)
-    }
 
     def removed(bloc: dict) -> bool:
         if "resource_id" in bloc and bloc["resource_id"] not in resource_ids:
             return True
-        return any(name in bloc and bloc[name]["id"] not in object_ids for name in object_fields)
+        return any(
+            name in bloc and bloc[name]["id"] not in object_ids
+            for name in ("dataset", "reuse", "dataservice")
+        )
 
     return without_blocs(blocs, removed)
 

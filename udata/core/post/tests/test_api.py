@@ -150,7 +150,7 @@ class PostsAPITest(APITestCase):
                 count = int(counter)
             assert200(response)
 
-            # A reference the prefetch fails to resolve serializes as null — which
+            # A reference the prefetch fails to resolve silently drops its bloc — which
             # *lowers* the query count. Assert every card is there, with its
             # organization resolved, so a flat count really means "batched".
             org_ids = {str(o.id) for o in orgs}
