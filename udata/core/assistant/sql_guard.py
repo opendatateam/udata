@@ -33,15 +33,22 @@ _WRITE_KEYWORDS = (
     "comment",
     "vacuum",
     "analyze",
+    "analyse",
     "set",
     "reset",
+    "prepare",
+    "execute",
+    "lock",
 )
 
 # Conservative: any read_*/*_scan-style file function, plus known Postgres
-# file/sequence functions. False positives are acceptable for a read-only guard.
+# file/sequence/admin functions. False positives are acceptable for a read-only
+# guard.
 _FORBIDDEN_FUNCTION_RE = re.compile(
     r"\b(?:read_\w+|\w+_scan|glob|pg_\w*(?:read|write)\w*|pg_ls_\w+"
-    r"|lo_import|lo_from_bytea|sqlite_attach|setval|nextval)\s*\(",
+    r"|lo_import|lo_from_bytea|sqlite_attach|setval|nextval"
+    r"|pg_terminate_backend|pg_cancel_backend|pg_reload_conf"
+    r"|pg_advisory_lock|pg_stat_file)\s*\(",
     re.IGNORECASE,
 )
 
@@ -50,7 +57,7 @@ _FOR_UPDATE_RE = re.compile(
     r"\bfor\s+(?:no\s+key\s+)?update\b|\bfor\s+(?:key\s+)?share\b", re.IGNORECASE
 )
 _EXPLAIN_RE = re.compile(r"explain\b", re.IGNORECASE)
-_EXPLAIN_ANALYZE_RE = re.compile(r"\banalyze\b", re.IGNORECASE)
+_EXPLAIN_ANALYZE_RE = re.compile(r"\banaly(?:s|z)e\b", re.IGNORECASE)
 _SELECT_OR_WITH_RE = re.compile(r"(?:select|with)\b", re.IGNORECASE)
 
 _DOLLAR_QUOTE_RE = re.compile(r"\$\$|\$[A-Za-z_][A-Za-z0-9_]*\$")

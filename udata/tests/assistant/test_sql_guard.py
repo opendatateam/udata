@@ -86,6 +86,21 @@ def test_accepts_read_only(sql):
         "SELECT * FROM t FOR UPDATE",
         "SELECT * FROM t FOR SHARE",
         "SELECT * FROM t FOR NO KEY UPDATE",
+        # B1: British spelling of ANALYZE also executes in EXPLAIN
+        "EXPLAIN ANALYSE DELETE FROM t",
+        "EXPLAIN (ANALYSE) DELETE FROM t",
+        "ANALYSE t",
+        # B2: prepared statements smuggle writes across tool calls
+        "PREPARE p AS DELETE FROM t",
+        "EXECUTE p",
+        # B3: disruptive / privilege-gated admin functions
+        "SELECT pg_terminate_backend(123)",
+        "SELECT pg_cancel_backend(123)",
+        "SELECT pg_reload_conf()",
+        "SELECT pg_advisory_lock(1)",
+        "SELECT pg_stat_file('/etc/passwd')",
+        # B4: table locks
+        "LOCK TABLE t IN ACCESS EXCLUSIVE MODE",
     ],
 )
 def test_rejects_unsafe(sql):
