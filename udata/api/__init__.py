@@ -153,7 +153,7 @@ class UDataApi(Api):
             self.abort(400, errors={"request": "expecting a JSON object"})
         return data
 
-    def resolve_reference(self, reference, field_name: str, allowed_classes):
+    def resolve_reference(self, reference, field_name: str, allowed_classes, missing_ok=False):
         """Resolve a `{"class": …, "id": …}` reference into a document, errors reported on
         `field_name`.
 
@@ -164,6 +164,8 @@ class UDataApi(Api):
         id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
         arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
         a `StringField` one.
+
+        With `missing_ok`, an unknown id returns `None` instead of aborting.
         """
         if not isinstance(reference, dict):
             self.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
@@ -181,6 +183,8 @@ class UDataApi(Api):
         try:
             return model.objects.get(id=object_id)
         except model.DoesNotExist:
+            if missing_ok:
+                return None
             self.abort(
                 400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
             )
