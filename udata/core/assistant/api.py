@@ -114,6 +114,46 @@ class AssistantChatAPI(API):
             api.abort(400, "Corps de requête invalide.")
         run_input.messages = [m for m in run_input.messages if m.role != "system"]
 
+        # Drop assistant messages that carry no content and no tool calls (e.g. a
+        # stream that errored right after `text-start`, leaving an empty text part).
+        # Rebuilding them would send an empty assistant ModelMessage to the
+        # provider, which Mistral-class APIs reject ("must have either content or
+        # tool_calls"), locking the conversation.
+        def _has_substance(message) -> bool:
+            for part in message.parts:
+                part_type = getattr(part, "type", "")
+                if part_type.startswith("tool-"):
+                    return True
+                if part_type == "text" and getattr(part, "text", "").strip():
+                    return True
+            return False
+
+        before = len(run_input.messages)
+        run_input.messages = [
+            m for m in run_input.messages if m.role != "assistant" or _has_substance(m)
+        ]
+        if len(run_input.messages) < before:
+            log.info(
+                "Assistant: dropped %s empty assistant message(s) from history",
+                before - len(run_input.messages),
+            )
+
+        # TEMPORARY DEBUG (local validation): log the loaded message roles/parts
+        # to diagnose empty-assistant-message provider errors. Remove before merge.
+        try:
+            debug_msgs = [
+                {
+                    "role": m.role,
+                    "parts": [
+                        getattr(p, "type", type(p).__name__) for p in getattr(m, "parts", [])
+                    ],
+                }
+                for m in run_input.messages
+            ]
+            log.warning("ASSISTANT DEBUG messages: %s", debug_msgs)
+        except Exception:  # noqa: BLE001
+            log.exception("ASSISTANT DEBUG logging failed")
+
         try:
             check_and_consume_quota(str(current_user.id))
         except QuotaExceeded:

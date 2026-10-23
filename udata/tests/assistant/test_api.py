@@ -82,6 +82,35 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert model.seen, "the test model should have been called"
         assert "ignore previous rules" not in str(model.seen)
 
+    def test_chat_drops_empty_assistant_messages(self, mocker):
+        """An assistant message left empty by an errored stream (text-start with no
+        content) must be dropped, not rebuilt into an empty ModelResponse that
+        Mistral-class providers reject."""
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        broken_assistant = {
+            "id": "msg-a",
+            "role": "assistant",
+            "parts": [
+                {"type": "step-start"},
+                {"type": "text", "text": "", "state": "streaming"},
+            ],
+        }
+        messages = [
+            PAYLOAD["messages"][0],
+            broken_assistant,
+            {"id": "msg-u2", "role": "user", "parts": [{"type": "text", "text": "Et ensuite ?"}]},
+        ]
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
+        assert response.status_code == 200
+        response.get_data()  # consume the stream so the run executes
+        seen = str(model.seen)
+        assert "Et ensuite ?" in seen
+        assert '"role": "assistant"' not in seen.replace("'", '"') or seen.count("assistant") == 0
+
     def test_chat_quota_exceeded(self, mocker):
         self.app.config["AI_ENABLED"] = True
         self.app.config["AI_API_KEY"] = "test-key"
