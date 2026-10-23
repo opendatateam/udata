@@ -668,6 +668,11 @@ class Defaults(object):
     AI_BASE_URL = "https://albert.api.etalab.gouv.fr/v1"
     AI_API_KEY = None
     AI_MODEL = "openai/gpt-oss-120b"
+    # Reasoning effort forwarded to the OpenAI-compatible provider
+    # (`openai_reasoning_effort`). Use "none" to disable thinking/reasoning on
+    # endpoints that emit thinking deltas (e.g. Mistral-class), None keeps the
+    # provider default.
+    AI_REASONING_EFFORT = None
     # pydantic-ai v2 has no step-cap parameter; this bounds the number of
     # tool calls per agent turn instead (proxy for steps, keeps the loop bounded).
     AI_MAX_STEPS = 5

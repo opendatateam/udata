@@ -29,6 +29,11 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
             tabular = TabularClient(base_url="http://tabular.test", timeout=5)
         return AssistantDeps(tabular=tabular)
 
+    def test_agent_forwards_reasoning_effort_setting(self):
+        self.app.config["AI_REASONING_EFFORT"] = "none"
+        agent = get_agent()
+        assert agent.model_settings == {"openai_reasoning_effort": "none"}
+
     def test_agent_runs_with_test_model(self):
         agent = get_agent()
         result = agent.run_sync("Bonjour", model=SystemPromptEchoModel(), deps=self.make_deps())

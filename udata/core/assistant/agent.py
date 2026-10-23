@@ -24,15 +24,21 @@ def get_agent() -> Agent[AssistantDeps, str]:
         current_app.config["AI_MODEL"],
         provider=OpenAIProvider(
             base_url=current_app.config["AI_BASE_URL"],
-            api_key=current_app.config["AI_API_KEY"],
+            # Placeholder keeps the agent buildable without a key; the endpoint
+            # 503s before any run when AI_API_KEY is unset.
+            api_key=current_app.config["AI_API_KEY"] or "not-configured",
         ),
     )
+    model_settings: dict[str, str] = {}
+    if effort := current_app.config.get("AI_REASONING_EFFORT"):
+        model_settings["openai_reasoning_effort"] = effort
     agent: Agent[AssistantDeps, str] = Agent(
         model,
         output_type=str,
         instructions=SYSTEM_INSTRUCTIONS,
         deps_type=AssistantDeps,
         retries=MODEL_RETRIES,
+        model_settings=model_settings or None,
     )
     register_tools(agent)
     return agent

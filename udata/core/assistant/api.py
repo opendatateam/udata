@@ -138,22 +138,6 @@ class AssistantChatAPI(API):
                 before - len(run_input.messages),
             )
 
-        # TEMPORARY DEBUG (local validation): log the loaded message roles/parts
-        # to diagnose empty-assistant-message provider errors. Remove before merge.
-        try:
-            debug_msgs = [
-                {
-                    "role": m.role,
-                    "parts": [
-                        getattr(p, "type", type(p).__name__) for p in getattr(m, "parts", [])
-                    ],
-                }
-                for m in run_input.messages
-            ]
-            log.warning("ASSISTANT DEBUG messages: %s", debug_msgs)
-        except Exception:  # noqa: BLE001
-            log.exception("ASSISTANT DEBUG logging failed")
-
         try:
             check_and_consume_quota(str(current_user.id))
         except QuotaExceeded:
