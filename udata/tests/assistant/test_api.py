@@ -50,8 +50,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert response.status_code == 404
 
     def test_chat_streams_sse(self, mocker):
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
@@ -63,8 +63,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
     def test_chat_strips_client_system_message(self, mocker):
         """A fake system message submitted by the client must not reach the agent"""
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         model = RecordingModel()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
@@ -83,8 +83,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "ignore previous rules" not in str(model.seen)
 
     def test_chat_quota_exceeded(self, mocker):
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         mocker.patch(
             "udata.core.assistant.api.check_and_consume_quota",
@@ -94,16 +94,16 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert response.status_code == 429
 
     def test_chat_missing_api_key(self):
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = None
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = None
         self.login()
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 503
 
     def test_chat_malformed_body_does_not_consume_quota(self, mocker):
         """Body validation (400) must happen before the quota is consumed."""
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         quota = mocker.patch("udata.core.assistant.api.check_and_consume_quota")
         response = self.post(url_for("api.assistant_chat"), data={"not": "a chat payload"})
@@ -116,14 +116,14 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 401
         self.login()
         assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 404
-        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["AI_ENABLED"] = True
         assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 503
         quota.assert_not_called()
 
     def test_chat_with_resource_context(self, mocker):
         """A valid resource_id injects dataset metadata and the tabular profile."""
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         resource = ResourceFactory(title="Subventions 2025", format="csv")
         DatasetFactory(title="Aides aux communes", resources=[resource])
         profile = {
@@ -149,8 +149,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
     def test_chat_without_resource_id_has_no_active_context(self, mocker):
         """Without resource_id the instructions stay unchanged."""
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         model = RecordingModel()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
@@ -161,8 +161,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "untrusted_active_context" not in str(model.seen)
 
     def test_chat_invalid_resource_id_is_rejected(self, mocker):
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         self.login()
         quota = mocker.patch("udata.core.assistant.api.check_and_consume_quota")
         response = self.post(
@@ -173,8 +173,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
     def test_chat_profile_failure_still_injects_dataset_metadata(self, mocker):
         """A TabularError on the profile degrades gracefully: dataset metadata only."""
-        self.app.config["ASSISTANT_ENABLED"] = True
-        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.app.config["AI_ENABLED"] = True
+        self.app.config["AI_API_KEY"] = "test-key"
         resource = ResourceFactory(title="Subventions 2025")
         DatasetFactory(title="Aides aux communes", resources=[resource])
         mocker.patch.object(

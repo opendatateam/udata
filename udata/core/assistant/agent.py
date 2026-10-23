@@ -21,10 +21,10 @@ MODEL_RETRIES = 2
 def get_agent() -> Agent[AssistantDeps, str]:
     """Build the assistant agent configured from the Flask settings."""
     model = OpenAIChatModel(
-        current_app.config["ALBERT_MODEL"],
+        current_app.config["AI_MODEL"],
         provider=OpenAIProvider(
-            base_url=current_app.config["ALBERT_BASE_URL"],
-            api_key=current_app.config["ALBERT_API_KEY"],
+            base_url=current_app.config["AI_BASE_URL"],
+            api_key=current_app.config["AI_API_KEY"],
         ),
     )
     agent: Agent[AssistantDeps, str] = Agent(

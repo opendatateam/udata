@@ -28,7 +28,7 @@ class QuotaExceeded(RuntimeError):
 def check_and_consume_quota(user_id: str) -> None:
     """Increment the daily call counter for a user and enforce the quota.
 
-    Raises QuotaExceeded once the user has consumed ASSISTANT_QUOTA_PER_USER
+    Raises QuotaExceeded once the user has consumed AI_QUOTA_PER_USER
     calls for the current day. The quota is approximate: per-process counting
     (no shared store) and fail-open if the cache backend does not persist
     (e.g. NullCache), per spec V1.
@@ -39,9 +39,9 @@ def check_and_consume_quota(user_id: str) -> None:
         log.warning(
             "Assistant quota is not enforced: the cache backend is a NullCache "
             "(no-op). This is a deliberate fail-open choice; configure a real "
-            "CACHE_TYPE to enforce ASSISTANT_QUOTA_PER_USER."
+            "CACHE_TYPE to enforce AI_QUOTA_PER_USER."
         )
-    quota = current_app.config["ASSISTANT_QUOTA_PER_USER"]
+    quota = current_app.config["AI_QUOTA_PER_USER"]
     today = datetime.now(timezone.utc).date().isoformat()
     key = f"{QUOTA_KEY_PREFIX}:{user_id}:{today}"
     count = (cache.get(key) or 0) + 1

@@ -664,18 +664,18 @@ class Defaults(object):
 
     # AI assistant settings (Albert + tabular SQL)
     ###########################################################################
-    ASSISTANT_ENABLED = False
-    ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1"
-    ALBERT_API_KEY = None
-    ALBERT_MODEL = "openai/gpt-oss-120b"
+    AI_ENABLED = False
+    AI_BASE_URL = "https://albert.api.etalab.gouv.fr/v1"
+    AI_API_KEY = None
+    AI_MODEL = "openai/gpt-oss-120b"
     # pydantic-ai v2 has no step-cap parameter; this bounds the number of
     # tool calls per agent turn instead (proxy for steps, keeps the loop bounded).
-    ASSISTANT_MAX_STEPS = 5
-    ASSISTANT_MAX_SQL_PER_QUESTION = 3
-    ASSISTANT_TURN_TIMEOUT = 120
+    AI_MAX_STEPS = 5
+    AI_MAX_SQL_PER_QUESTION = 3
+    AI_TURN_TIMEOUT = 120
     TABULAR_SQL_URL = None
     TABULAR_SQL_TIMEOUT = 30
-    ASSISTANT_QUOTA_PER_USER = 20
+    AI_QUOTA_PER_USER = 20
 
     # JSON-LD settings
     ###########################################################################

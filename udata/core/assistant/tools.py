@@ -30,17 +30,17 @@ class AssistantDeps:
 
 
 def _max_sql_per_question() -> int:
-    return current_app.config["ASSISTANT_MAX_SQL_PER_QUESTION"]
+    return current_app.config["AI_MAX_SQL_PER_QUESTION"]
 
 
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
-    """Enforce ASSISTANT_MAX_STEPS as a per-turn tool-call cap.
+    """Enforce AI_MAX_STEPS as a per-turn tool-call cap.
 
     pydantic-ai v2 has no step-cap parameter, so the step budget is proxied
     by counting tool calls per agent run. Returns a French refusal message
     once the budget is exhausted, None otherwise.
     """
-    limit = current_app.config["ASSISTANT_MAX_STEPS"]
+    limit = current_app.config["AI_MAX_STEPS"]
     if ctx.deps.tool_count >= limit:
         return f"Action refusée : la limite de {limit} appels d'outils par tour est atteinte."
     ctx.deps.tool_count += 1

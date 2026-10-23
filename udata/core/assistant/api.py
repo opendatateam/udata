@@ -91,14 +91,14 @@ class AssistantChatAPI(API):
     @api.doc("assistant_chat")
     def post(self):
         """Stream an assistant reply as Vercel AI SSE events"""
-        if not current_app.config["ASSISTANT_ENABLED"]:
+        if not current_app.config["AI_ENABLED"]:
             api.abort(404)
 
-        if not current_app.config["ALBERT_API_KEY"]:
+        if not current_app.config["AI_API_KEY"]:
             return (
                 {
                     "error": "L'assistant est activé mais la clé API Albert "
-                    "(ALBERT_API_KEY) n'est pas configurée."
+                    "(AI_API_KEY) n'est pas configurée."
                 },
                 503,
             )
@@ -132,7 +132,7 @@ class AssistantChatAPI(API):
                 deps=deps,
                 instructions=instructions,
                 cancellation_token=cancellation_token,
-                timeout=current_app.config["ASSISTANT_TURN_TIMEOUT"],
+                timeout=current_app.config["AI_TURN_TIMEOUT"],
             )
         )
 
