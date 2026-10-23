@@ -82,6 +82,21 @@ def _render_result(result: dict) -> str:
     return "\n".join(lines)
 
 
+def serialize_dataset_metadata(dataset: Dataset) -> str:
+    """JSON serialization of a dataset's metadata, shared by the tool and the chat endpoint."""
+    payload = {
+        "id": str(dataset.id),
+        "title": dataset.title,
+        "license": dataset.license.title if dataset.license else None,
+        "organization": dataset.organization.name if dataset.organization else None,
+        "resources": [
+            {"id": str(resource.id), "title": resource.title, "format": resource.format}
+            for resource in dataset.resources
+        ],
+    }
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
 def register_tools(agent: Agent) -> None:
     """Attach the four assistant tools to a pydantic-ai agent."""
 
@@ -94,17 +109,7 @@ def register_tools(agent: Agent) -> None:
             dataset = Dataset.objects.get(id=dataset_id)
         except (DoesNotExist, ValidationError):
             return f"Dataset introuvable : aucun dataset ne correspond à « {dataset_id} »."
-        payload = {
-            "id": str(dataset.id),
-            "title": dataset.title,
-            "license": dataset.license.title if dataset.license else None,
-            "organization": dataset.organization.name if dataset.organization else None,
-            "resources": [
-                {"id": str(resource.id), "title": resource.title, "format": resource.format}
-                for resource in dataset.resources
-            ],
-        }
-        return json.dumps(payload, ensure_ascii=False, indent=2)
+        return serialize_dataset_metadata(dataset)
 
     @agent.tool
     def inspect_schema(ctx: RunContext[AssistantDeps], resource_id: str) -> str:

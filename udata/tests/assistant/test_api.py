@@ -3,6 +3,8 @@ from pydantic_ai.models.test import TestModel
 
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.limits import QuotaExceeded
+from udata.core.assistant.tabular import TabularClient, TabularError
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
 PAYLOAD = {
@@ -117,3 +119,75 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         self.app.config["ASSISTANT_ENABLED"] = True
         assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 503
         quota.assert_not_called()
+
+    def test_chat_with_resource_context(self, mocker):
+        """A valid resource_id injects dataset metadata and the tabular profile."""
+        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["ALBERT_API_KEY"] = "test-key"
+        resource = ResourceFactory(title="Subventions 2025", format="csv")
+        DatasetFactory(title="Aides aux communes", resources=[resource])
+        profile = {
+            "columns": [
+                {"name": "nom_commune", "type": "text"},
+                {"name": "montant", "type": "integer"},
+            ],
+            "nb_rows": 42,
+        }
+        mocker.patch.object(TabularClient, "get_profile", return_value=profile)
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        payload = {**PAYLOAD, "resource_id": str(resource.id)}
+        response = self.post(url_for("api.assistant_chat"), data=payload)
+        assert response.status_code == 200
+        response.get_data()  # consume the stream so the run executes
+        seen = str(model.seen)
+        assert "<untrusted_active_context>" in seen
+        assert "Aides aux communes" in seen
+        assert "Subventions 2025" in seen
+        assert "nom_commune" in seen
+
+    def test_chat_without_resource_id_has_no_active_context(self, mocker):
+        """Without resource_id the instructions stay unchanged."""
+        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.login()
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        assert response.status_code == 200
+        response.get_data()
+        assert model.seen
+        assert "untrusted_active_context" not in str(model.seen)
+
+    def test_chat_invalid_resource_id_is_rejected(self, mocker):
+        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["ALBERT_API_KEY"] = "test-key"
+        self.login()
+        quota = mocker.patch("udata.core.assistant.api.check_and_consume_quota")
+        response = self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": "pas-un-uuid"}
+        )
+        assert response.status_code == 400
+        quota.assert_not_called()
+
+    def test_chat_profile_failure_still_injects_dataset_metadata(self, mocker):
+        """A TabularError on the profile degrades gracefully: dataset metadata only."""
+        self.app.config["ASSISTANT_ENABLED"] = True
+        self.app.config["ALBERT_API_KEY"] = "test-key"
+        resource = ResourceFactory(title="Subventions 2025")
+        DatasetFactory(title="Aides aux communes", resources=[resource])
+        mocker.patch.object(
+            TabularClient, "get_profile", side_effect=TabularError("api-tabular indisponible")
+        )
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        response = self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": str(resource.id)}
+        )
+        assert response.status_code == 200
+        response.get_data()
+        seen = str(model.seen)
+        assert "Aides aux communes" in seen
+        assert "Colonnes" not in seen
