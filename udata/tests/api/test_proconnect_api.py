@@ -151,7 +151,20 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert not self.is_fresh()
 
     def test_reauthentication_requires_being_logged_in(self):
-        self.assert401(self.get(url_for("api.proconnect_login", reauth=1)))
+        response = self.get(url_for("api.proconnect_login", reauth=1))
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+
+    def test_login_over_a_session_does_not_inherit_its_grace_period(self, proconnect):
+        UserFactory(email="john@example.org")
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "john@example.org")
+        # A sensitive operation starts the grace period of John's session.
+        assert self.is_fresh()
+
+        self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_AGO)
+
+        assert not self.is_fresh()
 
     def test_abandoned_reauthentication_does_not_apply_to_the_next_login(self, proconnect):
         UserFactory(email="jane@example.org")

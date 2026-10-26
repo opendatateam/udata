@@ -92,6 +92,9 @@ def mark_authenticated_at(auth_time: int) -> None:
     fresh, a tolerance meant for its own clock and not for ProConnect's.
     """
     session["fs_paa"] = min(auth_time, time.time())
+    # A grace period still running holds the session fresh before `fs_paa` is even read,
+    # and `login_user` keeps the one a previous user of this browser left behind.
+    session.pop("fs_gexp", None)
 
 
 def verify_page_url(flash: str) -> str:
@@ -110,8 +113,9 @@ class ProconnectLoginAPI(API):
         session.pop(REAUTH_KEY, None)
         params = {"acr_values": "eidas1", "claims": json.dumps(AUTH_TIME_CLAIMS)}
         if request.args.get("reauth"):
+            # A browser navigation from the cdata page, whose session may have expired.
             if not current_user.is_authenticated:
-                abort(401)
+                return redirect(verify_page_url("proconnect_reauth_failed"))
             session[REAUTH_KEY] = time.time()
             # Without it, an open ProConnect session answers without asking the agent anything.
             params["max_age"] = 0
