@@ -296,7 +296,6 @@ def nullable_text(value):
 
 class SelectField(FieldHelper, fields.SelectField):
     def __init__(self, label=None, validators=None, coerce=nullable_text, **kwargs):
-        # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
 
     @staticmethod
@@ -314,17 +313,6 @@ class SelectField(FieldHelper, fields.SelectField):
         ]
         for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
             yield (value, label, selected, render_kw)
-
-    @property
-    def choices(self):
-        if callable(self._choices):
-            return self._choices()
-        else:
-            return self._choices
-
-    @choices.setter
-    def choices(self, value):
-        self._choices = value
 
 
 class ModelSelectField(FieldHelper, BaseModelSelectField):
