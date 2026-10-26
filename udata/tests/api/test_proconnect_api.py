@@ -8,6 +8,7 @@ from udata.tests.api import PytestOnlyAPITestCase
 
 CDATA = "http://cdata.test"
 TWO_DAYS_AGO = int(time.time()) - 2 * 24 * 3600
+TWO_DAYS_LATER = int(time.time()) + 2 * 24 * 3600
 
 
 # The session cookie must carry the OAuth state from the login redirect to the callback:
@@ -67,6 +68,23 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert not self.is_fresh()
 
+    def test_login_with_an_auth_time_in_the_future_is_dated_now(self, proconnect):
+        # flask-security would hold a date this far ahead as stale, a nearer one as fresh
+        # for longer than `SECURITY_FRESHNESS`: either way, ProConnect's clock is not ours.
+        UserFactory(email="jane@example.org")
+
+        self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_LATER)
+
+        assert self.is_fresh()
+
+    def test_login_without_auth_time_is_dated_at_the_login(self, proconnect):
+        UserFactory(email="jane@example.org")
+        proconnect.returns_auth_time = False
+
+        self.sign_in(proconnect, "jane@example.org")
+
+        assert self.is_fresh()
+
     def test_reauthentication_makes_the_session_fresh(self, proconnect):
         user = UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_AGO)
@@ -86,6 +104,39 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
         assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
         assert not self.is_fresh()
+
+    def test_reauthentication_without_auth_time_is_refused(self, proconnect):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_AGO)
+        proconnect.returns_auth_time = False
+
+        response = self.reauthenticate(proconnect)
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        assert not self.is_fresh()
+
+    def test_reauthentication_cancelled_at_proconnect_is_refused(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_AGO)
+
+        response = self.get(url_for("api.proconnect_login", reauth=1))
+        response = self.get(url_for("api.proconnect_auth", **proconnect.deny(response.location)))
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        self.assert_logged_in_as(user)
+        assert not self.is_fresh()
+
+    def test_reauthentication_after_logging_out_is_refused(self, proconnect):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org", authenticated_at=TWO_DAYS_AGO)
+        response = self.get(url_for("api.proconnect_login", reauth=1))
+        self.get(url_for("security.logout"))
+
+        callback = proconnect.authorize(response.location)
+        response = self.get(url_for("api.proconnect_auth", **callback))
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        self.assert401(self.get(url_for("api.me")))
 
     def test_reauthentication_as_someone_else_is_refused(self, proconnect):
         user = UserFactory(email="jane@example.org")

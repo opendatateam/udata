@@ -18,7 +18,7 @@ oauth = OAuth()
 # blueprint = I18nBlueprint("proconnect", __name__, url_prefix="/proconnect")
 STATE_KEY = "proconnect_state"
 ID_TOKEN_KEY = "id_token"
-# Set when a signed-in agent asks to reauthenticate: the id of that agent, and when.
+# When a signed-in agent asked to reauthenticate.
 REAUTH_KEY = "proconnect_reauth"
 # Leeway between ProConnect's clock and ours when comparing its `auth_time` to ours.
 REAUTH_CLOCK_SKEW = 60
@@ -65,7 +65,7 @@ def get_logout_url():
 def authenticate() -> tuple[dict, dict]:
     """Complete the authorization code flow and return the id_token claims and the user info."""
     token = oauth.proconnect.authorize_access_token()
-    # Store the user info in the session, it'll be used when logging out from ProConnect.
+    # Store the id_token in the session, it'll be used when logging out from ProConnect.
     session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
     # /!\ DIRTY HACK.
     # authlib expects the userinfo to either be in the token["id_token"] as a jwt...
@@ -112,7 +112,7 @@ class ProconnectLoginAPI(API):
         if request.args.get("reauth"):
             if not current_user.is_authenticated:
                 abort(401)
-            session[REAUTH_KEY] = {"user": str(current_user.id), "started_at": time.time()}
+            session[REAUTH_KEY] = time.time()
             # Without it, an open ProConnect session answers without asking the agent anything.
             params["max_age"] = 0
 
@@ -125,9 +125,9 @@ class ProconnectAuthAPI(API):
     def get(self):
         from udata.models import datastore
 
-        reauth = session.pop(REAUTH_KEY, None)
-        if reauth:
-            return reauthenticate(reauth)
+        reauth_started_at = session.pop(REAUTH_KEY, None)
+        if reauth_started_at:
+            return reauthenticate(reauth_started_at)
 
         id_token_claims, proconnect_user = authenticate()
         user = datastore.find_user(email=proconnect_user["email"])
@@ -159,13 +159,15 @@ class ProconnectAuthAPI(API):
         return redirect(homepage_url(flash="connected"))
 
 
-def reauthenticate(reauth: dict):
+def reauthenticate(started_at: float):
     """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in.
 
-    Flask-Security's own `verify` asks for the password, which accounts created through
-    ProConnect don't have.
+    Not flask-security's `oauth_verify_*`: it can't pass `max_age=0` to the reauthentication
+    alone (the client is shared with the login), and dates the freshness from now rather
+    than from `auth_time`, so an open ProConnect session answering would pass for one.
     """
-    if not current_user.is_authenticated or str(current_user.id) != reauth["user"]:
+    # The agent may have logged out since: logging out leaves this key in the session.
+    if not current_user.is_authenticated:
         return redirect(verify_page_url("proconnect_reauth_failed"))
 
     try:
@@ -174,13 +176,14 @@ def reauthenticate(reauth: dict):
         # The agent cancelled, or ProConnect refused the exchange.
         return redirect(verify_page_url("proconnect_reauth_failed"))
 
-    if proconnect_user["email"].lower() != current_user.email.lower():
+    # Compared like the login resolves an account from a ProConnect identity.
+    if proconnect_user["email"] != current_user.email:
         return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
 
     # An authentication older than the request means ProConnect let its open session
     # answer despite `max_age=0`: it proves nothing about who is at the keyboard now.
     auth_time = id_token_claims.get("auth_time")
-    if not auth_time or auth_time < reauth["started_at"] - REAUTH_CLOCK_SKEW:
+    if not auth_time or auth_time < started_at - REAUTH_CLOCK_SKEW:
         return redirect(verify_page_url("proconnect_reauth_failed"))
 
     mark_authenticated_at(auth_time)
