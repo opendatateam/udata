@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.17.0 (2026-10-26)
+
+- feat: add a sysadmin endpoint to force a resource analysis by hydra ([#4024](https://github.com/opendatateam/udata/pull/4024))
+- feat(post): let a post display a side menu of its headings ([#4021](https://github.com/opendatateam/udata/pull/4021))
+- feat(search): match dotted titles when querying with spaces ([#3932](https://github.com/opendatateam/udata/pull/3932))
+
+
 ## 17.16.0 (2026-10-21)
 
 - feat(post): nest pages under a parent page and serve them under /pages/<path> ([#4011](https://github.com/opendatateam/udata/pull/4011))
