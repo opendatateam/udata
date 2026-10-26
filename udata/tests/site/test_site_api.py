@@ -157,6 +157,7 @@ class SiteAPITest(APITestCase):
         self.login(AdminFactory())
         response = self.patch(
             url_for("api.site"),
-            {"datasets_blocs": [{"class": "DatasetsListBloc", "datasets": []}]},
+            {"datasets_blocs": [{"class": "TitleBloc", "title": "Not in a section"}]},
         )
         self.assert400(response)
+        assert "TitleBloc is not allowed here" in response.get_data(as_text=True)

@@ -2,8 +2,7 @@ from typing import NamedTuple
 
 from bson import ObjectId
 from mongoengine import EmbeddedDocument
-from mongoengine.base.datastructures import BaseList
-from mongoengine.fields import EmbeddedDocumentListField, ListField, ReferenceField, StringField
+from mongoengine.fields import EmbeddedDocumentListField, ReferenceField, StringField
 
 from udata.api_fields import field, generate_fields
 from udata.mongo.errors import FieldValidationError
@@ -40,15 +39,6 @@ class SingleReference(NamedTuple):
     id: ObjectId
 
 
-class ListOfReferences(NamedTuple):
-    """A legacy bloc listing several objects, as collected by `prefetch_blocs_references`."""
-
-    bloc: EmbeddedDocument
-    attr: str
-    model: type
-    ids: list[ObjectId]
-
-
 def prefetch_blocs_references(blocs):
     """Batch-load the datasets/reuses/dataservices referenced by a list of blocs.
 
@@ -79,8 +69,7 @@ def prefetch_blocs_references(blocs):
     call already walked the whole tree and marked the blocs it went through, so they are
     skipped when their own list is marshalled in turn.
     """
-    collected: list[ListOfReferences] = []
-    collected_single: list[SingleReference] = []
+    collected: list[SingleReference] = []
 
     def walk(blocs):
         for bloc in blocs:
@@ -93,19 +82,8 @@ def prefetch_blocs_references(blocs):
                     # organization/owner) when the blocs list holding it was read.
                     ref = bloc._data.get(attr)
                     if ref is not None:
-                        collected_single.append(
-                            SingleReference(bloc, attr, mongo_field.document_type, ref.id)
-                        )
-                elif isinstance(mongo_field, ListField) and isinstance(
-                    mongo_field.field, ReferenceField
-                ):
-                    # A `ListField(ReferenceField)`: read the raw references from `_data`
-                    # to avoid a per-bloc dereference (we batch them across all blocs).
-                    refs = bloc._data.get(attr)
-                    if refs:
-                        model = mongo_field.field.document_type
                         collected.append(
-                            ListOfReferences(bloc, attr, model, [ref.id for ref in refs])
+                            SingleReference(bloc, attr, mongo_field.document_type, ref.id)
                         )
                 elif isinstance(mongo_field, EmbeddedDocumentListField):
                     # Recurse into nested blocs (e.g. accordion items -> content). Read from `_data`:
@@ -136,9 +114,7 @@ def prefetch_blocs_references(blocs):
     walk(blocs)
 
     ids_by_model: dict = {}
-    for references in collected:
-        ids_by_model.setdefault(references.model, set()).update(references.ids)
-    for reference in collected_single:
+    for reference in collected:
         ids_by_model.setdefault(reference.model, set()).add(reference.id)
 
     docs_by_model = {}
@@ -147,19 +123,7 @@ def prefetch_blocs_references(blocs):
         queryset = model.objects(id__in=list(ids)).exclude(*unused).select_related()
         docs_by_model[model] = {doc.id: doc for doc in queryset}
 
-    for references in collected:
-        by_id = docs_by_model[references.model]
-        # Mark the list as already dereferenced so marshalling reads it as-is instead
-        # of dereferencing each reference (and its organization) again.
-        resolved = BaseList(
-            [by_id[ref_id] for ref_id in references.ids if ref_id in by_id],
-            references.bloc,
-            references.attr,
-        )
-        resolved._dereferenced = True
-        references.bloc._data[references.attr] = resolved
-
-    for reference in collected_single:
+    for reference in collected:
         document = docs_by_model[reference.model].get(reference.id)
         if document is None:
             missing.add(id(reference.bloc))
@@ -213,24 +177,6 @@ SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc"}
 ACCORDION_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
 
 
-# Fields of the legacy format that must stay empty, and the blocs that replaced them (see
-# `BlocWithTitleMixin`).
-class LegacyFields(NamedTuple):
-    fields: tuple[str, ...]
-    replacements: str
-
-
-LEGACY_FIELDS = {
-    "MarkdownBloc": LegacyFields(("title", "subtitle"), "a TitleBloc"),
-    "ExploreBloc": LegacyFields(("title", "subtitle"), "a TitleBloc"),
-    "AccordionListBloc": LegacyFields(("title", "description"), "a TitleBloc"),
-    "LinksListBloc": LegacyFields(
-        ("title", "subtitle", "paragraph", "main_link_url", "main_link_title"),
-        "a TitleBloc, a MarkdownBloc and a ButtonBloc",
-    ),
-}
-
-
 def _check_layout(blocs, allowed: set, field: str):
     for bloc in blocs:
         name = bloc.__class__.__name__
@@ -238,12 +184,6 @@ def _check_layout(blocs, allowed: set, field: str):
             raise FieldValidationError(
                 field=field,
                 message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
-            )
-        legacy = LEGACY_FIELDS.get(name, LegacyFields((), ""))
-        if set_fields := [f for f in legacy.fields if getattr(bloc, f, None)]:
-            raise FieldValidationError(
-                field=field,
-                message=f"{name} cannot have {', '.join(set_fields)}, use {legacy.replacements}",
             )
         if name == "SectionBloc":
             # An empty section only exists in the editor, where blocs are added to it: no

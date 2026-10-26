@@ -19,7 +19,6 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataserviceBloc,
     DatasetBloc,
-    DatasetsListBloc,
     ExploreBloc,
     ReuseBloc,
     SectionBloc,
@@ -405,34 +404,6 @@ class PostsAPITest(APITestCase):
         post.reload()
         (section,) = post.blocs
         assert [(bloc.dataset.id, bloc.width) for bloc in section.blocs] == [(kept.id, "1/2")]
-
-    def test_post_api_get_legacy_blocs_with_dangling_dataset(self):
-        """Blocs not migrated yet to sections are still read, without the hard-deleted
-        datasets of their lists, at the top level and in an accordion."""
-        kept = DatasetFactory()
-        deleted = DatasetFactory()
-        post = PostFactory(
-            body_type="blocs",
-            blocs=[
-                DatasetsListBloc(title="T", datasets=[kept, deleted]),
-                AccordionListBloc(
-                    items=[
-                        AccordionItemBloc(
-                            title="i", content=[DatasetsListBloc(datasets=[kept, deleted])]
-                        )
-                    ]
-                ),
-            ],
-        )
-        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
-
-        response = self.get(url_for("api.post", post=post))
-
-        assert200(response)
-        top_level, accordion = response.json["blocs"]
-        assert [d["id"] for d in top_level["datasets"]] == [str(kept.id)]
-        nested = accordion["items"][0]["content"][0]
-        assert [d["id"] for d in nested["datasets"]] == [str(kept.id)]
 
     def test_post_api_create(self):
         """It should create a post from the API"""
@@ -1121,38 +1092,9 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 id="section-in-section",
             ),
             pytest.param([section()], "SectionBloc cannot be empty", id="empty-section"),
-            pytest.param(
-                [section({"class": "HeroBloc", "title": "H"})],
-                "HeroBloc is not allowed here",
-                id="hero-in-section",
-            ),
-            pytest.param(
-                [{"class": "HeroBloc", "title": "H"}],
-                "HeroBloc is not allowed here",
-                id="legacy-hero",
-            ),
             pytest.param([section(TITLE, color="red")], "color", id="unknown-color"),
             pytest.param(
                 [section({"class": "ButtonBloc", "title": "B"})], "url", id="button-without-url"
-            ),
-            pytest.param(
-                [
-                    section(
-                        {
-                            "class": "LinksListBloc",
-                            "links": [],
-                            "main_link_title": "B",
-                            "main_link_url": "https://example.com",
-                        }
-                    )
-                ],
-                "LinksListBloc cannot have main_link_url, main_link_title",
-                id="legacy-links-main-link",
-            ),
-            pytest.param(
-                [section({"class": "LinksListBloc", "links": [], "paragraph": "P"})],
-                "LinksListBloc cannot have paragraph",
-                id="legacy-links-paragraph",
             ),
             # The whole row is stored as no width at all
             pytest.param([section({**TITLE, "width": "1"})], "width", id="whole-row-width"),
@@ -1161,26 +1103,6 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 [section(accordion(accordion()))],
                 "AccordionListBloc is not allowed here",
                 id="accordion-in-accordion",
-            ),
-            pytest.param(
-                [{"class": "DatasetsListBloc", "datasets": []}],
-                "DatasetsListBloc is not allowed here",
-                id="legacy-list-at-top-level",
-            ),
-            pytest.param(
-                [section({"class": "ReusesListBloc", "reuses": []})],
-                "ReusesListBloc is not allowed here",
-                id="legacy-list-in-section",
-            ),
-            pytest.param(
-                [section({"class": "MarkdownBloc", "title": "T", "content": "C"})],
-                "MarkdownBloc cannot have title",
-                id="legacy-title",
-            ),
-            pytest.param(
-                [section({"class": "AccordionListBloc", "description": "D", "items": []})],
-                "AccordionListBloc cannot have description",
-                id="legacy-accordion-description",
             ),
         ],
     )
