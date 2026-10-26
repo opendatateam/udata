@@ -1,6 +1,7 @@
 import json
 
 import pytest
+import requests
 from rdflib import (
     BNode,
     Graph,
@@ -86,7 +87,39 @@ class ContentNegociationTest(TestCase):
 
 
 @pytest.mark.usefixtures("no_ambient_proxy")
-class JsonLdRemoteContextTest(PytestOnlyTestCase):
+class RdflibLocationTest(PytestOnlyTestCase):
+    def test_parsed_url_is_fetched(self, rmock):
+        rmock.get(
+            "http://data.test.org/catalog.ttl",
+            text=f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .",
+            headers={"Content-Type": "text/turtle; charset=utf-8"},
+        )
+
+        graph = Graph().parse("http://data.test.org/catalog.ttl")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    @pytest.mark.options(URLS_ALLOW_LOCAL=False)
+    def test_parsed_url_on_a_loopback_address_is_blocked(self):
+        # Deliberately no rmock: requests_mock substitutes the session adapter,
+        # which is precisely the guard under test.
+        with pytest.raises(BlockedAddressError, match="loopback"):
+            Graph().parse("http://127.0.0.1:9/catalog.ttl")
+
+    def test_parsed_file_uri_is_never_read(self, tmp_path):
+        catalog = tmp_path / "catalog.ttl"
+        catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
+
+        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
+            Graph().parse(catalog.as_uri(), format="turtle")
+
+    def test_parsed_local_path_is_never_read(self, tmp_path):
+        catalog = tmp_path / "catalog.ttl"
+        catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
+
+        with pytest.raises(requests.exceptions.MissingSchema):
+            Graph().parse(str(catalog), format="turtle")
+
     def test_remote_context_is_fetched(self, rmock):
         rmock.get("http://data.test.org/context.jsonld", json={"@context": {"@vocab": str(DCAT)}})
         data = json.dumps(

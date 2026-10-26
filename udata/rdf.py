@@ -11,6 +11,7 @@ from urllib.parse import quote
 import mongoengine
 from flask import abort, current_app, request, url_for
 from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import parser as rdflib_parser
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
@@ -23,7 +24,7 @@ from rdflib.namespace import (
     NamespaceManager,
     split_uri,
 )
-from rdflib.plugins.shared.jsonld import context as jsonld_context
+from rdflib.parser import StringInputSource
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
@@ -87,16 +88,28 @@ FORMAT_MAP["jsonld"] = "json-ld"
 FORMAT_MAP["xml"] = "xml"
 
 
-def _fetch_jsonld_context(url: str) -> tuple[dict, None]:
-    response = ssrf_session().get(url, headers={"Accept": "application/ld+json, application/json"})
+def _fetch_rdflib_location(
+    file: None, format: str | None, input_source: None, location: str
+) -> tuple[URIRef, bool, None, StringInputSource]:
+    accept = (
+        "application/ld+json, application/json;q=0.9, */*;q=0.1"
+        if format == "json-ld"
+        else "application/rdf+xml, text/turtle, application/ld+json, */*;q=0.1"
+    )
+    response = ssrf_session().get(location, headers={"Accept": accept})
     response.raise_for_status()
-    return response.json(), None
+    source = StringInputSource(response.content)
+    content_type = response.headers.get("Content-Type")
+    source.content_type = content_type.split(";", 1)[0] if content_type else None
+    return URIRef(response.url), True, None, source
 
 
-# rdflib resolves remote JSON-LD `@context` and `@import` with its own urllib loader, which also
-# opens local `file://` paths, and exposes no hook to replace it. Those URLs come from harvested
-# catalogs: fetch them through the SSRF-guarded session instead.
-jsonld_context.source_to_json = _fetch_jsonld_context
+# Whenever rdflib is handed a location instead of data, it opens it itself, with its own urllib
+# loader that also reads local `file://` paths and exposes no hook to replace it. Every such open
+# goes through this single private function: `Graph.parse(<url>)`, a remote JSON-LD `@context` or
+# `@import`, and whatever path rdflib grows next. Those locations come from harvested
+# catalogs, so they are fetched through the SSRF-guarded session, which also refuses `file://`.
+rdflib_parser._create_input_source_from_location = _fetch_rdflib_location
 
 # Map serialization formats to MIME types
 RDF_MIME_TYPES = {
