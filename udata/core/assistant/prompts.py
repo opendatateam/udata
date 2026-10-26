@@ -80,6 +80,10 @@ une égalité en recherche partielle avec LIKE ou ILIKE ;
 - pré-agrège en SQL pour les statistiques et les classements ; filtre aussi \
 les chaînes vides après TRIM lorsqu'elles ne constituent pas une catégorie \
 pertinente ;
+- pour proposer la requête d'un graphique : la première colonne sert \
+d'abscisse et au moins une colonne numérique (agrégat SUM, COUNT, AVG… ou \
+colonne numérique de la ressource) doit servir d'ordonnée — sans colonne \
+numérique, le graphique ne peut pas se rendre ;
 - utilise ORDER BY avec un critère de tri secondaire stable lorsqu'un \
 classement peut contenir des ex aequo, et une limite raisonnable pour les \
 listes et classements ;
