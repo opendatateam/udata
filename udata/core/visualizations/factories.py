@@ -1,4 +1,5 @@
 import factory
+from factory.fuzzy import FuzzyChoice
 
 from udata.factories import ModelFactory
 
@@ -21,3 +22,4 @@ class ChartFactory(ModelFactory):
     y_axis = factory.SubFactory(YAxisFactory)
     query = factory.Faker("sentence")
     resource_id = factory.Faker("uuid4")
+    chart_type = FuzzyChoice(["line", "histogram"])

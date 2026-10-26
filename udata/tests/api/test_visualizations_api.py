@@ -119,6 +119,46 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert response.json["query"] == data["query"]
         assert response.json["resource_id"] == data["resource_id"]
 
+    def test_visualization_api_create_with_chart_type(self):
+        """It should create a visualization with an explicit chart type"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+            "chart_type": "histogram",
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+        assert response.json["chart_type"] == "histogram"
+
+    def test_visualization_api_create_defaults_to_line_chart_type(self):
+        """It should default to line chart type when none is provided"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+        assert response.json["chart_type"] == "line"
+
+    def test_visualization_api_create_invalid_chart_type(self):
+        """It should not create a visualization with an invalid chart type"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+            "chart_type": "pie",
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+
     def test_visualization_api_create_without_query(self):
         """It should not create a visualization without a query"""
         self.login()

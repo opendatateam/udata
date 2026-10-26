@@ -84,6 +84,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
 
     query = field(StringField(required=True))
     resource_id = field(UUIDField(required=True, binary=False))
+    chart_type = field(StringField(choices=["line", "histogram"], default="line", required=True))
     y_axis = field(EmbeddedDocumentField(YAxis))
 
     image = field(
