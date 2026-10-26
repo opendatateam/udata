@@ -1,18 +1,26 @@
 import io
 import os
+import uuid
 from datetime import UTC, datetime
 
 from flask import json
+from lxml import etree
 from PIL import Image, UnidentifiedImageError
 from werkzeug.datastructures import FileStorage
 
-from udata.api import api, fields
+from udata.api import API, api, fields
 
-from . import chunks, utils
+from . import chunks, images, utils
 
 META = "meta.json"
 
 IMAGES_FORMATS = ("JPEG", "PNG", "WEBP")
+
+# Where the images shown in a content (a bloc, a markdown text) are stored, in the images
+# storage. Purged once nothing shows them anymore, see `purge_content_images`.
+CONTENT_IMAGES_PREFIX = "content"
+
+ns = api.namespace("images", "Images shown in a content")
 
 
 uploaded_image_fields = api.model(
@@ -265,3 +273,64 @@ def parse_uploaded_image(field):
     # would silently truncate the stored file.
     image.seek(0)
     field.save(image, bbox=bbox)
+
+
+content_image_parser = api.parser()
+content_image_parser.add_argument(
+    "file", type=FileStorage, location="files", required=True, help="The image to upload"
+)
+
+uploaded_content_image_fields = api.model(
+    "UploadedContentImage",
+    {"url": fields.String(description="The URL to show the image at", readonly=True)},
+)
+
+
+def is_svg(file) -> bool:
+    # Neither entities nor the network: a document cannot make the parser read a local file,
+    # reach a server, or expand into gigabytes.
+    parser = etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False)
+    try:
+        root = etree.parse(file, parser).getroot()
+    except etree.XMLSyntaxError:
+        return False
+    return etree.QName(root).localname == "svg"
+
+
+def content_image_extension(file) -> str:
+    """The extension to store an uploaded image with, from what it really is: the name and the
+    mimetype sent by the client prove nothing."""
+    try:
+        with Image.open(file) as image:
+            image_format = image.format
+    except Image.DecompressionBombError:
+        # Its header announces more pixels than Pillow accepts to decode.
+        api.abort(400, "Image is too large")
+    except UnidentifiedImageError:
+        # Illustrations are often vector drawings, which Pillow does not read. Opened on their
+        # own, they are downloaded rather than displayed: flask-storage stores them as
+        # attachments, so the scripts they may hold never run.
+        file.seek(0)
+        if is_svg(file):
+            return "svg"
+        api.abort(400, "Unsupported image format")
+    if image_format not in IMAGES_FORMATS:
+        api.abort(400, "Unsupported image format")
+    return image_format.lower()
+
+
+@ns.route("/", endpoint="content_images")
+class ContentImagesAPI(API):
+    @api.secure
+    @api.doc("upload_content_image")
+    @api.expect(content_image_parser)
+    @api.marshal_with(uploaded_content_image_fields, code=201)
+    def post(self):
+        """Upload an image to show in a content, such as a bloc or a markdown text"""
+        file = content_image_parser.parse_args()["file"]
+        extension = content_image_extension(file)
+        file.seek(0)
+        filename = images.save(
+            file, filename=f"{uuid.uuid4().hex}.{extension}", prefix=CONTENT_IMAGES_PREFIX
+        )
+        return {"url": images.url(filename, external=True)}, 201
