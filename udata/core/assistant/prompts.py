@@ -89,6 +89,10 @@ numérique, le graphique ne peut pas se rendre ;
 - utilise ORDER BY avec un critère de tri secondaire stable lorsqu'un \
 classement peut contenir des ex aequo, et une limite raisonnable pour les \
 listes et classements ;
+- pour UNNEST, nomme explicitement la colonne produite avec \
+UNNEST(expression) AS items(value), puis utilise value ;
+- n'applique TRIM qu'à une valeur convertie en VARCHAR, jamais à un alias de \
+table ou à une STRUCT produite par UNNEST ;
 - si une requête échoue, corrige sa cause sans répéter la même requête."""
 
 TABLES_PROMPT = """\
