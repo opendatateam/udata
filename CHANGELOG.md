@@ -1,5 +1,11 @@
 # Changelog
 
+## 17.18.0 (2026-10-26)
+
+- feat(blocs): compose pages from sections, grids and single object blocs ([#4026](https://github.com/opendatateam/udata/pull/4026))
+- fix: let wtforms resolve callable SelectField choices, broken by wtforms 3.3 ([#4032](https://github.com/opendatateam/udata/pull/4032))
+
+
 ## 17.17.0 (2026-10-26)
 
 - feat: add a sysadmin endpoint to force a resource analysis by hydra ([#4024](https://github.com/opendatateam/udata/pull/4024))
