@@ -1,20 +1,29 @@
+import json
+import time
 from datetime import datetime
 
 from authlib.common.urls import add_params_to_uri
+from authlib.integrations.base_client import OAuthError
 from authlib.integrations.flask_client import OAuth
 from flask import abort, current_app, redirect, request, session, url_for
 from flask_security.tf_plugin import tf_clean_session
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.auth import login_user
-from udata.uris import homepage_url
+from udata.auth import current_user, login_user
+from udata.uris import cdata_url, homepage_url
 
 ns = api.namespace("proconnect", "Proconnect related operations")
 oauth = OAuth()
 # blueprint = I18nBlueprint("proconnect", __name__, url_prefix="/proconnect")
 STATE_KEY = "proconnect_state"
 ID_TOKEN_KEY = "id_token"
+# Set when a signed-in agent asks to reauthenticate: the id of that agent, and when.
+REAUTH_KEY = "proconnect_reauth"
+# Leeway between ProConnect's clock and ours when comparing its `auth_time` to ours.
+REAUTH_CLOCK_SKEW = 60
+
+AUTH_TIME_CLAIMS = {"id_token": {"auth_time": {"essential": True}}}
 
 
 def init_app(app):
@@ -53,6 +62,42 @@ def get_logout_url():
     )
 
 
+def authenticate() -> tuple[dict, dict]:
+    """Complete the authorization code flow and return the id_token claims and the user info."""
+    token = oauth.proconnect.authorize_access_token()
+    # Store the user info in the session, it'll be used when logging out from ProConnect.
+    session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
+    # /!\ DIRTY HACK.
+    # authlib expects the userinfo to either be in the token["id_token"] as a jwt...
+    # but in this case, it's not there, it's some other information.
+    # We thus need to go get the userinfo from the userinfo_endpoint, but authlib
+    # expects it to be plain json. However, proconnect returns a jwt.
+    # So we can't use authlib's client.userinfo() helper, we need to do it ourselves.
+    metadata = oauth.proconnect.load_server_metadata()
+    resp = oauth.proconnect.get(metadata["userinfo_endpoint"])
+    resp.raise_for_status()
+    # Create a new token that `client.parse_id_token` expects. Replace the initial
+    # `id_token` with the jwt we received from the `userinfo_endpoint`.
+    userinfo_token = token.copy()
+    userinfo_token[ID_TOKEN_KEY] = resp.content
+    # authlib has verified the id_token (signature, nonce) in `authorize_access_token`
+    # and stored its claims under "userinfo".
+    return token["userinfo"], oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
+
+
+def mark_authenticated_at(auth_time: int) -> None:
+    """Date the session's freshness from the moment the agent authenticated at ProConnect.
+
+    `min` because flask-security holds a date up to `SECURITY_FRESHNESS` in the future as
+    fresh, a tolerance meant for its own clock and not for ProConnect's.
+    """
+    session["fs_paa"] = min(auth_time, time.time())
+
+
+def verify_page_url(flash: str) -> str:
+    return cdata_url("/verify", flash=flash) or homepage_url(flash=flash)
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -61,8 +106,18 @@ class ProconnectLoginAPI(API):
             # aborted 2FA attempt.
             tf_clean_session()
 
+        # A reauthentication abandoned before the callback must not apply to this round-trip.
+        session.pop(REAUTH_KEY, None)
+        params = {"acr_values": "eidas1", "claims": json.dumps(AUTH_TIME_CLAIMS)}
+        if request.args.get("reauth"):
+            if not current_user.is_authenticated:
+                abort(401)
+            session[REAUTH_KEY] = {"user": str(current_user.id), "started_at": time.time()}
+            # Without it, an open ProConnect session answers without asking the agent anything.
+            params["max_age"] = 0
+
         redirect_uri = url_for("api.proconnect_auth", _external=True)
-        return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
+        return oauth.proconnect.authorize_redirect(redirect_uri, **params)
 
 
 @ns.route("/auth", endpoint="proconnect_auth")
@@ -70,24 +125,11 @@ class ProconnectAuthAPI(API):
     def get(self):
         from udata.models import datastore
 
-        token = oauth.proconnect.authorize_access_token()
-        # Store the user info in the session, it'll be used when logging out from ProConnect.
-        session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
-        # /!\ DIRTY HACK.
-        # authlib expects the userinfo to either be in the token["id_token"] as a jwt...
-        # but in this case, it's not there, it's some other information.
-        # We thus need to go get the userinfo from the userinfo_endpoint, but authlib
-        # expects it to be plain json. However, proconnect returns a jwt.
-        # So we can't use authlib's client.userinfo() helper, we need to do it ourselves.
-        metadata = oauth.proconnect.load_server_metadata()
-        resp = oauth.proconnect.get(metadata["userinfo_endpoint"])
-        resp.raise_for_status()
-        # Create a new token that `client.parse_id_token` expects. Replace the initial
-        # `id_token` with the jwt we received from the `userinfo_endpoint`.
-        userinfo_token = token.copy()
-        userinfo_token[ID_TOKEN_KEY] = resp.content
-        proconnect_user = oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
-        # We now have the user information decoded from the jwt, ready to be used.
+        reauth = session.pop(REAUTH_KEY, None)
+        if reauth:
+            return reauthenticate(reauth)
+
+        id_token_claims, proconnect_user = authenticate()
         user = datastore.find_user(email=proconnect_user["email"])
         if not user:
             user = datastore.create_user(
@@ -109,8 +151,40 @@ class ProconnectAuthAPI(API):
 
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
+        # `login_user` dated the session now, while an open ProConnect session may have
+        # answered for an authentication made long before.
+        if auth_time := id_token_claims.get("auth_time"):
+            mark_authenticated_at(auth_time)
 
         return redirect(homepage_url(flash="connected"))
+
+
+def reauthenticate(reauth: dict):
+    """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in.
+
+    Flask-Security's own `verify` asks for the password, which accounts created through
+    ProConnect don't have.
+    """
+    if not current_user.is_authenticated or str(current_user.id) != reauth["user"]:
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    try:
+        id_token_claims, proconnect_user = authenticate()
+    except OAuthError:
+        # The agent cancelled, or ProConnect refused the exchange.
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    if proconnect_user["email"].lower() != current_user.email.lower():
+        return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
+
+    # An authentication older than the request means ProConnect let its open session
+    # answer despite `max_age=0`: it proves nothing about who is at the keyboard now.
+    auth_time = id_token_claims.get("auth_time")
+    if not auth_time or auth_time < reauth["started_at"] - REAUTH_CLOCK_SKEW:
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    mark_authenticated_at(auth_time)
+    return redirect(verify_page_url("proconnect_reauth_success"))
 
 
 @ns.route("/logout_oauth", endpoint="proconnect_logout_oauth")
