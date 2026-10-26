@@ -5,6 +5,7 @@ from uuid import uuid4
 import pytest
 from flask import url_for
 from mongoengine.context_managers import query_counter
+from PIL import Image
 
 from udata.core import storages
 from udata.core.access_type.constants import AccessAudienceCondition, AccessAudienceType
@@ -1074,6 +1075,23 @@ class PostsAPITest(APITestCase):
         assert post.image
         assert post.image.filename in storages.images
         assert post.image.original in storages.images
+
+    def test_post_image_upload_of_a_jpeg_holding_several_pictures(self):
+        """As phone cameras write them: Pillow reads them as MPO."""
+        post = PostFactory()
+        self.login(AdminFactory())
+        photo = BytesIO()
+        frames = [Image.new("RGB", (2, 2), color) for color in ("red", "blue")]
+        frames[0].save(photo, "MPO", save_all=True, append_images=frames[1:])
+        photo.seek(0)
+
+        response = self.post(
+            url_for("api.post_image", post=post), {"file": (photo, "photo.jpg")}, json=False
+        )
+
+        assert200(response)
+        post.reload()
+        assert post.image.filename in storages.images
 
     def test_post_image_upload_requires_admin(self):
         """It should forbid a non-admin from uploading a post image"""

@@ -19,6 +19,8 @@ IMAGES_FORMATS = ("JPEG", "PNG", "WEBP")
 # Where the images shown in a content (a bloc, a markdown text) are stored, in the images
 # storage. Purged once nothing shows them anymore, see `purge_content_images`.
 CONTENT_IMAGES_PREFIX = "content"
+# Large for an illustration.
+CONTENT_IMAGE_MAX_SIZE = 5 * 1024 * 1024
 
 ns = api.namespace("images", "Images shown in a content")
 
@@ -246,32 +248,48 @@ def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
     return [left, upper, right, lower]
 
 
-def parse_uploaded_image(field):
-    """Parse an uploaded image and save into a ImageField()"""
-    args = image_parser.parse_args()
+def uploaded_image_format(file) -> str | None:
+    """The format of an uploaded image, as Pillow reads it, `None` when Pillow does not read
+    the file.
 
-    image = args["file"]
-    # The mimetype is declared by the client and may not match the content at all
-    # (an SVG announced as `image/png` for instance): decode the file to know what
-    # it really is, otherwise Pillow raises further down and the request 500s.
+    The mimetype is declared by the client and may not match the content at all (an SVG
+    announced as `image/png` for instance): decode the file to know what it really is,
+    otherwise Pillow raises further down and the request 500s.
+    """
     try:
-        uploaded = Image.open(image)
+        with Image.open(file) as image:
+            image_format = image.format
     except UnidentifiedImageError:
-        api.abort(400, "Unsupported image format")
+        return None
     except Image.DecompressionBombError:
         # A valid image whose header announces more pixels than Pillow accepts to decode.
         # A few dozen bytes are enough to declare a huge size, so this must be refused
         # here: every other decoding (resize, optimize, thumbnails) would raise too.
         api.abort(400, "Image is too large")
-    if uploaded.format not in IMAGES_FORMATS:
+    finally:
+        # `Image.open` left the cursor right after the header it read. The file may be stored
+        # as-is afterwards (flask_storage only rewinds when it resizes or optimizes), which
+        # would silently truncate it.
+        file.seek(0)
+    # A JPEG holding several pictures, as most phone cameras write them.
+    return "JPEG" if image_format == "MPO" else image_format
+
+
+def parse_uploaded_image(field):
+    """Parse an uploaded image and save into a ImageField()"""
+    args = image_parser.parse_args()
+
+    image = args["file"]
+    if uploaded_image_format(image) not in IMAGES_FORMATS:
         api.abort(400, "Unsupported image format")
 
-    bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
+    if args["bbox"]:
+        with Image.open(image) as uploaded:
+            bbox = parse_bbox(args["bbox"], uploaded.size)
+        image.seek(0)
+    else:
+        bbox = None
 
-    # `Image.open` left the cursor right after the header it read. `field.save` may store
-    # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
-    # would silently truncate the stored file.
-    image.seek(0)
     field.save(image, bbox=bbox)
 
 
@@ -287,12 +305,15 @@ uploaded_content_image_fields = api.model(
 
 
 def is_svg(file) -> bool:
-    # Neither entities nor the network: a document cannot make the parser read a local file,
-    # reach a server, or expand into gigabytes.
-    parser = etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False)
+    # Only the root element is read: building the whole tree of a flat document of a hundred
+    # megabytes takes gigabytes. Neither entities nor the network: a document cannot make the
+    # parser read a local file, reach a server, or expand into gigabytes.
+    events = etree.iterparse(
+        file, events=("start",), resolve_entities=False, no_network=True, huge_tree=False
+    )
     try:
-        root = etree.parse(file, parser).getroot()
-    except etree.XMLSyntaxError:
+        _, root = next(events)
+    except (etree.XMLSyntaxError, StopIteration):
         return False
     return etree.QName(root).localname == "svg"
 
@@ -300,23 +321,15 @@ def is_svg(file) -> bool:
 def content_image_extension(file) -> str:
     """The extension to store an uploaded image with, from what it really is: the name and the
     mimetype sent by the client prove nothing."""
-    try:
-        with Image.open(file) as image:
-            image_format = image.format
-    except Image.DecompressionBombError:
-        # Its header announces more pixels than Pillow accepts to decode.
-        api.abort(400, "Image is too large")
-    except UnidentifiedImageError:
-        # Illustrations are often vector drawings, which Pillow does not read. Opened on their
-        # own, they are downloaded rather than displayed: flask-storage stores them as
-        # attachments, so the scripts they may hold never run.
-        file.seek(0)
-        if is_svg(file):
-            return "svg"
-        api.abort(400, "Unsupported image format")
-    if image_format not in IMAGES_FORMATS:
-        api.abort(400, "Unsupported image format")
-    return image_format.lower()
+    image_format = uploaded_image_format(file)
+    if image_format in IMAGES_FORMATS:
+        return image_format.lower()
+    # Illustrations are often vector drawings, which Pillow does not read. Opened on their own,
+    # they run the scripts they may hold: on S3, where the images are stored in production,
+    # flask-storage stores them as attachments, downloaded rather than displayed.
+    if image_format is None and is_svg(file):
+        return "svg"
+    api.abort(400, "Unsupported image format")
 
 
 @ns.route("/", endpoint="content_images")
@@ -328,6 +341,9 @@ class ContentImagesAPI(API):
     def post(self):
         """Upload an image to show in a content, such as a bloc or a markdown text"""
         file = content_image_parser.parse_args()["file"]
+        # Before reading it: whatever its format, decoding a file costs memory with its size.
+        if get_file_size(file) > CONTENT_IMAGE_MAX_SIZE:
+            api.abort(400, "Image is too large")
         extension = content_image_extension(file)
         file.seek(0)
         filename = images.save(
