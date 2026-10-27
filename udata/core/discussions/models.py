@@ -1,7 +1,7 @@
 import fnmatch
 import logging
 from datetime import UTC, datetime
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from bson import ObjectId
 from flask import current_app, g, url_for
@@ -423,7 +423,11 @@ class Discussion(SpamMixin, Linkable, Document):
         """
         external_url = self._notification_external_url()
         if external_url:
-            return f"{external_url}#discussion-{self.id}"
+            parts = urlparse(external_url)
+            query = urlencode(
+                [*parse_qsl(parts.query, keep_blank_values=True), ("discussion_id", str(self.id))]
+            )
+            return urlunparse(parts._replace(query=query))
         return self.url_for()
 
     @property
