@@ -3,7 +3,6 @@ import uuid
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     EmbeddedDocumentListField,
-    ListField,
     ReferenceField,
     StringField,
     UUIDField,
@@ -19,15 +18,6 @@ from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.uuid_fields import AutoUUIDField
 
-
-class BlocWithTitleMixin:
-    # Legacy: titles now live in their own `TitleBloc`. Only kept so that blocs saved
-    # before the `2026-10-21-blocs-sections` migration still load and serialize;
-    # `check_blocs_layout` rejects them on write.
-    title = field(StringField())
-    subtitle = field(StringField())
-
-
 DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,organization,owner,last_update,quality,metrics,badges,tags}"
 dataset_card_fields = api.model("Dataset (card)", dict(dataset_fields), mask=DATASET_CARD_MASK)
 
@@ -38,45 +28,6 @@ DATASERVICE_CARD_MASK = "{id,title,acronym,slug,description,base_api_url,format,
 dataservice_card_fields = api.model(
     "Dataservice (card)", dict(Dataservice.__read_fields__), mask=DATASERVICE_CARD_MASK
 )
-
-
-# Legacy: the `*ListBloc` became a row of `DatasetBloc`/`ReuseBloc`/`DataserviceBloc`.
-# Only kept so that blocs saved before the `2026-10-21-blocs-sections` migration still load
-# and serialize; `check_blocs_layout` rejects them on write.
-@generate_fields()
-class DatasetsListBloc(BlocWithTitleMixin, Bloc):
-    datasets = field(
-        ListField(
-            field(
-                ReferenceField("Dataset"),
-                nested_fields=dataset_card_fields,
-            )
-        )
-    )
-
-
-@generate_fields()
-class ReusesListBloc(BlocWithTitleMixin, Bloc):
-    reuses = field(
-        ListField(
-            field(
-                ReferenceField("Reuse"),
-                nested_fields=reuse_card_fields,
-            )
-        )
-    )
-
-
-@generate_fields()
-class DataservicesListBloc(BlocWithTitleMixin, Bloc):
-    dataservices = field(
-        ListField(
-            field(
-                ReferenceField("Dataservice"),
-                nested_fields=dataservice_card_fields,
-            )
-        )
-    )
 
 
 @generate_fields()
@@ -117,13 +68,7 @@ class LinkInBloc(EmbeddedDocument):
 
 
 @generate_fields()
-class LinksListBloc(SizedMixin, BlocWithTitleMixin, Bloc):
-    # Legacy: the paragraph is now a `MarkdownBloc` and the main link a `ButtonBloc`, see
-    # `BlocWithTitleMixin`.
-    paragraph = field(StringField())
-    main_link_url = field(StringField())
-    main_link_title = field(StringField())
-
+class LinksListBloc(SizedMixin, Bloc):
     links = field(EmbeddedDocumentListField(LinkInBloc))
 
 
@@ -133,22 +78,37 @@ class ButtonBloc(SizedMixin, Bloc):
     url = field(StringField(required=True))
 
 
+@generate_fields()
+class ImageBloc(SizedMixin, Bloc):
+    image = field(
+        StringField(required=True),
+        description="URL of the image, as returned by the upload of content images",
+    )
+    alt = field(
+        StringField(),
+        description="Text replacing the image for those who cannot see it. Without it, the "
+        "image is decorative.",
+    )
+
+
+@generate_fields()
+class CardBloc(SizedMixin, Bloc):
+    """A link to a page, shown as a card: the summary pages list their subpages with them."""
+
+    title = field(StringField(required=True))
+    url = field(StringField(required=True))
+    description = field(StringField())
+    image = field(
+        StringField(),
+        description="URL of the image, as returned by the upload of content images",
+    )
+
+
 SECTION_COLORS = ("primary", "green", "purple")
 
 
-# Legacy: a hero is now a colored `SectionBloc` holding a `TitleBloc` and a `ButtonBloc`,
-# see `BlocWithTitleMixin`.
 @generate_fields()
-class HeroBloc(Bloc):
-    title = field(StringField(required=True))
-    description = field(StringField())
-    color = field(StringField(choices=SECTION_COLORS))
-    main_link_url = field(StringField())
-    main_link_title = field(StringField())
-
-
-@generate_fields()
-class MarkdownBloc(SizedMixin, BlocWithTitleMixin, Bloc):
+class MarkdownBloc(SizedMixin, Bloc):
     content = field(
         StringField(required=True),
         markdown=True,
@@ -165,7 +125,7 @@ def check_resource_exists(resource_id, field, **_kwargs):
 
 
 @generate_fields()
-class ExploreBloc(SizedMixin, BlocWithTitleMixin, Bloc):
+class ExploreBloc(SizedMixin, Bloc):
     resource_id = field(
         UUIDField(required=True, binary=False),
         checks=[check_resource_exists],
@@ -183,9 +143,6 @@ class AccordionItemBloc(EmbeddedDocument):
 
 @generate_fields()
 class AccordionListBloc(SizedMixin, Bloc):
-    # Legacy, see `BlocWithTitleMixin`.
-    title = field(StringField())
-    description = field(StringField())
     items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 

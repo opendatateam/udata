@@ -10,10 +10,15 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 from udata.core import storages
+from udata.core.edito_blocs.models import CardBloc, ImageBloc, SectionBloc
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.post.factories import PostFactory
+from udata.core.site.factories import SiteFactory
 from udata.core.storages import utils
 from udata.core.storages.api import META, ChunksReader, chunk_filename
-from udata.core.storages.tasks import purge_chunks
+from udata.core.storages.tasks import purge_chunks, purge_content_images
 from udata.tests import PytestOnlyTestCase
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
 
@@ -140,6 +145,46 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
+
+
+@pytest.mark.usefixtures("instance_path")
+class ContentImagesPurgeTest(PytestOnlyDBTestCase):
+    def content_image(self) -> str:
+        filename = f"content/{uuid4().hex}.svg"
+        storages.images.write(filename, b"<svg/>")
+        return filename
+
+    @pytest.mark.options(UPLOAD_MAX_RETENTION=0)
+    def test_the_images_nothing_shows_are_deleted(self):
+        in_bloc, in_markdown, in_card, on_site, orphan = (self.content_image() for _ in range(5))
+        other_image = "elsewhere.png"
+        storages.images.write(other_image, b"png")
+
+        def url(filename):
+            return storages.images.url(filename, external=True)
+
+        PostFactory(body_type="blocs", blocs=[SectionBloc(blocs=[ImageBloc(image=url(in_bloc))])])
+        # A URL copied in a text counts as much as the one of an image bloc
+        PostFactory(content=f"An illustration: ![]({url(in_markdown)})")
+        card = CardBloc(title="Card", url="/pages/a", image=url(in_card))
+        OrganizationFactory(presentation_blocs=[SectionBloc(blocs=[card])])
+        image_bloc = ImageBloc(image=url(on_site))
+        SiteFactory(id="test-site", reuses_blocs=[SectionBloc(blocs=[image_bloc])])
+
+        purge_content_images.apply()
+
+        for filename in (in_bloc, in_markdown, in_card, on_site, other_image):
+            assert storages.images.exists(filename)
+        assert not storages.images.exists(orphan)
+
+    @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)
+    def test_an_image_just_uploaded_is_kept(self):
+        """Its editor may still be open, the image not saved in its content yet."""
+        orphan = self.content_image()
+
+        purge_content_images.apply()
+
+        assert storages.images.exists(orphan)
 
 
 class MeasuredStreamTest(PytestOnlyTestCase):

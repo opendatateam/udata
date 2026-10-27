@@ -5,6 +5,7 @@ from uuid import uuid4
 import pytest
 from flask import url_for
 from mongoengine.context_managers import query_counter
+from PIL import Image
 
 from udata.core import storages
 from udata.core.access_type.constants import AccessAudienceCondition, AccessAudienceType
@@ -19,7 +20,6 @@ from udata.core.edito_blocs.models import (
     AccordionListBloc,
     DataserviceBloc,
     DatasetBloc,
-    DatasetsListBloc,
     ExploreBloc,
     ReuseBloc,
     SectionBloc,
@@ -405,34 +405,6 @@ class PostsAPITest(APITestCase):
         post.reload()
         (section,) = post.blocs
         assert [(bloc.dataset.id, bloc.width) for bloc in section.blocs] == [(kept.id, "1/2")]
-
-    def test_post_api_get_legacy_blocs_with_dangling_dataset(self):
-        """Blocs not migrated yet to sections are still read, without the hard-deleted
-        datasets of their lists, at the top level and in an accordion."""
-        kept = DatasetFactory()
-        deleted = DatasetFactory()
-        post = PostFactory(
-            body_type="blocs",
-            blocs=[
-                DatasetsListBloc(title="T", datasets=[kept, deleted]),
-                AccordionListBloc(
-                    items=[
-                        AccordionItemBloc(
-                            title="i", content=[DatasetsListBloc(datasets=[kept, deleted])]
-                        )
-                    ]
-                ),
-            ],
-        )
-        DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
-
-        response = self.get(url_for("api.post", post=post))
-
-        assert200(response)
-        top_level, accordion = response.json["blocs"]
-        assert [d["id"] for d in top_level["datasets"]] == [str(kept.id)]
-        nested = accordion["items"][0]["content"][0]
-        assert [d["id"] for d in nested["datasets"]] == [str(kept.id)]
 
     def test_post_api_create(self):
         """It should create a post from the API"""
@@ -1075,6 +1047,23 @@ class PostsAPITest(APITestCase):
         assert post.image.filename in storages.images
         assert post.image.original in storages.images
 
+    def test_post_image_upload_of_a_jpeg_holding_several_pictures(self):
+        """As phone cameras write them: Pillow reads them as MPO."""
+        post = PostFactory()
+        self.login(AdminFactory())
+        photo = BytesIO()
+        frames = [Image.new("RGB", (2, 2), color) for color in ("red", "blue")]
+        frames[0].save(photo, "MPO", save_all=True, append_images=frames[1:])
+        photo.seek(0)
+
+        response = self.post(
+            url_for("api.post_image", post=post), {"file": (photo, "photo.jpg")}, json=False
+        )
+
+        assert200(response)
+        post.reload()
+        assert post.image.filename in storages.images
+
     def test_post_image_upload_requires_admin(self):
         """It should forbid a non-admin from uploading a post image"""
         post = PostFactory()
@@ -1121,38 +1110,9 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 id="section-in-section",
             ),
             pytest.param([section()], "SectionBloc cannot be empty", id="empty-section"),
-            pytest.param(
-                [section({"class": "HeroBloc", "title": "H"})],
-                "HeroBloc is not allowed here",
-                id="hero-in-section",
-            ),
-            pytest.param(
-                [{"class": "HeroBloc", "title": "H"}],
-                "HeroBloc is not allowed here",
-                id="legacy-hero",
-            ),
             pytest.param([section(TITLE, color="red")], "color", id="unknown-color"),
             pytest.param(
                 [section({"class": "ButtonBloc", "title": "B"})], "url", id="button-without-url"
-            ),
-            pytest.param(
-                [
-                    section(
-                        {
-                            "class": "LinksListBloc",
-                            "links": [],
-                            "main_link_title": "B",
-                            "main_link_url": "https://example.com",
-                        }
-                    )
-                ],
-                "LinksListBloc cannot have main_link_url, main_link_title",
-                id="legacy-links-main-link",
-            ),
-            pytest.param(
-                [section({"class": "LinksListBloc", "links": [], "paragraph": "P"})],
-                "LinksListBloc cannot have paragraph",
-                id="legacy-links-paragraph",
             ),
             # The whole row is stored as no width at all
             pytest.param([section({**TITLE, "width": "1"})], "width", id="whole-row-width"),
@@ -1161,26 +1121,6 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 [section(accordion(accordion()))],
                 "AccordionListBloc is not allowed here",
                 id="accordion-in-accordion",
-            ),
-            pytest.param(
-                [{"class": "DatasetsListBloc", "datasets": []}],
-                "DatasetsListBloc is not allowed here",
-                id="legacy-list-at-top-level",
-            ),
-            pytest.param(
-                [section({"class": "ReusesListBloc", "reuses": []})],
-                "ReusesListBloc is not allowed here",
-                id="legacy-list-in-section",
-            ),
-            pytest.param(
-                [section({"class": "MarkdownBloc", "title": "T", "content": "C"})],
-                "MarkdownBloc cannot have title",
-                id="legacy-title",
-            ),
-            pytest.param(
-                [section({"class": "AccordionListBloc", "description": "D", "items": []})],
-                "AccordionListBloc cannot have description",
-                id="legacy-accordion-description",
             ),
         ],
     )
@@ -1242,6 +1182,54 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
         assert title.title == "T"
         assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")
+
+    def test_post_api_accepts_images_and_cards(self):
+        """A hero with its illustration, and a summary page linking its subpages with cards,
+        down to an accordion item."""
+        self.login(AdminFactory())
+        image = {"class": "ImageBloc", "width": "1/3", "image": "https://e.com/i.svg", "alt": None}
+        card = {
+            "class": "CardBloc",
+            "width": "1/4",
+            "title": "Culture",
+            "url": "/pages/donnees_culture",
+            "description": "Données sur l'offre culturelle",
+            "image": "https://e.com/culture.svg",
+        }
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [
+                section({**TITLE, "width": "2/3"}, image, color="primary"),
+                section(card, accordion(card)),
+            ],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 201
+        hero, summary = response.json["blocs"]
+        assert {k: hero["blocs"][1][k] for k in image} == image
+        assert {k: summary["blocs"][0][k] for k in card} == card
+        assert {k: summary["blocs"][1]["items"][0]["content"][0][k] for k in card} == card
+
+    @pytest.mark.parametrize(
+        "bloc,field",
+        [
+            pytest.param({"class": "ImageBloc"}, "image", id="image-without-image"),
+            pytest.param({"class": "CardBloc", "url": "/"}, "title", id="card-without-title"),
+            pytest.param({"class": "CardBloc", "title": "T"}, "url", id="card-without-url"),
+        ],
+    )
+    def test_post_api_rejects_images_and_cards_without_their_content(self, bloc, field):
+        self.login(AdminFactory())
+        data = {"name": "Test blocs post", "body_type": "blocs", "blocs": [section(bloc)]}
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 400
+        assert field in response.get_data(as_text=True)
+        assert Post.objects.count() == 0
 
 
 class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
