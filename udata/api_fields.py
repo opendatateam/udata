@@ -606,7 +606,7 @@ def generate_fields(**kwargs) -> Callable:
                     # Since MongoDB is not capable of doing joins with a column like `organization__slug` we need to
                     # do a custom filter by splitting the query in two.
 
-                    def query(filterable, query, value) -> UDataQuerySet:
+                    def query(filterable, ref_model, query, value) -> UDataQuerySet:
                         # We use the computed `filterable["column"]` here because the `compute_filter` function
                         # could have added a default filter at the end (for example `organization__badges` converted
                         # in `organization__badges__kind`)
@@ -617,7 +617,7 @@ def generate_fields(**kwargs) -> Callable:
                         return query.filter(**{f"{parts[0]}__in": models})
 
                     # do a query-based filter instead of a column based one
-                    filterable["query"] = functools.partial(query, filterable)
+                    filterable["query"] = functools.partial(query, filterable, ref_model)
                     filterables.append(filterable)
 
             read, write = convert_db_to_field(key, field, info)
