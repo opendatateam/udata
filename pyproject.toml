@@ -197,6 +197,10 @@ ignore = [
     "B018",
     # `from x import Y as Y` is the PEP 484 explicit re-export.
     "PLC0414",
+    # A join over literals keeps one item per line (field masks, expected HTML in
+    # tests): collapsing it into a single string makes it unreadable and every change
+    # a diff on one long line.
+    "FLY002",
     # The log message is what users read in harvest reports (`HarvestLog` keeps
     # `record.getMessage()`, not the traceback) and what titles Sentry events: it must
     # carry the exception.

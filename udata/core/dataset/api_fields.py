@@ -314,7 +314,50 @@ community_resource_page_fields = api.model(
 )
 
 #: Default mask to make it lightweight by default
-DEFAULT_MASK = "id,title,acronym,slug,description,description_short,created_at,last_modified,deleted,private,tags,badges,resources,frequency,frequency_date,extras,harvest,geopf,metrics,organization,owner,schema,temporal_coverage,spatial,license,access_type,access_audiences,authorization_request_url,access_type_reason_category,access_type_reason,uri,page,last_update,archived,doi,quality,internal,contact_points,featured,permissions"
+DEFAULT_MASK = ",".join(
+    (
+        "id",
+        "title",
+        "acronym",
+        "slug",
+        "description",
+        "description_short",
+        "created_at",
+        "last_modified",
+        "deleted",
+        "private",
+        "tags",
+        "badges",
+        "resources",
+        "frequency",
+        "frequency_date",
+        "extras",
+        "harvest",
+        "geopf",
+        "metrics",
+        "organization",
+        "owner",
+        "schema",
+        "temporal_coverage",
+        "spatial",
+        "license",
+        "access_type",
+        "access_audiences",
+        "authorization_request_url",
+        "access_type_reason_category",
+        "access_type_reason",
+        "uri",
+        "page",
+        "last_update",
+        "archived",
+        "doi",
+        "quality",
+        "internal",
+        "contact_points",
+        "featured",
+        "permissions",
+    )
+)
 
 dataset_internal_fields = api.model(
     "DatasetInternals",
