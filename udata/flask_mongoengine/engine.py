@@ -80,7 +80,7 @@ def _include_mongoengine(obj):
 def current_mongoengine_instance():
     """Return a MongoEngine instance associated with current Flask app."""
     me = current_app.extensions.get("mongoengine", {})
-    for k in me.keys():
+    for k in me:
         if isinstance(k, MongoEngine):
             return k
 

@@ -218,7 +218,7 @@ class Schema(EmbeddedDocument):
                 'Schema name "{schema}" is not an allowed value. Allowed values: {values}'
             ).format(
                 schema=self.name,
-                values=", ".join((schema["name"] for schema in catalog_schemas)),
+                values=", ".join(schema["name"] for schema in catalog_schemas),
             )
             if check_schema_in_catalog:
                 raise FieldValidationError(message, field="name")
@@ -578,7 +578,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
 # Uses a standalone function (not a model method) because DatasetBadge is
 # defined before Dataset in the file — Dataset is resolved lazily at call time.
 def validate_badge(value):
-    if value not in Dataset.__badges__.keys():
+    if value not in Dataset.__badges__:
         raise MongoEngineValidationError("Unknown badge type")
 
 
@@ -1056,9 +1056,8 @@ class Dataset(
             score += UNIT
         if quality["update_frequency"]:
             score += UNIT
-        if "update_fulfilled_in_time" in quality:
-            if quality["update_fulfilled_in_time"]:
-                score += UNIT
+        if "update_fulfilled_in_time" in quality and quality["update_fulfilled_in_time"]:
+            score += UNIT
         if quality["dataset_description_quality"]:
             score += UNIT
         if "has_resources" in quality:

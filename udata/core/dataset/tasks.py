@@ -119,7 +119,7 @@ def get_or_create_resource(r_info, model, dataset):
 
 def store_resource(csvfile, model, dataset):
     timestr = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
-    filename = "export-%s-%s.csv" % (model, timestr)
+    filename = f"export-{model}-{timestr}.csv"
     prefix = f"{dataset.slug}/{timestr}"
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
@@ -134,7 +134,7 @@ def store_resource(csvfile, model, dataset):
 def export_csv_for_model(model, dataset, replace: bool = False):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
-        log.error("Unknow model %s" % model)
+        log.error(f"Unknow model {model}")
         return
 
     fs_filename_to_remove = None
@@ -144,11 +144,11 @@ def export_csv_for_model(model, dataset, replace: bool = False):
     queryset = get_queryset(model_cls)
     adapter = csv.get_adapter(model_cls)
     if not adapter:
-        log.error("No adapter found for %s" % model)
+        log.error(f"No adapter found for {model}")
         return
     adapter = adapter(queryset)
 
-    log.info("Exporting CSV for %s..." % model)
+    log.info(f"Exporting CSV for {model}...")
 
     csvfile = NamedTemporaryFile(mode="w", encoding="utf8", delete=False)
     try:
@@ -189,7 +189,7 @@ def export_csv(self, model=None):
     DATASET_ID = current_app.config.get("EXPORT_CSV_DATASET_ID")
 
     if model and model not in ALLOWED_MODELS:
-        log.error("Unknown or unallowed model: %s" % model)
+        log.error(f"Unknown or unallowed model: {model}")
         return
 
     if not DATASET_ID:

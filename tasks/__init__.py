@@ -140,13 +140,13 @@ def serve(ctx, host="localhost", port="7000"):
 @task
 def work(ctx, loglevel="info"):
     """Run a development worker"""
-    ctx.run("celery -A udata.worker worker --purge -l %s" % loglevel, pty=True)
+    ctx.run(f"celery -A udata.worker worker --purge -l {loglevel}", pty=True)
 
 
 @task
 def beat(ctx, loglevel="info"):
     """Run celery beat process"""
-    ctx.run("celery -A udata.worker beat -l %s" % loglevel)
+    ctx.run(f"celery -A udata.worker beat -l {loglevel}")
 
 
 @task(clean, default=True)

@@ -803,7 +803,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
         assert license.id == found.id
 
     def test_imatch_by_url(self):
-        url = "%s/CAPS.php" % faker.uri()
+        url = f"{faker.uri()}/CAPS.php"
         license = LicenseFactory(url=url)
         found = License.guess(license.url)
         assert isinstance(found, License)
@@ -817,7 +817,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
         assert license.id == found.id
 
     def test_imatch_by_alternate_url(self):
-        alternate_url = "%s/CAPS.php" % faker.uri()
+        alternate_url = f"{faker.uri()}/CAPS.php"
         license = LicenseFactory(alternate_urls=[alternate_url])
         found = License.guess(alternate_url)
         assert isinstance(found, License)

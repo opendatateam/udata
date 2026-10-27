@@ -145,7 +145,7 @@ def assert_status(response, status_code, message=None):
     """
     __tracebackhide__ = True
 
-    message = message or "HTTP Status %s expected but got %s" % (status_code, response.status_code)
+    message = message or f"HTTP Status {status_code} expected but got {response.status_code}"
     if response.mimetype == "application/json":
         try:
             second_line = f"Response content is {response.json}"

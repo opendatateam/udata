@@ -409,8 +409,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         d = dataset_to_rdf(dataset)
         g = d.graph
 
-        len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
-        len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
+        assert len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
+        assert len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
         dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(

@@ -195,7 +195,7 @@ class OrganizationQuerySet(UDataQuerySet):
 # Uses a standalone function (not a model method) because OrganizationBadge is
 # defined before Organization in the file — Organization is resolved lazily at call time.
 def validate_badge(value):
-    if value not in Organization.__badges__.keys():
+    if value not in Organization.__badges__:
         raise ValidationError("Unknown badge type")
 
 

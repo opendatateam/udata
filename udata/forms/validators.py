@@ -35,7 +35,7 @@ class RequiredIf(validators.DataRequired):
     def __call__(self, form, field):
         other_field = form._fields.get(self.other_field_name)
         if other_field is None:
-            raise Exception('No field named "%s" in form' % self.other_field_name)
+            raise Exception(f'No field named "{self.other_field_name}" in form')
         if bool(other_field.data):
             super().__call__(form, field)
 
@@ -54,7 +54,7 @@ class Requires:
             return
         other_field = form._fields.get(self.other_field_name)
         if other_field is None:
-            raise Exception('No field named "%s" in form' % self.other_field_name)
+            raise Exception(f'No field named "{self.other_field_name}" in form')
         if not bool(other_field.data):
             msg = field._('This field requires "%(name)s" to be set')
             raise validators.ValidationError(msg % {"name": field._(other_field.label.text)})
@@ -76,6 +76,6 @@ class RequiredIfVal(validators.DataRequired):
     def __call__(self, form, field):
         other_field = form._fields.get(self.other_field_name)
         if other_field is None:
-            raise Exception('No field named "%s" in form' % self.other_field_name)
+            raise Exception(f'No field named "{self.other_field_name}" in form')
         if other_field.data in self.expected_values:
             super().__call__(form, field)

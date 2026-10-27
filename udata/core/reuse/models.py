@@ -66,7 +66,7 @@ def check_url_does_not_exists(url, **_kwargs):
 # Uses a standalone function (not a model method) because ReuseBadge is
 # defined before Reuse in the file — Reuse is resolved lazily at call time.
 def validate_badge(value):
-    if value not in Reuse.__badges__.keys():
+    if value not in Reuse.__badges__:
         raise ValidationError("Unknown badge type")
 
 

@@ -522,9 +522,8 @@ class NestedModelList(fields.FieldList):
         """Perform validation only if data has been submitted"""
         if not self.has_data:
             return True
-        if self.is_list_data:
-            if not isinstance(self._formdata[self.name], (list, tuple)):
-                return False
+        if self.is_list_data and not isinstance(self._formdata[self.name], (list, tuple)):
+            return False
         return super().validate(form, extra_validators)
 
     def populate_obj(self, obj, name):

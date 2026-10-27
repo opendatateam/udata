@@ -32,7 +32,7 @@ def build_test_config(config):
     else:
         # use `{database_name}-test` database for testing
         parsed_url = urlparse(config["MONGODB_HOST"])
-        parsed_url = parsed_url._replace(path="%s-test" % parsed_url.path)
+        parsed_url = parsed_url._replace(path=f"{parsed_url.path}-test")
         config["MONGODB_HOST"] = parsed_url.geturl()
     validate_config(config)
 

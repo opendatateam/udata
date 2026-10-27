@@ -40,7 +40,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         DatasetFactory(resources=[ResourceFactory()])
         adapter = ResourcesCsvAdapter(Dataset.objects.all())
         rows = list(adapter.rows())
-        d_row = [r for r in rows if str(dataset.id) in r][0]
+        d_row = next(r for r in rows if str(dataset.id) in r)
         # harvest.created_at
         assert date_created.isoformat() in d_row
         # harvest.modified_at

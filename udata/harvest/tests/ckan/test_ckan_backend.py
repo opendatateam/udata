@@ -107,7 +107,7 @@ def kwargs(harvest_ckan):
 def job_item_for(job, result):
     """Get the job item for a given result"""
     remote_id = result["result"]["id"]
-    return [i for i in job.items if i.remote_id == remote_id][0]
+    return next(i for i in job.items if i.remote_id == remote_id)
 
 
 def dataset_for(result):

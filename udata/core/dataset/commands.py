@@ -78,7 +78,7 @@ def archive_one(dataset_id, comment):
     try:
         dataset = Dataset.objects.get(id=dataset_id)
     except Dataset.DoesNotExist:
-        exit_with_error("Cannot find a dataset with id %s" % dataset_id)
+        exit_with_error(f"Cannot find a dataset with id {dataset_id}")
     else:
         actions.archive(dataset, comment)
 
@@ -98,7 +98,7 @@ def archive(filepath, comment):
                 continue
             try:
                 dataset = Dataset.objects.get(id=ObjectId(line))
-            except Exception as e:  # noqa  (Never stop on failure)
+            except Exception as e:  # Never stop on failure
                 log.error("Unable to archive dataset %s: %s", line, e)
                 errors += 1
                 continue

@@ -469,15 +469,15 @@ def check_duplicate_resources_ids(
         # Filter out meteo france
         if (
             exclude_org
-            and list(info["datasets"])[0].organization
-            and str(list(info["datasets"])[0].organization.id) == exclude_org
+            and next(iter(info["datasets"])).organization
+            and str(next(iter(info["datasets"])).organization.id) == exclude_org
         ):
             continue
 
         # Filter everything except meteo france
         if only_org and (
-            not list(info["datasets"])[0].organization
-            or str(list(info["datasets"])[0].organization.id) != only_org
+            not next(iter(info["datasets"])).organization
+            or str(next(iter(info["datasets"])).organization.id) != only_org
         ):
             continue
 

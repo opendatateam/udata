@@ -206,7 +206,7 @@ def index(models=None, reindex=True, from_datetime=None):
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 
-    doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
+    doc_types_names = [m.__name__.lower() for m in adapter_catalog]
     models = [model.lower().rstrip("s") for model in (models or [])]
     for model in models:
         if model not in doc_types_names:

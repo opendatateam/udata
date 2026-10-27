@@ -308,9 +308,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             current_app.config["SECURITY_TWO_FACTOR_REQUIRED"]
             or len(tf_setup_methods) > 0
             or (current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
-        ):
-            if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
-                return True, tf_setup_methods
+        ) and (current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh):
+            return True, tf_setup_methods
         return False, tf_setup_methods
 
     def check_tf_required_setup(self) -> bool:
