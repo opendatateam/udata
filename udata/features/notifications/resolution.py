@@ -132,30 +132,33 @@ def resolved_for(
             else []
         )
 
-        # Both closures are only called within this iteration, so reading the loop
-        # variables is what we want (B023).
-        def followed_for(type: NotificationType) -> set[NotificationReason]:
-            """The reasons the follows covering `type` give, as at dispatch."""
-            if not event_for_type(type).reaches_subscribers:
-                return set()
-            chain = event_chain(type)
-            return {
-                REASON_BY_ORIGIN[rule.origin]
-                for rule in follows  # noqa: B023
-                if rule.event is None or rule.event in chain
-            }
-
-        def held_for(type: NotificationType) -> set[NotificationReason]:
-            held = set(roles)  # noqa: B023
-            # On the organization, a partial editor is only concerned by what is about the
-            # organization itself: the rest reaches them through what was assigned.
-            if isinstance(subject, Organization) and not type.startswith("organization."):  # noqa: B023
-                held.discard(NotificationReason.ORGANIZATION_PARTIAL_EDITOR)
-            return held | followed_for(type)
-
         concerning = [type for type in types if can_concern(type, subject)]
+        # The reasons the follows covering each type give, as at dispatch.
+        followed: dict[NotificationType, set[NotificationReason]] = {}
+        for type in concerning:
+            chain = event_chain(type)
+            followed[type] = (
+                {
+                    REASON_BY_ORIGIN[rule.origin]
+                    for rule in follows
+                    if rule.event is None or rule.event in chain
+                }
+                if event_for_type(type).reaches_subscribers
+                else set()
+            )
+        # On the organization, a partial editor is only concerned by what is about the
+        # organization itself: the rest reaches them through what was assigned.
+        held = {
+            type: (
+                roles - {NotificationReason.ORGANIZATION_PARTIAL_EDITOR}
+                if isinstance(subject, Organization) and not type.startswith("organization.")
+                else roles
+            )
+            | followed[type]
+            for type in concerning
+        }
         heard_types = [
-            type for type in concerning if resolve(rules, event_chain(type), scopes, held_for(type))
+            type for type in concerning if resolve(rules, event_chain(type), scopes, held[type])
         ]
         resolutions.append(
             Resolution(
@@ -165,7 +168,7 @@ def resolved_for(
                 heard_types=heard_types,
                 partial=0 < len(heard_types) < len(concerning),
                 reasons=sorted(
-                    roles | {reason for type in concerning for reason in followed_for(type)}
+                    roles | {reason for type in concerning for reason in followed[type]}
                 ),
                 muted=any(
                     rule.scope == subject.pk and rule.event == event and not rule.enabled

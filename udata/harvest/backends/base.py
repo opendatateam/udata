@@ -567,10 +567,7 @@ class BaseBackend(ABC):
                         msg = "[{0}] {1}"
                     else:
                         msg = "[{0}] {1}: {2}"
-                    try:
-                        msg = msg.format(field, txt, str(value))
-                    except Exception:  # noqa: BLE001 (fall back to a message without the value)
-                        msg = f"[{field}] {txt}"
+                    msg = msg.format(field, txt, str(value))
 
                 else:
                     msg = str(error)

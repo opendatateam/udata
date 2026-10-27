@@ -256,7 +256,7 @@ class MeAPITest(APITestCase):
         data["email"] = "someone.else@example.org"
         response = self.put(url_for("api.me"), data)
         self.assert400(response)
-        assert "email" in response.json["errors"]
+        assert response.json["errors"]["email"] == "Cannot modify email after creation"
         self.user.reload()
         self.assertEqual(self.user.email, previous_email)
 

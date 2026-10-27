@@ -555,9 +555,8 @@ class NestedModelList(fields.FieldList):
         Fill the form with previous data if necessary to handle partial update
         """
         if formdata:
-            prefix = "-".join((self.name, str(index)))
-            basekey = f"{prefix}-{{0}}"
-            idkey = basekey.format("id")
+            prefix = f"{self.name}-{index}"
+            idkey = f"{prefix}-id"
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
             data = None

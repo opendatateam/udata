@@ -1,10 +1,11 @@
 from datetime import UTC, datetime
-from importlib import import_module
 
 import pytest
+from flask import current_app
 from mongoengine.errors import ValidationError
 
 import udata.core.organization.constants as org_constants
+from udata.core import metrics
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
@@ -17,13 +18,11 @@ from udata.models import Dataset, Follow, Member, Reuse
 from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
-# Importing the metrics modules connects the signal handlers these tests rely on
-for module in ("udata.core.organization.metrics", "udata.core.followers.metrics"):
-    import_module(module)
-
 
 class OrganizationModelTest(DBTestCase):
     def test_organization_metrics(self):
+        # We need to init metrics module
+        metrics.init_app(current_app)
         # Members count update are in API calls, thus being tested in API dedicated tests
 
         member = Member(user=UserFactory(), role="admin")

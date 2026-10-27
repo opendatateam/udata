@@ -258,7 +258,7 @@ def load_migration(filename):
 
     try:
         script = files("udata").joinpath("migrations", filename).read_bytes()
-    except Exception:  # noqa: BLE001
+    except FileNotFoundError:
         # Return None if file doesn't exist instead of raising
         return None
 

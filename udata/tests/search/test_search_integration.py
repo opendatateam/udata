@@ -19,6 +19,7 @@ from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
+from udata.search import get_elastic_client
 from udata.search.commands import default_index_suffix_name, finalize_reindex, index_alias
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
@@ -31,8 +32,6 @@ class SearchIntegrationTest(APITestCase):
 
     @pytest.fixture(autouse=True)
     def clean_es(self, app):
-        from udata.search import get_elastic_client
-
         es_client = get_elastic_client()
         es_client.es.indices.delete(index="udata-test-*", ignore=[404])
         es_client.init_indices()
@@ -45,15 +44,11 @@ class SearchIntegrationTest(APITestCase):
         missing is the refresh. Forcing it is deterministic, unlike relying on
         ES' ~1s auto-refresh interval (which made these tests flaky).
         """
-        from udata.search import get_elastic_client
-
         get_elastic_client().es.indices.refresh(index="udata-test-*")
 
     def test_finalize_reindex_aliases_the_new_index_when_no_alias_exists(self):
         """`udata search index -r` without `init-es` first, or after `clean-es`: the alias
         lookup finds nothing, and the new index must still get the alias."""
-        from udata.search import get_elastic_client
-
         es = get_elastic_client().es
         start = datetime(2022, 2, 20, 20, 2)
         alias = index_alias("dataset")
@@ -352,8 +347,6 @@ class SearchIntegrationTest(APITestCase):
         assert names[1] == "aaa topic"
 
     def test_topic_sort_by_created(self):
-        from datetime import datetime
-
         TopicFactory(name="old topic", private=False, created_at=datetime(2020, 1, 1))
         TopicFactory(name="new topic", private=False, created_at=datetime(2024, 1, 1))
 
@@ -693,8 +686,6 @@ class SearchIntegrationTest(APITestCase):
         assert {str(open_dataservice.id), str(open_with_account_dataservice.id)} == set(ids)
 
     def test_dataset_sort_by_created(self):
-        from datetime import datetime
-
         DatasetFactory(title="Ancien", created_at_internal=datetime(2020, 1, 1))
         DatasetFactory(title="Récent", created_at_internal=datetime(2024, 1, 1))
 

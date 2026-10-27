@@ -504,16 +504,11 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if (
-        (
-            range := maybe_date_range(
-                resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)
-            )
-        )
-        or (range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)))
-        or (range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)))
-    ):
-        return range
+    return (
+        maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate))
+        or maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate))
+        or maybe_date_range(resource.value(SCV.min), resource.value(SCV.max))
+    )
 
 
 def temporal_from_rdf(period_of_time):
