@@ -956,7 +956,12 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                         "items": [
                             {
                                 "title": "Question",
-                                "content": [{"class": "HeroBloc", "title": "nope"}],
+                                "content": [
+                                    {
+                                        "class": "SectionBloc",
+                                        "blocs": [{"class": "TitleBloc", "title": "nope"}],
+                                    }
+                                ],
                             }
                         ],
                     }
