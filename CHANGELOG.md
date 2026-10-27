@@ -1,5 +1,18 @@
 # Changelog
 
+## 17.18.0 (2026-10-26)
+
+- feat(blocs): compose pages from sections, grids and single object blocs ([#4026](https://github.com/opendatateam/udata/pull/4026))
+- fix: let wtforms resolve callable SelectField choices, broken by wtforms 3.3 ([#4032](https://github.com/opendatateam/udata/pull/4032))
+
+
+## 17.17.0 (2026-10-26)
+
+- feat: add a sysadmin endpoint to force a resource analysis by hydra ([#4024](https://github.com/opendatateam/udata/pull/4024))
+- feat(post): let a post display a side menu of its headings ([#4021](https://github.com/opendatateam/udata/pull/4021))
+- feat(search): match dotted titles when querying with spaces ([#3932](https://github.com/opendatateam/udata/pull/3932))
+
+
 ## 17.16.0 (2026-10-21)
 
 - feat(post): nest pages under a parent page and serve them under /pages/<path> ([#4011](https://github.com/opendatateam/udata/pull/4011))

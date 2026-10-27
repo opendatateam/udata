@@ -1,7 +1,6 @@
 import uuid
 
 from mongoengine import EmbeddedDocument
-from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     EmbeddedDocumentListField,
     ListField,
@@ -15,14 +14,16 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import get_dataset_by_resource_id
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, SizedMixin
 from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.uuid_fields import AutoUUIDField
 
 
 class BlocWithTitleMixin:
-    # Optional: a list bloc nested in an accordion item (or following a markdown bloc that
-    # already introduces it) would otherwise repeat the heading right above it.
+    # Legacy: titles now live in their own `TitleBloc`. Only kept so that blocs saved
+    # before the `2026-10-21-blocs-sections` migration still load and serialize;
+    # `check_blocs_layout` rejects them on write.
     title = field(StringField())
     subtitle = field(StringField())
 
@@ -39,6 +40,9 @@ dataservice_card_fields = api.model(
 )
 
 
+# Legacy: the `*ListBloc` became a row of `DatasetBloc`/`ReuseBloc`/`DataserviceBloc`.
+# Only kept so that blocs saved before the `2026-10-21-blocs-sections` migration still load
+# and serialize; `check_blocs_layout` rejects them on write.
 @generate_fields()
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
@@ -76,6 +80,36 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
+class DatasetBloc(SizedMixin, Bloc):
+    dataset = field(
+        ReferenceField("Dataset", required=True),
+        nested_fields=dataset_card_fields,
+    )
+
+
+@generate_fields()
+class ReuseBloc(SizedMixin, Bloc):
+    reuse = field(
+        ReferenceField("Reuse", required=True),
+        nested_fields=reuse_card_fields,
+    )
+
+
+@generate_fields()
+class DataserviceBloc(SizedMixin, Bloc):
+    dataservice = field(
+        ReferenceField("Dataservice", required=True),
+        nested_fields=dataservice_card_fields,
+    )
+
+
+@generate_fields()
+class TitleBloc(SizedMixin, Bloc):
+    title = field(StringField(required=True))
+    subtitle = field(StringField())
+
+
+@generate_fields()
 class LinkInBloc(EmbeddedDocument):
     title = field(StringField(required=True))
     color = field(StringField())
@@ -83,7 +117,9 @@ class LinkInBloc(EmbeddedDocument):
 
 
 @generate_fields()
-class LinksListBloc(BlocWithTitleMixin, Bloc):
+class LinksListBloc(SizedMixin, BlocWithTitleMixin, Bloc):
+    # Legacy: the paragraph is now a `MarkdownBloc` and the main link a `ButtonBloc`, see
+    # `BlocWithTitleMixin`.
     paragraph = field(StringField())
     main_link_url = field(StringField())
     main_link_title = field(StringField())
@@ -91,20 +127,28 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
     links = field(EmbeddedDocumentListField(LinkInBloc))
 
 
-HERO_COLORS = ("primary", "green", "purple")
+@generate_fields()
+class ButtonBloc(SizedMixin, Bloc):
+    title = field(StringField(required=True))
+    url = field(StringField(required=True))
 
 
+SECTION_COLORS = ("primary", "green", "purple")
+
+
+# Legacy: a hero is now a colored `SectionBloc` holding a `TitleBloc` and a `ButtonBloc`,
+# see `BlocWithTitleMixin`.
 @generate_fields()
 class HeroBloc(Bloc):
     title = field(StringField(required=True))
     description = field(StringField())
-    color = field(StringField(choices=HERO_COLORS))
+    color = field(StringField(choices=SECTION_COLORS))
     main_link_url = field(StringField())
     main_link_title = field(StringField())
 
 
 @generate_fields()
-class MarkdownBloc(BlocWithTitleMixin, Bloc):
+class MarkdownBloc(SizedMixin, BlocWithTitleMixin, Bloc):
     content = field(
         StringField(required=True),
         markdown=True,
@@ -121,72 +165,38 @@ def check_resource_exists(resource_id, field, **_kwargs):
 
 
 @generate_fields()
-class ExploreBloc(BlocWithTitleMixin, Bloc):
+class ExploreBloc(SizedMixin, BlocWithTitleMixin, Bloc):
     resource_id = field(
         UUIDField(required=True, binary=False),
         checks=[check_resource_exists],
     )
 
 
-BLOCS_DISALLOWED_IN_ACCORDION = ("AccordionListBloc", "HeroBloc", "ExploreBloc")
-
-
-def check_no_recursive_blocs(blocs, **kwargs):
-    for bloc in blocs:
-        if bloc.__class__.__name__ in BLOCS_DISALLOWED_IN_ACCORDION:
-            raise ValidationError(f"{bloc.__class__.__name__} cannot be nested inside an accordion")
-
-
 @generate_fields()
 class AccordionItemBloc(EmbeddedDocument):
+    # Generated when an item without one is loaded (`AutoUUIDField`): the editor tells items
+    # apart by it as they move.
+    id = field(AutoUUIDField(primary_key=True))
     title = field(StringField(required=True))
-    content = field(
-        EmbeddedDocumentListField(Bloc),
-        generic=True,
-        checks=[check_no_recursive_blocs],
-    )
+    content = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
 @generate_fields()
-class AccordionListBloc(Bloc):
+class AccordionListBloc(SizedMixin, Bloc):
+    # Legacy, see `BlocWithTitleMixin`.
     title = field(StringField())
     description = field(StringField())
     items = field(EmbeddedDocumentListField(AccordionItemBloc))
 
 
+@generate_fields()
+class SectionBloc(Bloc):
+    color = field(
+        StringField(choices=SECTION_COLORS),
+        description="Background of the section. Without it, the sections of a page alternate "
+        "their neutral backgrounds.",
+    )
+    blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+
+
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
-
-
-def purge_blocs_references(ref_field, obj_id):
-    """Remove references to a deleted object from all blocs in Post, Site and Organization.
-
-    A reference can live both at the top level of a blocs field and nested inside an
-    accordion (`AccordionListBloc.items[].content[]`), so both depths are purged.
-    Accordions cannot themselves be nested (see `BLOCS_DISALLOWED_IN_ACCORDION`), so
-    two levels are enough.
-    """
-    from udata.core.organization.models import Organization
-    from udata.core.post.models import Post
-    from udata.core.site.models import Site
-
-    def purge(collection, blocs_field):
-        # Top-level blocs: <blocs_field>[].<ref_field>
-        collection.update_many(
-            {f"{blocs_field}.{ref_field}": obj_id},
-            {"$pull": {f"{blocs_field}.$[b].{ref_field}": obj_id}},
-            array_filters=[{f"b.{ref_field}": obj_id}],
-        )
-        # Blocs nested in an accordion: <blocs_field>[].items[].content[].<ref_field>
-        collection.update_many(
-            {f"{blocs_field}.items.content.{ref_field}": obj_id},
-            {"$pull": {f"{blocs_field}.$[b].items.$[].content.$[c].{ref_field}": obj_id}},
-            array_filters=[
-                {f"b.items.content.{ref_field}": obj_id},
-                {f"c.{ref_field}": obj_id},
-            ],
-        )
-
-    purge(Post._get_collection(), "blocs")
-    purge(Organization._get_collection(), "presentation_blocs")
-    for blocs_field in SITE_BLOCS_FIELDS:
-        purge(Site._get_collection(), blocs_field)

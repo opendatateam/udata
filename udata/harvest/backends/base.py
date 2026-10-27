@@ -146,8 +146,8 @@ class BaseBackend(ABC):
     def config(self):
         return self.source.config
 
-    def head(self, url, headers={}, **kwargs):
-        headers.update(self.get_headers())
+    def head(self, url, headers=None, **kwargs):
+        headers = {**(headers or {}), **self.get_headers()}
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
         response = self.session.head(url, headers=headers, **kwargs)
@@ -155,8 +155,8 @@ class BaseBackend(ABC):
             raise_if_redirect(response)
         return response
 
-    def get(self, url, headers={}, **kwargs):
-        headers.update(self.get_headers())
+    def get(self, url, headers=None, **kwargs):
+        headers = {**(headers or {}), **self.get_headers()}
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
         response = self.session.get(url, headers=headers, **kwargs)
@@ -164,8 +164,8 @@ class BaseBackend(ABC):
             raise_if_redirect(response)
         return response
 
-    def post(self, url, data, headers={}, **kwargs):
-        headers.update(self.get_headers())
+    def post(self, url, data, headers=None, **kwargs):
+        headers = {**(headers or {}), **self.get_headers()}
         kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         kwargs["allow_redirects"] = kwargs.get("allow_redirects", self.allow_redirects)
         response = self.session.post(url, data=data, headers=headers, **kwargs)

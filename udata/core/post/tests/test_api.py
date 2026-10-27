@@ -11,16 +11,19 @@ from udata.core.access_type.constants import AccessAudienceCondition, AccessAudi
 from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
-    DataservicesListBloc,
+    DataserviceBloc,
+    DatasetBloc,
     DatasetsListBloc,
     ExploreBloc,
-    ReusesListBloc,
+    ReuseBloc,
+    SectionBloc,
+    TitleBloc,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
@@ -28,7 +31,7 @@ from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.settings import NotificationSetting
-from udata.tests.api import APITestCase
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -38,6 +41,25 @@ from udata.tests.helpers import (
     assert404,
     create_test_image,
 )
+
+
+def side_by_side(blocs, width="1/2"):
+    for bloc in blocs:
+        bloc.width = width
+    return blocs
+
+
+def object_cards(value):
+    """The serialized datasets/reuses/dataservices shown anywhere in a blocs tree."""
+    if isinstance(value, list):
+        for item in value:
+            yield from object_cards(item)
+    elif isinstance(value, dict):
+        for key in ("dataset", "reuse", "dataservice"):
+            if value.get("class", "").lower() == f"{key}bloc":
+                yield value[key]
+        for item in value.values():
+            yield from object_cards(item)
 
 
 class PostsAPITest(APITestCase):
@@ -67,7 +89,7 @@ class PostsAPITest(APITestCase):
 
     def test_post_api_list_excludes_blocs(self):
         """Blocs should not be included in the list endpoint"""
-        bloc = DatasetsListBloc(title="Test", datasets=[])
+        bloc = SectionBloc(blocs=[TitleBloc(title="Test")])
         PostFactory(body_type="blocs", blocs=[bloc])
 
         response = self.get(url_for("api.posts"))
@@ -91,14 +113,16 @@ class PostsAPITest(APITestCase):
                     DatasetFactory(organization=orgs[i % len(orgs)]) for i in range(cards_per_bloc)
                 ]
 
-            # Datasets spread across 4 top-level blocs + 2 blocs nested in an accordion.
-            top_level = [DatasetsListBloc(title=f"Top {i}", datasets=datasets()) for i in range(4)]
+            # Datasets spread across 4 sections + 2 accordion items, one bloc per dataset.
+            sections = [
+                SectionBloc(blocs=side_by_side([DatasetBloc(dataset=d) for d in datasets()]))
+                for _ in range(4)
+            ]
             accordion = AccordionListBloc(
-                title="Accordion",
                 items=[
                     AccordionItemBloc(
                         title=f"Item {i}",
-                        content=[DatasetsListBloc(title=f"Nested {i}", datasets=datasets())],
+                        content=side_by_side([DatasetBloc(dataset=d) for d in datasets()]),
                     )
                     for i in range(2)
                 ],
@@ -107,10 +131,14 @@ class PostsAPITest(APITestCase):
             dataservices = [
                 DataserviceFactory(organization=orgs[i % len(orgs)]) for i in range(cards_per_bloc)
             ]
-            blocs = top_level + [
-                accordion,
-                ReusesListBloc(title="Reuses", reuses=reuses),
-                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+            blocs = sections + [
+                SectionBloc(
+                    blocs=[
+                        accordion,
+                        *side_by_side([ReuseBloc(reuse=r) for r in reuses], width="1/3"),
+                        *side_by_side([DataserviceBloc(dataservice=d) for d in dataservices]),
+                    ]
+                )
             ]
             post = PostFactory(body_type="blocs", content=None, blocs=blocs, datasets=[], reuses=[])
 
@@ -122,21 +150,12 @@ class PostsAPITest(APITestCase):
                 count = int(counter)
             assert200(response)
 
-            # A reference the prefetch fails to resolve silently drops from the list —
-            # which *lowers* the query count. Assert every card is there, with its
+            # A reference the prefetch fails to resolve silently drops its bloc — which
+            # *lowers* the query count. Assert every card is there, with its
             # organization resolved, so a flat count really means "batched".
             org_ids = {str(o.id) for o in orgs}
-            by_class = {}
-            for bloc in response.json["blocs"]:
-                by_class.setdefault(bloc["class"], []).append(bloc)
-            accordion_items = by_class["AccordionListBloc"][0]["items"]
-            dataset_blocs = by_class["DatasetsListBloc"] + [
-                item["content"][0] for item in accordion_items
-            ]
-            assert len(dataset_blocs) == 6  # 4 top-level + 2 nested in the accordion
-            cards = [card for bloc in dataset_blocs for card in bloc["datasets"]]
-            cards += by_class["ReusesListBloc"][0]["reuses"]
-            cards += by_class["DataservicesListBloc"][0]["dataservices"]
+            cards = list(object_cards(response.json["blocs"]))
+            # 6 rows of datasets (4 in sections, 2 in the accordion), reuses, dataservices
             assert len(cards) == cards_per_bloc * 8
             for card in cards:
                 assert card["organization"]["id"] in org_ids
@@ -194,9 +213,13 @@ class PostsAPITest(APITestCase):
             body_type="blocs",
             content=None,
             blocs=[
-                DatasetsListBloc(title="Datasets", datasets=datasets),
-                ReusesListBloc(title="Reuses", reuses=reuses),
-                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+                SectionBloc(
+                    blocs=[
+                        *side_by_side([DatasetBloc(dataset=d) for d in datasets]),
+                        *side_by_side([ReuseBloc(reuse=r) for r in reuses], width="1/3"),
+                        *side_by_side([DataserviceBloc(dataservice=d) for d in dataservices]),
+                    ]
+                )
             ],
             datasets=[],
             reuses=[],
@@ -212,32 +235,32 @@ class PostsAPITest(APITestCase):
         assert projected["blocs"] == full["blocs"]
         # `quality` carries resource-derived criteria: the card reads them from the
         # stored cache, which is why `resources` can be dropped from the load.
-        card = projected["blocs"][0]["datasets"][0]
+        card = next(object_cards(projected["blocs"]))
         assert card["quality"]["has_resources"] is True
 
     def test_post_api_blocs_preserve_reference_order(self):
-        """Batch-loading a bloc's references must not reorder its cards.
+        """Batch-loading the referenced objects must not swap them between blocs.
 
         `id__in` returns the documents in the model's default order (`Dataset` sorts
-        by `-created_at_internal`), not in the order of the reference list, so the
-        prefetch reorders them from the stored references. Bloc lists are editorial
+        by `-created_at_internal`), not in the order of the blocs, so the prefetch
+        assigns each document back to the bloc referencing it. Blocs are editorial
         content: their order is the behaviour.
         """
         created = [DatasetFactory() for _ in range(6)]
-        # Interleaved, so the list order matches neither the creation order nor its
+        # Interleaved, so the bloc order matches neither the creation order nor its
         # reverse — the two orders a batch query can return on its own.
         datasets = created[::2] + created[1::2]
         post = PostFactory(
             body_type="blocs",
             content=None,
-            blocs=[DatasetsListBloc(title="Ordered", datasets=datasets)],
+            blocs=[SectionBloc(blocs=side_by_side([DatasetBloc(dataset=d) for d in datasets]))],
             datasets=[],
             reuses=[],
         )
 
         response = self.get(url_for("api.post", post=post))
         assert200(response)
-        cards = response.json["blocs"][0]["datasets"]
+        cards = list(object_cards(response.json["blocs"]))
         assert [card["id"] for card in cards] == [str(dataset.id) for dataset in datasets]
 
     def test_post_list_does_not_dereference_blocs(self):
@@ -251,12 +274,10 @@ class PostsAPITest(APITestCase):
         post = PostFactory(body_type="blocs", content=None, blocs=[], datasets=[], reuses=[])
 
         def query_count(nb_cards):
-            post.blocs = [
-                DatasetsListBloc(
-                    title="Heavy",
-                    datasets=[DatasetFactory(organization=org) for _ in range(nb_cards)],
-                )
-            ]
+            datasets = [DatasetFactory(organization=org) for _ in range(nb_cards)]
+            post.blocs = (
+                [SectionBloc(blocs=[DatasetBloc(dataset=d) for d in datasets])] if datasets else []
+            )
             post.save()
 
             url = url_for("api.posts")
@@ -269,9 +290,9 @@ class PostsAPITest(APITestCase):
             assert "blocs" not in response.json["data"][0]
             return count
 
-        # Compared against an empty bloc, not a smaller one: a prefetch that ignores
-        # the mask costs a constant batch query, which a "20 vs 2 cards" comparison
-        # would not see. An empty bloc has nothing to load, so it gives the baseline.
+        # Compared against no blocs, not fewer cards: a prefetch that ignores the mask
+        # costs a constant batch query, which a "20 vs 2 cards" comparison would not see.
+        # Without blocs, there is nothing to load, so it gives the baseline.
         filled, empty = query_count(20), query_count(0)
         assert filled == empty, (
             f"the query count grows with the bloc contents ({filled} with cards, "
@@ -339,52 +360,79 @@ class PostsAPITest(APITestCase):
         dataset_ids = [d["id"] for d in response.json["datasets"]]
         assert dataset_ids == [str(kept.id)]
 
-    def test_post_api_get_with_dangling_dataset_in_bloc(self):
-        """Getting a post should not crash when a `DatasetsListBloc` references a
-        hard-deleted dataset. Bloc references live in `EmbeddedDocument`s, which
-        MongoEngine never cleans through `reverse_delete_rule`, so dangling DBRefs
-        are expected there."""
+    def make_post_with_dangling_dataset_blocs(self):
+        """A post showing a dataset that is then hard-deleted, in a section and in an
+        accordion. Bloc references live in `EmbeddedDocument`s, which MongoEngine never
+        cleans through `reverse_delete_rule`, so dangling references are expected there.
+        """
         kept = DatasetFactory()
         deleted = DatasetFactory()
+        nested = AccordionListBloc(
+            items=[AccordionItemBloc(title="Item", content=[DatasetBloc(dataset=deleted)])]
+        )
         post = PostFactory(
             body_type="blocs",
-            blocs=[DatasetsListBloc(title="Featured", datasets=[kept, deleted])],
+            blocs=[
+                SectionBloc(
+                    blocs=side_by_side([DatasetBloc(dataset=kept), DatasetBloc(dataset=deleted)])
+                ),
+                SectionBloc(blocs=[nested]),
+            ],
         )
-
         DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
+        return post, kept
+
+    def test_post_api_get_with_dangling_dataset_in_bloc(self):
+        """A bloc showing a hard-deleted dataset is left out, wherever it is, with the
+        containers it leaves empty: everything up to the second section."""
+        post, kept = self.make_post_with_dangling_dataset_blocs()
 
         response = self.get(url_for("api.post", post=post))
         assert200(response)
-        bloc_datasets = response.json["blocs"][0]["datasets"]
-        assert [d["id"] for d in bloc_datasets] == [str(kept.id)]
+        (section,) = response.json["blocs"]
+        assert [bloc["dataset"]["id"] for bloc in section["blocs"]] == [str(kept.id)]
 
-    def test_post_api_get_with_dangling_dataset_in_nested_accordion_bloc(self):
-        """Reproduces the production crash: a `DatasetsListBloc` nested inside an
-        `AccordionListBloc` references a hard-deleted dataset. `purge_blocs_references`
-        does not descend into accordion items, so the dangling DBRef survives the purge."""
+    def test_post_api_blocs_with_dangling_dataset_can_be_saved_back(self):
+        """The editor sends back the blocs it read: a dangling reference must not make the
+        page impossible to save."""
+        post, kept = self.make_post_with_dangling_dataset_blocs()
+        self.login(AdminFactory())
+
+        blocs = self.get(url_for("api.post", post=post)).json["blocs"]
+        response = self.put(url_for("api.post", post=post), {"blocs": blocs})
+
+        assert200(response)
+        post.reload()
+        (section,) = post.blocs
+        assert [(bloc.dataset.id, bloc.width) for bloc in section.blocs] == [(kept.id, "1/2")]
+
+    def test_post_api_get_legacy_blocs_with_dangling_dataset(self):
+        """Blocs not migrated yet to sections are still read, without the hard-deleted
+        datasets of their lists, at the top level and in an accordion."""
         kept = DatasetFactory()
         deleted = DatasetFactory()
         post = PostFactory(
             body_type="blocs",
             blocs=[
+                DatasetsListBloc(title="T", datasets=[kept, deleted]),
                 AccordionListBloc(
-                    title="Accordion",
                     items=[
                         AccordionItemBloc(
-                            title="Item",
-                            content=[DatasetsListBloc(title="Featured", datasets=[kept, deleted])],
+                            title="i", content=[DatasetsListBloc(datasets=[kept, deleted])]
                         )
-                    ],
-                )
+                    ]
+                ),
             ],
         )
-
         DatasetFactory._meta.model._get_collection().delete_one({"_id": deleted.id})
 
         response = self.get(url_for("api.post", post=post))
+
         assert200(response)
-        bloc_datasets = response.json["blocs"][0]["items"][0]["content"][0]["datasets"]
-        assert [d["id"] for d in bloc_datasets] == [str(kept.id)]
+        top_level, accordion = response.json["blocs"]
+        assert [d["id"] for d in top_level["datasets"]] == [str(kept.id)]
+        nested = accordion["items"][0]["content"][0]
+        assert [d["id"] for d in nested["datasets"]] == [str(kept.id)]
 
     def test_post_api_create(self):
         """It should create a post from the API"""
@@ -856,21 +904,63 @@ class PostsAPITest(APITestCase):
             "body_type": "blocs",
             "blocs": [
                 {
-                    "class": "DatasetsListBloc",
-                    "title": "Featured datasets",
-                    "datasets": [str(d.id) for d in datasets],
+                    "class": "SectionBloc",
+                    "color": "purple",
+                    "blocs": [
+                        {"class": "TitleBloc", "title": "Hero"},
+                        {"class": "ButtonBloc", "title": "Go", "url": "https://example.com"},
+                    ],
                 },
-                {"class": "ExploreBloc", "resource_id": str(resource_id)},
+                {
+                    "class": "SectionBloc",
+                    "blocs": [
+                        {"class": "TitleBloc", "title": "Featured datasets", "subtitle": "Sub"},
+                        *(
+                            {"class": "DatasetBloc", "width": "1/3", "dataset": str(d.id)}
+                            for d in datasets
+                        ),
+                        {"class": "ExploreBloc", "resource_id": str(resource_id)},
+                    ],
+                },
             ],
         }
         response = self.post(url_for("api.posts"), data)
         assert201(response)
         post = Post.objects.first()
         assert post.body_type == "blocs"
-        assert len(post.blocs) == 2
-        assert post.blocs[0].title == "Featured datasets"
-        assert isinstance(post.blocs[1], ExploreBloc)
-        assert post.blocs[1].resource_id == resource_id
+        hero, section = post.blocs
+        assert hero.color == "purple"
+        hero_title, button = hero.blocs
+        assert hero_title.title == "Hero"
+        assert (button.title, button.url) == ("Go", "https://example.com")
+        assert section.color is None
+        title, *objects, explore = section.blocs
+        assert (title.title, title.subtitle) == ("Featured datasets", "Sub")
+        assert [bloc.width for bloc in objects] == ["1/3", "1/3"]
+        assert [bloc.dataset.id for bloc in objects] == [d.id for d in datasets]
+        assert isinstance(explore, ExploreBloc)
+        assert explore.resource_id == resource_id
+
+    def test_post_api_bloc_width_is_optional(self):
+        """A bloc without a width takes the whole row."""
+        self.login(AdminFactory())
+        data = {
+            "name": "Widths",
+            "body_type": "blocs",
+            "blocs": [
+                {
+                    "class": "SectionBloc",
+                    "blocs": [
+                        {"class": "TitleBloc", "title": "A", "width": "2/3"},
+                        {"class": "TitleBloc", "title": "B"},
+                    ],
+                }
+            ],
+        }
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        blocs = response.json["blocs"][0]["blocs"]
+        assert [bloc["width"] for bloc in blocs] == ["2/3", None]
 
     def test_post_api_create_with_explore_bloc_unknown_resource(self):
         """An ExploreBloc must point to an existing resource"""
@@ -879,80 +969,65 @@ class PostsAPITest(APITestCase):
             data = {
                 "name": "Test explore post",
                 "body_type": "blocs",
-                "blocs": [{"class": "ExploreBloc", "resource_id": resource_id}],
+                "blocs": [
+                    {
+                        "class": "SectionBloc",
+                        "blocs": [{"class": "ExploreBloc", "resource_id": resource_id}],
+                    }
+                ],
             }
             response = self.post(url_for("api.posts"), data)
             assert400(response)
         assert Post.objects.count() == 0
 
-    def test_post_api_blocs_title_is_optional(self):
-        """A list bloc nested under a heading that already names it needs no title of its own."""
-        self.login(AdminFactory())
-        data = {
-            "name": "Test blocs post",
-            "body_type": "blocs",
-            "blocs": [
-                {
-                    "class": "AccordionListBloc",
-                    "title": "Comptes de campagne",
-                    "items": [
-                        {
-                            "title": "Comptes de campagne",
-                            "content": [{"class": "DatasetsListBloc", "datasets": []}],
-                        }
-                    ],
-                },
-                {"class": "ReusesListBloc", "title": "  ", "reuses": []},
-            ],
-        }
-        response = self.post(url_for("api.posts"), data)
-        assert201(response)
-        post = Post.objects.first()
-        assert post.blocs[0].items[0].content[0].title is None
-        assert post.blocs[1].title is None
-
     def test_post_api_get_with_blocs(self):
         """It should return blocs directly on the post"""
-        datasets = DatasetFactory.create_batch(2)
-        bloc = DatasetsListBloc(title="Featured datasets", datasets=datasets)
-        post = PostFactory(body_type="blocs", blocs=[bloc])
-        response = self.get(url_for("api.post", post=post))
-        assert200(response)
-        assert response.json["body_type"] == "blocs"
-        assert "blocs" in response.json
-        assert len(response.json["blocs"]) == 1
-        assert response.json["blocs"][0]["class"] == "DatasetsListBloc"
-        assert response.json["blocs"][0]["title"] == "Featured datasets"
-        assert len(response.json["blocs"][0]["datasets"]) == 2
-
-    def test_post_api_get_blocs_only_returns_card_fields(self):
-        """Blocs should return lightweight card representations, not full nested objects"""
-        datasets = DatasetFactory.create_batch(2)
-        reuses = ReuseFactory.create_batch(2)
-        dataservices = DataserviceFactory.create_batch(2)
+        dataset = DatasetFactory()
         post = PostFactory(
             body_type="blocs",
             blocs=[
-                DatasetsListBloc(title="Datasets", datasets=datasets),
-                ReusesListBloc(title="Reuses", reuses=reuses),
-                DataservicesListBloc(title="Dataservices", dataservices=dataservices),
+                SectionBloc(
+                    blocs=[TitleBloc(title="Featured"), DatasetBloc(dataset=dataset, width="1/2")]
+                )
+            ],
+        )
+        response = self.get(url_for("api.post", post=post))
+        assert200(response)
+        assert response.json["body_type"] == "blocs"
+        section = response.json["blocs"][0]
+        assert section["class"] == "SectionBloc"
+        title, dataset_bloc = section["blocs"]
+        assert (title["class"], title["title"]) == ("TitleBloc", "Featured")
+        assert (dataset_bloc["class"], dataset_bloc["width"]) == ("DatasetBloc", "1/2")
+        assert dataset_bloc["dataset"]["id"] == str(dataset.id)
+
+    def test_post_api_get_blocs_only_returns_card_fields(self):
+        """Blocs should return lightweight card representations, not full nested objects"""
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                SectionBloc(
+                    blocs=[
+                        DatasetBloc(dataset=DatasetFactory()),
+                        ReuseBloc(reuse=ReuseFactory()),
+                        DataserviceBloc(dataservice=DataserviceFactory()),
+                    ]
+                )
             ],
         )
         response = self.get(url_for("api.post", post=post))
         assert200(response)
 
-        dataset_json = response.json["blocs"][0]["datasets"][0]
+        dataset_json, reuse_json, dataservice_json = object_cards(response.json["blocs"])
         assert "id" in dataset_json
         assert "title" in dataset_json
         assert "resources" not in dataset_json
         assert "community_resources" not in dataset_json
 
-        reuse_json = response.json["blocs"][1]["reuses"][0]
         assert "id" in reuse_json
         assert "title" in reuse_json
         assert "datasets" not in reuse_json
 
-        dataservice_json = response.json["blocs"][2]["dataservices"][0]
         assert "id" in dataservice_json
         assert "title" in dataservice_json
         assert "datasets" not in dataservice_json
@@ -1021,3 +1096,191 @@ class PostsAPITest(APITestCase):
             json=False,
         )
         assert400(response)
+
+
+def section(*blocs, **fields):
+    return {"class": "SectionBloc", "blocs": list(blocs), **fields}
+
+
+def accordion(*content):
+    return {"class": "AccordionListBloc", "items": [{"title": "I", "content": list(content)}]}
+
+
+TITLE = {"class": "TitleBloc", "title": "T"}
+
+
+class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
+    # Each case with the reason it is rejected for, so that none passes for another one.
+    @pytest.mark.parametrize(
+        "blocs,reason",
+        [
+            pytest.param([TITLE], "TitleBloc is not allowed here", id="leaf-at-top-level"),
+            pytest.param(
+                [section(section(TITLE))],
+                "SectionBloc is not allowed here",
+                id="section-in-section",
+            ),
+            pytest.param([section()], "SectionBloc cannot be empty", id="empty-section"),
+            pytest.param(
+                [section({"class": "HeroBloc", "title": "H"})],
+                "HeroBloc is not allowed here",
+                id="hero-in-section",
+            ),
+            pytest.param(
+                [{"class": "HeroBloc", "title": "H"}],
+                "HeroBloc is not allowed here",
+                id="legacy-hero",
+            ),
+            pytest.param([section(TITLE, color="red")], "color", id="unknown-color"),
+            pytest.param(
+                [section({"class": "ButtonBloc", "title": "B"})], "url", id="button-without-url"
+            ),
+            pytest.param(
+                [
+                    section(
+                        {
+                            "class": "LinksListBloc",
+                            "links": [],
+                            "main_link_title": "B",
+                            "main_link_url": "https://example.com",
+                        }
+                    )
+                ],
+                "LinksListBloc cannot have main_link_url, main_link_title",
+                id="legacy-links-main-link",
+            ),
+            pytest.param(
+                [section({"class": "LinksListBloc", "links": [], "paragraph": "P"})],
+                "LinksListBloc cannot have paragraph",
+                id="legacy-links-paragraph",
+            ),
+            # The whole row is stored as no width at all
+            pytest.param([section({**TITLE, "width": "1"})], "width", id="whole-row-width"),
+            pytest.param([section({**TITLE, "width": "1/5"})], "width", id="unknown-width"),
+            pytest.param(
+                [section(accordion(accordion()))],
+                "AccordionListBloc is not allowed here",
+                id="accordion-in-accordion",
+            ),
+            pytest.param(
+                [{"class": "DatasetsListBloc", "datasets": []}],
+                "DatasetsListBloc is not allowed here",
+                id="legacy-list-at-top-level",
+            ),
+            pytest.param(
+                [section({"class": "ReusesListBloc", "reuses": []})],
+                "ReusesListBloc is not allowed here",
+                id="legacy-list-in-section",
+            ),
+            pytest.param(
+                [section({"class": "MarkdownBloc", "title": "T", "content": "C"})],
+                "MarkdownBloc cannot have title",
+                id="legacy-title",
+            ),
+            pytest.param(
+                [section({"class": "AccordionListBloc", "description": "D", "items": []})],
+                "AccordionListBloc cannot have description",
+                id="legacy-accordion-description",
+            ),
+        ],
+    )
+    def test_post_api_rejects_blocs_out_of_layout(self, blocs, reason):
+        self.login(AdminFactory())
+        data = {"name": "Test blocs post", "body_type": "blocs", "blocs": blocs}
+        response = self.post(url_for("api.posts"), data)
+        assert response.status_code == 400
+        assert reason in response.get_data(as_text=True)
+        assert Post.objects.count() == 0
+
+    def test_post_api_rejects_the_explorer_in_an_accordion(self):
+        """The explorer is too wide for an accordion, even of an existing resource."""
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
+        self.login(AdminFactory())
+
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [section(accordion(explorer))],
+        }
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 400
+        assert "ExploreBloc is not allowed here" in response.get_data(as_text=True)
+        # The same explorer is accepted in a section
+        data["blocs"] = [section(explorer)]
+        assert self.post(url_for("api.posts"), data).status_code == 201
+
+    def test_post_api_accepts_blocs_in_an_accordion(self):
+        """The layout the editor and the migration produce: objects side by side, under a
+        title, in an accordion item."""
+        dataset = DatasetFactory()
+        self.login(AdminFactory())
+        accordion = {
+            "class": "AccordionListBloc",
+            "items": [
+                {
+                    "title": "Item",
+                    "content": [
+                        {"class": "TitleBloc", "title": "T"},
+                        {"class": "DatasetBloc", "width": "1/2", "dataset": str(dataset.id)},
+                    ],
+                }
+            ],
+        }
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [{"class": "SectionBloc", "blocs": [accordion]}],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 201
+        # Items get an id, which the editor tells them apart by
+        assert response.json["blocs"][0]["blocs"][0]["items"][0]["id"]
+        title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
+        assert title.title == "T"
+        assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")
+
+
+class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
+    @pytest.mark.parametrize(
+        "factory,bloc_cls,ref",
+        [
+            (DatasetFactory, DatasetBloc, "dataset"),
+            (ReuseFactory, ReuseBloc, "reuse"),
+            (DataserviceFactory, DataserviceBloc, "dataservice"),
+        ],
+    )
+    def test_blocs_of_hard_deleted_objects_are_left_out(self, factory, bloc_cls, ref):
+        """Nothing purges the blocs of a hard-deleted object: they are left out at read, in a
+        section and in an accordion item, with the containers they leave empty."""
+        kept, deleted = factory(), factory()
+        post = PostFactory(
+            body_type="blocs",
+            blocs=[
+                SectionBloc(blocs=[bloc_cls(**{ref: deleted}), bloc_cls(**{ref: kept})]),
+                SectionBloc(
+                    blocs=[
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="Gone", content=[bloc_cls(**{ref: deleted})]
+                                ),
+                                AccordionItemBloc(title="Kept", content=[bloc_cls(**{ref: kept})]),
+                            ]
+                        )
+                    ]
+                ),
+            ],
+        )
+        type(deleted)._get_collection().delete_one({"_id": deleted.id})
+
+        response = self.get(url_for("api.post", post=post))
+
+        assert200(response)
+        section, accordion_section = response.json["blocs"]
+        assert [bloc[ref]["id"] for bloc in section["blocs"]] == [str(kept.id)]
+        (accordion,) = accordion_section["blocs"]
+        assert [item["title"] for item in accordion["items"]] == ["Kept"]
