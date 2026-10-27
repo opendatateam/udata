@@ -9,6 +9,10 @@ from udata.app import cache
 
 ns = api.namespace("avatars", "Avatars")
 
+# The image is allocated in memory at the requested size, so an unbounded size
+# lets any request exhaust the worker memory.
+MAX_SIZE = 512
+
 
 @cache.memoize()
 def generate_pydenticon(identifier, size):
@@ -36,6 +40,8 @@ class IdenticonAPI(API):
     @api.doc("avatars")
     def get(self, identifier, size):
         """Get a deterministic avatar given an identifier at a given size"""
+        if size > MAX_SIZE:
+            api.abort(400, f"Avatar size must not exceed {MAX_SIZE}")
         identicon = generate_pydenticon(identifier, size)
         response = send_file(io.BytesIO(identicon), mimetype="image/png")
         etag = hashlib.sha1(identicon).hexdigest()
