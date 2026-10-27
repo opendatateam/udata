@@ -207,7 +207,6 @@ def register_extensions(app):
         i18n,
         mail,
         mongo,
-        notifications,  # noqa
         routing,
         search,
         sentry,

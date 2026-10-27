@@ -248,6 +248,7 @@ class MeAPITest(APITestCase):
         self.assert400(response)
         assert "email" in response.json["errors"]
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_update_profile_cannot_change_email(self):
         """A new address is only granted by the `/change-email` confirmation flow"""
         self.login()

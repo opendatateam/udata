@@ -117,8 +117,8 @@ pytest udata/core/dataset/tests/test_models.py::DatasetModelTest::test_create
 pre-commit install
 
 # Format and lint with ruff (done automatically by pre-commit)
-ruff check --fix .
-ruff format .
+uv run ruff check --fix .
+uv run ruff format .
 
 # Run flake8 (legacy, still used in qa task)
 inv qa

@@ -538,8 +538,7 @@ def save_class_by_parents(cls):
         if parent == UDataDocument:
             return
 
-        classes_by_parents[parent] = classes_by_parents.get(parent, set())
-        classes_by_parents[parent].add(cls)
+        classes_by_parents.setdefault(parent, set()).add(cls)
 
 
 def generate_fields(**kwargs) -> Callable:

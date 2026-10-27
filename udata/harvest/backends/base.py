@@ -563,11 +563,11 @@ class BaseBackend(ABC):
 
                     txt = safe_unicode(error).replace("for dictionary value", "")
                     txt = txt.strip()
-                    if isinstance(error, RequiredFieldInvalid):
-                        msg = "[{0}] {1}"
-                    else:
-                        msg = "[{0}] {1}: {2}"
-                    msg = msg.format(field, txt, str(value))
+                    msg = (
+                        f"[{field}] {txt}"
+                        if isinstance(error, RequiredFieldInvalid)
+                        else f"[{field}] {txt}: {value}"
+                    )
 
                 else:
                     msg = str(error)
