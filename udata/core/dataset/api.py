@@ -315,10 +315,30 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
+# The whole RDF graph of a catalog page is built in memory: an unbounded page size
+# exhausts the worker memory.
+CATALOG_MAX_PAGE_SIZE = 1000
+
+
+def catalog_page_size(value):
+    value = positive(value)
+    if value > CATALOG_MAX_PAGE_SIZE:
+        raise ValueError(
+            f"Invalid argument: {value}. argument must be at most {CATALOG_MAX_PAGE_SIZE}"
+        )
+    return value
+
+
+catalog_page_size.__schema__ = {**positive.__schema__, "maximum": CATALOG_MAX_PAGE_SIZE}
+
 # Build catalog_parser from DatasetApiParser parser with a default page_size of 100
 catalog_parser = DatasetApiParser().parser
 catalog_parser.replace_argument(
-    "page_size", type=positive, location="args", default=100, help="The page size"
+    "page_size",
+    type=catalog_page_size,
+    location="args",
+    default=100,
+    help="The page size",
 )
 
 

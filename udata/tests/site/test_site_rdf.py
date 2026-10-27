@@ -16,7 +16,7 @@ from udata.core.site.rdf import build_catalog
 from udata.core.user.factories import UserFactory
 from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
 from udata.tests.api import PytestOnlyAPITestCase
-from udata.tests.helpers import assert200, assert404, assert_redirects
+from udata.tests.helpers import assert200, assert400, assert404, assert_redirects
 
 
 class CatalogTest(PytestOnlyAPITestCase):
@@ -267,6 +267,15 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         assert catalog is not None
         catalog = graph.resource(catalog)
         assert catalog.value(HYDRA.totalItems) == Literal(4)
+
+    def test_catalog_rdf_page_size_above_maximum(self, client, monkeypatch):
+        monkeypatch.setattr("udata.core.dataset.api.CATALOG_MAX_PAGE_SIZE", 2)
+
+        response = client.get(url_for("api.site_rdf_catalog_format", _format="n3", page_size=3))
+        assert400(response)
+
+        response = client.get(url_for("api.site_rdf_catalog_format", _format="n3", page_size=2))
+        assert200(response)
 
     def test_catalog_format_unknown(self, client):
         url = url_for("api.site_rdf_catalog_format", _format="unknown")
