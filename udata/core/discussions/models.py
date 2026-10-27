@@ -424,7 +424,9 @@ class Discussion(SpamMixin, Linkable, Document):
         external_url = self._notification_external_url()
         if external_url:
             parts = urlparse(external_url)
-            query = urlencode([*parse_qsl(parts.query), ("discussion_id", str(self.id))])
+            query = urlencode(
+                [*parse_qsl(parts.query, keep_blank_values=True), ("discussion_id", str(self.id))]
+            )
             return urlunparse(parts._replace(query=query))
         return self.url_for()
 
