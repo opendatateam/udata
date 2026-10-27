@@ -1,5 +1,18 @@
 # Changelog
 
+## 17.19.0 (2026-10-27)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.2 ([#4027](https://github.com/opendatateam/udata/pull/4027))
+- chore(deps): update redis:alpine docker digest to 47b0829 ([#4028](https://github.com/opendatateam/udata/pull/4028))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.4 ([#4019](https://github.com/opendatateam/udata/pull/4019))
+- chore: drop the legacy bloc format, now migrated to sections ([#4033](https://github.com/opendatateam/udata/pull/4033))
+- feat(blocs): add image and card blocs, with an upload of content images purged once unused, and accept the JPEGs of phones ([#4034](https://github.com/opendatateam/udata/pull/4034))
+- fix(harvest): stop sharing request headers between sources ([#4035](https://github.com/opendatateam/udata/pull/4035))
+- fix: query each nested filter on the model of its own reference ([#4036](https://github.com/opendatateam/udata/pull/4036))
+- fix(rdf): load only the URI fields of the datasets served by a dataservice ([#4039](https://github.com/opendatateam/udata/pull/4039))
+- fix(rdf): reject catalog page sizes above 1000 ([#4038](https://github.com/opendatateam/udata/pull/4038))
+
+
 ## 17.18.0 (2026-10-26)
 
 - feat(blocs): compose pages from sections, grids and single object blocs ([#4026](https://github.com/opendatateam/udata/pull/4026))
