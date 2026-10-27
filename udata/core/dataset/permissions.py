@@ -68,5 +68,5 @@ class ResourceEditPermission(OwnablePermission):
 
     def __init__(self, obj):
         if isinstance(obj, Resource):
-            raise ValueError("Resource permissions are holded by its dataset")
+            raise TypeError("Resource permissions are holded by its dataset")
         super().__init__(obj)

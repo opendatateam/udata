@@ -30,7 +30,8 @@ class StorageUtilsTest(PytestOnlyTestCase):
         self.file = self.filestorage(str(tmpfile))
 
     def filestorage(self, filename):
-        data = open(filename, "rb")
+        with open(filename, "rb") as f:
+            data = io.BytesIO(f.read())
         builder = EnvironBuilder(method="POST", data={"file": (data, basename(filename))})
         env = builder.get_environ()
         req = Request(env)

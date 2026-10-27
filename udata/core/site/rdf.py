@@ -15,7 +15,7 @@ from udata.uris import homepage_url
 from udata.utils import Paginable
 
 
-def build_catalog(site, datasets, dataservices=[], _format=None, **kwargs):
+def build_catalog(site, datasets, dataservices=(), _format=None, **kwargs):
     """Build the DCAT catalog for this site"""
     catalog_url = url_for("api.site_rdf_catalog", _external=True)
     graph = Graph(namespace_manager=namespace_manager)

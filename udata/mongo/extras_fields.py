@@ -12,10 +12,10 @@ ALLOWED_TYPES = (str, int, float, bool, datetime, date, list, dict)
 
 
 class ExtrasField(DictField):
-    def __init__(self, keys_types={}, reserved=(), **kwargs):
+    def __init__(self, keys_types=None, reserved=(), **kwargs):
         self.registered = {}
         self.reserved = reserved
-        for key, dbtype in keys_types.items():
+        for key, dbtype in (keys_types or {}).items():
             self.register(key, dbtype)
         super().__init__()
 

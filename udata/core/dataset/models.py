@@ -1056,7 +1056,7 @@ class Dataset(
             score += UNIT
         if quality["update_frequency"]:
             score += UNIT
-        if "update_fulfilled_in_time" in quality and quality["update_fulfilled_in_time"]:
+        if quality.get("update_fulfilled_in_time"):
             score += UNIT
         if quality["dataset_description_quality"]:
             score += UNIT

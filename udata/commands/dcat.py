@@ -97,7 +97,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
             try:
                 dataset.validate()
             except mongoengine.errors.ValidationError as e:
-                log.error(e, exc_info=True)
+                log.exception(e)
             else:
                 echo(green("Dataset is valid ✅"))
             echo("")

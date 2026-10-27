@@ -197,6 +197,10 @@ ignore = [
     "B018",
     # `from x import Y as Y` is the PEP 484 explicit re-export.
     "PLC0414",
+    # The log message is what users read in harvest reports (`HarvestLog` keeps
+    # `record.getMessage()`, not the traceback) and what titles Sentry events: it must
+    # carry the exception.
+    "TRY401",
 ]
 
 [tool.setuptools]

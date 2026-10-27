@@ -264,7 +264,8 @@ def load_migration(filename):
 
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
-    exec(script, module.__dict__)
+    # Migration filenames are dated (`2021-08-17-...`), not importable module names.
+    exec(script, module.__dict__)  # noqa: S102
     module.__file__ = str(files("udata").joinpath("migrations", filename))
     return module
 

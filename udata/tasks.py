@@ -110,13 +110,13 @@ def queue_test(self, raises=False):
     """
     self.log.info("Just a test task")
     if raises:
-        raise Exception("Test task processing")
+        raise RuntimeError("Test task processing")
 
 
 @job("test-error")
 def error_test(self):
     self.log.info("There should be an error soon")
-    raise Exception("There is an error")
+    raise RuntimeError("There is an error")
 
 
 def schedulables():

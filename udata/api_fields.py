@@ -591,7 +591,7 @@ def generate_fields(**kwargs) -> Callable:
                 if not isinstance(
                     field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
                 ):
-                    raise Exception("Cannot use nested_filters on a field that is not a ref.")
+                    raise TypeError("Cannot use nested_filters on a field that is not a ref.")
 
                 ref_model: mongoengine.Document = field.document_type
 
@@ -680,9 +680,7 @@ def generate_fields(**kwargs) -> Callable:
                 return_type = typing.get_type_hints(method).get("return")
                 field_constructor = PYTHON_TYPE_TO_RESTX_FIELD.get(return_type, restx_fields.String)
             else:
-
-                def field_constructor(**kwargs):
-                    return restx_fields.Nested(nested_fields, **kwargs)
+                field_constructor = functools.partial(restx_fields.Nested, nested_fields)
 
             # Getters are readonly, so they never reach `__write_fields__` and need no
             # entry in `api_key_to_attribute`: the rename only applies on the read side.
@@ -1357,7 +1355,7 @@ def wrap_primary_key(
         # … but it may be important to check before-hand that the reference point to a correct document.
         return foreign_document.to_dbref()
     else:
-        raise ValueError(
+        raise TypeError(
             f"Unknown ID field type {id_field.__class__} for {document_type} (ID field name is {id_field_name}, value was {value})"
         )
 
@@ -1391,7 +1389,7 @@ def get_fields_with_nested_filters(nested_filters: dict[str, str]) -> dict[str, 
                 }
             )
         else:
-            raise Exception(f"Do not support `nested_filters` without two parts: {key}.")
+            raise ValueError(f"Do not support `nested_filters` without two parts: {key}.")
 
     return results
 
@@ -1467,13 +1465,9 @@ def validation_to_type(validation: Callable) -> Callable:
     In mongo, a field's validation function cannot return anything, so this
     helper wraps the mongo field's validation to return the value if it validated.
     """
-    from mongoengine.errors import ValidationError
 
     def wrapper(value: str) -> str:
-        try:
-            validation(value)
-        except ValidationError:
-            raise
+        validation(value)
         return value
 
     wrapper.__schema__ = {"type": "string", "format": "my-custom-format"}

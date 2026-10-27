@@ -59,6 +59,7 @@ class AutoAssignWithoutRequestContextTest(DBTestCase):
             env = {**os.environ, "UDATA_SETTINGS": cfg.name}
             result = subprocess.run(
                 ["uv", "run", "udata", "import-fixtures", f.name],
+                check=False,
                 capture_output=True,
                 text=True,
                 env=env,

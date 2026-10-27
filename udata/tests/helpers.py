@@ -1,7 +1,7 @@
 import os
 import traceback
 from collections.abc import Callable, Iterable
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
@@ -147,11 +147,9 @@ def assert_status(response, status_code, message=None):
 
     message = message or f"HTTP Status {status_code} expected but got {response.status_code}"
     if response.mimetype == "application/json":
-        try:
+        with suppress(Exception):
             second_line = f"Response content is {response.json}"
             message = f"{message}\n{second_line}"
-        except Exception:
-            pass
     assert response.status_code == status_code, message
 
 

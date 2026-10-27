@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any
 
 from mongoengine.base import TopLevelDocumentMetaclass
@@ -40,7 +41,7 @@ def get_badge_job(model, badge):
 
 
 @job(name="update-badges")
-def update_badges(self, badges: list[str] = []) -> None:
+def update_badges(self, badges: Sequence[str] = ()) -> None:
     from udata.core.dataservices.models import Dataservice
     from udata.models import Dataset, Organization, Reuse
 

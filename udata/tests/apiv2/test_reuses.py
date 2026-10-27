@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask import url_for
 
@@ -232,7 +232,7 @@ class ReuseListAPIV2Test(APITestCase):
         """Deleted reuses are filtered out by the endpoint `deleted=None` clause;
         `deleted` is not `filterable`, so only this test guards that exclusion."""
         public_reuse = ReuseFactory()
-        ReuseFactory(deleted=datetime.utcnow())
+        ReuseFactory(deleted=datetime.now(UTC))
 
         response = self.get(url_for("apiv2.reuses"))
         assert200(response)

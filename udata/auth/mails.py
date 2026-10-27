@@ -52,14 +52,14 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
         case "two_factor_rescue":
             mail_message = two_factor_rescue(**kwargs)
         case _:
-            raise Exception(f"Unknown mail message template: {name}")
+            raise LookupError(f"Unknown mail message template: {name}")
 
     if format == "txt":
         return mail_message.text(kwargs.get("user"))
     elif format == "html":
         return mail_message.html(kwargs.get("user"))
     else:
-        raise Exception(f"Mail message with unknown format: {name} (txt or html supported)")
+        raise LookupError(f"Mail message with unknown format: {name} (txt or html supported)")
 
 
 def welcome(confirmation_link: str, **kwargs) -> MailMessage:

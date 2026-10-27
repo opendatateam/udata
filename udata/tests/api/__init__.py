@@ -114,8 +114,8 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.post(url, data=data or {}, *args, **kwargs)
-        return self.perform("post", url, data=data or {}, *args, **kwargs)
+            return self.client.post(url, *args, data=data or {}, **kwargs)
+        return self.perform("post", url, *args, data=data or {}, **kwargs)
 
     def put(self, url, data=None, json=True, *args, **kwargs):
         """
@@ -128,8 +128,8 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.put(url, data=data or {}, *args, **kwargs)
-        return self.perform("put", url, data=data or {}, *args, **kwargs)
+            return self.client.put(url, *args, data=data or {}, **kwargs)
+        return self.perform("put", url, *args, data=data or {}, **kwargs)
 
     def patch(self, url, data=None, json=True, *args, **kwargs):
         """
@@ -142,16 +142,16 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.patch(url, data=data or {}, *args, **kwargs)
-        return self.perform("patch", url, data=data or {}, *args, **kwargs)
+            return self.client.patch(url, *args, data=data or {}, **kwargs)
+        return self.perform("patch", url, *args, data=data or {}, **kwargs)
 
     def delete(self, url, data=None, *args, **kwargs):
         """Perform a DELETE request with JSON handling."""
-        return self.perform("delete", url, data=data or {}, *args, **kwargs)
+        return self.perform("delete", url, *args, data=data or {}, **kwargs)
 
     def options(self, url, data=None, *args, **kwargs):
         """Perform an OPTIONS request with JSON handling."""
-        return self.perform("options", url, data=data or {}, *args, **kwargs)
+        return self.perform("options", url, *args, data=data or {}, **kwargs)
 
     def assertStatus(self, response, status_code, message=None):
         __tracebackhide__ = True

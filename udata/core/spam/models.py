@@ -233,7 +233,7 @@ def spam_protected(get_model_to_check=None):
                 model_to_check = base_model
 
             if not isinstance(model_to_check, SpamMixin):
-                raise ValueError(
+                raise TypeError(
                     "@spam_protected should be called within a SpamMixin. "
                     + type(model_to_check).__name__
                     + " given."

@@ -28,6 +28,6 @@ def log():
     logger.error("error é")
     logger.critical("critical é")
     try:
-        raise Exception("An exception é")
+        raise RuntimeError("An exception é")
     except Exception:
         logger.exception("exception é")

@@ -132,7 +132,7 @@ def resolved_for(
             else []
         )
 
-        def followed_for(type: NotificationType) -> set[NotificationReason]:
+        def followed_for(type: NotificationType, follows=follows) -> set[NotificationReason]:
             """The reasons the follows covering `type` give, as at dispatch."""
             if not event_for_type(type).reaches_subscribers:
                 return set()
@@ -143,7 +143,9 @@ def resolved_for(
                 if rule.event is None or rule.event in chain
             }
 
-        def held_for(type: NotificationType) -> set[NotificationReason]:
+        def held_for(
+            type: NotificationType, roles=roles, subject=subject, followed_for=followed_for
+        ) -> set[NotificationReason]:
             held = set(roles)
             # On the organization, a partial editor is only concerned by what is about the
             # organization itself: the rest reaches them through what was assigned.

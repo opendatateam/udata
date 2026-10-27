@@ -750,7 +750,7 @@ class ExtrasField(Field):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not isinstance(self._form, ModelForm):
-            raise ValueError("ExtrasField can only be used within a ModelForm")
+            raise TypeError("ExtrasField can only be used within a ModelForm")
         model_field = getattr(self._form.model_class, self.short_name, None)
         if not model_field or not isinstance(model_field, MongoExtrasField):
             msg = "Form ExtrasField can only be mapped to a model ExtraField"

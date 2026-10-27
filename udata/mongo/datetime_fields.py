@@ -22,7 +22,8 @@ class DateField(BaseField):
             return value
         try:
             value = parse(value, yearfirst=True).date()
-        except Exception:
+        except (ValueError, OverflowError, TypeError):
+            # Not a parsable date: leave the value as is for validation to report it.
             pass
         return value
 

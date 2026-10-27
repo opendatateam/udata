@@ -32,12 +32,14 @@ class SiteActivityAPI(API):
                 item.organization
                 item.related_to
             except DoesNotExist as e:
-                log.error(e, exc_info=True)
+                log.exception(e)
                 continue
 
-            if isinstance(item.related_to, Owned):
-                if not OwnableReadPermission(item.related_to).can():
-                    continue
+            if (
+                isinstance(item.related_to, Owned)
+                and not OwnableReadPermission(item.related_to).can()
+            ):
+                continue
             safe_items.append(item)
         qs.queryset.items = safe_items
 

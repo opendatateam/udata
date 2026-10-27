@@ -1,6 +1,5 @@
 import collections
 import gzip
-import os
 from datetime import UTC, date, datetime
 from tempfile import NamedTemporaryFile
 
@@ -150,8 +149,7 @@ def export_csv_for_model(model, dataset, replace: bool = False):
 
     log.info(f"Exporting CSV for {model}...")
 
-    csvfile = NamedTemporaryFile(mode="w", encoding="utf8", delete=False)
-    try:
+    with NamedTemporaryFile(mode="w", encoding="utf8") as csvfile:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
         writer.writerow(adapter.header())
@@ -175,9 +173,6 @@ def export_csv_for_model(model, dataset, replace: bool = False):
                     f"File not found while deleting resource #{resource.id} ({fs_filename_to_remove}) in export_csv_for_model cleanup"
                 )
         return resource
-    finally:
-        csvfile.close()
-        os.unlink(csvfile.name)
 
 
 @job("export-csv")
@@ -201,9 +196,8 @@ def export_csv(self, model=None):
         log.error("EXPORT_CSV_DATASET_ID points to a non existent dataset")
         return
 
-    models = (model,) if model else ALLOWED_MODELS
-    for model in models:
-        resource = export_csv_for_model(model, dataset, replace=True)
+    for model_name in (model,) if model else ALLOWED_MODELS:
+        resource = export_csv_for_model(model_name, dataset, replace=True)
 
         # If we are the first day of the month, archive today catalogs
         if (
@@ -212,7 +206,7 @@ def export_csv(self, model=None):
             and date.today().day == 1
         ):
             log.info(
-                f"Archiving {model} csv catalog on {current_app.config['EXPORT_CSV_ARCHIVE_S3_BUCKET']} bucket"
+                f"Archiving {model_name} csv catalog on {current_app.config['EXPORT_CSV_ARCHIVE_S3_BUCKET']} bucket"
             )
             with storages.resources.open(resource.fs_filename, "rb") as f:
                 store_bytes(

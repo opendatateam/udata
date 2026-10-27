@@ -621,9 +621,11 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             {"page": 1, "page_size": 0},
             {"page": 0, "page_size": 5},
         ):
-            with app.test_request_context("/foobar", query_string=query):
-                with pytest.raises(BadRequest):
-                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+            with (
+                app.test_request_context("/foobar", query_string=query),
+                pytest.raises(BadRequest),
+            ):
+                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
 
 
 class PatchChoicesValidationTest(PytestOnlyDBTestCase):

@@ -640,13 +640,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == len({d.remote_id for d in dataset_records})
         assert Dataservice.objects.count() == len({d.remote_id for d in dataservice_records})
         seen = set()
-        for job in job.items:
-            if job.remote_id not in seen:
-                assert job.status == "done"
-                seen.add(job.remote_id)
+        for item in job.items:
+            if item.remote_id not in seen:
+                assert item.status == "done"
+                seen.add(item.remote_id)
             else:
-                assert job.status == "failed"
-                assert job.remote_id in job.errors[0].message
+                assert item.status == "failed"
+                assert item.remote_id in item.errors[0].message
 
     @pytest.mark.options(CDATA_BASE_URL="http://localhost")
     @pytest.mark.parametrize(

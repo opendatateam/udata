@@ -125,8 +125,7 @@ def status(queue, munin, munin_config):
     """List queued tasks aggregated by name"""
     if munin_config:
         return status_print_config(queue)
-    queues = get_queues(queue)
-    for queue in queues:
-        status_print_queue(queue, munin=munin)
+    for name in get_queues(queue):
+        status_print_queue(name, munin=munin)
     if not munin:
         print("-" * 40)

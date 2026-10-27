@@ -795,8 +795,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert [(entry.level, entry.message) for entry in item.logs] == [
             (
                 "WARNING",
-                "Several DOIs identify this dataset, none is kept: "
-                "10.15148/0e999ffc, 10.15148/762d02eb",
+                (
+                    "Several DOIs identify this dataset, none is kept: "
+                    "10.15148/0e999ffc, 10.15148/762d02eb"
+                ),
             )
         ]
 

@@ -235,7 +235,7 @@ def stream(queryset_or_adapter, basename=None):
         cls = _adapters.get(queryset_or_adapter._document)
         adapter = cls(queryset_or_adapter)
     else:
-        raise ValueError(f"Unsupported object type {queryset_or_adapter}")
+        raise TypeError(f"Unsupported object type {queryset_or_adapter}")
 
     timestamp = datetime.now(UTC).strftime("%Y-%m-%d-%H-%M")
     headers = {
