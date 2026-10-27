@@ -35,6 +35,7 @@ from ..backends import (
     HarvestFilter,
     get_all_backends,
 )
+from ..backends.ckan.harvesters import CkanBackend
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from .factories import HarvestSourceFactory
 
@@ -1103,6 +1104,25 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         finally:
             for signal, receiver in signals.items():
                 signal.disconnect(receiver)
+
+
+class BaseBackendHeadersTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize("method", ["head", "get", "post"])
+    def test_api_key_of_a_source_is_not_sent_to_another_source(self, rmock, method):
+        # CKAN sends the API key of its source as an `Authorization` header.
+        key_url = "https://with-key.example.com/api/3/action/package_list"
+        other_url = "https://without-key.example.com/api/3/action/package_list"
+        getattr(rmock, method)(key_url)
+        getattr(rmock, method)(other_url)
+        args = {"data": {}} if method == "post" else {}
+
+        with_key = CkanBackend(HarvestSourceFactory(config={"apikey": "secret-key"}))
+        getattr(with_key, method)(key_url, **args)
+        without_key = CkanBackend(HarvestSourceFactory(config={}))
+        getattr(without_key, method)(other_url, **args)
+
+        assert rmock.request_history[0].headers["Authorization"] == "secret-key"
+        assert "Authorization" not in rmock.request_history[1].headers
 
 
 class HarvestItemLogsTest(PytestOnlyDBTestCase):
