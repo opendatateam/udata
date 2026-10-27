@@ -1014,6 +1014,20 @@ class TopicElementsAPITest(APITestCase):
         assert response.status_code == 400
         assert "Unknown reference" in response.json["errors"][0]["element"][0]
 
+    def test_add_element_class_outside_choices(self):
+        """`db.resolve_model` resolves any registered document: an existing class that is
+        not among the field `choices` must be refused before it is queried."""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        organization = OrganizationFactory()
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"class": "Organization", "id": str(organization.id)}}],
+        )
+        assert response.status_code == 400
+        assert "Value must be one of" in response.json["errors"][0]["element"][0]
+        assert TopicElement.objects(topic=topic).count() == 0
+
     def test_add_element_with_malformed_class_returns_400(self):
         """Regression test: an unknown `class` or missing `class` key in an
         element reference must return 400, not 500. `patch()` raises a raw
