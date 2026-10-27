@@ -51,7 +51,7 @@ class SearchQuery:
 
             service = self.adapter.service_class(get_elastic_client())
             try:
-                results, total, total_pages, facets = service.search(self.to_search_params())
+                results, total, _total_pages, facets = service.search(self.to_search_params())
             except RequestError as e:
                 log.error(
                     "Elasticsearch RequestError for %s: %s",

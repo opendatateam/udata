@@ -107,7 +107,7 @@ def kwargs(harvest_ckan):
 def job_item_for(job, result):
     """Get the job item for a given result"""
     remote_id = result["result"]["id"]
-    return [i for i in job.items if i.remote_id == remote_id][0]
+    return next(i for i in job.items if i.remote_id == remote_id)
 
 
 def dataset_for(result):
@@ -448,7 +448,7 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset = dataset_for(result)
         assert dataset.title == data["title"]
         assert dataset.description == data["notes"]
-        assert set(dataset.tags) == set([t["name"] for t in data["tags"]])
+        assert set(dataset.tags) == {t["name"] for t in data["tags"]}
         assert dataset.harvest.remote_id == result["result"]["id"]
         assert dataset.harvest.domain == "localhost"
         assert dataset.harvest.ckan_name == data["name"]
@@ -612,7 +612,7 @@ class CkanBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.ckan_data("ckan_url_is_a_string")
     def test_ckan_url_is_string(self, ckan, data, result):
         dataset = dataset_for(result)
-        expected_url = "{0}/dataset/{1}".format(ckan.BASE_URL, data["name"])
+        expected_url = "{}/dataset/{}".format(ckan.BASE_URL, data["name"])
         assert dataset.harvest.remote_url == expected_url
         assert dataset.harvest.ckan_source == data["url"]
 
@@ -690,9 +690,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_minimal_ckan_response(self, rmock):
         """CKAN Harvester should accept the minimum dataset payload"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name = faker.unique_string()
         json = {
@@ -719,9 +719,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_flawed_ckan_response(self, rmock):
         """CKAN Harvester should report item error with id == remote_id in item"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name = faker.unique_string()
         _id = faker.uuid4()
@@ -772,9 +772,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_max_items(self, app, rmock):
         """CKAN Harvester should report item error with id == remote_id in item"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name_a = faker.unique_string()
         name_b = faker.unique_string()
@@ -817,25 +817,23 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
         # extras and revision_id are not always present so we exclude them
         # from the minimal payload
         return {
-            **{
-                "id": faker.uuid4(),
-                "name": faker.uuid4(),
-                "title": faker.sentence(),
-                "maintainer": faker.name(),
-                "tags": [],
-                "private": False,
-                "maintainer_email": faker.email(),
-                "license_id": None,
-                "metadata_created": faker.iso8601(),
-                "organization": None,
-                "metadata_modified": faker.iso8601(),
-                "author": None,
-                "author_email": None,
-                "notes": faker.paragraph(),
-                "license_title": None,
-                "state": None,
-                "type": "dataset",
-                "resources": [],
-            },
+            "id": faker.uuid4(),
+            "name": faker.uuid4(),
+            "title": faker.sentence(),
+            "maintainer": faker.name(),
+            "tags": [],
+            "private": False,
+            "maintainer_email": faker.email(),
+            "license_id": None,
+            "metadata_created": faker.iso8601(),
+            "organization": None,
+            "metadata_modified": faker.iso8601(),
+            "author": None,
+            "author_email": None,
+            "notes": faker.paragraph(),
+            "license_title": None,
+            "state": None,
+            "type": "dataset",
+            "resources": [],
             **kwargs,
         }

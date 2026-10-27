@@ -58,7 +58,7 @@ class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
     """Ensure any child class dispatches the on_new signal"""
 
     def __new__(cls, name, bases, attrs):
-        new_class = super(EmitNewActivityMetaClass, cls).__new__(cls, name, bases, attrs)
+        new_class = super().__new__(cls, name, bases, attrs)
         if new_class.key:
             post_save.connect(cls.post_save, sender=new_class)
             _registered_activities[new_class.key] = new_class
@@ -92,7 +92,7 @@ def filter_by_keys(base_query, values):
     """
     unknown = set(values) - set(_registered_activities)
     if unknown:
-        api.abort(400, "Unknown activity key(s): {0}".format(", ".join(sorted(unknown))))
+        api.abort(400, "Unknown activity key(s): {}".format(", ".join(sorted(unknown))))
 
     # `_cls` is what the key is stored as, and it leads every index of the collection.
     return base_query.filter(_cls__in=[_registered_activities[key]._class_name for key in values])

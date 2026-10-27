@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 @cli.group("info")
 def grp():
     """Display some details about the local environment"""
-    pass
 
 
 def by_name(e):
@@ -32,4 +31,4 @@ def config():
     for key in sorted(current_app.config):
         if key.startswith("__") or not key.isupper():
             continue
-        echo("{0}: {1}".format(white(key), current_app.config[key]))
+        echo(f"{white(key)}: {current_app.config[key]}")

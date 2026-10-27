@@ -177,7 +177,7 @@ class SpamTest(APITestCase):
         self.assertTrue(self.has_spam_report(dataset))
 
         report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
-        report.dismissed_at = datetime.utcnow()
+        report.dismissed_at = datetime.now(UTC)
         report.save()
 
         dataset.reload()

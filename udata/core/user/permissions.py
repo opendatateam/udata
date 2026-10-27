@@ -13,4 +13,4 @@ sysadmin = Permission(RoleNeed("admin"))
 class UserEditPermission(Permission):
     def __init__(self, user):
         need = UserNeed(user.fs_uniquifier)
-        super(UserEditPermission, self).__init__(need)
+        super().__init__(need)

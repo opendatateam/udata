@@ -1,6 +1,6 @@
 import struct
 import zlib
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 
 import pytest
@@ -248,6 +248,7 @@ class MeAPITest(APITestCase):
         self.assert400(response)
         assert "email" in response.json["errors"]
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_update_profile_cannot_change_email(self):
         """A new address is only granted by the `/change-email` confirmation flow"""
         self.login()
@@ -256,7 +257,7 @@ class MeAPITest(APITestCase):
         data["email"] = "someone.else@example.org"
         response = self.put(url_for("api.me"), data)
         self.assert400(response)
-        assert "email" in response.json["errors"]
+        assert response.json["errors"]["email"] == "Cannot modify email after creation"
         self.user.reload()
         self.assertEqual(self.user.email, previous_email)
 
@@ -596,7 +597,7 @@ class MeAPITest(APITestCase):
         with capture_mails() as mails:
             response = self.delete(url_for("api.me"))
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([user_email]))
+        self.assertEqual(mails[0].send_to, {user_email})
         self.assertEqual(mails[0].subject, _("Account deletion"))
         self.assert204(response)
 
@@ -616,7 +617,7 @@ class MeAPITest(APITestCase):
             followed.reload()
 
         # The personal data of the user are anonymized
-        self.assertEqual(user.email, "{}@deleted".format(user.id))
+        self.assertEqual(user.email, f"{user.id}@deleted")
         self.assertEqual(user.password, None)
         self.assertEqual(user.active, False)
         self.assertEqual(user.first_name, "DELETED")
@@ -655,8 +656,8 @@ class MeAPITest(APITestCase):
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
-        expired = datetime.now(timezone.utc) - timedelta(hours=1)
-        token, plaintext = ApiToken.generate(user, expires_at=expired)
+        expired = datetime.now(UTC) - timedelta(hours=1)
+        _token, plaintext = ApiToken.generate(user, expires_at=expired)
 
         response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})
         self.assert401(response)
@@ -671,7 +672,7 @@ class MeAPITest(APITestCase):
         # Without the timezone fix, this would raise:
         # TypeError: can't compare offset-naive and offset-aware datetimes
         future_naive = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30)
-        token, plaintext = ApiToken.generate(user, expires_at=future_naive)
+        _token, plaintext = ApiToken.generate(user, expires_at=future_naive)
 
         result, error = ApiToken.authenticate(plaintext)
         self.assertIsNotNone(result)
@@ -679,7 +680,7 @@ class MeAPITest(APITestCase):
 
         # Also verify the expired naive case
         past_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
-        token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
+        _token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
 
         result2, error2 = ApiToken.authenticate(plaintext2)
         self.assertIsNone(result2)

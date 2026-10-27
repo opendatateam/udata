@@ -35,10 +35,12 @@ class VisualizationTasksTest(PytestOnlyDBTestCase):
 
         mock_storage = MagicMock()
 
-        with patch("udata.core.visualizations.tasks.storages.images", mock_storage):
-            with patch.object(Chart, "objects") as mock_query:
-                mock_query.return_value = [chart]
-                purge_visualizations()
+        with (
+            patch("udata.core.visualizations.tasks.storages.images", mock_storage),
+            patch.object(Chart, "objects") as mock_query,
+        ):
+            mock_query.return_value = [chart]
+            purge_visualizations()
 
         assert mock_storage.delete.call_count == 0
 
@@ -46,9 +48,11 @@ class VisualizationTasksTest(PytestOnlyDBTestCase):
         """It should handle no deleted visualizations gracefully"""
         mock_storage = MagicMock()
 
-        with patch("udata.core.visualizations.tasks.storages.images", mock_storage):
-            with patch.object(Chart, "objects") as mock_query:
-                mock_query.return_value = []
-                purge_visualizations()
+        with (
+            patch("udata.core.visualizations.tasks.storages.images", mock_storage),
+            patch.object(Chart, "objects") as mock_query,
+        ):
+            mock_query.return_value = []
+            purge_visualizations()
 
         assert mock_storage.delete.call_count == 0

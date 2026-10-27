@@ -30,7 +30,8 @@ class StorageUtilsTest(PytestOnlyTestCase):
         self.file = self.filestorage(str(tmpfile))
 
     def filestorage(self, filename):
-        data = open(filename, "rb")
+        with open(filename, "rb") as f:
+            data = io.BytesIO(f.read())
         builder = EnvironBuilder(method="POST", data={"file": (data, basename(filename))})
         env = builder.get_environ()
         req = Request(env)
@@ -136,7 +137,7 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         self.create_chunks(expired_uuid, nb=parts, last=expired)
         self.create_chunks(active_uuid, nb=parts, last=not_expired)
         purge_chunks.apply()
-        expected = set([chunk_filename(active_uuid, i) for i in range(parts)])
+        expected = {chunk_filename(active_uuid, i) for i in range(parts)}
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too

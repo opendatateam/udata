@@ -8,7 +8,7 @@ The old apikey field is then removed from all user documents.
 import hashlib
 import hmac
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import current_app
 
@@ -47,7 +47,7 @@ def migrate(db):
                 "name": "Migrated API key",
                 "scopes": ["admin"],
                 "kind": "api_key",
-                "created_at": datetime.now(timezone.utc),
+                "created_at": datetime.now(UTC),
                 "last_used_at": None,
                 "user_agents": [],
                 "revoked_at": None,

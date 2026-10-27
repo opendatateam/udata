@@ -11,7 +11,6 @@ def grp():
     """
     Cache related operations.
     """
-    pass
 
 
 @grp.command()

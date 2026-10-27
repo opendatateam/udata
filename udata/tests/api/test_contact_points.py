@@ -168,7 +168,7 @@ class ContactPointAPITest(APITestCase):
 
     def test_contact_point_no_need_for_email_for_role_other_than_contact(self):
         self.login()
-        roles_other_than_contact = [role_ for role_ in CONTACT_ROLES.keys() if role_ != "contact"]
+        roles_other_than_contact = [role_ for role_ in CONTACT_ROLES if role_ != "contact"]
         for index, role in enumerate(roles_other_than_contact):
             data = {"name": faker.word(), "role": role}
             response = self.post(url_for("api.contact_points"), data=data)

@@ -57,7 +57,6 @@ class FixturesTest(PytestOnlyAPITestCase):
         ReuseFactory(datasets=[dataset], owner=user)
         CommunityResourceFactory(dataset=dataset, owner=user)
         DiscussionFactory(
-            **{},
             subject=dataset,
             user=user,
             discussion=[

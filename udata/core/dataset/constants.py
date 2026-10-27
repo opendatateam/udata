@@ -161,7 +161,7 @@ class DistanceUom(StrEnum):
     def factor(self) -> Decimal:
         return self._factor  # type: ignore[misc]
 
-    def in_meters(self, value: Decimal | float | int | str) -> Decimal:
+    def in_meters(self, value: Decimal | float | str) -> Decimal:
         return Decimal(value) * self.factor
 
 

@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 from collections.abc import Iterator
 from functools import wraps
@@ -147,7 +148,7 @@ def update_metrics(self):
     """Update udata objects metrics"""
     if not current_app.config["METRICS_API"]:
         log.error("You need to set METRICS_API to run update-metrics")
-        exit(1)
+        sys.exit(1)
     update_metrics_for_models()
 
 

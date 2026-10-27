@@ -233,8 +233,8 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 2)
         self.assertEqual(
-            set([str(tag_dataset_1.id), str(tag_dataset_2.id)]),
-            set([d["id"] for d in response.json["data"]]),
+            {str(tag_dataset_1.id), str(tag_dataset_2.id)},
+            {d["id"] for d in response.json["data"]},
         )
 
         # filter on multiple tags
@@ -1052,7 +1052,7 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
-        resource = next((r for r in dataset.resources if r.title == resource_data["title"]))
+        resource = next(r for r in dataset.resources if r.title == resource_data["title"])
         self.assertEqual(resource.extras, {"extra:id": "id"})
 
     def test_dataset_api_update_existing_resource_with_extras(self):
@@ -2398,7 +2398,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 400)
         self.assertEqual(
             response.json["message"],
-            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+            f"Resource ids must match existing ones in dataset, ie: { {str(r.id) for r in self.dataset.resources} }",
         )
 
         # Resources that don't belong to this dataset
@@ -2409,7 +2409,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 400)
         self.assertEqual(
             response.json["message"],
-            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+            f"Resource ids must match existing ones in dataset, ie: { {str(r.id) for r in self.dataset.resources} }",
         )
 
     def test_invalid_reorder_dict_without_id(self):
@@ -2905,7 +2905,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest datasets"""
         for i in range(3):
             DatasetFactory(
-                title="title-test-{0}".format(i) if i % 2 else faker.word(),
+                title=f"title-test-{i}" if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i},
             )
@@ -2932,7 +2932,7 @@ class DatasetResourceAPITest(APITestCase):
             DatasetFactory(
                 # Ensure title does not contains 'acronym-tes'
                 title=faker.unique_string(),
-                acronym="acronym-test-{0}".format(i) if i % 2 else None,
+                acronym=f"acronym-test-{i}" if i % 2 else None,
                 visible=True,
             )
 
@@ -2954,7 +2954,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest datasets with special characters"""
         for i in range(4):
             DatasetFactory(
-                title="title-testé-{0}".format(i) if i % 2 else faker.word(),
+                title=f"title-testé-{i}" if i % 2 else faker.word(),
                 resources=[ResourceFactory()],
             )
 
@@ -3173,7 +3173,7 @@ class CommunityResourceAPITest(APITestCase):
 
         self.assertEqual(len(resources), len(community_resources))
         # Assert we don't have duplicates
-        self.assertEqual(len(set(res["id"] for res in resources)), len(community_resources))
+        self.assertEqual(len({res["id"] for res in resources}), len(community_resources))
 
     def test_community_resource_api_get_from_string_id(self):
         """It should fetch a community resource from the API"""

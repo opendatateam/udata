@@ -376,9 +376,9 @@ class DatasetResourceAPIV2Test(APITestCase):
         resources = [ResourceFactory() for _ in range(40)]
         for i in range(nb_resources_with_specific_title):
             resources += [
-                ResourceFactory(title="primary-{0}".format(i))
+                ResourceFactory(title=f"primary-{i}")
                 if i % 2
-                else ResourceFactory(title="secondary-{0}".format(i))
+                else ResourceFactory(title=f"secondary-{i}")
             ]
         dataset = DatasetFactory(resources=resources)
 

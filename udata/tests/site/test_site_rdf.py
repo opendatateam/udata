@@ -232,7 +232,7 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
     @pytest.mark.parametrize("fmt", ("json", "xml", "ttl"))
     def test_dataportal_compliance(self, fmt, client):
         url = url_for("api.site_dataportal", _format=fmt)
-        assert url == "/api/1/site/data.{0}".format(fmt)
+        assert url == f"/api/1/site/data.{fmt}"
         expected_url = url_for("api.site_rdf_catalog_format", _format=fmt)
 
         response = client.get(url)

@@ -40,7 +40,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         DatasetFactory(resources=[ResourceFactory()])
         adapter = ResourcesCsvAdapter(Dataset.objects.all())
         rows = list(adapter.rows())
-        d_row = [r for r in rows if str(dataset.id) in r][0]
+        d_row = next(r for r in rows if str(dataset.id) in r)
         # harvest.created_at
         assert date_created.isoformat() in d_row
         # harvest.modified_at
@@ -119,7 +119,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         resources_dataset_values = csv[str(resources_dataset.id)]
         assert resources_dataset_values["resources_count"] == 3
         assert resources_dataset_values["main_resources_count"] == 1
-        assert set(resources_dataset_values["resources_formats"].split(",")) == set(["csv", "json"])
+        assert set(resources_dataset_values["resources_formats"].split(",")) == {"csv", "json"}
 
         spatial_zones_dataset_values = csv[str(spatial_zones_dataset.id)]
         assert spatial_zones_dataset_values["spatial.zones"] == "Provence Alpes Côtes dAzur"

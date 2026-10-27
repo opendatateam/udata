@@ -178,16 +178,16 @@ class PublishFieldTest(DBTestCase):
         self.assertEqual(ownable.organization, org)
 
     def test_with_invalid_data(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
 
-        form = OwnableForm(MultiDict({"organization": str("wrongwith12c")}))
+        form = OwnableForm(MultiDict({"organization": "wrongwith12c"}))
 
         form.validate()
         self.assertIn("organization", form.errors)
         self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_with_organization_not_found(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
 
         form = OwnableForm(MultiDict({"organization": str(ObjectId())}))
 
@@ -231,7 +231,7 @@ class PublishFieldTest(DBTestCase):
         self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_not_member(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         member = Member(user=UserFactory(), role="editor")
         org = OrganizationFactory(members=[member])
 
@@ -246,7 +246,7 @@ class PublishFieldTest(DBTestCase):
         self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_no_user_logged_in_permission(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         member = Member(user=UserFactory(), role="editor")
         org = OrganizationFactory(members=[member])
 

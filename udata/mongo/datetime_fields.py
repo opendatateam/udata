@@ -22,7 +22,8 @@ class DateField(BaseField):
             return value
         try:
             value = parse(value, yearfirst=True).date()
-        except Exception:
+        except (ValueError, OverflowError, TypeError):
+            # Not a parsable date: leave the value as is for validation to report it.
             pass
         return value
 
@@ -55,7 +56,7 @@ class DateRange(EmbeddedDocument):
             self.start, self.end = self.end, self.start
 
 
-class Datetimed(object):
+class Datetimed:
     created_at = field(
         DateTimeField(
             verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True

@@ -105,7 +105,7 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def _to_geojson(coords):
-    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+    return f"""{{"type": "Polygon", "coordinates": [{coords!s}]}}"""
 
 
 def _to_wkt(coords):
@@ -182,7 +182,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert d.value(DCT.modified) == Literal(dataset.harvest.modified_at)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
-        expected_tags = set(Literal(t) for t in dataset.tags)
+        expected_tags = {Literal(t) for t in dataset.tags}
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
         org = d.value(DCT.publisher)
@@ -409,8 +409,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         d = dataset_to_rdf(dataset)
         g = d.graph
 
-        len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
-        len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
+        assert len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
+        assert len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
         dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
@@ -927,7 +927,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g = Graph()
 
         description = faker.paragraph()
-        html_description = "<div>{0}</div>".format(description)
+        html_description = f"<div>{description}</div>"
         g.add((node, RDF.type, DCAT.Distribution))
         g.add((node, DCT.title, Literal(faker.sentence())))
         g.add((node, DCT.description, Literal(html_description)))
@@ -1312,7 +1312,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
 
-        pot = Literal("{0}/{1}".format(start.isoformat(), end.isoformat()))
+        pot = Literal(f"{start.isoformat()}/{end.isoformat()}")
 
         daterange = temporal_from_rdf(pot)
 

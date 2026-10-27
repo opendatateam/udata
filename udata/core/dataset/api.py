@@ -610,13 +610,9 @@ class ResourcesAPI(API):
             )
         if any(isinstance(r, dict) and "id" not in r for r in resources):
             api.abort(400, "Each resource must have an 'id' field")
-        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
-            str(r.id) for r in dataset.resources
-        ):
-            api.abort(
-                400,
-                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
-            )
+        existing_ids = {str(r.id) for r in dataset.resources}
+        if {r["id"] if isinstance(r, dict) else r for r in resources} != existing_ids:
+            api.abort(400, f"Resource ids must match existing ones in dataset, ie: {existing_ids}")
         data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
@@ -628,7 +624,7 @@ class ResourcesAPI(API):
         return dataset.resources, 200
 
 
-class UploadMixin(object):
+class UploadMixin:
     def handle_upload(self, dataset):
         prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
@@ -679,7 +675,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         return community_resource, 201
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, id=id)
         if not resource:

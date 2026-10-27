@@ -223,7 +223,9 @@ GEOPF_POLL_TIMEOUT = 1800  # default, 30 minutes
 # OAuth2/OIDC client registration against geopf's Keycloak
 GEOPF_OAUTH_CLIENT_ID = "<confidential client id>"
 GEOPF_OAUTH_CLIENT_SECRET = "<confidential client secret>"
-GEOPF_OAUTH_OPENID_CONF_URL = "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"  # default
+GEOPF_OAUTH_OPENID_CONF_URL = (
+    "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"  # default
+)
 GEOPF_OAUTH_SCOPE = "openid"  # default
 
 # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest

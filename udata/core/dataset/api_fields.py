@@ -498,7 +498,7 @@ dataset_fields = api.model(
 )
 
 dataset_page_fields = api.model(
-    "DatasetPage", fields.pager(dataset_fields), mask="data{{{0}}},*".format(DEFAULT_MASK)
+    "DatasetPage", fields.pager(dataset_fields), mask=f"data{{{DEFAULT_MASK}}},*"
 )
 
 

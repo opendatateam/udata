@@ -9,11 +9,16 @@ repos:
       - id: trailing-whitespace
       - id: check-added-large-files
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.1 # Ruff version
+  # Run ruff through uv so the hooks use the version locked in uv.lock, the same as the CI.
+  - repo: local
     hooks:
-      # Run the linter
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-      # Run the formatter
+        name: ruff
+        entry: uv run ruff check --fix --exit-non-zero-on-fix
+        language: system
+        types_or: [python, pyi]
       - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi, markdown]

@@ -25,7 +25,7 @@ def generate_pydenticon(identifier, size):
 
     # Pydenticon adds padding to the size and as a consequence
     # we need to compute the size without the padding
-    padding = int(round(current_app.config["AVATAR_INTERNAL_PADDING"] * size / 100.0))
+    padding = round(current_app.config["AVATAR_INTERNAL_PADDING"] * size / 100.0)
     size = size - 2 * padding
     padding = (padding,) * 4
     return generator.generate(identifier, size, size, padding=padding, output_format="png")

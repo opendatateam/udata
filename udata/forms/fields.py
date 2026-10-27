@@ -32,15 +32,15 @@ from udata.utils import get_by, to_iso_date
 from . import widgets
 
 
-class FieldHelper(object):
+class FieldHelper:
     def __init__(self, *args, **kwargs):
         self._preprocessors = kwargs.pop("preprocessors", [])
-        super(FieldHelper, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._form = kwargs.get("_form", None)
 
     @property
     def id(self):
-        return "{0}-id".format(self.name)
+        return f"{self.name}-id"
 
     @id.setter
     def id(self, value):
@@ -57,23 +57,23 @@ class FieldHelper(object):
         required = kwargs.pop("required", self.flags.required)
         if required is True:
             kwargs["required"] = required
-        return super(FieldHelper, self).__call__(**kwargs)
+        return super().__call__(**kwargs)
 
     def pre_validate(self, form):
         """Calls preprocessors before pre_validation"""
         for preprocessor in self._preprocessors:
             preprocessor(form, self)
-        super(FieldHelper, self).pre_validate(form)
+        super().pre_validate(form)
 
 
 class Field(FieldHelper, WTField):
     pass
 
 
-class EmptyNone(object):
+class EmptyNone:
     def process_formdata(self, valuelist):
         """Replace empty values by None"""
-        super(EmptyNone, self).process_formdata(valuelist)
+        super().process_formdata(valuelist)
         self.data = self.data or None
 
 
@@ -115,7 +115,7 @@ class WTFDateTimeField(WTField):
         display_format="%Y-%m-%d %H:%M",
         **kwargs,
     ):
-        super(WTFDateTimeField, self).__init__(label, validators, **kwargs)
+        super().__init__(label, validators, **kwargs)
         if parse_kwargs is None:
             parse_kwargs = {}
         self.parse_kwargs = parse_kwargs
@@ -155,12 +155,12 @@ class DateField(WTFDateTimeField):
     def __init__(
         self, label=None, validators=None, parse_kwargs=None, display_format="%Y-%m-%d", **kwargs
     ):
-        super(DateField, self).__init__(
+        super().__init__(
             label, validators, parse_kwargs=parse_kwargs, display_format=display_format, **kwargs
         )
 
     def process_formdata(self, valuelist):
-        super(DateField, self).process_formdata(valuelist)
+        super().process_formdata(valuelist)
         if self.data is not None and hasattr(self.data, "date"):
             self.data = self.data.date()
 
@@ -185,7 +185,7 @@ class UUIDField(Field):
 class BooleanField(FieldHelper, fields.BooleanField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop("stacked", False)
-        super(BooleanField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def process_formdata(self, valuelist):
         # We override this so that when no value is provided
@@ -201,7 +201,7 @@ class BooleanField(FieldHelper, fields.BooleanField):
 class RadioField(FieldHelper, fields.RadioField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop("stacked", False)
-        super(RadioField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class FileField(FieldHelper, fields.FileField):
@@ -218,7 +218,7 @@ class URLField(EmptyNone, Field):
         return True
 
     def process_formdata(self, valuelist):
-        super(URLField, self).process_formdata(valuelist)
+        super().process_formdata(valuelist)
         if self.data:
             if not isinstance(self.data, str):
                 # A ValueError is what wtforms (and our own extras parsing) catch
@@ -232,7 +232,7 @@ class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
     pass
 
 
-class FormWrapper(object):
+class FormWrapper:
     """
     Wrap FormField nested form class to handle both
     JSON provisionning from wtforms-json
@@ -253,15 +253,15 @@ class FormWrapper(object):
 
 class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
-        super(FormField, self).__init__(FormWrapper(form_class), *args, **kwargs)
-        self.prefix = "{0}-".format(self.name)
+        super().__init__(FormWrapper(form_class), *args, **kwargs)
+        self.prefix = f"{self.name}-"
         self._formdata = None
 
     def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        return super(FormField, self).process(formdata, data=data, **kwargs)
+        return super().process(formdata, data=data, **kwargs)
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         if extra_validators:
             raise TypeError(
                 "FormField does not accept in-line validators, "
@@ -278,7 +278,7 @@ class FormField(FieldHelper, fields.FormField):
             return
         if getattr(self.form_class, "model_class", None) and not self._obj:
             self._obj = self.form_class.model_class()
-        super(FormField, self).populate_obj(obj, name)
+        super().populate_obj(obj, name)
 
     @property
     def data(self):
@@ -295,7 +295,7 @@ def nullable_text(value):
 
 class SelectField(FieldHelper, fields.SelectField):
     def __init__(self, label=None, validators=None, coerce=nullable_text, **kwargs):
-        super(SelectField, self).__init__(label, validators, coerce, **kwargs)
+        super().__init__(label, validators, coerce, **kwargs)
 
 
 class ModelSelectField(FieldHelper, BaseModelSelectField):
@@ -340,16 +340,16 @@ def clean_oid(oid, model):
             # and returns the original value on exception
             model.id.validate(oid)
             return model.id.to_python(oid)
-        except Exception:  # Catch all exceptions as model.type is not predefined
-            raise ValueError("Unsupported identifier: {0}".format(oid))
+        except Exception as e:  # Catch all exceptions as model.type is not predefined
+            raise ValueError(f"Unsupported identifier: {oid}") from e
 
 
-class ModelFieldMixin(object):
+class ModelFieldMixin:
     model = None
 
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop("model", self.model)
-        super(ModelFieldMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _value(self):
         if self.data:
@@ -379,7 +379,7 @@ class ModelField(Field):
                     newdata[key.replace(prefix, "")] = value
             if newdata:
                 formdata.add(self.short_name, newdata)
-        super(ModelField, self).process(formdata, data, **kwargs)
+        super().process(formdata, data, **kwargs)
 
     def process_formdata(self, valuelist):
         if not valuelist or len(valuelist) != 1 or not valuelist[0]:
@@ -421,7 +421,7 @@ class ModelField(Field):
         try:
             self.data = model.objects.only("id").get(id=oid)
         except DoesNotExist:
-            label = "{0}({1})".format(model.__name__, oid)
+            label = f"{model.__name__}({oid})"
             msg = _("{0} does not exists").format(label)
             raise validators.ValidationError(msg)
 
@@ -430,7 +430,7 @@ class ModelField(Field):
         # to prevent "DataRequired" validator from clearing errors
         if self.errors:
             raise validators.StopValidation()
-        super(ModelField, self).pre_validate(form)
+        super().pre_validate(form)
 
 
 class ModelChoiceField(StringField):
@@ -438,7 +438,7 @@ class ModelChoiceField(StringField):
 
     def __init__(self, *args, **kwargs):
         self.models = kwargs.pop("models", self.models)
-        super(ModelChoiceField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _value(self):
         if self.data:
@@ -458,7 +458,7 @@ class ModelChoiceField(StringField):
                 raise validators.ValidationError(message)
 
 
-class ModelList(object):
+class ModelList:
     model = None
 
     def _value(self):
@@ -498,12 +498,12 @@ class ModelList(object):
 
 class NestedModelList(fields.FieldList):
     def __init__(self, model_form, *args, **kwargs):
-        super(NestedModelList, self).__init__(FormField(model_form), *args, **kwargs)
+        super().__init__(FormField(model_form), *args, **kwargs)
         self.nested_form = model_form
         self.nested_model = model_form.model_class
         self.data_submitted = False
         self.initial_data = []
-        self.prefix = "{0}-".format(self.name)
+        self.prefix = f"{self.name}-"
 
     def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
@@ -513,19 +513,18 @@ class NestedModelList(fields.FieldList):
         self.is_dict_data = formdata and any(k.startswith(self.prefix) for k in formdata)
         self.has_data = self.is_list_data or self.is_dict_data
         if self.has_data:
-            super(NestedModelList, self).process(formdata, data, **kwargs)
+            super().process(formdata, data, **kwargs)
         else:
             self.entries = []
             # super(NestedModelList, self).process(None, data, **kwargs)
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         """Perform validation only if data has been submitted"""
         if not self.has_data:
             return True
-        if self.is_list_data:
-            if not isinstance(self._formdata[self.name], (list, tuple)):
-                return False
-        return super(NestedModelList, self).validate(form, extra_validators)
+        if self.is_list_data and not isinstance(self._formdata[self.name], (list, tuple)):
+            return False
+        return super().validate(form, extra_validators)
 
     def populate_obj(self, obj, name):
         if not self.has_data:
@@ -534,7 +533,7 @@ class NestedModelList(fields.FieldList):
         initial_values = getattr(obj, name, [])
         new_values = []
 
-        class Holder(object):
+        class Holder:
             pass
 
         holder = Holder()
@@ -556,9 +555,8 @@ class NestedModelList(fields.FieldList):
         Fill the form with previous data if necessary to handle partial update
         """
         if formdata:
-            prefix = "-".join((self.name, str(index)))
-            basekey = "-".join((prefix, "{0}"))
-            idkey = basekey.format("id")
+            prefix = f"{self.name}-{index}"
+            idkey = f"{prefix}-id"
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
             data = None
@@ -584,7 +582,7 @@ class NestedModelList(fields.FieldList):
                         # globally by `/datasets/r/<id>`, so honouring a client-chosen one
                         # would let anyone squat another dataset's permalink.
                         del formdata[idkey]
-        return super(NestedModelList, self)._add_entry(formdata, data, index)
+        return super()._add_entry(formdata, data, index)
 
 
 class DatasetListField(ModelList, Field):
@@ -655,12 +653,12 @@ class CurrentUserField(ModelFieldMixin, Field):
 
     def __init__(self, *args, **kwargs):
         kwargs["default"] = kwargs.pop("default", default_owner)
-        super(CurrentUserField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def process(self, formdata, data=unset_value, **kwargs):
         if formdata and self.name in formdata and formdata[self.name] is None:
             formdata.pop(self.name)  # None value does not trigger default
-        return super(CurrentUserField, self).process(formdata, data, **kwargs)
+        return super().process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
         if (
@@ -687,7 +685,7 @@ class PublishAsField(ModelFieldMixin, Field):
 
     def __init__(self, *args, **kwargs):
         self.owner_field = kwargs.pop("owner_field", self.owner_field)
-        super(PublishAsField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def hidden(self):
@@ -749,9 +747,9 @@ class ExtrasField(Field):
     }
 
     def __init__(self, *args, **kwargs):
-        super(ExtrasField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not isinstance(self._form, ModelForm):
-            raise ValueError("ExtrasField can only be used within a ModelForm")
+            raise TypeError("ExtrasField can only be used within a ModelForm")
         model_field = getattr(self._form.model_class, self.short_name, None)
         if not model_field or not isinstance(model_field, MongoExtrasField):
             msg = "Form ExtrasField can only be mapped to a model ExtraField"
@@ -765,7 +763,7 @@ class ExtrasField(Field):
     def parse(self, data):
         """Parse fields and store individual errors"""
         self.field_errors = {}
-        return dict((k, self._parse_value(k, v)) for k, v in data.items())
+        return {k: self._parse_value(k, v) for k, v in data.items()}
 
     def _parse_value(self, key, value):
         if key not in self.extras.registered:
@@ -810,7 +808,7 @@ class ExtrasField(Field):
             (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
         )
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         if self.process_errors:
             self.errors = list(self.process_errors)
         elif getattr(self, "field_errors", None):

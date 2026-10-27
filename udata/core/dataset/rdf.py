@@ -151,7 +151,7 @@ QUDT_TO_UDATA = {
 
 # A DOI as sources write it: bare, as a `doi:` or `info:doi/` URI, or as a resolver URL.
 DOI_IDENTIFIER_RE = re.compile(
-    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I
+    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.IGNORECASE
 )
 
 
@@ -327,7 +327,7 @@ def resource_to_rdf(
     if resource.checksum:
         checksum = graph.resource(BNode())
         checksum.set(RDF.type, SPDX.Checksum)
-        algorithm = "checksumAlgorithm_{0}".format(resource.checksum.type)
+        algorithm = f"checksumAlgorithm_{resource.checksum.type}"
         checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
@@ -504,12 +504,11 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
-        return range
-    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
-        return range
-    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
-        return range
+    return (
+        maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate))
+        or maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate))
+        or maybe_date_range(resource.value(SCV.min), resource.value(SCV.max))
+    )
 
 
 def temporal_from_rdf(period_of_time):

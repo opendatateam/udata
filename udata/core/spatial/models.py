@@ -72,7 +72,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
 
     def __html__(self):
         """In use within the admin."""
-        return "{name} <i>({code})</i>".format(name=_(self.name), code=self.code)
+        return f"{_(self.name)} <i>({self.code})</i>"
 
     @cached_property
     def level_code(self):
@@ -138,7 +138,7 @@ spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale(
 
 @cache.cached(timeout=50, key_prefix="admin_levels")
 def get_spatial_admin_levels():
-    return dict((geolevel.id, geolevel.admin_level) for geolevel in GeoLevel.objects)
+    return {geolevel.id: geolevel.admin_level for geolevel in GeoLevel.objects}
 
 
 admin_levels = LocalProxy(get_spatial_admin_levels)

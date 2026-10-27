@@ -12,7 +12,7 @@ class UserFactory(ModelFactory):
 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    email = factory.Sequence(lambda n: "user{}@example.com".format(n))
+    email = factory.Sequence(lambda n: f"user{n}@example.com")
     fs_uniquifier = factory.Faker("uuid4")
     active = True
 

@@ -8,7 +8,7 @@ from udata.utils import clean_string
 
 log = logging.getLogger(__name__)
 
-__all__ = ("BoolFilter", "ModelTermsFilter", "TemporalCoverageFilter", "Filter", "ListFilter")
+__all__ = ("BoolFilter", "Filter", "ListFilter", "ModelTermsFilter", "TemporalCoverageFilter")
 
 
 ES_NUM_FAILURES = "-Infinity", "Infinity", "NaN", None
@@ -55,15 +55,15 @@ class ModelTermsFilter(Filter):
             return value
         try:
             return [self.model_field.to_mongo(v) for v in value.split(OR_SEPARATOR)]
-        except Exception:
-            raise ValueError('"{0}" is not valid identifier'.format(value))
+        except Exception as e:
+            raise ValueError(f'"{value}" is not valid identifier') from e
 
 
 class TemporalCoverageFilter(Filter):
     @classmethod
     def validate_parameter(cls, value):
         if not isinstance(value, str) or not RE_TIME_COVERAGE.match(value):
-            msg = '"{0}" does not match YYYY-MM-DD-YYYY-MM-DD'.format(value)
+            msg = f'"{value}" does not match YYYY-MM-DD-YYYY-MM-DD'
             raise ValueError(msg)
         return value
 

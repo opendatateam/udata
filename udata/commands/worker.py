@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 @cli.group("worker")
 def grp():
     """Worker related operations"""
-    pass
 
 
 @grp.command()
@@ -30,21 +29,21 @@ def start():
 def status_print_task(count, biggest_task_name, munin=False):
     if munin:
         # Munin expect all values, including zeros
-        print("%s.value %s" % (format_field_for_munin(count[0]), count[1]))
+        print(f"{format_field_for_munin(count[0])}.value {count[1]}")
     elif count[1] > 0:
         # We only display tasks with items in queue for readability
-        print("* %s : %s" % (count[0].ljust(biggest_task_name), count[1]))
+        print(f"* {count[0].ljust(biggest_task_name)} : {count[1]}")
 
 
 def status_print_config(queue):
     if not queue:
         exit_with_error("--munin-config called without a --queue parameter")
     tasks = [n for n, q in get_tasks().items() if q == queue]
-    print("graph_title Waiting tasks for queue %s" % queue)
+    print(f"graph_title Waiting tasks for queue {queue}")
     print("graph_vlabel Nb of tasks")
     print("graph_category celery")
     for task in tasks:
-        print("%s.label %s" % (format_field_for_munin(task), short_name(task)))
+        print(f"{format_field_for_munin(task)}.label {short_name(task)}")
 
 
 def status_print_queue(queue, munin=False):
@@ -53,14 +52,13 @@ def status_print_queue(queue, munin=False):
         print("-" * 40)
     queue_length = r.llen(queue)
     if not munin:
-        print('Queue "%s": %s task(s)' % (queue, queue_length))
+        print(f'Queue "{queue}": {queue_length} task(s)')
     counter = Counter({n: 0 for n, q in get_tasks().items() if q == queue})
     biggest_task_name = 0
     for task in r.lrange(queue, 0, -1):
         task = json.loads(task)
         task_name = task["headers"]["task"]
-        if len(task_name) > biggest_task_name:
-            biggest_task_name = len(task_name)
+        biggest_task_name = max(biggest_task_name, len(task_name))
         counter[task_name] += 1
     for count in counter.most_common():
         status_print_task(count, biggest_task_name, munin=munin)
@@ -114,7 +112,7 @@ def tasks():
     longest = max(tasks.keys(), key=len)
     size = len(longest)
     for name, queue in sorted(tasks.items()):
-        print("* {0}: {1}".format(name.ljust(size), queue))
+        print(f"* {name.ljust(size)}: {queue}")
 
 
 @grp.command()
@@ -127,8 +125,7 @@ def status(queue, munin, munin_config):
     """List queued tasks aggregated by name"""
     if munin_config:
         return status_print_config(queue)
-    queues = get_queues(queue)
-    for queue in queues:
-        status_print_queue(queue, munin=munin)
+    for name in get_queues(queue):
+        status_print_queue(name, munin=munin)
     if not munin:
         print("-" * 40)

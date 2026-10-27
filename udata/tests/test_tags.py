@@ -31,7 +31,7 @@ class TagsTests:
         assert response.charset == "utf-8"
 
         csvfile = StringIO(response.data.decode("utf8"))
-        reader = reader = csv.get_reader(csvfile)
+        reader = csv.get_reader(csvfile)
         header = next(reader)
         rows = list(reader)
 
@@ -44,7 +44,7 @@ class TagsTests:
     def test_count(self):
         for i in range(1, 4):
             # Tags should be normalized and deduplicated.
-            tags = ['Tag "{0}"'.format(j) for j in range(i)] + ["tag-0"]
+            tags = [f'Tag "{j}"' for j in range(i)] + ["tag-0"]
             DatasetFactory(tags=tags, visible=True)
             ReuseFactory(tags=tags, visible=True)
 

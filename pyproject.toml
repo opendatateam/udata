@@ -179,10 +179,37 @@ markers = [
 ]
 
 [tool.ruff]
-lint = { extend-select = [
-    "I",
-] } # ["I"] is to also sort imports with an isort rule
 line-length = 100
+
+[tool.ruff.lint]
+# ["I"] is to also sort imports with an isort rule
+extend-select = ["I"]
+ignore = [
+    # Flask config classes, mongoengine `meta`, factories and API field declarations
+    # are class attributes by design.
+    "RUF012",
+    # A join over literals keeps one item per line (field masks, expected HTML in
+    # tests): collapsing it into a single string makes it unreadable and every change
+    # a diff on one long line.
+    "FLY002",
+    # The log message is what users read in harvest reports (`HarvestLog` keeps
+    # `record.getMessage()`, not the traceback) and what titles Sentry events: it must
+    # carry the exception.
+    "TRY401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Migrations are one-shot batch scripts: they must not stop on one broken document, and
+# touching a reference is how they check it still exists (mongoengine dereferences on
+# attribute access and raises `DoesNotExist`).
+"udata/migrations/*.py" = ["BLE001", "B018"]
+# Commands run over whole collections: one failing object must not stop the batch.
+"udata/commands/*.py" = ["BLE001"]
+"udata/**/commands.py" = ["BLE001"]
+# A notification handler must never fail the action that triggered it.
+"udata/**/notifications.py" = ["BLE001"]
+# `from x import Y as Y` is the PEP 484 explicit re-export of the flask-restx fields.
+"udata/api/fields.py" = ["PLC0414"]
 
 [tool.setuptools]
 packages = ["udata", "udata_search_service"]

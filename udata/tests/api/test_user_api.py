@@ -71,7 +71,7 @@ class UserAPITest(APITestCase):
     def test_suggest_users_api_first_name(self):
         """It should suggest users based on first name"""
         for i in range(4):
-            UserFactory(first_name="first-name-test-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(first_name=f"first-name-test-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_users", q="first-name-test", size=5))
         self.assert200(response)
@@ -90,7 +90,7 @@ class UserAPITest(APITestCase):
     def test_suggest_users_api_last_name(self):
         """It should suggest users based on last name"""
         for i in range(4):
-            UserFactory(last_name="last-name-test-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(last_name=f"last-name-test-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_users", q="last-name-test", size=5))
         self.assert200(response)
@@ -108,7 +108,7 @@ class UserAPITest(APITestCase):
     def test_suggest_users_api_unicode(self):
         """It should suggest users with special characters"""
         for i in range(4):
-            UserFactory(last_name="last-name-testé-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(last_name=f"last-name-testé-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_users", q="last-name-testé", size=5))
         self.assert200(response)
@@ -166,7 +166,7 @@ class UserAPITest(APITestCase):
         self.login(AdminFactory())
 
         for i in range(4):
-            UserFactory(first_name="test-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(first_name=f"test-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.users", q="test"))
         self.assert200(response)
@@ -178,7 +178,7 @@ class UserAPITest(APITestCase):
         self.login(AdminFactory())
 
         for i in range(4):
-            UserFactory(last_name="test-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(last_name=f"test-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.users", q="test"))
         self.assert200(response)
@@ -202,7 +202,7 @@ class UserAPITest(APITestCase):
         self.login(AdminFactory())
 
         for i in range(4):
-            UserFactory(first_name="test-{0}".format(i) if i % 2 else faker.word())
+            UserFactory(first_name=f"test-{i}" if i % 2 else faker.word())
 
         user = UserFactory(first_name="test", last_name="testé")
 

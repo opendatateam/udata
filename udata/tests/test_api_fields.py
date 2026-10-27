@@ -56,7 +56,6 @@ FORBIDDEN_MESSAGE: str = "Forbidden value"
 def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
-    return
 
 
 def check_not_forbidden(value: str = "", field: str = "", **_kwargs) -> None:
@@ -253,7 +252,7 @@ class FakeFactory(ModelFactory):
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
-    url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
+    url = factory.LazyAttribute(lambda o: f"{faker.url()}/{faker.unique_string()}")
     archived = None
     score = factory.Faker("pyfloat", left_digits=1, right_digits=1)
 
@@ -386,7 +385,7 @@ class FakeWithFilteredList(Document):
 class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
-    index_parser_args_names: set[str] = set([field.name for field in Fake.__index_parser__.args])
+    index_parser_args_names: set[str] = {field.name for field in Fake.__index_parser__.args}
 
     def test_index_parser(self) -> None:
         assert type(self.index_parser) is RequestParser
@@ -399,12 +398,10 @@ class IndexParserTest(PytestOnlyDBTestCase):
         - tag instead of tags
 
         """
-        assert set(
-            [
-                "dataset",
-                "tag",
-            ]
-        ).issubset(self.index_parser_args_names)
+        assert {
+            "dataset",
+            "tag",
+        }.issubset(self.index_parser_args_names)
 
     def test_readonly_and_non_wrapped_fields_not_in_parser(self) -> None:
         """Readonly fields() and non wrapped fields should not have a parser arg."""
@@ -413,7 +410,7 @@ class IndexParserTest(PytestOnlyDBTestCase):
 
     def test_filterable_fields_from_mixins_in_parser(self) -> None:
         """Filterable fields from mixins should have a parser arg."""
-        assert set(["owner", "organization"]).issubset(self.index_parser_args_names)
+        assert {"owner", "organization"}.issubset(self.index_parser_args_names)
 
     def test_nested_filters_in_parser(self) -> None:
         """Filterable fields from the `nested_filters` decorater parameter should have a parser arg."""
@@ -624,9 +621,11 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             {"page": 1, "page_size": 0},
             {"page": 0, "page_size": 5},
         ):
-            with app.test_request_context("/foobar", query_string=query):
-                with pytest.raises(BadRequest):
-                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+            with (
+                app.test_request_context("/foobar", query_string=query),
+                pytest.raises(BadRequest),
+            ):
+                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
 
 
 class PatchChoicesValidationTest(PytestOnlyDBTestCase):
@@ -792,7 +791,7 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         """Renamed fields are exposed under their API key, and their Python attribute
         name disappears from the read model."""
         read_fields = FakeWithRename.__read_fields__
-        assert set(["name", "since", "picture", "api_url"]).issubset(read_fields.keys())
+        assert {"name", "since", "picture", "api_url"}.issubset(read_fields.keys())
         for attribute in ["label", "created_at", "image", "uri"]:
             assert attribute not in read_fields
 

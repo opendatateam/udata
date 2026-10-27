@@ -65,8 +65,7 @@ def extension(filename):
 
     while "." in filename:
         filename, ext = os.path.splitext(filename)
-        if ext.startswith("."):
-            ext = ext[1:]
+        ext = ext.removeprefix(".")
 
         if extension and ext not in current_app.config["ALLOWED_RESOURCES_EXTENSIONS"]:
             # We don't want to add this extension if one has already been detected

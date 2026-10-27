@@ -16,6 +16,6 @@ def purge_visualizations(self) -> None:
             storage = storages.images
             storage.delete(chart.image.filename)
             storage.delete(chart.image.original)
-            for key, value in chart.image.thumbnails.items():
+            for value in chart.image.thumbnails.values():
                 storage.delete(value)
         chart.delete()

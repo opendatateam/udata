@@ -69,11 +69,10 @@ class UDataApp(Flask):
             return send_static(self.static_folder, filename, cache_timeout=cache_timeout)
 
         # Handle aliases
-        for prefix, directory in self.config.get("STATIC_DIRS", tuple()):
+        for prefix, directory in self.config.get("STATIC_DIRS", ()):
             if filename.startswith(prefix):
                 real_filename = filename[len(prefix) :]
-                if real_filename.startswith("/"):
-                    real_filename = real_filename[1:]
+                real_filename = real_filename.removeprefix("/")
                 if isfile(join(directory, real_filename)):
                     return send_static(directory, real_filename, cache_timeout=cache_timeout)
         abort(404)
@@ -82,7 +81,7 @@ class UDataApp(Flask):
         # Make exception/HTTPError available for context processors
         if "error" not in g:
             g.error = e
-        return super(UDataApp, self).handle_http_exception(e)
+        return super().handle_http_exception(e)
 
     def register_blueprint(self, blueprint, **kwargs):
         if blueprint.name in self.blueprints:
@@ -93,7 +92,7 @@ class UDataApp(Flask):
 
         if blueprint.has_static_folder and "url_prefix" in kwargs:
             self.static_prefixes[blueprint.name] = kwargs["url_prefix"]
-        return super(UDataApp, self).register_blueprint(blueprint, **kwargs)
+        return super().register_blueprint(blueprint, **kwargs)
 
 
 class Blueprint(BaseBlueprint):
@@ -125,7 +124,7 @@ class UdataJsonProvider(DefaultJSONProvider):
 
     @staticmethod
     def default(obj):
-        if isinstance(obj, BaseDocument) or isinstance(obj, EmbeddedDocument):
+        if isinstance(obj, (BaseDocument, EmbeddedDocument)):
             return json_util._json_convert(obj.to_mongo())
         elif isinstance(obj, bson.ObjectId):
             return str(obj)
@@ -208,7 +207,6 @@ def register_extensions(app):
         i18n,
         mail,
         mongo,
-        notifications,  # noqa
         routing,
         search,
         sentry,

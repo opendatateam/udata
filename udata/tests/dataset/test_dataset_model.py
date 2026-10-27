@@ -1,6 +1,6 @@
 import gc
 import logging
-from datetime import UTC, date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -382,7 +382,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
             description="",
             frequency=UpdateFrequency.DAILY,
             harvest=HarvestDatasetMetadata(
-                modified_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                modified_at=datetime.now(UTC) - timedelta(hours=1),
             ),
         )
         assert dataset.quality["update_frequency"] is True
@@ -747,7 +747,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
 
     def test_exact_match_by_id_with_spaces(self):
         license = LicenseFactory()
-        found = License.guess(" {0} ".format(license.id))
+        found = License.guess(f" {license.id} ")
         assert isinstance(found, License)
         assert license.id == found.id
 
@@ -803,7 +803,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
         assert license.id == found.id
 
     def test_imatch_by_url(self):
-        url = "%s/CAPS.php" % faker.uri()
+        url = f"{faker.uri()}/CAPS.php"
         license = LicenseFactory(url=url)
         found = License.guess(license.url)
         assert isinstance(found, License)
@@ -817,7 +817,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
         assert license.id == found.id
 
     def test_imatch_by_alternate_url(self):
-        alternate_url = "%s/CAPS.php" % faker.uri()
+        alternate_url = f"{faker.uri()}/CAPS.php"
         license = LicenseFactory(alternate_urls=[alternate_url])
         found = License.guess(alternate_url)
         assert isinstance(found, License)
@@ -844,7 +844,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
 
     def test_exact_match_by_title_with_spaces(self):
         license = LicenseFactory()
-        found = License.guess(" {0} ".format(license.title))
+        found = License.guess(f" {license.title} ")
         assert isinstance(found, License)
         assert license.id == found.id
 
@@ -876,7 +876,7 @@ class LicenseModelTest(PytestOnlyDBTestCase):
     def test_exact_match_by_alternate_title_with_spaces(self):
         alternate_title = faker.sentence()
         license = LicenseFactory(alternate_titles=[alternate_title])
-        found = License.guess(" {0} ".format(alternate_title))
+        found = License.guess(f" {alternate_title} ")
         assert isinstance(found, License)
         assert license.id == found.id
 

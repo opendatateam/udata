@@ -72,29 +72,29 @@ def is_allowed_cors_route():
     # Allow to keep clean CORS when `udata` and the frontend are on the same domain
     # (as it's the case in data.gouv with cdata/udata).
     if not current_app.config["SECURITY_SPA_ON_SAME_DOMAIN"] and (
-        path.startswith(current_app.config["SECURITY_LOGIN_URL"])
-        or path.startswith(current_app.config["SECURITY_LOGOUT_URL"])
-        or path.startswith(current_app.config["SECURITY_RESET_URL"])
-        or path.startswith(current_app.config["SECURITY_REGISTER_URL"])
-        or path.startswith(current_app.config["SECURITY_CONFIRM_URL"])
-        or path.startswith(current_app.config["SECURITY_CHANGE_URL"])
-        or path.startswith(current_app.config["SECURITY_CHANGE_EMAIL_URL"])
-        or path.startswith(current_app.config["SECURITY_GET_CSRF"])
-        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_SETUP_URL"])
-        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"])
-        or path.startswith(current_app.config["SECURITY_TWO_FACTOR_RESCUE_URL"])
-        or path.startswith(current_app.config["SECURITY_VERIFY_URL"])
-        or path.startswith("/oauth")
+        path.startswith(
+            (
+                current_app.config["SECURITY_LOGIN_URL"],
+                current_app.config["SECURITY_LOGOUT_URL"],
+                current_app.config["SECURITY_RESET_URL"],
+                current_app.config["SECURITY_REGISTER_URL"],
+                current_app.config["SECURITY_CONFIRM_URL"],
+                current_app.config["SECURITY_CHANGE_URL"],
+                current_app.config["SECURITY_CHANGE_EMAIL_URL"],
+                current_app.config["SECURITY_GET_CSRF"],
+                current_app.config["SECURITY_TWO_FACTOR_SETUP_URL"],
+                current_app.config["SECURITY_TWO_FACTOR_TOKEN_VALIDATION_URL"],
+                current_app.config["SECURITY_TWO_FACTOR_RESCUE_URL"],
+                current_app.config["SECURITY_VERIFY_URL"],
+                "/oauth",
+            )
+        )
     ):
         return True
 
-    return (
-        path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
-        or path.startswith("/api")
-        or path.startswith("/oauth/token")
-        or path.startswith("/oauth/revoke")
-        or path.startswith("/datasets/r/")
-    )
+    return path.endswith(
+        (".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg")
+    ) or path.startswith(("/api", "/oauth/token", "/oauth/revoke", "/datasets/r/"))
 
 
 def add_preflight_request_headers(headers: Headers) -> Headers:

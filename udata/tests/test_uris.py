@@ -214,18 +214,18 @@ class UriValidationTest(PytestOnlyTestCase):
 
     @pytest.mark.parametrize("scheme", DEFAULT_SCHEMES)
     def test_default_should_validate_default_schemes(self, scheme):
-        url = "{0}://somewhere.com".format(scheme)
+        url = f"{scheme}://somewhere.com"
         assert uris.validate(url) == url
 
     @pytest.mark.parametrize("scheme", CUSTOM_SCHEMES)
     def test_default_should_not_validate_non_default_schemes(self, scheme):
-        url = "{0}://somewhere.com".format(scheme)
+        url = f"{scheme}://somewhere.com"
         with pytest.raises(uris.ValidationError, match="Invalid scheme"):
             uris.validate(url)
 
     @pytest.mark.parametrize("tld", CUSTOM_TLDS)
     def test_default_should_not_validate_unknown_tlds(self, tld):
-        url = "http://somewhere.{0}".format(tld)
+        url = f"http://somewhere.{tld}"
         with pytest.raises(uris.ValidationError, match="Invalid TLD"):
             uris.validate(url)
 
@@ -307,23 +307,23 @@ class UriValidationTest(PytestOnlyTestCase):
 
     @pytest.mark.parametrize("scheme", CUSTOM_SCHEMES)
     def test_custom_schemes(self, scheme):
-        url = "{0}://somewhere.com".format(scheme)
+        url = f"{scheme}://somewhere.com"
         assert uris.validate(url, schemes=CUSTOM_SCHEMES) == url
 
     @pytest.mark.parametrize("scheme", DEFAULT_SCHEMES)
     def test_custom_schemes_should_not_validate_defaults(self, scheme):
-        url = "{0}://somewhere.com".format(scheme)
+        url = f"{scheme}://somewhere.com"
         with pytest.raises(uris.ValidationError, match="Invalid scheme"):
             uris.validate(url, schemes=CUSTOM_SCHEMES)
 
     @pytest.mark.parametrize("tld", CUSTOM_TLDS)
     def test_custom_tlds(self, tld):
-        url = "http://somewhere.{0}".format(tld)
+        url = f"http://somewhere.{tld}"
         assert uris.validate(url, tlds=CUSTOM_TLDS) == url
 
     @pytest.mark.parametrize("tld", DEFAULT_TLDS)
     def test_custom_tlds_should_not_validate_defaults(self, tld):
-        url = "http://somewhere.{0}".format(tld)
+        url = f"http://somewhere.{tld}"
         with pytest.raises(uris.ValidationError, match="Invalid "):
             uris.validate(url, tlds=CUSTOM_TLDS)
 

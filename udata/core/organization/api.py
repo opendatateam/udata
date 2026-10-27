@@ -180,7 +180,7 @@ class DatasetsCsvAPI(API):
     def get(self, org):
         datasets = Dataset.objects(organization=str(org.id)).visible()
         adapter = DatasetCsvAdapter(datasets)
-        return csv.stream(adapter, "{0}-datasets".format(org.slug))
+        return csv.stream(adapter, f"{org.slug}-datasets")
 
 
 @ns.route("/<org:org>/dataservices.csv", endpoint="organization_dataservices_csv")
@@ -190,7 +190,7 @@ class DataservicesCsv(API):
     def get(self, org):
         dataservices = Dataservice.objects(organization=str(org.id)).visible()
         adapter = DataserviceCsvAdapter(dataservices)
-        return csv.stream(adapter, "{0}-dataservices".format(org.slug))
+        return csv.stream(adapter, f"{org.slug}-dataservices")
 
 
 @ns.route("/<org:org>/discussions.csv", endpoint="organization_discussions_csv", doc=common_doc)
@@ -202,7 +202,7 @@ class DiscussionsCsvAPI(API):
         # select_related allows us to dereference subject Referencefield  as efficiently as possible
         discussions = Discussion.objects.filter(subject__in=datasets).select_related()
         adapter = DiscussionCsvAdapter(discussions)
-        return csv.stream(adapter, "{0}-discussions".format(org.slug))
+        return csv.stream(adapter, f"{org.slug}-discussions")
 
 
 @ns.route(
@@ -216,7 +216,7 @@ class DatasetsResourcesCsvAPI(API):
     def get(self, org):
         datasets = Dataset.objects(organization=str(org.id)).visible()
         adapter = ResourcesCsvAdapter(datasets)
-        return csv.stream(adapter, "{0}-datasets-resources".format(org.slug))
+        return csv.stream(adapter, f"{org.slug}-datasets-resources")
 
 
 @ns.route("/<org:org>/catalog", endpoint="organization_rdf", doc=common_doc)

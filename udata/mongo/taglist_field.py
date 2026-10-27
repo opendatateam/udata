@@ -8,7 +8,7 @@ from udata.tags import slug as slugify_tag
 class TagListField(ListField):
     def __init__(self, **kwargs):
         self.tags = []
-        super(TagListField, self).__init__(StringField(), **kwargs)
+        super().__init__(StringField(), **kwargs)
 
     @staticmethod
     def from_input(input):
@@ -23,13 +23,13 @@ class TagListField(ListField):
         return sorted({slugify_tag(v) for v in value})
 
     def to_python(self, value):
-        return super(TagListField, self).to_python(self.clean(value))
+        return super().to_python(self.clean(value))
 
     def to_mongo(self, value):
-        return super(TagListField, self).to_mongo(self.clean(value))
+        return super().to_mongo(self.clean(value))
 
     def validate(self, values):
-        super(TagListField, self).validate(values)
+        super().validate(values)
 
         for tag in values:
             if not tags.TAG_MIN_LENGTH <= len(tag) <= tags.TAG_MAX_LENGTH:

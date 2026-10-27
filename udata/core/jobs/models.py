@@ -17,7 +17,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.tasks import schedulables
 
-__all__ = ("PeriodicTask", "PERIODS")
+__all__ = ("PERIODS", "PeriodicTask")
 
 CRON = "{minute} {hour} {day_of_month} {month_of_year} {day_of_week}"
 

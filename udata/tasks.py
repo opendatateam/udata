@@ -1,4 +1,5 @@
 import logging
+from importlib import import_module
 from importlib.metadata import entry_points
 
 from celery import Celery, Task
@@ -17,7 +18,7 @@ class ContextTask(Task):
 
     def __call__(self, *args, **kwargs):
         with self.current_app.app_context():
-            return super(ContextTask, self).__call__(*args, **kwargs)
+            return super().__call__(*args, **kwargs)
 
 
 class JobTask(ContextTask):
@@ -48,7 +49,7 @@ def router(name, args, kwargs, options, task=None, **kw):
     # queue parameter, routing_key computed if not present
     if task.default_queue:
         key = task.default_routing_key
-        key = key or "{0.default_queue}.{0.name}".format(task)
+        key = key or f"{task.default_queue}.{task.name}"
         return {"queue": task.default_queue, "routing_key": key}
     # only routing_key, queue should not be returned to fallback on default
     elif task.default_routing_key:
@@ -58,7 +59,7 @@ def router(name, args, kwargs, options, task=None, **kw):
 def task(*args, **kwargs):
     for arg in "queue", "routing_key":
         if arg in kwargs:
-            kwargs["default_{0}".format(arg)] = kwargs.pop(arg)
+            kwargs[f"default_{arg}"] = kwargs.pop(arg)
     return celery.task(*args, **kwargs)
 
 
@@ -110,13 +111,13 @@ def queue_test(self, raises=False):
     """
     self.log.info("Just a test task")
     if raises:
-        raise Exception("Test task processing")
+        raise RuntimeError("Test task processing")
 
 
 @job("test-error")
 def error_test(self):
     self.log.info("There should be an error soon")
-    raise Exception("There is an error")
+    raise RuntimeError("There is an error")
 
 
 def schedulables():
@@ -127,38 +128,41 @@ def init_app(app):
     celery.main = app.import_name
 
     celery.conf.update(
-        **dict(
-            (k.replace("CELERY_", "").lower(), v)
+        **{
+            k.replace("CELERY_", "").lower(): v
             for k, v in app.config.items()
             if k.startswith("CELERY_")
-        )
+        }
     )
 
     ContextTask.current_app = app
 
-    # Load core tasks
-    import udata.core.metrics.tasks  # noqa
-    import udata.core.tags.tasks  # noqa
-    import udata.core.activity.tasks  # noqa
-    import udata.core.dataservices.tasks  # noqa
-    import udata.core.dataset.doi  # noqa
-    import udata.core.dataset.tasks  # noqa
-    import udata.core.dataset.transport  # noqa
-    import udata.core.dataset.recommendations  # noqa
-    import udata.core.spatial.tasks  # noqa
-    import udata.core.topic.tasks  # noqa
-    import udata.core.reuse.tasks  # noqa
-    import udata.core.user.tasks  # noqa
-    import udata.core.organization.tasks  # noqa
-    import udata.core.discussions.tasks  # noqa
-    import udata.core.badges.tasks  # noqa
-    import udata.core.storages.tasks  # noqa
-    import udata.core.sitemap.tasks  # noqa
-    import udata.core.visualizations.tasks  # noqa
-    import udata.features.notifications.tasks  # noqa
-    import udata.notifications.tchap  # noqa
-    import udata.harvest.tasks  # noqa
-    import udata.db.tasks  # noqa
+    # Load core tasks: importing a module registers its tasks
+    for module in (
+        "udata.core.metrics.tasks",
+        "udata.core.tags.tasks",
+        "udata.core.activity.tasks",
+        "udata.core.dataservices.tasks",
+        "udata.core.dataset.doi",
+        "udata.core.dataset.tasks",
+        "udata.core.dataset.transport",
+        "udata.core.dataset.recommendations",
+        "udata.core.spatial.tasks",
+        "udata.core.topic.tasks",
+        "udata.core.reuse.tasks",
+        "udata.core.user.tasks",
+        "udata.core.organization.tasks",
+        "udata.core.discussions.tasks",
+        "udata.core.badges.tasks",
+        "udata.core.storages.tasks",
+        "udata.core.sitemap.tasks",
+        "udata.core.visualizations.tasks",
+        "udata.features.notifications.tasks",
+        "udata.notifications.tchap",
+        "udata.harvest.tasks",
+        "udata.db.tasks",
+    ):
+        import_module(module)
 
     for ep in entry_points(group="udata.tasks"):
         ep.load()

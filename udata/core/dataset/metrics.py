@@ -10,11 +10,11 @@ from .models import Dataset
 def update_dataset_reuses_metric(reuse, **kwargs):
     previous = kwargs.get("previous")
     if previous and previous.get("datasets"):
-        datasets_delta = set(dat.id for dat in reuse.datasets).symmetric_difference(
-            set(dat.id for dat in previous["datasets"])
+        datasets_delta = {dat.id for dat in reuse.datasets}.symmetric_difference(
+            {dat.id for dat in previous["datasets"]}
         )
     else:
-        datasets_delta = set(dat.id for dat in reuse.datasets)
+        datasets_delta = {dat.id for dat in reuse.datasets}
     for dataset in datasets_delta:
         Dataset.get(dataset).count_reuses()
 
@@ -25,10 +25,10 @@ def update_dataset_reuses_metric(reuse, **kwargs):
 def update_dataset_dataservices_metric(dataservice, **kwargs):
     previous = kwargs.get("previous")
     if previous and previous.get("datasets"):
-        datasets_delta = set(dat.id for dat in dataservice.datasets).symmetric_difference(
-            set(dat.id for dat in previous["datasets"])
+        datasets_delta = {dat.id for dat in dataservice.datasets}.symmetric_difference(
+            {dat.id for dat in previous["datasets"]}
         )
     else:
-        datasets_delta = set(dat.id for dat in dataservice.datasets)
+        datasets_delta = {dat.id for dat in dataservice.datasets}
     for dataset in datasets_delta:
         Dataset.get(dataset).count_dataservices()

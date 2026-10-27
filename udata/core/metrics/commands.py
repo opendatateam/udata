@@ -13,7 +13,6 @@ log = logging.getLogger(__name__)
 @cli.group("metrics")
 def grp():
     """Metrics related operations"""
-    pass
 
 
 @grp.command()

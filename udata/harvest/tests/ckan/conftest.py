@@ -21,12 +21,12 @@ class CkanError(ValueError):
     pass
 
 
-class CkanClient(object):
+class CkanClient:
     BASE_URL = CKAN_URL
-    API_URL = "{}/api/3/action/".format(BASE_URL)
-    PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-    PACKAGE_SEARCH_URL = "{}package_search".format(API_URL)
-    PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+    API_URL = f"{BASE_URL}/api/3/action/"
+    PACKAGE_LIST_URL = f"{API_URL}package_list"
+    PACKAGE_SEARCH_URL = f"{API_URL}package_search"
+    PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
     @property
     def headers(self):
@@ -42,7 +42,7 @@ class CkanClient(object):
         return requests.post(url, data=json.dumps(data), headers=self.headers, **kwargs)
 
     def action_url(self, endpoint):
-        path = "/".join(["api/3/action", endpoint])
+        path = f"api/3/action/{endpoint}"
         return urljoin(self.BASE_URL, path)
 
     def action(self, endpoint, data=None, **kwargs):
@@ -64,4 +64,4 @@ def ckan():
 @faker_provider
 class UdataCkanProvider(BaseProvider):
     def unique_url(self):
-        return "{0}?_={1}".format(faker.uri(), faker.unique_string())
+        return f"{faker.uri()}?_={faker.unique_string()}"

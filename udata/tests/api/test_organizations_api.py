@@ -1968,7 +1968,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         """It should suggest organizations"""
         for i in range(3):
             OrganizationFactory(
-                name="test-{0}".format(i) if i % 2 else faker.word(), metrics={"followers": i}
+                name=f"test-{i}" if i % 2 else faker.word(), metrics={"followers": i}
             )
         max_follower_organization = OrganizationFactory(name="test-4", metrics={"followers": 10})
         response = self.get(url_for("api.suggest_organizations", q="tes", size=5))
@@ -1989,7 +1989,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
     def test_suggest_organizations_with_special_chars(self):
         """It should suggest organizations with special caracters"""
         for i in range(4):
-            OrganizationFactory(name="testé-{0}".format(i) if i % 2 else faker.word())
+            OrganizationFactory(name=f"testé-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_organizations", q="testé", size=5))
         assert200(response)
@@ -2007,7 +2007,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
     def test_suggest_organizations_with_multiple_words(self):
         """It should suggest organizations with words"""
         for i in range(4):
-            OrganizationFactory(name="mon testé-{0}".format(i) if i % 2 else faker.word())
+            OrganizationFactory(name=f"mon testé-{i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_organizations", q="mon testé", size=5))
         assert200(response)
@@ -2025,9 +2025,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
     def test_suggest_organizations_with_apostrophe(self):
         """It should suggest organizations with words"""
         for i in range(4):
-            OrganizationFactory(
-                name="Ministère de l'intérieur {0}".format(i) if i % 2 else faker.word()
-            )
+            OrganizationFactory(name=f"Ministère de l'intérieur {i}" if i % 2 else faker.word())
 
         response = self.get(url_for("api.suggest_organizations", q="Ministère", size=5))
         assert200(response)
@@ -2371,7 +2369,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
             for resource in dataset.resources:
                 assert (str(dataset.id), str(resource.id)) in ids
 
-        dataset_ids = set(row[0] for row in rows)
+        dataset_ids = {row[0] for row in rows}
         assert str(hidden_dataset.id) not in dataset_ids
         assert str(not_org_dataset.id) not in dataset_ids
 
@@ -2417,7 +2415,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization_discussions_csv", org=organization))
         assert200(response)
 
-        headers, data = response.data.decode("utf-8").strip().split("\r\n")
+        _headers, data = response.data.decode("utf-8").strip().split("\r\n")
         expected = '"{discussion.id}";"{discussion.user}"'
         assert_starts_with(data, expected.format(discussion=discussion))
 

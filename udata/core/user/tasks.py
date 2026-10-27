@@ -15,9 +15,7 @@ log = logging.getLogger(__name__)
 @job("notify-inactive-users")
 def notify_inactive_users(self):
     if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"]:
-        logging.warning(
-            "YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned"
-        )
+        log.warning("YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned")
         return
     notification_comparison_date = (
         datetime.now(UTC)
@@ -32,24 +30,22 @@ def notify_inactive_users(self):
     )
     for i, user in enumerate(users_to_notify):
         if i >= current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
-            logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
+            log.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
             return
 
         mails.inactive_user(user).send(user)
 
-        logging.debug(f"Notified {user.email} of account inactivity")
+        log.debug(f"Notified {user.email} of account inactivity")
         user.inactive_deletion_notified_at = datetime.now(UTC)
         user.save()
 
-    logging.info(f"Notified {users_to_notify.count()} inactive users")
+    log.info(f"Notified {users_to_notify.count()} inactive users")
 
 
 @job("delete-inactive-users")
 def delete_inactive_users(self):
     if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"]:
-        logging.warning(
-            "YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned"
-        )
+        log.warning("YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned")
         return
 
     # Clear inactive_deletion_notified_at field if user has logged in since notification
@@ -73,7 +69,7 @@ def delete_inactive_users(self):
     for user in users_to_delete:
         copied_user = copy(user)
         user.mark_as_deleted(notify=False, delete_comments=False)
-        logging.warning(f"Deleted user {copied_user.email} due to account inactivity")
+        log.warning(f"Deleted user {copied_user.email} due to account inactivity")
         mails.inactive_account_deleted().send(copied_user)
 
-    logging.info(f"Deleted {users_to_delete.count()} inactive users")
+    log.info(f"Deleted {users_to_delete.count()} inactive users")

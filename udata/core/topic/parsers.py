@@ -91,7 +91,7 @@ class TopicApiParser(ModelApiParser):
 
             # Find topics that have elements matching the search
             matching_elements = TopicElement.objects.search_text(phrase_query)
-            element_topic_ids = set(elem.topic.id for elem in matching_elements if elem.topic)
+            element_topic_ids = {elem.topic.id for elem in matching_elements if elem.topic}
 
             # Combine with OR
             if element_topic_ids:

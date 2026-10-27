@@ -26,7 +26,7 @@ class FakeSearchable(Document):
         return self.title
 
     def __html__(self):
-        return "<span>{0}</span>".format(self.title)
+        return f"<span>{self.title}</span>"
 
 
 class FakeFactory(MongoEngineFactory):

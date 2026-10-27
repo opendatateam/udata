@@ -15,7 +15,7 @@ SCHEDULE_LINE = "{name}: {label} ↦ {schedule}"
 def job_label(name, args, kwargs):
     label = name
     params = args[:]
-    params += ["=".join((k, v)) for k, v in sorted(kwargs.items())]
+    params += [f"{k}={v}" for k, v in sorted(kwargs.items())]
     if params:
         label += "(" + ", ".join(params) + ")"
     return label
@@ -24,7 +24,6 @@ def job_label(name, args, kwargs):
 @cli.group("job")
 def grp():
     """Jobs related operations"""
-    pass
 
 
 @grp.command()
@@ -83,7 +82,7 @@ def schedule(cron, name, params):
 
     args = [p for p in params if "=" not in p]
     kwargs = dict(p.split("=") for p in params if "=" in p)
-    label = "Job {0}".format(job_label(name, args, kwargs))
+    label = f"Job {job_label(name, args, kwargs)}"
 
     try:
         task = PeriodicTask.objects.get(task=name, args=args, kwargs=kwargs)
@@ -92,7 +91,7 @@ def schedule(cron, name, params):
         task = PeriodicTask.objects.create(
             task=name,
             name=label,
-            description="Periodic {0} job".format(name),
+            description=f"Periodic {name} job",
             enabled=True,
             args=args,
             kwargs=kwargs,
@@ -119,12 +118,12 @@ def unschedule(name, params):
     # otherwise the beat keeps sending it to workers that discard it.
     args = [p for p in params if "=" not in p]
     kwargs = dict(p.split("=") for p in params if "=" in p)
-    label = "Job {0}".format(job_label(name, args, kwargs))
+    label = f"Job {job_label(name, args, kwargs)}"
 
     try:
         task = PeriodicTask.objects.get(task=name, args=args, kwargs=kwargs)
     except PeriodicTask.DoesNotExist:
-        exit_with_error("No scheduled job match {0}".format(label))
+        exit_with_error(f"No scheduled job match {label}")
 
     task.delete()
     msg = "Unscheduled {label} with the following crontab: {cron}"

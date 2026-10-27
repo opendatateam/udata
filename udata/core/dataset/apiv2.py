@@ -269,12 +269,12 @@ resource_page_fields = apiv2.model(
 )
 
 dataset_page_fields = apiv2.model(
-    "DatasetPage", fields.pager(dataset_fields), mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2)
+    "DatasetPage", fields.pager(dataset_fields), mask=f"data{{{DEFAULT_MASK_APIV2}}},*"
 )
 dataset_search_page_fields = apiv2.model(
     "DatasetSearchPage",
     fields.search_pager(dataset_fields),
-    mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2),
+    mask=f"data{{{DEFAULT_MASK_APIV2}}},*",
 )
 
 specific_resource_fields = apiv2.model(

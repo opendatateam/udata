@@ -54,21 +54,67 @@ The site identifier. It is used to attached some database configuration, metrics
 ```python
 [
     # Base
-    'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf', 'xsd',
+    "csv",
+    "txt",
+    "json",
+    "pdf",
+    "xml",
+    "rdf",
+    "rtf",
+    "xsd",
     # OpenOffice
-    'ods', 'odt', 'odp', 'odg',
+    "ods",
+    "odt",
+    "odp",
+    "odg",
     # Microsoft Office
-    'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
+    "xls",
+    "xlsx",
+    "doc",
+    "docx",
+    "pps",
+    "ppt",
     # Archives
-    'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
+    "tar",
+    "gz",
+    "tgz",
+    "rar",
+    "zip",
+    "7z",
+    "xz",
+    "bz2",
     # Images
-    'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
+    "jpeg",
+    "jpg",
+    "jpe",
+    "gif",
+    "png",
+    "dwg",
+    "svg",
+    "tiff",
+    "ecw",
+    "svgz",
+    "jp2",
     # Geo
-    'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
+    "shp",
+    "kml",
+    "kmz",
+    "gpx",
+    "shx",
+    "ovr",
+    "geojson",
     # Meteorology
-    'grib2',
+    "grib2",
     # Misc
-    'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+    "dbf",
+    "prj",
+    "sql",
+    "epub",
+    "sbn",
+    "sbx",
+    "cpg",
+    "lyr",
+    "owl",
 ]
 ```
 
@@ -150,7 +196,7 @@ When using udata on an intranet, you might want to add your own custom TLDs:
 ```python
 from udata.settings import Defaults
 
-URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
+URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(["custom", "company"])
 ```
 
 ### EXPORT_CSV_MODELS
@@ -187,7 +233,7 @@ If not specified, mongo full text search is used as a fallback.
 
 Ex:
 ```python
-ELASTICSEARCH_URL = 'http://localhost:9200'
+ELASTICSEARCH_URL = "http://localhost:9200"
 ```
 
 Before running the application, initialize the Elasticsearch indices:
@@ -242,7 +288,7 @@ for more details.
 Authentication is also supported in the URL:
 
 ```python
-MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
+MONGODB_HOST = "mongodb://<user>:<password>@<host>:<port>/<database>"
 ```
 
 ### MONGODB_HOST_TEST
@@ -259,22 +305,22 @@ jobs managed through the API (`PeriodicTask`).
 The defaults are:
 
 ```python
-CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'fanout_prefix': True,
-    'fanout_patterns': True,
+    "fanout_prefix": True,
+    "fanout_patterns": True,
 }
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_ACCEPT_CONTENT = ["pickle", "json"]
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_BEAT_SCHEDULER = 'udata.core.jobs.scheduler.Scheduler'
+CELERY_BEAT_SCHEDULER = "udata.core.jobs.scheduler.Scheduler"
 ```
 
 Authentication is supported on Redis:
 
 ```python
-CELERY_RESULT_BACKEND = 'redis://u:<password>@<host>:<port>'
-CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
+CELERY_RESULT_BACKEND = "redis://u:<password>@<host>:<port>"
+CELERY_BROKER_URL = "redis://u:<password>@<host>:<port>"
 ```
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
@@ -308,12 +354,12 @@ The full option list is available in
 
 **default**:
 ```python
-    {
-        'authorization_code': 10 * 24 * HOUR,
-        'implicit': 10 * 24 * HOUR,
-        'password': 10 * 24 * HOUR,
-        'client_credentials': 10 * 24 * HOUR
-    }
+{
+    "authorization_code": 10 * 24 * HOUR,
+    "implicit": 10 * 24 * HOUR,
+    "password": 10 * 24 * HOUR,
+    "client_credentials": 10 * 24 * HOUR,
+}
 ```
 
 The OAuth2 token duration.
@@ -506,26 +552,26 @@ Enables the app's read only mode.
 **default**:
 ```python
 [
-    'OrganizationListAPI.post',
-    'MembershipRequestAPI.post',
-    'MemberAPI.post',
-    'ReuseListAPI.post',
-    'DatasetListAPI.post',
-    'ResourcesAPI.post',
-    'UploadNewDatasetResource.post',
-    'UploadDatasetResource.post',
-    'CommunityResourcesAPI.post',
-    'UploadNewCommunityResources.post',
-    'ReuploadCommunityResource.post',
-    'DiscussionAPI.post',
-    'DiscussionsAPI.post',
-    'SourcesAPI.post',
-    'PreviewSourceConfigAPI.post',
-    'FollowAPI.post',
-    'ContactPointsListAPI.post',
-    'DataservicesAPI.post',
-    'TopicsAPI.post',
-    'TransferRequestsAPI.post',
+    "OrganizationListAPI.post",
+    "MembershipRequestAPI.post",
+    "MemberAPI.post",
+    "ReuseListAPI.post",
+    "DatasetListAPI.post",
+    "ResourcesAPI.post",
+    "UploadNewDatasetResource.post",
+    "UploadDatasetResource.post",
+    "CommunityResourcesAPI.post",
+    "UploadNewCommunityResources.post",
+    "ReuploadCommunityResource.post",
+    "DiscussionAPI.post",
+    "DiscussionsAPI.post",
+    "SourcesAPI.post",
+    "PreviewSourceConfigAPI.post",
+    "FollowAPI.post",
+    "ContactPointsListAPI.post",
+    "DataservicesAPI.post",
+    "TopicsAPI.post",
+    "TransferRequestsAPI.post",
 ]
 ```
 
@@ -547,17 +593,17 @@ Here a sample configuration file:
 DEBUG = True
 SEND_MAIL = False
 
-SECRET_KEY = 'A unique secret key'
-API_TOKEN_SECRET = 'A different unique secret key'
+SECRET_KEY = "A unique secret key"
+API_TOKEN_SECRET = "A different unique secret key"
 
-SERVER_NAME = 'www.data.dev'
+SERVER_NAME = "www.data.dev"
 
-DEFAULT_LANGUAGE = 'fr'
-SITE_ID = 'www.data.dev'
-SITE_TITLE = 'data.dev'
+DEFAULT_LANGUAGE = "fr"
+SITE_ID = "www.data.dev"
+SITE_TITLE = "data.dev"
 
-FS_PREFIX = '/s'
-FS_ROOT = '/srv/http/www.data.dev/fs'
+FS_PREFIX = "/s"
+FS_ROOT = "/srv/http/www.data.dev/fs"
 ```
 
 [celery-doc]: http://docs.celeryproject.org/en/latest/userguide/configuration.html

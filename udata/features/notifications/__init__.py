@@ -1,16 +1,19 @@
 import logging
+from importlib import import_module
 
 log = logging.getLogger(__name__)
 
 
 def init_app(app):
-    # Load core notifications
-    import udata.core.organization.notifications  # noqa
-    import udata.core.discussions.notifications  # noqa
-    import udata.harvest.notifications  # noqa
-
-    # Load feature notifications
-    import udata.features.transfer.notifications  # noqa
-
-    # Following what one works on
-    import udata.features.notifications.follow  # noqa
+    # Importing a module connects its notification handlers
+    for module in (
+        # Core notifications
+        "udata.core.organization.notifications",
+        "udata.core.discussions.notifications",
+        "udata.harvest.notifications",
+        # Feature notifications
+        "udata.features.transfer.notifications",
+        # Following what one works on
+        "udata.features.notifications.follow",
+    ):
+        import_module(module)

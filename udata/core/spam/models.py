@@ -5,7 +5,7 @@ from langdetect.lang_detect_exception import LangDetectException
 from .signals import on_new_potential_spam
 
 
-class SpamMixin(object):
+class SpamMixin:
     """
     Mixin for models that can be checked for spam.
     Spam detection creates Report objects instead of storing spam info on the model itself.
@@ -152,7 +152,7 @@ class SpamMixin(object):
         """Detect spam in an embedded document."""
         breadcrumb.append(embed)
 
-        for field_name, text in embed.fields_to_check_for_spam().items():
+        for text in embed.fields_to_check_for_spam().values():
             if not text:
                 continue
 
@@ -233,7 +233,7 @@ def spam_protected(get_model_to_check=None):
                 model_to_check = base_model
 
             if not isinstance(model_to_check, SpamMixin):
-                raise ValueError(
+                raise TypeError(
                     "@spam_protected should be called within a SpamMixin. "
                     + type(model_to_check).__name__
                     + " given."

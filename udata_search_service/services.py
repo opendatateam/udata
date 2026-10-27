@@ -1,5 +1,4 @@
 from math import ceil
-from typing import List, Optional, Tuple
 
 from udata_search_service.entities import (
     Dataservice,
@@ -30,10 +29,10 @@ class BaseService:
         self._client_find_one = getattr(search_client, f"find_one_{self.entity_name}")
         self._client_delete_one = getattr(search_client, f"delete_one_{self.entity_name}")
 
-    def feed(self, entity: EntityBase, index: str = None) -> None:
+    def feed(self, entity: EntityBase, index: str | None = None) -> None:
         self._client_index(entity, index)
 
-    def search(self, filters: dict) -> Tuple[List[EntityBase], int, int, dict]:
+    def search(self, filters: dict) -> tuple[list[EntityBase], int, int, dict]:
         page = filters.pop("page")
         page_size = filters.pop("page_size")
         search_text = filters.pop("q")
@@ -50,13 +49,13 @@ class BaseService:
         total_pages = ceil(results_number / page_size) or 1
         return results, results_number, total_pages, facets
 
-    def find_one(self, entity_id: str) -> Optional[EntityBase]:
+    def find_one(self, entity_id: str) -> EntityBase | None:
         try:
             return self.entity_class.load_from_dict(self._client_find_one(entity_id))
         except TypeError:
             return None
 
-    def delete_one(self, entity_id: str) -> Optional[str]:
+    def delete_one(self, entity_id: str) -> str | None:
         return self._client_delete_one(entity_id)
 
     @classmethod

@@ -64,7 +64,7 @@ def instance_path(app, tmpdir):
     app.config["FS_ROOT"] = str(tmpdir / "fs")
     # Force local storage:
     for s in "resources", "avatars", "logos", "images", "chunks":
-        key = "{0}_FS_{{0}}".format(s.upper())
+        key = f"{s.upper()}_FS_{{0}}"
         app.config[key.format("BACKEND")] = "local"
         app.config.pop(key.format("ROOT"), None)
 

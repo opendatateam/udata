@@ -22,7 +22,7 @@ class URLField(StringField):
     """
 
     def __init__(self, private=None, local=None, resolve=None, schemes=None, tlds=None, **kwargs):
-        super(URLField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.private = private
         self.local = local
         self.resolve = resolve
@@ -30,12 +30,12 @@ class URLField(StringField):
         self.tlds = tlds
 
     def to_python(self, value):
-        value = super(URLField, self).to_python(value)
+        value = super().to_python(value)
         if value:
             return value.strip()
 
     def validate(self, value):
-        super(URLField, self).validate(value)
+        super().validate(value)
         kwargs = {
             a: getattr(self, a)
             for a in ("private", "local", "resolve", "schemes", "tlds")
