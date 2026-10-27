@@ -109,8 +109,8 @@ class DatasetApiParser(ModelApiParser):
         "views": "metrics.views",
     }
 
-    def __init__(self, **pagination):
-        super().__init__(**pagination)
+    def __init__(self, *, page_size: int = 20, max_page_size: int | None = None):
+        super().__init__(page_size=page_size, max_page_size=max_page_size)
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
         self.parser.add_argument(
