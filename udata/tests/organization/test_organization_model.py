@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from importlib import import_module
 
 import pytest
 from mongoengine.errors import ValidationError
@@ -16,12 +17,12 @@ from udata.models import Dataset, Follow, Member, Reuse
 from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
+# Importing the metrics modules connects the signal handlers these tests rely on
+for module in ("udata.core.organization.metrics", "udata.core.followers.metrics"):
+    import_module(module)
+
 
 class OrganizationModelTest(DBTestCase):
-    # Load metrics
-    import udata.core.organization.metrics  # noqa
-    import udata.core.followers.metrics
-
     def test_organization_metrics(self):
         # Members count update are in API calls, thus being tested in API dedicated tests
 

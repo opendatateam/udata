@@ -1,4 +1,5 @@
 import logging
+from importlib import import_module
 from importlib.metadata import entry_points
 
 from celery import Celery, Task
@@ -136,29 +137,32 @@ def init_app(app):
 
     ContextTask.current_app = app
 
-    # Load core tasks
-    import udata.core.metrics.tasks  # noqa
-    import udata.core.tags.tasks
-    import udata.core.activity.tasks
-    import udata.core.dataservices.tasks
-    import udata.core.dataset.doi
-    import udata.core.dataset.tasks
-    import udata.core.dataset.transport
-    import udata.core.dataset.recommendations
-    import udata.core.spatial.tasks
-    import udata.core.topic.tasks
-    import udata.core.reuse.tasks
-    import udata.core.user.tasks
-    import udata.core.organization.tasks
-    import udata.core.discussions.tasks
-    import udata.core.badges.tasks
-    import udata.core.storages.tasks
-    import udata.core.sitemap.tasks
-    import udata.core.visualizations.tasks
-    import udata.features.notifications.tasks
-    import udata.notifications.tchap
-    import udata.harvest.tasks
-    import udata.db.tasks  # noqa
+    # Load core tasks: importing a module registers its tasks
+    for module in (
+        "udata.core.metrics.tasks",
+        "udata.core.tags.tasks",
+        "udata.core.activity.tasks",
+        "udata.core.dataservices.tasks",
+        "udata.core.dataset.doi",
+        "udata.core.dataset.tasks",
+        "udata.core.dataset.transport",
+        "udata.core.dataset.recommendations",
+        "udata.core.spatial.tasks",
+        "udata.core.topic.tasks",
+        "udata.core.reuse.tasks",
+        "udata.core.user.tasks",
+        "udata.core.organization.tasks",
+        "udata.core.discussions.tasks",
+        "udata.core.badges.tasks",
+        "udata.core.storages.tasks",
+        "udata.core.sitemap.tasks",
+        "udata.core.visualizations.tasks",
+        "udata.features.notifications.tasks",
+        "udata.notifications.tchap",
+        "udata.harvest.tasks",
+        "udata.db.tasks",
+    ):
+        import_module(module)
 
     for ep in entry_points(group="udata.tasks"):
         ep.load()

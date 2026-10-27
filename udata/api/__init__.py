@@ -1,5 +1,6 @@
 import logging
 from functools import wraps
+from importlib import import_module
 
 import mongoengine
 from babel import Locale, UnknownLocaleError
@@ -397,37 +398,40 @@ def marshal_page_with(func):
 
 
 def init_app(app):
-    # Load all core APIs
-    import udata.core.access_type.api  # noqa
-    import udata.core.activity.api
-    import udata.core.spatial.api
-    import udata.core.user.api
-    import udata.core.user.apiv2
-    import udata.core.dataset.api
-    import udata.core.dataset.apiv2
-    import udata.core.dataservices.api
-    import udata.core.dataservices.apiv2
-    import udata.core.visualizations.api
-    import udata.core.discussions.api
-    import udata.core.discussions.apiv2
-    import udata.core.reuse.api
-    import udata.core.reuse.apiv2
-    import udata.core.organization.api
-    import udata.core.organization.apiv2
-    import udata.core.followers.api
-    import udata.core.jobs.api
-    import udata.core.reports.api
-    import udata.core.site.api
-    import udata.core.tags.api
-    import udata.core.topic.apiv2
-    import udata.core.post.api
-    import udata.core.post.apiv2
-    import udata.core.contact_point.api
-    import udata.features.transfer.api
-    import udata.features.notifications.api
-    import udata.core.avatars.api
-    import udata.geopf.api
-    import udata.harvest.api  # noqa
+    # Load all core APIs: importing a module registers its endpoints
+    for module in (
+        "udata.core.access_type.api",
+        "udata.core.activity.api",
+        "udata.core.spatial.api",
+        "udata.core.user.api",
+        "udata.core.user.apiv2",
+        "udata.core.dataset.api",
+        "udata.core.dataset.apiv2",
+        "udata.core.dataservices.api",
+        "udata.core.dataservices.apiv2",
+        "udata.core.visualizations.api",
+        "udata.core.discussions.api",
+        "udata.core.discussions.apiv2",
+        "udata.core.reuse.api",
+        "udata.core.reuse.apiv2",
+        "udata.core.organization.api",
+        "udata.core.organization.apiv2",
+        "udata.core.followers.api",
+        "udata.core.jobs.api",
+        "udata.core.reports.api",
+        "udata.core.site.api",
+        "udata.core.tags.api",
+        "udata.core.topic.apiv2",
+        "udata.core.post.api",
+        "udata.core.post.apiv2",
+        "udata.core.contact_point.api",
+        "udata.features.transfer.api",
+        "udata.features.notifications.api",
+        "udata.core.avatars.api",
+        "udata.geopf.api",
+        "udata.harvest.api",
+    ):
+        import_module(module)
 
     # api.init_app(app)
     app.register_blueprint(apiv1_blueprint)
