@@ -179,10 +179,25 @@ markers = [
 ]
 
 [tool.ruff]
-lint = { extend-select = [
-    "I",
-] } # ["I"] is to also sort imports with an isort rule
 line-length = 100
+
+[tool.ruff.lint]
+# ["I"] is to also sort imports with an isort rule
+extend-select = ["I"]
+ignore = [
+    # Flask config classes, mongoengine `meta`, factories and API field declarations
+    # are class attributes by design.
+    "RUF012",
+    # Every `except Exception` is a log-and-continue boundary: batch migrations and
+    # commands must not stop on one broken document, notifications must not fail the
+    # action that triggered them.
+    "BLE001",
+    # Mongoengine dereferences on attribute access: touching a reference is how we check
+    # it still exists (it raises `DoesNotExist` otherwise).
+    "B018",
+    # `from x import Y as Y` is the PEP 484 explicit re-export.
+    "PLC0414",
+]
 
 [tool.setuptools]
 packages = ["udata", "udata_search_service"]
