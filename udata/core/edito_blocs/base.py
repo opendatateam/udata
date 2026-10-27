@@ -166,6 +166,8 @@ LEAF_BLOCS = {
     "MarkdownBloc",
     "LinksListBloc",
     "ButtonBloc",
+    "ImageBloc",
+    "CardBloc",
     "ExploreBloc",
     "DatasetBloc",
     "ReuseBloc",

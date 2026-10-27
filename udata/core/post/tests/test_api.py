@@ -5,6 +5,7 @@ from uuid import uuid4
 import pytest
 from flask import url_for
 from mongoengine.context_managers import query_counter
+from PIL import Image
 
 from udata.core import storages
 from udata.core.access_type.constants import AccessAudienceCondition, AccessAudienceType
@@ -1046,6 +1047,23 @@ class PostsAPITest(APITestCase):
         assert post.image.filename in storages.images
         assert post.image.original in storages.images
 
+    def test_post_image_upload_of_a_jpeg_holding_several_pictures(self):
+        """As phone cameras write them: Pillow reads them as MPO."""
+        post = PostFactory()
+        self.login(AdminFactory())
+        photo = BytesIO()
+        frames = [Image.new("RGB", (2, 2), color) for color in ("red", "blue")]
+        frames[0].save(photo, "MPO", save_all=True, append_images=frames[1:])
+        photo.seek(0)
+
+        response = self.post(
+            url_for("api.post_image", post=post), {"file": (photo, "photo.jpg")}, json=False
+        )
+
+        assert200(response)
+        post.reload()
+        assert post.image.filename in storages.images
+
     def test_post_image_upload_requires_admin(self):
         """It should forbid a non-admin from uploading a post image"""
         post = PostFactory()
@@ -1164,6 +1182,54 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
         assert title.title == "T"
         assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")
+
+    def test_post_api_accepts_images_and_cards(self):
+        """A hero with its illustration, and a summary page linking its subpages with cards,
+        down to an accordion item."""
+        self.login(AdminFactory())
+        image = {"class": "ImageBloc", "width": "1/3", "image": "https://e.com/i.svg", "alt": None}
+        card = {
+            "class": "CardBloc",
+            "width": "1/4",
+            "title": "Culture",
+            "url": "/pages/donnees_culture",
+            "description": "Données sur l'offre culturelle",
+            "image": "https://e.com/culture.svg",
+        }
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [
+                section({**TITLE, "width": "2/3"}, image, color="primary"),
+                section(card, accordion(card)),
+            ],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 201
+        hero, summary = response.json["blocs"]
+        assert {k: hero["blocs"][1][k] for k in image} == image
+        assert {k: summary["blocs"][0][k] for k in card} == card
+        assert {k: summary["blocs"][1]["items"][0]["content"][0][k] for k in card} == card
+
+    @pytest.mark.parametrize(
+        "bloc,field",
+        [
+            pytest.param({"class": "ImageBloc"}, "image", id="image-without-image"),
+            pytest.param({"class": "CardBloc", "url": "/"}, "title", id="card-without-title"),
+            pytest.param({"class": "CardBloc", "title": "T"}, "url", id="card-without-url"),
+        ],
+    )
+    def test_post_api_rejects_images_and_cards_without_their_content(self, bloc, field):
+        self.login(AdminFactory())
+        data = {"name": "Test blocs post", "body_type": "blocs", "blocs": [section(bloc)]}
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 400
+        assert field in response.get_data(as_text=True)
+        assert Post.objects.count() == 0
 
 
 class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):

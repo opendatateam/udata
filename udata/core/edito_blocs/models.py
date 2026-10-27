@@ -78,6 +78,32 @@ class ButtonBloc(SizedMixin, Bloc):
     url = field(StringField(required=True))
 
 
+@generate_fields()
+class ImageBloc(SizedMixin, Bloc):
+    image = field(
+        StringField(required=True),
+        description="URL of the image, as returned by the upload of content images",
+    )
+    alt = field(
+        StringField(),
+        description="Text replacing the image for those who cannot see it. Without it, the "
+        "image is decorative.",
+    )
+
+
+@generate_fields()
+class CardBloc(SizedMixin, Bloc):
+    """A link to a page, shown as a card: the summary pages list their subpages with them."""
+
+    title = field(StringField(required=True))
+    url = field(StringField(required=True))
+    description = field(StringField())
+    image = field(
+        StringField(),
+        description="URL of the image, as returned by the upload of content images",
+    )
+
+
 SECTION_COLORS = ("primary", "green", "purple")
 
 

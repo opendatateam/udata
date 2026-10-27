@@ -482,7 +482,7 @@ class Defaults(object):
         "text/turtle",
     ]
 
-    # How much time upload chunks are kept before cleanup
+    # How much time upload chunks, and content images nothing shows, are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
     # Avatar providers parameters
