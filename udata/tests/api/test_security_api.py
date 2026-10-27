@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from flask import url_for
 from flask_security.recoverable import generate_reset_password_token
+from flask_security.utils import get_message
 
 from udata.commands.fixtures import UserFactory
 from udata.core.user.factories import AdminFactory
@@ -108,6 +109,37 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         assert len(mails[0].recipients) == 1
         assert mails[0].recipients[0] == "jane2@example.org"
         assert mails[0].subject == _("Confirm your email address")
+
+    def test_verify_with_password(self):
+        user = UserFactory(password="password", confirmed_at=datetime.now())
+        self.login(user)
+
+        response = self.post(url_for("security.verify"), {"password": "password"})
+
+        self.assert200(response)
+
+    def test_verify_with_a_wrong_password_is_refused(self):
+        user = UserFactory(password="password", confirmed_at=datetime.now())
+        self.login(user)
+
+        response = self.post(url_for("security.verify"), {"password": "wrong"})
+
+        self.assert400(response)
+        assert response.json["response"]["field_errors"]["password"] == [
+            get_message("INVALID_PASSWORD")[0]
+        ]
+
+    def test_verify_without_password_is_a_form_error(self):
+        # Accounts created through ProConnect or the admin API have no password.
+        user = UserFactory(confirmed_at=datetime.now())
+        self.login(user)
+
+        response = self.post(url_for("security.verify"), {"password": "anything"})
+
+        self.assert400(response)
+        assert response.json["response"]["field_errors"]["password"] == [
+            _("This account has no password.")
+        ]
 
 
 class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
