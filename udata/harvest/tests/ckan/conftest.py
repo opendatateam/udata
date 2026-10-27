@@ -42,7 +42,7 @@ class CkanClient:
         return requests.post(url, data=json.dumps(data), headers=self.headers, **kwargs)
 
     def action_url(self, endpoint):
-        path = "/".join(["api/3/action", endpoint])
+        path = f"api/3/action/{endpoint}"
         return urljoin(self.BASE_URL, path)
 
     def action(self, endpoint, data=None, **kwargs):

@@ -1153,22 +1153,20 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["total"] == 3
         assert len(response.json["data"]) == 3
-        assert set(response.json["data"][0].keys()) == set(
-            [
-                "created",
-                "started",
-                "ended",
-                "dataset",
-                "dataservice",
-                "remote_url",
-                "remote_id",
-                "args",
-                "errors",
-                "kwargs",
-                "logs",
-                "status",
-            ]
-        )
+        assert set(response.json["data"][0].keys()) == {
+            "created",
+            "started",
+            "ended",
+            "dataset",
+            "dataservice",
+            "remote_url",
+            "remote_id",
+            "args",
+            "errors",
+            "kwargs",
+            "logs",
+            "status",
+        }
         # Make sure appropriate dataset or dataservice is set
         assert response.json["data"][0]["dataset"] is not None
         assert response.json["data"][0]["dataservice"] is None

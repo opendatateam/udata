@@ -77,7 +77,7 @@ def can_concern(type: NotificationType, subject: Document) -> bool:
     if type.startswith("organization.membership."):
         return False
     # A harvest source is no scope: its organization is.
-    if type.startswith("organization.") or type.startswith("harvest."):
+    if type.startswith(("organization.", "harvest.")):
         return isinstance(subject, Organization)
     return False
 

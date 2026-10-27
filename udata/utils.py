@@ -50,9 +50,9 @@ def get_by(lst, **fields: Any) -> Any | None:
 
 def multi_to_dict(multi):
     """Transform a Werkzeug multidictionnary into a flat dictionnary"""
-    return dict(
-        (key, value[0] if len(value) == 1 else value) for key, value in multi.to_dict(False).items()
-    )
+    return {
+        key: value[0] if len(value) == 1 else value for key, value in multi.to_dict(False).items()
+    }
 
 
 def get_field_value_from_path(document, field_path: str):
@@ -129,7 +129,7 @@ class Paginable:
     @property
     def pages(self):
         if self.page_size:
-            return int(ceil(self.total / float(self.page_size)))
+            return ceil(self.total / float(self.page_size))
         else:
             return 1
 
@@ -307,7 +307,7 @@ def to_iso_datetime(dt: date | datetime | None) -> str | None:
             if isinstance(dt, datetime)
             else "00:00:00"
         )
-        return "T".join((date_str, time_str))
+        return f"{date_str}T{time_str}"
 
 
 def to_bool(value: bool | str | int) -> bool:
@@ -369,7 +369,7 @@ def recursive_get(obj: Any, key: Any):
 def unique_string(length: int = UUID_LENGTH) -> str:
     """Generate a unique string"""
     # We need a string at least as long as length
-    string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
+    string = str(uuid4()) * math.ceil(length / float(UUID_LENGTH))
     return string[:length] if length else string
 
 

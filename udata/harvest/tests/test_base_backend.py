@@ -325,7 +325,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert len(job.items) == 2 * n
-        assert all([item.remote_url for item in job.items])
+        assert all(item.remote_url for item in job.items)
 
     def test_harvest_source_id(self):
         nb_datasets = 3
@@ -819,7 +819,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
             # gated metrics (behind Organization.compute_aggregate_metrics)
             for metric in ["datasets_by_months", "dataservices_by_months"]:
-                assert (metric in org.metrics) is (True if liverun else False)
+                assert (metric in org.metrics) is bool(liverun)
 
             # signals
             signals[before_harvest_job].assert_called_with(backend)

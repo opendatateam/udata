@@ -173,13 +173,13 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(len(response.json), len(levels) + 2)
 
     def test_zone_datasets_empty(self):
-        paca, bdr, arles = create_geozones_fixtures()
+        paca, _bdr, _arles = create_geozones_fixtures()
         response = self.get(url_for("api.zone_datasets", id=paca.id))
         self.assert200(response)
         self.assertEqual(response.json, [])
 
     def test_zone_datasets(self):
-        paca, bdr, arles = create_geozones_fixtures()
+        paca, _bdr, _arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
             DatasetFactory(
@@ -191,7 +191,7 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(len(response.json), 3)
 
     def test_zone_datasets_with_size(self):
-        paca, bdr, arles = create_geozones_fixtures()
+        paca, _bdr, _arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
             DatasetFactory(
@@ -203,7 +203,7 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(len(response.json), 2)
 
     def test_zone_datasets_with_dynamic(self):
-        paca, bdr, arles = create_geozones_fixtures()
+        paca, _bdr, _arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
             DatasetFactory(
@@ -216,7 +216,7 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(len(response.json), 3)
 
     def test_zone_datasets_with_dynamic_and_size(self):
-        paca, bdr, arles = create_geozones_fixtures()
+        paca, _bdr, _arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
             DatasetFactory(

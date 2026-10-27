@@ -116,7 +116,7 @@ def load(geozones_file, levels_file, drop=False):
 
     ts = datetime.now(UTC).isoformat().replace("-", "").replace(":", "").split(".")[0]
     if drop and GeoLevel.objects.count():
-        name = "_".join((GeoLevel._get_collection_name(), ts))
+        name = f"{GeoLevel._get_collection_name()}_{ts}"
         target = GeoLevel._get_collection_name()
         with switch_collection(GeoLevel, name), handle_error(GeoLevel):
             total = load_levels(GeoLevel, json_levels)
@@ -136,7 +136,7 @@ def load(geozones_file, levels_file, drop=False):
             json_geozones = json.load(f)
 
     if drop and GeoZone.objects.count():
-        name = "_".join((GeoZone._get_collection_name(), ts))
+        name = f"{GeoZone._get_collection_name()}_{ts}"
         target = GeoZone._get_collection_name()
         with switch_collection(GeoZone, name), handle_error(GeoZone):
             total = load_zones(GeoZone, json_geozones)

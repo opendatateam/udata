@@ -29,7 +29,7 @@ class BaseService:
         self._client_find_one = getattr(search_client, f"find_one_{self.entity_name}")
         self._client_delete_one = getattr(search_client, f"delete_one_{self.entity_name}")
 
-    def feed(self, entity: EntityBase, index: str = None) -> None:
+    def feed(self, entity: EntityBase, index: str | None = None) -> None:
         self._client_index(entity, index)
 
     def search(self, filters: dict) -> tuple[list[EntityBase], int, int, dict]:

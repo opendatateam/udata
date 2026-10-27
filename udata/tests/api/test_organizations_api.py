@@ -2369,7 +2369,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
             for resource in dataset.resources:
                 assert (str(dataset.id), str(resource.id)) in ids
 
-        dataset_ids = set(row[0] for row in rows)
+        dataset_ids = {row[0] for row in rows}
         assert str(hidden_dataset.id) not in dataset_ids
         assert str(not_org_dataset.id) not in dataset_ids
 
@@ -2415,7 +2415,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.organization_discussions_csv", org=organization))
         assert200(response)
 
-        headers, data = response.data.decode("utf-8").strip().split("\r\n")
+        _headers, data = response.data.decode("utf-8").strip().split("\r\n")
         expected = '"{discussion.id}";"{discussion.user}"'
         assert_starts_with(data, expected.format(discussion=discussion))
 

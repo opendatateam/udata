@@ -36,25 +36,25 @@ def render():
 
     organizations = Organization.objects(logo__exists=True)
     total["orgs"] = organizations.count()
-    log.info("Processing {0} organizations logos".format(total["orgs"]))
+    log.info("Processing {} organizations logos".format(total["orgs"]))
     for org in organizations:
         count["orgs"] += render_or_skip(org, "logo")
 
     users = User.objects(avatar__exists=True)
     total["users"] = users.count()
-    log.info("Processing {0} user avatars".format(total["users"]))
+    log.info("Processing {} user avatars".format(total["users"]))
     for user in users:
         count["users"] += render_or_skip(user, "avatar")
 
     posts = Post.objects(image__exists=True)
     total["posts"] = posts.count()
-    log.info("Processing {0} post images".format(total["posts"]))
+    log.info("Processing {} post images".format(total["posts"]))
     for post in posts:
         count["posts"] += render_or_skip(post, "image")
 
     reuses = Reuse.objects(image__exists=True)
     total["reuses"] = reuses.count()
-    log.info("Processing {0} reuse images".format(total["reuses"]))
+    log.info("Processing {} reuse images".format(total["reuses"]))
     for reuse in reuses:
         count["reuses"] += render_or_skip(reuse, "image")
 

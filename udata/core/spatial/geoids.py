@@ -16,7 +16,7 @@ def parse(text):
     # Kept validity parsing for legacy parsing and migration.
     # Validity is parsed but ignored.
     if "@" in text:
-        spatial, validity = text.split("@")
+        spatial, _validity = text.split("@")
     else:
         spatial = text
     spatial = spatial.lower().replace("/", ":")  # Backward compatibility
@@ -32,7 +32,7 @@ def parse(text):
 
 def build(level, code):
     """Serialize a GeoID from its parts"""
-    return ":".join((level, code))
+    return f"{level}:{code}"
 
 
 def from_zone(zone):

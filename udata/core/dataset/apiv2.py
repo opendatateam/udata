@@ -42,50 +42,7 @@ from .search import DatasetSearch
 DEFAULT_PAGE_SIZE = 50
 
 #: Default mask to make it lightweight by default
-DEFAULT_MASK_APIV2 = ",".join(
-    (
-        "id",
-        "title",
-        "acronym",
-        "slug",
-        "description",
-        "description_short",
-        "created_at",
-        "last_modified",
-        "deleted",
-        "private",
-        "tags",
-        "badges",
-        "resources",
-        "community_resources",
-        "frequency",
-        "frequency_date",
-        "extras",
-        "metrics",
-        "organization",
-        "owner",
-        "temporal_coverage",
-        "spatial",
-        "license",
-        "access_type",
-        "access_audiences",
-        "access_type_reason_category",
-        "access_type_reason",
-        "authorization_request_url",
-        "uri",
-        "page",
-        "last_update",
-        "archived",
-        "doi",
-        "quality",
-        "harvest",
-        "geopf",
-        "internal",
-        "contact_points",
-        "featured",
-        "permissions",
-    )
-)
+DEFAULT_MASK_APIV2 = "id,title,acronym,slug,description,description_short,created_at,last_modified,deleted,private,tags,badges,resources,community_resources,frequency,frequency_date,extras,metrics,organization,owner,temporal_coverage,spatial,license,access_type,access_audiences,access_type_reason_category,access_type_reason,authorization_request_url,uri,page,last_update,archived,doi,quality,harvest,geopf,internal,contact_points,featured,permissions"
 
 log = logging.getLogger(__name__)
 

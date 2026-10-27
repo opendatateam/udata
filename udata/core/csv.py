@@ -239,7 +239,7 @@ def stream(queryset_or_adapter, basename=None):
 
     timestamp = datetime.now(UTC).strftime("%Y-%m-%d-%H-%M")
     headers = {
-        "Content-Disposition": "attachment; filename={0}-{1}.csv".format(
+        "Content-Disposition": "attachment; filename={}-{}.csv".format(
             basename or "export", timestamp
         ),
     }

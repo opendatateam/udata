@@ -174,31 +174,8 @@ class MarkdownTest(PytestOnlyAPITestCase):
 
     def test_gfm_tables(self, assert_md):
         """Should render GFM tables"""
-        text = "\n".join(
-            (
-                "| first | second |",
-                "|-------|--------|",
-                "| value | value  |",
-            )
-        )
-        expected = "\n".join(
-            (
-                "<table>",
-                "<thead>",
-                "<tr>",
-                "  <th>first</th>",
-                "  <th>second</th>",
-                "</tr>",
-                "</thead>",
-                "<tbody>",
-                "<tr>",
-                "  <td>value</td>",
-                "  <td>value</td>",
-                "</tr>",
-                "</tbody>",
-                "</table>",
-            )
-        )
+        text = "| first | second |\n|-------|--------|\n| value | value  |"
+        expected = "<table>\n<thead>\n<tr>\n  <th>first</th>\n  <th>second</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n  <td>value</td>\n  <td>value</td>\n</tr>\n</tbody>\n</table>"
         assert_md(text, expected)
 
     def test_gfm_strikethrough(self, assert_md):
@@ -209,82 +186,28 @@ class MarkdownTest(PytestOnlyAPITestCase):
     def test_gfm_tagfilter(self, assert_md):
         """It should handle GFM tagfilter extension"""
         # Test extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
-        text = "\n".join(
-            (
-                "<strong> <title></title> <style></style> <em></em></strong>",
-                "<blockquote>",
-                "  <xmp> is disallowed.  <XMP> is also disallowed.",
-                "</blockquote>",
-            )
-        )
-        expected = "\n".join(
-            (
-                "<p><strong> &lt;title&gt;&lt;/title&gt; &lt;style&gt;&lt;/style&gt; <em></em></strong></p>",
-                "<blockquote>",
-                "  &lt;xmp&gt; is disallowed.  &lt;XMP&gt; is also disallowed.",
-                "</blockquote>",
-            )
-        )
+        text = "<strong> <title></title> <style></style> <em></em></strong>\n<blockquote>\n  <xmp> is disallowed.  <XMP> is also disallowed.\n</blockquote>"
+        expected = "<p><strong> &lt;title&gt;&lt;/title&gt; &lt;style&gt;&lt;/style&gt; <em></em></strong></p>\n<blockquote>\n  &lt;xmp&gt; is disallowed.  &lt;XMP&gt; is also disallowed.\n</blockquote>"
         assert_md(text, expected)
 
     def test_gfm_tagfilter_legit(self, assert_md):
         """It should not filter legit markup"""
-        text = "\n".join(
-            (
-                "> This is a blockquote",
-                "> with <script>evil()</script> inside",
-            )
-        )
-        expected = "\n".join(
-            (
-                "<blockquote>",
-                "<p>This is a blockquote<br>",
-                "with &lt;script&gt;evil()&lt;/script&gt; inside</p>",
-                "</blockquote>",
-            )
-        )
+        text = "> This is a blockquote\n> with <script>evil()</script> inside"
+        expected = "<blockquote>\n<p>This is a blockquote<br>\nwith &lt;script&gt;evil()&lt;/script&gt; inside</p>\n</blockquote>"
         assert_md(text, expected)
 
     def test_collapsible(self, assert_md):
         """It should not escape the collabsible HTML elem"""
-        text = "\n".join(
-            (
-                "<details>",
-                "<summary>TITLE</summary>",
-                "BODY CONTENT",
-                "</details>",
-            )
-        )
-        expected = "\n".join(
-            (
-                "<details>",
-                "<summary>TITLE</summary>",
-                "BODY CONTENT",
-                "</details>",
-            )
-        )
+        text = "<details>\n<summary>TITLE</summary>\nBODY CONTENT\n</details>"
+        expected = "<details>\n<summary>TITLE</summary>\nBODY CONTENT\n</details>"
         assert_md(text, expected)
 
     @pytest.mark.options(MD_ALLOWED_ATTRIBUTES={"*": ["style"]})
     @pytest.mark.options(MD_ALLOWED_STYLES=["font-weight"])
     def test_styles(self, assert_md):
         """It should keep only explicitly allowed styles if style attribute is set"""
-        text = "\n".join(
-            (
-                "<p>",
-                '<span style="background-color: red; font-weight: heavy;">TITLE</span>',
-                "BODY CONTENT",
-                "</p>",
-            )
-        )
-        expected = "\n".join(
-            (
-                "<p>",
-                '<span style="font-weight: heavy;">TITLE</span>',
-                "BODY CONTENT",
-                "</p>",
-            )
-        )
+        text = '<p>\n<span style="background-color: red; font-weight: heavy;">TITLE</span>\nBODY CONTENT\n</p>'
+        expected = '<p>\n<span style="font-weight: heavy;">TITLE</span>\nBODY CONTENT\n</p>'
         assert_md(text, expected)
 
 

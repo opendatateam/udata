@@ -69,7 +69,7 @@ class UDataApp(Flask):
             return send_static(self.static_folder, filename, cache_timeout=cache_timeout)
 
         # Handle aliases
-        for prefix, directory in self.config.get("STATIC_DIRS", tuple()):
+        for prefix, directory in self.config.get("STATIC_DIRS", ()):
             if filename.startswith(prefix):
                 real_filename = filename[len(prefix) :]
                 real_filename = real_filename.removeprefix("/")
@@ -124,7 +124,7 @@ class UdataJsonProvider(DefaultJSONProvider):
 
     @staticmethod
     def default(obj):
-        if isinstance(obj, BaseDocument) or isinstance(obj, EmbeddedDocument):
+        if isinstance(obj, (BaseDocument, EmbeddedDocument)):
             return json_util._json_convert(obj.to_mongo())
         elif isinstance(obj, bson.ObjectId):
             return str(obj)

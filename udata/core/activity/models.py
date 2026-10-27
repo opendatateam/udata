@@ -92,7 +92,7 @@ def filter_by_keys(base_query, values):
     """
     unknown = set(values) - set(_registered_activities)
     if unknown:
-        api.abort(400, "Unknown activity key(s): {0}".format(", ".join(sorted(unknown))))
+        api.abort(400, "Unknown activity key(s): {}".format(", ".join(sorted(unknown))))
 
     # `_cls` is what the key is stored as, and it leads every index of the collection.
     return base_query.filter(_cls__in=[_registered_activities[key]._class_name for key in values])

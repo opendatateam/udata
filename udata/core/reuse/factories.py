@@ -15,7 +15,7 @@ class ReuseFactory(ModelFactory):
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
-    url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
+    url = factory.LazyAttribute(lambda o: f"{faker.url()}/{faker.unique_string()}")
     type = FuzzyChoice(REUSE_TYPES.keys())
     topic = FuzzyChoice(REUSE_TOPICS.keys())
     archived = None

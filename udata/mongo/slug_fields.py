@@ -233,7 +233,7 @@ def populate_slug(instance, field):
                 # Find all existing slugs with suffixes
                 if existing_slugs is None or trimmed_slug != base_slug:
                     base_slug = trimmed_slug
-                    existing_slugs = set(sorted(get_existing_slug_suffixes(base_slug)))
+                    existing_slugs = set(get_existing_slug_suffixes(base_slug))
                 slug = f"{base_slug}-{index}"
                 if slug not in existing_slugs:
                     break

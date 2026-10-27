@@ -48,7 +48,7 @@ class APITestCaseMixin:
                 response = self.get(url)
         """
         self._user = user or UserFactory()
-        token, plaintext = ApiToken.generate(self._user)
+        _token, plaintext = ApiToken.generate(self._user)
         self._api_key = plaintext
         yield self._user
         self._user = None

@@ -15,9 +15,7 @@ log = logging.getLogger(__name__)
 
 def should_keep(extra):
     extras_to_remove = ["remote_url", "dct:identifier", "uri", "ckan:name", "ckan:source"]
-    if extra.startswith("harvest:") or extra.startswith("ods:") or extra in extras_to_remove:
-        return False
-    return True
+    return not (extra.startswith(("harvest:", "ods:")) or extra in extras_to_remove)
 
 
 def migrate(db):

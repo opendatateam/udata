@@ -233,8 +233,8 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 2)
         self.assertEqual(
-            set([str(tag_dataset_1.id), str(tag_dataset_2.id)]),
-            set([d["id"] for d in response.json["data"]]),
+            {str(tag_dataset_1.id), str(tag_dataset_2.id)},
+            {d["id"] for d in response.json["data"]},
         )
 
         # filter on multiple tags
@@ -2398,7 +2398,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 400)
         self.assertEqual(
             response.json["message"],
-            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+            f"Resource ids must match existing ones in dataset, ie: { {str(r.id) for r in self.dataset.resources} }",
         )
 
         # Resources that don't belong to this dataset
@@ -2409,7 +2409,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 400)
         self.assertEqual(
             response.json["message"],
-            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+            f"Resource ids must match existing ones in dataset, ie: { {str(r.id) for r in self.dataset.resources} }",
         )
 
     def test_invalid_reorder_dict_without_id(self):
@@ -3173,7 +3173,7 @@ class CommunityResourceAPITest(APITestCase):
 
         self.assertEqual(len(resources), len(community_resources))
         # Assert we don't have duplicates
-        self.assertEqual(len(set(res["id"] for res in resources)), len(community_resources))
+        self.assertEqual(len({res["id"] for res in resources}), len(community_resources))
 
     def test_community_resource_api_get_from_string_id(self):
         """It should fetch a community resource from the API"""

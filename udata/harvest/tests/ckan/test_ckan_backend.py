@@ -448,7 +448,7 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset = dataset_for(result)
         assert dataset.title == data["title"]
         assert dataset.description == data["notes"]
-        assert set(dataset.tags) == set([t["name"] for t in data["tags"]])
+        assert set(dataset.tags) == {t["name"] for t in data["tags"]}
         assert dataset.harvest.remote_id == result["result"]["id"]
         assert dataset.harvest.domain == "localhost"
         assert dataset.harvest.ckan_name == data["name"]
@@ -612,7 +612,7 @@ class CkanBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.ckan_data("ckan_url_is_a_string")
     def test_ckan_url_is_string(self, ckan, data, result):
         dataset = dataset_for(result)
-        expected_url = "{0}/dataset/{1}".format(ckan.BASE_URL, data["name"])
+        expected_url = "{}/dataset/{}".format(ckan.BASE_URL, data["name"])
         assert dataset.harvest.remote_url == expected_url
         assert dataset.harvest.ckan_source == data["url"]
 

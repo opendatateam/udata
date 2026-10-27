@@ -312,30 +312,30 @@ class ElasticClient:
     def delete_index(self, index_document: IndexDocument):
         index_document.delete_indices(self.es)
 
-    def index_organization(self, to_index: Organization, index: str = None) -> None:
+    def index_organization(self, to_index: Organization, index: str | None = None) -> None:
         SearchableOrganization(meta={"id": to_index.id}, **to_index.to_dict()).save(
             skip_empty=False, index=index
         )
 
-    def index_dataset(self, to_index: Dataset, index: str = None) -> None:
+    def index_dataset(self, to_index: Dataset, index: str | None = None) -> None:
         data = to_index.to_dict()
         if data.get("organization") and data.get("organization_name"):
             data["organization_with_id"] = f"{data['organization']}|{data['organization_name']}"
         SearchableDataset(meta={"id": to_index.id}, **data).save(skip_empty=False, index=index)
 
-    def index_reuse(self, to_index: Reuse, index: str = None) -> None:
+    def index_reuse(self, to_index: Reuse, index: str | None = None) -> None:
         data = to_index.to_dict()
         if data.get("organization") and data.get("organization_name"):
             data["organization_with_id"] = f"{data['organization']}|{data['organization_name']}"
         SearchableReuse(meta={"id": to_index.id}, **data).save(skip_empty=False, index=index)
 
-    def index_dataservice(self, to_index: Dataservice, index: str = None) -> None:
+    def index_dataservice(self, to_index: Dataservice, index: str | None = None) -> None:
         data = to_index.to_dict()
         if data.get("organization") and data.get("organization_name"):
             data["organization_with_id"] = f"{data['organization']}|{data['organization_name']}"
         SearchableDataservice(meta={"id": to_index.id}, **data).save(skip_empty=False, index=index)
 
-    def index_topic(self, to_index: Topic, index: str = None) -> None:
+    def index_topic(self, to_index: Topic, index: str | None = None) -> None:
         data = to_index.to_dict()
         if data.get("organization") and data.get("organization_name"):
             data["organization_with_id"] = f"{data['organization']}|{data['organization_name']}"
@@ -1695,7 +1695,7 @@ class ElasticClient:
         except NotFoundError:
             return None
 
-    def index_discussion(self, to_index: Discussion, index: str = None) -> None:
+    def index_discussion(self, to_index: Discussion, index: str | None = None) -> None:
         SearchableDiscussion(meta={"id": to_index.id}, **to_index.to_dict()).save(
             skip_empty=False, index=index
         )
@@ -1806,7 +1806,7 @@ class ElasticClient:
         except NotFoundError:
             return None
 
-    def index_post(self, to_index: Post, index: str = None) -> None:
+    def index_post(self, to_index: Post, index: str | None = None) -> None:
         SearchablePost(meta={"id": to_index.id}, **to_index.to_dict()).save(
             skip_empty=False, index=index
         )

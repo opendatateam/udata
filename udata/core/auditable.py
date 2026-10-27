@@ -23,7 +23,7 @@ class Auditable:
             try:
                 # `only` does not support having nested list as expressed in changed fields, ex resources.0.title
                 # thus we only strip to direct attributes for simplicity
-                direct_attributes = set(field.split(".")[0] for field in changed_fields)
+                direct_attributes = {field.split(".")[0] for field in changed_fields}
                 old_document = self.__class__.objects.only(*direct_attributes).get(pk=self.pk)
                 self._previous_changed_fields = {}
                 for field_path in changed_fields:

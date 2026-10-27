@@ -117,16 +117,16 @@ class BaseBackend(ABC):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     # Filters are public, don't store sensitive information
-    filters = tuple()
+    filters = ()
 
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFeature]
-    features = tuple()
+    features = ()
 
     # Define some allowed extras config variables on the backend
     # This a Sequence[HarvestExtraConfig]
     # Extra configs are public, don't store sensitive information
-    extra_configs = tuple()
+    extra_configs = ()
 
     def __init__(self, source_or_job, dryrun=False, max_items=None):
         if isinstance(source_or_job, HarvestJob):

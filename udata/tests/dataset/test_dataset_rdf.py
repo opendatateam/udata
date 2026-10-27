@@ -182,7 +182,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert d.value(DCT.modified) == Literal(dataset.harvest.modified_at)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
-        expected_tags = set(Literal(t) for t in dataset.tags)
+        expected_tags = {Literal(t) for t in dataset.tags}
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
         org = d.value(DCT.publisher)

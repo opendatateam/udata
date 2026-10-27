@@ -149,7 +149,7 @@ def assert_status(response, status_code, message=None):
     if response.mimetype == "application/json":
         try:
             second_line = f"Response content is {response.json}"
-            message = "\n".join((message, second_line))
+            message = f"{message}\n{second_line}"
         except Exception:
             pass
     assert response.status_code == status_code, message

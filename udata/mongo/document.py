@@ -83,13 +83,11 @@ class UDataDocument(Document, Generic[QS]):
         excluded_keys = set(exclude or [])
         excluded_keys.add("_id")
         excluded_keys.add("_cls")
-        data = dict(
-            (
-                (key, serialize(value))
-                for key, value in self.to_mongo().items()
-                if key not in excluded_keys
-            )
-        )
+        data = {
+            key: serialize(value)
+            for key, value in self.to_mongo().items()
+            if key not in excluded_keys
+        }
         data[id_field] = getattr(self, id_field)
         return data
 

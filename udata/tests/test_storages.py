@@ -136,7 +136,7 @@ class ChunksRetentionTest(PytestOnlyTestCase):
         self.create_chunks(expired_uuid, nb=parts, last=expired)
         self.create_chunks(active_uuid, nb=parts, last=not_expired)
         purge_chunks.apply()
-        expected = set([chunk_filename(active_uuid, i) for i in range(parts)])
+        expected = {chunk_filename(active_uuid, i) for i in range(parts)}
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
         assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too

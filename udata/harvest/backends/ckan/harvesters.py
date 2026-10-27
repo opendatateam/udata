@@ -71,11 +71,11 @@ class CkanBackend(BaseBackend):
         return headers
 
     def action_url(self, endpoint):
-        path = "/".join(["api/3/action", endpoint])
+        path = f"api/3/action/{endpoint}"
         return urljoin(self.source.url, path)
 
     def dataset_url(self, name):
-        path = "/".join(["dataset", name])
+        path = f"dataset/{name}"
         return urljoin(self.source.url, path)
 
     def get_action(self, endpoint, fix=False, **kwargs):

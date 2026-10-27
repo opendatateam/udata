@@ -31,9 +31,7 @@ log = get_task_logger(__name__)
 
 def flatten(iterable):
     for el in iterable:
-        if isinstance(el, collections.Iterable) and not (
-            isinstance(el, str) or isinstance(el, Document)
-        ):
+        if isinstance(el, collections.Iterable) and not (isinstance(el, (str, Document))):
             yield from flatten(el)
         else:
             yield el
@@ -122,7 +120,7 @@ def get_or_create_resource(r_info, model, dataset):
 def store_resource(csvfile, model, dataset):
     timestr = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     filename = "export-%s-%s.csv" % (model, timestr)
-    prefix = "/".join((dataset.slug, timestr))
+    prefix = f"{dataset.slug}/{timestr}"
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
         r_info = storages.utils.save_upload(storage, infile, filename, prefix=prefix)

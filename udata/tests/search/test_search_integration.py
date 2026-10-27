@@ -665,13 +665,13 @@ class SearchIntegrationTest(APITestCase):
         self.assert200(response)
         assert response.json["total"] == 1
         ids = [o["id"] for o in response.json["data"]]
-        assert set([str(restricted_dataservice.id)]) == set(ids)
+        assert {str(restricted_dataservice.id)} == set(ids)
 
         response = self.get("/api/2/dataservices/search/?is_restricted=false")
         self.assert200(response)
         assert response.json["total"] == 2
         ids = [o["id"] for o in response.json["data"]]
-        assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)
+        assert {str(open_dataservice.id), str(open_with_account_dataservice.id)} == set(ids)
 
     def test_dataset_sort_by_created(self):
         from datetime import datetime

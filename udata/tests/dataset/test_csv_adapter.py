@@ -119,7 +119,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         resources_dataset_values = csv[str(resources_dataset.id)]
         assert resources_dataset_values["resources_count"] == 3
         assert resources_dataset_values["main_resources_count"] == 1
-        assert set(resources_dataset_values["resources_formats"].split(",")) == set(["csv", "json"])
+        assert set(resources_dataset_values["resources_formats"].split(",")) == {"csv", "json"}
 
         spatial_zones_dataset_values = csv[str(spatial_zones_dataset.id)]
         assert spatial_zones_dataset_values["spatial.zones"] == "Provence Alpes Côtes dAzur"

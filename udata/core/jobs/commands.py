@@ -15,7 +15,7 @@ SCHEDULE_LINE = "{name}: {label} ↦ {schedule}"
 def job_label(name, args, kwargs):
     label = name
     params = args[:]
-    params += ["=".join((k, v)) for k, v in sorted(kwargs.items())]
+    params += [f"{k}={v}" for k, v in sorted(kwargs.items())]
     if params:
         label += "(" + ", ".join(params) + ")"
     return label

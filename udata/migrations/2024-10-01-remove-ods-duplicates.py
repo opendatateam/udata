@@ -69,7 +69,7 @@ def migrate(db):
 
             except StopIteration:
                 log.info(
-                    f"Could not find expected params on {res_format} for {dat.id} : {set(res.url.split('/')[-1] for res in resources)}"
+                    f"Could not find expected params on {res_format} for {dat.id} : { {res.url.split('/')[-1] for res in resources} }"
                 )
                 errors += 1
                 continue

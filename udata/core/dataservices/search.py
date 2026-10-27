@@ -153,7 +153,7 @@ class DataserviceSearch(ModelSearchAdapter):
         organization = None
 
         topic_ids = list(
-            set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
+            {te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic}
         )
 
         if dataservice.organization:

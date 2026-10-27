@@ -28,7 +28,7 @@ def clean(ctx, translations=False):
     for pattern in patterns:
         info(pattern)
     with ctx.cd(ROOT):
-        ctx.run("rm -rf {0}".format(" ".join(patterns)))
+        ctx.run("rm -rf {}".format(" ".join(patterns)))
 
 
 @task
@@ -105,7 +105,7 @@ def cover(ctx, html=False):
     header("Run tests suite with coverage")
     cmd = "pytest --cov udata --cov-report term"
     if html:
-        cmd = " ".join((cmd, "--cov-report html:reports/python/cover"))
+        cmd = f"{cmd} --cov-report html:reports/python/cover"
     with ctx.cd(ROOT):
         ctx.run(cmd, pty=True)
 

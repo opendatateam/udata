@@ -261,7 +261,7 @@ class FormField(FieldHelper, fields.FormField):
         self._formdata = formdata
         return super().process(formdata, data=data, **kwargs)
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         if extra_validators:
             raise TypeError(
                 "FormField does not accept in-line validators, "
@@ -518,7 +518,7 @@ class NestedModelList(fields.FieldList):
             self.entries = []
             # super(NestedModelList, self).process(None, data, **kwargs)
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         """Perform validation only if data has been submitted"""
         if not self.has_data:
             return True
@@ -557,7 +557,7 @@ class NestedModelList(fields.FieldList):
         """
         if formdata:
             prefix = "-".join((self.name, str(index)))
-            basekey = "-".join((prefix, "{0}"))
+            basekey = f"{prefix}-{{0}}"
             idkey = basekey.format("id")
             if prefix in formdata:
                 formdata[idkey] = formdata.pop(prefix)
@@ -765,7 +765,7 @@ class ExtrasField(Field):
     def parse(self, data):
         """Parse fields and store individual errors"""
         self.field_errors = {}
-        return dict((k, self._parse_value(k, v)) for k, v in data.items())
+        return {k: self._parse_value(k, v) for k, v in data.items()}
 
     def _parse_value(self, key, value):
         if key not in self.extras.registered:
@@ -810,7 +810,7 @@ class ExtrasField(Field):
             (self.data or {}) | {k: v for k, v in stored.items() if not self.can_write(k)},
         )
 
-    def validate(self, form, extra_validators=tuple()):
+    def validate(self, form, extra_validators=()):
         if self.process_errors:
             self.errors = list(self.process_errors)
         elif getattr(self, "field_errors", None):

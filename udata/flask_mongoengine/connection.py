@@ -107,9 +107,9 @@ def get_connection_settings(config):
     # If "MONGODB_SETTINGS" doesn't exist, sanitize the "MONGODB_" keys
     # as if they all describe a single connection.
     else:
-        config = dict(
-            (k, v) for k, v in config.items() if k in MONGODB_CONF_VARS
-        )  # ugly dict comprehention in order to support python 2.6
+        config = {
+            k: v for k, v in config.items() if k in MONGODB_CONF_VARS
+        }  # ugly dict comprehention in order to support python 2.6
         return _sanitize_settings(config)
 
 

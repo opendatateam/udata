@@ -437,7 +437,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                 storage = storages.avatars
                 storage.delete(self.avatar.filename)
                 storage.delete(self.avatar.original)
-                for key, value in self.avatar.thumbnails.items():
+                for value in self.avatar.thumbnails.values():
                     storage.delete(value)
             except FileNotFoundError as e:
                 log.error(f"File not found while deleting user #{self.id} avatar: {e}")

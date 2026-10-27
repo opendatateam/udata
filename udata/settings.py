@@ -744,7 +744,7 @@ class Testing:
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_RESOLVE_HOSTNAME = False
-    URLS_ALLOWED_TLDS = tld_set | set(["test"])
+    URLS_ALLOWED_TLDS = tld_set | {"test"}
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
     SECURITY_EMAIL_VALIDATOR_ARGS = {

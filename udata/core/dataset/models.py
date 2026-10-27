@@ -218,7 +218,7 @@ class Schema(EmbeddedDocument):
                 'Schema name "{schema}" is not an allowed value. Allowed values: {values}'
             ).format(
                 schema=self.name,
-                values=", ".join(map(lambda schema: schema["name"], catalog_schemas)),
+                values=", ".join((schema["name"] for schema in catalog_schemas)),
             )
             if check_schema_in_catalog:
                 raise FieldValidationError(message, field="name")
@@ -227,9 +227,7 @@ class Schema(EmbeddedDocument):
                 return
 
         if self.version:
-            allowed_versions = list(
-                map(lambda version: version["version_name"], existing_schema["versions"])
-            )
+            allowed_versions = [version["version_name"] for version in existing_schema["versions"]]
             allowed_versions.append("latest")
 
             if self.version not in allowed_versions:
@@ -267,7 +265,7 @@ class License(Document):
         Extracts the first URL from a given text string and returns the URL and the remaining text.
         """
         if text is None:
-            return tuple()
+            return ()
         url_pattern = r"(https?://\S+)"
         match = re.search(url_pattern, text.rstrip("."))
         if match:
@@ -798,7 +796,7 @@ class Dataset(
     def clean(self):
         super().clean()
 
-        if len(set(res.id for res in self.resources)) != len(self.resources):
+        if len({res.id for res in self.resources}) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
         if self.doi:
@@ -999,9 +997,9 @@ class Dataset(
         """
         result = {}
 
-        result["license"] = True if self.license else False
-        result["temporal_coverage"] = True if self.temporal_coverage else False
-        result["spatial"] = True if self.spatial else False
+        result["license"] = bool(self.license)
+        result["temporal_coverage"] = bool(self.temporal_coverage)
+        result["spatial"] = bool(self.spatial)
 
         result["update_frequency"] = self.has_frequency
 
@@ -1011,10 +1009,8 @@ class Dataset(
         # See :UpdateFulfilledInTime
         result["next_update_for_update_fulfilled_in_time"] = self.next_update
 
-        result["dataset_description_quality"] = (
-            True
-            if len(self.description) > current_app.config.get("QUALITY_DESCRIPTION_LENGTH")
-            else False
+        result["dataset_description_quality"] = len(self.description) > current_app.config.get(
+            "QUALITY_DESCRIPTION_LENGTH"
         )
 
         if self.resources:

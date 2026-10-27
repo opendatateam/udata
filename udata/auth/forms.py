@@ -60,10 +60,7 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
         if not self.validate_captcha():
             return False
 
-        if not super().validate(**kwargs):
-            return False
-
-        return True
+        return super().validate(**kwargs)
 
 
 class ExtendedLoginForm(LoginForm):
@@ -96,10 +93,7 @@ class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
         if not self.validate_captcha():
             return False
 
-        if not super().validate(**kwargs):
-            return False
-
-        return True
+        return super().validate(**kwargs)
 
 
 class ChangeEmailForm(Form):

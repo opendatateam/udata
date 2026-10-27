@@ -596,7 +596,7 @@ class MeAPITest(APITestCase):
         with capture_mails() as mails:
             response = self.delete(url_for("api.me"))
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([user_email]))
+        self.assertEqual(mails[0].send_to, {user_email})
         self.assertEqual(mails[0].subject, _("Account deletion"))
         self.assert204(response)
 
@@ -656,7 +656,7 @@ class MeAPITest(APITestCase):
 
         user = UserFactory()
         expired = datetime.now(UTC) - timedelta(hours=1)
-        token, plaintext = ApiToken.generate(user, expires_at=expired)
+        _token, plaintext = ApiToken.generate(user, expires_at=expired)
 
         response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})
         self.assert401(response)
@@ -671,7 +671,7 @@ class MeAPITest(APITestCase):
         # Without the timezone fix, this would raise:
         # TypeError: can't compare offset-naive and offset-aware datetimes
         future_naive = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30)
-        token, plaintext = ApiToken.generate(user, expires_at=future_naive)
+        _token, plaintext = ApiToken.generate(user, expires_at=future_naive)
 
         result, error = ApiToken.authenticate(plaintext)
         self.assertIsNotNone(result)
@@ -679,7 +679,7 @@ class MeAPITest(APITestCase):
 
         # Also verify the expired naive case
         past_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
-        token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
+        _token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
 
         result2, error2 = ApiToken.authenticate(plaintext2)
         self.assertIsNone(result2)

@@ -51,7 +51,7 @@ def format_output(output, success=True, traceback=None):
         for tb in traceback.split("\n"):
             echo(f"  │ {tb}")
     echo("  │")
-    echo("  └──[{0}]".format(green("OK") if success else red("KO")))
+    echo("  └──[{}]".format(green("OK") if success else red("KO")))
     echo("")
 
 

@@ -60,8 +60,8 @@ class TopicsListAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 2
         self.assertEqual(
-            set([str(tag_topic_1.id), str(tag_topic_2.id)]),
-            set([t["id"] for t in response.json["data"]]),
+            {str(tag_topic_1.id), str(tag_topic_2.id)},
+            {t["id"] for t in response.json["data"]},
         )
 
         response = self.get(url_for("apiv2.topics_list", private="true"))

@@ -210,7 +210,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # TODO: this is currently never used. We may remove it if the auto-conversion
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
-    elif isinstance(field, mongo_fields.StringField) or isinstance(field, mongo_fields.EnumField):
+    elif isinstance(field, (mongo_fields.StringField, mongo_fields.EnumField)):
         constructor = (
             custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
         )
@@ -240,7 +240,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor = custom_restx_fields.ISODateTime
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
-    elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+    elif isinstance(field, (mongo_fields.ImageField, FlaskStorageImageField)):
         size: int | None = info.get("size", None)
         if size:
             params["description"] = f"URL of the cropped and squared image ({size}x{size})"
@@ -511,7 +511,7 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
 
         yield key, field, info
 
-        if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+        if isinstance(field, (mongo_fields.ImageField, FlaskStorageImageField)):
             if not getattr(field, "thumbnail_sizes", None) and not info.get("thumbnail_info"):
                 # The model generates no thumbnail files and no thumbnail is
                 # configured for the API: don't expose a `<key>_thumbnail` key
@@ -538,9 +538,7 @@ def save_class_by_parents(cls):
         if parent == UDataDocument:
             return
 
-        classes_by_parents[parent] = (
-            classes_by_parents[parent] if parent in classes_by_parents else set()
-        )
+        classes_by_parents[parent] = classes_by_parents.get(parent, set())
         classes_by_parents[parent].add(cls)
 
 
@@ -728,7 +726,7 @@ def generate_fields(**kwargs) -> Callable:
 
         page_mask = None
         if page_mask_exclude:
-            page_mask = "data{{{0}}},*".format(
+            page_mask = "data{{{}}},*".format(
                 ",".join(k for k in read_fields if k not in page_mask_exclude)
             )
         elif page_mask is not None:

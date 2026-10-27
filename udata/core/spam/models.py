@@ -152,7 +152,7 @@ class SpamMixin:
         """Detect spam in an embedded document."""
         breadcrumb.append(embed)
 
-        for field_name, text in embed.fields_to_check_for_spam().items():
+        for text in embed.fields_to_check_for_spam().values():
             if not text:
                 continue
 
