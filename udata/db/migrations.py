@@ -150,7 +150,7 @@ class Migration:
         return self._record
 
     def __eq__(self, value):
-        return isinstance(value, Migration) and getattr(value, "filename") == self.filename
+        return isinstance(value, Migration) and value.filename == self.filename
 
     def execute(self, recordonly=False, dryrun=False):
         """

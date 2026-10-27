@@ -40,7 +40,7 @@ def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.
 
 def assert_starts_with(haystack, needle):
     __tracebackhide__ = True
-    msg = "{haystack} does not start with {needle}".format(haystack=haystack, needle=needle)
+    msg = f"{haystack} does not start with {needle}"
     assert haystack.startswith(needle), msg
 
 
@@ -148,7 +148,7 @@ def assert_status(response, status_code, message=None):
     message = message or "HTTP Status %s expected but got %s" % (status_code, response.status_code)
     if response.mimetype == "application/json":
         try:
-            second_line = "Response content is {0}".format(response.json)
+            second_line = f"Response content is {response.json}"
             message = "\n".join((message, second_line))
         except Exception:
             pass

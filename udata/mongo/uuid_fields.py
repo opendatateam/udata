@@ -13,9 +13,9 @@ class AutoUUIDField(UUIDField):
 
     def __init__(self, **kwargs):
         kwargs.setdefault("binary", False)
-        super(AutoUUIDField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def __set__(self, instance, value):
         if not value:
             value = uuid.uuid4()
-        return super(AutoUUIDField, self).__set__(instance, value)
+        return super().__set__(instance, value)

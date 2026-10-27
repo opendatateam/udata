@@ -4,8 +4,9 @@ This module centralize udata-wide RDF helpers and configuration
 
 import logging
 import re
+from collections.abc import Iterator
 from html.parser import HTMLParser
-from typing import Iterator, cast
+from typing import cast
 from urllib.parse import quote
 
 import mongoengine
@@ -49,7 +50,7 @@ DCATAP = Namespace("http://data.europa.eu/r5r/")
 DCT = DCTERMS  # More common usage
 DQV = Namespace("http://www.w3.org/ns/dqv#")
 EUFORMAT = Namespace("http://publications.europa.eu/resource/authority/file-type/")
-EUFREQ = Namespace("http://publications.europa.eu/resource/authority/frequency/")  # noqa: E501
+EUFREQ = Namespace("http://publications.europa.eu/resource/authority/frequency/")
 FREQ = Namespace("http://purl.org/cld/freq/")
 GEODCAT = Namespace("http://data.europa.eu/930/")
 GEOSPARQL = Namespace("http://www.opengis.net/ont/geosparql#")

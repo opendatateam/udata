@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 @cli.group("worker")
 def grp():
     """Worker related operations"""
-    pass
 
 
 @grp.command()
@@ -59,8 +58,7 @@ def status_print_queue(queue, munin=False):
     for task in r.lrange(queue, 0, -1):
         task = json.loads(task)
         task_name = task["headers"]["task"]
-        if len(task_name) > biggest_task_name:
-            biggest_task_name = len(task_name)
+        biggest_task_name = max(biggest_task_name, len(task_name))
         counter[task_name] += 1
     for count in counter.most_common():
         status_print_task(count, biggest_task_name, munin=munin)
@@ -114,7 +112,7 @@ def tasks():
     longest = max(tasks.keys(), key=len)
     size = len(longest)
     for name, queue in sorted(tasks.items()):
-        print("* {0}: {1}".format(name.ljust(size), queue))
+        print(f"* {name.ljust(size)}: {queue}")
 
 
 @grp.command()

@@ -20,7 +20,7 @@ from udata.tests.helpers import assert_emit
 class OrganizationModelTest(DBTestCase):
     # Load metrics
     import udata.core.organization.metrics  # noqa
-    import udata.core.followers.metrics  # noqa
+    import udata.core.followers.metrics
 
     def test_organization_metrics(self):
         # Members count update are in API calls, thus being tested in API dedicated tests

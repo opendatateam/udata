@@ -19,11 +19,7 @@ def toggle_badge(id_or_slug, badge_kind):
     if not organization:
         log.error("No organization found for %s", id_or_slug)
         return
-    log.info(
-        "Toggling badge {kind} for organization {org}".format(
-            kind=badge_kind, org=organization.name
-        )
-    )
+    log.info(f"Toggling badge {badge_kind} for organization {organization.name}")
     organization.toggle_badge(badge_kind)
 
 
@@ -38,7 +34,7 @@ def toggle(path_or_id, badge_kind):
     """
     if exists(path_or_id):
         with open(path_or_id) as open_file:
-            for id_or_slug in open_file.readlines():
+            for id_or_slug in open_file:
                 toggle_badge(id_or_slug.strip(), badge_kind)
     else:
         toggle_badge(path_or_id, badge_kind)

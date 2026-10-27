@@ -87,13 +87,13 @@ from .exceptions import (
 )
 
 __all__ = (
-    "License",
-    "Resource",
-    "Schema",
-    "Dataset",
     "Checksum",
     "CommunityResource",
+    "Dataset",
+    "License",
+    "Resource",
     "ResourceSchema",
+    "Schema",
 )
 
 BADGES: dict[str, LazyString] = {
@@ -382,7 +382,7 @@ class Checksum(EmbeddedDocument):
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
-            return super(Checksum, self).to_mongo()
+            return super().to_mongo()
 
 
 # Resource fields the platform maintains on its own: they say nothing about what the
@@ -393,7 +393,7 @@ class Checksum(EmbeddedDocument):
 RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)
     description = StringField()
@@ -466,7 +466,7 @@ class ResourceMixin(object):
         return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
-        super(ResourceMixin, self).clean()
+        super().clean()
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
@@ -796,7 +796,7 @@ class Dataset(
         validate_contact_points_ownership(self)
 
     def clean(self):
-        super(Dataset, self).clean()
+        super().clean()
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
@@ -1346,7 +1346,7 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySe
         }
 
 
-class ResourceSchema(object):
+class ResourceSchema:
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():

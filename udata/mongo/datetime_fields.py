@@ -55,7 +55,7 @@ class DateRange(EmbeddedDocument):
             self.start, self.end = self.end, self.start
 
 
-class Datetimed(object):
+class Datetimed:
     created_at = field(
         DateTimeField(
             verbose_name=_("Creation date"), default=lambda: datetime.now(UTC), required=True

@@ -57,7 +57,7 @@ class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
         decorators = kwargs.pop("decorators", []) or []
         kwargs["decorators"] = [self.authentify] + decorators
-        super(UDataApi, self).__init__(app, **kwargs)
+        super().__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
 
     def secure(self, func):
@@ -171,7 +171,7 @@ class UDataApi(Api):
         class_name = reference.get("class")
         if class_name not in allowed_classes:
             expected = ", ".join(allowed_classes)
-            self.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+            self.abort(400, errors={field_name: f"`class` must be one of: {expected}"})
 
         object_id = reference.get("id")
         if not ObjectId.is_valid(object_id):
@@ -181,9 +181,7 @@ class UDataApi(Api):
         try:
             return model.objects.get(id=object_id)
         except model.DoesNotExist:
-            self.abort(
-                400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
-            )
+            self.abort(400, errors={field_name: f'Unknown {field_name} id "{object_id}"'})
 
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
@@ -203,7 +201,7 @@ class UDataApi(Api):
     def unauthorized(self, response):
         """Override to change the WWW-Authenticate challenge"""
         realm = current_app.config.get("HTTP_OAUTH_REALM", "uData")
-        challenge = 'Bearer realm="{0}"'.format(realm)
+        challenge = f'Bearer realm="{realm}"'
 
         response.headers["WWW-Authenticate"] = challenge
         return response
@@ -302,9 +300,7 @@ def handle_value_error(error):
 def handle_unauthorized_file_type(error):
     """Error occuring when the user try to upload a non-allowed file type"""
     url = url_for("api.allowed_extensions", _external=True)
-    msg = ("This file type is not allowed.The allowed file type list is available at {url}").format(
-        url=url
-    )
+    msg = f"This file type is not allowed.The allowed file type list is available at {url}"
     return {"message": msg}, 400
 
 
@@ -403,34 +399,34 @@ def marshal_page_with(func):
 def init_app(app):
     # Load all core APIs
     import udata.core.access_type.api  # noqa
-    import udata.core.activity.api  # noqa
-    import udata.core.spatial.api  # noqa
-    import udata.core.user.api  # noqa
-    import udata.core.user.apiv2  # noqa
-    import udata.core.dataset.api  # noqa
-    import udata.core.dataset.apiv2  # noqa
-    import udata.core.dataservices.api  # noqa
-    import udata.core.dataservices.apiv2  # noqa
-    import udata.core.visualizations.api  # noqa
-    import udata.core.discussions.api  # noqa
-    import udata.core.discussions.apiv2  # noqa
-    import udata.core.reuse.api  # noqa
-    import udata.core.reuse.apiv2  # noqa
-    import udata.core.organization.api  # noqa
-    import udata.core.organization.apiv2  # noqa
-    import udata.core.followers.api  # noqa
-    import udata.core.jobs.api  # noqa
-    import udata.core.reports.api  # noqa
-    import udata.core.site.api  # noqa
-    import udata.core.tags.api  # noqa
-    import udata.core.topic.apiv2  # noqa
-    import udata.core.post.api  # noqa
-    import udata.core.post.apiv2  # noqa
-    import udata.core.contact_point.api  # noqa
-    import udata.features.transfer.api  # noqa
-    import udata.features.notifications.api  # noqa
-    import udata.core.avatars.api  # noqa
-    import udata.geopf.api  # noqa
+    import udata.core.activity.api
+    import udata.core.spatial.api
+    import udata.core.user.api
+    import udata.core.user.apiv2
+    import udata.core.dataset.api
+    import udata.core.dataset.apiv2
+    import udata.core.dataservices.api
+    import udata.core.dataservices.apiv2
+    import udata.core.visualizations.api
+    import udata.core.discussions.api
+    import udata.core.discussions.apiv2
+    import udata.core.reuse.api
+    import udata.core.reuse.apiv2
+    import udata.core.organization.api
+    import udata.core.organization.apiv2
+    import udata.core.followers.api
+    import udata.core.jobs.api
+    import udata.core.reports.api
+    import udata.core.site.api
+    import udata.core.tags.api
+    import udata.core.topic.apiv2
+    import udata.core.post.api
+    import udata.core.post.apiv2
+    import udata.core.contact_point.api
+    import udata.features.transfer.api
+    import udata.features.notifications.api
+    import udata.core.avatars.api
+    import udata.geopf.api
     import udata.harvest.api  # noqa
 
     # api.init_app(app)

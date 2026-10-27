@@ -67,7 +67,7 @@ class DatasetCsvAdapter(csv.Adapter):
 
 
 def dataset_field(name, getter=None):
-    return ("dataset.{0}".format(name), getter or name)
+    return (f"dataset.{name}", getter or name)
 
 
 @csv.adapter(Resource)

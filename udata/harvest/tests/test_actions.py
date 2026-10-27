@@ -2,10 +2,10 @@ import csv
 import logging
 from datetime import UTC, datetime, timedelta
 from tempfile import NamedTemporaryFile
+from unittest.mock import patch
 
 import pytest
 from flask import current_app
-from mock import patch
 
 from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
@@ -423,7 +423,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
             result = actions.attach("test.org", csvfile.name)
 
-        dbcount = Dataset.objects(**{"harvest__remote_id__exists": True}).count()
+        dbcount = Dataset.objects(harvest__remote_id__exists=True).count()
         assert result.success == len(datasets)
         assert dbcount == result.success
         for index, dataset in enumerate(datasets):

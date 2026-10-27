@@ -1,7 +1,7 @@
 from mongoengine import post_save
 from mongoengine.fields import BooleanField, ReferenceField, StringField
 
-import udata.core.owned as owned
+from udata.core import owned
 from udata.core.dataset.permissions import OwnableReadPermission
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization

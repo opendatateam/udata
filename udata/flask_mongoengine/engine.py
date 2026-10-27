@@ -85,7 +85,7 @@ def current_mongoengine_instance():
             return k
 
 
-class MongoEngine(object):
+class MongoEngine:
     """Main class used for initialization of Flask-MongoEngine."""
 
     def __init__(self, app=None, config=None):

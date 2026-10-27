@@ -690,7 +690,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It should suggest reuses"""
         for i in range(3):
             ReuseFactory(
-                title="arealtestprefix-{0}".format(i) if i % 2 else faker.word(),
+                title=f"arealtestprefix-{i}" if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i},
             )
@@ -715,7 +715,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
     def test_suggest_reuses_api_unicode(self):
         """It should suggest reuses with special characters"""
         for i in range(4):
-            ReuseFactory(title="testé-{0}".format(i) if i % 2 else faker.word(), visible=True)
+            ReuseFactory(title=f"testé-{i}" if i % 2 else faker.word(), visible=True)
 
         response = self.get(url_for("api.suggest_reuses", q="testé", size=5))
         assert200(response)

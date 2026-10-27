@@ -18,7 +18,6 @@ from .tasks import (
 @cli.group("geopf")
 def grp():
     """Géoplateforme integration operations"""
-    pass
 
 
 def _require_datastore_id(datastore_id: str | None) -> str:

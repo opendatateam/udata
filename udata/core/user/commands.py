@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 @cli.group("user")
 def grp():
     """User related operations"""
-    pass
 
 
 @grp.command()
@@ -45,7 +44,7 @@ def create(first_name, last_name, email, password, admin):
         if admin:
             role = datastore.find_or_create_role("admin")
             datastore.add_role_to_user(user, role)
-        success("User(id={u.id} email={u.email}) created".format(u=user))
+        success(f"User(id={user.id} email={user.email}) created")
         return user
     errors = "\n".join("\n".join([str(m) for m in e]) for e in form.errors.values())
     exit_with_error("Error creating user", errors)

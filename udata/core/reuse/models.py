@@ -283,7 +283,7 @@ class Reuse(
         return REUSE_TOPICS[self.topic]
 
     def clean(self):
-        super(Reuse, self).clean()
+        super().clean()
         """Auto populate urlhash from url"""
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)

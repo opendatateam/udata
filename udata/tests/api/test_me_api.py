@@ -1,6 +1,6 @@
 import struct
 import zlib
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 
 import pytest
@@ -616,7 +616,7 @@ class MeAPITest(APITestCase):
             followed.reload()
 
         # The personal data of the user are anonymized
-        self.assertEqual(user.email, "{}@deleted".format(user.id))
+        self.assertEqual(user.email, f"{user.id}@deleted")
         self.assertEqual(user.password, None)
         self.assertEqual(user.active, False)
         self.assertEqual(user.first_name, "DELETED")
@@ -655,7 +655,7 @@ class MeAPITest(APITestCase):
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
-        expired = datetime.now(timezone.utc) - timedelta(hours=1)
+        expired = datetime.now(UTC) - timedelta(hours=1)
         token, plaintext = ApiToken.generate(user, expires_at=expired)
 
         response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})

@@ -19,7 +19,7 @@ from udata.mongo.slug_fields import SlugField
 from udata.uris import cdata_url, homepage_url
 
 
-class LazyRedirect(object):
+class LazyRedirect:
     """Store location for lazy redirections"""
 
     def __init__(self, arg):
@@ -238,7 +238,7 @@ class TerritoryConverter(PathConverter):
         code = getattr(obj, "code", None)
         slug = getattr(obj, "slug", None)
         if code and slug:
-            return "{level_name}/{code}/{slug}".format(level_name=level_name, code=code, slug=slug)
+            return f"{level_name}/{code}/{slug}"
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

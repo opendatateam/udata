@@ -180,7 +180,7 @@ class PublishFieldTest(DBTestCase):
     def test_with_invalid_data(self):
         Ownable, OwnableForm = self.factory()
 
-        form = OwnableForm(MultiDict({"organization": str("wrongwith12c")}))
+        form = OwnableForm(MultiDict({"organization": "wrongwith12c"}))
 
         form.validate()
         self.assertIn("organization", form.errors)

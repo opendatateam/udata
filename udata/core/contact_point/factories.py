@@ -12,5 +12,5 @@ class ContactPointFactory(ModelFactory):
 
     name = factory.Faker("name")
     contact_form = factory.Faker("url")
-    email = factory.Sequence(lambda n: "contact_point{}@example.com".format(n))
+    email = factory.Sequence(lambda n: f"contact_point{n}@example.com")
     role = factory.fuzzy.FuzzyChoice(CONTACT_ROLES.keys())

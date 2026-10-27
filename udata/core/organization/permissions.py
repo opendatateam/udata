@@ -18,14 +18,14 @@ class EditOrganizationPermission(Permission):
 
     def __init__(self, org):
         need = OrganizationAdminNeed(org.id)
-        super(EditOrganizationPermission, self).__init__(need)
+        super().__init__(need)
 
 
 class OrganizationPrivatePermission(Permission):
     """Permission to see organization private assets"""
 
     def __init__(self, org):
-        super(OrganizationPrivatePermission, self).__init__(
+        super().__init__(
             OrganizationAdminNeed(org.id),
             OrganizationEditorNeed(org.id),
             OrganizationPartialEditorNeed(org.id),

@@ -21,9 +21,9 @@ class DkanBackendTest(PytestOnlyDBTestCase):
     def test_dkan_french_w_license(self, rmock):
         """CKAN Harvester should accept the minimum dataset payload"""
         DKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(DKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{DKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         with open(data_path("dkan-french-w-license.json")) as ifile:
             data = json.loads(ifile.read())
@@ -49,7 +49,7 @@ class DkanBackendTest(PytestOnlyDBTestCase):
         datasets = Dataset.objects.filter(organization=org)
         assert len(datasets) > 0
 
-        dataset = datasets.get(**{"harvest__remote_id": "04be6288-696d-4331-850d-a144871a7e3a"})
+        dataset = datasets.get(harvest__remote_id="04be6288-696d-4331-850d-a144871a7e3a")
         assert dataset.harvest.created_at == datetime(2019, 12, 10, 0, 0)
         assert dataset.harvest.modified_at is None
         assert len(dataset.resources) == 2

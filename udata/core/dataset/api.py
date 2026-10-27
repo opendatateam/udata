@@ -628,7 +628,7 @@ class ResourcesAPI(API):
         return dataset.resources, 200
 
 
-class UploadMixin(object):
+class UploadMixin:
     def handle_upload(self, dataset):
         prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
@@ -679,7 +679,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         return community_resource, 201
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, id=id)
         if not resource:

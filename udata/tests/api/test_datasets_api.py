@@ -1052,7 +1052,7 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
-        resource = next((r for r in dataset.resources if r.title == resource_data["title"]))
+        resource = next(r for r in dataset.resources if r.title == resource_data["title"])
         self.assertEqual(resource.extras, {"extra:id": "id"})
 
     def test_dataset_api_update_existing_resource_with_extras(self):
@@ -2905,7 +2905,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest datasets"""
         for i in range(3):
             DatasetFactory(
-                title="title-test-{0}".format(i) if i % 2 else faker.word(),
+                title=f"title-test-{i}" if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i},
             )
@@ -2932,7 +2932,7 @@ class DatasetResourceAPITest(APITestCase):
             DatasetFactory(
                 # Ensure title does not contains 'acronym-tes'
                 title=faker.unique_string(),
-                acronym="acronym-test-{0}".format(i) if i % 2 else None,
+                acronym=f"acronym-test-{i}" if i % 2 else None,
                 visible=True,
             )
 
@@ -2954,7 +2954,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest datasets with special characters"""
         for i in range(4):
             DatasetFactory(
-                title="title-testé-{0}".format(i) if i % 2 else faker.word(),
+                title=f"title-testé-{i}" if i % 2 else faker.word(),
                 resources=[ResourceFactory()],
             )
 

@@ -89,7 +89,7 @@ def register(adapter):
 
 from .adapter import ModelSearchAdapter  # noqa
 from .result import SearchResult  # noqa
-from .fields import *  # noqa
+from .fields import *
 
 
 def adapter_for(model_or_adapter):
@@ -112,11 +112,11 @@ def query(model, **params):
 
 def init_app(app):
     # Side-effect imports to register event handlers and search adapters
-    import udata.core.dataservices.search  # noqa
-    import udata.core.dataset.search  # noqa
-    import udata.core.discussions.search  # noqa
-    import udata.core.organization.search  # noqa
-    import udata.core.post.search  # noqa
-    import udata.core.reuse.search  # noqa
-    import udata.core.topic.search  # noqa
+    import udata.core.dataservices.search
+    import udata.core.dataset.search
+    import udata.core.discussions.search
+    import udata.core.organization.search
+    import udata.core.post.search
+    import udata.core.reuse.search
+    import udata.core.topic.search
     import udata.event  # noqa

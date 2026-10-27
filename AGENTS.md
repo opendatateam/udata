@@ -195,6 +195,7 @@ uv build --wheel
 # In udata/commands/mycommand.py or udata/core/mymodule/commands.py
 from udata.commands import cli
 
+
 @cli.command()
 def mycommand():
     """Command description"""
@@ -213,6 +214,7 @@ Commands are auto-discovered from modules listed in `MODULES_WITH_COMMANDS` in `
 Example:
 ```python
 from udata.harvest.backends.base import BaseBackend
+
 
 class MyBackend(BaseBackend):
     name = "mybackend"

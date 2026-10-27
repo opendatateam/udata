@@ -14,7 +14,7 @@ from . import actions
 log = logging.getLogger(__name__)
 
 # Use CKAN license group from opendefinition as default license list
-DEFAULT_LICENSE_FILE = "http://licenses.opendefinition.org/licenses/groups/ckan.json"  # noqa
+DEFAULT_LICENSE_FILE = "http://licenses.opendefinition.org/licenses/groups/ckan.json"
 
 FLAGS_MAP = {
     "domain_content": "domain_content",
@@ -68,7 +68,6 @@ def licenses(source=DEFAULT_LICENSE_FILE):
 @cli.group("dataset")
 def grp():
     """Dataset related operations"""
-    pass
 
 
 @grp.command()
@@ -93,7 +92,7 @@ def archive(filepath, comment):
     errors = 0
     log.info("Archiving datasets...")
     with open(filepath) as inputfile:
-        for line in inputfile.readlines():
+        for line in inputfile:
             line = line.rstrip()
             if not line:
                 continue

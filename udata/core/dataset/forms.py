@@ -28,7 +28,7 @@ from .models import (
     Schema,
 )
 
-__all__ = ("DatasetForm", "ResourceForm", "CommunityResourceForm")
+__all__ = ("CommunityResourceForm", "DatasetForm", "ResourceForm")
 
 # Fields computed by the server at upload time for resources hosted on our
 # file storage (see `handle_upload`). They must not be overridden by API

@@ -21,7 +21,7 @@ class ZonesAutocompleter(widgets.TextInput):
             kwargs["data-values"] = json.dumps(
                 [{"id": zone.id, "name": zone.name} for zone in field.data]
             )
-        return super(ZonesAutocompleter, self).__call__(field, **kwargs)
+        return super().__call__(field, **kwargs)
 
 
 class ZonesField(ModelList, Field):
@@ -95,4 +95,4 @@ class SpatialCoverageForm(ModelForm):
 
 class SpatialCoverageField(FormField):
     def __init__(self, *args, **kwargs):
-        super(SpatialCoverageField, self).__init__(SpatialCoverageForm, *args, **kwargs)
+        super().__init__(SpatialCoverageForm, *args, **kwargs)

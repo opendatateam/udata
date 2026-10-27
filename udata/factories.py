@@ -47,7 +47,7 @@ class HarvestableFactoryMixin(_ModelFactoryBase):
         - callable(i) => attribute set to returned value (with i a sequence number)
         """
         if extracted is True:
-            extracted = lambda i: f"{type(obj).__name__.lower()}-{i}"  # noqa: E731
+            extracted = lambda i: f"{type(obj).__name__.lower()}-{i}"
         if callable(extracted):
             extracted = extracted(next(HarvestableFactoryMixin._ids))
         if extracted:

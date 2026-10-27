@@ -105,7 +105,7 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def _to_geojson(coords):
-    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+    return f"""{{"type": "Polygon", "coordinates": [{coords!s}]}}"""
 
 
 def _to_wkt(coords):
@@ -927,7 +927,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g = Graph()
 
         description = faker.paragraph()
-        html_description = "<div>{0}</div>".format(description)
+        html_description = f"<div>{description}</div>"
         g.add((node, RDF.type, DCAT.Distribution))
         g.add((node, DCT.title, Literal(faker.sentence())))
         g.add((node, DCT.description, Literal(html_description)))
@@ -1312,7 +1312,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
 
-        pot = Literal("{0}/{1}".format(start.isoformat(), end.isoformat()))
+        pot = Literal(f"{start.isoformat()}/{end.isoformat()}")
 
         daterange = temporal_from_rdf(pot)
 

@@ -1,6 +1,5 @@
 import dataclasses
 from datetime import datetime
-from typing import List
 
 from dateutil.parser import isoparse
 
@@ -38,8 +37,8 @@ class Organization(EntityBase):
     views: int
     reuses: int
 
-    badges: List[str] = None
-    producer_type: List[str] = None
+    badges: list[str] = None
+    producer_type: list[str] = None
     acronym: str = None
 
     def __post_init__(self):
@@ -54,7 +53,7 @@ class Dataset(EntityBase):
     url: str
     created_at: datetime.date
     frequency: str
-    format: List[str]
+    format: list[str]
     views: int
     followers: int
     reuses: int
@@ -65,27 +64,27 @@ class Dataset(EntityBase):
 
     last_update: datetime.date = None
     acronym: str = None
-    badges: List[str] = None
-    tags: List[str] = None
+    badges: list[str] = None
+    tags: list[str] = None
     license: str = None
     temporal_coverage_start: datetime.date = None
     temporal_coverage_end: datetime.date = None
     granularity: str = None
-    geozones: List[str] = None
-    schema: List[str] = None
-    topics: List[str] = None
-    resources_ids: List[str] = None
-    resources_titles: List[str] = None
+    geozones: list[str] = None
+    schema: list[str] = None
+    topics: list[str] = None
+    resources_ids: list[str] = None
+    resources_titles: list[str] = None
 
     orga_sp: int = None
     orga_followers: int = None
     organization: str = None
     organization_name: str = None
-    organization_badges: List[str] = None
+    organization_badges: list[str] = None
     owner: str = None
     access_type: str = None
-    format_family: List[str] = None
-    producer_type: List[str] = None
+    format_family: list[str] = None
+    producer_type: list[str] = None
 
     def __post_init__(self):
         if isinstance(self.created_at, str):
@@ -114,15 +113,15 @@ class Reuse(EntityBase):
 
     last_modified: datetime.date = None
     archived: datetime.date = None
-    tags: List[str] = None
-    badges: List[str] = None
-    topic_object: List[str] = None
+    tags: list[str] = None
+    badges: list[str] = None
+    topic_object: list[str] = None
     orga_followers: int = None
     organization: str = None
     organization_name: str = None
-    organization_badges: List[str] = None
+    organization_badges: list[str] = None
     owner: str = None
-    producer_type: List[str] = None
+    producer_type: list[str] = None
 
     def __post_init__(self):
         if isinstance(self.created_at, str):
@@ -149,10 +148,10 @@ class Dataservice(EntityBase):
     organization: str = None
     organization_name: str = None
     owner: str = None
-    tags: List[str] = None
-    topics: List[str] = None
+    tags: list[str] = None
+    topics: list[str] = None
     access_type: str = None
-    producer_type: List[str] = None
+    producer_type: list[str] = None
     documentation_content: str = None
 
     def __post_init__(self):
@@ -169,19 +168,19 @@ class Topic(EntityBase):
     description: str
     created_at: datetime.date
 
-    tags: List[str] = None
+    tags: list[str] = None
     featured: bool = False
     private: bool = False
     last_modified: datetime.date = None
     organization: str = None
     organization_name: str = None
-    producer_type: List[str] = None
+    producer_type: list[str] = None
     nb_datasets: int = 0
     nb_reuses: int = 0
     nb_dataservices: int = 0
-    elements_titles: List[str] = None
-    elements_descriptions: List[str] = None
-    elements_tags: List[str] = None
+    elements_titles: list[str] = None
+    elements_descriptions: list[str] = None
+    elements_tags: list[str] = None
 
     def __post_init__(self):
         if isinstance(self.created_at, str):
@@ -214,7 +213,7 @@ class Post(EntityBase):
     name: str
     headline: str = None
     content: str = None
-    tags: List[str] = None
+    tags: list[str] = None
     created_at: datetime.date = None
     last_modified: datetime.date = None
     published: datetime.date = None

@@ -12,7 +12,7 @@ class TagsAPITest(PytestOnlyAPITestCase):
     def test_suggest_tags_api(self):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.tag(), faker.tag(), "test", "test-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "test", f"test-{i}"]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 
@@ -32,7 +32,7 @@ class TagsAPITest(PytestOnlyAPITestCase):
     def test_suggest_tags_api_with_unicode(self):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.tag(), faker.tag(), "testé", "testé-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "testé", f"testé-{i}"]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 
@@ -52,7 +52,7 @@ class TagsAPITest(PytestOnlyAPITestCase):
     def test_suggest_tags_api_no_match(self):
         """It should not provide tag suggestion if no match"""
         for i in range(3):
-            tags = ["aaaa", "aaaa-{0}".format(i)]
+            tags = ["aaaa", f"aaaa-{i}"]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 

@@ -108,7 +108,7 @@ class XmlParserTest:
     def test_does_not_resolve_external_general_entity(self, secret_file):
         xml = (
             f'<!DOCTYPE root [<!ENTITY leak SYSTEM "file://{secret_file}">]><root>&leak;</root>'
-        ).encode("utf-8")
+        ).encode()
 
         root = etree.fromstring(xml, parser=XML_PARSER)
 
@@ -118,7 +118,7 @@ class XmlParserTest:
         xml = (
             f'<!DOCTYPE root [<!ENTITY % remote SYSTEM "file://{exfiltrating_dtd}"> %remote;]>'
             "<root>&leak;</root>"
-        ).encode("utf-8")
+        ).encode()
 
         root = etree.fromstring(xml, parser=XML_PARSER)
 

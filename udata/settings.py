@@ -8,7 +8,7 @@ from udata.i18n import lazy_gettext as _
 HOUR = 60 * 60
 
 
-class Defaults(object):
+class Defaults:
     DEBUG = False
     TESTING = False
     SEND_MAIL = True
@@ -721,11 +721,11 @@ class Defaults(object):
     DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
 
 
-class Testing(object):
+class Testing:
     """Sane values for testing. Should be applied as override"""
 
     TESTING = True
-    # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
+    # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f
     # this keeps our legacy tests from failing, we should probably fix the tests instead someday
     PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False

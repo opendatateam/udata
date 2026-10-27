@@ -302,7 +302,7 @@ class SpatialCoverageFieldTest(TestCase):
         for i in range(3):
             GeoZoneFactory(code=zone.code)
 
-        geoid = "{0.level}:{0.code}".format(zone)
+        geoid = f"{zone.level}:{zone.code}"
 
         fake = Fake()
         form = FakeForm.from_json(

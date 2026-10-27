@@ -5,7 +5,7 @@ from udata.api_fields import field
 __all__ = ("WithMetrics",)
 
 
-class WithMetrics(object):
+class WithMetrics:
     metrics = field(
         DictField(),
         readonly=True,

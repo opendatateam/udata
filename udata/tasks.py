@@ -17,7 +17,7 @@ class ContextTask(Task):
 
     def __call__(self, *args, **kwargs):
         with self.current_app.app_context():
-            return super(ContextTask, self).__call__(*args, **kwargs)
+            return super().__call__(*args, **kwargs)
 
 
 class JobTask(ContextTask):
@@ -48,7 +48,7 @@ def router(name, args, kwargs, options, task=None, **kw):
     # queue parameter, routing_key computed if not present
     if task.default_queue:
         key = task.default_routing_key
-        key = key or "{0.default_queue}.{0.name}".format(task)
+        key = key or f"{task.default_queue}.{task.name}"
         return {"queue": task.default_queue, "routing_key": key}
     # only routing_key, queue should not be returned to fallback on default
     elif task.default_routing_key:
@@ -58,7 +58,7 @@ def router(name, args, kwargs, options, task=None, **kw):
 def task(*args, **kwargs):
     for arg in "queue", "routing_key":
         if arg in kwargs:
-            kwargs["default_{0}".format(arg)] = kwargs.pop(arg)
+            kwargs[f"default_{arg}"] = kwargs.pop(arg)
     return celery.task(*args, **kwargs)
 
 
@@ -138,26 +138,26 @@ def init_app(app):
 
     # Load core tasks
     import udata.core.metrics.tasks  # noqa
-    import udata.core.tags.tasks  # noqa
-    import udata.core.activity.tasks  # noqa
-    import udata.core.dataservices.tasks  # noqa
-    import udata.core.dataset.doi  # noqa
-    import udata.core.dataset.tasks  # noqa
-    import udata.core.dataset.transport  # noqa
-    import udata.core.dataset.recommendations  # noqa
-    import udata.core.spatial.tasks  # noqa
-    import udata.core.topic.tasks  # noqa
-    import udata.core.reuse.tasks  # noqa
-    import udata.core.user.tasks  # noqa
-    import udata.core.organization.tasks  # noqa
-    import udata.core.discussions.tasks  # noqa
-    import udata.core.badges.tasks  # noqa
-    import udata.core.storages.tasks  # noqa
-    import udata.core.sitemap.tasks  # noqa
-    import udata.core.visualizations.tasks  # noqa
-    import udata.features.notifications.tasks  # noqa
-    import udata.notifications.tchap  # noqa
-    import udata.harvest.tasks  # noqa
+    import udata.core.tags.tasks
+    import udata.core.activity.tasks
+    import udata.core.dataservices.tasks
+    import udata.core.dataset.doi
+    import udata.core.dataset.tasks
+    import udata.core.dataset.transport
+    import udata.core.dataset.recommendations
+    import udata.core.spatial.tasks
+    import udata.core.topic.tasks
+    import udata.core.reuse.tasks
+    import udata.core.user.tasks
+    import udata.core.organization.tasks
+    import udata.core.discussions.tasks
+    import udata.core.badges.tasks
+    import udata.core.storages.tasks
+    import udata.core.sitemap.tasks
+    import udata.core.visualizations.tasks
+    import udata.features.notifications.tasks
+    import udata.notifications.tchap
+    import udata.harvest.tasks
     import udata.db.tasks  # noqa
 
     for ep in entry_points(group="udata.tasks"):

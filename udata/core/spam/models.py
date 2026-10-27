@@ -5,7 +5,7 @@ from langdetect.lang_detect_exception import LangDetectException
 from .signals import on_new_potential_spam
 
 
-class SpamMixin(object):
+class SpamMixin:
     """
     Mixin for models that can be checked for spam.
     Spam detection creates Report objects instead of storing spam info on the model itself.

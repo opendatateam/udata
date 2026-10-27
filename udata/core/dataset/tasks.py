@@ -92,7 +92,7 @@ def purge_datasets(self):
 def get_queryset(model_cls):
     # special case for resources
     if model_cls.__name__ == "Resource":
-        model_cls = getattr(udata_models, "Dataset")
+        model_cls = udata_models.Dataset
     params = {}
     attrs = ("private", "deleted", "deleted_at")
     for attr in attrs:

@@ -103,7 +103,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         assert len(datasets) == 3
 
-        for i in "1 2 3".split():
+        for i in ["1", "2", "3"]:
             d = datasets[i]
             assert d.title == f"Dataset {i}"
             assert d.description == f"Dataset {i} description"
@@ -730,18 +730,18 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert (
             dataset.harvest.remote_id
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert (
             dataset.harvest.dct_identifier
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert dataset.harvest.issued_at.date() == date(2004, 11, 3)
         assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
         assert (
             dataset.harvest.uri
             == "https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith("Data of type chemistry")
         assert dataset.temporal_coverage is not None
@@ -774,11 +774,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert (
             dataset.harvest.uri
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
-        )  # noqa
+        )
         assert (
             dataset.harvest.remote_url
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
-        )  # noqa
+        )
         assert dataset.harvest.last_update.date() == date.today()
 
     def test_conflicting_dois_are_reported_in_the_harvest_logs(self, rmock):

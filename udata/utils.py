@@ -117,7 +117,7 @@ def camel_to_lodash(name):
     return ALL_CAP_RE.sub(r"\1_\2", s1).lower()
 
 
-class Paginable(object):
+class Paginable:
     """
     A simple helper mixin for pagination
     """
@@ -281,7 +281,7 @@ def to_iso_date(dt: date | datetime | None) -> str | None:
     Support dates before 1900.
     """
     if dt:
-        return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
+        return f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
 
 
 @overload
@@ -303,7 +303,7 @@ def to_iso_datetime(dt: date | datetime | None) -> str | None:
     if dt:
         date_str = to_iso_date(dt)
         time_str = (
-            "{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}".format(dt=dt)
+            f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}"
             if isinstance(dt, datetime)
             else "00:00:00"
         )

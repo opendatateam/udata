@@ -30,7 +30,7 @@ def safestr(value):
         return str(value)
 
 
-class Adapter(object):
+class Adapter:
     """A Base model CSV adapter"""
 
     fields = None
@@ -62,9 +62,7 @@ class Adapter(object):
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
                     log.exception(
-                        "Error exporting CSV for {name}: {error_class} {error}".format(
-                            name=self.__class__.__name__, error_class=e.__class__.__name__, error=e
-                        ),
+                        f"Error exporting CSV for {self.__class__.__name__}: {e.__class__.__name__} {e}",
                         stack_info=True,
                     )
                 self._fields.append(field_tuple)
@@ -72,7 +70,7 @@ class Adapter(object):
 
     def getter(self, name, getter=None):
         if not getter:
-            method = "field_{0}".format(name)
+            method = f"field_{name}"
             return (
                 getattr(self, method) if hasattr(self, method) else lambda o: recursive_get(o, name)
             )
@@ -96,9 +94,7 @@ class Adapter(object):
                     content = safestr(getter(obj))
                 except Exception as e:  # Catch all errors intentionally.
                     log.exception(
-                        "Error exporting CSV for {name}: {error_class} {error}".format(
-                            name=self.__class__.__name__, error_class=e.__class__.__name__, error=e
-                        ),
+                        f"Error exporting CSV for {self.__class__.__name__}: {e.__class__.__name__} {e}",
                         stack_info=True,
                     )
             row.append(content)
@@ -113,14 +109,12 @@ class NestedAdapter(Adapter):
     nested_fields = None
 
     def __init__(self, queryset):
-        super(NestedAdapter, self).__init__(queryset)
+        super().__init__(queryset)
         self._nested_fields = None
 
     def header(self):
         """Generate the CSV header row"""
-        return super(NestedAdapter, self).header() + [
-            name for name, getter in self.get_nested_fields()
-        ]
+        return super().header() + [name for name, getter in self.get_nested_fields()]
 
     def get_nested_fields(self):
         if not self._nested_fields:
@@ -141,9 +135,7 @@ class NestedAdapter(Adapter):
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
                     log.exception(
-                        "Error exporting CSV for {name}: {error_class} {error}".format(
-                            name=self.__class__.__name__, error_class=e.__class__.__name__, error=e
-                        ),
+                        f"Error exporting CSV for {self.__class__.__name__}: {e.__class__.__name__} {e}",
                         stack_info=True,
                     )
                 self._nested_fields.append(field_tuple)
@@ -168,9 +160,7 @@ class NestedAdapter(Adapter):
                     content = safestr(getter(nested))
                 except Exception as e:  # Catch all errors intentionally.
                     log.exception(
-                        "Error exporting CSV for {name}: {error_class} {error}".format(
-                            name=self.__class__.__name__, error_class=e.__class__.__name__, error=e
-                        ),
+                        f"Error exporting CSV for {self.__class__.__name__}: {e.__class__.__name__} {e}",
                         stack_info=True,
                     )
             row.append(content)
@@ -199,7 +189,7 @@ def _metric_getter(key):
 
 
 def metric_fields(cls):
-    return [("metric.{0}".format(key), _metric_getter(key)) for key in cls.__metrics_keys__]
+    return [(f"metric.{key}", _metric_getter(key)) for key in cls.__metrics_keys__]
 
 
 def get_writer(out):

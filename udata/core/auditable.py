@@ -6,7 +6,7 @@ from udata.utils import filter_changed_fields, get_field_value_from_path
 __all__ = ("Auditable",)
 
 
-class Auditable(object):
+class Auditable:
     """Emit create/update/delete signals carrying the fields that actually changed.
 
     Lives here rather than next to the `Activity` document it feeds: recording an

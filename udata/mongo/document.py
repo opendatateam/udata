@@ -101,5 +101,3 @@ class UDataDocument(Document, Generic[QS]):
 
 class DomainModel(UDataDocument):
     """Placeholder for inheritance"""
-
-    pass

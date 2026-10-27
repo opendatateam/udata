@@ -56,7 +56,6 @@ FORBIDDEN_MESSAGE: str = "Forbidden value"
 def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
-    return
 
 
 def check_not_forbidden(value: str = "", field: str = "", **_kwargs) -> None:

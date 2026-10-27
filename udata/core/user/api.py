@@ -499,7 +499,7 @@ class UserRotatePasswordAPI(API):
 
 
 # These imports are not at the top of the file to avoid circular imports
-from udata.models import ContactPoint  # noqa
+from udata.models import ContactPoint
 
 contact_point_parser = ContactPoint.__index_parser__
 
@@ -530,7 +530,7 @@ class FollowUserAPI(FollowAPI):
         """Follow a user given its ID"""
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
-        return super(FollowUserAPI, self).post(id)
+        return super().post(id)
 
 
 suggest_parser = api.parser()

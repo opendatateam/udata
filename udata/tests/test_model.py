@@ -700,7 +700,7 @@ class MongoConfigTest(PytestOnlyDBTestCase):
 
     def test_build_test_config_without_MONGODB_HOST_TEST(self):
         config = {"MONGODB_HOST": Defaults.MONGODB_HOST}
-        expected = "{0}-test".format(Defaults.MONGODB_HOST)
+        expected = f"{Defaults.MONGODB_HOST}-test"
         build_test_config(config)
         assert config["MONGODB_HOST"] == expected
 

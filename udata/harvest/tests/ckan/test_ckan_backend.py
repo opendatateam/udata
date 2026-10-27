@@ -690,9 +690,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_minimal_ckan_response(self, rmock):
         """CKAN Harvester should accept the minimum dataset payload"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name = faker.unique_string()
         json = {
@@ -719,9 +719,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_flawed_ckan_response(self, rmock):
         """CKAN Harvester should report item error with id == remote_id in item"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name = faker.unique_string()
         _id = faker.uuid4()
@@ -772,9 +772,9 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_max_items(self, app, rmock):
         """CKAN Harvester should report item error with id == remote_id in item"""
         CKAN_URL = "https://harvest.me/"
-        API_URL = "{}api/3/action/".format(CKAN_URL)
-        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        API_URL = f"{CKAN_URL}api/3/action/"
+        PACKAGE_LIST_URL = f"{API_URL}package_list"
+        PACKAGE_SHOW_URL = f"{API_URL}package_show"
 
         name_a = faker.unique_string()
         name_b = faker.unique_string()
@@ -817,25 +817,23 @@ class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
         # extras and revision_id are not always present so we exclude them
         # from the minimal payload
         return {
-            **{
-                "id": faker.uuid4(),
-                "name": faker.uuid4(),
-                "title": faker.sentence(),
-                "maintainer": faker.name(),
-                "tags": [],
-                "private": False,
-                "maintainer_email": faker.email(),
-                "license_id": None,
-                "metadata_created": faker.iso8601(),
-                "organization": None,
-                "metadata_modified": faker.iso8601(),
-                "author": None,
-                "author_email": None,
-                "notes": faker.paragraph(),
-                "license_title": None,
-                "state": None,
-                "type": "dataset",
-                "resources": [],
-            },
+            "id": faker.uuid4(),
+            "name": faker.uuid4(),
+            "title": faker.sentence(),
+            "maintainer": faker.name(),
+            "tags": [],
+            "private": False,
+            "maintainer_email": faker.email(),
+            "license_id": None,
+            "metadata_created": faker.iso8601(),
+            "organization": None,
+            "metadata_modified": faker.iso8601(),
+            "author": None,
+            "author_email": None,
+            "notes": faker.paragraph(),
+            "license_title": None,
+            "state": None,
+            "type": "dataset",
+            "resources": [],
             **kwargs,
         }

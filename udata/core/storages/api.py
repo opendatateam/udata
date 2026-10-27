@@ -86,7 +86,7 @@ upload_parser.add_argument(
 
 class UploadStatus(Exception):
     def __init__(self, ok=True, error=None):
-        super(UploadStatus, self).__init__()
+        super().__init__()
         self.ok = ok
         self.error = error
 
@@ -94,14 +94,12 @@ class UploadStatus(Exception):
 class UploadProgress(UploadStatus):
     """Raised on successful chunk uploaded"""
 
-    pass
-
 
 class UploadError(UploadStatus):
     """Raised on any upload error"""
 
     def __init__(self, error=None):
-        super(UploadError, self).__init__(ok=False, error=error)
+        super().__init__(ok=False, error=error)
 
 
 def on_upload_status(status):

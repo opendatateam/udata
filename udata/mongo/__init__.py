@@ -21,9 +21,9 @@ def validate_config(config):
     url = config["MONGODB_HOST"]
     parsed_url = urlparse(url)
     if not all((parsed_url.scheme, parsed_url.netloc)):
-        raise ConfigError("{0} is not a valid MongoDB URL".format(url))
+        raise ConfigError(f"{url} is not a valid MongoDB URL")
     if len(parsed_url.path) <= 1:
-        raise ConfigError("{0} is missing the database path".format(url))
+        raise ConfigError(f"{url} is missing the database path")
 
 
 def build_test_config(config):

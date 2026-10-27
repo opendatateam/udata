@@ -25,7 +25,6 @@ log = logging.getLogger(__name__)
 @cli.group("db")
 def grp():
     """Database related operations"""
-    pass
 
 
 def log_status(migration, status):
@@ -46,11 +45,11 @@ def status_label(record):
 def format_output(output, success=True, traceback=None):
     echo("  │")
     for level, msg in output:
-        echo("  │ {0}".format(msg))
+        echo(f"  │ {msg}")
     echo("  │")
     if traceback:
         for tb in traceback.split("\n"):
-            echo("  │ {0}".format(tb))
+            echo(f"  │ {tb}")
     echo("  │")
     echo("  └──[{0}]".format(green("OK") if success else red("KO")))
     echo("")
@@ -100,9 +99,9 @@ def unrecord(filename):
     """
     removed = migrations.unrecord(filename)
     if removed:
-        echo("Removed migration {}".format(filename))
+        echo(f"Removed migration {filename}")
     else:
-        echo(red("Migration not found {}".format(filename)))
+        echo(red(f"Migration not found {filename}"))
 
 
 @grp.command()
@@ -127,7 +126,7 @@ def info(filename):
 def display_op(op):
     timestamp = white(op["date"].strftime(DATE_FORMAT))
     label = white(op["type"].title()) + " "
-    echo("{label:.<70} [{date}]".format(label=label, date=timestamp))
+    echo(f"{label:.<70} [{timestamp}]")
     format_output(op["output"], success=op["success"], traceback=op.get("traceback"))
 
 
@@ -282,7 +281,7 @@ def check_references(models_to_check=()):
     print("Those references will be inspected:")
     for reference in references:
         print(f"- {reference['repr']}({reference['destination']}) — {reference['type']}")
-    print("")
+    print()
 
     total = 0
     for model, model_references in groupby(references, lambda i: i["model"]):
@@ -487,7 +486,7 @@ def check_duplicate_resources_ids(
         for dataset in info["datasets"]:
             count_datasets += 1
             print(f"\t- Dataset#{dataset.id} {dataset.title}")
-        print("")
+        print()
         for resource in info["resources"]:
             count_resources += 1
             print(

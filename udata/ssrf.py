@@ -33,10 +33,11 @@ from __future__ import annotations
 
 import ipaddress
 import socket
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 from urllib.parse import urlsplit
 
 import requests
@@ -56,11 +57,11 @@ if TYPE_CHECKING:
     from urllib3.util.timeout import _TYPE_TIMEOUT
 
 __all__ = [
-    "SSRFPolicy",
     "BlockedAddressError",
     "BlockedCategory",
-    "blocked_reason",
+    "SSRFPolicy",
     "SSRFProtectedSession",
+    "blocked_reason",
 ]
 
 
@@ -267,7 +268,7 @@ class _GuardedConnectionMixin:
             )
         except socket.gaierror as e:
             raise NameResolutionError(self.host, self, e) from e
-        except socket.timeout as e:
+        except TimeoutError as e:
             raise ConnectTimeoutError(
                 self,
                 f"Connection to {self.host} timed out. (connect timeout={self.timeout})",

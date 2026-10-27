@@ -4,10 +4,10 @@ from mongoengine.fields import ReferenceField
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Reuse
 
-__all__ = ("UserCreatedReuse", "UserUpdatedReuse", "UserDeletedReuse", "ReuseRelatedActivity")
+__all__ = ("ReuseRelatedActivity", "UserCreatedReuse", "UserDeletedReuse", "UserUpdatedReuse")
 
 
-class ReuseRelatedActivity(object):
+class ReuseRelatedActivity:
     template = "activity/reuse.html"
     related_to = ReferenceField("Reuse")
 

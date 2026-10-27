@@ -64,7 +64,7 @@ from .constants import (
     REQUEST_TYPES,
 )
 
-__all__ = ("Organization", "Team", "Member", "MembershipRequest")
+__all__ = ("Member", "MembershipRequest", "Organization", "Team")
 
 
 def check_siret(value, field, **_kwargs):

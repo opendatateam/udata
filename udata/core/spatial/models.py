@@ -72,7 +72,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
 
     def __html__(self):
         """In use within the admin."""
-        return "{name} <i>({code})</i>".format(name=_(self.name), code=self.code)
+        return f"{_(self.name)} <i>({self.code})</i>"
 
     @cached_property
     def level_code(self):

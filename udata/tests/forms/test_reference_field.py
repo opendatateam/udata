@@ -23,7 +23,7 @@ class WithReferenceForm(ModelForm):
     nested = fields.ModelField()
 
 
-class ModelFieldTestMixin(object):
+class ModelFieldTestMixin:
     model = None
     form = None
 

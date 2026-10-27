@@ -4,7 +4,7 @@ from flask import abort
 from mongoengine.queryset import QuerySet
 
 
-class Pagination(object):
+class Pagination:
     def __init__(self, iterable, page, per_page):
         if page < 1 or per_page < 1:
             abort(404)

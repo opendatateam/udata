@@ -27,8 +27,9 @@ For field-specific metadata, see the `field()` function documentation.
 
 import functools
 import typing
+from collections.abc import Callable, Iterable
 from datetime import datetime
-from typing import Any, Callable, Iterable, Literal, TypedDict, TypeVar, Unpack, overload
+from typing import Any, Literal, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -93,7 +94,7 @@ classes_by_parents = {}
 
 class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
-        super(GenericField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.default = None
         # Key under which the concrete class name is emitted on output. Comes from
         # the field's kwargs `generic_key`, so it matches whatever the model
@@ -731,7 +732,7 @@ def generate_fields(**kwargs) -> Callable:
                 ",".join(k for k in read_fields if k not in page_mask_exclude)
             )
         elif page_mask is not None:
-            page_mask = "data{{{0}}},*".format(page_mask)
+            page_mask = f"data{{{page_mask}}},*"
         cls.__page_fields__ = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(cls.__read_fields__),
@@ -1012,13 +1013,11 @@ def field(
 def run_check(check, value, key, obj, data):
     check(
         value,
-        **{
-            "is_creation": obj._created,
-            "is_update": not obj._created,
-            "field": key,
-            "obj": obj,
-            "data": data,
-        },
+        is_creation=obj._created,
+        is_update=not obj._created,
+        field=key,
+        obj=obj,
+        data=data,
     )
 
 

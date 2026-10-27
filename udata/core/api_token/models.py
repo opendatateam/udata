@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import current_app
 
@@ -22,8 +22,8 @@ def parse_future_datetime(value):
     except (ValueError, TypeError):
         api.abort(400, "Invalid expires_at format")
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    if dt < datetime.now(timezone.utc):
+        dt = dt.replace(tzinfo=UTC)
+    if dt < datetime.now(UTC):
         api.abort(400, "expires_at must be in the future")
     return dt
 
@@ -56,7 +56,7 @@ class ApiToken(db.Document):
         description="Token type",
     )
     created_at = field(
-        db.DateTimeField(default=lambda: datetime.now(timezone.utc), required=True),
+        db.DateTimeField(default=lambda: datetime.now(UTC), required=True),
         readonly=True,
         description="Token creation date",
     )
@@ -125,17 +125,17 @@ class ApiToken(db.Document):
         if token.expires_at:
             expires_at = token.expires_at
             if expires_at.tzinfo is None:
-                expires_at = expires_at.replace(tzinfo=timezone.utc)
-            if expires_at < datetime.now(timezone.utc):
+                expires_at = expires_at.replace(tzinfo=UTC)
+            if expires_at < datetime.now(UTC):
                 return None, "expired"
         return token, None
 
     def revoke(self):
-        self.revoked_at = datetime.now(timezone.utc)
+        self.revoked_at = datetime.now(UTC)
         self.save()
 
     def update_usage(self, user_agent=None):
-        update_kwargs = {"set__last_used_at": datetime.now(timezone.utc)}
+        update_kwargs = {"set__last_used_at": datetime.now(UTC)}
         agents = self.user_agents or []
         if user_agent and len(agents) < MAX_USER_AGENTS:
             update_kwargs["add_to_set__user_agents"] = user_agent

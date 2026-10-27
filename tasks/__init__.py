@@ -56,7 +56,7 @@ def i18n(ctx, update=False):
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
     # Opening the catalog also allows to set extra metadata
-    potfile = join(ROOT, "udata", "translations", "{}.pot".format(I18N_DOMAIN))
+    potfile = join(ROOT, "udata", "translations", f"{I18N_DOMAIN}.pot")
     with open(potfile, "rb") as infile:
         catalog = read_po(infile, "en")
     catalog.copyright_holder = "Open Data Team"

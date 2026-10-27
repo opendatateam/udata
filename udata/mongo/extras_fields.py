@@ -17,7 +17,7 @@ class ExtrasField(DictField):
         self.reserved = reserved
         for key, dbtype in keys_types.items():
             self.register(key, dbtype)
-        super(ExtrasField, self).__init__()
+        super().__init__()
 
     def register(self, key, dbtype):
         """Register a DB type to add constraint on a given extra key"""
@@ -35,7 +35,7 @@ class ExtrasField(DictField):
         return any(fnmatchcase(key, pattern) for pattern in self.reserved)
 
     def validate(self, values):
-        super(ExtrasField, self).validate(values)
+        super().validate(values)
 
         errors = {}
         for key, value in values.items():
@@ -73,12 +73,12 @@ class ExtrasField(DictField):
     def to_python(self, value):
         if isinstance(value, EmbeddedDocument):
             return value
-        return super(ExtrasField, self).to_python(value)
+        return super().to_python(value)
 
 
 class OrganizationExtrasField(ExtrasField):
     def __init__(self, **kwargs):
-        super(OrganizationExtrasField, self).__init__()
+        super().__init__()
 
     def validate(self, values):
         super(ExtrasField, self).validate(values)

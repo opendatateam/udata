@@ -53,8 +53,6 @@ log = logging.getLogger(__name__)
 class ValidationError(ValueError):
     """Raised when URL is invalid"""
 
-    pass
-
 
 def error(url, reason=None) -> NoReturn:
     __tracebackhide__ = True

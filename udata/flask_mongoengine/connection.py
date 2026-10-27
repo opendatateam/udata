@@ -2,9 +2,9 @@ import mongoengine
 from pymongo import ReadPreference, uri_parser
 
 __all__ = (
+    "InvalidSettingsError",
     "create_connections",
     "get_connection_settings",
-    "InvalidSettingsError",
 )
 
 
@@ -32,8 +32,7 @@ def _sanitize_settings(settings):
     # Remove the "MONGODB_" prefix and make all settings keys lower case.
     resolved_settings = {}
     for k, v in settings.items():
-        if k.startswith("MONGODB_"):
-            k = k[len("MONGODB_") :]
+        k = k.removeprefix("MONGODB_")
         k = k.lower()
         resolved_settings[k] = v
 

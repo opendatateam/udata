@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 @cli.group("search")
 def grp():
     """Search/Indexation related operations"""
-    pass
 
 
 TIMESTAMP_FORMAT = "%Y-%m-%d-%H-%M"

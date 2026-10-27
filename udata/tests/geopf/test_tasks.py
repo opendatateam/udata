@@ -624,15 +624,17 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         resource_id = str(dataset.resources[0].id)
         user = UserFactory()
 
-        with patch(
-            "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
-        ) as mock_resolve:
-            with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
-                with patch("udata.geopf.tasks._run_pipeline"):
-                    push_resource_to_geopf.apply(
-                        args=[str(dataset.id), resource_id],
-                        kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
-                    )
+        with (
+            patch(
+                "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
+            ) as mock_resolve,
+            patch("udata.geopf.tasks.GeopfClient") as mock_client_cls,
+        ):
+            with patch("udata.geopf.tasks._run_pipeline"):
+                push_resource_to_geopf.apply(
+                    args=[str(dataset.id), resource_id],
+                    kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
+                )
 
         mock_resolve.assert_called_once()
         assert mock_resolve.call_args.kwargs["user"].id == user.id

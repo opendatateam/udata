@@ -466,15 +466,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        dataset = Dataset.objects.get(**{"harvest__remote_id": mock_datasets[0].remote_id})
+        dataset = Dataset.objects.get(harvest__remote_id=mock_datasets[0].remote_id)
         dataset.archived = datetime.now(UTC)
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
-        dataservice = Dataservice.objects.get(
-            **{"harvest__remote_id": mock_dataservices[0].remote_id}
-        )
+        dataservice = Dataservice.objects.get(harvest__remote_id=mock_dataservices[0].remote_id)
         dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_reason = "not-on-remote"
@@ -1041,7 +1039,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             harvest={
                 "remote_id": "dataset",
                 "last_update": last_update,
-                **{match_field: match_value(source)},
+                match_field: match_value(source),
             }
         )
         backend = MockBackend(source)

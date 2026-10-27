@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 @cli.group("images")
 def grp():
     """Images related operations"""
-    pass
 
 
 def render_or_skip(obj, attr):
@@ -60,11 +59,11 @@ def render():
         count["reuses"] += render_or_skip(reuse, "image")
 
     log.info(
-        """Summary:
-    Organization logos: {count[orgs]}/{total[orgs]}
-    User avatars: {count[users]}/{total[users]}
-    Post images: {count[posts]}/{total[posts]}
-    Reuse images: {count[reuses]}/{total[reuses]}
-    """.format(count=count, total=total)
+        f"""Summary:
+    Organization logos: {count["orgs"]}/{total["orgs"]}
+    User avatars: {count["users"]}/{total["users"]}
+    Post images: {count["posts"]}/{total["posts"]}
+    Reuse images: {count["reuses"]}/{total["reuses"]}
+    """
     )
     success("Images rendered")

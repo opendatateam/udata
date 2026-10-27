@@ -25,7 +25,7 @@ class QuerySetSelectField(SelectFieldBase):
         allow_blank=False,
         **kwargs,
     ):
-        super(QuerySetSelectField, self).__init__(label, validators, **kwargs)
+        super().__init__(label, validators, **kwargs)
         self.allow_blank = allow_blank
         self.queryset = queryset
 
@@ -58,4 +58,4 @@ class ModelSelectField(QuerySetSelectField):
 
     def __init__(self, label="", validators=None, model=None, **kwargs):
         queryset = kwargs.pop("queryset", model.objects)
-        super(ModelSelectField, self).__init__(label, validators, queryset=queryset, **kwargs)
+        super().__init__(label, validators, queryset=queryset, **kwargs)

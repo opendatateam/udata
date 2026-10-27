@@ -64,7 +64,7 @@ class CkanBackend(BaseBackend):
     schema = ckan_schema
 
     def get_headers(self):
-        headers = super(CkanBackend, self).get_headers()
+        headers = super().get_headers()
         headers["content-type"] = "application/json"
         if self.config.get("apikey"):
             headers["Authorization"] = self.config["apikey"]
@@ -109,7 +109,7 @@ class CkanBackend(BaseBackend):
                 raise HarvestException(msg)
 
         elif mime_type == "text/html":  # Standard html error page
-            raise HarvestException("Unknown Error: {} returned HTML".format(url))
+            raise HarvestException(f"Unknown Error: {url} returned HTML")
         else:
             # If it's not HTML, CKAN respond with raw quoted text
             msg = response.text.strip('"')

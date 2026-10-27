@@ -1,6 +1,5 @@
 import logging
-from datetime import datetime, timezone
-from typing import List, Optional, Tuple
+from datetime import UTC, datetime
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
@@ -298,7 +297,7 @@ class ElasticClient:
         Create templates based on Document mappings and map patterns.
         Create time-based index matchin the template patterns.
         """
-        suffix_name = "-" + datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
+        suffix_name = "-" + datetime.now(UTC).strftime("%Y-%m-%d-%H-%M")
 
         for index_document in ALL_DOCUMENT_CLASSES:
             index_document.init_index(self.es, suffix_name)
@@ -348,8 +347,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchableOrganization.search()
 
         post_filters = []
@@ -449,8 +448,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchableTopic.search()
 
         last_update_range_mapping = {
@@ -666,8 +665,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchableDataset.search()
 
         last_update_range_mapping = {
@@ -728,7 +727,7 @@ class ElasticClient:
                     list_filters = [query.Q("term", organization=v) for v in value]
                     filter_dict[key] = query.Bool(should=list_filters, minimum_should_match=1)
                 else:
-                    filter_dict[key] = query.Q("term", **{"organization": value})
+                    filter_dict[key] = query.Q("term", organization=value)
             elif key in ["format_family", "access_type", "producer_type", "tag"]:
                 filter_dict[key] = query.Q("term", **{key: value})
             else:
@@ -1072,8 +1071,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchableReuse.search()
 
         last_update_range_mapping = {
@@ -1362,7 +1361,7 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
+        sort: str | None = None,
     ):
         search = SearchableDataservice.search()
 
@@ -1631,65 +1630,65 @@ class ElasticClient:
 
         return results_number, res, facets
 
-    def find_one_organization(self, organization_id: str) -> Optional[dict]:
+    def find_one_organization(self, organization_id: str) -> dict | None:
         try:
             return SearchableOrganization.get(id=organization_id).to_dict()
         except NotFoundError:
             return None
 
-    def find_one_dataset(self, dataset_id: str) -> Optional[dict]:
+    def find_one_dataset(self, dataset_id: str) -> dict | None:
         try:
             return SearchableDataset.get(id=dataset_id).to_dict()
         except NotFoundError:
             return None
 
-    def find_one_reuse(self, reuse_id: str) -> Optional[dict]:
+    def find_one_reuse(self, reuse_id: str) -> dict | None:
         try:
             return SearchableReuse.get(id=reuse_id).to_dict()
         except NotFoundError:
             return None
 
-    def find_one_dataservice(self, dataservice_id: str) -> Optional[dict]:
+    def find_one_dataservice(self, dataservice_id: str) -> dict | None:
         try:
             return SearchableDataservice.get(id=dataservice_id).to_dict()
         except NotFoundError:
             return None
 
-    def find_one_topic(self, topic_id: str) -> Optional[dict]:
+    def find_one_topic(self, topic_id: str) -> dict | None:
         try:
             return SearchableTopic.get(id=topic_id).to_dict()
         except NotFoundError:
             return None
 
-    def delete_one_organization(self, organization_id: str) -> Optional[str]:
+    def delete_one_organization(self, organization_id: str) -> str | None:
         try:
             SearchableOrganization.get(id=organization_id).delete()
             return organization_id
         except NotFoundError:
             return None
 
-    def delete_one_dataset(self, dataset_id: str) -> Optional[str]:
+    def delete_one_dataset(self, dataset_id: str) -> str | None:
         try:
             SearchableDataset.get(id=dataset_id).delete()
             return dataset_id
         except NotFoundError:
             return None
 
-    def delete_one_reuse(self, reuse_id: str) -> Optional[str]:
+    def delete_one_reuse(self, reuse_id: str) -> str | None:
         try:
             SearchableReuse.get(id=reuse_id).delete()
             return reuse_id
         except NotFoundError:
             return None
 
-    def delete_one_dataservice(self, dataservice_id: str) -> Optional[str]:
+    def delete_one_dataservice(self, dataservice_id: str) -> str | None:
         try:
             SearchableDataservice.get(id=dataservice_id).delete()
             return dataservice_id
         except NotFoundError:
             return None
 
-    def delete_one_topic(self, topic_id: str) -> Optional[str]:
+    def delete_one_topic(self, topic_id: str) -> str | None:
         try:
             SearchableTopic.get(id=topic_id).delete()
             return topic_id
@@ -1707,8 +1706,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchableDiscussion.search()
 
         last_update_range_mapping = {
@@ -1794,13 +1793,13 @@ class ElasticClient:
 
         return results_number, res, facets
 
-    def find_one_discussion(self, discussion_id: str) -> Optional[dict]:
+    def find_one_discussion(self, discussion_id: str) -> dict | None:
         try:
             return SearchableDiscussion.get(id=discussion_id).to_dict()
         except NotFoundError:
             return None
 
-    def delete_one_discussion(self, discussion_id: str) -> Optional[str]:
+    def delete_one_discussion(self, discussion_id: str) -> str | None:
         try:
             SearchableDiscussion.get(id=discussion_id).delete()
             return discussion_id
@@ -1818,8 +1817,8 @@ class ElasticClient:
         offset: int,
         page_size: int,
         filters: dict,
-        sort: Optional[str] = None,
-    ) -> Tuple[int, List[dict], dict]:
+        sort: str | None = None,
+    ) -> tuple[int, list[dict], dict]:
         search = SearchablePost.search()
 
         last_modified_range_mapping = {
@@ -1911,13 +1910,13 @@ class ElasticClient:
 
         return results_number, res, facets
 
-    def find_one_post(self, post_id: str) -> Optional[dict]:
+    def find_one_post(self, post_id: str) -> dict | None:
         try:
             return SearchablePost.get(id=post_id).to_dict()
         except NotFoundError:
             return None
 
-    def delete_one_post(self, post_id: str) -> Optional[str]:
+    def delete_one_post(self, post_id: str) -> str | None:
         try:
             SearchablePost.get(id=post_id).delete()
             return post_id

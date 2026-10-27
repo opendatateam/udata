@@ -1,6 +1,6 @@
 from urlextract import URLExtract
 from wtforms import validators
-from wtforms.validators import *  # noqa
+from wtforms.validators import *
 from wtforms.validators import StopValidation, ValidationError  # noqa
 
 
@@ -8,7 +8,7 @@ def _(s):
     return s
 
 
-class NoURLs(object):
+class NoURLs:
     """
     Check no url is present on this field
     """
@@ -30,24 +30,24 @@ class RequiredIf(validators.DataRequired):
 
     def __init__(self, other_field_name, *args, **kwargs):
         self.other_field_name = other_field_name
-        super(RequiredIf, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __call__(self, form, field):
         other_field = form._fields.get(self.other_field_name)
         if other_field is None:
             raise Exception('No field named "%s" in form' % self.other_field_name)
         if bool(other_field.data):
-            super(RequiredIf, self).__call__(form, field)
+            super().__call__(form, field)
 
 
-class Requires(object):
+class Requires:
     """
     A validator which makes a field required another field.
     """
 
     def __init__(self, other_field_name, *args, **kwargs):
         self.other_field_name = other_field_name
-        super(Requires, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __call__(self, form, field):
         if not field.data:
@@ -71,11 +71,11 @@ class RequiredIfVal(validators.DataRequired):
         self.expected_values = (
             expected_value if isinstance(expected_value, (list, tuple)) else (expected_value,)
         )
-        super(RequiredIfVal, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __call__(self, form, field):
         other_field = form._fields.get(self.other_field_name)
         if other_field is None:
             raise Exception('No field named "%s" in form' % self.other_field_name)
         if other_field.data in self.expected_values:
-            super(RequiredIfVal, self).__call__(form, field)
+            super().__call__(form, field)
