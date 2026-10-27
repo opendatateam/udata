@@ -26,7 +26,7 @@ import requests
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
-from flask_restx.inputs import boolean, positive
+from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
@@ -109,8 +109,8 @@ class DatasetApiParser(ModelApiParser):
         "views": "metrics.views",
     }
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **pagination):
+        super().__init__(**pagination)
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
         self.parser.add_argument(
@@ -319,27 +319,7 @@ common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 # exhausts the worker memory.
 CATALOG_MAX_PAGE_SIZE = 1000
 
-
-def catalog_page_size(value):
-    value = positive(value)
-    if value > CATALOG_MAX_PAGE_SIZE:
-        raise ValueError(
-            f"Invalid argument: {value}. argument must be at most {CATALOG_MAX_PAGE_SIZE}"
-        )
-    return value
-
-
-catalog_page_size.__schema__ = {**positive.__schema__, "maximum": CATALOG_MAX_PAGE_SIZE}
-
-# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
-catalog_parser = DatasetApiParser().parser
-catalog_parser.replace_argument(
-    "page_size",
-    type=catalog_page_size,
-    location="args",
-    default=100,
-    help="The page size",
-)
+catalog_parser = DatasetApiParser(page_size=100, max_page_size=CATALOG_MAX_PAGE_SIZE).parser
 
 
 @ns.route("/", endpoint="datasets")

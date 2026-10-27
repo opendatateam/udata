@@ -1,13 +1,15 @@
+from urllib.parse import parse_qsl, urlsplit
+
 import pytest
 from flask import url_for
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
-from werkzeug.datastructures import ImmutableMultiDict
 
 from udata.core.access_type.constants import AccessType
 from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
+from udata.core.dataset.api import CATALOG_MAX_PAGE_SIZE
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -161,12 +163,6 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         It should filter out unknown params (including url_for keywords).
         Repeated keywords should be kept as expected.
         """
-        expected_params = ImmutableMultiDict(
-            [("page", 3), ("tag", "hvd"), ("tag", "other"), ("page_size", 100)]
-        )
-        expected = url_for(
-            "api.site_rdf_catalog_format", _format="xml", **expected_params.to_dict(flat=False)
-        )
         params = [
             ("page", 3),
             ("tag", "hvd"),
@@ -181,7 +177,16 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         )
         headers = {"accept": "application/xml"}
         response = client.get(url, headers=headers)
-        assert_redirects(response, expected)
+
+        assert response.status_code == 302
+        location = urlsplit(response.location)
+        assert location.path == url_for("api.site_rdf_catalog_format", _format="xml")
+        assert sorted(parse_qsl(location.query)) == [
+            ("page", "3"),
+            ("page_size", "100"),
+            ("tag", "hvd"),
+            ("tag", "other"),
+        ]
 
     def test_rdf_perform_content_negociation(self, client):
         expected = url_for("api.site_rdf_catalog_format", _format="xml", page=1, page_size=100)
@@ -268,14 +273,14 @@ class SiteRdfViewsTest(PytestOnlyAPITestCase):
         catalog = graph.resource(catalog)
         assert catalog.value(HYDRA.totalItems) == Literal(4)
 
-    def test_catalog_rdf_page_size_above_maximum(self, client, monkeypatch):
-        monkeypatch.setattr("udata.core.dataset.api.CATALOG_MAX_PAGE_SIZE", 2)
+    def test_catalog_rdf_page_size_above_maximum(self, client):
+        url = url_for(
+            "api.site_rdf_catalog_format", _format="n3", page_size=CATALOG_MAX_PAGE_SIZE + 1
+        )
+        assert400(client.get(url))
 
-        response = client.get(url_for("api.site_rdf_catalog_format", _format="n3", page_size=3))
-        assert400(response)
-
-        response = client.get(url_for("api.site_rdf_catalog_format", _format="n3", page_size=2))
-        assert200(response)
+        url = url_for("api.site_rdf_catalog_format", _format="n3", page_size=CATALOG_MAX_PAGE_SIZE)
+        assert200(client.get(url))
 
     def test_catalog_format_unknown(self, client):
         url = url_for("api.site_rdf_catalog_format", _format="unknown")
