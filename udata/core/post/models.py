@@ -3,6 +3,7 @@ from flask_storage.mongo import ImageField
 from mongoengine import DENY, PULL
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     EmbeddedDocumentListField,
     ListField,
@@ -12,7 +13,7 @@ from mongoengine.fields import (
 
 from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout
 from udata.core.linkable import Linkable
 from udata.core.reuse.models import Reuse
 from udata.core.storages import default_image_basename, images
@@ -83,6 +84,7 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
     blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
+        checks=[check_blocs_layout],
     )
     image_url = field(
         StringField(),
@@ -141,6 +143,11 @@ class Post(Datetimed, Linkable, Document[PostQuerySet]):
         StringField(choices=list(POST_KINDS), default="news", required=False),
         filterable={},
         description="Post kind (news or page)",
+    )
+
+    sidemenu = field(
+        BooleanField(default=False),
+        description="Display a side menu linking to the headings of the post",
     )
 
     parent = field(
