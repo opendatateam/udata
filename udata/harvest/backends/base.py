@@ -558,7 +558,7 @@ class BaseBackend(ABC):
                             if isinstance(value, (list, tuple)):
                                 attr = int(attr)
                             value = value[attr]
-                        except Exception:
+                        except Exception:  # noqa: BLE001 (only used to enrich the message)
                             value = None
 
                     txt = safe_unicode(error).replace("for dictionary value", "")
@@ -569,7 +569,7 @@ class BaseBackend(ABC):
                         msg = "[{0}] {1}: {2}"
                     try:
                         msg = msg.format(field, txt, str(value))
-                    except Exception:
+                    except Exception:  # noqa: BLE001 (fall back to a message without the value)
                         msg = f"[{field}] {txt}"
 
                 else:

@@ -340,8 +340,8 @@ def clean_oid(oid, model):
             # and returns the original value on exception
             model.id.validate(oid)
             return model.id.to_python(oid)
-        except Exception:  # Catch all exceptions as model.type is not predefined
-            raise ValueError(f"Unsupported identifier: {oid}")
+        except Exception as e:  # Catch all exceptions as model.type is not predefined
+            raise ValueError(f"Unsupported identifier: {oid}") from e
 
 
 class ModelFieldMixin:

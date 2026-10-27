@@ -181,7 +181,7 @@ class Migration:
                 self.add_record("migrate", out, False, traceback=tb)
                 raise MigrationError(
                     "Error while executing migration", output=out, exc=e, traceback=tb
-                )
+                ) from e
 
         if not dryrun:
             self.add_record("migrate", out, True)
@@ -258,7 +258,7 @@ def load_migration(filename):
 
     try:
         script = files("udata").joinpath("migrations", filename).read_bytes()
-    except Exception:
+    except Exception:  # noqa: BLE001
         # Return None if file doesn't exist instead of raising
         return None
 

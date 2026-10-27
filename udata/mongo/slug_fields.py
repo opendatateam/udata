@@ -168,7 +168,7 @@ def populate_slug(instance, field):
 
     try:
         previous = instance.__class__.objects.get(id=instance.id)
-    except Exception:
+    except Exception:  # noqa: BLE001 (no stored version to compare the slug with)
         previous = None
 
     # Field value has changed

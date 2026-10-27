@@ -79,7 +79,7 @@ def homepage_url(**kwargs) -> str:
     # this :-(
     try:
         return cdata_url("/", **kwargs) or url_for("api.site", **kwargs)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return "/"
 
 

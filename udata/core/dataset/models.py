@@ -558,7 +558,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
     @property
     def dataset(self):
         try:
-            self._instance.id  # try to access attr from parent instance
+            self._instance.id  # noqa: B018 (try to access attr from parent instance)
             return self._instance
         except ReferenceError:  # weakly-referenced object no longer exists
             log.warning(

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from bson import DBRef
 from flask import url_for
@@ -17,6 +19,7 @@ from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
+from udata.search.commands import default_index_suffix_name, finalize_reindex, index_alias
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -45,6 +48,22 @@ class SearchIntegrationTest(APITestCase):
         from udata.search import get_elastic_client
 
         get_elastic_client().es.indices.refresh(index="udata-test-*")
+
+    def test_finalize_reindex_aliases_the_new_index_when_no_alias_exists(self):
+        """`udata search index -r` without `init-es` first, or after `clean-es`: the alias
+        lookup finds nothing, and the new index must still get the alias."""
+        from udata.search import get_elastic_client
+
+        es = get_elastic_client().es
+        start = datetime(2022, 2, 20, 20, 2)
+        alias = index_alias("dataset")
+        new_index = f"{alias}-{default_index_suffix_name(start)}"
+        es.indices.delete(index=f"{alias}*", ignore=[404])
+        es.indices.create(index=new_index)
+
+        finalize_reindex(["dataset"], start)
+
+        assert list(es.indices.get_alias(name=alias)) == [new_index]
 
     def test_dataset_fuzzy_search(self):
         """

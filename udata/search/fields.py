@@ -55,8 +55,8 @@ class ModelTermsFilter(Filter):
             return value
         try:
             return [self.model_field.to_mongo(v) for v in value.split(OR_SEPARATOR)]
-        except Exception:
-            raise ValueError(f'"{value}" is not valid identifier')
+        except Exception as e:
+            raise ValueError(f'"{value}" is not valid identifier') from e
 
 
 class TemporalCoverageFilter(Filter):

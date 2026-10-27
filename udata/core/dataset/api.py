@@ -610,13 +610,9 @@ class ResourcesAPI(API):
             )
         if any(isinstance(r, dict) and "id" not in r for r in resources):
             api.abort(400, "Each resource must have an 'id' field")
-        if {r["id"] if isinstance(r, dict) else r for r in resources} != {
-            str(r.id) for r in dataset.resources
-        }:
-            api.abort(
-                400,
-                f"Resource ids must match existing ones in dataset, ie: { {str(r.id) for r in dataset.resources} }",
-            )
+        existing_ids = {str(r.id) for r in dataset.resources}
+        if {r["id"] if isinstance(r, dict) else r for r in resources} != existing_ids:
+            api.abort(400, f"Resource ids must match existing ones in dataset, ie: {existing_ids}")
         data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}

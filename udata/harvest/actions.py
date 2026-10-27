@@ -120,7 +120,7 @@ def purge_sources():
 
         try:
             Notification.objects(details__source=source).delete()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 (the purge must go on)
             log.error(f"Error cleaning up notifications for purged harvest source {source.id}: {e}")
 
         source.delete()

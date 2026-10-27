@@ -132,24 +132,24 @@ def resolved_for(
             else []
         )
 
-        def followed_for(type: NotificationType, follows=follows) -> set[NotificationReason]:
+        # Both closures are only called within this iteration, so reading the loop
+        # variables is what we want (B023).
+        def followed_for(type: NotificationType) -> set[NotificationReason]:
             """The reasons the follows covering `type` give, as at dispatch."""
             if not event_for_type(type).reaches_subscribers:
                 return set()
             chain = event_chain(type)
             return {
                 REASON_BY_ORIGIN[rule.origin]
-                for rule in follows
+                for rule in follows  # noqa: B023
                 if rule.event is None or rule.event in chain
             }
 
-        def held_for(
-            type: NotificationType, roles=roles, subject=subject, followed_for=followed_for
-        ) -> set[NotificationReason]:
-            held = set(roles)
+        def held_for(type: NotificationType) -> set[NotificationReason]:
+            held = set(roles)  # noqa: B023
             # On the organization, a partial editor is only concerned by what is about the
             # organization itself: the rest reaches them through what was assigned.
-            if isinstance(subject, Organization) and not type.startswith("organization."):
+            if isinstance(subject, Organization) and not type.startswith("organization."):  # noqa: B023
                 held.discard(NotificationReason.ORGANIZATION_PARTIAL_EDITOR)
             return held | followed_for(type)
 

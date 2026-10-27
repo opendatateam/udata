@@ -1,4 +1,3 @@
-import collections
 import gzip
 from datetime import UTC, date, datetime
 from tempfile import NamedTemporaryFile
@@ -19,21 +18,12 @@ from udata.core.organization.models import Organization
 from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer
-from udata.mongo.document import UDataDocument as Document
 from udata.storage.s3 import store_bytes
 from udata.tasks import job
 
 from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
-
-
-def flatten(iterable):
-    for el in iterable:
-        if isinstance(el, collections.Iterable) and not (isinstance(el, (str, Document))):
-            yield from flatten(el)
-        else:
-            yield el
 
 
 @job("purge-datasets")

@@ -78,7 +78,7 @@ Linting, formatting and import sorting are done automatically by [Ruff](https://
 ```shell
 pre-commit install
 ```
-Once this is done, code formatting and linting, as well as import sorting, will be automatically checked before each commit.
+Once this is done, code formatting and linting, as well as import sorting, will be automatically checked before each commit. The hooks run Ruff through `uv run`, so they need [uv](https://docs.astral.sh/uv/) and use the Ruff version locked in `uv.lock`, the same as the CI.
 
 If you cannot use pre-commit, it is necessary to format, lint, and sort imports with [Ruff](https://docs.astral.sh/ruff/) before committing:
 ```shell

@@ -428,7 +428,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 try:
                     doc = self.as_dcat(result).to_string("utf-8")
                     page_graph.parse(data=doc, format=self.format)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 (one broken record must not stop the page)
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
                     xml = result.to_string("utf-8")
@@ -464,7 +464,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         returned_count = int(search_results.get_attribute_value("numberOfRecordsReturned"))
 
         # Break conditions copied gratefully from
-
+        # https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
         should_break = (
             # A value of 0 means all records have been returned (standard CSW)
             (next_record == 0)

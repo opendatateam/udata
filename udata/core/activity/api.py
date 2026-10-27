@@ -28,9 +28,9 @@ class SiteActivityAPI(API):
         safe_items = []
         for item in qs.queryset.items:
             try:
-                item.actor
-                item.organization
-                item.related_to
+                item.actor  # noqa: B018
+                item.organization  # noqa: B018
+                item.related_to  # noqa: B018
             except DoesNotExist as e:
                 log.exception(e)
                 continue

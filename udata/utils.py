@@ -129,7 +129,7 @@ class Paginable:
     @property
     def pages(self):
         if self.page_size:
-            return ceil(self.total / float(self.page_size))
+            return ceil(self.total / self.page_size)
         else:
             return 1
 
@@ -369,7 +369,7 @@ def recursive_get(obj: Any, key: Any):
 def unique_string(length: int = UUID_LENGTH) -> str:
     """Generate a unique string"""
     # We need a string at least as long as length
-    string = str(uuid4()) * math.ceil(length / float(UUID_LENGTH))
+    string = str(uuid4()) * math.ceil(length / UUID_LENGTH)
     return string[:length] if length else string
 
 

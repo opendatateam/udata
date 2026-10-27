@@ -338,8 +338,11 @@ class DateFieldTest(PytestOnlyDBTestCase):
         obj.reload()
         assert obj.a_date == the_date
 
-    def test_not_valid(self):
-        obj = DateTester(a_date="invalid")
+    # Each value makes the date parsing raise a different exception: `ValueError`,
+    # `TypeError` and `OverflowError`, all left for the validation to report.
+    @pytest.mark.parametrize("value", ["invalid", 42, "99999999999999999999"])
+    def test_not_valid(self, value):
+        obj = DateTester(a_date=value)
         with pytest.raises(ValidationError):
             obj.save()
 

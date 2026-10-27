@@ -133,7 +133,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
         except requests.RequestException:
             return None
-        except Exception:
+        except Exception:  # noqa: BLE001 (indexing must not fail on an unreadable OpenAPI spec)
             return None
 
     @classmethod

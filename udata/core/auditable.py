@@ -38,7 +38,7 @@ class Auditable:
             auditable_fields = [
                 key for key, field, info in get_fields(cls) if info.get("auditable", True)
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001
             # for backward compatibility, all fields are treated as auditable for classes not using field() function
             auditable_fields = document._get_changed_fields()
         changed_fields = [

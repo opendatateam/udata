@@ -188,15 +188,6 @@ ignore = [
     # Flask config classes, mongoengine `meta`, factories and API field declarations
     # are class attributes by design.
     "RUF012",
-    # Every `except Exception` is a log-and-continue boundary: batch migrations and
-    # commands must not stop on one broken document, notifications must not fail the
-    # action that triggered them.
-    "BLE001",
-    # Mongoengine dereferences on attribute access: touching a reference is how we check
-    # it still exists (it raises `DoesNotExist` otherwise).
-    "B018",
-    # `from x import Y as Y` is the PEP 484 explicit re-export.
-    "PLC0414",
     # A join over literals keeps one item per line (field masks, expected HTML in
     # tests): collapsing it into a single string makes it unreadable and every change
     # a diff on one long line.
@@ -206,6 +197,19 @@ ignore = [
     # carry the exception.
     "TRY401",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Migrations are one-shot batch scripts: they must not stop on one broken document, and
+# touching a reference is how they check it still exists (mongoengine dereferences on
+# attribute access and raises `DoesNotExist`).
+"udata/migrations/*.py" = ["BLE001", "B018"]
+# Commands run over whole collections: one failing object must not stop the batch.
+"udata/commands/*.py" = ["BLE001"]
+"udata/**/commands.py" = ["BLE001"]
+# A notification handler must never fail the action that triggered it.
+"udata/**/notifications.py" = ["BLE001"]
+# `from x import Y as Y` is the PEP 484 explicit re-export of the flask-restx fields.
+"udata/api/fields.py" = ["PLC0414"]
 
 [tool.setuptools]
 packages = ["udata", "udata_search_service"]

@@ -57,7 +57,7 @@ class ExtrasField(DictField):
                     )
                 else:
                     extra_cls().validate(value)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 (every extra's error is reported below)
                 errors[key] = getattr(e, "message", str(e))
 
         if errors:

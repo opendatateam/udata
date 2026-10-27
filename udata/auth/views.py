@@ -43,7 +43,7 @@ def slash_url_suffix(url, suffix):
     the URL ends with a slash.
     """
 
-    return url.endswith("/") and (f"{suffix}/") or (f"/{suffix}")
+    return f"{suffix}/" if url.endswith("/") else f"/{suffix}"
 
 
 def send_change_email_confirmation_instructions(user, new_email):
