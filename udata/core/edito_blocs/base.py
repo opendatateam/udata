@@ -61,7 +61,7 @@ def prefetch_blocs_references(blocs):
     real pages. See `CARD_UNUSED_HEAVY_FIELDS`.
 
     A bloc showing a single object that no longer exists is left out, with the containers
-    it leaves empty (section, accordion item). Nothing purges the blocs of a hard-deleted
+    it leaves empty (section, accordion item, column). Nothing purges the blocs of a hard-deleted
     object from storage: they go when the page is saved again, from what it read.
 
     This runs once per marshalled bloc list — including the nested ones, since a

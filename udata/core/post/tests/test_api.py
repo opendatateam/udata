@@ -1226,12 +1226,22 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         response = self.post(url_for("api.posts"), data)
 
         assert response.status_code == 201
-        served = response.json["blocs"][0]["blocs"][0]
-        assert (served["class"], served["width"]) == ("ColumnBloc", "3/4")
-        assert [bloc["class"] for bloc in served["blocs"]] == ["TitleBloc", "MarkdownBloc"]
-        stored = Post.objects.get().blocs
-        assert stored[0].blocs[0].blocs[0].title == "T"
-        assert stored[1].blocs[0].items[0].content[0].blocs[1].content == "Texte"
+        served_section, served_accordion_section = response.json["blocs"]
+        stored_section, stored_accordion_section = Post.objects.get().blocs
+        for served, stored in [
+            (served_section["blocs"], stored_section.blocs),
+            (
+                served_accordion_section["blocs"][0]["items"][0]["content"],
+                stored_accordion_section.blocs[0].items[0].content,
+            ),
+        ]:
+            assert [(bloc["class"], bloc["width"]) for bloc in served] == [
+                ("ColumnBloc", "3/4"),
+                ("ImageBloc", "1/4"),
+            ]
+            assert [bloc["class"] for bloc in served[0]["blocs"]] == ["TitleBloc", "MarkdownBloc"]
+            assert stored[0].blocs[0].title == "T"
+            assert stored[0].blocs[1].content == "Texte"
 
     def test_post_api_accepts_images_and_cards(self):
         """A hero with its illustration, and a summary page linking its subpages with cards,
