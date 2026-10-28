@@ -159,8 +159,8 @@ class Bloc(EmbeddedDocument):
     id = field(AutoUUIDField(primary_key=True))
 
 
-# The layout of a blocs field, from the top: sections; sections hold accordions and leaves,
-# accordion items only hold leaves.
+# The layout of a blocs field, from the top: sections; sections hold accordions, columns and
+# leaves; accordion items hold columns and leaves; columns only hold leaves.
 LEAF_BLOCS = {
     "TitleBloc",
     "MarkdownBloc",
@@ -174,9 +174,10 @@ LEAF_BLOCS = {
     "DataserviceBloc",
 }
 TOP_LEVEL_BLOCS = {"SectionBloc"}
-SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc"}
-# The explorer is too wide for an accordion.
-ACCORDION_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
+SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc", "ColumnBloc"}
+# The explorer is too wide for an accordion, or for a column, a share of a row.
+COLUMN_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
+ACCORDION_BLOCS = COLUMN_BLOCS | {"ColumnBloc"}
 
 
 def _check_layout(blocs, allowed: set, field: str):
@@ -187,12 +188,14 @@ def _check_layout(blocs, allowed: set, field: str):
                 field=field,
                 message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
             )
-        if name == "SectionBloc":
-            # An empty section only exists in the editor, where blocs are added to it: no
-            # reader would see it.
+        if name in ("SectionBloc", "ColumnBloc"):
+            # An empty section or column only exists in the editor, where blocs are added to it:
+            # no reader would see it.
             if not bloc.blocs:
-                raise FieldValidationError(field=field, message="SectionBloc cannot be empty")
-            _check_layout(bloc.blocs, SECTION_BLOCS, field)
+                raise FieldValidationError(field=field, message=f"{name} cannot be empty")
+            _check_layout(
+                bloc.blocs, SECTION_BLOCS if name == "SectionBloc" else COLUMN_BLOCS, field
+            )
         elif name == "AccordionListBloc":
             for item in bloc.items:
                 _check_layout(item.content, ACCORDION_BLOCS, field)

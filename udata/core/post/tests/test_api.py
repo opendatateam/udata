@@ -1095,6 +1095,10 @@ def accordion(*content):
     return {"class": "AccordionListBloc", "items": [{"title": "I", "content": list(content)}]}
 
 
+def column(*blocs, **fields):
+    return {"class": "ColumnBloc", "blocs": list(blocs), **fields}
+
+
 TITLE = {"class": "TitleBloc", "title": "T"}
 
 
@@ -1122,6 +1126,26 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 "AccordionListBloc is not allowed here",
                 id="accordion-in-accordion",
             ),
+            pytest.param(
+                [column(TITLE)], "ColumnBloc is not allowed here", id="column-at-top-level"
+            ),
+            pytest.param([section(column())], "ColumnBloc cannot be empty", id="empty-column"),
+            pytest.param(
+                [section(column(column(TITLE)))],
+                "ColumnBloc is not allowed here",
+                id="column-in-column",
+            ),
+            pytest.param(
+                [section(column(accordion(TITLE)))],
+                "AccordionListBloc is not allowed here",
+                id="accordion-in-column",
+            ),
+            pytest.param(
+                [section(accordion(column()))],
+                "ColumnBloc cannot be empty",
+                id="empty-column-in-accordion",
+            ),
+            pytest.param([section(column(TITLE, width="1/5"))], "width", id="unknown-column-width"),
         ],
     )
     def test_post_api_rejects_blocs_out_of_layout(self, blocs, reason):
@@ -1182,6 +1206,45 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
         assert title.title == "T"
         assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")
+
+    def test_post_api_accepts_columns(self):
+        """A banner: a title and its text stacked in a column beside an illustration, in a
+        section and in an accordion item."""
+        self.login(AdminFactory())
+        text = {"class": "MarkdownBloc", "content": "Texte"}
+        image = {"class": "ImageBloc", "width": "1/4", "image": "https://e.com/i.svg", "alt": None}
+        banner = [column(TITLE, text, width="3/4"), image]
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [section(*banner), section(accordion(*banner))],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 201
+        served = response.json["blocs"][0]["blocs"][0]
+        assert (served["class"], served["width"]) == ("ColumnBloc", "3/4")
+        assert [bloc["class"] for bloc in served["blocs"]] == ["TitleBloc", "MarkdownBloc"]
+        stored = Post.objects.get().blocs
+        assert [bloc.title for bloc in stored[0].blocs[0].blocs[:1]] == ["T"]
+        assert stored[1].blocs[0].items[0].content[0].blocs[1].content == "Texte"
+
+    def test_post_api_rejects_the_explorer_in_a_column(self):
+        """A share of a row, too narrow for the explorer, as an accordion."""
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
+        self.login(AdminFactory())
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [section(column(explorer))],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 400
+        assert "ExploreBloc is not allowed here" in response.get_data(as_text=True)
 
     def test_post_api_accepts_images_and_cards(self):
         """A hero with its illustration, and a summary page linking its subpages with cards,
