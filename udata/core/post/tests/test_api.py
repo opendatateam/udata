@@ -18,6 +18,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
+    ColumnBloc,
     DataserviceBloc,
     DatasetBloc,
     ExploreBloc,
@@ -1095,6 +1096,10 @@ def accordion(*content):
     return {"class": "AccordionListBloc", "items": [{"title": "I", "content": list(content)}]}
 
 
+def column(*blocs, **fields):
+    return {"class": "ColumnBloc", "blocs": list(blocs), **fields}
+
+
 TITLE = {"class": "TitleBloc", "title": "T"}
 
 
@@ -1122,6 +1127,26 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
                 "AccordionListBloc is not allowed here",
                 id="accordion-in-accordion",
             ),
+            pytest.param(
+                [column(TITLE)], "ColumnBloc is not allowed here", id="column-at-top-level"
+            ),
+            pytest.param([section(column())], "ColumnBloc cannot be empty", id="empty-column"),
+            pytest.param(
+                [section(column(column(TITLE)))],
+                "ColumnBloc is not allowed here",
+                id="column-in-column",
+            ),
+            pytest.param(
+                [section(column(accordion(TITLE)))],
+                "AccordionListBloc is not allowed here",
+                id="accordion-in-column",
+            ),
+            pytest.param(
+                [section(accordion(column()))],
+                "ColumnBloc cannot be empty",
+                id="empty-column-in-accordion",
+            ),
+            pytest.param([section(column(TITLE, width="1/5"))], "width", id="unknown-column-width"),
         ],
     )
     def test_post_api_rejects_blocs_out_of_layout(self, blocs, reason):
@@ -1132,8 +1157,10 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         assert reason in response.get_data(as_text=True)
         assert Post.objects.count() == 0
 
-    def test_post_api_rejects_the_explorer_in_an_accordion(self):
-        """The explorer is too wide for an accordion, even of an existing resource."""
+    @pytest.mark.parametrize("container", [accordion, column], ids=["accordion", "column"])
+    def test_post_api_rejects_the_explorer_in_an_accordion_or_a_column(self, container):
+        """The explorer is too wide for an accordion or a column, a share of a row, even of an
+        existing resource."""
         dataset = DatasetFactory(resources=[ResourceFactory()])
         explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
         self.login(AdminFactory())
@@ -1141,7 +1168,7 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         data = {
             "name": "Test blocs post",
             "body_type": "blocs",
-            "blocs": [section(accordion(explorer))],
+            "blocs": [section(container(explorer))],
         }
         response = self.post(url_for("api.posts"), data)
 
@@ -1182,6 +1209,39 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         title, dataset_bloc = Post.objects.get().blocs[0].blocs[0].items[0].content
         assert title.title == "T"
         assert (dataset_bloc.dataset.id, dataset_bloc.width) == (dataset.id, "1/2")
+
+    def test_post_api_accepts_columns(self):
+        """A banner: a title and its text stacked in a column beside an illustration, in a
+        section and in an accordion item."""
+        self.login(AdminFactory())
+        text = {"class": "MarkdownBloc", "content": "Texte"}
+        image = {"class": "ImageBloc", "width": "1/4", "image": "https://e.com/i.svg", "alt": None}
+        banner = [column(TITLE, text, width="3/4"), image]
+        data = {
+            "name": "Test blocs post",
+            "body_type": "blocs",
+            "blocs": [section(*banner), section(accordion(*banner))],
+        }
+
+        response = self.post(url_for("api.posts"), data)
+
+        assert response.status_code == 201
+        served_section, served_accordion_section = response.json["blocs"]
+        stored_section, stored_accordion_section = Post.objects.get().blocs
+        for served, stored in [
+            (served_section["blocs"], stored_section.blocs),
+            (
+                served_accordion_section["blocs"][0]["items"][0]["content"],
+                stored_accordion_section.blocs[0].items[0].content,
+            ),
+        ]:
+            assert [(bloc["class"], bloc["width"]) for bloc in served] == [
+                ("ColumnBloc", "3/4"),
+                ("ImageBloc", "1/4"),
+            ]
+            assert [bloc["class"] for bloc in served[0]["blocs"]] == ["TitleBloc", "MarkdownBloc"]
+            assert stored[0].blocs[0].title == "T"
+            assert stored[0].blocs[1].content == "Texte"
 
     def test_post_api_accepts_images_and_cards(self):
         """A hero with its illustration, and a summary page linking its subpages with cards,
@@ -1243,7 +1303,7 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
     )
     def test_blocs_of_hard_deleted_objects_are_left_out(self, factory, bloc_cls, ref):
         """Nothing purges the blocs of a hard-deleted object: they are left out at read, in a
-        section and in an accordion item, with the containers they leave empty."""
+        section, an accordion item and a column, with the containers they leave empty."""
         kept, deleted = factory(), factory()
         post = PostFactory(
             body_type="blocs",
@@ -1261,6 +1321,12 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
                         )
                     ]
                 ),
+                SectionBloc(
+                    blocs=[
+                        ColumnBloc(blocs=[bloc_cls(**{ref: deleted})]),
+                        ColumnBloc(blocs=[bloc_cls(**{ref: deleted}), bloc_cls(**{ref: kept})]),
+                    ]
+                ),
             ],
         )
         type(deleted)._get_collection().delete_one({"_id": deleted.id})
@@ -1268,7 +1334,9 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.post", post=post))
 
         assert200(response)
-        section, accordion_section = response.json["blocs"]
+        section, accordion_section, column_section = response.json["blocs"]
         assert [bloc[ref]["id"] for bloc in section["blocs"]] == [str(kept.id)]
         (accordion,) = accordion_section["blocs"]
         assert [item["title"] for item in accordion["items"]] == ["Kept"]
+        (kept_column,) = column_section["blocs"]
+        assert [bloc[ref]["id"] for bloc in kept_column["blocs"]] == [str(kept.id)]

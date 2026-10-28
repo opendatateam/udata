@@ -156,4 +156,12 @@ class SectionBloc(Bloc):
     blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
 
 
+@generate_fields()
+class ColumnBloc(SizedMixin, Bloc):
+    """Blocs stacked in a share of a row, beside the others: a title and its text beside an
+    illustration."""
+
+    blocs = field(EmbeddedDocumentListField(Bloc), generic=True)
+
+
 SITE_BLOCS_FIELDS = ("datasets_blocs", "reuses_blocs", "dataservices_blocs")
