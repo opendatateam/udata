@@ -1157,8 +1157,10 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         assert reason in response.get_data(as_text=True)
         assert Post.objects.count() == 0
 
-    def test_post_api_rejects_the_explorer_in_an_accordion(self):
-        """The explorer is too wide for an accordion, even of an existing resource."""
+    @pytest.mark.parametrize("container", [accordion, column], ids=["accordion", "column"])
+    def test_post_api_rejects_the_explorer_in_an_accordion_or_a_column(self, container):
+        """The explorer is too wide for an accordion or a column, a share of a row, even of an
+        existing resource."""
         dataset = DatasetFactory(resources=[ResourceFactory()])
         explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
         self.login(AdminFactory())
@@ -1166,7 +1168,7 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         data = {
             "name": "Test blocs post",
             "body_type": "blocs",
-            "blocs": [section(accordion(explorer))],
+            "blocs": [section(container(explorer))],
         }
         response = self.post(url_for("api.posts"), data)
 
@@ -1230,22 +1232,6 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         stored = Post.objects.get().blocs
         assert stored[0].blocs[0].blocs[0].title == "T"
         assert stored[1].blocs[0].items[0].content[0].blocs[1].content == "Texte"
-
-    def test_post_api_rejects_the_explorer_in_a_column(self):
-        """A share of a row, too narrow for the explorer, as an accordion."""
-        dataset = DatasetFactory(resources=[ResourceFactory()])
-        explorer = {"class": "ExploreBloc", "resource_id": str(dataset.resources[0].id)}
-        self.login(AdminFactory())
-        data = {
-            "name": "Test blocs post",
-            "body_type": "blocs",
-            "blocs": [section(column(explorer))],
-        }
-
-        response = self.post(url_for("api.posts"), data)
-
-        assert response.status_code == 400
-        assert "ExploreBloc is not allowed here" in response.get_data(as_text=True)
 
     def test_post_api_accepts_images_and_cards(self):
         """A hero with its illustration, and a summary page linking its subpages with cards,
