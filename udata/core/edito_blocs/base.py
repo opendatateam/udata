@@ -139,7 +139,7 @@ BLOC_WIDTHS = ("1/4", "1/3", "1/2", "2/3", "3/4")
 
 
 class SizedMixin:
-    """For the blocs laid out side by side in a section or an accordion item."""
+    """For the blocs laid out side by side in a section, an accordion item or a column."""
 
     width = field(
         StringField(choices=BLOC_WIDTHS),
@@ -178,6 +178,8 @@ SECTION_BLOCS = LEAF_BLOCS | {"AccordionListBloc", "ColumnBloc"}
 # The explorer is too wide for an accordion, or for a column, a share of a row.
 COLUMN_BLOCS = LEAF_BLOCS - {"ExploreBloc"}
 ACCORDION_BLOCS = COLUMN_BLOCS | {"ColumnBloc"}
+# The containers holding their blocs in a `blocs` field, with the blocs each one accepts.
+CONTAINED_BLOCS = {"SectionBloc": SECTION_BLOCS, "ColumnBloc": COLUMN_BLOCS}
 
 
 def _check_layout(blocs, allowed: set, field: str):
@@ -188,14 +190,12 @@ def _check_layout(blocs, allowed: set, field: str):
                 field=field,
                 message=f"{name} is not allowed here, expected one of {sorted(allowed)}",
             )
-        if name in ("SectionBloc", "ColumnBloc"):
+        if name in CONTAINED_BLOCS:
             # An empty section or column only exists in the editor, where blocs are added to it:
             # no reader would see it.
             if not bloc.blocs:
                 raise FieldValidationError(field=field, message=f"{name} cannot be empty")
-            _check_layout(
-                bloc.blocs, SECTION_BLOCS if name == "SectionBloc" else COLUMN_BLOCS, field
-            )
+            _check_layout(bloc.blocs, CONTAINED_BLOCS[name], field)
         elif name == "AccordionListBloc":
             for item in bloc.items:
                 _check_layout(item.content, ACCORDION_BLOCS, field)

@@ -18,6 +18,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
+    ColumnBloc,
     DataserviceBloc,
     DatasetBloc,
     ExploreBloc,
@@ -1227,7 +1228,7 @@ class PostBlocsLayoutAPITest(PytestOnlyAPITestCase):
         assert (served["class"], served["width"]) == ("ColumnBloc", "3/4")
         assert [bloc["class"] for bloc in served["blocs"]] == ["TitleBloc", "MarkdownBloc"]
         stored = Post.objects.get().blocs
-        assert [bloc.title for bloc in stored[0].blocs[0].blocs[:1]] == ["T"]
+        assert stored[0].blocs[0].blocs[0].title == "T"
         assert stored[1].blocs[0].items[0].content[0].blocs[1].content == "Texte"
 
     def test_post_api_rejects_the_explorer_in_a_column(self):
@@ -1306,7 +1307,7 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
     )
     def test_blocs_of_hard_deleted_objects_are_left_out(self, factory, bloc_cls, ref):
         """Nothing purges the blocs of a hard-deleted object: they are left out at read, in a
-        section and in an accordion item, with the containers they leave empty."""
+        section, an accordion item and a column, with the containers they leave empty."""
         kept, deleted = factory(), factory()
         post = PostFactory(
             body_type="blocs",
@@ -1324,6 +1325,12 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
                         )
                     ]
                 ),
+                SectionBloc(
+                    blocs=[
+                        ColumnBloc(blocs=[bloc_cls(**{ref: deleted})]),
+                        ColumnBloc(blocs=[bloc_cls(**{ref: deleted}), bloc_cls(**{ref: kept})]),
+                    ]
+                ),
             ],
         )
         type(deleted)._get_collection().delete_one({"_id": deleted.id})
@@ -1331,7 +1338,9 @@ class PostBlocsDeletedObjectsAPITest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.post", post=post))
 
         assert200(response)
-        section, accordion_section = response.json["blocs"]
+        section, accordion_section, column_section = response.json["blocs"]
         assert [bloc[ref]["id"] for bloc in section["blocs"]] == [str(kept.id)]
         (accordion,) = accordion_section["blocs"]
         assert [item["title"] for item in accordion["items"]] == ["Kept"]
+        (kept_column,) = column_section["blocs"]
+        assert [bloc[ref]["id"] for bloc in kept_column["blocs"]] == [str(kept.id)]
