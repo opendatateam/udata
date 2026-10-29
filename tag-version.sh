@@ -323,11 +323,19 @@ fi
 
 # Commit the CHANGELOG and publiccode.yml updates
 git add CHANGELOG.md publiccode.yml
+# git captures ssh-keygen's stderr and only shows it on failure, so the
+# "Confirm user presence" prompt of a security key never reaches the terminal.
+if [ "$(git config --bool commit.gpgsign)" = "true" ]; then
+    echo "→ Touch your security key to sign the commit"
+fi
 git commit -m "Bump version $VERSION"
 
 echo "✓ Committed CHANGELOG.md and publiccode.yml"
 
 # Create the git tag
+if [ "$(git config --bool tag.gpgsign)" = "true" ]; then
+    echo "→ Touch your security key to sign the tag"
+fi
 git tag -a "v$VERSION" -m "Version $VERSION"
 
 echo "✓ Created tag v$VERSION"
