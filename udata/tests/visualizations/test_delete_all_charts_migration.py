@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from mongoengine.connection import get_db
 
 from udata.core.user.factories import UserFactory
@@ -26,3 +28,26 @@ class DeleteAllChartsMigrationTest(PytestOnlyDBTestCase):
         ChartFactory.create_batch(2, owner=user)
         migrate()
         assert Chart.objects.count() == 0
+
+    def test_delete_all_charts_with_legacy_shaped_documents(self):
+        """Legacy-shaped documents (fields the current model no longer has, or
+        fields missing) must be deletable without unmarshalling them."""
+        collection = get_db()["chart"]
+        ChartFactory()
+        legacy_id = collection.insert_one(
+            {
+                "title": "Legacy chart",
+                "slug": "legacy-chart",
+                "query": "SELECT 1",
+                # Legacy shape: an old free-form ``config`` dict, no chart_type,
+                # no y_axis, and an image field that predates the thumbnails map.
+                "config": {"x": "a", "y": "b", "kind": "line"},
+                "image": {"filename": "ab/cd/legacy.png", "original": "ab/cd/legacy_o.png"},
+                "created_at": datetime.now(UTC),
+            }
+        ).inserted_id
+
+        migrate()
+
+        assert collection.count_documents({}) == 0
+        assert collection.find_one({"_id": legacy_id}) is None

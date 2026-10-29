@@ -166,6 +166,40 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         response = self.post(url_for("api.visualizations"), data)
         assert response.status_code == 400
 
+    def test_visualization_api_create_rejects_non_read_only_query(self):
+        """It should not create a visualization with a query that is not
+        guaranteed to be a single read-only statement"""
+        self.login()
+        for query in (
+            "DROP TABLE data",
+            "SELECT a FROM data; DELETE FROM data",
+            "SELECT read_csv('/etc/passwd')",
+            "SELECT set_config('x', 'y', false)",
+            "SELECT * INTO newtab FROM data",
+        ):
+            data = {
+                "title": "My chart",
+                "description": "Some description",
+                "query": query,
+                "resource_id": str(uuid4()),
+            }
+            response = self.post(url_for("api.visualizations"), data)
+            assert response.status_code == 400, query
+            assert Chart.objects.count() == 0
+
+    def test_visualization_api_create_accepts_read_only_query(self):
+        """It should create a visualization with a read-only query, CTEs included"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "WITH x AS (SELECT category, COUNT(*) AS n FROM data GROUP BY category) "
+            "SELECT * FROM x ORDER BY n DESC",
+            "resource_id": str(uuid4()),
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+
     def test_visualization_api_create_invalid_resource_id(self):
         """It should not create a visualization with an invalid resource_id"""
         self.login()

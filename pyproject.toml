@@ -94,6 +94,7 @@ dependencies = [
     "beautifulsoup4>=4.14.3,<5.0.0",
     "markdown>=3.10,<4.0",
     "pyproj>=3.7.2",
+    "sqlglot>=26,<27",
 ]
 
 [project.urls]

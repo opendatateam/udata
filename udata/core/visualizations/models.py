@@ -2,6 +2,7 @@ from blinker import Signal
 from flask.helpers import url_for
 from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument, Q
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
@@ -25,6 +26,7 @@ from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
+from udata.sql_guard import UnsafeSQLError, assert_read_only
 from udata.uris import cdata_url
 
 from .constants import IMAGE_MAX_SIZE
@@ -86,6 +88,16 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
     resource_id = field(UUIDField(required=True, binary=False))
     chart_type = field(StringField(choices=["line", "histogram"], default="line", required=True))
     y_axis = field(EmbeddedDocumentField(YAxis))
+
+    def clean(self):
+        super().clean()
+        # Chart queries run read-only against the tabular engine; an absent
+        # query is the required-field validator's job, not the guard's.
+        if self.query:
+            try:
+                assert_read_only(self.query)
+            except UnsafeSQLError as error:
+                raise MongoEngineValidationError(f"Chart query is not read-only: {error}")
 
     image = field(
         ImageField(

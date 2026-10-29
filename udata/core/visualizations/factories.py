@@ -20,6 +20,6 @@ class ChartFactory(ModelFactory):
     title = factory.Faker("sentence")
     description = factory.Faker("text")
     y_axis = factory.SubFactory(YAxisFactory)
-    query = factory.Faker("sentence")
+    query = "SELECT category, COUNT(*) AS total FROM data GROUP BY category"
     resource_id = factory.Faker("uuid4")
     chart_type = FuzzyChoice(["line", "histogram"])
