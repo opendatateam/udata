@@ -1,5 +1,14 @@
 # Changelog
 
+## 17.20.0 (2026-10-29)
+
+- chore: add CODEOWNERS ([#4047](https://github.com/opendatateam/udata/pull/4047))
+- feat(blocs): add a column bloc, to stack blocs beside the others in a section or an accordion item ([#4046](https://github.com/opendatateam/udata/pull/4046))
+- feat(discussions): use new url format for external notifications ([#4025](https://github.com/opendatateam/udata/pull/4025))
+- fix(auth): answer a form error instead of a 500 when an account without password tries /verify ([#4043](https://github.com/opendatateam/udata/pull/4043))
+- test: fix the names in the user email search test, a random "Jane" matched the query ([#4044](https://github.com/opendatateam/udata/pull/4044))
+
+
 ## 17.19.0 (2026-10-27)
 
 - chore(deps): update astral-sh/setup-uv action to v10.3.2 ([#4027](https://github.com/opendatateam/udata/pull/4027))
