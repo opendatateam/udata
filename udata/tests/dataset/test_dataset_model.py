@@ -717,6 +717,17 @@ class ResourceModelTest(PytestOnlyDBTestCase):
 
 
 class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
+    def test_found(self):
+        """The resource is picked among several, the dataset comes back without its resources"""
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found_dataset, found_resource = get_dataset_and_resource_by_id(resource.id)
+
+        assert found_dataset.id == dataset.id
+        assert found_dataset.resources == []
+        assert found_resource.id == resource.id
+
     def test_ambiguous_id(self, caplog):
         """A resource id duplicated across datasets resolves to nothing and is reported"""
         shared_id = uuid4()
@@ -751,7 +762,7 @@ class GetDatasetByResourceIdTest(PytestOnlyDBTestCase):
         assert str(shared_id) in caplog.text
 
     def test_exclude_resources(self):
-        """The dataset comes back without its resources list, so a heavy dataset isn't fetched whole"""
+        """The dataset comes back without its resources, so a heavy dataset isn't fetched whole"""
         resource = ResourceFactory()
         dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
 

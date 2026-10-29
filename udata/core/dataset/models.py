@@ -1443,7 +1443,8 @@ def get_dataset_and_resource_by_id(id):
 
     The dataset is loaded without its resources list (`dataset.resources` is empty), so a
     heavy dataset isn't fetched whole to serve a single resource. The resource isn't
-    attached to the dataset either: `resource.dataset` can't resolve it.
+    attached to the dataset either: `resource.dataset` can't resolve it (raises
+    AttributeError rather than the old weakref fallback).
     """
     dataset = get_dataset_by_resource_id(id, exclude_resources=True)
     if not dataset:
@@ -1461,7 +1462,12 @@ def get_dataset_and_resource_by_id(id):
 
 
 def get_resource(id):
-    """Fetch a resource given its UUID"""
+    """Fetch a resource by UUID.
+
+    Resources returned here are detached from their parent dataset (the internal
+    `_instance` is None), so dataset-dependent methods are unavailable: `resource.dataset`,
+    `url_for()`, `self_web_url()` and `save()` all raise AttributeError.
+    """
     _, resource = get_dataset_and_resource_by_id(id)
     if resource:
         return resource
