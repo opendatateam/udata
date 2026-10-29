@@ -317,8 +317,8 @@ git commit -m "Bump version $VERSION"
 
 echo "✓ Committed CHANGELOG.md and publiccode.yml"
 
-# Create the git tag. The CI only releases tags signed by a key listed in
-# .github/allowed_signers. The default cleanup would strip markdown headings.
+# Create the git tag. The CI only releases tags signed by a key declared on a GitHub
+# account. The default cleanup would strip markdown headings.
 echo "→ Touch your security key to sign the tag"
 printf 'Version %s\n\n%s\n' "$VERSION" "$RELEASE_NOTES" | git tag -s --cleanup=verbatim -F - "v$VERSION"
 

@@ -11,8 +11,8 @@ udata uses a custom release script (`tag-version.sh`) to automate its release pr
 
 To create a release, you need to:
 - have administrator permission on the udata repository (to allow direct push)
-- sign your tags with an SSH key listed in `.github/allowed_signers`: the CI refuses to
-  publish a tag it cannot verify
+- sign your tags with a key declared as a signing key on your GitHub account: the CI
+  refuses to publish a tag GitHub cannot verify
 
 The steps to make a release are:
 

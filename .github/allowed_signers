@@ -1,4 +1,0 @@
-# SSH keys allowed to sign release tags, checked by the CI before publishing.
-# Format: <email> namespaces="git" <key>, see "ALLOWED SIGNERS" in ssh-keygen(1).
-git@hadibut.fr namespaces="git" sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAICLDC6s/rkdlY0OUGpuN+U7MykorlXgMixTDNX0FLURvAAAABHNzaDo=
-git@hadibut.fr namespaces="git" sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIGwgjlURd1Q0Ea8kv51UYOEuFuuIh9lGR1R44ZcaRnr4AAAABHNzaDo=

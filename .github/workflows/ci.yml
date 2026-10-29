@@ -153,14 +153,20 @@ jobs:
           fetch-depth: 0
 
       # A vX.Y.Z tag on HEAD makes setuptools_scm build that release version. Merged
-      # commits are signed by GitHub itself, so the tag is what a maintainer signs to
-      # release: only a key listed in allowed_signers may publish one.
+      # commits are signed by GitHub itself, but GitHub never signs a tag object: a
+      # verified tag was signed by a person, with a key declared on their account.
       - name: Check the release tag is signed by a maintainer
         id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           tag=$(git tag --points-at HEAD "v*")
           if [ -n "$tag" ]; then
-            git -c gpg.ssh.allowedSignersFile=.github/allowed_signers verify-tag "$tag"
+            verified=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$(git rev-parse "$tag")" --jq .verification.verified)
+            if [ "$verified" != "true" ]; then
+              echo "Tag $tag is not signed with a key declared on a GitHub account"
+              exit 1
+            fi
             echo "name=$tag" >> "$GITHUB_OUTPUT"
           fi
 
