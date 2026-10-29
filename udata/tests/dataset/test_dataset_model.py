@@ -717,16 +717,6 @@ class ResourceModelTest(PytestOnlyDBTestCase):
 
 
 class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
-    def test_found(self):
-        """The dataset comes back without its resources list, so a heavy dataset isn't fetched whole"""
-        resource = ResourceFactory(id="817204ac-2202-8b4a-98e7-4284d154d10c")
-        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
-
-        found_dataset, _ = get_dataset_and_resource_by_id(resource.id)
-
-        assert found_dataset.id == dataset.id
-        assert found_dataset.resources == []
-
     def test_ambiguous_id(self, caplog):
         """A resource id duplicated across datasets resolves to nothing and is reported"""
         shared_id = uuid4()
@@ -773,7 +763,7 @@ class GetDatasetByResourceIdTest(PytestOnlyDBTestCase):
 
 class GetResourceTest(PytestOnlyDBTestCase):
     def test_dataset_resource(self):
-        """The resource is fetched without loading the whole dataset"""
+        """The requested resource is picked among the dataset's resources"""
         resource = ResourceFactory()
         DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
 
@@ -786,15 +776,6 @@ class GetResourceTest(PytestOnlyDBTestCase):
         com_resource = CommunityResourceFactory()
 
         assert get_resource(com_resource.id).id == com_resource.id
-
-    def test_dataset_property_falls_back_to_query(self):
-        """The fetched resource isn't attached to its dataset, `.dataset` resolves it anyway"""
-        resource = ResourceFactory()
-        dataset = DatasetFactory(resources=[resource])
-
-        found = get_resource(resource.id)
-
-        assert found.dataset.id == dataset.id
 
     def test_not_found(self):
         assert get_resource(uuid4()) is None

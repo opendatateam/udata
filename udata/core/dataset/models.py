@@ -561,9 +561,6 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
 
     @property
     def dataset(self):
-        if self._instance is None:
-            # Fetched without its parent dataset (single-resource query)
-            return get_dataset_by_resource_id(self.id)
         try:
             self._instance.id  # try to access attr from parent instance
             return self._instance
@@ -1446,7 +1443,7 @@ def get_dataset_and_resource_by_id(id):
 
     The dataset is loaded without its resources list (`dataset.resources` is empty), so a
     heavy dataset isn't fetched whole to serve a single resource. The resource isn't
-    attached to the dataset either: `resource.dataset` resolves it with an extra query.
+    attached to the dataset either: `resource.dataset` can't resolve it.
     """
     dataset = get_dataset_by_resource_id(id, exclude_resources=True)
     if not dataset:
