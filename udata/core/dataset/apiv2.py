@@ -553,7 +553,9 @@ class ResourceAPI(API):
                     apiv2.abort(410, "Dataset has been deleted")
                 apiv2.abort(404)
         else:
-            resource = CommunityResource.objects(id=rid).first()
+            # `no_dereference` keeps `resource.dataset` a DBRef: the parent Dataset is
+            # never fetched whole since only its id ends up in the response.
+            resource = CommunityResource.objects(id=rid).no_dereference().first()
             if resource:
                 dataset = resource.dataset
         if not resource:
