@@ -664,8 +664,10 @@ class Defaults(object):
 
     # AI assistant settings (Albert + tabular SQL)
     ###########################################################################
-    AI_ENABLED = False
-    AI_BASE_URL = "https://albert.api.etalab.gouv.fr/v1"
+    # The assistant is disabled when AI_BASE_URL is None (default). Hard
+    # bounds on the agent loop live as module constants next to the code
+    # they size (assistant.api, assistant.tools, assistant.tabular).
+    AI_BASE_URL = None
     AI_API_KEY = None
     AI_MODEL = "openai/gpt-oss-120b"
     # Reasoning effort forwarded to the OpenAI-compatible provider
@@ -673,14 +675,9 @@ class Defaults(object):
     # endpoints that emit thinking deltas (e.g. Mistral-class), None keeps the
     # provider default.
     AI_REASONING_EFFORT = None
-    # pydantic-ai v2 has no step-cap parameter; this bounds the number of
-    # tool calls per agent turn instead (proxy for steps, keeps the loop bounded).
-    AI_MAX_STEPS = 5
-    AI_MAX_SQL_PER_QUESTION = 3
-    AI_TURN_TIMEOUT = 120
+    # Base URL of the api-tabular service (resource profiles and read-only
+    # SQL). No existing setting covers it, so it stays here.
     TABULAR_SQL_URL = None
-    TABULAR_SQL_TIMEOUT = 30
-    AI_QUOTA_PER_USER = 20
 
     # JSON-LD settings
     ###########################################################################

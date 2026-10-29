@@ -8,42 +8,88 @@ escaping a tool kills the whole agent run.
 import json
 from dataclasses import dataclass
 
-from flask import current_app
+from flask_principal import AnonymousIdentity, Identity, RoleNeed, UserNeed
 from mongoengine.errors import DoesNotExist, ValidationError
 from pydantic_ai import Agent, RunContext
 
-from udata.core.assistant.sql_guard import UnsafeSQLError, assert_read_only
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.dataset.models import Dataset
+from udata.core.user.models import User
+from udata.sql_guard import UnsafeSQLError, assert_read_only
 
 # Hard cap on rendered rows so huge results do not blow up the context window.
 MAX_RENDERED_ROWS = 50
+# pydantic-ai v2 has no step-cap parameter: these bound the agent loop per turn.
+MAX_STEPS = 5
+MAX_SQL_PER_QUESTION = 3
 
 
 @dataclass
 class AssistantDeps:
-    """Per-turn state shared with the assistant agent."""
+    """Per-turn state shared with the assistant agent.
+
+    ``user`` is a snapshot taken in the request thread: tool calls run in a
+    pydantic-ai worker thread where Flask's ``current_user`` does not exist.
+    """
 
     tabular: TabularClient
+    user: User | None = None
     sql_count: int = 0
     tool_count: int = 0
 
 
-def _max_sql_per_question() -> int:
-    return current_app.config["AI_MAX_SQL_PER_QUESTION"]
+def _identity_for(user: User | None) -> Identity:
+    """Rebuild the flask-principal identity of the requesting user.
+
+    Same construction as ``udata.features.notifications.settings.readable_by``:
+    the permission is checked against the user who asked, not against
+    whoever happens to be in the (worker) thread's request context.
+    """
+    if user is None:
+        return AnonymousIdentity()
+    identity = Identity(user.id)
+    identity.provides.add(UserNeed(user.fs_uniquifier))
+    identity.provides.update(RoleNeed(role.name) for role in user.roles)
+    from udata.core.organization.permissions import organization_needs
+
+    identity.provides.update(organization_needs(user))
+    return identity
 
 
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
-    """Enforce AI_MAX_STEPS as a per-turn tool-call cap.
+    """Enforce MAX_STEPS as a per-turn tool-call cap.
 
     pydantic-ai v2 has no step-cap parameter, so the step budget is proxied
     by counting tool calls per agent run. Returns a French refusal message
     once the budget is exhausted, None otherwise.
     """
-    limit = current_app.config["AI_MAX_STEPS"]
-    if ctx.deps.tool_count >= limit:
-        return f"Action refusée : la limite de {limit} appels d'outils par tour est atteinte."
+    if ctx.deps.tool_count >= MAX_STEPS:
+        return f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
     ctx.deps.tool_count += 1
+    return None
+
+
+def _dataset_for_current_user(dataset_id: str, user: User | None) -> Dataset | None:
+    """Fetch a dataset the requesting user is allowed to read, else None.
+
+    Hidden datasets (private, archived or deleted) are only exposed to their
+    owner, their organization or an admin — the same OwnableReadPermission
+    rule as the dataset API.
+    """
+    try:
+        dataset = Dataset.objects.get(id=dataset_id)
+    except (DoesNotExist, ValidationError):
+        return None
+    if dataset.permissions["read"].allows(_identity_for(user)):
+        return dataset
+    return None
+
+
+def _dataset_for_resource(resource_id: str, user: User | None) -> Dataset | None:
+    """Owner dataset of a resource, readable by the requesting user, else None."""
+    dataset = Dataset.objects(resources__id=resource_id).first()
+    if dataset is not None and dataset.permissions["read"].allows(_identity_for(user)):
+        return dataset
     return None
 
 
@@ -105,9 +151,8 @@ def register_tools(agent: Agent) -> None:
         """Récupère les métadonnées d'un dataset : titre, licence, organisation et ressources."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
-        try:
-            dataset = Dataset.objects.get(id=dataset_id)
-        except (DoesNotExist, ValidationError):
+        dataset = _dataset_for_current_user(dataset_id, ctx.deps.user)
+        if dataset is None:
             return f"Dataset introuvable : aucun dataset ne correspond à « {dataset_id} »."
         return serialize_dataset_metadata(dataset)
 
@@ -116,10 +161,14 @@ def register_tools(agent: Agent) -> None:
         """Inspecte le schéma d'une ressource tabulaire : colonnes, types et nombre de lignes."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
+        if _dataset_for_resource(resource_id, ctx.deps.user) is None:
+            return (
+                "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
+            )
         try:
             profile = ctx.deps.tabular.get_profile(resource_id)
-        except TabularError as error:
-            return f"Impossible d'inspecter le schéma de la ressource : {error}"
+        except TabularError:
+            return "Impossible d'inspecter le schéma de la ressource : le service tabulaire est indisponible."
         return _render_profile(profile)
 
     @agent.tool
@@ -127,6 +176,10 @@ def register_tools(agent: Agent) -> None:
         """Exécute une requête SQL en lecture seule sur une ressource tabulaire."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
+        if _dataset_for_resource(resource_id, ctx.deps.user) is None:
+            return (
+                "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
+            )
         try:
             assert_read_only(sql)
         except UnsafeSQLError:
@@ -134,14 +187,16 @@ def register_tools(agent: Agent) -> None:
                 "Requête refusée : l'assistant fonctionne en lecture seule "
                 "et cette requête n'est pas autorisée."
             )
-        limit = _max_sql_per_question()
-        if ctx.deps.sql_count >= limit:
-            return f"Requête refusée : la limite de {limit} requêtes SQL par question est atteinte."
+        if ctx.deps.sql_count >= MAX_SQL_PER_QUESTION:
+            return (
+                f"Requête refusée : la limite de {MAX_SQL_PER_QUESTION} "
+                "requêtes SQL par question est atteinte."
+            )
         ctx.deps.sql_count += 1
         try:
             result = ctx.deps.tabular.execute_sql(resource_id, sql)
-        except TabularError as error:
-            return f"L'exécution de la requête a échoué : {error}"
+        except TabularError:
+            return "L'exécution de la requête a échoué : le service tabulaire est indisponible."
         return _render_result(result)
 
     @agent.tool

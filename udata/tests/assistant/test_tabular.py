@@ -1,17 +1,21 @@
 import pytest
 import requests
 
-from udata.core.assistant.tabular import TabularClient, TabularError
+from udata.core.assistant.tabular import (
+    DEFAULT_TIMEOUT,
+    TABULAR_SQL_TIMEOUT,
+    TabularClient,
+    TabularError,
+)
 from udata.tests import PytestOnlyTestCase
 
 BASE_URL = "https://tabular.example.com"
-RESOURCE_ID = "5c4ae7a0e3f14a3f8b1d2e9f"
+RESOURCE_ID = "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000"
 
 
 class TabularClientTest(PytestOnlyTestCase):
     def setup_method(self, method):
         self.app.config["TABULAR_SQL_URL"] = BASE_URL
-        self.app.config["TABULAR_SQL_TIMEOUT"] = 7
 
     def make_client(self, **kwargs) -> TabularClient:
         with self.app.test_request_context():
@@ -37,30 +41,84 @@ class TabularClientTest(PytestOnlyTestCase):
         request = requests_mock.request_history[0]
         assert request.json() == {"query": "SELECT a FROM data"}
 
-    def test_http_error_raises_tabular_error(self, requests_mock):
+    @pytest.mark.parametrize(
+        "bad_id",
+        [
+            "not-a-uuid",
+            "../admin",
+            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000/extra",
+            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000?apikey=secret",
+            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000#frag",
+            "",
+            None,
+            42,
+        ],
+    )
+    def test_malformed_resource_id_is_rejected_before_any_request(self, requests_mock, bad_id):
+        """Only plain UUIDs may reach the upstream URL path."""
+        client = self.make_client()
+        with pytest.raises(TabularError):
+            client.get_profile(bad_id)
+        with pytest.raises(TabularError):
+            client.execute_sql(bad_id, "SELECT 1")
+        assert not requests_mock.request_history
+
+    def test_uuid_with_uppercase_and_braces_is_normalized(self, requests_mock):
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
+            json={"ok": True},
+        )
+        braced = "{5C4AE7A0-E3F1-4A3F-8B1D-2E9F00000000}"
+        assert self.make_client().get_profile(braced) == {"ok": True}
+
+    def test_http_error_raises_sanitized_tabular_error(self, requests_mock, caplog):
         requests_mock.post(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/sql",
             status_code=500,
             json={"error": "boom"},
         )
-        with pytest.raises(TabularError):
-            self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        with (
+            self.app.test_request_context(),
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+        ):
+            with pytest.raises(TabularError) as excinfo:
+                self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        # The client-facing error is sanitized: no URL, no upstream details.
+        message = str(excinfo.value)
+        assert BASE_URL not in message
+        assert "boom" not in message
+        assert "500" not in message
+        # The details stay in the server logs.
+        assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
-    def test_timeout_raises_tabular_error(self, requests_mock):
+    def test_timeout_raises_sanitized_tabular_error(self, requests_mock, caplog):
         requests_mock.post(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/sql",
             exc=requests.exceptions.ConnectTimeout,
         )
-        with pytest.raises(TabularError):
-            self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        with (
+            self.app.test_request_context(),
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+        ):
+            with pytest.raises(TabularError) as excinfo:
+                self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        assert BASE_URL not in str(excinfo.value)
+        assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
-    def test_invalid_json_raises_tabular_error(self, requests_mock):
+    def test_invalid_json_raises_sanitized_tabular_error(self, requests_mock, caplog):
         requests_mock.post(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/sql",
             text="not json",
         )
-        with pytest.raises(TabularError):
-            self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        with (
+            self.app.test_request_context(),
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+        ):
+            with pytest.raises(TabularError) as excinfo:
+                self.make_client().execute_sql(RESOURCE_ID, "SELECT 1")
+        assert "not json" not in str(excinfo.value)
+        # The server-side log keeps the diagnostic details (URL, error).
+        assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
     def test_unconfigured_raises_tabular_error(self):
         self.app.config["TABULAR_SQL_URL"] = None
@@ -78,22 +136,20 @@ class TabularClientTest(PytestOnlyTestCase):
         client = self.make_client(base_url="https://override.example.com", timeout=3)
         assert client.get_profile(RESOURCE_ID) == {"ok": True}
 
-    def test_none_timeout_falls_back_to_bounded_default(self, requests_mock):
-        self.app.config["TABULAR_SQL_TIMEOUT"] = None
+    def test_default_timeout_comes_from_module_constant(self, requests_mock):
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
             json={"ok": True},
         )
         client = self.make_client()
         assert client.get_profile(RESOURCE_ID) == {"ok": True}
-        assert requests_mock.request_history[0].timeout == 30
+        assert requests_mock.request_history[0].timeout == TABULAR_SQL_TIMEOUT
 
     def test_non_positive_timeout_falls_back_to_bounded_default(self, requests_mock):
-        self.app.config["TABULAR_SQL_TIMEOUT"] = 0
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
             json={"ok": True},
         )
         client = self.make_client(timeout=-1)
         assert client.get_profile(RESOURCE_ID) == {"ok": True}
-        assert requests_mock.request_history[0].timeout == 30
+        assert requests_mock.request_history[0].timeout == DEFAULT_TIMEOUT

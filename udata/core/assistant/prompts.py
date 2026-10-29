@@ -1,14 +1,11 @@
 """System prompts of the AI assistant.
 
-French port of the prompt sections of the ``datagouv-agents-prototype``
-repository (``server/agents/prompts/``), adapted to the server-side
-context: SQL is executed through the api-tabular service via tools, answers
-are produced in French, and the final output pairs a validated SQL query in
-a ```sql block with a French summary. This is a port of the spirit of the
-prototype prompts, not a literal translation.
+French port of the ``datagouv-agents-prototype`` prompt sections
+(``server/agents/prompts/``), in spirit rather than literally: SQL runs
+through the api-tabular service and answers are in French.
 
-Bump ``PROMPT_VERSION`` whenever a significant change is made to the
-instructions, so that conversations can be traced back to a prompt version.
+Bump ``PROMPT_VERSION`` on any significant prompt change so conversations
+can be traced back to a prompt version.
 """
 
 PROMPT_VERSION = "2026-10-22.1"
