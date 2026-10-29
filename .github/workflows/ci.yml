@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
   pull_request:
 
 concurrency:
@@ -147,45 +145,24 @@ jobs:
     needs: dist
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: dist
-          path: dist/
-
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-
-      - name: Publish on PyPI
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
-        # The release commit is pushed along with its tag, so it builds the release
-        # version here too: only the tag build, once its signature is checked,
-        # publishes it.
-        run: |
-          if ! compgen -G "dist/*.dev*.whl" > /dev/null; then
-            echo "Release version, published by the tag build"
-            exit 0
-          fi
-          uv publish dist/*.whl
-
-  verify-tag:
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # Commits merged from the GitHub UI are signed by GitHub itself: only a tag
-      # signed by a maintainer's own key, listed in allowed_signers, is released.
-      - name: Check the tag is signed by a maintainer
-        run: git -c gpg.ssh.allowedSignersFile=.github/allowed_signers verify-tag "$GITHUB_REF_NAME"
-
-  release:
-    needs: [dist, verify-tag]
-    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A vX.Y.Z tag on HEAD makes setuptools_scm build that release version. Merged
+      # commits are signed by GitHub itself, so the tag is what a maintainer signs to
+      # release: only a key listed in allowed_signers may publish one.
+      - name: Check the release tag is signed by a maintainer
+        id: tag
+        run: |
+          tag=$(git tag --points-at HEAD "v*")
+          if [ -n "$tag" ]; then
+            git -c gpg.ssh.allowedSignersFile=.github/allowed_signers verify-tag "$tag"
+            echo "name=$tag" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -201,8 +178,10 @@ jobs:
 
       # The tag message is "Version X.Y.Z" followed by the changelog entry
       - name: Create the GitHub release
+        if: steps.tag.outputs.name
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.name }}
         run: |
-          git tag --list --format='%(contents:body)' "$GITHUB_REF_NAME" > notes.md
-          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md
+          git tag --list --format='%(contents:body)' "$TAG" > notes.md
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md

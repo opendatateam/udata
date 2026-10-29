@@ -328,4 +328,4 @@ echo "✓ Created tag v$VERSION"
 git push origin HEAD "v$VERSION"
 
 echo "✓ Pushed commit and tag v$VERSION to origin"
-echo "The CI publishes the release on PyPI and GitHub: $REPO_URL/actions?query=branch%3Av$VERSION"
+echo "The CI of the commit publishes the release on PyPI and GitHub: $REPO_URL/commit/$(git rev-parse HEAD)"

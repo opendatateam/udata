@@ -28,8 +28,9 @@ The steps to make a release are:
     - commit the changelog update
     - create a signed git tag (`vX.Y.Z`) whose message carries the changelog entry
     - push both the commit and the tag to origin
-5. wait for the [CI][] build of the tag to succeed: it checks the tag signature, runs the
-   tests, publishes to PyPI and creates the GitHub release from the tag message
+5. wait for the [CI][] build of the changelog commit on `main` to succeed: it runs the tests,
+   checks the tag signature, publishes to PyPI and creates the GitHub release from the tag
+   message
 6. check on [PyPI](https://pypi.org/project/udata/#history) and on [github][] that the new
    release is present
 7. celebrate!
