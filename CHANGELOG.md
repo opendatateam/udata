@@ -1,5 +1,64 @@
 # Changelog
 
+## 17.20.0 (2026-10-29)
+
+- chore: add CODEOWNERS ([#4047](https://github.com/opendatateam/udata/pull/4047))
+- feat(blocs): add a column bloc, to stack blocs beside the others in a section or an accordion item ([#4046](https://github.com/opendatateam/udata/pull/4046))
+- feat(discussions): use new url format for external notifications ([#4025](https://github.com/opendatateam/udata/pull/4025))
+- fix(auth): answer a form error instead of a 500 when an account without password tries /verify ([#4043](https://github.com/opendatateam/udata/pull/4043))
+- test: fix the names in the user email search test, a random "Jane" matched the query ([#4044](https://github.com/opendatateam/udata/pull/4044))
+
+
+## 17.19.0 (2026-10-27)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.2 ([#4027](https://github.com/opendatateam/udata/pull/4027))
+- chore(deps): update redis:alpine docker digest to 47b0829 ([#4028](https://github.com/opendatateam/udata/pull/4028))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.4 ([#4019](https://github.com/opendatateam/udata/pull/4019))
+- chore: drop the legacy bloc format, now migrated to sections ([#4033](https://github.com/opendatateam/udata/pull/4033))
+- feat(blocs): add image and card blocs, with an upload of content images purged once unused, and accept the JPEGs of phones ([#4034](https://github.com/opendatateam/udata/pull/4034))
+- fix(harvest): stop sharing request headers between sources ([#4035](https://github.com/opendatateam/udata/pull/4035))
+- fix: query each nested filter on the model of its own reference ([#4036](https://github.com/opendatateam/udata/pull/4036))
+- fix(rdf): load only the URI fields of the datasets served by a dataservice ([#4039](https://github.com/opendatateam/udata/pull/4039))
+- fix(rdf): reject catalog page sizes above 1000 ([#4038](https://github.com/opendatateam/udata/pull/4038))
+
+
+## 17.18.0 (2026-10-26)
+
+- feat(blocs): compose pages from sections, grids and single object blocs ([#4026](https://github.com/opendatateam/udata/pull/4026))
+- fix: let wtforms resolve callable SelectField choices, broken by wtforms 3.3 ([#4032](https://github.com/opendatateam/udata/pull/4032))
+
+
+## 17.17.0 (2026-10-26)
+
+- feat: add a sysadmin endpoint to force a resource analysis by hydra ([#4024](https://github.com/opendatateam/udata/pull/4024))
+- feat(post): let a post display a side menu of its headings ([#4021](https://github.com/opendatateam/udata/pull/4021))
+- feat(search): match dotted titles when querying with spaces ([#3932](https://github.com/opendatateam/udata/pull/3932))
+
+
+## 17.16.0 (2026-10-21)
+
+- feat(post): nest pages under a parent page and serve them under /pages/<path> ([#4011](https://github.com/opendatateam/udata/pull/4011))
+- fix: allow mailto links in server-rendered markdown (recent.atom feeds) ([#4017](https://github.com/opendatateam/udata/pull/4017))
+- fix: delete membership request for deleted user in a deleted org ([#4023](https://github.com/opendatateam/udata/pull/4023))
+- fix: membership requests deleted user ([#4014](https://github.com/opendatateam/udata/pull/4014))
+- refactor: migrate spatial coverage to the api_fields system ([#4015](https://github.com/opendatateam/udata/pull/4015))
+
+
+## 17.15.0 (2026-10-19)
+
+- chore(deps): update actions/download-artifact action to v8.0.2 ([#3997](https://github.com/opendatateam/udata/pull/3997))
+- chore(deps): update actions/upload-artifact action to v7.0.2 ([#3999](https://github.com/opendatateam/udata/pull/3999))
+- chore(deps): update astral-sh/setup-uv action to v10.3.0 ([#4005](https://github.com/opendatateam/udata/pull/4005))
+- chore(deps): update dependency faker to >=40.43, <40.44 ([#4004](https://github.com/opendatateam/udata/pull/4004))
+- ci: drop redundant ruff --extend-select I ([#4013](https://github.com/opendatateam/udata/pull/4013))
+- feat: add dataservices suggest endpoint for search autocomplete ([#3939](https://github.com/opendatateam/udata/pull/3939))
+- feat: extract the DOI a harvest source declares as dct:identifier ([#3993](https://github.com/opendatateam/udata/pull/3993))
+- feat: migrate jobs api fields ([#3901](https://github.com/opendatateam/udata/pull/3901))
+- feat(post): let sysadmins choose the slug of a post ([#4010](https://github.com/opendatateam/udata/pull/4010))
+- feat: support Python 3.14 ([#4012](https://github.com/opendatateam/udata/pull/4012))
+- fix(deps): update dependency cryptography to v50 [security] ([#3996](https://github.com/opendatateam/udata/pull/3996))
+
+
 ## 17.14.0 (2026-10-15)
 
 - feat(organization): add banner ([#4003](https://github.com/opendatateam/udata/pull/4003))

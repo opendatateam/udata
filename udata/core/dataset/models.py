@@ -48,7 +48,6 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spam.models import SpamMixin
-from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
 from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
@@ -632,10 +631,7 @@ class Dataset(
         EmbeddedDocumentField(DateRange),
         nested_fields=temporal_coverage_fields,
     )
-    spatial = field(
-        EmbeddedDocumentField(SpatialCoverage),
-        nested_fields=spatial_coverage_fields,
-    )
+    spatial = field(EmbeddedDocumentField(SpatialCoverage))
     schema = field(EmbeddedDocumentField(Schema))
 
     ext = field(MapField(GenericEmbeddedDocumentField()), auditable=False)

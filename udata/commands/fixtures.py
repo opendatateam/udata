@@ -7,11 +7,13 @@ When "importing" the fixtures, massage them so they can be loaded properly.
 import json
 import logging
 import pathlib
+from collections.abc import Callable
 
 import click
 import requests
 from flask import current_app
 
+from udata.api_fields import patch
 from udata.commands import cli
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
@@ -22,19 +24,7 @@ from udata.core.dataset.factories import (
     ResourceFactory,
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.edito_blocs.models import (
-    SITE_BLOCS_FIELDS,
-    AccordionItemBloc,
-    AccordionListBloc,
-    DataservicesListBloc,
-    DatasetsListBloc,
-    ExploreBloc,
-    HeroBloc,
-    LinkInBloc,
-    LinksListBloc,
-    MarkdownBloc,
-    ReusesListBloc,
-)
+from udata.core.edito_blocs.models import SITE_BLOCS_FIELDS
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.owned import ownership_filter
@@ -118,22 +108,13 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "reuses",
         "owner",
         "permissions",
+        "parent",
+        "ancestors",
     ],
     "site": [
         "version",
         "settings",
     ],
-}
-
-BLOC_CLASSES = {
-    "DatasetsListBloc": DatasetsListBloc,
-    "ReusesListBloc": ReusesListBloc,
-    "DataservicesListBloc": DataservicesListBloc,
-    "LinksListBloc": LinksListBloc,
-    "HeroBloc": HeroBloc,
-    "MarkdownBloc": MarkdownBloc,
-    "ExploreBloc": ExploreBloc,
-    "AccordionListBloc": AccordionListBloc,
 }
 
 
@@ -159,38 +140,42 @@ def fix_dates(obj: dict) -> dict:
     return obj
 
 
-def clean_bloc_for_generate(bloc: dict) -> dict:
-    """Strip expanded reference objects from blocs, keep only structural content."""
-    for ref_field in ("datasets", "reuses", "dataservices"):
-        bloc.pop(ref_field, None)
-    if bloc.get("items"):
-        for item in bloc["items"]:
-            for sub_bloc in item.get("content", []):
-                clean_bloc_for_generate(sub_bloc)
-    return bloc
+def without_blocs(items: list[dict], removed: Callable[[dict], bool]) -> list[dict]:
+    """Serialized blocs without the `removed` ones, at any depth.
+
+    A container (section, accordion item) left empty only held removed blocs: it goes with
+    them.
+    """
+    kept = []
+    for item in items:
+        if removed(item):
+            continue
+        emptied = False
+        for key, value in item.items():
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                item[key] = without_blocs(value, removed)
+                emptied = emptied or not item[key]
+        if not emptied:
+            kept.append(item)
+    return kept
 
 
-def create_bloc_from_dict(data: dict):
-    """Convert a bloc dict from the fixture JSON into a MongoEngine EmbeddedDocument."""
-    cls_name = data.pop("class", None)
-    bloc_class = BLOC_CLASSES.get(cls_name)
-    if not bloc_class:
-        return None
+def clean_blocs_for_generate(
+    blocs: list[dict], object_ids: set[str], resource_ids: set[str]
+) -> list[dict]:
+    """Remove the blocs the fixtures could not import: those showing an object not exported
+    (the exported ones keep their id), and the explorers of a resource of a dataset not
+    exported."""
 
-    if cls_name == "LinksListBloc" and "links" in data:
-        data["links"] = [LinkInBloc(**link) for link in data["links"]]
-    elif cls_name == "AccordionListBloc" and "items" in data:
-        items = []
-        for item in data["items"]:
-            content = create_blocs_from_dicts(item.get("content", []))
-            items.append(AccordionItemBloc(title=item["title"], content=content))
-        data["items"] = items
+    def removed(bloc: dict) -> bool:
+        if "resource_id" in bloc and bloc["resource_id"] not in resource_ids:
+            return True
+        return any(
+            name in bloc and bloc[name]["id"] not in object_ids
+            for name in ("dataset", "reuse", "dataservice")
+        )
 
-    return bloc_class(**data)
-
-
-def create_blocs_from_dicts(dicts):
-    return [b for b in (create_bloc_from_dict(d) for d in dicts) if b is not None]
+    return without_blocs(blocs, removed)
 
 
 @cli.command()
@@ -264,6 +249,15 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
             json_datasets.append(json_fixture)
 
+    object_ids = {
+        obj["id"]
+        for fixture in json_datasets
+        for obj in [fixture["dataset"], *fixture["reuses"], *fixture["dataservices"]]
+    }
+    resource_ids = {
+        resource["id"] for fixture in json_datasets for resource in fixture["resources"]
+    }
+
     # Fetch posts (detail endpoint to get blocs)
     print("Fetching posts...")
     json_posts_list = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
@@ -271,8 +265,10 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     for post_summary in json_posts_list:
         post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
         remove_unwanted_keys(post_detail, "post")
-        for bloc in post_detail.get("blocs", []):
-            clean_bloc_for_generate(bloc)
+        if "blocs" in post_detail:
+            post_detail["blocs"] = clean_blocs_for_generate(
+                post_detail["blocs"], object_ids, resource_ids
+            )
         json_posts.append(post_detail)
 
     # Fetch site (with blocs via X-Fields)
@@ -280,8 +276,10 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
     remove_unwanted_keys(json_site, "site")
     for blocs_field in SITE_BLOCS_FIELDS:
-        for bloc in json_site.get(blocs_field, []):
-            clean_bloc_for_generate(bloc)
+        if blocs_field in json_site:
+            json_site[blocs_field] = clean_blocs_for_generate(
+                json_site[blocs_field], object_ids, resource_ids
+            )
 
     json_output = {
         "datasets": json_datasets,
@@ -339,16 +337,6 @@ def import_fixtures(source):
     else:
         with open(source) as f:
             json_fixtures = json.load(f)
-
-    # Import site
-    site_data = json_fixtures.get("site")
-    if site_data:
-        site_data = remove_unwanted_keys(site_data, "site")
-        for blocs_field in SITE_BLOCS_FIELDS:
-            if blocs_field in site_data:
-                site_data[blocs_field] = create_blocs_from_dicts(site_data.pop(blocs_field))
-        if not Site.objects(id=site_data["id"]).first():
-            SiteFactory(**site_data)
 
     # Import datasets
     with click.progressbar(json_fixtures["datasets"], label="Importing datasets") as bar:
@@ -416,11 +404,12 @@ def import_fixtures(source):
                     **dataservice, datasets=[dataset], **ownership_filter(dataservice_owner)
                 )
 
-    # Import posts
+    # Import posts and the site last: their blocs are checked as the API would, and an
+    # explorer bloc requires the resource it explores.
     for post_data in json_fixtures.get("posts", []):
         post_data = remove_unwanted_keys(post_data, "post")
         user = UserFactory()
-        blocs = create_blocs_from_dicts(post_data.pop("blocs", []))
+        blocs = patch(Post(), {"blocs": post_data.pop("blocs", [])}).blocs
         if not Post.objects(id=post_data["id"]).first():
             PostFactory(
                 **post_data,
@@ -429,3 +418,11 @@ def import_fixtures(source):
                 datasets=[],
                 reuses=[],
             )
+
+    site_data = json_fixtures.get("site")
+    if site_data:
+        site_data = remove_unwanted_keys(site_data, "site")
+        blocs = {field: site_data.pop(field) for field in SITE_BLOCS_FIELDS if field in site_data}
+        site = patch(Site(), blocs)
+        if not Site.objects(id=site_data["id"]).first():
+            SiteFactory(**site_data, **{field: getattr(site, field) for field in blocs})

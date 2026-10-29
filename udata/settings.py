@@ -296,7 +296,7 @@ class Defaults(object):
         "plaintext",
     ]
 
-    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps"]
+    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps", "mailto"]
 
     # Tags constraints
     TAG_MIN_LENGTH = 3
@@ -482,7 +482,7 @@ class Defaults(object):
         "text/turtle",
     ]
 
-    # How much time upload chunks are kept before cleanup
+    # How much time upload chunks, and content images nothing shows, are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
     # Avatar providers parameters

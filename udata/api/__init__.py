@@ -15,7 +15,7 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
-from flask_restx.inputs import positive
+from flask_restx.inputs import int_range, positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
@@ -35,17 +35,21 @@ DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
 
 
-def add_pagination_arguments(parser: RequestParser, *, page_size: int = 20) -> RequestParser:
+def add_pagination_arguments(
+    parser: RequestParser, *, page_size: int = 20, max_page_size: int | None = None
+) -> RequestParser:
     """Add the standard ``page``/``page_size`` query arguments to ``parser``.
 
     Both are validated as strictly positive integers, so an out-of-range value
     (``0`` or negative) yields a clean 400 instead of failing deeper down — e.g.
     a negative length reaching a Mongo ``$slice`` aggregation, which is a 500.
+    ``max_page_size`` bounds ``page_size`` the same way, for endpoints whose
+    response cost grows too much with the page size.
     """
     parser.add_argument("page", type=positive, default=1, location="args", help="The page to fetch")
     parser.add_argument(
         "page_size",
-        type=positive,
+        type=positive if max_page_size is None else int_range(1, max_page_size),
         default=page_size,
         location="args",
         help="The page size to fetch",
@@ -379,6 +383,18 @@ base_reference = api.model(
     description="Base model for reference field, aka. inline model reference",
 )
 
+GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
+
+geojson = api.model(
+    "GeoJSON",
+    {
+        "type": fields.String(description="The GeoJSON Type", required=True, enum=GEOM_TYPES),
+        "coordinates": fields.List(
+            fields.Raw(), description="The geometry as coordinates lists", required=True
+        ),
+    },
+)
+
 
 def marshal_page(page, page_fields):
     return api.marshal(page, fields.pager(page_fields))
@@ -414,6 +430,7 @@ def init_app(app):
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.core.post.apiv2  # noqa
+    import udata.core.storages.api  # noqa
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa

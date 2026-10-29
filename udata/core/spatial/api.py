@@ -16,7 +16,6 @@ from .api_fields import (
 )
 from .models import GeoLevel, GeoZone, spatial_granularities
 
-GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
 LEGACY_GEOID_PATTERN = r"^([a-z]+:[a-z]+:\d+)@(\d{4}-\d{2}-\d{2})$"
 
 

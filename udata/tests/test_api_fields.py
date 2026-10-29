@@ -28,6 +28,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
+from udata.core.user.factories import UserFactory
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
 from udata.mongo.document import UDataDocument as Document
@@ -232,6 +233,18 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
         ],
         "auto_create_index_on_save": True,
     }
+
+
+@generate_fields(
+    nested_filters={
+        "owner_first_name": "owner.first_name",
+        "organization_badge": "organization.badges",
+    },
+)
+class FakeWithTwoNestedFilters(Owned, Document):
+    """Two nested filters on references to two different models."""
+
+    meta = {"collection": "fake_with_two_nested_filters_api_fields"}
 
 
 class FakeFactory(ModelFactory):
@@ -513,6 +526,26 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
+
+    def test_nested_filters_on_two_references(self, app) -> None:
+        """Each nested filter queries the model of its own reference, not the last one declared."""
+        alice = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Alice")).save()
+        bob = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Bob")).save()
+        org_public_service: Organization = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+        public_service = FakeWithTwoNestedFilters(organization=org_public_service).save()
+        company = FakeWithTwoNestedFilters(organization=OrganizationFactory()).save()
+
+        with app.test_request_context("/foobar", query_string={"owner_first_name": "Alice"}):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [alice]
+            assert bob not in results
+        with app.test_request_context(
+            "/foobar", query_string={"organization_badge": org_constants.PUBLIC_SERVICE}
+        ):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [public_service]
+            assert company not in results
 
     def test_searchable(self, app) -> None:
         """If `@generate_fields(searchable=True)`, then the document can be full-text searched."""

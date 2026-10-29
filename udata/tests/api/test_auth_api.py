@@ -28,7 +28,7 @@ ns = api.namespace("fake", "A Fake namespace")
 
 class FakeForm(Form):
     required = fields.StringField(validators=[validators.DataRequired()])
-    choices = fields.SelectField(choices=(("first", ""), ("second", "")))
+    choices = fields.SelectField(choices=["first", "second"])
     email = fields.StringField(validators=[validators.Email()])
 
 
