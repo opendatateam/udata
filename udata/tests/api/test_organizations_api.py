@@ -2281,12 +2281,20 @@ class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
         }
         response = self.post(url_for("api.contact_points"), data)
         assert201(response)
+        contact_point_id = response.json["id"]
 
         response = self.get(url_for("api.org_contact_points", org=org))
         assert200(response)
 
-        assert response.json["data"][0]["name"] == data["name"]
-        assert response.json["data"][0]["email"] == data["email"]
+        assert response.json["data"] == [
+            {
+                "id": contact_point_id,
+                "name": data["name"],
+                "email": data["email"],
+                "contact_form": None,
+                "role": "contact",
+            }
+        ]
 
     def test_org_contact_points_suggest(self):
         user = self.login()
