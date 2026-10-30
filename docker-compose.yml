@@ -1,6 +1,6 @@
 services:
     db:
-        image: mongo:7.0.28
+        image: mongo:8.3.13
         volumes:
           - db-data:/data/db
         expose:
