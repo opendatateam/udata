@@ -35,8 +35,13 @@ class ListFilter:
 
 
 class BoolFilter(Filter):
-    @staticmethod
-    def as_request_parser_kwargs():
+    def __init__(self, help=None):
+        super().__init__()
+        self.help = help
+
+    def as_request_parser_kwargs(self):
+        if self.help:
+            return {"type": inputs.boolean, "help": self.help}
         return {"type": inputs.boolean}
 
 
