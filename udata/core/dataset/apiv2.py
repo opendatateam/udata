@@ -18,7 +18,6 @@ from udata.core.spatial.api_fields import granularity_fields
 from udata.core.spatial.models import GeoZone, SpatialCoverage
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
-from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
@@ -36,7 +35,7 @@ from .api_fields import (
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
+from .models import CommunityResource, Dataset, Resource, get_dataset_and_resource_by_id
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -548,27 +547,24 @@ class DatasetSchemasAPI(API):
 @ns.route("/resources/<uuid:rid>/", endpoint="resource")
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
+    @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
-        dataset = get_dataset_by_resource_id(rid)
+        dataset, resource = get_dataset_and_resource_by_id(rid)
         if dataset:
             if not dataset.permissions["read"].can():
                 if not dataset.private and dataset.deleted:
                     apiv2.abort(410, "Dataset has been deleted")
                 apiv2.abort(404)
-            resource = get_by(dataset.resources, id=rid)
         else:
-            resource = CommunityResource.objects(id=rid).first()
+            # `no_dereference` keeps `resource.dataset` a DBRef: the parent Dataset is
+            # never fetched whole since only its id ends up in the response.
+            resource = CommunityResource.objects(id=rid).no_dereference().first()
             if resource:
                 dataset = resource.dataset
         if not resource:
             apiv2.abort(404, "Resource does not exist")
 
-        # Manually marshalling to make sure resource.dataset is in the scope.
-        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
-        return marshal(
-            {"resource": resource, "dataset_id": dataset.id if dataset else None},
-            specific_resource_fields,
-        )
+        return {"resource": resource, "dataset_id": dataset.id if dataset else None}
 
 
 @ns.route(

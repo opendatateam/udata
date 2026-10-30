@@ -36,7 +36,13 @@ from udata.core.dataset.factories import (
     ResourceFactory,
     ResourceSchemaMockData,
 )
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import (
+    HarvestDatasetMetadata,
+    HarvestResourceMetadata,
+    get_dataset_and_resource_by_id,
+    get_dataset_by_resource_id,
+    get_resource,
+)
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
@@ -708,6 +714,92 @@ class ResourceModelTest(PytestOnlyDBTestCase):
 
         with pytest.raises(RuntimeError):
             resource.save()
+
+
+class GetDatasetAndResourceByIdTest(PytestOnlyDBTestCase):
+    def test_found(self):
+        """The resource is picked among several, the dataset comes back without its resources"""
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found_dataset, found_resource = get_dataset_and_resource_by_id(resource.id)
+
+        assert found_dataset.id == dataset.id
+        assert found_dataset.resources == []
+        assert found_resource.id == resource.id
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_dataset_and_resource_by_id(shared_id) == (None, None)
+        assert str(shared_id) in caplog.text
+
+
+class GetDatasetByResourceIdTest(PytestOnlyDBTestCase):
+    def test_found(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+
+        found = get_dataset_by_resource_id(resource.id)
+
+        assert found.id == dataset.id
+
+    def test_not_found(self):
+        assert get_dataset_by_resource_id(uuid4()) is None
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_dataset_by_resource_id(shared_id) is None
+        assert str(shared_id) in caplog.text
+
+    def test_exclude_resources(self):
+        """The dataset comes back without its resources, so a heavy dataset isn't fetched whole"""
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found = get_dataset_by_resource_id(resource.id, exclude_resources=True)
+
+        assert found.id == dataset.id
+        assert found.resources == []
+
+
+class GetResourceTest(PytestOnlyDBTestCase):
+    def test_dataset_resource(self):
+        """The requested resource is picked among the dataset's resources"""
+        resource = ResourceFactory()
+        DatasetFactory(resources=[ResourceFactory() for _ in range(5)] + [resource])
+
+        found = get_resource(resource.id)
+
+        assert found.id == resource.id
+        assert found.title == resource.title
+
+    def test_community_resource(self):
+        com_resource = CommunityResourceFactory()
+
+        assert get_resource(com_resource.id).id == com_resource.id
+
+    def test_not_found(self):
+        assert get_resource(uuid4()) is None
+
+    def test_ambiguous_id(self, caplog):
+        """A resource id duplicated across datasets resolves to nothing and is reported"""
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+
+        with caplog.at_level(logging.ERROR, logger="udata.core.dataset.models"):
+            assert get_resource(shared_id) is None
+        assert str(shared_id) in caplog.text
 
 
 class LicenseModelTest(PytestOnlyDBTestCase):
