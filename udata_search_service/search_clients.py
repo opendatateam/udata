@@ -3,8 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import NotFoundError
-from elasticsearch_dsl import (
+from elasticsearch.dsl import (
     Date,
     Document,
     Float,
@@ -17,7 +16,8 @@ from elasticsearch_dsl import (
     token_filter,
     tokenizer,
 )
-from elasticsearch_dsl.connections import connections
+from elasticsearch.dsl.connections import connections
+from elasticsearch.exceptions import NotFoundError
 
 from udata_search_service.entities import (
     Dataservice,
@@ -93,7 +93,7 @@ class IndexDocument(Document):
         pattern = alias + "-*"
 
         log.info(f"Saving template {alias} on the following pattern: {pattern}")
-        index_template = cls._index.as_template(alias, pattern)
+        index_template = cls._index.as_composable_template(alias, pattern)
         index_template.save()
 
         if not cls._index.exists():

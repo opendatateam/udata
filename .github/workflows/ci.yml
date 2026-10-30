@@ -26,7 +26,7 @@ jobs:
       matrix:
         python-version: ["3.11", "3.14"]
         mongo-version: ["7.0.28"]
-        elasticsearch-version: ["7.17.28", "8.19.13"]
+        elasticsearch-version: ["8.19.13", "9.5.5"]
     env:
       UDATA_TEST_SEARCH_INTEGRATION: "1"
       UDATA_TEST_S3_INTEGRATION: "1"
