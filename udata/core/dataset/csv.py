@@ -59,6 +59,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("harvest.last_update", lambda r: r.harvest and r.harvest.last_update),
         ("harvest.dct_identifier", lambda r: r.harvest and r.harvest.dct_identifier),
         ("quality_score", lambda o: format(o.quality["score"], ".2f")),
+        ("extras", lambda o: json.dumps(o.extras, default=str)),
         # schema? what is the schema of a dataset?
     )
 
