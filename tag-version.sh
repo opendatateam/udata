@@ -64,19 +64,6 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-# Check if gh CLI is installed and configured
-if ! command -v gh &> /dev/null; then
-    echo "Error: GitHub CLI (gh) is not installed"
-    echo "Please install it: https://cli.github.com/"
-    exit 1
-fi
-
-if ! gh auth status &> /dev/null; then
-    echo "Error: GitHub CLI is not authenticated"
-    echo "Please run: gh auth login"
-    exit 1
-fi
-
 # Detect main branch (master or main)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if git rev-parse --verify master >/dev/null 2>&1; then
@@ -272,9 +259,6 @@ NEW_ENTRY="## $VERSION ($DATE)
 $SORTED_COMMITS
 "
 
-# Prepare release notes for GitHub
-RELEASE_NOTES="$SORTED_COMMITS"
-
 # Update CHANGELOG.md
 if [ "$DRY_RUN" = true ]; then
     echo "Would update CHANGELOG.md with:"
@@ -287,9 +271,8 @@ if [ "$DRY_RUN" = true ]; then
     fi
     echo "Would run: git add CHANGELOG.md publiccode.yml"
     echo "Would run: git commit -m \"Bump version $VERSION\""
-    echo "Would run: git tag -a \"v$VERSION\" -m \"Version $VERSION\""
+    echo "Would run: git tag -s \"v$VERSION\" with the changelog entry as message"
     echo "Would run: git push origin HEAD v$VERSION"
-    echo "Would run: gh release create \"v$VERSION\" --title \"v$VERSION\" --notes <release notes>"
     exit 0
 fi
 
@@ -317,18 +300,27 @@ echo "publiccode.yml updated: softwareVersion=v$VERSION, releaseDate=$DATE"
 
 if [ "$EDIT_CHANGELOG" = true ]; then
     ${EDITOR:-vi} CHANGELOG.md
-    # Re-extract release notes from the edited changelog (content between first and second ## headings)
-    RELEASE_NOTES=$(sed -n '/^## '"$VERSION"'/,/^## /{/^## /!p}' CHANGELOG.md)
 fi
+
+# The CHANGELOG is the source of the release notes: the tag carries a copy of its
+# section, which the CI publishes as the GitHub release.
+RELEASE_NOTES=$(sed -n '/^## '"$VERSION"' /,/^## /{/^## /!p}' CHANGELOG.md)
 
 # Commit the CHANGELOG and publiccode.yml updates
 git add CHANGELOG.md publiccode.yml
+# git captures ssh-keygen's stderr and only shows it on failure, so the
+# "Confirm user presence" prompt of a security key never reaches the terminal.
+if [ "$(git config --bool commit.gpgsign)" = "true" ]; then
+    echo "→ Touch your security key to sign the commit"
+fi
 git commit -m "Bump version $VERSION"
 
 echo "✓ Committed CHANGELOG.md and publiccode.yml"
 
-# Create the git tag
-git tag -a "v$VERSION" -m "Version $VERSION"
+# Create the git tag. The CI only releases tags signed by a key declared on a GitHub
+# account. The default cleanup would strip markdown headings.
+echo "→ Touch your security key to sign the tag"
+printf 'Version %s\n\n%s\n' "$VERSION" "$RELEASE_NOTES" | git tag -s --cleanup=verbatim -F - "v$VERSION"
 
 echo "✓ Created tag v$VERSION"
 
@@ -336,10 +328,4 @@ echo "✓ Created tag v$VERSION"
 git push origin HEAD "v$VERSION"
 
 echo "✓ Pushed commit and tag v$VERSION to origin"
-
-# Create GitHub release
-echo "$RELEASE_NOTES" | gh release create "v$VERSION" \
-    --title "v$VERSION" \
-    --notes-file -
-
-echo "✓ Created GitHub release v$VERSION"
+echo "The CI of the commit publishes the release on PyPI and GitHub: $REPO_URL/commit/$(git rev-parse HEAD)"

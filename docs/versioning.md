@@ -11,7 +11,8 @@ udata uses a custom release script (`tag-version.sh`) to automate its release pr
 
 To create a release, you need to:
 - have administrator permission on the udata repository (to allow direct push)
-- have the [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated (`gh auth login`)
+- sign your tags with a key declared as a signing key on your GitHub account: the CI
+  refuses to publish a tag GitHub cannot verify
 
 The steps to make a release are:
 
@@ -25,14 +26,14 @@ The steps to make a release are:
     - convert PR references (`#XXXX`) to markdown links
     - update CHANGELOG.md with the new version and date
     - commit the changelog update
-    - create a git tag with the version (`vX.Y.Z`)
+    - create a signed git tag (`vX.Y.Z`) whose message carries the changelog entry
     - push both the commit and the tag to origin
-    - create a GitHub release with the same changelog content
-5. check on [github][] that the release has been created
-6. wait for the [CI][] build of the changelog commit on `main` to succeed — this is what
-   publishes to PyPI, tagged builds don't publish
-7. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
-8. celebrate!
+5. wait for the [CI][] build of the changelog commit on `main` to succeed: it runs the tests,
+   checks the tag signature, publishes to PyPI and creates the GitHub release from the tag
+   message
+6. check on [PyPI](https://pypi.org/project/udata/#history) and on [github][] that the new
+   release is present
+7. celebrate!
 
 ## Breaking changes
 
