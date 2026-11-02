@@ -123,6 +123,24 @@ class TestOwned(DBTestCase):
 
         self.assertTrue(getattr(handler, "called", False))
 
+    def test_owner_changed_with_both_fields_set_at_once(self):
+        # As forms do: they set `owner` and `organization` together, one of them to None.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(owner=user)
+
+        def handler(document, previous):
+            self.assertEqual(document.organization, org)
+            self.assertEqual(previous, user)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.owner = None
+            owned.organization = org
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
     def test_owner_changed_from_org_to_user_with_owned_postsave_signal(self):
         # Test with an additionnal post save signal that will retriger save signals
         user = UserFactory()

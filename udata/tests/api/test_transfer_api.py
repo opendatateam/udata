@@ -9,8 +9,11 @@ from udata.core.dataset.tasks import purge_datasets
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.tasks import purge_organizations
 from udata.core.topic.factories import TopicFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.features.notifications.models import Notification
+from udata.features.transfer.factories import TransferFactory
+from udata.features.transfer.models import Transfer
 from udata.utils import faker
 
 from . import APITestCase
@@ -462,6 +465,60 @@ class TransferAPITest(APITestCase):
 
         response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "refuse"})
         self.assert400(response)
+
+    def test_cannot_accept_a_transfer_requested_by_a_former_owner(self):
+        attacker = self.login()
+        accomplice = UserFactory()
+        victim = UserFactory()
+        dataset = DatasetFactory(owner=attacker)
+
+        stale = self._create_transfer(dataset, accomplice).json
+        to_victim = self._create_transfer(dataset, victim).json
+
+        self.login(victim)
+        self.assert200(
+            self.post(url_for("api.transfer", id=to_victim["id"]), {"response": "accept"})
+        )
+
+        self.login(accomplice)
+        response = self.post(url_for("api.transfer", id=stale["id"]), {"response": "accept"})
+
+        self.assert404(response)
+        dataset.reload()
+        self.assertEqual(dataset.owner, victim)
+        self.assertIsNone(dataset.organization)
+
+    def test_moving_a_subject_drops_its_pending_transfers(self):
+        owner = UserFactory()
+        recipient_admin = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        transfer = TransferFactory(
+            owner=owner,
+            recipient=OrganizationFactory(admins=[recipient_admin]),
+            subject=dataset,
+        )
+        self.assertEqual(Notification.objects(user=recipient_admin).count(), 1)
+
+        self.login(AdminFactory())
+        data = dataset.to_dict()
+        data["organization"] = {"id": OrganizationFactory().id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert200(response)
+        self.assertEqual(Transfer.objects(id=transfer.id).count(), 0)
+        self.assertEqual(Notification.objects(user=recipient_admin).count(), 0)
+
+    def test_editing_a_subject_keeps_its_pending_transfers(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=UserFactory(), subject=dataset)
+
+        data = dataset.to_dict()
+        data["title"] = "New title"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert200(response)
+        self.assertEqual(Transfer.objects(id=transfer.id).count(), 1)
 
     def test_request_and_respond_to_transfer_with_non_object_body(self):
         user = self.login()
