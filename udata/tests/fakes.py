@@ -4,7 +4,6 @@ A fake reproduces the behaviour of the real service and is inspected after the f
 instead of being handed a canned response per test.
 """
 
-import json
 import time
 from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
@@ -14,26 +13,18 @@ from authlib.jose import JsonWebKey, jwt
 
 
 @dataclass
-class ProConnectSession:
-    email: str
-    auth_time: int
-
-
-@dataclass
 class ProConnectGrant:
     email: str
-    # The jwt claims, signed into the id_token when the code is exchanged.
-    id_token_claims: dict
+    nonce: str
 
 
 class ProConnectFake:
-    """An in-memory ProConnect.
+    """An in-memory ProConnect, with the semantics measured on its integration environment.
 
-    The agent has a ProConnect session, opened when they last authenticated there: it
-    answers authorizations without asking them anything, unless `max_age=0` makes
-    ProConnect authenticate them again (OpenID Connect Core, not measured on ProConnect
-    yet: `honors_max_age` plays a provider that ignores it). `auth_time` is only returned
-    when requested through `claims` (`returns_auth_time` plays a provider that never does).
+    An open ProConnect session answers authorizations without asking the agent anything,
+    whatever `max_age` or `prompt=login` say. Only signing out (`end_session`, which
+    also closes the session at the agent's identity provider) makes the next
+    authorization authenticate them again: `authentications` counts those.
     The id_token doesn't carry the email: it comes from the userinfo endpoint, as a
     signed jwt.
     """
@@ -44,9 +35,10 @@ class ProConnectFake:
     def __init__(self, client_id: str):
         self.client_id = client_id
         self.key = JsonWebKey.generate_key("RSA", 2048, is_private=True, options={"kid": "test"})
-        self.honors_max_age = True
-        self.returns_auth_time = True
-        self._session: ProConnectSession | None = None
+        # The ProConnect account of whoever is at the keyboard.
+        self.agent: str | None = None
+        self.session_open = False
+        self.authentications = 0
         self._grants: dict[str, ProConnectGrant] = {}
         self._access_tokens: dict[str, ProConnectGrant] = {}
 
@@ -56,28 +48,32 @@ class ProConnectFake:
         rmock.post(f"{self.ISSUER}/token", json=self._handle_token)
         rmock.get(f"{self.ISSUER}/userinfo", content=self._handle_userinfo)
 
-    def agent_has_session(self, email: str, authenticated_at: int | None = None) -> None:
-        """Open a ProConnect session for `email`, authenticated at `authenticated_at` (now by default)."""
-        self._session = ProConnectSession(email, authenticated_at or int(time.time()))
+    def agent_has_session(self, email: str) -> None:
+        """Put `email` at the keyboard, with a ProConnect session already open."""
+        self.agent = email
+        self.session_open = True
 
     def authorize(self, authorize_url: str) -> dict:
         """Play the browser round-trip and return the callback query parameters."""
         params = self._params(authorize_url)
-        if self.honors_max_age and params.get("max_age") == "0":
-            self._session.auth_time = int(time.time())
-
-        requested = json.loads(params.get("claims", "{}")).get("id_token", {})
-        id_token_claims = {"acr": "eidas1", "nonce": params["nonce"]}
-        if "auth_time" in requested and self.returns_auth_time:
-            id_token_claims["auth_time"] = self._session.auth_time
+        if not self.session_open:
+            self.authentications += 1
+            self.session_open = True
 
         code = uuid4().hex
-        self._grants[code] = ProConnectGrant(self._session.email, id_token_claims)
+        self._grants[code] = ProConnectGrant(self.agent, params["nonce"])
         return {"code": code, "state": params["state"]}
 
     def deny(self, authorize_url: str) -> dict:
         """Play the agent cancelling at ProConnect and return the callback query parameters."""
         return {"error": "access_denied", "state": self._params(authorize_url)["state"]}
+
+    def end_session(self, end_session_url: str) -> dict:
+        """Play the sign-out round-trip and return the post-logout query parameters."""
+        params = self._params(end_session_url)
+        assert params["id_token_hint"]
+        self.session_open = False
+        return {"state": params["state"]}
 
     def _params(self, authorize_url: str) -> dict:
         return {key: values[0] for key, values in parse_qs(urlparse(authorize_url).query).items()}
@@ -113,7 +109,7 @@ class ProConnectFake:
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": 3600,
-            "id_token": self._sign(grant.id_token_claims),
+            "id_token": self._sign({"acr": "eidas1", "nonce": grant.nonce}),
         }
 
     def _handle_userinfo(self, request, context) -> bytes:

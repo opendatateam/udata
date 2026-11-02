@@ -1,4 +1,3 @@
-import json
 import time
 from datetime import datetime
 
@@ -20,10 +19,6 @@ STATE_KEY = "proconnect_state"
 ID_TOKEN_KEY = "id_token"
 # When a signed-in agent asked to reauthenticate.
 REAUTH_KEY = "proconnect_reauth"
-# Leeway between ProConnect's clock and ours when comparing its `auth_time` to ours.
-REAUTH_CLOCK_SKEW = 60
-
-AUTH_TIME_CLAIMS = {"id_token": {"auth_time": {"essential": True}}}
 
 
 def init_app(app):
@@ -62,8 +57,13 @@ def get_logout_url():
     )
 
 
-def authenticate() -> tuple[dict, dict]:
-    """Complete the authorization code flow and return the id_token claims and the user info."""
+def authorize_redirect():
+    redirect_uri = url_for("api.proconnect_auth", _external=True)
+    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
+
+
+def authenticate() -> dict:
+    """Complete the authorization code flow and return the user info."""
     token = oauth.proconnect.authorize_access_token()
     # Store the id_token in the session, it'll be used when logging out from ProConnect.
     session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
@@ -80,21 +80,7 @@ def authenticate() -> tuple[dict, dict]:
     # `id_token` with the jwt we received from the `userinfo_endpoint`.
     userinfo_token = token.copy()
     userinfo_token[ID_TOKEN_KEY] = resp.content
-    # authlib has verified the id_token (signature, nonce) in `authorize_access_token`
-    # and stored its claims under "userinfo".
-    return token["userinfo"], oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
-
-
-def mark_authenticated_at(auth_time: int) -> None:
-    """Date the session's freshness from the moment the agent authenticated at ProConnect.
-
-    `min` because flask-security holds a date up to `SECURITY_FRESHNESS` in the future as
-    fresh, a tolerance meant for its own clock and not for ProConnect's.
-    """
-    session["fs_paa"] = min(auth_time, time.time())
-    # A grace period still running holds the session fresh before `fs_paa` is even read,
-    # and `login_user` keeps the one a previous user of this browser left behind.
-    session.pop("fs_gexp", None)
+    return oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
 
 
 def verify_page_url(flash: str) -> str:
@@ -111,17 +97,30 @@ class ProconnectLoginAPI(API):
 
         # A reauthentication abandoned before the callback must not apply to this round-trip.
         session.pop(REAUTH_KEY, None)
-        params = {"acr_values": "eidas1", "claims": json.dumps(AUTH_TIME_CLAIMS)}
         if request.args.get("reauth"):
-            # A browser navigation from the cdata page, whose session may have expired.
-            if not current_user.is_authenticated:
-                return redirect(verify_page_url("proconnect_reauth_failed"))
-            session[REAUTH_KEY] = time.time()
-            # Without it, an open ProConnect session answers without asking the agent anything.
-            params["max_age"] = 0
+            return start_reauthentication()
 
-        redirect_uri = url_for("api.proconnect_auth", _external=True)
-        return oauth.proconnect.authorize_redirect(redirect_uri, **params)
+        return authorize_redirect()
+
+
+def start_reauthentication():
+    """Sign the agent out of ProConnect, to sign them back in from `ProconnectLogoutAPI`.
+
+    ProConnect ignores `max_age` and `prompt=login`, and dates `auth_time` from its own
+    round-trip: an open ProConnect session would answer without asking the agent anything.
+    Signing out closes it, and the session at their identity provider with it.
+    """
+    # A browser navigation from the cdata page, whose session may have expired.
+    if not current_user.is_authenticated:
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    logout_url = get_logout_url()
+    # Without the id_token of a ProConnect login, nothing tells ProConnect which session to close.
+    if logout_url is None:
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    session[REAUTH_KEY] = True
+    return redirect(logout_url)
 
 
 @ns.route("/auth", endpoint="proconnect_auth")
@@ -129,11 +128,10 @@ class ProconnectAuthAPI(API):
     def get(self):
         from udata.models import datastore
 
-        reauth_started_at = session.pop(REAUTH_KEY, None)
-        if reauth_started_at:
-            return reauthenticate(reauth_started_at)
+        if session.pop(REAUTH_KEY, None):
+            return reauthenticate()
 
-        id_token_claims, proconnect_user = authenticate()
+        proconnect_user = authenticate()
         user = datastore.find_user(email=proconnect_user["email"])
         if not user:
             user = datastore.create_user(
@@ -156,26 +154,22 @@ class ProconnectAuthAPI(API):
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
         # `login_user` dated the session now, while an open ProConnect session may have
-        # answered for an authentication made long before.
-        if auth_time := id_token_claims.get("auth_time"):
-            mark_authenticated_at(auth_time)
+        # signed the agent in without asking them anything: only a reauthentication makes
+        # it fresh. Without `fs_paa`, flask-security ignores the grace period a previous
+        # user of this browser may have left.
+        session.pop("fs_paa", None)
 
         return redirect(homepage_url(flash="connected"))
 
 
-def reauthenticate(started_at: float):
-    """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in.
-
-    Not flask-security's `oauth_verify_*`: it can't pass `max_age=0` to the reauthentication
-    alone (the client is shared with the login), and dates the freshness from now rather
-    than from `auth_time`, so an open ProConnect session answering would pass for one.
-    """
+def reauthenticate():
+    """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in."""
     # The agent may have logged out since: logging out leaves this key in the session.
     if not current_user.is_authenticated:
         return redirect(verify_page_url("proconnect_reauth_failed"))
 
     try:
-        id_token_claims, proconnect_user = authenticate()
+        proconnect_user = authenticate()
     except OAuthError:
         # The agent cancelled, or ProConnect refused the exchange.
         return redirect(verify_page_url("proconnect_reauth_failed"))
@@ -184,19 +178,17 @@ def reauthenticate(started_at: float):
     if proconnect_user["email"] != current_user.email:
         return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
 
-    # An authentication older than the request means ProConnect let its open session
-    # answer despite `max_age=0`: it proves nothing about who is at the keyboard now.
-    auth_time = id_token_claims.get("auth_time")
-    if not auth_time or auth_time < started_at - REAUTH_CLOCK_SKEW:
-        return redirect(verify_page_url("proconnect_reauth_failed"))
-
-    mark_authenticated_at(auth_time)
+    # Signed out of ProConnect beforehand, the agent has just authenticated.
+    session["fs_paa"] = time.time()
     return redirect(verify_page_url("proconnect_reauth_success"))
 
 
 @ns.route("/logout_oauth", endpoint="proconnect_logout_oauth")
 class ProconnectLogoutOAuthAPI(API):
     def get(self):
+        # A reauthentication abandoned before ProConnect signed the agent out must not turn
+        # this logout into a login.
+        session.pop(REAUTH_KEY, None)
         # At the time of this writing, authlib didn't implement OpenIDC session management:
         # https://github.com/lepture/authlib/issues/292
         # So we implement it ourselves. This code may be simplified (or even removed?) in the future
@@ -220,5 +212,8 @@ class ProconnectLogoutAPI(API):
         # We're logged out from ProConnect, cleanup the ProConnect related data from the session.
         session.pop(ID_TOKEN_KEY, None)
         session.pop(STATE_KEY, None)
+
+        if session.get(REAUTH_KEY):
+            return authorize_redirect()
 
         return redirect(url_for("security.logout"))
