@@ -38,6 +38,7 @@ def generate_pydenticon(identifier, size):
 @ns.route("/<identifier>/<int:size>/", endpoint="avatar")
 class IdenticonAPI(API):
     @api.doc("avatars")
+    @api.response(400, "Size too large, or too small to draw the avatar")
     def get(self, identifier, size):
         """Get a deterministic avatar given an identifier at a given size"""
         if size > MAX_SIZE:
