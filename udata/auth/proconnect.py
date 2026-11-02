@@ -101,31 +101,31 @@ class ProconnectLoginAPI(API):
             # aborted 2FA attempt.
             tf_clean_session()
 
-        if request.args.get("reauth"):
-            return start_reauthentication()
-
         return authorize_redirect()
 
 
-def start_reauthentication():
-    """Sign the agent out of ProConnect, to sign them back in from `ProconnectLogoutAPI`.
+@ns.route("/reauth/", endpoint="proconnect_reauth")
+class ProconnectReauthAPI(API):
+    def get(self):
+        """Sign the agent out of ProConnect, to sign them back in from `ProconnectLogoutAPI`.
 
-    ProConnect ignores `max_age` and `prompt=login`, and dates `auth_time` from its own
-    round-trip: an open ProConnect session would answer without asking the agent anything.
-    Signing out closes it, and the session at their identity provider with it when the
-    provider lets ProConnect close it.
-    """
-    # A browser navigation from the cdata page, whose session may have expired.
-    if not current_user.is_authenticated:
-        return redirect(login_page_url())
+        ProConnect ignores `max_age` and `prompt=login`, and dates `auth_time` from its own
+        round-trip: an open ProConnect session would answer without asking the agent anything.
+        Signing out closes it, and the session at their identity provider with it when the
+        provider lets ProConnect close it.
+        """
+        # A browser navigation from the cdata page, whose session may have expired.
+        if not current_user.is_authenticated:
+            return redirect(login_page_url())
 
-    logout_url = get_logout_url()
-    # Without the id_token of a ProConnect login, nothing tells ProConnect which session to close.
-    if logout_url is None:
-        return redirect(verify_page_url("proconnect_reauth_unavailable"))
+        logout_url = get_logout_url()
+        # Without the id_token of a ProConnect login, nothing tells ProConnect which session
+        # to close.
+        if logout_url is None:
+            return redirect(verify_page_url("proconnect_reauth_unavailable"))
 
-    session[REAUTH_KEY] = session[STATE_KEY]
-    return redirect(logout_url)
+        session[REAUTH_KEY] = session[STATE_KEY]
+        return redirect(logout_url)
 
 
 @ns.route("/auth", endpoint="proconnect_auth")
@@ -160,9 +160,9 @@ class ProconnectAuthAPI(API):
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
         # `login_user` dated the session now, while an open ProConnect session may have
-        # signed the agent in without asking them anything: only a reauthentication makes
-        # it fresh. Without `fs_paa`, flask-security ignores the grace period a previous
-        # user of this browser may have left.
+        # signed the agent in without asking them anything: only a reauthentication, or
+        # the code of the udata 2FA above, makes it fresh. Without `fs_paa`, flask-security
+        # ignores the grace period a previous user of this browser may have left.
         session.pop("fs_paa", None)
 
         return redirect(homepage_url(flash="connected"))

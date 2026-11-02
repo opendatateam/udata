@@ -33,7 +33,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
     def start_reauthentication(self, proconnect):
         """Go through the ProConnect sign-out, and return udata's redirection to the authorization."""
-        response = self.get(url_for("api.proconnect_login", reauth=1))
+        response = self.get(url_for("api.proconnect_reauth"))
         signed_out = proconnect.end_session(response.location)
         return self.get(url_for("api.proconnect_logout", **signed_out))
 
@@ -68,6 +68,23 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert proconnect.authentications == 0
         assert not self.is_fresh()
+
+    def test_login_completed_by_the_two_factor_is_fresh(self, proconnect):
+        # A code from the agent's authenticator proves as much as a password on /verify.
+        totp = current_app.extensions["security"].totp_factory
+        secret = totp.generate_totp_secret()
+        UserFactory(
+            email="jane@example.org", tf_primary_method="authenticator", tf_totp_secret=secret
+        )
+        self.sign_in(proconnect, "jane@example.org")
+
+        response = self.post(
+            url_for("security.two_factor_token_validation"),
+            {"code": totp.generate_totp_password(secret)},
+        )
+
+        self.assert200(response)
+        assert self.is_fresh()
 
     def test_reauthentication_makes_the_agent_authenticate_and_the_session_fresh(self, proconnect):
         user = UserFactory(email="jane@example.org")
@@ -130,7 +147,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
     def test_reauthentication_requires_being_logged_in(self):
         # The cdata session expired on /verify: signing in again is what's left to do.
-        response = self.get(url_for("api.proconnect_login", reauth=1))
+        response = self.get(url_for("api.proconnect_reauth"))
 
         assert response.location == f"{CDATA}/login"
 
@@ -140,7 +157,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.post(url_for("security.login"), {"email": user.email, "password": "password"})
         self.assert_logged_in_as(user)
 
-        response = self.get(url_for("api.proconnect_login", reauth=1))
+        response = self.get(url_for("api.proconnect_reauth"))
 
         assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_unavailable"
 
@@ -171,7 +188,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
         # Left at ProConnect, before it signs the agent out.
-        self.get(url_for("api.proconnect_login", reauth=1))
+        self.get(url_for("api.proconnect_reauth"))
 
         # How cdata logs out.
         response = self.post(url_for("security.logout"), headers={"Accept": "application/json"})
