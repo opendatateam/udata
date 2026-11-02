@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
-from authlib.jose import JsonWebKey, jwt
+from joserfc import jwt
+from joserfc.jwk import RSAKey
 
 
 @dataclass
@@ -24,7 +25,8 @@ class ProConnectFake:
     An open ProConnect session answers authorizations without asking the agent anything,
     whatever `max_age` or `prompt=login` say. Only signing out (`end_session`, which
     also closes the session at the agent's identity provider) makes the next
-    authorization authenticate them again: `authentications` counts those.
+    authorization authenticate them again: `authentications` counts those. Signing out
+    with the id_token of a session already closed, even expired, comes back all the same.
     The id_token doesn't carry the email: it comes from the userinfo endpoint, as a
     signed jwt.
     """
@@ -34,7 +36,7 @@ class ProConnectFake:
 
     def __init__(self, client_id: str):
         self.client_id = client_id
-        self.key = JsonWebKey.generate_key("RSA", 2048, is_private=True, options={"kid": "test"})
+        self.key = RSAKey.generate_key(2048, parameters={"kid": "test"}, private=True)
         # The ProConnect account of whoever is at the keyboard.
         self.agent: str | None = None
         self.session_open = False
@@ -44,7 +46,7 @@ class ProConnectFake:
 
     def mount(self, rmock) -> None:
         rmock.get(self.METADATA_URL, json=self._metadata())
-        rmock.get(f"{self.ISSUER}/jwks", json={"keys": [self.key.as_dict()]})
+        rmock.get(f"{self.ISSUER}/jwks", json={"keys": [self.key.as_dict(private=False)]})
         rmock.post(f"{self.ISSUER}/token", json=self._handle_token)
         rmock.get(f"{self.ISSUER}/userinfo", content=self._handle_userinfo)
 
@@ -99,7 +101,7 @@ class ProConnectFake:
             "exp": now + 60,
             **claims,
         }
-        return jwt.encode({"alg": "RS256", "kid": "test"}, payload, self.key).decode()
+        return jwt.encode({"alg": "RS256", "kid": "test"}, payload, self.key)
 
     def _handle_token(self, request, context) -> dict:
         grant = self._grants.pop(parse_qs(request.text)["code"][0])

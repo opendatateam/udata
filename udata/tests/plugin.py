@@ -42,8 +42,10 @@ def datacite(app, rmock):
 
 
 @pytest.fixture
-def proconnect(app, rmock):
+def proconnect(app, rmock, monkeypatch):
     """An in-memory ProConnect, registered as udata's OpenID provider."""
+    from authlib.integrations.flask_client import OAuth
+
     from udata.auth import proconnect as proconnect_auth
 
     fake = ProConnectFake(client_id="udata-test")
@@ -54,9 +56,9 @@ def proconnect(app, rmock):
         PROCONNECT_OPENID_CONF_URL=fake.METADATA_URL,
         PROCONNECT_SCOPE="openid email given_name usual_name",
     )
-    # The OAuth registry is module-level and keeps the client built for a previous app,
-    # or from a local udata.cfg pointing at the real ProConnect.
-    proconnect_auth.oauth._clients.pop("proconnect", None)
+    # A registry of its own: the module-level one keeps the client built for a previous
+    # app, or from a local udata.cfg pointing at the real ProConnect.
+    monkeypatch.setattr(proconnect_auth, "oauth", OAuth())
     proconnect_auth.init_app(app)
     return fake
 

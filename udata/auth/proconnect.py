@@ -58,14 +58,9 @@ def get_logout_url():
     )
 
 
-def authorize_redirect(reauth: bool = False):
+def authorize_redirect(state: str | None = None):
     redirect_uri = url_for("api.proconnect_auth", _external=True)
-    # authlib's `authorize_redirect`, which doesn't hand the state out.
-    rv = oauth.proconnect.create_authorization_url(redirect_uri, acr_values="eidas1")
-    oauth.proconnect.save_authorize_data(redirect_uri=redirect_uri, **rv)
-    if reauth:
-        session[REAUTH_KEY] = rv["state"]
-    return redirect(rv["url"])
+    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
 
 
 def authenticate() -> dict:
@@ -222,7 +217,8 @@ class ProconnectLogoutAPI(API):
         if session.get(REAUTH_KEY) == state:
             # The id_token signs the agent out again if they cancel and retry, the next
             # authentication replaces it.
-            return authorize_redirect(reauth=True)
+            session[REAUTH_KEY] = reauth_state = gen_salt(50)
+            return authorize_redirect(state=reauth_state)
 
         # We're logged out from ProConnect, cleanup the ProConnect related data from the session.
         session.pop(ID_TOKEN_KEY, None)
