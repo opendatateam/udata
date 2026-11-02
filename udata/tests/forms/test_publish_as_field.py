@@ -299,6 +299,36 @@ class PublishFieldTest(DBTestCase):
         self.assertEqual(ownable.owner, user)
         self.assertIsNone(ownable.organization)
 
+    def test_member_cannot_move_organization_object_to_themselves(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        ownable = Ownable(organization=org)
+
+        login_user(user)
+
+        form = OwnableForm(MultiDict({"owner": str(user.id)}), obj=ownable)
+
+        self.assertFalse(form.validate())
+        self.assertEqual(
+            form.errors["owner"],
+            [_("Cannot change owner after creation. Please use transfer feature.")],
+        )
+
+    def test_member_cannot_clear_organization_to_take_object(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        ownable = Ownable(organization=org)
+
+        login_user(user)
+
+        form = OwnableForm.from_json({"owner": str(user.id), "organization": None}, obj=ownable)
+
+        self.assertFalse(form.validate())
+        self.assertIn("owner", form.errors)
+        self.assertIn("organization", form.errors)
+
     def test_admin_can_set_organization(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()

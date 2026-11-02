@@ -644,6 +644,10 @@ class DateRangeField(Field):
             self.data = None
 
 
+def _id_or_none(document):
+    return document.id if document else None
+
+
 def default_owner():
     """Default to current_user if authenticated"""
     if current_user.is_authenticated:
@@ -663,15 +667,14 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
-        if (
-            form.instance
-            and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
-            and not admin_permission
-        ):
-            raise validators.ValidationError(
-                _("Cannot change owner after creation. Please use transfer feature.")
-            )
+        # An unset previous owner is a value too: an organization object has none, and setting
+        # one moves the object out of its organization, `PublishAsField` clearing it in turn.
+        if form.instance and not admin_permission:
+            previous = getattr(form.instance, self.name, None)
+            if _id_or_none(previous) != _id_or_none(self.data):
+                raise validators.ValidationError(
+                    _("Cannot change owner after creation. Please use transfer feature.")
+                )
 
         if self.data:
             if current_user.is_anonymous:
@@ -699,7 +702,7 @@ class PublishAsField(ModelFieldMixin, Field):
             isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
+            and getattr(form.instance, self.name).id != _id_or_none(self.data)
             and not admin_permission
         ):
             raise validators.ValidationError(
