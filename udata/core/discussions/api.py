@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 
-from bson import ObjectId
 from flask_restx.inputs import boolean
 from flask_security import current_user
 
@@ -240,13 +239,9 @@ class DiscussionsAPI(API):
     @api.marshal_with(Discussion.__page_fields__)
     def get(self):
         """List all Discussions"""
-        # Filters first, so that a malformed `for` is rejected before being read here.
-        discussions = Discussion.apply_sort_filters(Discussion.objects)
-        args = Discussion.__index_parser__.parse_args()
-        # An empty `for` is ignored by the filter, it must not bound the lookup either.
-        subjects = [ObjectId(id) for id in args["for"] or [] if id]
-        # `for` bounds the subjects to check, keeping cheap the lookup a subject page runs.
-        discussions = discussions.visible_by_user(current_user, subjects or None)
+        discussions = Discussion.apply_sort_filters(Discussion.objects).visible_by_user(
+            current_user
+        )
         return Discussion.apply_pagination(discussions)
 
     @api.secure

@@ -182,13 +182,11 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
-def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[ObjectId]:
-    """Ids of the discussion subjects `user` may not read, among `among` if given.
+def unreadable_subject_ids(user, among: list[ObjectId]) -> set[ObjectId]:
+    """Ids of the subjects of `among` that `user` may not read.
 
     A discussion is readable only if its subject is: these are the rules of the subjects'
     `read` permissions, as queries. Topics are absent, anyone can read a private topic.
-    `among` bounds the lookup to the subjects at hand, which is much cheaper than listing
-    every hidden object of the catalog.
     """
     # Deferred for the same reason as in `filter_by_organization` below.
     from udata.core.dataservices.models import Dataservice
@@ -201,10 +199,7 @@ def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[Obj
         return set()
 
     def hidden(model, query):
-        queryset = model.objects(query)
-        if among is not None:
-            queryset = queryset(id__in=among)
-        return set(queryset.scalar("id"))
+        return set(model.objects(query, id__in=among).scalar("id"))
 
     ids = hidden(Post, Q(published=None))
     owners = [user.id, *user.organizations] if user.is_authenticated else []
@@ -217,9 +212,12 @@ def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[Obj
 
 
 class DiscussionQuerySet(UDataQuerySet):
-    def visible_by_user(self, user, among: list[ObjectId] | None = None):
+    def visible_by_user(self, user):
         """Drop the discussions whose subject `user` may not read (see `unreadable_subject_ids`)."""
-        ids = unreadable_subject_ids(user, among)
+        # Only the subjects of the discussions at hand are checked: the filters already
+        # applied (`for`, `org`…) bound the lookup.
+        subjects = self._collection.distinct("subject._ref.$id", self._query)
+        ids = unreadable_subject_ids(user, subjects)
         if not ids:
             return self
         return self(__raw__={"subject._ref.$id": {"$nin": list(ids)}})

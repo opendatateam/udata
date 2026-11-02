@@ -2593,8 +2593,9 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
         on_license_notification = self.notify_discussion(user, on_license)
         without_subject_notification = self.notify_discussion(user, without_subject)
 
-        # Both listings crash on those discussions before the migration.
-        self.assert500(self.get(url_for("api.discussions")))
+        # Both listings fail on those discussions before the migration. The discussions one
+        # stops while checking the subjects' visibility, on the license's id.
+        self.assert400(self.get(url_for("api.discussions")))
         self.assert500(self.get(url_for("api.notifications")))
 
         self.run_migration()
