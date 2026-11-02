@@ -242,11 +242,11 @@ class DiscussionsAPI(API):
         """List all Discussions"""
         # Filters first, so that a malformed `for` is rejected before being read here.
         discussions = Discussion.apply_sort_filters(Discussion.objects)
+        args = Discussion.__index_parser__.parse_args()
+        # An empty `for` is ignored by the filter, it must not bound the lookup either.
+        subjects = [ObjectId(id) for id in args["for"] or [] if id]
         # `for` bounds the subjects to check, keeping cheap the lookup a subject page runs.
-        subjects = [id for id in Discussion.__index_parser__.parse_args().get("for") or [] if id]
-        discussions = discussions.visible_by_user(
-            current_user, [ObjectId(id) for id in subjects] if subjects else None
-        )
+        discussions = discussions.visible_by_user(current_user, subjects or None)
         return Discussion.apply_pagination(discussions)
 
     @api.secure

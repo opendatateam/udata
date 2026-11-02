@@ -193,6 +193,7 @@ def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[Obj
     # Deferred for the same reason as in `filter_by_organization` below.
     from udata.core.dataservices.models import Dataservice
     from udata.core.dataset.models import Dataset
+    from udata.core.dataset.permissions import ownable_hidden_query
     from udata.core.post.models import Post
     from udata.core.reuse.models import Reuse
 
@@ -207,12 +208,8 @@ def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[Obj
 
     ids = hidden(Post, Q(published=None))
     owners = [user.id, *user.organizations] if user.is_authenticated else []
-    for model, query in (
-        (Dataset, Q(private=True) | Q(deleted__ne=None)),
-        (Reuse, Q(private=True) | Q(deleted__ne=None)),
-        (Dataservice, Q(private=True) | Q(deleted_at__ne=None)),
-    ):
-        model_ids = hidden(model, query)
+    for model in (Dataset, Reuse, Dataservice):
+        model_ids = hidden(model, ownable_hidden_query(model))
         if owners and model_ids:
             model_ids -= set(model.objects(id__in=model_ids).owned_by(*owners).scalar("id"))
         ids |= model_ids

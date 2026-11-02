@@ -1,5 +1,6 @@
 from flask_principal import Permission as BasePermission
 from flask_principal import RoleNeed
+from mongoengine import Q
 
 from udata.auth import Permission, UserNeed
 from udata.core.organization.permissions import (
@@ -57,6 +58,12 @@ class OwnableReadPermission(BasePermission):
             needs.append(UserNeed(obj.owner.fs_uniquifier))
 
         super().__init__(*needs)
+
+
+def ownable_hidden_query(model) -> Q:
+    """The objects of `model` that `OwnableReadPermission` hides, as a query."""
+    deleted = "deleted" if "deleted" in model._fields else "deleted_at"
+    return Q(private=True) | Q(**{f"{deleted}__ne": None})
 
 
 class DatasetEditPermission(OwnablePermission):
