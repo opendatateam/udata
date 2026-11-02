@@ -903,6 +903,22 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().organization.id, new_org.id)
 
+    def test_dataset_api_update_org_editor_cannot_take_ownership(self):
+        """An organization editor cannot move an organization dataset to themselves"""
+        editor = self.login()
+        org = OrganizationFactory(members=[Member(user=editor, role="editor")])
+        dataset = DatasetFactory(organization=org)
+
+        data = dataset.to_dict()
+        del data["organization"]
+        data["owner"] = str(editor.id)
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.organization, org)
+        self.assertIsNone(dataset.owner)
+
     def test_dataset_api_update_with_resources(self):
         """It should update a dataset from the API with resources parameters"""
         user = self.login()
