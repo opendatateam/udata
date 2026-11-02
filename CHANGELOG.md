@@ -1,5 +1,18 @@
 # Changelog
 
+## 17.21.0 (2026-11-02)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.3 ([#4049](https://github.com/opendatateam/udata/pull/4049))
+- chore(deps): update dependency authlib to v1.9.1 [security] ([#4054](https://github.com/opendatateam/udata/pull/4054))
+- chore(deps): update dependency faker to >=40.44, <40.45 ([#4050](https://github.com/opendatateam/udata/pull/4050))
+- chore(deps): update dependency pymongo to v4.18.3 [security] ([#4053](https://github.com/opendatateam/udata/pull/4053))
+- chore(deps): update redis:alpine docker digest to 21090af ([#4051](https://github.com/opendatateam/udata/pull/4051))
+- chore: upgrade the Elasticsearch client to 8.19 and test against ES 8 and 9 ([#4045](https://github.com/opendatateam/udata/pull/4045))
+- fix(avatars): cap the avatar size to avoid exhausting the worker memory ([#4041](https://github.com/opendatateam/udata/pull/4041))
+- fix: forbid non-admins to move an organization dataset to themselves ([#4056](https://github.com/opendatateam/udata/pull/4056))
+- fix(perfs): fetch a single resource MongoDB side in `/api/2/datasets/resources/<rid>/` ([#4018](https://github.com/opendatateam/udata/pull/4018))
+
+
 ## 17.20.0 (2026-10-29)
 
 - chore: add CODEOWNERS ([#4047](https://github.com/opendatateam/udata/pull/4047))
