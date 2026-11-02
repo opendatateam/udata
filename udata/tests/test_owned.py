@@ -193,6 +193,44 @@ class TestOwned(DBTestCase):
         assert received
         assert all(previous == org for previous in received)
 
+    def test_previous_owner_survives_a_nested_save_between_two_orgs(self):
+        first_org = OrganizationFactory()
+        second_org = OrganizationFactory()
+        owned = OwnedPostSave.objects.create(organization=first_org)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.organization = second_org
+            owned.save()
+
+        assert received
+        assert all(previous == first_org for previous in received)
+
+    def test_previous_owner_survives_a_nested_save_between_two_users(self):
+        first_user = UserFactory()
+        second_user = UserFactory()
+        owned = OwnedPostSave.objects.create(owner=first_user)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.owner = second_user
+            owned.save()
+
+        assert received
+        assert all(previous == first_user for previous in received)
+
 
 class OwnedQuerysetTest(DBTestCase):
     def test_queryset_type(self):
