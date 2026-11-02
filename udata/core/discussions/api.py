@@ -13,7 +13,7 @@ from .models import (
     Discussion,
     Message,
     check_organization_voice,
-    unreadable_subject_ids,
+    read_permission,
 )
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -74,7 +74,8 @@ discussion_delete_parser = add_send_legal_notice_argument(api.parser())
 def get_discussion_or_404(id):
     """Answer a 404 on a discussion whose subject the current user may not read, like the subject."""
     discussion = Discussion.objects.get_or_404(id=id_or_404(id))
-    if unreadable_subject_ids(current_user, [discussion.subject.id]):
+    read = read_permission(discussion)
+    if read is not None and not read.can():
         api.abort(404)
     return discussion
 

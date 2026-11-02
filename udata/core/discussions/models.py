@@ -185,8 +185,9 @@ class NotificationExtra(EmbeddedDocument):
 def unreadable_subject_ids(user, among: list[ObjectId]) -> set[ObjectId]:
     """Ids of the subjects of `among` that `user` may not read.
 
-    A discussion is readable only if its subject is: these are the rules of the subjects'
-    `read` permissions, as queries. Topics are absent, anyone can read a private topic.
+    The rules of the subjects' `read` permissions (see `read_permission`), as queries, for
+    the lists that cannot check their discussions one by one without breaking pagination.
+    Topics are absent, anyone can read a private topic.
     """
     # Deferred for the same reason as in `filter_by_organization` below.
     from udata.core.dataservices.models import Dataservice
@@ -198,16 +199,16 @@ def unreadable_subject_ids(user, among: list[ObjectId]) -> set[ObjectId]:
     if user.is_authenticated and user.sysadmin:
         return set()
 
-    def hidden(model, query):
-        return set(model.objects(query, id__in=among).scalar("id"))
-
-    ids = hidden(Post, Q(published=None))
-    owners = [user.id, *user.organizations] if user.is_authenticated else []
+    ids = set(Post.objects(published=None, id__in=among).scalar("id"))
+    # What the user owns, directly or through an organization, stays readable to them.
+    not_owned = (
+        Q(owner__ne=user.id, organization__nin=list(user.organizations))
+        if user.is_authenticated
+        else Q()
+    )
     for model in (Dataset, Reuse, Dataservice):
-        model_ids = hidden(model, ownable_hidden_query(model))
-        if owners and model_ids:
-            model_ids -= set(model.objects(id__in=model_ids).owned_by(*owners).scalar("id"))
-        ids |= model_ids
+        hidden = ownable_hidden_query(model) & not_owned
+        ids |= set(model.objects(hidden, id__in=among).scalar("id"))
     return ids
 
 
@@ -223,8 +224,20 @@ class DiscussionQuerySet(UDataQuerySet):
         return self(__raw__={"subject._ref.$id": {"$nin": list(ids)}})
 
 
+def subject_of(obj):
+    """What `obj` is about: a discussion stands for its subject."""
+    return obj.subject if isinstance(obj, Discussion) else obj
+
+
+def read_permission(obj):
+    """Who may read `obj`, a discussion standing for its subject: its `read` permission,
+    `None` when anybody may (an organization, a topic)."""
+    return getattr(subject_of(obj), "permissions", {}).get("read")
+
+
 def check_subject_is_readable(subject, **_kwargs):
-    if subject and unreadable_subject_ids(current_user, [subject.id]):
+    read = read_permission(subject)
+    if read is not None and not read.can():
         raise FieldValidationError(_("Unknown subject"), field="subject")
 
 

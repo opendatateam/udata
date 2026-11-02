@@ -16,7 +16,7 @@ from mongoengine.fields import (
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.discussions.constants import DISCUSSION_SUBJECTS
-from udata.core.discussions.models import Discussion
+from udata.core.discussions.models import read_permission, subject_of
 from udata.core.organization.models import Organization
 from udata.core.organization.permissions import organization_needs
 from udata.core.user.models import User
@@ -350,17 +350,6 @@ def set_rule(user: User, scope: Document | None, event: str | None, enabled: boo
     NotificationSetting.objects.get_or_create(
         **key, updates={"enabled": enabled, "origin": FollowOrigin.FOLLOWED}
     )
-
-
-def subject_of(scope):
-    """What a rule on `scope` is about: a thread stands for its subject."""
-    return scope.subject if isinstance(scope, Discussion) else scope
-
-
-def read_permission(scope):
-    """Who may read what a rule on `scope` is about: its `read` permission, `None` when
-    anybody may (an organization, a topic)."""
-    return getattr(subject_of(scope), "permissions", {}).get("read")
 
 
 def readable_by(user: User, scope) -> bool:

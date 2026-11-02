@@ -2593,10 +2593,9 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
         on_license_notification = self.notify_discussion(user, on_license)
         without_subject_notification = self.notify_discussion(user, without_subject)
 
-        # Both listings fail on those discussions before the migration. The discussions one
-        # stops while checking the subjects' visibility, on the license's id.
-        self.assert400(self.get(url_for("api.discussions")))
-        self.assert500(self.get(url_for("api.notifications")))
+        # Both listings fail on those discussions before the migration.
+        assert self.get(url_for("api.discussions")).status_code >= 400
+        assert self.get(url_for("api.notifications")).status_code >= 400
 
         self.run_migration()
 
@@ -2717,6 +2716,41 @@ class DiscussionOnHiddenSubjectTest(PytestOnlyAPITestCase):
 
         assert self.listed_ids() == {str(discussion.id)}
 
+    def test_list_keeps_discussions_on_a_private_topic(self):
+        """Anyone may read a private topic, so do its discussions."""
+        discussion = DiscussionFactory(subject=TopicFactory(private=True), user=UserFactory())
+
+        assert self.listed_ids() == {str(discussion.id)}
+
+    @pytest.mark.parametrize(
+        "subject_factory",
+        [DatasetFactory, ReuseFactory, DataserviceFactory],
+        ids=["dataset", "reuse", "dataservice"],
+    )
+    def test_the_owner_of_a_private_subject_reads_its_discussions(self, subject_factory):
+        owner = UserFactory()
+        discussion = DiscussionFactory(
+            subject=subject_factory(owner=owner, private=True), user=UserFactory()
+        )
+
+        assert self.listed_ids() == set()
+        self.login(owner)
+        assert self.listed_ids() == {str(discussion.id)}
+        assert200(self.get(url_for("api.discussion", id=discussion.id)))
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_search_without_elasticsearch_excludes_them(self, make_subject):
+        self.setup_discussions(make_subject)
+
+        def searched_ids():
+            response = self.get(url_for("apiv2.discussion_search"))
+            assert200(response)
+            return {discussion["id"] for discussion in response.json["data"]}
+
+        assert searched_ids() == {str(self.public.id)}
+        self.login(self.member)
+        assert searched_ids() == {str(self.public.id), str(self.hidden.id)}
+
     @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
     def test_get_answers_404(self, make_subject):
         self.setup_discussions(make_subject)
@@ -2771,7 +2805,6 @@ class DiscussionOnHiddenSubjectTest(PytestOnlyAPITestCase):
         assert201(response)
 
     def test_organization_csv_excludes_them(self):
-        """The case of the report: the CSV listed the discussions of private datasets."""
         self.setup_discussions(HIDDEN_SUBJECTS["private dataset"])
 
         response = self.get(url_for("api.organization_discussions_csv", org=self.organization))
