@@ -315,6 +315,24 @@ class PublishFieldTest(DBTestCase):
             [_("Cannot change owner after creation. Please use transfer feature.")],
         )
 
+    def test_member_cannot_set_owner_on_organization_object_even_keeping_organization(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        ownable = Ownable(organization=org)
+
+        login_user(user)
+
+        form = OwnableForm(
+            MultiDict({"owner": str(user.id), "organization": str(org.id)}), obj=ownable
+        )
+
+        self.assertFalse(form.validate())
+        self.assertEqual(
+            form.errors["owner"],
+            [_("Cannot change owner after creation. Please use transfer feature.")],
+        )
+
     def test_member_cannot_clear_organization_to_take_object(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
