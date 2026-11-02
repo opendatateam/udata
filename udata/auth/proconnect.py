@@ -152,10 +152,16 @@ class ProconnectAuthAPI(API):
                 user=user,
                 remember_me=False,
                 primary_authn_via="password",
-                next_loc=homepage_url(flash="connected"),
+                next_loc=None,
             )
             if response:
-                return response
+                # flask-security redirects this browser navigation to its own HTML views:
+                # send the agent to the cdata pages the password login leads to instead.
+                if session.get("tf_state") == "setup_from_login":
+                    page = cdata_url("/setup-two-factor")
+                else:
+                    page = cdata_url("/tf-validate")
+                return redirect(page) if page else response
 
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
