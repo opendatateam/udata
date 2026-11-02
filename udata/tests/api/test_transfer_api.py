@@ -510,6 +510,9 @@ class TransferAPITest(APITestCase):
             recipient=OrganizationFactory(admins=[recipient_admin]),
             subject=dataset,
         )
+        unmoved_transfer = TransferFactory(
+            owner=owner, recipient=UserFactory(), subject=DatasetFactory(owner=owner)
+        )
         self.assertEqual(Notification.objects(user=recipient_admin).count(), 1)
 
         self.login(AdminFactory())
@@ -520,6 +523,24 @@ class TransferAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Transfer.objects(id=transfer.id).count(), 0)
         self.assertEqual(Notification.objects(user=recipient_admin).count(), 0)
+        self.assertEqual(Transfer.objects(id=unmoved_transfer.id).count(), 1)
+
+    def test_accepting_a_duplicate_transfer_keeps_its_notification(self):
+        owner = self.login()
+        recipient = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        accepted = self._create_transfer(dataset, recipient).json
+        self.assert201(self._create_transfer(dataset, recipient))
+        # Both requests share the notification: the second one finds it already pending.
+        self.assertEqual(Notification.objects(user=recipient).count(), 1)
+
+        self.login(recipient)
+        response = self.post(url_for("api.transfer", id=accepted["id"]), {"response": "accept"})
+
+        self.assert200(response)
+        self.assertEqual(Transfer.objects(subject=dataset, status="pending").count(), 0)
+        notification = Notification.objects.get(user=recipient)
+        self.assertIsNotNone(notification.handled_at)
 
     def test_editing_a_subject_keeps_its_pending_transfers(self):
         owner = self.login()

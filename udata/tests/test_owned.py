@@ -141,6 +141,23 @@ class TestOwned(DBTestCase):
 
         self.assertTrue(getattr(handler, "called", False))
 
+    def test_owner_changed_from_org_to_user_with_both_fields_set_at_once(self):
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(organization=org)
+
+        def handler(document, previous):
+            self.assertEqual(document.owner, user)
+            self.assertEqual(previous, org)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.organization = None
+            owned.owner = user
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
     def test_owner_changed_from_org_to_user_with_owned_postsave_signal(self):
         # Test with an additionnal post save signal that will retriger save signals
         user = UserFactory()
