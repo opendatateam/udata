@@ -883,7 +883,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         original_member = Member(user=user, role="editor")
         original_org = OrganizationFactory(members=[original_member])
-        dataset = DatasetFactory(owner=user, organization=original_org)
+        dataset = DatasetFactory(organization=original_org)
 
         new_member = Member(user=self.user, role="admin")
         new_org = OrganizationFactory(members=[new_member])
@@ -1856,9 +1856,8 @@ class DatasetsFeedAPItest(APITestCase):
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
-        owner = UserFactory()
         org = OrganizationFactory()
-        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
+        DatasetFactory(organization=org, resources=[ResourceFactory()])
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
 
