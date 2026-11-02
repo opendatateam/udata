@@ -695,7 +695,9 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
-        # Some forms (like DiscussionCommentForm) are not model forms
+        # Some forms (like DiscussionCommentForm) are not model forms.
+        # Unlike the owner, an unset organization stays settable: moving one's own object to an
+        # organization one can publish for is allowed, the permission check below guarding it.
         if (
             isinstance(form, ModelForm)
             and form.instance
