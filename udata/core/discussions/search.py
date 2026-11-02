@@ -1,4 +1,7 @@
-from udata.core.discussions.models import Discussion
+from flask_security.core import AnonymousUser
+
+from udata.auth import current_user
+from udata.core.discussions.models import Discussion, unreadable_subject_ids
 from udata.search import BoolFilter, Filter, ModelSearchAdapter, register
 from udata_search_service.consumers import DiscussionConsumer
 from udata_search_service.services import DiscussionService
@@ -22,11 +25,12 @@ class DiscussionSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, discussion):
-        return True
+        # The search endpoint is public: only index what an anonymous user may read.
+        return not unreadable_subject_ids(AnonymousUser(), [discussion.subject.id])
 
     @classmethod
     def mongo_search(cls, args):
-        discussions = Discussion.objects()
+        discussions = Discussion.objects.visible_by_user(current_user)
         sort = cls.parse_sort(args["sort"]) or "-created"
         return discussions.order_by(sort).paginate(args["page"], args["page_size"])
 

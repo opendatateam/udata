@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from bson import ObjectId
 from flask_restx.inputs import boolean
 from flask_security import current_user
 
@@ -13,6 +14,7 @@ from .models import (
     Discussion,
     Message,
     check_organization_voice,
+    unreadable_subject_ids,
 )
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -70,6 +72,14 @@ edit_discussion_fields = api.model(
 discussion_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
+def get_discussion_or_404(id):
+    """Answer a 404 on a discussion whose subject the current user may not read, like the subject."""
+    discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+    if unreadable_subject_ids(current_user, [discussion.subject.id]):
+        api.abort(404)
+    return discussion
+
+
 @ns.route("/<id>/", endpoint="discussion")
 class DiscussionAPI(API):
     """
@@ -80,7 +90,7 @@ class DiscussionAPI(API):
     @api.marshal_with(Discussion.__read_fields__)
     def get(self, id):
         """Get a discussion given its ID"""
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         return discussion
 
     @api.secure
@@ -92,7 +102,7 @@ class DiscussionAPI(API):
     @api.marshal_with(Discussion.__read_fields__)
     def post(self, id):
         """Add comment and optionally close a discussion given its ID"""
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
 
@@ -141,7 +151,7 @@ class DiscussionAPI(API):
     @api.marshal_with(Discussion.__read_fields__)
     def put(self, id):
         """Update a discussion given its ID"""
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         discussion.permissions["edit"].test()
 
         return patch_and_save(discussion, {"title": api.json_payload().get("title")})
@@ -153,7 +163,7 @@ class DiscussionAPI(API):
     def delete(self, id):
         """Delete a discussion given its ID"""
         args = discussion_delete_parser.parse_args()
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         discussion.permissions["delete"].test()
         send_legal_notice_on_deletion(discussion, args)
 
@@ -191,7 +201,7 @@ class DiscussionCommentAPI(API):
     @api.marshal_with(Discussion.__read_fields__)
     def put(self, id, cidx):
         """Edit a comment given its index or UUID"""
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         message = self._resolve_message(discussion, cidx)
         message.permissions["edit"].test()
 
@@ -207,7 +217,7 @@ class DiscussionCommentAPI(API):
     def delete(self, id, cidx):
         """Delete a comment given its index or UUID"""
         args = message_delete_parser.parse_args()
-        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion = get_discussion_or_404(id)
         message = self._resolve_message(discussion, cidx)
         if message == discussion.discussion[0]:
             api.abort(400, "You cannot delete the first comment of a discussion")
@@ -230,7 +240,14 @@ class DiscussionsAPI(API):
     @api.marshal_with(Discussion.__page_fields__)
     def get(self):
         """List all Discussions"""
-        return Discussion.apply_pagination(Discussion.apply_sort_filters(Discussion.objects))
+        # Filters first, so that a malformed `for` is rejected before being read here.
+        discussions = Discussion.apply_sort_filters(Discussion.objects)
+        # `for` bounds the subjects to check, keeping cheap the lookup a subject page runs.
+        subjects = [id for id in Discussion.__index_parser__.parse_args().get("for") or [] if id]
+        discussions = discussions.visible_by_user(
+            current_user, [ObjectId(id) for id in subjects] if subjects else None
+        )
+        return Discussion.apply_pagination(discussions)
 
     @api.secure
     @api.doc("create_discussion")

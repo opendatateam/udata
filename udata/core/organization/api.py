@@ -198,9 +198,12 @@ class DataservicesCsv(API):
 @api.response(410, "Organization has been deleted")
 class DiscussionsCsvAPI(API):
     def get(self, org):
-        datasets = Dataset.objects.filter(organization=str(org.id))
+        datasets = list(Dataset.objects(organization=org).only("id"))
+        discussions = Discussion.objects(subject__in=datasets).visible_by_user(
+            current_user, [dataset.id for dataset in datasets]
+        )
         # select_related allows us to dereference subject Referencefield  as efficiently as possible
-        discussions = Discussion.objects.filter(subject__in=datasets).select_related()
+        discussions = discussions.select_related()
         adapter = DiscussionCsvAdapter(discussions)
         return csv.stream(adapter, "{0}-discussions".format(org.slug))
 
@@ -754,8 +757,10 @@ class OrgDiscussionsAPI(API):
         reuses = Reuse.objects(organization=org).only("id")
         datasets = Dataset.objects(organization=org).only("id")
         subjects = list(reuses) + list(datasets)
-        qs = Discussion.objects(subject__in=subjects).order_by("-created")
-        return list(qs)
+        qs = Discussion.objects(subject__in=subjects).visible_by_user(
+            current_user, [subject.id for subject in subjects]
+        )
+        return list(qs.order_by("-created"))
 
 
 @ns.route("/roles/", endpoint="org_roles")

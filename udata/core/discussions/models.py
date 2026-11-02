@@ -7,7 +7,7 @@ from bson import ObjectId
 from flask import current_app, g, url_for
 from flask_login import current_user
 from flask_restx.inputs import boolean
-from mongoengine import EmbeddedDocument
+from mongoengine import EmbeddedDocument, Q
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
     DateTimeField,
@@ -32,6 +32,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.queryset import UDataQuerySet
 from udata.mongo.uuid_fields import AutoUUIDField
 
 from .constants import COMMENT_SIZE_LIMIT, DISCUSSION_SUBJECTS
@@ -181,6 +182,57 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
+def unreadable_subject_ids(user, among: list[ObjectId] | None = None) -> set[ObjectId]:
+    """Ids of the discussion subjects `user` may not read, among `among` if given.
+
+    A discussion is readable only if its subject is: these are the rules of the subjects'
+    `read` permissions, as queries. Topics are absent, anyone can read a private topic.
+    `among` bounds the lookup to the subjects at hand, which is much cheaper than listing
+    every hidden object of the catalog.
+    """
+    # Deferred for the same reason as in `filter_by_organization` below.
+    from udata.core.dataservices.models import Dataservice
+    from udata.core.dataset.models import Dataset
+    from udata.core.post.models import Post
+    from udata.core.reuse.models import Reuse
+
+    if user.is_authenticated and user.sysadmin:
+        return set()
+
+    def hidden(model, query):
+        queryset = model.objects(query)
+        if among is not None:
+            queryset = queryset(id__in=among)
+        return set(queryset.scalar("id"))
+
+    ids = hidden(Post, Q(published=None))
+    owners = [user.id, *user.organizations] if user.is_authenticated else []
+    for model, query in (
+        (Dataset, Q(private=True) | Q(deleted__ne=None)),
+        (Reuse, Q(private=True) | Q(deleted__ne=None)),
+        (Dataservice, Q(private=True) | Q(deleted_at__ne=None)),
+    ):
+        model_ids = hidden(model, query)
+        if owners and model_ids:
+            model_ids -= set(model.objects(id__in=model_ids).owned_by(*owners).scalar("id"))
+        ids |= model_ids
+    return ids
+
+
+class DiscussionQuerySet(UDataQuerySet):
+    def visible_by_user(self, user, among: list[ObjectId] | None = None):
+        """Drop the discussions whose subject `user` may not read (see `unreadable_subject_ids`)."""
+        ids = unreadable_subject_ids(user, among)
+        if not ids:
+            return self
+        return self(__raw__={"subject._ref.$id": {"$nin": list(ids)}})
+
+
+def check_subject_is_readable(subject, **_kwargs):
+    if subject and unreadable_subject_ids(current_user, [subject.id]):
+        raise FieldValidationError(_("Unknown subject"), field="subject")
+
+
 def filter_by_subject(base_query, filter_value):
     return base_query.generic_in(subject=filter_value)
 
@@ -261,7 +313,7 @@ def check_organization_voice(organization, obj, **_kwargs):
         },
     ],
 )
-class Discussion(SpamMixin, Linkable, Document):
+class Discussion(SpamMixin, Linkable, Document[DiscussionQuerySet]):
     verbose_name = _("discussion")
 
     user = field(
@@ -281,6 +333,7 @@ class Discussion(SpamMixin, Linkable, Document):
         GenericReferenceField(choices=DISCUSSION_SUBJECTS, required=True),
         nested_fields=api.model_reference,
         description="The discussion target object",
+        checks=[check_subject_is_readable, only_creation],
     )
     title = field(StringField(required=True), sortable=True, description="The discussion title")
     discussion = field(
@@ -331,6 +384,7 @@ class Discussion(SpamMixin, Linkable, Document):
         ],
         "ordering": ["-created"],
         "auto_create_index_on_save": True,
+        "queryset_class": DiscussionQuerySet,
     }
 
     @property

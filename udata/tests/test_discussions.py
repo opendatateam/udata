@@ -14,6 +14,7 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.notifications import DiscussionNotificationDetails
+from udata.core.discussions.search import DiscussionSearch
 from udata.core.discussions.signals import (
     on_discussion_closed,
     on_discussion_deleted,
@@ -46,8 +47,8 @@ from udata.mongo import db
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from .api import APITestCase, PytestOnlyDBTestCase
-from .helpers import assert_emit, assert_not_emit
+from .api import APITestCase, PytestOnlyAPITestCase, PytestOnlyDBTestCase
+from .helpers import assert200, assert201, assert400, assert404, assert_emit, assert_not_emit
 
 
 class DiscussionModelTest(PytestOnlyDBTestCase):
@@ -2630,3 +2631,185 @@ class DeleteDiscussionsOnUnsupportedSubjectsMigrationTest(APITestCase):
         assert Discussion.objects.first() == discussion
         assert Report.objects.get(pk=report).subject_deleted_at is None
         assert Notification.objects(id=notification).count() == 1
+
+
+# Every way a subject hides from people outside of its producer.
+HIDDEN_SUBJECTS = {
+    "private dataset": lambda org: DatasetFactory(organization=org, private=True),
+    "deleted dataset": lambda org: DatasetFactory(organization=org, deleted=datetime.now(UTC)),
+    "private reuse": lambda org: ReuseFactory(organization=org, private=True),
+    "deleted reuse": lambda org: ReuseFactory(organization=org, deleted=datetime.now(UTC)),
+    "private dataservice": lambda org: DataserviceFactory(organization=org, private=True),
+    "deleted dataservice": lambda org: DataserviceFactory(
+        organization=org, deleted_at=datetime.now(UTC)
+    ),
+}
+
+
+class DiscussionOnHiddenSubjectTest(PytestOnlyAPITestCase):
+    """A discussion is readable only by who may read its subject, whatever the route."""
+
+    def setup_discussions(self, make_subject):
+        self.member = UserFactory()
+        self.organization = OrganizationFactory(members=[Member(user=self.member, role="editor")])
+        self.hidden = DiscussionFactory(subject=make_subject(self.organization), user=UserFactory())
+        self.public = DiscussionFactory(
+            subject=DatasetFactory(organization=self.organization), user=UserFactory()
+        )
+
+    def listed_ids(self, **params):
+        response = self.get(url_for("api.discussions", **params))
+        assert200(response)
+        return {discussion["id"] for discussion in response.json["data"]}
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_list_excludes_them_for_anonymous(self, make_subject):
+        self.setup_discussions(make_subject)
+
+        assert self.listed_ids() == {str(self.public.id)}
+        assert self.listed_ids(**{"for": [str(self.hidden.subject.id)]}) == set()
+        assert self.listed_ids(org=str(self.organization.id)) == {str(self.public.id)}
+        assert self.listed_ids(user=str(self.hidden.user.id)) == set()
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_list_excludes_them_for_a_stranger(self, make_subject):
+        self.setup_discussions(make_subject)
+        self.login()
+
+        assert self.listed_ids() == {str(self.public.id)}
+        assert self.listed_ids(**{"for": [str(self.hidden.subject.id)]}) == set()
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_list_includes_them_for_a_member(self, make_subject):
+        self.setup_discussions(make_subject)
+        self.login(self.member)
+
+        assert self.listed_ids() == {str(self.public.id), str(self.hidden.id)}
+        assert self.listed_ids(**{"for": [str(self.hidden.subject.id)]}) == {str(self.hidden.id)}
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_list_includes_them_for_a_sysadmin(self, make_subject):
+        self.setup_discussions(make_subject)
+        self.login(AdminFactory())
+
+        assert self.listed_ids() == {str(self.public.id), str(self.hidden.id)}
+
+    def test_list_for_a_public_and_a_hidden_subject(self):
+        """`for` with several subjects only drops the hidden one."""
+        self.setup_discussions(HIDDEN_SUBJECTS["private dataset"])
+
+        subjects = [str(self.hidden.subject.id), str(self.public.subject.id)]
+        assert self.listed_ids(**{"for": subjects}) == {str(self.public.id)}
+
+    def test_list_keeps_an_unpublished_post_to_sysadmins(self):
+        discussion = DiscussionFactory(subject=PostFactory(published=None), user=UserFactory())
+
+        assert self.listed_ids() == set()
+        self.login(AdminFactory())
+        assert self.listed_ids() == {str(discussion.id)}
+
+    def test_list_keeps_discussions_on_an_archived_dataset(self):
+        """An archived dataset stays readable by anyone, so do its discussions."""
+        discussion = DiscussionFactory(
+            subject=DatasetFactory(archived=datetime.now(UTC)), user=UserFactory()
+        )
+
+        assert self.listed_ids() == {str(discussion.id)}
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_get_answers_404(self, make_subject):
+        self.setup_discussions(make_subject)
+
+        assert404(self.get(url_for("api.discussion", id=self.hidden.id)))
+        self.login()
+        assert404(self.get(url_for("api.discussion", id=self.hidden.id)))
+        self.login(self.member)
+        assert200(self.get(url_for("api.discussion", id=self.hidden.id)))
+
+    def test_comment_answers_404(self):
+        self.setup_discussions(HIDDEN_SUBJECTS["private dataset"])
+        self.login()
+
+        response = self.post(url_for("api.discussion", id=self.hidden.id), {"comment": "hello"})
+
+        assert404(response)
+        assert len(Discussion.objects.get(id=self.hidden.id).discussion) == 0
+
+    def test_create_on_a_hidden_subject_is_refused(self):
+        dataset = DatasetFactory(private=True)
+        self.login()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "title",
+                "comment": "comment",
+                "subject": {"class": "Dataset", "id": str(dataset.id)},
+            },
+        )
+
+        assert400(response)
+        assert "subject" in response.json["errors"]
+        assert Discussion.objects.count() == 0
+
+    def test_create_on_a_hidden_subject_of_ones_own(self):
+        member = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=member, role="editor")])
+        dataset = DatasetFactory(organization=organization, private=True)
+        self.login(member)
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "title",
+                "comment": "comment",
+                "subject": {"class": "Dataset", "id": str(dataset.id)},
+            },
+        )
+
+        assert201(response)
+
+    def test_organization_csv_excludes_them(self):
+        """The case of the report: the CSV listed the discussions of private datasets."""
+        self.setup_discussions(HIDDEN_SUBJECTS["private dataset"])
+
+        response = self.get(url_for("api.organization_discussions_csv", org=self.organization))
+
+        assert200(response)
+        rows = response.data.decode("utf8").strip().split("\r\n")[1:]
+        assert [row.split(";")[0] for row in rows] == [f'"{self.public.id}"']
+
+    def test_organization_csv_of_an_organization_without_datasets(self):
+        DiscussionFactory()
+
+        response = self.get(url_for("api.organization_discussions_csv", org=OrganizationFactory()))
+
+        assert200(response)
+        assert len(response.data.decode("utf8").strip().split("\r\n")) == 1
+
+    @pytest.mark.parametrize(
+        "make_subject",
+        [HIDDEN_SUBJECTS["private dataset"], HIDDEN_SUBJECTS["private reuse"]],
+        ids=["private dataset", "private reuse"],
+    )
+    def test_organization_discussions_exclude_them(self, make_subject):
+        self.setup_discussions(make_subject)
+
+        response = self.get(url_for("api.org_discussions", org=self.organization))
+
+        assert200(response)
+        assert [discussion["id"] for discussion in response.json] == [str(self.public.id)]
+
+        self.login(self.member)
+        response = self.get(url_for("api.org_discussions", org=self.organization))
+        assert {discussion["id"] for discussion in response.json} == {
+            str(self.public.id),
+            str(self.hidden.id),
+        }
+
+    @pytest.mark.parametrize("make_subject", HIDDEN_SUBJECTS.values(), ids=HIDDEN_SUBJECTS.keys())
+    def test_not_indexed_for_the_public_search(self, make_subject):
+        self.setup_discussions(make_subject)
+
+        assert not DiscussionSearch.is_indexable(self.hidden)
+        assert DiscussionSearch.is_indexable(self.public)
