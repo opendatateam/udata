@@ -22,12 +22,14 @@ services:
           - "6379:6379"
 
     search:
-        image: elasticsearch:7.17.28
+        image: elasticsearch:8.19.13
         environment:
           - node.name=es01
           - cluster.name=es-docker-cluster
           - cluster.initial_master_nodes=es01
           - cluster.routing.allocation.disk.threshold_enabled=false
+          - xpack.security.enabled=false
+          - action.destructive_requires_name=false
           - ES_JAVA_OPTS=-Xms750m -Xmx750m
         volumes:
           - search-data:/usr/share/elasticsearch/data
