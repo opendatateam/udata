@@ -27,11 +27,8 @@ class TransferAPITest(APITestCase):
         recipient_user = UserFactory()
         recipient_org = OrganizationFactory()
         dataset = DatasetFactory(owner=user)
+        other_dataset = DatasetFactory(owner=user)
         comment = faker.sentence()
-
-        # It's a little bit weird to create two transfer for the same dataset
-        # but it's currently allowed. If we change this, we can create a second
-        # dataset for this test.
 
         response = self.post(
             url_for("api.transfers"),
@@ -54,7 +51,7 @@ class TransferAPITest(APITestCase):
             {
                 "subject": {
                     "class": "Dataset",
-                    "id": str(dataset.id),
+                    "id": str(other_dataset.id),
                 },
                 "recipient": {
                     "class": "User",
@@ -73,7 +70,7 @@ class TransferAPITest(APITestCase):
         self.assertEqual(data["recipient"]["id"], str(recipient_user.id))
         self.assertEqual(data["recipient"]["class"], "User")
 
-        self.assertEqual(data["subject"]["id"], str(dataset.id))
+        self.assertEqual(data["subject"]["id"], str(other_dataset.id))
         self.assertEqual(data["subject"]["class"], "Dataset")
 
         self.assertEqual(data["owner"]["id"], str(user.id))
@@ -91,7 +88,7 @@ class TransferAPITest(APITestCase):
         self.assert200(response)
 
         data = response.json
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 1)
 
         self.assertEqual(data[0]["recipient"]["id"], str(recipient_org.id))
         self.assertEqual(data[0]["recipient"]["class"], "Organization")
@@ -104,18 +101,6 @@ class TransferAPITest(APITestCase):
 
         self.assertEqual(data[0]["comment"], comment)
         self.assertEqual(data[0]["status"], "pending")
-
-        self.assertEqual(data[1]["recipient"]["id"], str(recipient_user.id))
-        self.assertEqual(data[1]["recipient"]["class"], "User")
-
-        self.assertEqual(data[1]["subject"]["id"], str(dataset.id))
-        self.assertEqual(data[1]["subject"]["class"], "Dataset")
-
-        self.assertEqual(data[1]["owner"]["id"], str(user.id))
-        self.assertEqual(data[1]["owner"]["class"], "User")
-
-        self.assertEqual(data[1]["comment"], comment)
-        self.assertEqual(data[1]["status"], "pending")
 
         response = self.get(
             url_for(
@@ -485,8 +470,10 @@ class TransferAPITest(APITestCase):
             subject = factory(organization=attacker_org)
 
             self.login(attacker)
-            stale = self._create_transfer(subject, accomplice).json
             to_victim = self._create_transfer(subject, victim).json
+            self.assert400(self._create_transfer(subject, accomplice))
+            # As the API used to allow: a second pending transfer of the same object.
+            stale = TransferFactory(owner=attacker_org, recipient=accomplice, subject=subject)
 
             self.login(victim)
             self.assert200(
@@ -494,7 +481,7 @@ class TransferAPITest(APITestCase):
             )
 
             self.login(accomplice)
-            response = self.post(url_for("api.transfer", id=stale["id"]), {"response": "accept"})
+            response = self.post(url_for("api.transfer", id=stale.id), {"response": "accept"})
 
             self.assertEqual(response.status_code, 404, f"stale {class_name} transfer accepted")
             subject.reload()
@@ -524,23 +511,6 @@ class TransferAPITest(APITestCase):
         self.assertEqual(Transfer.objects(id=transfer.id).count(), 0)
         self.assertEqual(Notification.objects(user=recipient_admin).count(), 0)
         self.assertEqual(Transfer.objects(id=unmoved_transfer.id).count(), 1)
-
-    def test_accepting_a_duplicate_transfer_keeps_its_notification(self):
-        owner = self.login()
-        recipient = UserFactory()
-        dataset = DatasetFactory(owner=owner)
-        accepted = self._create_transfer(dataset, recipient).json
-        self.assert201(self._create_transfer(dataset, recipient))
-        # Both requests share the notification: the second one finds it already pending.
-        self.assertEqual(Notification.objects(user=recipient).count(), 1)
-
-        self.login(recipient)
-        response = self.post(url_for("api.transfer", id=accepted["id"]), {"response": "accept"})
-
-        self.assert200(response)
-        self.assertEqual(Transfer.objects(subject=dataset, status="pending").count(), 0)
-        notification = Notification.objects.get(user=recipient)
-        self.assertIsNotNone(notification.handled_at)
 
     def test_editing_a_subject_keeps_its_pending_transfers(self):
         owner = self.login()

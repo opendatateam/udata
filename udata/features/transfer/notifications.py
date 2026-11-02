@@ -102,12 +102,7 @@ def on_transfer_deleted(sender, document, **kwargs):
     from udata.features.notifications.models import Notification
 
     try:
-        # Notifications identify a transfer by this triplet, and duplicate requests share
-        # one: it goes with the last transfer that still matches, not with the first deleted.
-        if Transfer.objects(
-            owner=document.owner, recipient=document.recipient, subject=document.subject
-        ).count():
-            return
+        # Delete all notifications that reference this transfer
         Notification.objects(
             details__transfer_owner=document.owner,
             details__transfer_recipient=document.recipient,
