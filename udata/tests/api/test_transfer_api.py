@@ -3,17 +3,19 @@ from datetime import UTC, datetime
 from bson import ObjectId
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
-from udata.core.dataset.models import Dataset
 from udata.core.dataset.tasks import purge_datasets
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.tasks import purge_organizations
+from udata.core.owned import Owned
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.features.notifications.models import Notification
 from udata.features.transfer.factories import TransferFactory
-from udata.features.transfer.models import Transfer
+from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
 from udata.utils import faker
 
 from . import APITestCase
@@ -467,26 +469,37 @@ class TransferAPITest(APITestCase):
         self.assert400(response)
 
     def test_cannot_accept_a_transfer_requested_by_a_former_owner(self):
-        attacker = self.login()
-        accomplice = UserFactory()
-        victim = UserFactory()
-        dataset = DatasetFactory(owner=attacker)
+        attacker = UserFactory()
+        attacker_org = OrganizationFactory(admins=[attacker])
+        factories = {
+            "Dataset": DatasetFactory,
+            "Reuse": ReuseFactory,
+            "Dataservice": DataserviceFactory,
+            "Topic": TopicFactory,
+        }
+        self.assertEqual(sorted(factories), sorted(TRANSFERABLE_SUBJECTS))
 
-        stale = self._create_transfer(dataset, accomplice).json
-        to_victim = self._create_transfer(dataset, victim).json
+        for class_name, factory in factories.items():
+            accomplice = UserFactory()
+            victim = UserFactory()
+            subject = factory(organization=attacker_org)
 
-        self.login(victim)
-        self.assert200(
-            self.post(url_for("api.transfer", id=to_victim["id"]), {"response": "accept"})
-        )
+            self.login(attacker)
+            stale = self._create_transfer(subject, accomplice).json
+            to_victim = self._create_transfer(subject, victim).json
 
-        self.login(accomplice)
-        response = self.post(url_for("api.transfer", id=stale["id"]), {"response": "accept"})
+            self.login(victim)
+            self.assert200(
+                self.post(url_for("api.transfer", id=to_victim["id"]), {"response": "accept"})
+            )
 
-        self.assert404(response)
-        dataset.reload()
-        self.assertEqual(dataset.owner, victim)
-        self.assertIsNone(dataset.organization)
+            self.login(accomplice)
+            response = self.post(url_for("api.transfer", id=stale["id"]), {"response": "accept"})
+
+            self.assertEqual(response.status_code, 404, f"stale {class_name} transfer accepted")
+            subject.reload()
+            self.assertEqual(subject.owner, victim, class_name)
+            self.assertIsNone(subject.organization, class_name)
 
     def test_moving_a_subject_drops_its_pending_transfers(self):
         owner = UserFactory()
@@ -543,12 +556,12 @@ class TransferAPITest(APITestCase):
         response = self.get(url_for("api.transfer", id=transfer["id"]))
         self.assertEqual(response.json["status"], "pending")
 
-    def _create_transfer(self, source: Dataset, destination: User):
+    def _create_transfer(self, source: Owned, destination: User):
         return self.post(
             url_for("api.transfers"),
             {
                 "subject": {
-                    "class": "Dataset",
+                    "class": source.__class__.__name__,
                     "id": str(source.id),
                 },
                 "recipient": {

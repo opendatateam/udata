@@ -155,6 +155,27 @@ class TestOwned(DBTestCase):
         assert owned.owner == user
         assert owned.organization is None
 
+    def test_owner_change_signal_keeps_previous_owner_through_a_nested_save(self):
+        # The nested save, as `Reuse.count_datasets()` does from `post_save`, finds the new
+        # owner already in base: it must not report it as the previous one.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = OwnedPostSave.objects.create(organization=org)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.owner = user
+            owned.save()
+
+        assert received
+        assert all(previous == org for previous in received)
+
 
 class OwnedQuerysetTest(DBTestCase):
     def test_queryset_type(self):

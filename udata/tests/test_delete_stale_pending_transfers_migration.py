@@ -27,7 +27,7 @@ class DeleteStalePendingTransfersMigrationTest(PytestOnlyDBTestCase):
             recipient=OrganizationFactory(admins=[recipient_admin]),
             subject=dataset,
         )
-        # As accepting another transfer did until now: the owner changes, the transfer stays.
+        # As accepting another transfer used to: the owner changes, the transfer stays.
         Dataset._get_collection().update_one(
             {"_id": dataset.id}, {"$set": {"owner": UserFactory().id}}
         )
