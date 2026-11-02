@@ -75,8 +75,8 @@ class ProConnectFake:
         self.session_open = False
         return {"state": params["state"]}
 
-    def _params(self, authorize_url: str) -> dict:
-        return {key: values[0] for key, values in parse_qs(urlparse(authorize_url).query).items()}
+    def _params(self, url: str) -> dict:
+        return {key: values[0] for key, values in parse_qs(urlparse(url).query).items()}
 
     def _metadata(self) -> dict:
         return {

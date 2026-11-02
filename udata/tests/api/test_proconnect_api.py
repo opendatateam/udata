@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from flask import current_app, url_for
 
@@ -18,6 +20,10 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         # freshness, would never be read again. A context per request reads it.
         with current_app.app_context():
             return super().get(url, *args, **kwargs)
+
+    def post(self, url, *args, **kwargs):
+        with current_app.app_context():
+            return super().post(url, *args, **kwargs)
 
     def sign_in(self, proconnect, email):
         proconnect.agent_has_session(email)
@@ -85,6 +91,17 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert not self.is_fresh()
 
+    def test_reauthentication_can_be_retried_after_cancelling(self, proconnect):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        response = self.start_reauthentication(proconnect)
+        self.get(url_for("api.proconnect_auth", **proconnect.deny(response.location)))
+
+        response = self.reauthenticate(proconnect)
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_success"
+        assert self.is_fresh()
+
     def test_reauthentication_after_logging_out_is_refused(self, proconnect):
         UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
@@ -94,7 +111,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         callback = proconnect.authorize(response.location)
         response = self.get(url_for("api.proconnect_auth", **callback))
 
-        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        assert response.location == f"{CDATA}/login"
         self.assert401(self.get(url_for("api.me")))
 
     def test_reauthentication_as_someone_else_is_refused(self, proconnect):
@@ -112,17 +129,20 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert not self.is_fresh()
 
     def test_reauthentication_requires_being_logged_in(self):
+        # The cdata session expired on /verify: signing in again is what's left to do.
         response = self.get(url_for("api.proconnect_login", reauth=1))
 
-        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        assert response.location == f"{CDATA}/login"
 
     def test_reauthentication_requires_a_proconnect_login(self):
         # Signed in with a password: no id_token tells ProConnect which session to close.
-        self.login(UserFactory(password="password"))
+        user = UserFactory(password="password", confirmed_at=datetime.now())
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        self.assert_logged_in_as(user)
 
         response = self.get(url_for("api.proconnect_login", reauth=1))
 
-        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_failed"
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_unavailable"
 
     def test_login_over_a_session_does_not_inherit_its_grace_period(self, proconnect):
         UserFactory(email="john@example.org")
@@ -150,10 +170,12 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
     def test_abandoned_reauthentication_does_not_turn_the_logout_into_a_login(self, proconnect):
         UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
+        # Left at ProConnect, before it signs the agent out.
         self.get(url_for("api.proconnect_login", reauth=1))
 
-        response = self.get(url_for("api.proconnect_logout_oauth"))
-        signed_out = proconnect.end_session(response.location)
+        # How cdata logs out.
+        response = self.post(url_for("security.logout"), headers={"Accept": "application/json"})
+        signed_out = proconnect.end_session(response.json["proconnect_logout_url"])
         response = self.get(url_for("api.proconnect_logout", **signed_out))
 
         assert response.location == url_for("security.logout")

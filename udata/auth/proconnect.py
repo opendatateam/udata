@@ -17,7 +17,8 @@ oauth = OAuth()
 # blueprint = I18nBlueprint("proconnect", __name__, url_prefix="/proconnect")
 STATE_KEY = "proconnect_state"
 ID_TOKEN_KEY = "id_token"
-# When a signed-in agent asked to reauthenticate.
+# The `state` of the ProConnect round-trip reauthenticating a signed-in agent: a login or a
+# logout started since has its own, so an abandoned reauthentication can't apply to it.
 REAUTH_KEY = "proconnect_reauth"
 
 
@@ -57,9 +58,14 @@ def get_logout_url():
     )
 
 
-def authorize_redirect():
+def authorize_redirect(reauth: bool = False):
     redirect_uri = url_for("api.proconnect_auth", _external=True)
-    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
+    # authlib's `authorize_redirect`, which doesn't hand the state out.
+    rv = oauth.proconnect.create_authorization_url(redirect_uri, acr_values="eidas1")
+    oauth.proconnect.save_authorize_data(redirect_uri=redirect_uri, **rv)
+    if reauth:
+        session[REAUTH_KEY] = rv["state"]
+    return redirect(rv["url"])
 
 
 def authenticate() -> dict:
@@ -87,6 +93,11 @@ def verify_page_url(flash: str) -> str:
     return cdata_url("/verify", flash=flash) or homepage_url(flash=flash)
 
 
+def login_page_url() -> str:
+    """Where a reauthentication goes when the agent isn't signed in anymore."""
+    return cdata_url("/login") or homepage_url()
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -95,8 +106,6 @@ class ProconnectLoginAPI(API):
             # aborted 2FA attempt.
             tf_clean_session()
 
-        # A reauthentication abandoned before the callback must not apply to this round-trip.
-        session.pop(REAUTH_KEY, None)
         if request.args.get("reauth"):
             return start_reauthentication()
 
@@ -108,18 +117,19 @@ def start_reauthentication():
 
     ProConnect ignores `max_age` and `prompt=login`, and dates `auth_time` from its own
     round-trip: an open ProConnect session would answer without asking the agent anything.
-    Signing out closes it, and the session at their identity provider with it.
+    Signing out closes it, and the session at their identity provider with it when the
+    provider lets ProConnect close it.
     """
     # A browser navigation from the cdata page, whose session may have expired.
     if not current_user.is_authenticated:
-        return redirect(verify_page_url("proconnect_reauth_failed"))
+        return redirect(login_page_url())
 
     logout_url = get_logout_url()
     # Without the id_token of a ProConnect login, nothing tells ProConnect which session to close.
     if logout_url is None:
-        return redirect(verify_page_url("proconnect_reauth_failed"))
+        return redirect(verify_page_url("proconnect_reauth_unavailable"))
 
-    session[REAUTH_KEY] = True
+    session[REAUTH_KEY] = session[STATE_KEY]
     return redirect(logout_url)
 
 
@@ -128,7 +138,8 @@ class ProconnectAuthAPI(API):
     def get(self):
         from udata.models import datastore
 
-        if session.pop(REAUTH_KEY, None):
+        reauth_state = session.pop(REAUTH_KEY, None)
+        if reauth_state and reauth_state == request.args.get("state"):
             return reauthenticate()
 
         proconnect_user = authenticate()
@@ -166,7 +177,7 @@ def reauthenticate():
     """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in."""
     # The agent may have logged out since: logging out leaves this key in the session.
     if not current_user.is_authenticated:
-        return redirect(verify_page_url("proconnect_reauth_failed"))
+        return redirect(login_page_url())
 
     try:
         proconnect_user = authenticate()
@@ -178,7 +189,8 @@ def reauthenticate():
     if proconnect_user["email"] != current_user.email:
         return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
 
-    # Signed out of ProConnect beforehand, the agent has just authenticated.
+    # Signed out of ProConnect beforehand: their identity provider asked them to authenticate,
+    # unless it keeps a session ProConnect can't close.
     session["fs_paa"] = time.time()
     return redirect(verify_page_url("proconnect_reauth_success"))
 
@@ -186,9 +198,6 @@ def reauthenticate():
 @ns.route("/logout_oauth", endpoint="proconnect_logout_oauth")
 class ProconnectLogoutOAuthAPI(API):
     def get(self):
-        # A reauthentication abandoned before ProConnect signed the agent out must not turn
-        # this logout into a login.
-        session.pop(REAUTH_KEY, None)
         # At the time of this writing, authlib didn't implement OpenIDC session management:
         # https://github.com/lepture/authlib/issues/292
         # So we implement it ourselves. This code may be simplified (or even removed?) in the future
@@ -209,11 +218,12 @@ class ProconnectLogoutAPI(API):
         if state != stored_state:
             abort(401)
 
+        session.pop(STATE_KEY, None)
+        if session.get(REAUTH_KEY) == state:
+            # The id_token signs the agent out again if they cancel and retry, the next
+            # authentication replaces it.
+            return authorize_redirect(reauth=True)
+
         # We're logged out from ProConnect, cleanup the ProConnect related data from the session.
         session.pop(ID_TOKEN_KEY, None)
-        session.pop(STATE_KEY, None)
-
-        if session.get(REAUTH_KEY):
-            return authorize_redirect()
-
         return redirect(url_for("security.logout"))
