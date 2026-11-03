@@ -1,5 +1,40 @@
 # Changelog
 
+## 17.21.0 (2026-11-02)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.3 ([#4049](https://github.com/opendatateam/udata/pull/4049))
+- chore(deps): update dependency authlib to v1.9.1 [security] ([#4054](https://github.com/opendatateam/udata/pull/4054))
+- chore(deps): update dependency faker to >=40.44, <40.45 ([#4050](https://github.com/opendatateam/udata/pull/4050))
+- chore(deps): update dependency pymongo to v4.18.3 [security] ([#4053](https://github.com/opendatateam/udata/pull/4053))
+- chore(deps): update redis:alpine docker digest to 21090af ([#4051](https://github.com/opendatateam/udata/pull/4051))
+- chore: upgrade the Elasticsearch client to 8.19 and test against ES 8 and 9 ([#4045](https://github.com/opendatateam/udata/pull/4045))
+- fix(avatars): cap the avatar size to avoid exhausting the worker memory ([#4041](https://github.com/opendatateam/udata/pull/4041))
+- fix: forbid non-admins to move an organization dataset to themselves ([#4056](https://github.com/opendatateam/udata/pull/4056))
+- fix(perfs): fetch a single resource MongoDB side in `/api/2/datasets/resources/<rid>/` ([#4018](https://github.com/opendatateam/udata/pull/4018))
+
+
+## 17.20.0 (2026-10-29)
+
+- chore: add CODEOWNERS ([#4047](https://github.com/opendatateam/udata/pull/4047))
+- feat(blocs): add a column bloc, to stack blocs beside the others in a section or an accordion item ([#4046](https://github.com/opendatateam/udata/pull/4046))
+- feat(discussions): use new url format for external notifications ([#4025](https://github.com/opendatateam/udata/pull/4025))
+- fix(auth): answer a form error instead of a 500 when an account without password tries /verify ([#4043](https://github.com/opendatateam/udata/pull/4043))
+- test: fix the names in the user email search test, a random "Jane" matched the query ([#4044](https://github.com/opendatateam/udata/pull/4044))
+
+
+## 17.19.0 (2026-10-27)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.2 ([#4027](https://github.com/opendatateam/udata/pull/4027))
+- chore(deps): update redis:alpine docker digest to 47b0829 ([#4028](https://github.com/opendatateam/udata/pull/4028))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.4 ([#4019](https://github.com/opendatateam/udata/pull/4019))
+- chore: drop the legacy bloc format, now migrated to sections ([#4033](https://github.com/opendatateam/udata/pull/4033))
+- feat(blocs): add image and card blocs, with an upload of content images purged once unused, and accept the JPEGs of phones ([#4034](https://github.com/opendatateam/udata/pull/4034))
+- fix(harvest): stop sharing request headers between sources ([#4035](https://github.com/opendatateam/udata/pull/4035))
+- fix: query each nested filter on the model of its own reference ([#4036](https://github.com/opendatateam/udata/pull/4036))
+- fix(rdf): load only the URI fields of the datasets served by a dataservice ([#4039](https://github.com/opendatateam/udata/pull/4039))
+- fix(rdf): reject catalog page sizes above 1000 ([#4038](https://github.com/opendatateam/udata/pull/4038))
+
+
 ## 17.18.0 (2026-10-26)
 
 - feat(blocs): compose pages from sections, grids and single object blocs ([#4026](https://github.com/opendatateam/udata/pull/4026))

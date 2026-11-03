@@ -2147,7 +2147,28 @@ class DiscussionExternalNotificationTest(APITestCase):
         assert mail.recipients[0] == owner.email
         # The subject type label comes from the Topic's verbose_name.
         assert "collection" in mail.subject
-        assert f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in mail.body
+        assert f"https://eco.example.com/bouquets/foo/?discussion_id={discussion.id}" in mail.body
+
+    @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
+    def test_notification_url_merges_discussion_id_into_query(self):
+        base = "https://eco.example.com/b/foo/"
+        cases = [
+            (base, f"{base}?discussion_id={{id}}"),
+            (f"{base}?tab=x", f"{base}?tab=x&discussion_id={{id}}"),
+            (f"{base}#top", f"{base}?discussion_id={{id}}#top"),
+            (f"{base}?flag&a=", f"{base}?flag=&a=&discussion_id={{id}}"),
+        ]
+        for external_url, expected in cases:
+            with self.subTest(external_url=external_url):
+                discussion = Discussion.objects.create(
+                    subject=TopicFactory(),
+                    user=UserFactory(),
+                    title=faker.sentence(),
+                    discussion=[Message(content=faker.sentence(), posted_by=UserFactory())],
+                    extras={"notification": {"external_url": external_url}},
+                )
+
+                assert discussion.notification_url == expected.format(id=discussion.id)
 
     @pytest.mark.options(DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=["*.example.com"])
     def test_a_digest_links_to_the_external_page_too(self):
@@ -2268,7 +2289,7 @@ class DiscussionExternalNotificationTest(APITestCase):
 
         assert len(mails) >= 1
         assert all(
-            f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in m.body
+            f"https://eco.example.com/bouquets/foo/?discussion_id={discussion.id}" in m.body
             for m in mails
         )
 
@@ -2281,7 +2302,7 @@ class DiscussionExternalNotificationTest(APITestCase):
 
         assert len(mails) >= 1
         assert all(
-            f"https://eco.example.com/bouquets/foo/#discussion-{discussion.id}" in m.body
+            f"https://eco.example.com/bouquets/foo/?discussion_id={discussion.id}" in m.body
             for m in mails
         )
 

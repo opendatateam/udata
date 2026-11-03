@@ -312,7 +312,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                     cls.__name__: convert_db_to_field(
                         f"{key}.{cls.__name__}",
                         # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        # of the subclasses with EmbeddedDocumentField(DatasetBloc), EmbeddedDocumentField(DataserviceBloc)…
                         mongoengine.fields.EmbeddedDocumentField(cls),
                         nested_info,
                     )

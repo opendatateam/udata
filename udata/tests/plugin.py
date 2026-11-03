@@ -6,9 +6,9 @@ import pytest
 
 from udata.tests.fakes import DataCiteFake
 
-# The storages the resources migration is about. The others keep their own
-# tests on the local backend.
-S3_TESTED_STORAGES = ("resources", "chunks")
+# The storages the resources migration is about, and the images, where what S3 serves an SVG
+# with matters. The others keep their own tests on the local backend.
+S3_TESTED_STORAGES = ("resources", "chunks", "images")
 
 
 def pytest_configure(config):

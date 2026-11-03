@@ -1,18 +1,28 @@
 import io
 import os
+import uuid
 from datetime import UTC, datetime
 
 from flask import json
+from lxml import etree
 from PIL import Image, UnidentifiedImageError
 from werkzeug.datastructures import FileStorage
 
-from udata.api import api, fields
+from udata.api import API, api, fields
 
-from . import chunks, utils
+from . import chunks, images, utils
 
 META = "meta.json"
 
 IMAGES_FORMATS = ("JPEG", "PNG", "WEBP")
+
+# Where the images shown in a content (a bloc, a markdown text) are stored, in the images
+# storage. Purged once nothing shows them anymore, see `purge_content_images`.
+CONTENT_IMAGES_PREFIX = "content"
+# Large for an illustration.
+CONTENT_IMAGE_MAX_SIZE = 5 * 1024 * 1024
+
+ns = api.namespace("images", "Images shown in a content")
 
 
 uploaded_image_fields = api.model(
@@ -238,30 +248,105 @@ def parse_bbox(raw: str, image_size: tuple[int, int]) -> list[int]:
     return [left, upper, right, lower]
 
 
-def parse_uploaded_image(field):
-    """Parse an uploaded image and save into a ImageField()"""
-    args = image_parser.parse_args()
+def uploaded_image_format(file) -> str | None:
+    """The format of an uploaded image, as Pillow reads it, `None` when Pillow does not read
+    the file.
 
-    image = args["file"]
-    # The mimetype is declared by the client and may not match the content at all
-    # (an SVG announced as `image/png` for instance): decode the file to know what
-    # it really is, otherwise Pillow raises further down and the request 500s.
+    The mimetype is declared by the client and may not match the content at all (an SVG
+    announced as `image/png` for instance): decode the file to know what it really is,
+    otherwise Pillow raises further down and the request 500s.
+    """
     try:
-        uploaded = Image.open(image)
+        with Image.open(file) as image:
+            image_format = image.format
     except UnidentifiedImageError:
-        api.abort(400, "Unsupported image format")
+        return None
     except Image.DecompressionBombError:
         # A valid image whose header announces more pixels than Pillow accepts to decode.
         # A few dozen bytes are enough to declare a huge size, so this must be refused
         # here: every other decoding (resize, optimize, thumbnails) would raise too.
         api.abort(400, "Image is too large")
-    if uploaded.format not in IMAGES_FORMATS:
+    finally:
+        # `Image.open` left the cursor right after the header it read. The file may be stored
+        # as-is afterwards (flask_storage only rewinds when it resizes or optimizes), which
+        # would silently truncate it.
+        file.seek(0)
+    # A JPEG holding several pictures, as most phone cameras write them.
+    return "JPEG" if image_format == "MPO" else image_format
+
+
+def parse_uploaded_image(field):
+    """Parse an uploaded image and save into a ImageField()"""
+    args = image_parser.parse_args()
+
+    image = args["file"]
+    if uploaded_image_format(image) not in IMAGES_FORMATS:
         api.abort(400, "Unsupported image format")
 
-    bbox = parse_bbox(args["bbox"], uploaded.size) if args["bbox"] else None
+    if args["bbox"]:
+        with Image.open(image) as uploaded:
+            bbox = parse_bbox(args["bbox"], uploaded.size)
+        image.seek(0)
+    else:
+        bbox = None
 
-    # `Image.open` left the cursor right after the header it read. `field.save` may store
-    # the stream as-is (flask_storage only rewinds when it resizes or optimizes), which
-    # would silently truncate the stored file.
-    image.seek(0)
     field.save(image, bbox=bbox)
+
+
+content_image_parser = api.parser()
+content_image_parser.add_argument(
+    "file", type=FileStorage, location="files", required=True, help="The image to upload"
+)
+
+uploaded_content_image_fields = api.model(
+    "UploadedContentImage",
+    {"url": fields.String(description="The URL to show the image at", readonly=True)},
+)
+
+
+def is_svg(file) -> bool:
+    # Only the root element is read: building the whole tree of a flat document of a hundred
+    # megabytes takes gigabytes. Neither entities nor the network: a document cannot make the
+    # parser read a local file, reach a server, or expand into gigabytes.
+    events = etree.iterparse(
+        file, events=("start",), resolve_entities=False, no_network=True, huge_tree=False
+    )
+    try:
+        _, root = next(events)
+    except (etree.XMLSyntaxError, StopIteration):
+        return False
+    return etree.QName(root).localname == "svg"
+
+
+def content_image_extension(file) -> str:
+    """The extension to store an uploaded image with, from what it really is: the name and the
+    mimetype sent by the client prove nothing."""
+    image_format = uploaded_image_format(file)
+    if image_format in IMAGES_FORMATS:
+        return image_format.lower()
+    # Illustrations are often vector drawings, which Pillow does not read. Opened on their own,
+    # they run the scripts they may hold: on S3, where the images are stored in production,
+    # flask-storage stores them as attachments, downloaded rather than displayed.
+    if image_format is None and is_svg(file):
+        return "svg"
+    api.abort(400, "Unsupported image format")
+
+
+@ns.route("/", endpoint="content_images")
+class ContentImagesAPI(API):
+    @api.secure
+    @api.doc("upload_content_image")
+    @api.expect(content_image_parser)
+    @api.marshal_with(uploaded_content_image_fields, code=201)
+    def post(self):
+        """Upload an image to show in a content, such as a bloc or a markdown text"""
+        file = content_image_parser.parse_args()["file"]
+        # Before reading it: whatever its format, decoding a file costs memory with its size.
+        if get_file_size(file) > CONTENT_IMAGE_MAX_SIZE:
+            api.abort(400, "Image is too large")
+        extension = content_image_extension(file)
+        file.seek(0)
+        filename = images.save(
+            file, filename=f"{uuid.uuid4().hex}.{extension}", prefix=CONTENT_IMAGES_PREFIX
+        )
+        return {"url": images.url(filename, external=True)}, 201

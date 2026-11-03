@@ -26,7 +26,7 @@ jobs:
       matrix:
         python-version: ["3.11", "3.14"]
         mongo-version: ["7.0.28"]
-        elasticsearch-version: ["7.17.28", "8.19.13"]
+        elasticsearch-version: ["8.19.13", "9.5.5"]
     env:
       UDATA_TEST_SEARCH_INTEGRATION: "1"
       UDATA_TEST_S3_INTEGRATION: "1"
@@ -44,7 +44,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       redis:
-        image: redis:alpine@sha256:47b08295737773de3b711fb86f13ae802f5074e96a9a2d29f5f80164ac08c046
+        image: redis:alpine@sha256:21090af93f8324db2f0f0f4f38a7c60369d47d917e000c3423d89d2ae2883537
         ports:
           - 6379:6379
         options: >-
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
@@ -128,7 +128,7 @@ jobs:
           # setuptools_scm derives the version from the tag history
           fetch-depth: 0
 
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
@@ -151,7 +151,7 @@ jobs:
           name: dist
           path: dist/
 
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
       - name: Publish on PyPI
         env:
