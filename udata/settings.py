@@ -164,6 +164,9 @@ class Defaults(object):
     SECURITY_TWO_FACTOR_RESCUE_MAIL = (
         "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
     )
+    # Make ProConnect ask the agent for a second factor. Agents whose identity provider
+    # offers none are then denied access at ProConnect, without coming back.
+    PROCONNECT_REQUIRE_SECOND_FACTOR = False
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None

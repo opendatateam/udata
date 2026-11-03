@@ -69,6 +69,30 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert proconnect.authentications == 0
         assert not self.is_fresh()
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_requires_a_second_factor_at_proconnect(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+
+        assert proconnect.second_factors == 1
+        self.assert_logged_in_as(user)
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
+    def test_login_does_not_require_a_second_factor_unless_configured(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+
+        assert proconnect.second_factors == 0
+        self.assert_logged_in_as(user)
+
     def test_login_completed_by_the_two_factor_is_fresh(self, proconnect):
         # A code from the agent's authenticator proves as much as a password on /verify.
         totp = current_app.extensions["security"].totp_factory

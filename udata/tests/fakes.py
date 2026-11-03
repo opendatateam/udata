@@ -4,6 +4,7 @@ A fake reproduces the behaviour of the real service and is inspected after the f
 instead of being handed a canned response per test.
 """
 
+import json
 import time
 from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
@@ -27,9 +28,13 @@ class ProConnectFake:
     also closes the session at the agent's identity provider) makes the next
     authorization authenticate them again: `authentications` counts those. Signing out
     with the id_token of a session already closed, even expired, comes back all the same.
+    An `acr` required at a second factor level is the exception: a session opened
+    without one makes the agent authenticate again, with a second factor this time.
     The id_token doesn't carry the email: it comes from the userinfo endpoint, as a
     signed jwt.
     """
+
+    SECOND_FACTOR_ACR_VALUES = {"eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"}
 
     ISSUER = "https://proconnect.test/api/v2"
     METADATA_URL = f"{ISSUER}/.well-known/openid-configuration"
@@ -40,7 +45,9 @@ class ProConnectFake:
         # The ProConnect account of whoever is at the keyboard.
         self.agent: str | None = None
         self.session_open = False
+        self.session_second_factor = False
         self.authentications = 0
+        self.second_factors = 0
         self._grants: dict[str, ProConnectGrant] = {}
         self._access_tokens: dict[str, ProConnectGrant] = {}
 
@@ -50,17 +57,25 @@ class ProConnectFake:
         rmock.post(f"{self.ISSUER}/token", json=self._handle_token)
         rmock.get(f"{self.ISSUER}/userinfo", content=self._handle_userinfo)
 
-    def agent_has_session(self, email: str) -> None:
+    def agent_has_session(self, email: str, second_factor: bool = True) -> None:
         """Put `email` at the keyboard, with a ProConnect session already open."""
         self.agent = email
         self.session_open = True
+        self.session_second_factor = second_factor
 
     def authorize(self, authorize_url: str) -> dict:
         """Play the browser round-trip and return the callback query parameters."""
         params = self._params(authorize_url)
-        if not self.session_open:
+        acr = json.loads(params.get("claims", "{}")).get("id_token", {}).get("acr", {})
+        second_factor_required = acr.get("essential", False) and set(acr["values"]) <= (
+            self.SECOND_FACTOR_ACR_VALUES
+        )
+        if not self.session_open or (second_factor_required and not self.session_second_factor):
             self.authentications += 1
             self.session_open = True
+            self.session_second_factor = second_factor_required
+            if second_factor_required:
+                self.second_factors += 1
 
         code = uuid4().hex
         self._grants[code] = ProConnectGrant(self.agent, params["nonce"])

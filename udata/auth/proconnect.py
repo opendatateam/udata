@@ -1,3 +1,4 @@
+import json
 import time
 from datetime import datetime
 
@@ -20,6 +21,8 @@ ID_TOKEN_KEY = "id_token"
 # The `state` of the ProConnect round-trip reauthenticating a signed-in agent: a login or a
 # logout started since has its own, so an abandoned reauthentication can't apply to it.
 REAUTH_KEY = "proconnect_reauth"
+# The ProConnect levels reached with a second factor: eIDAS substantial and high imply one.
+SECOND_FACTOR_ACR_VALUES = ["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"]
 
 
 def init_app(app):
@@ -60,7 +63,12 @@ def get_logout_url():
 
 def authorize_redirect(state: str | None = None):
     redirect_uri = url_for("api.proconnect_auth", _external=True)
-    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
+    if not current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
+        return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
+    # Required rather than requested: ProConnect then has the agent present a second factor,
+    # or set one up, before coming back.
+    claims = {"id_token": {"acr": {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}}}
+    return oauth.proconnect.authorize_redirect(redirect_uri, state=state, claims=json.dumps(claims))
 
 
 def authenticate() -> dict:
