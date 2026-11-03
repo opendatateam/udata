@@ -389,6 +389,7 @@ class Defaults(object):
         # Base
         "csv",
         "txt",
+        "md",
         "json",
         "pdf",
         "xml",
