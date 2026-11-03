@@ -146,7 +146,11 @@ def owned_post_save(sender, document, **kwargs):
     ``def handler(document, previous)``
     """
     if isinstance(document, Owned) and hasattr(document, "_previous_owner"):
-        Owned.on_owner_change.send(document, previous=document._previous_owner)
+        # Consumed before sending: the instance outlives this save, and a later save of it
+        # (or one nested in a receiver) would otherwise report the same change again.
+        previous = document._previous_owner
+        del document._previous_owner
+        Owned.on_owner_change.send(document, previous=previous)
 
 
 post_save.connect(owned_post_save)

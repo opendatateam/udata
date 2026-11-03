@@ -190,8 +190,7 @@ class TestOwned(DBTestCase):
             owned.owner = user
             owned.save()
 
-        assert received
-        assert all(previous == org for previous in received)
+        assert received == [org]
 
     def test_previous_owner_survives_a_nested_save_between_two_orgs(self):
         first_org = OrganizationFactory()
@@ -209,8 +208,7 @@ class TestOwned(DBTestCase):
             owned.organization = second_org
             owned.save()
 
-        assert received
-        assert all(previous == first_org for previous in received)
+        assert received == [first_org]
 
     def test_previous_owner_survives_a_nested_save_between_two_users(self):
         first_user = UserFactory()
@@ -228,8 +226,24 @@ class TestOwned(DBTestCase):
             owned.owner = second_user
             owned.save()
 
-        assert received
-        assert all(previous == first_user for previous in received)
+        assert received == [first_user]
+
+    def test_owner_change_signal_is_not_sent_again_by_a_later_save(self):
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(owner=user)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.organization = org
+            owned.save()
+            owned.name = "New name"
+            owned.save()
+
+        assert received == [user]
 
 
 class OwnedQuerysetTest(DBTestCase):
