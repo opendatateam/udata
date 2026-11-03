@@ -86,6 +86,27 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert200(response)
         assert self.is_fresh()
 
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED=True)
+    def test_login_sends_an_agent_without_2fa_to_the_cdata_setup_page(self, proconnect):
+        UserFactory(email="jane@example.org")
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert response.location == f"{CDATA}/setup-two-factor"
+        self.assert401(self.get(url_for("api.me")))
+
+    def test_login_sends_an_agent_with_2fa_to_the_cdata_validation_page(self, proconnect):
+        UserFactory(
+            email="jane@example.org",
+            tf_primary_method="authenticator",
+            tf_totp_secret="test_secret",
+        )
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert response.location == f"{CDATA}/tf-validate"
+        self.assert401(self.get(url_for("api.me")))
+
     def test_reauthentication_makes_the_agent_authenticate_and_the_session_fresh(self, proconnect):
         user = UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
