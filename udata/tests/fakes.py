@@ -18,6 +18,7 @@ from joserfc.jwk import RSAKey
 class ProConnectGrant:
     email: str
     nonce: str
+    acr: str
 
 
 class ProConnectFake:
@@ -77,8 +78,11 @@ class ProConnectFake:
             if second_factor_required:
                 self.second_factors += 1
 
+        # The `acr` is the level asked for, not the one reached: only a required one tells
+        # that the agent presented a second factor.
+        acr = "eidas0-mfa" if second_factor_required else "eidas1"
         code = uuid4().hex
-        self._grants[code] = ProConnectGrant(self.agent, params["nonce"])
+        self._grants[code] = ProConnectGrant(self.agent, params["nonce"], acr)
         return {"code": code, "state": params["state"]}
 
     def deny(self, authorize_url: str) -> dict:
@@ -126,7 +130,7 @@ class ProConnectFake:
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": 3600,
-            "id_token": self._sign({"acr": "eidas1", "nonce": grant.nonce}),
+            "id_token": self._sign({"acr": grant.acr, "nonce": grant.nonce}),
         }
 
     def _handle_userinfo(self, request, context) -> bytes:
