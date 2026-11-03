@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.22.0 (2026-11-03)
+
+- feat(auth): let accounts without password reauthenticate through ProConnect ([#4062](https://github.com/opendatateam/udata/pull/4062))
+- feat(dataservices): metadata quality score ([#3819](https://github.com/opendatateam/udata/pull/3819))
+- fix(auth): send a ProConnect login that needs the 2FA to the cdata pages ([#4063](https://github.com/opendatateam/udata/pull/4063))
+- fix: drop pending transfers when their subject changes owner ([#4057](https://github.com/opendatateam/udata/pull/4057))
+
+
 ## 17.21.0 (2026-11-02)
 
 - chore(deps): update astral-sh/setup-uv action to v10.3.3 ([#4049](https://github.com/opendatateam/udata/pull/4049))
