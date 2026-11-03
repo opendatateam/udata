@@ -1,20 +1,25 @@
+import time
 from datetime import datetime
 
 from authlib.common.urls import add_params_to_uri
+from authlib.integrations.base_client import OAuthError
 from authlib.integrations.flask_client import OAuth
 from flask import abort, current_app, redirect, request, session, url_for
 from flask_security.tf_plugin import tf_clean_session
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.auth import login_user
-from udata.uris import homepage_url
+from udata.auth import current_user, login_user
+from udata.uris import cdata_url, homepage_url
 
 ns = api.namespace("proconnect", "Proconnect related operations")
 oauth = OAuth()
 # blueprint = I18nBlueprint("proconnect", __name__, url_prefix="/proconnect")
 STATE_KEY = "proconnect_state"
 ID_TOKEN_KEY = "id_token"
+# The `state` of the ProConnect round-trip reauthenticating a signed-in agent: a login or a
+# logout started since has its own, so an abandoned reauthentication can't apply to it.
+REAUTH_KEY = "proconnect_reauth"
 
 
 def init_app(app):
@@ -53,6 +58,41 @@ def get_logout_url():
     )
 
 
+def authorize_redirect(state: str | None = None):
+    redirect_uri = url_for("api.proconnect_auth", _external=True)
+    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
+
+
+def authenticate() -> dict:
+    """Complete the authorization code flow and return the user info."""
+    token = oauth.proconnect.authorize_access_token()
+    # Store the id_token in the session, it'll be used when logging out from ProConnect.
+    session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
+    # /!\ DIRTY HACK.
+    # authlib expects the userinfo to either be in the token["id_token"] as a jwt...
+    # but in this case, it's not there, it's some other information.
+    # We thus need to go get the userinfo from the userinfo_endpoint, but authlib
+    # expects it to be plain json. However, proconnect returns a jwt.
+    # So we can't use authlib's client.userinfo() helper, we need to do it ourselves.
+    metadata = oauth.proconnect.load_server_metadata()
+    resp = oauth.proconnect.get(metadata["userinfo_endpoint"])
+    resp.raise_for_status()
+    # Create a new token that `client.parse_id_token` expects. Replace the initial
+    # `id_token` with the jwt we received from the `userinfo_endpoint`.
+    userinfo_token = token.copy()
+    userinfo_token[ID_TOKEN_KEY] = resp.content
+    return oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
+
+
+def verify_page_url(flash: str) -> str:
+    return cdata_url("/verify", flash=flash) or homepage_url(flash=flash)
+
+
+def login_page_url() -> str:
+    """Where a reauthentication goes when the agent isn't signed in anymore."""
+    return cdata_url("/login") or homepage_url()
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -61,8 +101,31 @@ class ProconnectLoginAPI(API):
             # aborted 2FA attempt.
             tf_clean_session()
 
-        redirect_uri = url_for("api.proconnect_auth", _external=True)
-        return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
+        return authorize_redirect()
+
+
+@ns.route("/reauth/", endpoint="proconnect_reauth")
+class ProconnectReauthAPI(API):
+    def get(self):
+        """Sign the agent out of ProConnect, to sign them back in from `ProconnectLogoutAPI`.
+
+        ProConnect ignores `max_age` and `prompt=login`, and dates `auth_time` from its own
+        round-trip: an open ProConnect session would answer without asking the agent anything.
+        Signing out closes it, and the session at their identity provider with it when the
+        provider lets ProConnect close it.
+        """
+        # A browser navigation from the cdata page, whose session may have expired.
+        if not current_user.is_authenticated:
+            return redirect(login_page_url())
+
+        logout_url = get_logout_url()
+        # Without the id_token of a ProConnect login, nothing tells ProConnect which session
+        # to close.
+        if logout_url is None:
+            return redirect(verify_page_url("proconnect_reauth_unavailable"))
+
+        session[REAUTH_KEY] = session[STATE_KEY]
+        return redirect(logout_url)
 
 
 @ns.route("/auth", endpoint="proconnect_auth")
@@ -70,24 +133,11 @@ class ProconnectAuthAPI(API):
     def get(self):
         from udata.models import datastore
 
-        token = oauth.proconnect.authorize_access_token()
-        # Store the user info in the session, it'll be used when logging out from ProConnect.
-        session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
-        # /!\ DIRTY HACK.
-        # authlib expects the userinfo to either be in the token["id_token"] as a jwt...
-        # but in this case, it's not there, it's some other information.
-        # We thus need to go get the userinfo from the userinfo_endpoint, but authlib
-        # expects it to be plain json. However, proconnect returns a jwt.
-        # So we can't use authlib's client.userinfo() helper, we need to do it ourselves.
-        metadata = oauth.proconnect.load_server_metadata()
-        resp = oauth.proconnect.get(metadata["userinfo_endpoint"])
-        resp.raise_for_status()
-        # Create a new token that `client.parse_id_token` expects. Replace the initial
-        # `id_token` with the jwt we received from the `userinfo_endpoint`.
-        userinfo_token = token.copy()
-        userinfo_token[ID_TOKEN_KEY] = resp.content
-        proconnect_user = oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
-        # We now have the user information decoded from the jwt, ready to be used.
+        reauth_state = session.pop(REAUTH_KEY, None)
+        if reauth_state and reauth_state == request.args.get("state"):
+            return reauthenticate()
+
+        proconnect_user = authenticate()
         user = datastore.find_user(email=proconnect_user["email"])
         if not user:
             user = datastore.create_user(
@@ -109,8 +159,35 @@ class ProconnectAuthAPI(API):
 
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
+        # `login_user` dated the session now, while an open ProConnect session may have
+        # signed the agent in without asking them anything: only a reauthentication, or
+        # the code of the udata 2FA above, makes it fresh. Without `fs_paa`, flask-security
+        # ignores the grace period a previous user of this browser may have left.
+        session.pop("fs_paa", None)
 
         return redirect(homepage_url(flash="connected"))
+
+
+def reauthenticate():
+    """Refresh the session of the agent already signed in ("sudo mode"), never sign anyone in."""
+    # The agent may have logged out since: logging out leaves this key in the session.
+    if not current_user.is_authenticated:
+        return redirect(login_page_url())
+
+    try:
+        proconnect_user = authenticate()
+    except OAuthError:
+        # The agent cancelled, or ProConnect refused the exchange.
+        return redirect(verify_page_url("proconnect_reauth_failed"))
+
+    # Compared like the login resolves an account from a ProConnect identity.
+    if proconnect_user["email"] != current_user.email:
+        return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
+
+    # Signed out of ProConnect beforehand: their identity provider asked them to authenticate,
+    # unless it keeps a session ProConnect can't close.
+    session["fs_paa"] = time.time()
+    return redirect(verify_page_url("proconnect_reauth_success"))
 
 
 @ns.route("/logout_oauth", endpoint="proconnect_logout_oauth")
@@ -136,8 +213,13 @@ class ProconnectLogoutAPI(API):
         if state != stored_state:
             abort(401)
 
+        session.pop(STATE_KEY, None)
+        if session.get(REAUTH_KEY) == state:
+            # The id_token signs the agent out again if they cancel and retry, the next
+            # authentication replaces it.
+            session[REAUTH_KEY] = reauth_state = gen_salt(50)
+            return authorize_redirect(state=reauth_state)
+
         # We're logged out from ProConnect, cleanup the ProConnect related data from the session.
         session.pop(ID_TOKEN_KEY, None)
-        session.pop(STATE_KEY, None)
-
         return redirect(url_for("security.logout"))
