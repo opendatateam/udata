@@ -121,7 +121,7 @@ class TopicElement(Auditable, Document):
 
 
 @generate_fields()
-class Topic(Datetimed, Auditable, Linkable, Document[TopicQuerySet], Owned):
+class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
     verbose_name = _("collection")
 
     name = field(StringField(required=True), show_as_ref=True)

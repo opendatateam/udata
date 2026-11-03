@@ -123,6 +123,41 @@ class TestOwned(DBTestCase):
 
         self.assertTrue(getattr(handler, "called", False))
 
+    def test_owner_changed_with_both_fields_set_at_once(self):
+        # As forms do: they set `owner` and `organization` together, one of them to None.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(owner=user)
+
+        def handler(document, previous):
+            self.assertEqual(document.organization, org)
+            self.assertEqual(previous, user)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.owner = None
+            owned.organization = org
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
+    def test_owner_changed_from_org_to_user_with_both_fields_set_at_once(self):
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(organization=org)
+
+        def handler(document, previous):
+            self.assertEqual(document.owner, user)
+            self.assertEqual(previous, org)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.organization = None
+            owned.owner = user
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
     def test_owner_changed_from_org_to_user_with_owned_postsave_signal(self):
         # Test with an additionnal post save signal that will retriger save signals
         user = UserFactory()
@@ -136,6 +171,27 @@ class TestOwned(DBTestCase):
 
         assert owned.owner == user
         assert owned.organization is None
+
+    def test_owner_change_signal_keeps_previous_owner_through_a_nested_save(self):
+        # The nested save, as `Reuse.count_datasets()` does from `post_save`, finds the new
+        # owner already in base: it must not report it as the previous one.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = OwnedPostSave.objects.create(organization=org)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.owner = user
+            owned.save()
+
+        assert received
+        assert all(previous == org for previous in received)
 
 
 class OwnedQuerysetTest(DBTestCase):

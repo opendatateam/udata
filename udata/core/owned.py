@@ -122,7 +122,14 @@ class Owned(object):
 
         changed_fields = self._get_changed_fields()
         if "organization" in changed_fields and "owner" in changed_fields:
-            # Ownership changes (org to owner or the other way around) have already been made
+            # Both fields already hold the new ownership (forms set them together, the branches
+            # below clear the other one), so the previous one is only left in base. A save
+            # nested in a `post_save` receiver sees the same changed fields with the new owner
+            # already in base: it must keep the previous owner found by the outer save.
+            original = self.__class__.objects.only("owner", "organization").get(pk=self.pk)
+            previous = original.organization or original.owner
+            if previous != (self.organization or self.owner):
+                self._previous_owner = previous
             return
         if "organization" in changed_fields:
             if self.owner:
