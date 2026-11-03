@@ -8,13 +8,11 @@ escaping a tool kills the whole agent run.
 import json
 from dataclasses import dataclass
 
-from flask_principal import AnonymousIdentity, Identity, RoleNeed, UserNeed
 from mongoengine.errors import DoesNotExist, ValidationError
 from pydantic_ai import Agent, RunContext
 
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.dataset.models import Dataset
-from udata.core.user.models import User
 from udata.sql_guard import UnsafeSQLError, assert_read_only
 
 # Hard cap on rendered rows so huge results do not blow up the context window.
@@ -28,32 +26,14 @@ MAX_SQL_PER_QUESTION = 3
 class AssistantDeps:
     """Per-turn state shared with the assistant agent.
 
-    ``user`` is a snapshot taken in the request thread: tool calls run in a
-    pydantic-ai worker thread where Flask's ``current_user`` does not exist.
+    Tool calls run in a pydantic-ai worker thread that inherits the request
+    context (contextvars), so permission checks use the requesting user's
+    identity exactly like the rest of the API.
     """
 
     tabular: TabularClient
-    user: User | None = None
     sql_count: int = 0
     tool_count: int = 0
-
-
-def _identity_for(user: User | None) -> Identity:
-    """Rebuild the flask-principal identity of the requesting user.
-
-    Same construction as ``udata.features.notifications.settings.readable_by``:
-    the permission is checked against the user who asked, not against
-    whoever happens to be in the (worker) thread's request context.
-    """
-    if user is None:
-        return AnonymousIdentity()
-    identity = Identity(user.id)
-    identity.provides.add(UserNeed(user.fs_uniquifier))
-    identity.provides.update(RoleNeed(role.name) for role in user.roles)
-    from udata.core.organization.permissions import organization_needs
-
-    identity.provides.update(organization_needs(user))
-    return identity
 
 
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
@@ -69,7 +49,7 @@ def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     return None
 
 
-def _dataset_for_current_user(dataset_id: str, user: User | None) -> Dataset | None:
+def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
     """Fetch a dataset the requesting user is allowed to read, else None.
 
     Hidden datasets (private, archived or deleted) are only exposed to their
@@ -80,15 +60,15 @@ def _dataset_for_current_user(dataset_id: str, user: User | None) -> Dataset | N
         dataset = Dataset.objects.get(id=dataset_id)
     except (DoesNotExist, ValidationError):
         return None
-    if dataset.permissions["read"].allows(_identity_for(user)):
+    if dataset.permissions["read"].can():
         return dataset
     return None
 
 
-def _dataset_for_resource(resource_id: str, user: User | None) -> Dataset | None:
+def _dataset_for_resource(resource_id: str) -> Dataset | None:
     """Owner dataset of a resource, readable by the requesting user, else None."""
     dataset = Dataset.objects(resources__id=resource_id).first()
-    if dataset is not None and dataset.permissions["read"].allows(_identity_for(user)):
+    if dataset is not None and dataset.permissions["read"].can():
         return dataset
     return None
 
@@ -151,7 +131,7 @@ def register_tools(agent: Agent) -> None:
         """Récupère les métadonnées d'un dataset : titre, licence, organisation et ressources."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
-        dataset = _dataset_for_current_user(dataset_id, ctx.deps.user)
+        dataset = _dataset_for_current_user(dataset_id)
         if dataset is None:
             return f"Dataset introuvable : aucun dataset ne correspond à « {dataset_id} »."
         return serialize_dataset_metadata(dataset)
@@ -161,7 +141,7 @@ def register_tools(agent: Agent) -> None:
         """Inspecte le schéma d'une ressource tabulaire : colonnes, types et nombre de lignes."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
-        if _dataset_for_resource(resource_id, ctx.deps.user) is None:
+        if _dataset_for_resource(resource_id) is None:
             return (
                 "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
             )
@@ -176,7 +156,7 @@ def register_tools(agent: Agent) -> None:
         """Exécute une requête SQL en lecture seule sur une ressource tabulaire."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
-        if _dataset_for_resource(resource_id, ctx.deps.user) is None:
+        if _dataset_for_resource(resource_id) is None:
             return (
                 "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
             )

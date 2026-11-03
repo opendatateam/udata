@@ -7,6 +7,7 @@ from pydantic_ai.models.test import TestModel
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.user.factories import UserFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
 PAYLOAD = {
@@ -32,6 +33,17 @@ class RecordingModel(TestModel):
     def _request(self, messages, model_settings, model_request_parameters):
         self.seen.append(messages)
         return super()._request(messages, model_settings, model_request_parameters)
+
+
+class DatasetMetadataModel(RecordingModel):
+    """RecordingModel that calls get_dataset_metadata on a fixed dataset."""
+
+    def __init__(self, dataset_id):
+        super().__init__(call_tools=["get_dataset_metadata"])
+        self.dataset_id = dataset_id
+
+    def gen_tool_args(self, tool_def):
+        return {"dataset_id": self.dataset_id}
 
 
 def agent_with_model(model=None):
@@ -436,3 +448,30 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         generator.close()
         assert closed == [True]
         token_cancel.return_value.cancel.assert_called_once()
+
+    def _chat_through_metadata_tool(self, mocker, dataset, user):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        model = DatasetMetadataModel(str(dataset.id))
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login(user)
+        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        assert response.status_code == 200
+        response.get_data()  # consume the stream so the run executes
+        return str(model.seen)
+
+    def test_chat_tools_see_the_requesting_user(self, mocker):
+        """Tools run in a worker thread yet check permissions as the logged-in user."""
+        owner = UserFactory()
+        dataset = DatasetFactory(title="Brouillon du propriétaire", private=True, owner=owner)
+        seen = self._chat_through_metadata_tool(mocker, dataset, owner)
+        assert "Brouillon du propriétaire" in seen
+        assert "introuvable" not in seen
+
+    def test_chat_tools_hide_private_dataset_from_other_user(self, mocker):
+        dataset = DatasetFactory(
+            title="Brouillon du propriétaire", private=True, owner=UserFactory()
+        )
+        seen = self._chat_through_metadata_tool(mocker, dataset, UserFactory())
+        assert "introuvable" in seen
+        assert "Brouillon du propriétaire" not in seen

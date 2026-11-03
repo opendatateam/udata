@@ -6,12 +6,14 @@ are checked against an identity rebuilt from that snapshot.
 """
 
 import json
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
 from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 
+from udata.auth import login_user
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.assistant.tools import (
     MAX_SQL_PER_QUESTION,
@@ -33,15 +35,24 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         register_tools(self.agent)
         self.tools = self.agent._function_toolset.tools
 
-    def call(self, name, deps, **kwargs):
+    @contextmanager
+    def request_as(self, user=None):
+        """Request context whose flask-principal identity is ``user`` (anonymous if None)."""
+        with self.app.test_request_context():
+            self.app.preprocess_request()
+            if user is not None:
+                login_user(user)
+            yield
+
+    def call(self, name, deps, user=None, **kwargs):
         ctx = SimpleNamespace(deps=deps)
-        with self.app.app_context():
+        with self.request_as(user):
             return self.tools[name].function(ctx, **kwargs)
 
-    def make_deps(self, user=None, **kwargs):
+    def make_deps(self, **kwargs):
         with self.app.app_context():
             tabular = TabularClient()
-        return AssistantDeps(tabular=tabular, user=user, **kwargs)
+        return AssistantDeps(tabular=tabular, **kwargs)
 
     def owned_resource(self, **dataset_kwargs):
         """A resource with a dataset; public unless ``dataset_kwargs`` say otherwise."""
@@ -97,7 +108,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         other = UserFactory()
         result = self.call(
             "get_dataset_metadata",
-            self.make_deps(user=other),
+            self.make_deps(),
+            user=other,
             dataset_id=str(dataset.id),
         )
         assert "introuvable" in result
@@ -116,7 +128,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(title="Secret", private=True, owner=owner)
         result = self.call(
             "get_dataset_metadata",
-            self.make_deps(user=owner),
+            self.make_deps(),
+            user=owner,
             dataset_id=str(dataset.id),
         )
         payload = json.loads(result)
@@ -166,9 +179,9 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def test_inspect_schema_owner_of_private_dataset_is_allowed(self, mocker):
         owner = UserFactory()
         resource = self.owned_resource(private=True, owner=owner)
-        deps = self.make_deps(user=owner)
+        deps = self.make_deps()
         mocker.patch.object(deps.tabular, "get_profile", return_value={"nb_rows": 1})
-        result = self.call("inspect_schema", deps, resource_id=str(resource.id))
+        result = self.call("inspect_schema", deps, user=owner, resource_id=str(resource.id))
         assert "introuvable" not in result
 
     def test_inspect_schema_tabular_error_returns_sanitized_french_message(self, mocker):
@@ -324,7 +337,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
         agent = Agent(model=FixedArgsModel(call_tools=["execute_sql"]), deps_type=AssistantDeps)
         register_tools(agent)
-        with self.app.app_context():
+        with self.request_as():
             result = agent.run_sync("compte les lignes", deps=deps)
         assert deps.sql_count == 1
         mock.assert_called_once_with(str(resource.id), SQL)

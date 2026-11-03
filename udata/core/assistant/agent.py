@@ -1,9 +1,8 @@
 """pydantic-ai agent wiring for the AI assistant.
 
-The agent talks to the Albert API through an OpenAI-compatible provider
-and is built for synchronous use from Flask sync workers: build it with
-:func:`get_agent` inside an application context and run it with
-``agent.run_sync``.
+The agent talks to the Albert API through an OpenAI-compatible provider.
+Build it with :func:`get_agent` inside an application context: the chat
+endpoint streams it through pydantic-ai's Vercel AI adapter.
 """
 
 from flask import current_app

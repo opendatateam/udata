@@ -10,7 +10,6 @@ import logging
 import uuid
 
 from flask import Response, current_app, request, stream_with_context
-from flask_login import current_user
 from pydantic import ValidationError
 from pydantic_ai import CancellationToken
 from pydantic_ai.ui import SSE_CONTENT_TYPE
@@ -168,13 +167,7 @@ class AssistantChatAPI(API):
         agent = get_agent()
         adapter = VercelAIAdapter(agent, run_input, accept=SSE_CONTENT_TYPE)
         cancellation_token = CancellationToken()
-        # Snapshot the requesting user: tool calls run in a pydantic-ai worker
-        # thread where Flask's current_user does not exist, and dataset
-        # visibility is checked against this snapshot.
-        deps = AssistantDeps(
-            tabular=TabularClient(),
-            user=current_user._get_current_object(),
-        )
+        deps = AssistantDeps(tabular=TabularClient())
         instructions = (
             _build_resource_instructions(resource_id, deps.tabular) if resource_id else None
         )
