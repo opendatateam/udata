@@ -107,9 +107,7 @@ def dataservice_from_rdf(
 
     dataservice.set_harvested()
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    dataservice.harvest.remote_url = remote_url_from_rdf(
-        d, graph, remote_url_prefix=remote_url_prefix
-    )
+    dataservice.harvest.remote_url = remote_url_from_rdf(d, remote_url_prefix=remote_url_prefix)
     dataservice.harvest.created_at = rdf_value(d, DCT.created)
     dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.harvest.modified_at = rdf_value(d, DCT.modified)

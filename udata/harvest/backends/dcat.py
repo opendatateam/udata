@@ -13,8 +13,15 @@ from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.rdf import dataservice_from_rdf
+from udata.core.dataset.constants import DCAT_EXTRAS_KEY
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.rdf import dataset_from_rdf
+from udata.core.dataset.rdf import (
+    DCAT_EXTRAS_PARENT_KEY,
+    dataset_from_rdf,
+    get_dcat_extra,
+    set_dcat_extra,
+    unset_dcat_extra,
+)
 from udata.harvest.exceptions import HarvestValidationError
 from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import lazy_gettext as _
@@ -32,7 +39,7 @@ from udata.rdf import (
 from udata.storage.s3 import store_as_json
 from udata.utils import safe_unicode, uniquify
 
-from .base import BaseBackend, HarvestExtraConfig, HarvestFeature
+from .base import BaseBackend, HarvestExtraConfig, HarvestFeature, StopHarvest
 
 log = logging.getLogger(__name__)
 
@@ -93,6 +100,18 @@ class DcatBackend(BaseBackend):
             # then one pass of attaching datasets to dataservices.
             for page_graph, page_number in self.graphs:
                 self.process_one_dataservices_page(page_graph, page_number)
+
+            # Only resolve parents on full harvests. Errors/StopHarvest won't reach here.
+            try:
+                self.resolve_parents()
+            except Exception as e:
+                log.exception(f"Failed while resolving parents: {safe_unicode(e)}")
+                self.job.errors.append(
+                    HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+                )
+        except StopHarvest:
+            log.info("Skipping parent resolution on partial harvest")
+            raise
         finally:
             try:
                 self.store_graphs()
@@ -235,6 +254,61 @@ class DcatBackend(BaseBackend):
         )
 
         return dataservice
+
+    def resolve_parents(self) -> None:
+        """Resolve children to their parent dataset once all items have been harvested.
+
+        Resolution should only be triggered after a full, successful harvest, because parents are
+        matched by `harvest.record_id` among the "done" items of the current harvest job; so a
+        parent harvested by a different source (or in an earlier run, but not seen since) is
+        considered unresolved.
+
+        When resolved, the parent's `dataset.id` is stored in `extras["dcat"]["parent"]`.
+
+        Resolution failures record errors but keep `harvest_item.status` as "done" by design.
+        """
+        completed = [
+            (harvest_item, harvest_item.dataset)
+            for harvest_item in self.job.items
+            if harvest_item.status == "done" and harvest_item.dataset is not None
+        ]
+        index = {
+            dataset.harvest.record_id: dataset
+            for _, dataset in completed
+            if dataset.harvest.record_id
+        }
+
+        for harvest_item, dataset in completed:
+            parent_record_id = dataset.harvest.parent_record_id
+            existing_parent_id = get_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY)
+            if not parent_record_id and not existing_parent_id:
+                continue
+            parent = index.get(parent_record_id) if parent_record_id else None
+            if parent_record_id and not parent:
+                msg = f'Failed resolving parent "{parent_record_id}" for item "{harvest_item.remote_id}"'
+                log.warning(msg)
+                harvest_item.errors.append(HarvestError(message=msg))
+            try:
+                new_parent_id = str(parent.id) if parent else None
+                if new_parent_id == existing_parent_id:
+                    continue
+                if new_parent_id:
+                    set_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY, new_parent_id)
+                else:
+                    unset_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY)
+                if not self.dryrun:
+                    # Targeted update to avoid triggering another full `save()`:
+                    # sync the `extras["dcat"]` sub-dict, or drop it when left empty.
+                    if dcat := dataset.extras.get(DCAT_EXTRAS_KEY):
+                        Dataset.objects(id=dataset.id).update_one(set__extras__dcat=dcat)
+                    else:
+                        Dataset.objects(id=dataset.id).update_one(unset__extras__dcat=1)
+            except Exception as e:
+                msg = f'Failed updating parent "{parent_record_id}" for item "{harvest_item.remote_id}": {safe_unicode(e)}'
+                log.exception(msg)
+                harvest_item.errors.append(
+                    HarvestError(message=msg, details=traceback.format_exc())
+                )
 
     def store_graphs(self):
         # The official MongoDB document size in 16MB. The default value here is 15MB to account
