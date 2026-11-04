@@ -3,8 +3,8 @@
 Parser-based allow-list (sqlglot, DuckDB dialect — the api-tabular engine):
 exactly one statement, root Select/Union/Intersect/Except/Values, no write
 or lock nodes anywhere (including inside CTE
-bodies), an explicit function allow-list, and table sources restricted to
-plain identifiers.
+bodies), an explicit function allow-list, and table sources restricted to the
+resource's ``data`` table and the query's own CTEs.
 
 This is defense in depth on top of executor-side controls: the api-tabular
 service must still run queries under a read-only role, with external-access
@@ -23,6 +23,10 @@ __all__ = ["UnsafeSQLError", "assert_read_only"]
 # api-tabular runs DuckDB; parsing with the matching dialect keeps quoted
 # identifiers and engine-specific syntax unambiguous.
 DIALECT = "duckdb"
+
+# api-tabular exposes the rows of the resource named in the URL as this
+# table (convention shared with cdata's default chart query).
+DATA_TABLE = "data"
 
 _WRITE_NODES = (
     exp.Alter,
@@ -69,6 +73,7 @@ _ALLOWED_FUNCTIONS = frozenset(
         "string_agg",
         "group_concat",
         "list_agg",
+        "array_agg",
         "arg_min",
         "arg_max",
         "first",
@@ -93,7 +98,6 @@ _ALLOWED_FUNCTIONS = frozenset(
         "log2",
         "power",
         "pow",
-        "mod",
         "pi",
         "sign",
         "gcd",
@@ -138,7 +142,6 @@ _ALLOWED_FUNCTIONS = frozenset(
         "date",
         "time",
         "timestamp",
-        "interval",
         "date_trunc",
         "date_part",
         "timestamp_trunc",
@@ -189,9 +192,6 @@ _ALLOWED_FUNCTIONS = frozenset(
         "nvl",
         "greatest",
         "least",
-        "case",
-        "cast",
-        "try_cast",
         # structural (lists/structs/maps/rows, unnest)
         "unnest",
         "array",
@@ -273,38 +273,81 @@ class UnsafeSQLError(ValueError):
     """Raised when a SQL statement is not guaranteed to be read-only."""
 
 
-def _function_name(node: exp.Func | exp.Anonymous) -> str:
-    """Canonical uppercase function name, robust to quoting and dialect aliases."""
+def _function_name(node: exp.Func) -> str:
     if isinstance(node, exp.Anonymous):
         # Anonymous nodes carry the raw (possibly quoted) name in ``this``.
-        name = node.name
-    else:
-        name = node.sql_name()
-    return name.upper()
+        return node.name.upper()
+    return node.sql_name()
+
+
+def _allowed_function_classes() -> frozenset[type[exp.Func]]:
+    """sqlglot node classes the allowed DuckDB names parse to.
+
+    sqlglot maps many DuckDB functions to dialect-neutral nodes whose
+    ``sql_name()`` differs from the DuckDB name (strftime -> TIME_TO_STR,
+    unnest -> EXPLODE...), so recognised functions are matched by node class.
+    Names sqlglot does not recognise stay ``Anonymous`` and are matched by name.
+    """
+    classes: set[type[exp.Func]] = set()
+    for name in _ALLOWED_FUNCTIONS:
+        for args in ("x", "x, y", "x, y, z", ""):
+            try:
+                tree = sqlglot.parse_one(f"SELECT {name}({args})", dialect=DIALECT)
+            except SqlglotError:
+                continue
+            nodes = list(tree.find_all(exp.Func))
+            if nodes:
+                classes.update(type(n) for n in nodes if not isinstance(n, exp.Anonymous))
+                break
+    # Syntax forms rather than calls: CASE, CAST/TRY_CAST (``x::INT`` too) and
+    # UNNEST as a FROM source.
+    classes.update((exp.Case, exp.If, exp.Cast, exp.TryCast, exp.Unnest))
+    return frozenset(classes)
+
+
+_ALLOWED_FUNCTION_CLASSES = _allowed_function_classes()
 
 
 def _check_functions(tree: exp.Expression) -> None:
-    for node in tree.find_all((exp.Func, exp.Anonymous)):
-        if _function_name(node) not in _ALLOWED_FUNCTIONS:
+    for node in tree.find_all(exp.Func):
+        if isinstance(node, exp.Anonymous):
+            allowed = node.name.upper() in _ALLOWED_FUNCTIONS
+        else:
+            allowed = type(node) in _ALLOWED_FUNCTION_CLASSES
+        if not allowed:
             raise UnsafeSQLError(f"Function is not allowed: {_function_name(node)}")
 
 
 def _check_tables(tree: exp.Expression) -> None:
-    """Table sources must be plain identifiers: no function scans, no string
-    literals (DuckDB resolves them as file paths), no quoted table names."""
+    """Table sources must be the ``data`` table or a CTE of the query.
+
+    DuckDB resolves an unknown table name that looks like a path
+    (``FROM "x.csv"``, ``FROM 'x.csv'``) as a file scan, and unknown plain
+    names may hit catalog views (``duckdb_tables``, ``pg_settings``): only
+    known names pass. Quoting is accepted for ``data`` alone, since a quoted
+    CTE name referenced outside its scope would fall back to a file scan.
+    """
+    cte_names = {cte.alias.lower() for cte in tree.find_all(exp.CTE)}
     for node in tree.find_all(exp.Table):
-        if node.this is not None and not isinstance(node.this, exp.Identifier):
+        if node.this is None:
+            continue
+        if not isinstance(node.this, exp.Identifier):
             raise UnsafeSQLError(
                 f"Table source is not a plain identifier: {node.sql(dialect=DIALECT)}"
-            )
-        if node.this is not None and node.this.args.get("quoted"):
-            raise UnsafeSQLError(
-                f"Quoted table identifiers are not allowed: {node.sql(dialect=DIALECT)}"
             )
         if node.args.get("db") is not None:
             raise UnsafeSQLError(
                 f"Qualified table names are not allowed: {node.sql(dialect=DIALECT)}"
             )
+        name = node.name.lower()
+        if name == DATA_TABLE:
+            continue
+        if node.this.args.get("quoted"):
+            raise UnsafeSQLError(
+                f"Quoted table identifiers are not allowed: {node.sql(dialect=DIALECT)}"
+            )
+        if name not in cte_names:
+            raise UnsafeSQLError(f"Unknown table: {node.name} (query the {DATA_TABLE} table)")
 
 
 def _check_string_literals(sql: str) -> None:
@@ -327,13 +370,6 @@ def _check_query(tree: exp.Expression) -> None:
     _check_no_writes(tree)
     _check_functions(tree)
     _check_tables(tree)
-
-
-def _parse_single(sql: str) -> exp.Expression:
-    try:
-        return sqlglot.parse_one(sql, dialect=DIALECT)
-    except SqlglotError as error:
-        raise UnsafeSQLError(f"SQL could not be parsed: {error}") from error
 
 
 def assert_read_only(sql: str) -> None:

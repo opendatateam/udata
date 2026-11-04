@@ -1,6 +1,6 @@
 import pytest
 
-from udata.sql_guard import UnsafeSQLError, assert_read_only
+from udata.sql_guard import _ALLOWED_FUNCTIONS, UnsafeSQLError, assert_read_only
 
 
 @pytest.mark.parametrize(
@@ -9,29 +9,43 @@ from udata.sql_guard import UnsafeSQLError, assert_read_only
         "SELECT a, b FROM data",
         "WITH x AS (SELECT 1 AS a) SELECT * FROM x",
         "SELECT ';' AS semi",  # point-virgule dans une chaîne : OK
-        "SELECT a FROM t -- ; comment\n",
-        'SELECT "drop" FROM t',  # mot-clé en identifiant quoté : OK
+        "SELECT a FROM data -- ; comment\n",
+        'SELECT "drop" FROM data',  # mot-clé en identifiant quoté : OK
         "SELECT 1;",  # point-virgule terminal unique : OK
-        "SELECT count('x') FROM t",
+        "SELECT count('x') FROM data",
         "SELECT upper('abc')",
         "SELECT date('2024-01-01')",
         "SELECT concat('a', 'b')",
         # unions and CTEs, including recursive ones
-        "SELECT a FROM t1 UNION ALL SELECT a FROM t2",
-        "SELECT a FROM t1 UNION SELECT a FROM t2 INTERSECT SELECT a FROM t3",
+        "SELECT a FROM data UNION ALL SELECT b FROM data",
+        "SELECT a FROM data UNION SELECT b FROM data INTERSECT SELECT c FROM data",
         "WITH RECURSIVE x(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM x) SELECT * FROM x",
         "WITH x(a, b) AS (SELECT 1, 2) SELECT * FROM x",
         # values and subqueries
         "VALUES (1, 2)",
-        "SELECT * FROM (SELECT a FROM t) sub",
+        "SELECT * FROM (SELECT a FROM data) sub",
         # window functions and common built-ins
-        "SELECT row_number() OVER (PARTITION BY g ORDER BY x) FROM t",
+        "SELECT row_number() OVER (PARTITION BY g ORDER BY x) FROM data",
         "SELECT substring(trim(name), 1, 3) AS s FROM data",
         "SELECT date_trunc('month', d) AS m, sum(v) FROM data GROUP BY m ORDER BY m",
-        "SELECT CAST(x AS INT), x::INT FROM t",
-        "SELECT coalesce(a, 0), nullif(a, b) FROM t",
+        "SELECT CAST(x AS INT), x::INT, TRY_CAST(x AS INT) FROM data",
+        "SELECT coalesce(a, 0), nullif(a, b) FROM data",
         # unnest of a list column, as documented in the SQL prompt
-        "SELECT items.value FROM t, UNNEST(list_col) AS items(value)",
+        "SELECT items.value FROM data, UNNEST(list_col) AS items(value)",
+        # the data table, quoted or not, with any case and alias
+        'SELECT * FROM "data"',
+        "SELECT d.a FROM DATA AS d",
+        "SELECT * FROM data JOIN data AS other ON data.a = other.a",
+        # DuckDB names sqlglot maps to differently named nodes
+        "SELECT strftime(\"date\", '%Y') AS y, count(*) FROM data GROUP BY y",
+        "SELECT strptime(d, '%d/%m/%Y') FROM data",
+        "SELECT unnest(l) FROM data",
+        "SELECT strpos(s, 'a'), position('a' IN s) FROM data",
+        "SELECT epoch(d), to_timestamp(n), isodow(d) FROM data",
+        "SELECT approx_count_distinct(a), array_agg(a), var_pop(n) FROM data",
+        "SELECT array_length(l), list_sort(l), isnan(n), isinf(n) FROM data",
+        "SELECT CASE WHEN a > 1 THEN 'x' ELSE 'y' END FROM data",
+        "SELECT a % 2, mod(a, 2), d + INTERVAL 1 DAY FROM data",
     ],
 )
 def test_accepts_read_only(sql):
@@ -61,6 +75,16 @@ def test_accepts_read_only(sql):
         "SELECT postgres_scan('host=...')",
         # string-literal and function table sources
         "SELECT * FROM '/etc/passwd'",
+        'SELECT * FROM "/etc/passwd"',
+        'SELECT * FROM "data.csv"',
+        'WITH "x.csv" AS (SELECT 1) SELECT * FROM "x.csv"',
+        # catalog views and any table other than data or a CTE
+        "SELECT * FROM duckdb_settings",
+        "SELECT * FROM duckdb_tables",
+        "SELECT * FROM pg_tables",
+        "SELECT * FROM information_schema.tables",
+        "SELECT * FROM other_table",
+        "SELECT * FROM data.csv",
         "SELECT * FROM read_parquet('/etc/passwd')",
         # session/admin functions
         "SELECT set_config('a', 'b', false)",
@@ -134,3 +158,17 @@ def test_accepts_read_only(sql):
 def test_rejects_unsafe(sql):
     with pytest.raises(UnsafeSQLError):
         assert_read_only(sql)
+
+
+@pytest.mark.parametrize("name", sorted(_ALLOWED_FUNCTIONS))
+def test_every_allowed_function_passes(name):
+    """Each allow-listed DuckDB name is accepted in its plain call form."""
+    for args in ("x", "x, y", "x, y, z", ""):
+        try:
+            assert_read_only(f"SELECT {name}({args}) FROM data")
+        except UnsafeSQLError as error:
+            if "Function is not allowed" in str(error):
+                raise
+            continue
+        return
+    pytest.fail(f"{name} could not be parsed in any call form")
