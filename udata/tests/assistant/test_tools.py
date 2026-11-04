@@ -242,6 +242,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         mock = mocker.patch.object(deps.tabular, "execute_sql")
         result = self.call("execute_sql", deps, resource_id=str(resource.id), sql="DROP TABLE data")
         assert "lecture seule" in result
+        assert "Statement type is not allowed" in result
         mock.assert_not_called()
         assert deps.sql_count == 0
 

@@ -17,9 +17,13 @@ from udata.sql_guard import UnsafeSQLError, assert_read_only
 
 # Hard cap on rendered rows so huge results do not blow up the context window.
 MAX_RENDERED_ROWS = 50
-# pydantic-ai v2 has no step-cap parameter: these bound the agent loop per turn.
+# Per-turn budgets. Exhausted tool budgets return a refusal the model can
+# explain; MODEL_REQUEST_LIMIT (passed as pydantic-ai usage limits) is the
+# hard stop for a model that keeps calling tools after a refusal.
 MAX_STEPS = 5
 MAX_SQL_PER_QUESTION = 3
+# One request per tool round, plus the refused round and the final answer.
+MODEL_REQUEST_LIMIT = MAX_STEPS + 2
 
 
 @dataclass
@@ -39,9 +43,8 @@ class AssistantDeps:
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     """Enforce MAX_STEPS as a per-turn tool-call cap.
 
-    pydantic-ai v2 has no step-cap parameter, so the step budget is proxied
-    by counting tool calls per agent run. Returns a French refusal message
-    once the budget is exhausted, None otherwise.
+    Returns a French refusal message once the budget is exhausted, None
+    otherwise, so the model can still explain the limit in its answer.
     """
     if ctx.deps.tool_count >= MAX_STEPS:
         return f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
@@ -162,10 +165,11 @@ def register_tools(agent: Agent) -> None:
             )
         try:
             assert_read_only(sql)
-        except UnsafeSQLError:
+        except UnsafeSQLError as error:
+            # The guard's reason lets the model fix the query on its next try.
             return (
                 "Requête refusée : l'assistant fonctionne en lecture seule "
-                "et cette requête n'est pas autorisée."
+                f"et cette requête n'est pas autorisée ({error})."
             )
         if ctx.deps.sql_count >= MAX_SQL_PER_QUESTION:
             return (

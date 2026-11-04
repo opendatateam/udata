@@ -15,11 +15,17 @@ from pydantic_ai import CancellationToken
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 from pydantic_ai.ui.vercel_ai.response_types import ErrorChunk
+from pydantic_ai.usage import UsageLimits
 
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.tabular import TabularClient, TabularError
-from udata.core.assistant.tools import AssistantDeps, _render_profile, serialize_dataset_metadata
+from udata.core.assistant.tools import (
+    MODEL_REQUEST_LIMIT,
+    AssistantDeps,
+    _render_profile,
+    serialize_dataset_metadata,
+)
 from udata.core.dataset.models import Dataset
 from udata.i18n import gettext as _
 
@@ -178,6 +184,7 @@ class AssistantChatAPI(API):
                 instructions=instructions,
                 cancellation_token=cancellation_token,
                 timeout=AI_TURN_TIMEOUT,
+                usage_limits=UsageLimits(request_limit=MODEL_REQUEST_LIMIT),
             )
         )
 
@@ -187,7 +194,12 @@ class AssistantChatAPI(API):
             # this sync generator so Flask streams chunk by chunk.
             loop = asyncio.new_event_loop()
             iterator = stream.__aiter__()
+            entered = False
             try:
+                # Entering the agent ties the provider's HTTP client to this
+                # turn: it is closed on exit instead of leaking a connection.
+                loop.run_until_complete(agent.__aenter__())
+                entered = True
                 while True:
                     try:
                         yield _sanitize_chunk(
@@ -208,8 +220,12 @@ class AssistantChatAPI(API):
                 message = _("An error occurred while generating the response.")
                 yield f"data: {ErrorChunk(error_text=message).encode(adapter.sdk_version)}\n\n"
             finally:
-                loop.run_until_complete(loop.shutdown_asyncgens())
-                loop.close()
+                try:
+                    if entered:
+                        loop.run_until_complete(agent.__aexit__(None, None, None))
+                finally:
+                    loop.run_until_complete(loop.shutdown_asyncgens())
+                    loop.close()
 
         return Response(
             generate(),
