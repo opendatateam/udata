@@ -69,6 +69,59 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert proconnect.authentications == 0
         assert not self.is_fresh()
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_requires_a_second_factor_at_proconnect(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+
+        assert proconnect.second_factors == 1
+        self.assert_logged_in_as(user)
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
+    def test_login_does_not_require_a_second_factor_unless_configured(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+
+        assert proconnect.second_factors == 0
+        self.assert_logged_in_as(user)
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_second_factor_presented_to_proconnect_stands_for_the_udata_one(self, proconnect):
+        totp = current_app.extensions["security"].totp_factory
+        user = UserFactory(
+            email="jane@example.org",
+            tf_primary_method="authenticator",
+            tf_totp_secret=totp.generate_totp_secret(),
+        )
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert "flash=connected" in response.location
+        self.assert_logged_in_as(user)
+        # The second factor may come from a ProConnect session opened earlier.
+        assert not self.is_fresh()
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
+    def test_udata_second_factor_is_asked_when_proconnect_does_not_require_one(self, proconnect):
+        totp = current_app.extensions["security"].totp_factory
+        UserFactory(
+            email="jane@example.org",
+            tf_primary_method="authenticator",
+            tf_totp_secret=totp.generate_totp_secret(),
+        )
+
+        self.sign_in(proconnect, "jane@example.org")
+
+        self.assert401(self.get(url_for("api.me")))
+
     def test_login_completed_by_the_two_factor_is_fresh(self, proconnect):
         # A code from the agent's authenticator proves as much as a password on /verify.
         totp = current_app.extensions["security"].totp_factory

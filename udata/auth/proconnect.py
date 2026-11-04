@@ -1,4 +1,6 @@
+import json
 import time
+from dataclasses import dataclass
 from datetime import datetime
 
 from authlib.common.urls import add_params_to_uri
@@ -20,6 +22,8 @@ ID_TOKEN_KEY = "id_token"
 # The `state` of the ProConnect round-trip reauthenticating a signed-in agent: a login or a
 # logout started since has its own, so an abandoned reauthentication can't apply to it.
 REAUTH_KEY = "proconnect_reauth"
+# The ProConnect levels reached with a second factor: eIDAS substantial and high imply one.
+SECOND_FACTOR_ACR_VALUES = ["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"]
 
 
 def init_app(app):
@@ -60,12 +64,26 @@ def get_logout_url():
 
 def authorize_redirect(state: str | None = None):
     redirect_uri = url_for("api.proconnect_auth", _external=True)
-    return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
+    if not current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
+        return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
+    # Required rather than requested: ProConnect then has the agent present a second factor,
+    # or set one up, before coming back.
+    claims = {"id_token": {"acr": {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}}}
+    return oauth.proconnect.authorize_redirect(redirect_uri, state=state, claims=json.dumps(claims))
 
 
-def authenticate() -> dict:
-    """Complete the authorization code flow and return the user info."""
+@dataclass
+class ProConnectAuthentication:
+    userinfo: dict
+    # ProConnect vouches that the agent presented a second factor.
+    second_factor: bool
+
+
+def authenticate() -> ProConnectAuthentication:
+    """Complete the authorization code flow and return what ProConnect says of the agent."""
     token = oauth.proconnect.authorize_access_token()
+    # authlib leaves the claims of the id_token it verified under `userinfo`.
+    acr = token["userinfo"].get("acr")
     # Store the id_token in the session, it'll be used when logging out from ProConnect.
     session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
     # /!\ DIRTY HACK.
@@ -81,7 +99,10 @@ def authenticate() -> dict:
     # `id_token` with the jwt we received from the `userinfo_endpoint`.
     userinfo_token = token.copy()
     userinfo_token[ID_TOKEN_KEY] = resp.content
-    return oauth.proconnect.parse_id_token(userinfo_token, nonce=None)
+    return ProConnectAuthentication(
+        userinfo=oauth.proconnect.parse_id_token(userinfo_token, nonce=None),
+        second_factor=acr in SECOND_FACTOR_ACR_VALUES,
+    )
 
 
 def verify_page_url(flash: str) -> str:
@@ -137,7 +158,8 @@ class ProconnectAuthAPI(API):
         if reauth_state and reauth_state == request.args.get("state"):
             return reauthenticate()
 
-        proconnect_user = authenticate()
+        authentication = authenticate()
+        proconnect_user = authentication.userinfo
         user = datastore.find_user(email=proconnect_user["email"])
         if not user:
             user = datastore.create_user(
@@ -146,7 +168,10 @@ class ProconnectAuthAPI(API):
                 last_name=proconnect_user.get("usual_name"),
                 confirmed_at=datetime.now(),
             )
-        if current_app.config["SECURITY_TWO_FACTOR"]:
+        # A second factor presented to ProConnect stands for the udata one, as the identity
+        # provider's password stands for the udata one. It may come from a ProConnect session
+        # opened earlier, which is why the login stays not fresh below.
+        if current_app.config["SECURITY_TWO_FACTOR"] and not authentication.second_factor:
             # Enter 2FA check if required
             response = current_app.extensions["security"].two_factor_plugins.tf_enter(
                 user=user,
@@ -181,7 +206,7 @@ def reauthenticate():
         return redirect(login_page_url())
 
     try:
-        proconnect_user = authenticate()
+        proconnect_user = authenticate().userinfo
     except OAuthError:
         # The agent cancelled, or ProConnect refused the exchange.
         return redirect(verify_page_url("proconnect_reauth_failed"))
