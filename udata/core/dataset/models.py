@@ -132,10 +132,6 @@ class HarvestDatasetMetadata(HarvestMetadata):
     ckan_name = StringField()
     ckan_source = StringField()
 
-    # In-memory attributes, only used within a harvest job run.
-    record_id: str | None = None
-    parent_record_id: str | None = None
-
 
 class HarvestResourceMetadata(EmbeddedDocument):
     uri = StringField()

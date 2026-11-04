@@ -155,11 +155,6 @@ DOI_IDENTIFIER_RE = re.compile(
     r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I
 )
 
-# Custom (SEMIC XSLT datagouv patch) record id format: `urn:iso19139:parent:<record uuid>`
-ISO19139_PARENT_PREFIX = "urn:iso19139:parent:"
-# Custom `extras["dcat"]` key storing parent `dataset.id`
-DCAT_EXTRAS_PARENT_KEY = "parent"
-
 
 def temporal_to_rdf(daterange: DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
@@ -815,24 +810,6 @@ def inspire_category_from_rights(rights: Collection[str]) -> InspireLimitationCa
     return None
 
 
-def custom_iso19139_parent_record_id_from_rdf(resource: RdfResource) -> str | None:
-    """Return the first parent record identifier, if any.
-
-    Currently only supports the custom `urn:iso19139:parent:...` pattern implemented ahead of
-    specification in the datagouv ISO-to-DCAT XSLT.
-    """
-    for obj in resource.objects(DCAT.inSeries):
-        if isinstance(obj, Literal):
-            # <dcat:inSeries>...</dcat:inSeries> (lenient)
-            value = str(obj).strip()
-        else:
-            # <dcat:inSeries rdf:resource="...">
-            value = str(obj.identifier).strip()
-        if value and value.startswith(ISO19139_PARENT_PREFIX):
-            return value.removeprefix(ISO19139_PARENT_PREFIX)
-    return None
-
-
 def set_dcat_extra(
     obj: Dataset | Resource, property: URIRef | str, value: str | Collection
 ) -> None:
@@ -1118,7 +1095,8 @@ def dataset_from_rdf(
         *(licenses + rights + resources_licenses), default=default_license
     )
 
-    identifier = rdf_value(d, DCT.identifier)
+    record_id = record_id_from_rdf(d)
+    dct_identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
 
     remote_url = remote_url_from_rdf(d, remote_url_prefix=remote_url_prefix)
@@ -1128,7 +1106,8 @@ def dataset_from_rdf(
     modified_at = rdf_value(d, DCT.modified)
 
     dataset.set_harvested()
-    dataset.harvest.dct_identifier = identifier
+    dataset.harvest.record_id = record_id
+    dataset.harvest.dct_identifier = dct_identifier
     dataset.harvest.doi = doi_from_rdf(d)
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
@@ -1139,12 +1118,6 @@ def dataset_from_rdf(
     dataset.harvest.modified_at = safe_harvest_datetime(
         modified_at, "DCT.modified (dataset)", refuse_future=True
     )
-
-    dataset.harvest.record_id = record_id_from_rdf(d)
-    if (
-        record_id := custom_iso19139_parent_record_id_from_rdf(d)
-    ) and record_id != dataset.harvest.record_id:
-        dataset.harvest.parent_record_id = record_id
 
     return dataset
 

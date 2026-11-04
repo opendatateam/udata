@@ -28,7 +28,6 @@ from udata.core.dataset.rdf import (
     FREQ_TERM_TO_UDATA,
     access_right_to_rdf,
     access_rights_from_rdf,
-    custom_iso19139_parent_record_id_from_rdf,
     dataset_from_rdf,
     dataset_to_rdf,
     format_from_rdf,
@@ -538,6 +537,11 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((publisher, VCARD.hasEmail, Literal(publisher_email)))
         g.add((node, DCT.publisher, publisher))
 
+        record_id = faker.uuid4()
+        record = BNode()
+        g.add((record, DCT.identifier, Literal(record_id)))
+        g.add((record, FOAF.primaryTopic, node))
+
         # Dataset needs an owner/organization for contact_points_from_rdf() to work
         d = DatasetFactory.build()
         d.organization = OrganizationFactory(name="organization")
@@ -561,6 +565,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert contacts["contact"] == (contact_name, contact_email)
         assert contacts["publisher"] == (publisher_name, publisher_email)
 
+        assert dataset.harvest.record_id == record_id
         assert dataset.harvest.dct_identifier == id
         assert dataset.harvest.uri == uri
 
@@ -1751,6 +1756,15 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert record_id_from_rdf(g.resource(node)) == "primary-topic-identifier"
 
+    def test_record_id_from_rdf_none(self):
+        """A resource without any `CatalogRecord` primary topic has no record id."""
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        assert record_id_from_rdf(g.resource(node)) is None
+
     def test_record_id_from_rdf_uriref(self):
         """A `URIRef`-valued `dct:identifier` is returned as-is."""
         g = Graph()
@@ -1763,6 +1777,18 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((primary_topic_node, FOAF.primaryTopic, node))
 
         assert record_id_from_rdf(g.resource(node)) == "http://example.org/record"
+
+    def test_record_id_from_rdf_strip(self):
+        """A string record id is stripped."""
+        g = Graph()
+
+        node = BNode()
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, DCT.identifier, Literal(" abc-1234\n")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "abc-1234"
 
     def test_record_id_from_rdf_urnuuid(self):
         """An `anyURI` record id with a `urn:uuid:` prefix returns the id stripped of its prefix."""
@@ -1778,14 +1804,23 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert record_id_from_rdf(g.resource(node)) == "abc-1234"
 
-    def test_record_id_from_rdf_none(self):
-        """A resource without any `CatalogRecord` primary topic has no record id."""
+    def test_record_id_from_rdf_urnuuid_strip(self):
+        """An `anyURI` record id with a `urn:uuid:` prefix is stripped before the prefix check."""
         g = Graph()
 
         node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
 
-        assert record_id_from_rdf(g.resource(node)) is None
+        primary_topic_node = BNode()
+        g.add(
+            (
+                primary_topic_node,
+                DCT.identifier,
+                Literal(" urn:uuid:abc-1234\n", datatype=XSD.anyURI),
+            )
+        )
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "abc-1234"
 
     def test_remote_url_from_rdf_urnuuid_iso191153(self):
         """
@@ -1872,114 +1907,6 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((node, RDF.type, DCAT.Dataset))
 
         assert remote_url_from_rdf(g.resource(node)) is None
-
-    def test_custom_iso19139_parent_record_id_from_rdf_bare_uriref(self):
-        """A `dcat:inSeries` with `urn:iso19139:parent:<uuid>` URIRef returns the prefix-stripped
-        record id."""
-        g = Graph()
-
-        node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:abc-1234")))
-
-        assert custom_iso19139_parent_record_id_from_rdf(g.resource(node)) == "abc-1234"
-
-    def test_custom_iso19139_parent_record_id_from_rdf_literal(self):
-        """A `dcat:inSeries` `urn:iso19139:parent:<uuid>` Literal returns the prefix-stripped record
-        id."""
-        g = Graph()
-
-        node = BNode()
-        g.add((node, DCAT.inSeries, Literal("urn:iso19139:parent:abc-1234")))
-
-        assert custom_iso19139_parent_record_id_from_rdf(g.resource(node)) == "abc-1234"
-
-    def test_custom_iso19139_parent_record_id_from_rdf_without_prefix(self):
-        """A `dcat:inSeries` without `urn:iso19139:parent:` prefix does not resolve."""
-        g = Graph()
-
-        node = BNode()
-        g.add((node, DCAT.inSeries, URIRef("http://example.org/series")))
-
-        assert custom_iso19139_parent_record_id_from_rdf(g.resource(node)) is None
-
-    def test_custom_iso19139_parent_record_id_from_rdf_none(self):
-        """A resource without `dcat:inSeries` has no parent record id."""
-        g = Graph()
-
-        node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
-
-        assert custom_iso19139_parent_record_id_from_rdf(g.resource(node)) is None
-
-    def test_custom_iso19139_parent_record_id_from_rdf_multiple(self):
-        """Multiple `dcat:inSeries` return the first prefix-stripped `urn:iso19139:parent:<uuid>` record id."""
-        g = Graph()
-
-        node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:no-match")))
-        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:abc-1234")))
-        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:too-late")))
-
-        assert custom_iso19139_parent_record_id_from_rdf(g.resource(node)) == "abc-1234"
-
-    def test_dataset_has_record_and_parent_record_ids(self):
-        """`dataset_from_rdf` populates `harvest.record_id`/`harvest.parent_record_id`, in-memory only."""
-        g = Graph()
-        parent_id = "5586c306-b54d-4172-8cbe-6f4047470de6"
-        child_id = "02df0629-d467-4310-adc1-b625a1e59b19"
-
-        node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Série de données")))
-        g.add((node, DCAT.inSeries, URIRef(f"urn:iso19139:parent:{parent_id}")))
-
-        primary_topic_node = BNode()
-        g.add(
-            (
-                primary_topic_node,
-                DCT.identifier,
-                Literal(f"urn:uuid:{child_id}", datatype=XSD.anyURI),
-            )
-        )
-        g.add((primary_topic_node, FOAF.primaryTopic, node))
-
-        dataset = dataset_from_rdf(g, dataset=DatasetFactory.create())
-
-        assert dataset.harvest.record_id == child_id
-        assert dataset.harvest.parent_record_id == parent_id
-
-        dataset.save()
-        persisted = Dataset.objects.get(id=dataset.id)
-        # Plain class attributes are not persisted.
-        assert persisted.harvest.record_id is None
-        assert persisted.harvest.parent_record_id is None
-
-    def test_dataset_self_parent_ignored(self):
-        """A record cannot have itself as parent."""
-        g = Graph()
-        record_id = "02df0629-d467-4310-adc1-b625a1e59b19"
-
-        node = BNode()
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.title, Literal("Série de données")))
-        g.add((node, DCAT.inSeries, URIRef(f"urn:iso19139:parent:{record_id}")))
-
-        primary_topic_node = BNode()
-        g.add(
-            (
-                primary_topic_node,
-                DCT.identifier,
-                Literal(f"urn:uuid:{record_id}", datatype=XSD.anyURI),
-            )
-        )
-        g.add((primary_topic_node, FOAF.primaryTopic, node))
-
-        dataset = dataset_from_rdf(g, dataset=DatasetFactory.create())
-
-        assert dataset.harvest.record_id == record_id
-        assert dataset.harvest.parent_record_id is None
 
     def test_rdf_value_with_preferred_language(self, app):
         """Check that rdf_value gets the Literal with preferred language if multiple exists"""

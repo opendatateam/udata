@@ -590,12 +590,11 @@ def record_id_from_rdf(resource: RdfResource) -> str | None:
     # using "urn:...:" prefixes in their gmd:fileIdentifier (e.g. Geo2France), but ISO-19139 has
     # no concept of codeSpace, it's simply a string. So in ISO-19139, what looks like a "prefix"
     # is just an arbitrary part the plain string identifier, with no special meaning.
-    if (
-        isinstance(identifier, Literal)  # don't process URIRef
-        and identifier.datatype == XSD.anyURI
-        and identifier.value.startswith(URN_UUID_PREFIX)
-    ):
-        identifier = identifier.value.removeprefix(URN_UUID_PREFIX)
+    if isinstance(identifier, Literal):  # GeoNetwork uses `Literal`
+        val = str(identifier).strip()
+        if identifier.datatype == XSD.anyURI and val.startswith(URN_UUID_PREFIX):
+            val = val.removeprefix(URN_UUID_PREFIX)
+        identifier = val
 
     return str(identifier)
 
