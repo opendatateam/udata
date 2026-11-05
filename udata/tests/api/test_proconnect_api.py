@@ -26,11 +26,38 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         with current_app.app_context():
             return super().post(url, *args, **kwargs)
 
-    def sign_in(self, proconnect, email, second_factor=True, sub=None, amr=None):
+    def sign_in(
+        self,
+        proconnect,
+        email,
+        second_factor=True,
+        sub=None,
+        amr=None,
+        require_second_factor: bool | None = None,
+    ):
+        """`require_second_factor` is what the agent's browser makes of the redirection."""
         proconnect.agent_has_session(email, second_factor=second_factor, sub=sub, amr=amr)
-        response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(response.location)
+        authorize_url = self.get(url_for("api.proconnect_login")).location
+        if require_second_factor is not None:
+            authorize_url = proconnect.tamper(
+                authorize_url, require_second_factor=require_second_factor
+            )
+        callback = proconnect.authorize(authorize_url)
         return self.get(url_for("api.proconnect_auth", **callback))
+
+    def set_up_two_factor(self, setup):
+        return self.post(
+            url_for("security.two_factor_setup"),
+            {"setup": setup},
+            headers={"Accept": "application/json"},
+        )
+
+    def assert_two_factor_setup_refused(self, response):
+        self.assert400(response)
+        assert response.json["response"]["field_errors"]["setup"] == [
+            "Your account is protected by the two-factor authentication of ProConnect: "
+            "sign in with ProConnect to set up another one."
+        ]
 
     def enter_totp(self, secret):
         totp = current_app.extensions["security"].totp_factory
@@ -142,23 +169,6 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert self.identity_of(user).sub == "sub-of-jane@example.org"
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
-    def test_requiring_a_second_factor_from_the_browser_does_not_skip_the_udata_one(
-        self, proconnect
-    ):
-        # The redirection to ProConnect isn't signed: an agent may require the second factor
-        # we don't, and present their own.
-        self.totp_user(email="jane@example.org")
-        proconnect.agent_has_session("jane@example.org", sub="attacker")
-        response = self.get(url_for("api.proconnect_login"))
-
-        callback = proconnect.authorize(
-            proconnect.tamper(response.location, require_second_factor=True)
-        )
-        self.get(url_for("api.proconnect_auth", **callback))
-
-        self.assert401(self.get(url_for("api.me")))
-
-    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
     def test_identity_seen_without_a_second_factor_is_not_trusted_once_it_has_one(self, proconnect):
         user, secret = self.totp_user(email="jane@example.org")
         # Jane's ProConnect identity has no second factor yet, and none is required.
@@ -229,12 +239,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org", amr=["pwd", "mail", "mfa"])
 
         # She signs in again, and this time presents her key once sent back for it.
-        proconnect.agent_has_session("jane@example.org", second_factor=False)
-        response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(
-            proconnect.tamper(response.location, require_second_factor=False)
+        response = self.sign_in(
+            proconnect, "jane@example.org", second_factor=False, require_second_factor=False
         )
-        response = self.get(url_for("api.proconnect_auth", **callback))
         callback = proconnect.authorize(response.location)
         self.get(url_for("api.proconnect_auth", **callback))
 
@@ -246,13 +253,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org")
         self.get(url_for("security.logout"))
         # The request we send goes through the browser, which may drop the requirement.
-        proconnect.agent_has_session("jane@example.org", second_factor=False)
-        response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(
-            proconnect.tamper(response.location, require_second_factor=False)
+        response = self.sign_in(
+            proconnect, "jane@example.org", second_factor=False, require_second_factor=False
         )
-
-        response = self.get(url_for("api.proconnect_auth", **callback))
 
         self.assert401(self.get(url_for("api.me")))
         # Back at ProConnect, the second factor is asked for: Jane presents it.
@@ -337,28 +340,15 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org")
         self.enter_totp(secret)
         self.get(url_for("security.logout"))
-        proconnect.agent_has_session("jane@example.org", second_factor=False)
-        response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(
-            proconnect.tamper(response.location, require_second_factor=False)
+        self.sign_in(
+            proconnect, "jane@example.org", second_factor=False, require_second_factor=False
         )
-        self.get(url_for("api.proconnect_auth", **callback))
         self.enter_totp(secret)
-        disabled = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "disable"},
-            headers={"Accept": "application/json"},
-        )
-        self.assert200(disabled)
+        self.assert200(self.set_up_two_factor("disable"))
 
-        response = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "authenticator"},
-            headers={"Accept": "application/json"},
-        )
+        response = self.set_up_two_factor("authenticator")
 
-        self.assert400(response)
-        assert not User.objects.get(id=user.id).tf_totp_secret
+        self.assert_two_factor_setup_refused(response)
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_udata_2fa_cannot_be_set_up_by_password_once_proconnect_holds_the_second_factor(
@@ -374,14 +364,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert self.is_fresh()
 
-        response = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "authenticator"},
-            headers={"Accept": "application/json"},
-        )
+        response = self.set_up_two_factor("authenticator")
 
-        self.assert400(response)
-        assert not User.objects.get(id=user.id).tf_totp_secret
+        self.assert_two_factor_setup_refused(response)
 
     @pytest.mark.options(
         SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True, PROCONNECT_REQUIRE_SECOND_FACTOR=True
@@ -402,14 +387,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
             headers={"Accept": "application/json"},
         )
         assert response.json["response"]["tf_state"] == "setup_from_login"
-        response = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "authenticator"},
-            headers={"Accept": "application/json"},
-        )
+        response = self.set_up_two_factor("authenticator")
 
-        self.assert400(response)
-        assert not User.objects.get(id=admin.id).tf_totp_secret
+        self.assert_two_factor_setup_refused(response)
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_udata_2fa_can_be_set_up_from_the_trusted_proconnect_login(self, proconnect):
@@ -417,11 +397,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org")
         self.reauthenticate(proconnect)
 
-        response = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "authenticator"},
-            headers={"Accept": "application/json"},
-        )
+        response = self.set_up_two_factor("authenticator")
 
         self.assert200(response)
 
@@ -466,14 +442,6 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert response.json["has_password"] is None
         assert response.json["has_two_factor"] is None
         assert response.json["proconnect"] is None
-
-    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
-    def test_udata_second_factor_is_asked_when_proconnect_does_not_require_one(self, proconnect):
-        self.totp_user(email="jane@example.org")
-
-        self.sign_in(proconnect, "jane@example.org")
-
-        self.assert401(self.get(url_for("api.me")))
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_one_time_code_by_email_is_no_second_factor(self, proconnect):

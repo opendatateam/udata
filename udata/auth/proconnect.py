@@ -79,14 +79,16 @@ def authorize_redirect(state: str | None = None, require_second_factor: bool = F
     redirect_uri = url_for("api.proconnect_auth", _external=True)
     # ProConnect only returns the `amr` when the `claims` ask for it.
     claims = {"id_token": {"amr": None}}
-    if not (require_second_factor or current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]):
-        return oauth.proconnect.authorize_redirect(
-            redirect_uri, acr_values="eidas1", state=state, claims=json.dumps(claims)
-        )
-    # Required rather than requested: ProConnect then has the agent present a second factor,
-    # or set one up, before coming back.
-    claims["id_token"]["acr"] = {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}
-    return oauth.proconnect.authorize_redirect(redirect_uri, state=state, claims=json.dumps(claims))
+    params = {}
+    if require_second_factor or current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
+        # Required rather than requested: ProConnect then has the agent present a second
+        # factor, or set one up, before coming back.
+        claims["id_token"]["acr"] = {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}
+    else:
+        params["acr_values"] = "eidas1"
+    return oauth.proconnect.authorize_redirect(
+        redirect_uri, state=state, claims=json.dumps(claims), **params
+    )
 
 
 @dataclass
@@ -335,11 +337,11 @@ def reauthenticate():
     # Compared like the login resolves an account from a ProConnect identity: by the trusted
     # identity when there is one, which another one at the same address isn't.
     trusted_sub = current_user.trusted_proconnect_sub
-    if (
-        authentication.sub != trusted_sub
-        if trusted_sub
-        else authentication.userinfo["email"] != current_user.email
-    ):
+    if trusted_sub:
+        mismatch = authentication.sub != trusted_sub
+    else:
+        mismatch = authentication.userinfo["email"] != current_user.email
+    if mismatch:
         return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
 
     # Signed out of ProConnect beforehand: their identity provider asked them to authenticate,
