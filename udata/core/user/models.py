@@ -285,6 +285,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             },
             "-created_at",
             "slug",
+            # Every ProConnect login looks the trusted identity up.
+            {"fields": ["proconnect.sub"], "sparse": True},
         ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,

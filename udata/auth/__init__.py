@@ -62,6 +62,7 @@ def init_app(app):
             raise ConfigError(f"{key} must be set to a unique, random value.")
 
     from .forms import (
+        ExtendedChangePasswordForm,
         ExtendedForgotPasswordForm,
         ExtendedLoginForm,
         ExtendedRegisterForm,
@@ -100,6 +101,7 @@ def init_app(app):
         forgot_password_form=ExtendedForgotPasswordForm,
         verify_form=ExtendedVerifyForm,
         two_factor_setup_form=ExtendedTwoFactorSetupForm,
+        change_password_form=ExtendedChangePasswordForm,
         password_util_cls=UdataPasswordUtil,
         mail_util_cls=mail_util_cls,
     )

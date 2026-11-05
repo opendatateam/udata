@@ -5,6 +5,7 @@ import requests
 from flask import current_app, session
 from flask_login import current_user
 from flask_security.forms import (
+    ChangePasswordForm,
     ForgotPasswordForm,
     Form,
     LoginForm,
@@ -69,6 +70,11 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
         return True
 
 
+# Without a password, an account signs in with ProConnect only: giving it one, through a
+# reset that only takes reading the mailbox, would open a second way in without a 2FA.
+PROCONNECT_ONLY = _("This account signs in with ProConnect only.")
+
+
 class ExtendedLoginForm(LoginForm):
     def validate(self, **kwargs):
         # A password login: a ProConnect login left in this browser, waiting for its udata
@@ -90,12 +96,26 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         if not super().validate(**kwargs):
             return False
 
+        if not self.user.password:
+            self.password.errors.append(PROCONNECT_ONLY)
+            return False
+
         if self.user.password_rotation_demanded:
             self.user.password_rotation_demanded = None
             self.user.password_rotation_performed = datetime.now(UTC)
             self.user.save()
 
         return True
+
+
+class ExtendedChangePasswordForm(ChangePasswordForm):
+    def validate(self, **kwargs):
+        # flask-security lets an account without a password set one with a fresh session.
+        if not current_user.password:
+            self.new_password.errors = [PROCONNECT_ONLY]
+            return False
+
+        return super().validate(**kwargs)
 
 
 class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
