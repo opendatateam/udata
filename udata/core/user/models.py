@@ -232,7 +232,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     tf_primary_method = StringField()
     tf_totp_secret = StringField()
 
-    # Only written by the ProConnect login: see `udata.auth.proconnect`.
+    # Written by the ProConnect login (`udata.auth.proconnect`), cleared by `udata user
+    # unset-proconnect`.
     proconnect = field(
         EmbeddedDocumentField(ProConnectIdentity),
         allow_null=True,

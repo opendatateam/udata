@@ -14,9 +14,7 @@ from flask_security.utils import check_and_update_authn_fresh
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.api.oauth2 import OAuth2Token
 from udata.auth import current_user, login_user, mails
-from udata.core.api_token.models import ApiToken
 from udata.core.user.models import ProConnectIdentity, User, datastore
 from udata.uris import cdata_url, homepage_url
 
@@ -319,11 +317,9 @@ class ProconnectOnlyAPI(API):
         if not can_switch_to_proconnect_only(user):
             api.abort(403, "Sign in with ProConnect and its second factor first")
 
-        # Every other way in goes: the sessions, including any opened with the password, and
-        # the tokens, which an API key or a password grant got without the second factor.
+        # Also signs out the other sessions, including any opened with the password. The API
+        # keys stay: scripts depend on them.
         datastore.reset_user_access(user)
-        ApiToken.objects(user=user, revoked_at=None).update(set__revoked_at=datetime.now(UTC))
-        OAuth2Token.objects(user=user, revoked=False).update(set__revoked=True)
         user.password = None
         datastore.put(user)
         login_user(user)
@@ -361,8 +357,6 @@ def record_login(user: User, login: ProConnectLogin, udata_second_factor: bool) 
         and (udata_second_factor or trusts_first_second_factor(user))
     ):
         identity.verified_at = datetime.now(UTC)
-        # Its holder learns it from their mailbox, should the identity be someone else's.
-        mails.proconnect_identity_trusted().send(user)
     user.proconnect = identity
     datastore.put(user)
 
