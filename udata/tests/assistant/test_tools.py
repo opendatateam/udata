@@ -10,6 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 from pydantic_ai import Agent
+from pydantic_ai.messages import ModelResponse, TextPart, ToolCallPart
+from pydantic_ai.models.function import FunctionModel
 from pydantic_ai.models.test import TestModel
 
 from udata.auth import login_user
@@ -317,7 +319,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call(
             "query_data", deps, groupby="dep", aggregate_column="n_cum_dose1", aggregate="max"
         )
-        assert "Plus de 50 groupes" in result
+        # cdata parses this exact sentence
+        assert result.endswith("\nPlus de 50 groupes : seuls les 50 premiers sont pris en compte.")
         more.assert_called_once()
 
     def test_query_data_allows_a_global_aggregate(self, mocker):
@@ -377,8 +380,9 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
     def test_create_chart_returns_the_validated_chart(self, mocker):
         deps, resource = self.active(mocker)
-        mocker.patch.object(deps.tabular, "get_data", return_value={"data": [{"dep": "01"}]})
+        more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
         result = self.call("create_chart", deps, config=self.chart_config())
+        more.assert_called_once()
         assert result["status"] == "ok"
         assert result["chart"]["series"][0]["resource_id"] == str(resource.id)
         assert result["more_groups"] is False
@@ -403,13 +407,14 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=True)
         result = self.call("create_chart", deps, config=self.chart_config())
         assert result["more_groups"] is True
-        query = "dep__groupby&n_cum_dose1__max&dep__sort=asc"
-        get_data.assert_called_once_with(str(resource.id), query + "&page=1&page_size=50")
-        more.assert_called_once_with(str(resource.id), query)
+        get_data.assert_not_called()
+        more.assert_called_once_with(
+            str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc"
+        )
 
     def test_create_chart_stays_valid_when_the_group_check_fails(self, mocker):
         deps, _ = self.active(mocker)
-        mocker.patch.object(deps.tabular, "get_data", side_effect=TabularError("x"))
+        mocker.patch.object(deps.tabular, "has_more_groups", side_effect=TabularError("x"))
         result = self.call("create_chart", deps, config=self.chart_config())
         assert result["status"] == "ok"
         assert result["more_groups"] is False
@@ -421,6 +426,31 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def test_update_chart_rejects_an_empty_patch(self):
         result = self.call("update_chart", self.make_deps(), patch=UpdateChartInput())
         assert result["status"] == "error"
+
+    def test_request_clarification_bounds_choices_to_2_to_4(self):
+        schema = self.tools["request_clarification"].tool_def.parameters_json_schema
+        choices = schema["properties"]["choices"]
+        assert choices["minItems"] == 2
+        assert choices["maxItems"] == 4
+
+    def test_query_data_accepts_a_numeric_filter_without_cls(self, mocker):
+        deps, resource = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        flt = {"column": "n_cum_dose1", "condition": "greater", "value": 2.5}
+
+        async def call_query_data(messages, info):
+            if any(getattr(p, "part_kind", "") == "tool-return" for m in messages for p in m.parts):
+                return ModelResponse(parts=[TextPart("ok")])
+            args = json.dumps({"filters": flt})
+            return ModelResponse(parts=[ToolCallPart("query_data", args)])
+
+        agent = Agent(model=FunctionModel(call_query_data), deps_type=AssistantDeps)
+        register_tools(agent)
+        with self.request_as():
+            agent.run_sync("filtre", deps=deps)
+        get_data.assert_called_once_with(
+            str(resource.id), "n_cum_dose1__greater=2.5&page=1&page_size=50"
+        )
 
     def test_tools_are_callable_through_the_agent(self, mocker):
         deps, _ = self.active(mocker)

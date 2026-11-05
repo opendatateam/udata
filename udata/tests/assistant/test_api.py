@@ -392,7 +392,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert self.post(url, data={**PAYLOAD, "visualization": too_big}).status_code == 400
         agent.assert_not_called()
 
-    def test_chat_streams_a_create_chart_tool_result(self, mocker):
+    def test_chat_streams_create_then_update_chart_results(self, mocker):
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = "test-key"
         user = self.login()
@@ -409,36 +409,71 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
             }
         }
         mocker.patch.object(TabularClient, "get_profile", return_value=profile)
-        mocker.patch.object(TabularClient, "get_data", return_value={"data": [{"dep": "01"}]})
+        mocker.patch.object(TabularClient, "has_more_groups", return_value=False)
         config = {
             "title": "Doses",
             "type": "line",
             "x_axis": {"column_x": "dep", "type": "discrete"},
             "series": [{"column_y": "n_cum_dose1", "aggregate_y": "max"}],
+            "filters": {"column": "dep", "condition": "differs", "value": "75"},
         }
+        patch = {"y_axis": {"unit": "doses"}}
 
-        async def call_create_chart(messages, info):
-            if any(
+        async def create_then_update(messages, info):
+            returns = sum(
                 getattr(part, "part_kind", "") == "tool-return"
                 for m in messages
                 for part in m.parts
-            ):
-                yield "Voici le graphique."
-            else:
+            )
+            if returns == 0:
                 args = json.dumps({"config": config})
                 yield {0: DeltaToolCall(name="create_chart", json_args=args)}
+            elif returns == 1:
+                args = json.dumps({"patch": patch})
+                yield {0: DeltaToolCall(name="update_chart", json_args=args)}
+            else:
+                yield "Voici le graphique."
 
         mocker.patch(
             "udata.core.assistant.api.get_agent",
-            return_value=agent_with_model(FunctionModel(stream_function=call_create_chart)),
+            return_value=agent_with_model(FunctionModel(stream_function=create_then_update)),
         )
         response = self.post(
             url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": str(resource.id)}
         )
         assert response.status_code == 200
-        body = response.get_data(as_text=True)
-        assert "tool-output-available" in body
-        assert '"status":"ok"' in body
+        outputs = []
+        for line in response.get_data(as_text=True).splitlines():
+            if line.startswith("data: {"):
+                chunk = json.loads(line[len("data: ") :])
+                if chunk.get("type") == "tool-output-available":
+                    outputs.append(chunk["output"])
+        assert len(outputs) == 2
+        created, updated = outputs
+        assert created["status"] == "ok"
+        series = created["chart"]["series"][0]
+        assert series["resource_id"] == str(resource.id)
+        assert series["filters"]["_cls"] == "Filter"
+        assert isinstance(created["more_groups"], bool)
+        assert updated["status"] == "ok"
+        assert updated["patch"] == {"y_axis": {"unit": "doses"}}
+
+    def test_chat_normalizes_an_uppercase_resource_id(self, mocker):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        resource = ResourceFactory(title="Subventions 2025")
+        DatasetFactory(resources=[resource])
+        mocker.patch.object(TabularClient, "get_profile", return_value={})
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        payload = {**PAYLOAD, "resource_id": str(resource.id).upper()}
+        response = self.post(url_for("api.assistant_chat"), data=payload)
+        assert response.status_code == 200
+        response.get_data()
+        assert f"Ressource active (resource_id à utiliser avec les outils) : {resource.id}" in str(
+            model.seen
+        )
 
     def test_chat_caps_model_requests_per_turn(self, mocker):
         """A model that keeps calling tools after the tool budget is refused
@@ -450,7 +485,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
         async def always_call_a_tool(messages, info):
             calls.append(messages)
-            args = json.dumps({"question": "Laquelle ?", "choices": ["a"]})
+            args = json.dumps({"question": "Laquelle ?", "choices": ["a", "b"]})
             yield {0: DeltaToolCall(name="request_clarification", json_args=args)}
 
         mocker.patch(

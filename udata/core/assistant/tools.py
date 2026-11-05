@@ -1,16 +1,18 @@
 """Tools attached to the AI assistant agent.
 
-Every tool returns a French text: outputs feed back into the LLM as tool
-results, and error cases must be explained, never raised — an exception
-escaping a tool kills the whole agent run.
+`create_chart` and `update_chart` return dicts (validated chart or patch, or
+a list of errors); the other tools return a French text. Outputs feed back
+into the LLM as tool results, and error cases must be explained, never
+raised — an exception escaping a tool kills the whole agent run.
 """
 
 import json
 import logging
 from dataclasses import dataclass
-from typing import Literal
+from typing import Annotated, Literal
 
 from mongoengine.errors import DoesNotExist, ValidationError
+from pydantic import Field
 from pydantic_ai import Agent, RunContext
 
 from udata.core.assistant.charts import (
@@ -299,9 +301,7 @@ def register_tools(agent: Agent) -> None:
         )
         more_groups = False
         try:
-            result = ctx.deps.tabular.get_data(resource_id, with_page(query))
-            rows = result.get("data") if isinstance(result, dict) else None
-            more_groups = _has_more_groups(ctx.deps.tabular, resource_id, query, rows or [])
+            more_groups = ctx.deps.tabular.has_more_groups(resource_id, query)
         except TabularError:
             log.warning("Could not check the group count of a chart", exc_info=True)
         return {
@@ -325,7 +325,9 @@ def register_tools(agent: Agent) -> None:
 
     @agent.tool
     def request_clarification(
-        ctx: RunContext[AssistantDeps], question: str, choices: list[str]
+        ctx: RunContext[AssistantDeps],
+        question: str,
+        choices: Annotated[list[str], Field(min_length=2, max_length=4)],
     ) -> str:
         """Demande une clarification à l'utilisateur en proposant une liste de choix numérotés."""
         if refusal := _consume_tool_budget(ctx):

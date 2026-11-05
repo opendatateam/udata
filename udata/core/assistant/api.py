@@ -62,7 +62,7 @@ def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
         if not isinstance(resource_id, str):
             api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
         try:
-            uuid.UUID(resource_id)
+            resource_id = str(uuid.UUID(resource_id))
         except ValueError:
             api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
 
