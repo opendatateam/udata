@@ -341,6 +341,54 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "groupby demande un agrégat" in result
         get_data.assert_not_called()
 
+    def test_query_data_refuses_columns_with_an_aggregate(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        result = self.call(
+            "query_data",
+            deps,
+            groupby="dep",
+            aggregate_column="n_cum_dose1",
+            aggregate="sum",
+            columns=["dep"],
+        )
+        assert result == (
+            "Requête invalide : columns ne peut pas être combiné avec un agrégat ; retire columns."
+        )
+        get_data.assert_not_called()
+        assert deps.query_count == 0
+        self.call("query_data", deps)
+        assert deps.query_count == 1
+
+    def test_query_data_refuses_sorting_on_an_aggregated_column(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
+        result = self.call(
+            "query_data",
+            deps,
+            groupby="dep",
+            aggregate_column="n_cum_dose1",
+            aggregate="sum",
+            sort_column="n_cum_dose1",
+            sort_direction="desc",
+        )
+        assert "le tri n'est possible que sur la colonne groupby" in result
+        assert "sort_x_by=axis_y" in result
+        get_data.assert_not_called()
+        assert deps.query_count == 0
+        ok = self.call(
+            "query_data",
+            deps,
+            groupby="dep",
+            aggregate_column="n_cum_dose1",
+            aggregate="sum",
+            sort_column="dep",
+        )
+        assert "invalide" not in ok
+        get_data.assert_called_once()
+        assert deps.query_count == 1
+
     def test_query_data_rejects_an_unknown_column(self, mocker):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data")

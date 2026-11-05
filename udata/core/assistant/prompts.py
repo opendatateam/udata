@@ -73,6 +73,8 @@ l'échec sans inventer de résultat ;
 correspondance demandé : n'élargis jamais une égalité en recherche partielle ;
 - agrège plutôt que de lister des lignes pour les statistiques et les \
 classements ; limite les colonnes à celles utiles à la réponse ;
+- avec un agrégat, ne passe pas `columns` et ne trie que sur la colonne \
+groupby ; un tri par valeur se fait côté graphique avec sort_x_by=axis_y ;
 - exclus les valeurs NULL ou vides lorsqu'elles fausseraient le résultat ;
 - une exploration renvoie au plus 50 lignes ou groupes : n'affirme jamais \
 l'exhaustivité au-delà de 50 groupes ;

@@ -231,7 +231,9 @@ def register_tools(agent: Agent) -> None:
         Un agrégat sans `groupby` est autorisé : il donne un total global.
         Pour regrouper, renseigne `groupby`, `aggregate_column` et `aggregate`
         (avg, sum, count, min, max). Sans tri explicite, un regroupement est trié
-        sur la colonne de regroupement. Retourne au plus 50 lignes.
+        sur la colonne de regroupement. Avec un agrégat, ne passe pas `columns` et ne
+        trie que sur la colonne `groupby` (le service ne trie pas sur une valeur
+        agrégée). Retourne au plus 50 lignes.
         """
         if refusal := _consume_tool_budget(ctx):
             return refusal
@@ -243,6 +245,14 @@ def register_tools(agent: Agent) -> None:
             return "Requête invalide : aggregate_column et aggregate vont ensemble."
         if groupby and not aggregate:
             return "Requête invalide : groupby demande un agrégat (aggregate_column et aggregate)."
+        if aggregate and columns:
+            return "Requête invalide : columns ne peut pas être combiné avec un agrégat ; retire columns."
+        if aggregate and sort_column and sort_column != groupby:
+            return (
+                "Requête invalide : le tri n'est possible que sur la colonne groupby ; "
+                "le service ne trie pas sur une valeur agrégée. "
+                "Trie côté graphique avec sort_x_by=axis_y."
+            )
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
         unknown = list(dict.fromkeys(name for name in used if name and name not in known))
         if unknown:
