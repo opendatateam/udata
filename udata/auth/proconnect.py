@@ -110,12 +110,7 @@ class ProConnectLogin:
     def presents_trusted_second_factor(self, user: User) -> bool:
         """Whether this login of `user` presented the second factor of its trusted identity, the
         proof that sensitive changes to the account's second factors require."""
-        return (
-            self.is_of(user)
-            and self.second_factor
-            and user.trusted_proconnect_sub is not None
-            and self.sub == user.trusted_proconnect_sub
-        )
+        return self.is_of(user) and self.second_factor and self.sub == user.trusted_proconnect_sub
 
 
 def session_login(key: str) -> ProConnectLogin | None:

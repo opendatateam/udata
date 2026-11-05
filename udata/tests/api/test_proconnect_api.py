@@ -1,6 +1,4 @@
-import json
 from datetime import datetime
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import pytest
 from flask import current_app, url_for
@@ -10,26 +8,6 @@ from udata.core.user.models import User
 from udata.tests.api import PytestOnlyAPITestCase
 
 CDATA = "http://cdata.test"
-
-
-def require_second_factor(authorize_url: str) -> str:
-    """What an agent's browser can do to the redirection to ProConnect before following it."""
-    parts = urlparse(authorize_url)
-    params = {key: values[0] for key, values in parse_qs(parts.query).items()}
-    params.pop("acr_values", None)
-    params["claims"] = json.dumps(
-        {"id_token": {"acr": {"essential": True, "values": ["eidas0-mfa"]}, "amr": None}}
-    )
-    return urlunparse(parts._replace(query=urlencode(params)))
-
-
-def drop_second_factor_requirement(authorize_url: str) -> str:
-    """The reverse: an attacker with the password at the identity provider skips the factor."""
-    parts = urlparse(authorize_url)
-    params = {key: values[0] for key, values in parse_qs(parts.query).items()}
-    params["acr_values"] = "eidas1"
-    params["claims"] = json.dumps({"id_token": {"amr": None}})
-    return urlunparse(parts._replace(query=urlencode(params)))
 
 
 # The session cookie must carry the OAuth state from the login redirect to the callback:
@@ -48,8 +26,8 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         with current_app.app_context():
             return super().post(url, *args, **kwargs)
 
-    def sign_in(self, proconnect, email, second_factor=True, sub=None):
-        proconnect.agent_has_session(email, second_factor=second_factor, sub=sub)
+    def sign_in(self, proconnect, email, second_factor=True, sub=None, amr=None):
+        proconnect.agent_has_session(email, second_factor=second_factor, sub=sub, amr=amr)
         response = self.get(url_for("api.proconnect_login"))
         callback = proconnect.authorize(response.location)
         return self.get(url_for("api.proconnect_auth", **callback))
@@ -173,7 +151,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         proconnect.agent_has_session("jane@example.org", sub="attacker")
         response = self.get(url_for("api.proconnect_login"))
 
-        callback = proconnect.authorize(require_second_factor(response.location))
+        callback = proconnect.authorize(
+            proconnect.tamper(response.location, require_second_factor=True)
+        )
         self.get(url_for("api.proconnect_auth", **callback))
 
         self.assert401(self.get(url_for("api.me")))
@@ -218,18 +198,24 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_login_without_the_second_factor_proconnect_holds_is_sent_back_for_it(self, proconnect):
-        UserFactory(email="jane@example.org")
+        user = UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
         self.get(url_for("security.logout"))
-        # Someone with Jane's password at her identity provider skips the requirement.
+        # The request we send goes through the browser, which may drop the requirement.
         proconnect.agent_has_session("jane@example.org", second_factor=False)
         response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(drop_second_factor_requirement(response.location))
+        callback = proconnect.authorize(
+            proconnect.tamper(response.location, require_second_factor=False)
+        )
 
         response = self.get(url_for("api.proconnect_auth", **callback))
 
-        assert '"essential": true' in parse_qs(urlparse(response.location).query)["claims"][0]
         self.assert401(self.get(url_for("api.me")))
+        # Back at ProConnect, the second factor is asked for: Jane presents it.
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+        assert proconnect.second_factors == 1
+        self.assert_logged_in_as(user)
 
     def test_login_without_second_factor_does_not_trust_the_identity(self, proconnect):
         user = UserFactory(email="jane@example.org")
@@ -309,7 +295,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.get(url_for("security.logout"))
         proconnect.agent_has_session("jane@example.org", second_factor=False)
         response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(drop_second_factor_requirement(response.location))
+        callback = proconnect.authorize(
+            proconnect.tamper(response.location, require_second_factor=False)
+        )
         self.get(url_for("api.proconnect_auth", **callback))
         self.enter_totp(secret)
         disabled = self.post(
@@ -437,30 +425,42 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
     def test_udata_second_factor_is_asked_when_proconnect_does_not_require_one(self, proconnect):
-        totp = current_app.extensions["security"].totp_factory
-        UserFactory(
-            email="jane@example.org",
-            tf_primary_method="authenticator",
-            tf_totp_secret=totp.generate_totp_secret(),
-        )
+        self.totp_user(email="jane@example.org")
 
         self.sign_in(proconnect, "jane@example.org")
 
         self.assert401(self.get(url_for("api.me")))
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_one_time_code_by_email_is_no_second_factor(self, proconnect):
+        # ProConnect adds one for an identity provider without a second factor: it only proves
+        # access to the mailbox again.
+        user = UserFactory(email="jane@example.org")
+
+        self.sign_in(proconnect, "jane@example.org", amr=["pwd", "mail", "mfa"])
+
+        identity = self.identity_of(user)
+        assert not identity.second_factor
+        assert identity.verified_at is None
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_one_time_code_by_email_does_not_skip_the_udata_second_factor(self, proconnect):
+        _, secret = self.totp_user(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.enter_totp(secret)
+        self.get(url_for("security.logout"))
+
+        # Her trusted identity, signing in with a code by email instead of her key.
+        self.sign_in(proconnect, "jane@example.org", amr=["pwd", "mail", "mfa"])
+
+        self.assert401(self.get(url_for("api.me")))
+
     def test_login_completed_by_the_two_factor_is_fresh(self, proconnect):
         # A code from the agent's authenticator proves as much as a password on /verify.
-        totp = current_app.extensions["security"].totp_factory
-        secret = totp.generate_totp_secret()
-        UserFactory(
-            email="jane@example.org", tf_primary_method="authenticator", tf_totp_secret=secret
-        )
+        _, secret = self.totp_user(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
 
-        response = self.post(
-            url_for("security.two_factor_token_validation"),
-            {"code": totp.generate_totp_password(secret)},
-        )
+        response = self.enter_totp(secret)
 
         self.assert200(response)
         assert self.is_fresh()

@@ -376,7 +376,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         definitive answer in the authentication path.
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         """
-        return super().check_tf_required_setup() or self.two_factor_required_by_policy
+        return self.two_factor_required_by_policy
 
     def self_web_url(self, **kwargs):
         return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)

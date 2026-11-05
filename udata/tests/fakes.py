@@ -7,7 +7,7 @@ instead of being handed a canned response per test.
 import json
 import time
 from dataclasses import dataclass
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from uuid import uuid4
 
 from joserfc import jwt
@@ -50,6 +50,7 @@ class ProConnectFake:
         # The ProConnect account of whoever is at the keyboard.
         self.agent: str | None = None
         self.agent_sub: str | None = None
+        self.agent_amr: list[str] | None = None
         self.session_open = False
         self.session_second_factor = False
         self.authentications = 0
@@ -64,15 +65,34 @@ class ProConnectFake:
         rmock.get(f"{self.ISSUER}/userinfo", content=self._handle_userinfo)
 
     def agent_has_session(
-        self, email: str, second_factor: bool = True, sub: str | None = None
+        self,
+        email: str,
+        second_factor: bool = True,
+        sub: str | None = None,
+        amr: list[str] | None = None,
     ) -> None:
         """Put the ProConnect identity of `email` at the keyboard, with a session already
         open. Another identity with the same email, such as one an attacker created, gets
-        its own `sub`."""
+        its own `sub`. `amr` is how the identity provider authenticates the agent, when it
+        isn't a security key: a one-time code by email for one without a second factor."""
         self.agent = email
         self.agent_sub = sub or f"sub-of-{email}"
+        self.agent_amr = amr
         self.session_open = True
         self.session_second_factor = second_factor
+
+    def tamper(self, authorize_url: str, require_second_factor: bool) -> str:
+        """What the agent's browser can do to the redirection to ProConnect before following
+        it: require a second factor we don't, or drop the one we do."""
+        params = self._params(authorize_url)
+        if require_second_factor:
+            params.pop("acr_values", None)
+            claims = {"acr": {"essential": True, "values": ["eidas0-mfa"]}, "amr": None}
+        else:
+            params["acr_values"] = "eidas1"
+            claims = {"amr": None}
+        params["claims"] = json.dumps({"id_token": claims})
+        return urlunparse(urlparse(authorize_url)._replace(query=urlencode(params)))
 
     def authorize(self, authorize_url: str) -> dict:
         """Play the browser round-trip and return the callback query parameters."""
@@ -94,7 +114,7 @@ class ProConnectFake:
         acr = "eidas0-mfa" if second_factor_required else "eidas1"
         amr = None
         if "amr" in id_token_claims:
-            amr = ["pop", "mfa"] if self.session_second_factor else ["pwd"]
+            amr = self.agent_amr or (["pop", "mfa"] if self.session_second_factor else ["pwd"])
         code = uuid4().hex
         self._grants[code] = ProConnectGrant(self.agent, self.agent_sub, params["nonce"], acr, amr)
         return {"code": code, "state": params["state"]}
