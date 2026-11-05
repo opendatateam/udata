@@ -478,6 +478,7 @@ class Defaults(object):
         "image/webp",
         "text/html",
         "text/calendar",
+        "text/markdown",
         "text/plain",
         "text/xml",
         "text/turtle",

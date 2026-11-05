@@ -50,29 +50,10 @@ The site identifier. It is used to attached some database configuration, metrics
 
 ### ALLOWED_RESOURCES_EXTENSIONS
 
-**default**:
-```python
-[
-    # Base
-    'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf', 'xsd',
-    # OpenOffice
-    'ods', 'odt', 'odp', 'odg',
-    # Microsoft Office
-    'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
-    # Archives
-    'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
-    # Images
-    'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
-    # Geo
-    'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
-    # Meteorology
-    'grib2',
-    # Misc
-    'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
-]
-```
+**default**: see `ALLOWED_RESOURCES_EXTENSIONS` in [`udata/settings.py`](https://github.com/opendatateam/udata/blob/main/udata/settings.py)
 
 This is the allowed resources extensions list that user can upload.
+The list effectively allowed by a running instance is returned by `GET /api/1/datasets/extensions/`.
 
 ### PREVIEW_MODE
 
