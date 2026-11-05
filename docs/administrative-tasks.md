@@ -197,6 +197,38 @@ It's possible to index or reindex only last modified documents.
 time udata search index -f 2022-02-20-20-02
 ```
 
+## Geospatial zones
+
+To load or refresh the zones:
+
+```shell
+$ udata spatial load [<geozones-file>] [<levels-file>]
+```
+
+Each zone of the geozones file can carry an optional `bbox` property: its bounding box
+`[minx, miny, maxx, maxy]` (WGS84 longitude/latitude). Bounding boxes are used to detect a
+dataset's zone from its spatial geometry. Files without `bbox` still load, and leave existing
+bounding boxes untouched. Use `--drop` to rebuild the zones from the file, which also removes
+the bounding boxes it no longer carries.
+
+Zones are detected for a dataset when it's created or when its spatial coverage changes.
+To run the detection on existing datasets that have a `spatial.geom` (datasets whose detected
+zones change are reindexed):
+
+```shell
+$ udata spatial detect-zones
+```
+
+Detected zones are indexed in the `geozones_detected` field of the dataset search. On an existing
+deployment, refresh the Elasticsearch templates and rebuild the dataset index so that the field
+gets its mapping. A plain `udata search index` writes into the existing index, where the field
+would be mapped dynamically as text and the geozone filters would not match it:
+
+```shell
+$ udata search init-es
+$ udata search index dataset -r true
+```
+
 ## Workers
 
 Start a worker with:
