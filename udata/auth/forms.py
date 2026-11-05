@@ -113,21 +113,12 @@ class ExtendedTwoFactorSetupForm(TwoFactorSetupForm):
     def validate(self, **kwargs):
         if not super().validate(**kwargs):
             return False
-        if self.setup.data == "disable" or self.user.tf_primary_method:
-            return True
-
-        identity = self.user.proconnect
-        if identity is None or identity.verified_at is None:
+        if self.setup.data == "disable" or not self.user.second_factor_at_proconnect_only:
             return True
         # The ProConnect identity is the account's second factor: whoever sets up the
         # udata one must present it, or a stolen password would take the account over.
         login = session_login(LOGIN_KEY)
-        if (
-            login is not None
-            and login.is_of(self.user)
-            and login.sub == identity.sub
-            and login.second_factor
-        ):
+        if login is not None and login.presents_trusted_second_factor(self.user):
             return True
         self.setup.errors.append(
             _(

@@ -23,6 +23,15 @@ def require_second_factor(authorize_url: str) -> str:
     return urlunparse(parts._replace(query=urlencode(params)))
 
 
+def drop_second_factor_requirement(authorize_url: str) -> str:
+    """The reverse: an attacker with the password at the identity provider skips the factor."""
+    parts = urlparse(authorize_url)
+    params = {key: values[0] for key, values in parse_qs(parts.query).items()}
+    params["acr_values"] = "eidas1"
+    params["claims"] = json.dumps({"id_token": {"amr": None}})
+    return urlunparse(parts._replace(query=urlencode(params)))
+
+
 # The session cookie must carry the OAuth state from the login redirect to the callback:
 # the test client speaks plain http to local.test, whatever a local udata.cfg says.
 @pytest.mark.options(SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None, CDATA_BASE_URL=CDATA)
@@ -183,6 +192,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
         self.assert401(self.get(url_for("api.me")))
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_first_second_factor_of_an_account_without_udata_2fa_is_trusted(self, proconnect):
         user = UserFactory(email="jane@example.org")
 
@@ -193,6 +203,33 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert identity.sub == "sub-of-jane@example.org"
         assert identity.second_factor
         assert identity.verified_at
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
+    def test_first_second_factor_is_not_trusted_unless_proconnect_requires_it(self, proconnect):
+        # The account would rely on it, while ProConnect wouldn't ask an authenticator app.
+        user = UserFactory(email="jane@example.org")
+
+        self.sign_in(proconnect, "jane@example.org")
+
+        self.assert_logged_in_as(user)
+        identity = self.identity_of(user)
+        assert identity.second_factor
+        assert identity.verified_at is None
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_without_the_second_factor_proconnect_holds_is_sent_back_for_it(self, proconnect):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        # Someone with Jane's password at her identity provider skips the requirement.
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(drop_second_factor_requirement(response.location))
+
+        response = self.get(url_for("api.proconnect_auth", **callback))
+
+        assert '"essential": true' in parse_qs(urlparse(response.location).query)["claims"][0]
+        self.assert401(self.get(url_for("api.me")))
 
     def test_login_without_second_factor_does_not_trust_the_identity(self, proconnect):
         user = UserFactory(email="jane@example.org")
@@ -205,6 +242,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert not identity.second_factor
         assert identity.verified_at is None
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_another_identity_is_refused_when_proconnect_holds_the_second_factor(self, proconnect):
         user = UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
@@ -216,7 +254,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert401(self.get(url_for("api.me")))
         assert self.identity_of(user).sub == "sub-of-jane@example.org"
 
-    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True, PROCONNECT_REQUIRE_SECOND_FACTOR=True
+    )
     def test_sysadmin_without_udata_2fa_signs_in_with_the_proconnect_second_factor(
         self, proconnect
     ):
@@ -228,17 +268,67 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(admin)
         assert not User.objects.get(id=admin.id).tf_primary_method
 
-    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
-    def test_sysadmin_trusting_proconnect_is_refused_without_its_second_factor(self, proconnect):
-        AdminFactory(email="admin@example.org")
-        self.sign_in(proconnect, "admin@example.org")
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_another_identity_at_the_same_address_cannot_reauthenticate(self, proconnect):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        response = self.start_reauthentication(proconnect)
+        # On Jane's unattended session, someone with their own identity at her address.
+        proconnect.agent_sub = "attacker"
+
+        callback = proconnect.authorize(response.location)
+        response = self.get(url_for("api.proconnect_auth", **callback))
+
+        assert response.location == f"{CDATA}/verify?flash=proconnect_reauth_identity_mismatch"
+        assert not self.is_fresh()
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_new_identity_passing_the_udata_2fa_becomes_the_trusted_one(self, proconnect):
+        # Jane moved to another identity provider: her udata code proves it's her.
+        user, secret = self.totp_user(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.enter_totp(secret)
         self.get(url_for("security.logout"))
 
-        response = self.sign_in(proconnect, "admin@example.org", second_factor=False)
+        self.sign_in(proconnect, "jane@example.org", sub="new-jane")
+        self.assert200(self.enter_totp(secret))
 
-        assert "flash=proconnect_second_factor_required" in response.location
-        self.assert401(self.get(url_for("api.me")))
+        identity = self.identity_of(user)
+        assert identity.sub == "new-jane"
+        assert identity.verified_at
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_udata_2fa_cannot_be_set_up_from_a_login_without_the_proconnect_second_factor(
+        self, proconnect
+    ):
+        # Jane's identity is trusted, but this login didn't present its second factor: the
+        # udata code stood for it. Then she drops the udata 2FA, ProConnect's being the only.
+        user, secret = self.totp_user(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.enter_totp(secret)
+        self.get(url_for("security.logout"))
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(drop_second_factor_requirement(response.location))
+        self.get(url_for("api.proconnect_auth", **callback))
+        self.enter_totp(secret)
+        disabled = self.post(
+            url_for("security.two_factor_setup"),
+            {"setup": "disable"},
+            headers={"Accept": "application/json"},
+        )
+        self.assert200(disabled)
+
+        response = self.post(
+            url_for("security.two_factor_setup"),
+            {"setup": "authenticator"},
+            headers={"Accept": "application/json"},
+        )
+
+        self.assert400(response)
+        assert not User.objects.get(id=user.id).tf_totp_secret
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_udata_2fa_cannot_be_set_up_by_password_once_proconnect_holds_the_second_factor(
         self, proconnect
     ):
@@ -261,7 +351,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert400(response)
         assert not User.objects.get(id=user.id).tf_totp_secret
 
-    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True, PROCONNECT_REQUIRE_SECOND_FACTOR=True
+    )
     def test_sysadmin_trusting_proconnect_cannot_set_up_the_udata_2fa_from_a_password_login(
         self, proconnect
     ):
@@ -287,6 +379,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert400(response)
         assert not User.objects.get(id=admin.id).tf_totp_secret
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_udata_2fa_can_be_set_up_from_the_trusted_proconnect_login(self, proconnect):
         UserFactory(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
@@ -316,6 +409,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert self.identity_of(user) is None
 
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_the_account_security_is_shown_to_the_user(self, proconnect):
         UserFactory(email="jane@example.org", password="password")
         self.sign_in(proconnect, "jane@example.org")

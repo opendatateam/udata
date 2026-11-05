@@ -327,6 +327,18 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
         )
 
+    @property
+    def trusted_proconnect_sub(self) -> str | None:
+        """The ProConnect identity trusted as the account holder's, if any."""
+        identity = self.proconnect
+        return identity.sub if identity is not None and identity.verified_at else None
+
+    @property
+    def second_factor_at_proconnect_only(self) -> bool:
+        """Whether the account's only second factor is the one of its trusted ProConnect identity,
+        which a login must then present as a udata one would be."""
+        return self.trusted_proconnect_sub is not None and not self.tf_primary_method
+
     @field(description="Whether the account can sign in with a password", allow_null=True)
     def has_password(self) -> bool:
         return bool(self.password) if current_user_is_admin_or_self() else None
