@@ -392,6 +392,7 @@ class Defaults(object):
         # Base
         "csv",
         "txt",
+        "md",
         "json",
         "pdf",
         "xml",
@@ -480,6 +481,7 @@ class Defaults(object):
         "image/webp",
         "text/html",
         "text/calendar",
+        "text/markdown",
         "text/plain",
         "text/xml",
         "text/turtle",
