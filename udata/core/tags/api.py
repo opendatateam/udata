@@ -1,6 +1,6 @@
 from udata.api import API, api
+from udata.core.suggest import mongo_suggest
 from udata.models import Tag
-from udata.tags import slug  # TODO: merge this into this package
 
 DEFAULT_SIZE = 8
 
@@ -24,8 +24,13 @@ class SuggestTagsAPI(API):
     @api.doc("suggest_tags")
     @api.expect(parser)
     def get(self):
-        """Suggest tags"""
+        """Suggest tags, ranked by match quality (exact > prefix > word > substring)."""
         args = parser.parse_args()
-        q = slug(args["q"])
-        results = [{"text": i.name} for i in Tag.objects(name__icontains=q).limit(args["size"])]
-        return sorted(results, key=lambda o: len(o["text"]))
+        tags = mongo_suggest(
+            Tag.objects,
+            args["q"],
+            match_fields=["name"],
+            slug_field="name",
+            size=args["size"],
+        )
+        return [{"text": tag.name} for tag in tags]
