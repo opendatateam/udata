@@ -8,7 +8,7 @@ equivalent of JavaScript's `encodeURIComponent`.
 from typing import Annotated, Literal
 from urllib.parse import quote
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
 
 FilterCondition = Literal[
     "exact",
@@ -25,7 +25,7 @@ PAGE_SIZE = 50
 
 
 class Filter(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, coerce_numbers_to_str=True)
 
     cls: Literal["Filter"] = Field("Filter", alias="_cls")
     column: str
@@ -50,7 +50,20 @@ class OrFilters(BaseModel):
 AndFilters.model_rebuild()
 OrFilters.model_rebuild()
 
-GenericFilter = Annotated[Filter | AndFilters | OrFilters, Field(discriminator="cls")]
+
+def _filter_tag(value) -> str | None:
+    # `_cls` is optional in the published schema: a bare condition is a Filter.
+    if isinstance(value, dict):
+        return value.get("_cls") or value.get("cls") or "Filter"
+    return getattr(value, "cls", None)
+
+
+GenericFilter = Annotated[
+    Annotated[Filter, Tag("Filter")]
+    | Annotated[AndFilters, Tag("AndFilters")]
+    | Annotated[OrFilters, Tag("OrFilters")],
+    Discriminator(_filter_tag),
+]
 
 
 def _encode(value: str) -> str:

@@ -99,3 +99,29 @@ def test_filter_columns_nested_and_none():
         ]
     )
     assert filter_columns(f) == {"a", "b"}
+
+
+def test_numeric_filter_value_is_coerced_to_a_string():
+    f = TypeAdapter(GenericFilter).validate_python(
+        {"_cls": "Filter", "column": "b", "condition": "greater", "value": 2.5}
+    )
+    assert f.value == "2.5"
+    group = OrFilters(filters=[f])
+    assert build_data_query(filters=group) == "or=(b__greater.2%252E5)"
+
+
+def test_filter_without_cls_parses_as_a_filter():
+    f = TypeAdapter(GenericFilter).validate_python(
+        {"column": "n", "condition": "greater", "value": 2}
+    )
+    assert isinstance(f, Filter)
+    assert f.value == "2"
+    assert build_data_query(filters=f) == "n__greater=2"
+    assert f.model_dump(by_alias=True)["_cls"] == "Filter"
+
+
+def test_group_children_without_cls_parse_as_filters():
+    f = TypeAdapter(GenericFilter).validate_python(
+        {"_cls": "AndFilters", "filters": [{"column": "a", "condition": "is_null"}]}
+    )
+    assert isinstance(f.filters[0], Filter)
