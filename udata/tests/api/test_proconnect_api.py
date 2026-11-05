@@ -2,7 +2,9 @@ from datetime import datetime
 
 import pytest
 from flask import current_app, url_for
+from flask_security.recoverable import generate_reset_password_token
 
+from udata.auth.mails import render_mail_template
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.tests.api import PytestOnlyAPITestCase
@@ -442,6 +444,134 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert response.json["has_password"] is None
         assert response.json["has_two_factor"] is None
         assert response.json["proconnect"] is None
+
+    def switch_to_proconnect_only(self):
+        return self.post(url_for("api.proconnect_only"), headers={"Accept": "application/json"})
+
+    def test_switching_to_proconnect_only_drops_the_password_and_the_udata_2fa(self, proconnect):
+        user, secret = self.totp_user(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.sign_in(proconnect, "jane@example.org")
+        self.enter_totp(secret)
+        self.reauthenticate(proconnect)
+
+        response = self.switch_to_proconnect_only()
+
+        self.assertStatus(response, 204)
+        user.reload()
+        assert not user.password
+        assert not user.tf_primary_method
+        assert not user.tf_totp_secret
+        self.assert_logged_in_as(user)
+        self.get(url_for("security.logout"))
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        self.assert401(self.get(url_for("api.me")))
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_switching_to_proconnect_only_signs_out_the_other_sessions(self, proconnect):
+        user = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        elsewhere = current_app.test_client()
+        elsewhere.post(
+            url_for("security.login"), data={"email": user.email, "password": "password"}
+        )
+        with current_app.app_context():
+            assert elsewhere.get(url_for("api.me")).status_code == 200
+        self.sign_in(proconnect, "jane@example.org")
+        self.reauthenticate(proconnect)
+
+        self.assertStatus(self.switch_to_proconnect_only(), 204)
+
+        with current_app.app_context():
+            assert elsewhere.get(url_for("api.me")).status_code == 401
+        self.assert_logged_in_as(user)
+
+    def test_switching_to_proconnect_only_requires_a_fresh_session(self, proconnect):
+        UserFactory(email="jane@example.org", password="password")
+        self.sign_in(proconnect, "jane@example.org")
+
+        response = self.switch_to_proconnect_only()
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+
+    def test_switching_to_proconnect_only_requires_the_trusted_proconnect_identity(
+        self, proconnect
+    ):
+        # Signed in with the password: whoever has it doesn't prove the ProConnect key.
+        user = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        assert self.is_fresh()
+
+        self.assert403(self.switch_to_proconnect_only())
+        assert User.objects.get(id=user.id).password
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
+    def test_switching_to_proconnect_only_requires_its_second_factor(self, proconnect):
+        user = UserFactory(email="jane@example.org", password="password")
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        self.sign_in(proconnect, "jane@example.org", second_factor=False)
+        self.reauthenticate(proconnect)
+
+        self.assert403(self.switch_to_proconnect_only())
+        assert User.objects.get(id=user.id).password
+
+    def test_reset_cannot_give_a_password_to_an_account_without_one(self, proconnect):
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        user = User.objects.get(email="jane@example.org")
+
+        response = self.post(
+            url_for("security.reset_password", token=generate_reset_password_token(user)),
+            {"password": "Attacker-Pass-1337", "password_confirm": "Attacker-Pass-1337"},
+            headers={"Accept": "application/json"},
+        )
+
+        self.assert400(response)
+        assert not User.objects.get(id=user.id).password
+
+    def test_reset_mail_of_an_account_without_password_sends_to_proconnect(self, proconnect):
+        self.sign_in(proconnect, "jane@example.org")
+        user = User.objects.get(email="jane@example.org")
+
+        text = render_mail_template(
+            "security/email/reset_instructions.txt", user=user, reset_token="the-token"
+        )
+
+        assert "ProConnect" in text
+        assert "the-token" not in text
+
+    def test_change_password_cannot_give_a_password_to_an_account_without_one(self, proconnect):
+        user = UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.reauthenticate(proconnect)
+
+        response = self.post(
+            url_for("security.change_password"),
+            {"new_password": "Attacker-Pass-1337", "new_password_confirm": "Attacker-Pass-1337"},
+            headers={"Accept": "application/json"},
+        )
+
+        self.assert400(response)
+        assert not User.objects.get(id=user.id).password
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_trusted_identity_finds_its_account_after_its_address_changed(self, proconnect):
+        user = UserFactory(email="jane@old-domain.fr")
+        self.sign_in(proconnect, "jane@old-domain.fr", sub="jane")
+        self.get(url_for("security.logout"))
+
+        self.sign_in(proconnect, "jane@new-domain.fr", sub="jane")
+
+        self.assert_logged_in_as(user)
+        assert not User.objects(email="jane@new-domain.fr")
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_one_time_code_by_email_is_no_second_factor(self, proconnect):

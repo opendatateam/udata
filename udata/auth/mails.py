@@ -103,9 +103,25 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
+def reset_instructions(reset_token: str, user, **kwargs) -> MailMessage:
     from udata.i18n import lazy_gettext as _
     from udata.uris import cdata_url
+
+    if not user.password:
+        # The page answers as for any account, so as not to tell whether it has a password:
+        # the mail does, to its owner. `ExtendedResetPasswordForm` refuses the token anyway.
+        return MailMessage(
+            subject=_("Your account signs in with ProConnect"),
+            paragraphs=[
+                _(
+                    "Someone requested a password reset for your %(site)s account.",
+                    site=current_app.config["SITE_TITLE"],
+                ),
+                _("Your account has no password: it signs in with ProConnect only."),
+                _("If this wasn't you, please ignore this email."),
+                MailCTA(_("Sign in with ProConnect"), cdata_url("/login")),
+            ],
+        )
 
     return MailMessage(
         subject=_("Reset your password"),

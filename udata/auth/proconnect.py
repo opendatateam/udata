@@ -1,6 +1,6 @@
 import json
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 
 from authlib.common.urls import add_params_to_uri
@@ -10,6 +10,7 @@ from flask import abort, current_app, redirect, request, session, url_for
 from flask_login import user_logged_out
 from flask_security.signals import tf_code_confirmed
 from flask_security.tf_plugin import tf_clean_session
+from flask_security.utils import check_and_update_authn_fresh
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
@@ -205,10 +206,15 @@ class ProconnectAuthAPI(API):
         second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
         authentication = authenticate()
         proconnect_user = authentication.userinfo
-        user = datastore.find_user(email=proconnect_user["email"])
+        email = proconnect_user["email"]
+        # The identity trusted as an account holder's finds that account even when its
+        # identity provider changed its address (a renamed domain).
+        user = User.objects(
+            proconnect__sub=authentication.sub, proconnect__verified_at__ne=None, deleted=None
+        ).first() or datastore.find_user(email=email)
         if not user:
             user = datastore.create_user(
-                email=proconnect_user["email"],
+                email=email,
                 first_name=proconnect_user.get("given_name"),
                 last_name=proconnect_user.get("usual_name"),
                 confirmed_at=datetime.now(),
@@ -273,6 +279,36 @@ class ProconnectAuthAPI(API):
         session.pop("fs_paa", None)
 
         return redirect(homepage_url(flash="connected"))
+
+
+@ns.route("/only/", endpoint="proconnect_only")
+class ProconnectOnlyAPI(API):
+    @api.secure
+    @api.doc("proconnect_only")
+    @api.response(204, "The account signs in with ProConnect only")
+    @api.response(403, "This session wasn't opened by the trusted ProConnect identity")
+    def post(self):
+        """Drop the password and the udata 2FA: the account signs in with ProConnect only."""
+        security = current_app.extensions["security"]
+        within = current_app.config["SECURITY_FRESHNESS"]
+        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
+        if not check_and_update_authn_fresh(within, grace):
+            return security._reauthn_handler(within, grace)
+
+        user = current_user._get_current_object()
+        login = session_login(LOGIN_KEY)
+        # The second factor at ProConnect becomes the only one: it must be the one trusted
+        # as the account holder's, presented by whoever drops the others.
+        if login is None or not login.presents_trusted_second_factor(user):
+            api.abort(403, "Sign in with ProConnect and its second factor first")
+
+        # Also signs out every other session, including any opened with the password.
+        datastore.reset_user_access(user)
+        user.password = None
+        datastore.put(user)
+        login_user(user)
+        session[LOGIN_KEY] = asdict(replace(login, fs_uniquifier=user.fs_uniquifier))
+        return "", 204
 
 
 def trusts_first_second_factor(user: User) -> bool:

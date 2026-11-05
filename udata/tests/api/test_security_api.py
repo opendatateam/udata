@@ -208,7 +208,9 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
     def test_reset_password(self):
-        user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())
+        user = UserFactory(
+            email="jane@example.org", password="Forgotten123", confirmed_at=datetime.now()
+        )
         token = generate_reset_password_token(user)
 
         response = self.post(
