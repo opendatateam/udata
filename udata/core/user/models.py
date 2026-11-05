@@ -341,6 +341,24 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         which a login must then present as a udata one would be."""
         return self.trusted_proconnect_sub is not None and not self.tf_primary_method
 
+    @property
+    def signs_in_with_proconnect_only(self) -> bool:
+        """Whether the account has no way in but its trusted ProConnect identity: no password to
+        give it back, which a reset only takes reading the mailbox to do."""
+        return not self.password and self.second_factor_at_proconnect_only
+
+    @field(
+        description="Whether this session may drop the password and the udata 2FA of the account",
+        allow_null=True,
+    )
+    def can_switch_to_proconnect_only(self) -> bool:
+        # Circular import: the ProConnect login imports this model.
+        from udata.auth.proconnect import can_switch_to_proconnect_only
+
+        if not current_user_is_admin_or_self():
+            return None
+        return bool(self.password) and can_switch_to_proconnect_only(self)
+
     @field(description="Whether the account can sign in with a password", allow_null=True)
     def has_password(self) -> bool:
         return bool(self.password) if current_user_is_admin_or_self() else None

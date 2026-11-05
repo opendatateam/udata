@@ -60,7 +60,7 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         # directly and not with our system but if the sending is working
         # we test the rendering of the mail.
 
-        UserFactory(email="jane@example.org", confirmed_at=datetime.now())
+        UserFactory(email="jane@example.org", password="Forgotten123", confirmed_at=datetime.now())
 
         response = self.post(
             url_for("security.forgot_password"), {"email": "jane@example.org", "submit": True}

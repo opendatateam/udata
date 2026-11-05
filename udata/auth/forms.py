@@ -70,8 +70,8 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
         return True
 
 
-# Without a password, an account signs in with ProConnect only: giving it one, through a
-# reset that only takes reading the mailbox, would open a second way in without a 2FA.
+# Giving a password to an account that signs in with ProConnect only, through a reset that only
+# takes reading the mailbox, would open a second way in without its ProConnect second factor.
 PROCONNECT_ONLY = _("This account signs in with ProConnect only.")
 
 
@@ -96,7 +96,7 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         if not super().validate(**kwargs):
             return False
 
-        if not self.user.password:
+        if self.user.signs_in_with_proconnect_only:
             self.password.errors.append(PROCONNECT_ONLY)
             return False
 
@@ -111,7 +111,7 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 class ExtendedChangePasswordForm(ChangePasswordForm):
     def validate(self, **kwargs):
         # flask-security lets an account without a password set one with a fresh session.
-        if not current_user.password:
+        if current_user.signs_in_with_proconnect_only:
             self.new_password.errors = [PROCONNECT_ONLY]
             return False
 
