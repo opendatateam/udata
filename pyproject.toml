@@ -93,6 +93,7 @@ dependencies = [
     "beautifulsoup4>=4.14.3,<5.0.0",
     "markdown>=3.10,<4.0",
     "pyproj>=3.7.2",
+    "pydantic-ai-slim[openai,ui]>=2.0,<3.0.0",
 ]
 
 [project.urls]
