@@ -1,5 +1,6 @@
 """Declarative chart tool inputs, validation and conversion to the chart model."""
 
+import copy
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -92,11 +93,7 @@ def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[s
 
 
 def validate_update(patch: UpdateChartInput) -> list[str]:
-    fields = patch.model_fields_set
-    empty_y_axis = fields == {"y_axis"} and (
-        patch.y_axis is None or not patch.y_axis.model_fields_set
-    )
-    if not fields or empty_y_axis:
+    if not to_update_output(patch):
         return ["Au moins une modification est requise."]
     return []
 
@@ -116,7 +113,7 @@ def to_chart_output(config: CreateChartInput, resource_id: str) -> dict:
                 "aggregate_y": s.aggregate_y,
                 "resource_id": resource_id,
                 "column_x_name_override": None,
-                "filters": filters,
+                "filters": copy.deepcopy(filters),
             }
             for s in config.series
         ],
@@ -124,4 +121,11 @@ def to_chart_output(config: CreateChartInput, resource_id: str) -> dict:
 
 
 def to_update_output(patch: UpdateChartInput) -> dict:
-    return patch.model_dump(exclude_unset=True)
+    """Provided fields only; top-level nulls mean "leave unchanged" and are dropped.
+
+    Inside `y_axis`, an explicit null is kept: it clears that field.
+    """
+    out = {k: v for k, v in patch.model_dump(exclude_unset=True).items() if v is not None}
+    if "y_axis" in out and not out["y_axis"]:
+        del out["y_axis"]
+    return out
