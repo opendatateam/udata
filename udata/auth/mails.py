@@ -104,18 +104,6 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def security_mail_subject(template: str, subject: str, user: User | None) -> str:
-    """The subject of a flask-security mail, which takes it from its configuration rather than
-    from the message: the ProConnect reply to a password reset needs its own."""
-    if (
-        template == "security/email/reset_instructions"
-        and user is not None
-        and user.signs_in_with_proconnect_only
-    ):
-        return str(proconnect_only_reset_instructions().subject)
-    return subject
-
-
 def proconnect_only_reset_instructions() -> MailMessage:
     from udata.uris import cdata_url
 

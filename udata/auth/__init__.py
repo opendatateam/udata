@@ -35,26 +35,8 @@ class Permission(BasePermission):
 admin_permission = Permission()
 
 
-class UdataMailUtil(mail_util.MailUtil):
+class NoopMailUtil(mail_util.MailUtil):
     def send_mail(
-        self,
-        template: str,
-        subject: str,
-        recipient: str,
-        sender: t.Union[str, tuple],
-        body: str,
-        html: t.Optional[str],
-        **kwargs: t.Any,
-    ) -> None:
-        subject = mails.security_mail_subject(template, subject, kwargs.get("user"))
-        self.deliver(template, subject, recipient, sender, body, html, **kwargs)
-
-    def deliver(self, *args: t.Any, **kwargs: t.Any) -> None:
-        super().send_mail(*args, **kwargs)
-
-
-class NoopMailUtil(UdataMailUtil):
-    def deliver(
         self,
         template: str,
         subject: str,
@@ -67,6 +49,8 @@ class NoopMailUtil(UdataMailUtil):
         log.debug(f"Sending mail {subject} to {recipient}")
         log.debug(body)
         log.debug(html)
+
+        return None
 
 
 def init_app(app):
@@ -105,7 +89,7 @@ def init_app(app):
     # Same logic as in our own mail system :DisableMail
     debug = app.config.get("DEBUG", False)
     send_mail = app.config.get("SEND_MAIL", not debug)
-    mail_util_cls = UdataMailUtil if send_mail else NoopMailUtil
+    mail_util_cls = mail_util.MailUtil if send_mail else NoopMailUtil
 
     security = Security(
         datastore,

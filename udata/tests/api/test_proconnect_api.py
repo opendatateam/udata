@@ -491,10 +491,10 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert401(self.get(url_for("api.me")))
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
-    def test_switching_to_proconnect_only_requires_proconnect_to_ask_for_the_second_factor(
+    def test_switching_to_proconnect_only_does_not_need_proconnect_to_require_the_second_factor(
         self, proconnect
     ):
-        # Jane's identity is trusted through her udata code, and this login presented her key.
+        # A later login without it is sent back to ProConnect with it required.
         user, secret = self.totp_user(
             email="jane@example.org", password="password", confirmed_at=datetime.now()
         )
@@ -502,8 +502,8 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.enter_totp(secret)
         self.reauthenticate(proconnect)
 
-        self.assert403(self.switch_to_proconnect_only())
-        assert User.objects.get(id=user.id).password
+        self.assertStatus(self.switch_to_proconnect_only(), 204)
+        assert not User.objects.get(id=user.id).password
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_switching_to_proconnect_only_keeps_the_api_keys(self, proconnect):
@@ -521,7 +521,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
             )
         self.assert200(response)
 
-    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
     def test_login_with_a_password_left_invites_to_switch_to_proconnect_only(self, proconnect):
         UserFactory(email="jane@example.org", password="password")
 
@@ -644,9 +644,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         sent = []
         monkeypatch.setattr(
             NoopMailUtil,
-            "deliver",
+            "send_mail",
             lambda self, template, subject, recipient, sender, body, html, **kwargs: sent.append(
-                {"recipient": recipient, "subject": subject, "body": body}
+                {"recipient": recipient, "body": body}
             ),
         )
 
@@ -658,8 +658,8 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
         self.assert200(response)
         assert [mail["recipient"] for mail in sent] == ["jane@example.org"]
-        assert sent[0]["subject"] == "Your account signs in with ProConnect"
-        assert "ProConnect" in sent[0]["body"]
+        assert "it signs in with ProConnect only" in sent[0]["body"]
+        assert f"{CDATA}/login" in sent[0]["body"]
         assert "/reset/" not in sent[0]["body"]
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
