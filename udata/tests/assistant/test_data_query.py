@@ -20,6 +20,10 @@ def test_columns():
     assert build_data_query(columns=["a b", "c"]) == "columns=a%20b,c"
 
 
+def test_aggregate_without_groupby_is_a_global_total():
+    assert build_data_query(aggregate=("n_cum_dose1", "sum")) == "n_cum_dose1__sum"
+
+
 def test_with_page():
     assert with_page("a__groupby") == "a__groupby&page=1&page_size=50"
     assert with_page("") == "page=1&page_size=50"

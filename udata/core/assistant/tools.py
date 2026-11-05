@@ -226,6 +226,7 @@ def register_tools(agent: Agent) -> None:
     ) -> str:
         """Interroge la ressource active (lecture seule) pour vérifier les données avant un graphique.
 
+        Un agrégat sans `groupby` est autorisé : il donne un total global.
         Pour regrouper, renseigne `groupby`, `aggregate_column` et `aggregate`
         (avg, sum, count, min, max). Sans tri explicite, un regroupement est trié
         sur la colonne de regroupement. Retourne au plus 50 lignes.
@@ -236,10 +237,10 @@ def register_tools(agent: Agent) -> None:
             resource_id, known = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return str(refusal)
-        if bool(groupby) != bool(aggregate_column and aggregate) or bool(aggregate_column) != bool(
-            aggregate
-        ):
-            return "Requête invalide : groupby, aggregate_column et aggregate vont ensemble."
+        if bool(aggregate_column) != bool(aggregate):
+            return "Requête invalide : aggregate_column et aggregate vont ensemble."
+        if groupby and not aggregate:
+            return "Requête invalide : groupby demande un agrégat (aggregate_column et aggregate)."
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
         unknown = list(dict.fromkeys(name for name in used if name and name not in known))
         if unknown:

@@ -128,8 +128,9 @@ def build_data_query(
     params: list[str] = []
     if columns:
         params.append("columns=" + ",".join(_encode(c) for c in columns))
-    if groupby and aggregate:
+    if groupby:
         params.append(f"{_encode(groupby)}__groupby")
+    if aggregate:
         params.append(f"{_encode(aggregate[0])}__{_encode(aggregate[1])}")
     if sort:
         params.append(f"{_encode(sort[0])}__sort={_encode(sort[1])}")

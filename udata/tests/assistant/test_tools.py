@@ -1,8 +1,7 @@
 """Tools attached to the AI assistant agent: tests.
 
 Tools run in a pydantic-ai worker thread without Flask's request context:
-the requesting user travels through ``AssistantDeps.user`` and permissions
-are checked against an identity rebuilt from that snapshot.
+permissions are checked against the identity of the request context.
 """
 
 import json
@@ -206,7 +205,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
     def test_tool_budget_refuses_beyond_assistant_max_steps(self, mocker):
         """MAX_STEPS caps tool calls per agent run (steps proxy), independently
-        of the per-question SQL limit."""
+        of the per-question query limit."""
         resource = self.owned_resource()
         deps = self.make_deps()
         mocker.patch.object(
@@ -320,6 +319,24 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         )
         assert "Plus de 50 groupes" in result
         more.assert_called_once()
+
+    def test_query_data_allows_a_global_aggregate(self, mocker):
+        deps, resource = self.active(mocker)
+        get_data = mocker.patch.object(
+            deps.tabular, "get_data", return_value={"data": [{"n_cum_dose1__sum": 5}]}
+        )
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        result = self.call("query_data", deps, aggregate_column="n_cum_dose1", aggregate="sum")
+        get_data.assert_called_once_with(str(resource.id), "n_cum_dose1__sum&page=1&page_size=50")
+        more.assert_not_called()
+        assert "n_cum_dose1__sum" in result
+
+    def test_query_data_refuses_groupby_without_aggregate(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        result = self.call("query_data", deps, groupby="dep")
+        assert "groupby demande un agrégat" in result
+        get_data.assert_not_called()
 
     def test_query_data_rejects_an_unknown_column(self, mocker):
         deps, _ = self.active(mocker)
