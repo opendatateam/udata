@@ -1,4 +1,4 @@
-from mongoengine import post_save
+from mongoengine import ValidationError, post_save
 from mongoengine.fields import BooleanField, ReferenceField, StringField
 
 import udata.core.owned as owned
@@ -50,6 +50,12 @@ class TestOwned(DBTestCase):
 
         self.assertIsInstance(Owned.organization, ReferenceField)
         self.assertEqual(Owned.organization.document_type_obj, Organization)
+
+    def test_cannot_be_created_with_both_an_owner_and_an_organization(self):
+        with self.assertRaises(ValidationError):
+            Owned.objects.create(owner=UserFactory(), organization=OrganizationFactory())
+
+        self.assertEqual(Owned.objects.count(), 0)
 
     def test_owner_changed_from_user_to_user(self):
         first_owner = UserFactory()

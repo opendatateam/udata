@@ -787,9 +787,8 @@ class ReusesFeedAPItest(APITestCase):
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
-        owner = UserFactory()
         org = OrganizationFactory()
-        ReuseFactory(owner=owner, organization=org, datasets=[DatasetFactory()])
+        ReuseFactory(organization=org, datasets=[DatasetFactory()])
 
         response = self.get(url_for("api.recent_reuses_atom_feed"))
 

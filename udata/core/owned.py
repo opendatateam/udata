@@ -115,6 +115,17 @@ class Owned(object):
         "queryset_class": OwnedQuerySet,
     }
 
+    def validate(self, clean=True):
+        super().validate(clean=clean)
+        # After `clean`, which clears the field the object moves away from: what remains set
+        # on both is a creation, where no field counts as changed. Permissions would read the
+        # organization and listings the owner, each granting a different one.
+        if self.owner and self.organization:
+            raise FieldValidationError(
+                _("An object belongs either to a user or to an organization, not both"),
+                field="organization",
+            )
+
     def clean(self):
         """
         Verify owner consistency and fetch original owner before the new one erase it.
