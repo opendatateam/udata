@@ -1,15 +1,15 @@
 from datetime import UTC, datetime
 from io import BytesIO
+from uuid import uuid4
 
-import pytest
 from flask import url_for
 
 from udata.core import storages
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
-from udata.core.visualizations.factories import ChartFactory, FilterFactory
-from udata.core.visualizations.models import AndFilters, Chart, Filter, OrFilters
+from udata.core.visualizations.factories import ChartFactory
+from udata.core.visualizations.models import Chart
 from udata.tests.helpers import create_test_image
 
 from . import PytestOnlyAPITestCase
@@ -105,165 +105,112 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
 
-    def test_visualization_api_create_with_non_object_embedded_document(self):
-        user = self.login()
-        chart = ChartFactory.build(owner=user)
-        chart.owner = str(user.id)
-
-        serie = chart.to_dict()["series"][0]
-        cases = [
-            ("x_axis", [1, 2, 3], "x_axis"),
-            ("series", 1, "series"),
-            ("series", [[1, 2, 3]], "series"),
-            ("series", [{**serie, "filters": [1]}], "filters"),
-            ("series", [{**serie, "filters": {"column": "a"}}], "filters"),
-            ("series", [{**serie, "filters": {"_cls": "Unknown"}}], "filters"),
-            ("series", [{**serie, "filters": {"_cls": "AndFilters", "filters": 1}}], "filters"),
-        ]
-        for key, value, error_field in cases:
-            data = chart.to_dict()
-            data[key] = value
-            response = self.post(url_for("api.visualizations"), data)
-            assert response.status_code == 400, (key, value)
-            assert error_field in response.json["errors"], (key, value)
-
-        assert Chart.objects.count() == 0
-
-    def test_visualization_api_create_filter(self):
-        """It should create a visualization"""
-        user = self.login()
-        filter = FilterFactory()
-        chart = ChartFactory.build(owner=user, series__0__filters=filter)
-        chart.owner = str(user.id)
-        response = self.post(
-            url_for("api.visualizations"),
-            chart.to_dict(),
-        )
+    def test_visualization_api_create_with_query(self):
+        """It should create a visualization with a SQL query and resource_id"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+        }
+        response = self.post(url_for("api.visualizations"), data)
         assert response.status_code == 201
-        assert Chart.objects.count() == 1
+        assert response.json["query"] == data["query"]
+        assert response.json["resource_id"] == data["resource_id"]
 
-        visualization = Chart.objects.first()
-        assert visualization.title == chart.title
-        assert visualization.description == chart.description
-        assert visualization.owner == user
-        assert visualization.series[0].filters == filter
-
-        # GET should serialize the filter fields, not return an empty dict
-        response = self.get(url_for("api.visualization", visualization=visualization))
-        assert response.status_code == 200
-        filters_data = response.json["series"][0]["filters"]
-        assert filters_data["column"] == filter.column
-        assert filters_data["condition"] == filter.condition
-        assert filters_data["value"] == filter.value
-
-    def test_visualization_api_create_and_filter(self):
-        """It should create a visualization"""
-        user = self.login()
-        filters = AndFilters(filters=[FilterFactory(), FilterFactory()])
-        chart = ChartFactory.build(owner=user, series__0__filters=filters)
-        chart.owner = str(user.id)
-        response = self.post(
-            url_for("api.visualizations"),
-            chart.to_dict(),
-        )
+    def test_visualization_api_create_with_chart_type(self):
+        """It should create a visualization with an explicit chart type"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+            "chart_type": "histogram",
+        }
+        response = self.post(url_for("api.visualizations"), data)
         assert response.status_code == 201
-        assert Chart.objects.count() == 1
+        assert response.json["chart_type"] == "histogram"
 
-        visualization = Chart.objects.first()
-        assert visualization.title == chart.title
-        assert visualization.description == chart.description
-        assert visualization.owner == user
-        assert visualization.series[0].filters == filters
-
-    def test_visualization_api_create_or_filter(self):
-        """It should create a visualization with an OrFilters group"""
-        user = self.login()
-        filters = OrFilters(filters=[FilterFactory(), FilterFactory()])
-        chart = ChartFactory.build(owner=user, series__0__filters=filters)
-        chart.owner = str(user.id)
-        response = self.post(
-            url_for("api.visualizations"),
-            chart.to_dict(),
-        )
+    def test_visualization_api_create_defaults_to_line_chart_type(self):
+        """It should default to line chart type when none is provided"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+        }
+        response = self.post(url_for("api.visualizations"), data)
         assert response.status_code == 201
-        assert Chart.objects.count() == 1
+        assert response.json["chart_type"] == "line"
 
-        visualization = Chart.objects.first()
-        assert visualization.series[0].filters == filters
-
-        # GET should serialize the nested filter fields, not return empty dicts
-        response = self.get(url_for("api.visualization", visualization=visualization))
-        assert response.status_code == 200
-        filters_data = response.json["series"][0]["filters"]
-        assert filters_data["_cls"] == "OrFilters"
-        assert len(filters_data["filters"]) == 2
-        assert filters_data["filters"][0]["column"] == filters.filters[0].column
-
-    def test_visualization_api_create_nested_group_filters(self):
-        """AndFilters can contain OrFilters groups and vice versa"""
-        user = self.login()
-
-        def check_nested(filters, outer_type, inner_type):
-            chart = ChartFactory.build(owner=user, series__0__filters=filters)
-            chart.owner = str(user.id)
-            response = self.post(
-                url_for("api.visualizations"),
-                chart.to_dict(),
-            )
-            assert response.status_code == 201
-
-            visualization = Chart.objects.get(title=chart.title)
-            stored = visualization.series[0].filters
-            assert isinstance(stored, outer_type)
-            assert isinstance(stored.filters[0], Filter)
-            assert isinstance(stored.filters[1], inner_type)
-            assert len(stored.filters[1].filters) == 2
-
-            response = self.get(url_for("api.visualization", visualization=visualization))
-            assert response.status_code == 200
-            filters_data = response.json["series"][0]["filters"]
-            assert filters_data["filters"][1]["_cls"] == inner_type.__name__
-
-        check_nested(
-            AndFilters(
-                filters=[
-                    FilterFactory(),
-                    OrFilters(filters=[FilterFactory(), FilterFactory()]),
-                ]
-            ),
-            AndFilters,
-            OrFilters,
-        )
-        check_nested(
-            OrFilters(
-                filters=[
-                    FilterFactory(),
-                    AndFilters(filters=[FilterFactory(), FilterFactory()]),
-                ]
-            ),
-            OrFilters,
-            AndFilters,
-        )
-
-    @pytest.mark.parametrize(
-        "filters",
-        [
-            {"column": "a", "condition": "exact", "value": "b"},
-            {"_cls": "MarkdownBloc", "content": "not a filter"},
-            # Nested list of generic filters.
-            {"_cls": "AndFilters", "filters": [{"column": "a"}]},
-            {"_cls": "AndFilters", "filters": [{"_cls": "MarkdownBloc"}]},
-        ],
-    )
-    def test_visualization_api_create_rejects_filter_without_valid_cls(self, filters):
-        user = self.login()
-        chart = ChartFactory.build(owner=user)
-        chart.owner = str(user.id)
-        data = chart.to_dict()
-        data["series"][0]["filters"] = filters
+    def test_visualization_api_create_invalid_chart_type(self):
+        """It should not create a visualization with an invalid chart type"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT region, COUNT(*) FROM data GROUP BY region",
+            "resource_id": str(uuid4()),
+            "chart_type": "pie",
+        }
         response = self.post(url_for("api.visualizations"), data)
         assert response.status_code == 400
-        assert Chart.objects.count() == 0
+
+    def test_visualization_api_create_without_query(self):
+        """It should not create a visualization without a query"""
+        self.login()
+        data = {"title": "My chart", "description": "Some description", "resource_id": str(uuid4())}
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+
+    def test_visualization_api_create_rejects_non_read_only_query(self):
+        """It should not create a visualization with a query that is not
+        guaranteed to be a single read-only statement"""
+        self.login()
+        for query in (
+            "DROP TABLE data",
+            "SELECT a FROM data; DELETE FROM data",
+            "SELECT read_csv('/etc/passwd')",
+            "SELECT set_config('x', 'y', false)",
+            "SELECT * INTO newtab FROM data",
+        ):
+            data = {
+                "title": "My chart",
+                "description": "Some description",
+                "query": query,
+                "resource_id": str(uuid4()),
+            }
+            response = self.post(url_for("api.visualizations"), data)
+            assert response.status_code == 400, query
+            assert Chart.objects.count() == 0
+
+    def test_visualization_api_create_accepts_read_only_query(self):
+        """It should create a visualization with a read-only query, CTEs included"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "WITH x AS (SELECT category, COUNT(*) AS n FROM data GROUP BY category) "
+            "SELECT * FROM x ORDER BY n DESC",
+            "resource_id": str(uuid4()),
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+
+    def test_visualization_api_create_invalid_resource_id(self):
+        """It should not create a visualization with an invalid resource_id"""
+        self.login()
+        data = {
+            "title": "My chart",
+            "description": "Some description",
+            "query": "SELECT 1",
+            "resource_id": "not-a-uuid",
+        }
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
 
     def test_visualization_api_create_for_org(self):
         """It should create a visualization for an organization"""

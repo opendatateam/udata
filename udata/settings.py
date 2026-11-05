@@ -665,6 +665,23 @@ class Defaults(object):
     TABULAR_EXPLORE_URL = None
     TABULAR_ALLOW_REMOTE = True
 
+    # AI assistant settings (Albert + tabular SQL)
+    ###########################################################################
+    # The assistant is disabled when AI_BASE_URL is None (default). Hard
+    # bounds on the agent loop live as module constants next to the code
+    # they size (assistant.api, assistant.tools, assistant.tabular).
+    AI_BASE_URL = None
+    AI_API_KEY = None
+    AI_MODEL = "openai/gpt-oss-120b"
+    # Reasoning effort forwarded to the OpenAI-compatible provider
+    # (`openai_reasoning_effort`). Use "none" to disable thinking/reasoning on
+    # endpoints that emit thinking deltas (e.g. Mistral-class), None keeps the
+    # provider default.
+    AI_REASONING_EFFORT = None
+    # Base URL of the api-tabular service (resource profiles and read-only
+    # SQL). No existing setting covers it, so it stays here.
+    TABULAR_SQL_URL = None
+
     # JSON-LD settings
     ###########################################################################
     MAX_RESOURCES_IN_JSON_LD = 20

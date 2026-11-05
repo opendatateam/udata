@@ -2,14 +2,12 @@ from blinker import Signal
 from flask.helpers import url_for
 from flask_storage.mongo import ImageField
 from mongoengine import EmbeddedDocument, Q
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
     EmbeddedDocumentField,
-    EmbeddedDocumentListField,
     FloatField,
-    GenericEmbeddedDocumentField,
-    ListField,
     StringField,
     UUIDField,
 )
@@ -18,7 +16,6 @@ from mongoengine.signals import post_delete
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.auditable import Auditable
-from udata.core.dataset.models import get_resource
 from udata.core.dataset.permissions import OwnablePermission, OwnableReadPermission
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
@@ -29,6 +26,7 @@ from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument
 from udata.mongo.extras_fields import ExtrasField
 from udata.mongo.slug_fields import SlugField
+from udata.sql_guard import UnsafeSQLError, assert_read_only
 from udata.uris import cdata_url
 
 from .constants import IMAGE_MAX_SIZE
@@ -48,85 +46,6 @@ class ChartQuerySet(OwnedQuerySet):
 
     def hidden(self):
         return self(Q(private=True) | Q(deleted_at__ne=None))
-
-
-@generate_fields()
-class Filter(EmbeddedDocument):
-    column = field(StringField(required=True))
-    condition = field(
-        StringField(
-            required=True,
-            choices=[
-                "exact",
-                "differs",
-                "is_null",
-                "is_not_null",
-                "greater",
-                "less",
-                "strictly_greater",
-                "strictly_less",
-            ],
-        )
-    )
-    value = field(StringField())
-
-
-@generate_fields()
-class OrFilters(EmbeddedDocument):
-    filters = field(
-        ListField(GenericEmbeddedDocumentField(choices=[Filter, "AndFilters"])),
-        generic_key="_cls",
-    )
-
-
-@generate_fields()
-class AndFilters(EmbeddedDocument):
-    filters = field(
-        ListField(GenericEmbeddedDocumentField(choices=[Filter, OrFilters])),
-        generic_key="_cls",
-    )
-
-
-# The two group classes reference each other; now that both are defined, replace
-# the string reference in OrFilters' choices with the concrete class so MongoEngine
-# validation and (de)serialization can use it.
-OrFilters._fields["filters"].field.choices = [Filter, AndFilters]
-
-
-@generate_fields()
-class DataSeries(EmbeddedDocument):
-    type = field(StringField(choices=["line", "histogram"]))
-    # if not column y, we count the number of x. Could it be non int/float values?
-    column_y = field(StringField(required=False))
-    aggregate_y = field(StringField(choices=["avg", "sum", "count", "min", "max"], required=False))
-    resource_id = field(UUIDField(required=True, binary=False))
-    # if the column x name in this resource does not match the one from XAxis
-    column_x_name_override = field(StringField())
-
-    filters = field(
-        GenericEmbeddedDocumentField(choices=[AndFilters, OrFilters, Filter], allow_null=True),
-        generic=True,
-        generic_key="_cls",
-    )
-
-    @property
-    def resource(self):
-        """Resolve the resource from resource_id"""
-        if self.resource_id:
-            return get_resource(self.resource_id)
-        return None
-
-
-@generate_fields()
-class XAxis(EmbeddedDocument):
-    column_x = field(StringField(required=True))
-    sort_x_by = field(StringField(choices=["axis_x", "axis_y"], default="axis_x"))
-    sort_x_direction = field(StringField(choices=["asc", "desc"], default="asc"))
-    type = field(
-        StringField(
-            choices=["discrete", "continuous"], required=True
-        )  # can be deduced based on the column type, but an int could actually be discrete (code postal)
-    )
 
 
 @generate_fields()
@@ -165,9 +84,20 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
         auditable=False,
     )
 
-    x_axis = field(EmbeddedDocumentField(XAxis, required=True))
+    query = field(StringField(required=True))
+    resource_id = field(UUIDField(required=True, binary=False))
+    chart_type = field(StringField(choices=["line", "histogram"], default="line", required=True))
     y_axis = field(EmbeddedDocumentField(YAxis))
-    series = field(EmbeddedDocumentListField(DataSeries, required=True))
+
+    def clean(self):
+        super().clean()
+        # Chart queries run read-only against the tabular engine; an absent
+        # query is the required-field validator's job, not the guard's.
+        if self.query:
+            try:
+                assert_read_only(self.query)
+            except UnsafeSQLError as error:
+                raise MongoEngineValidationError(f"Chart query is not read-only: {error}")
 
     image = field(
         ImageField(
