@@ -287,14 +287,7 @@ class ProconnectAuthAPI(API):
 
 def can_switch_to_proconnect_only(user: User) -> bool:
     """Whether this session may drop the password and the udata 2FA of `user`, its ProConnect
-    second factor becoming the only one: the session must have presented it.
-
-    Only once ProConnect asks every login for the second factor: a login of the account without
-    it is then sent back to ProConnect, which wouldn't ask an agent with an authenticator app for
-    it otherwise, and would never let them in.
-    """
-    if not current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
-        return False
+    second factor becoming the only one: the session must have presented it."""
     login = session_login(LOGIN_KEY)
     return login is not None and login.presents_trusted_second_factor(user)
 
