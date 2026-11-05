@@ -278,6 +278,10 @@ class ProconnectAuthAPI(API):
         # ignores the grace period a previous user of this browser may have left.
         session.pop("fs_paa", None)
 
+        if user.password and login.presents_trusted_second_factor(user):
+            # The password is a way in without the ProConnect second factor: cdata invites
+            # the agent to drop it, which `ProconnectOnlyAPI` accepts from this very session.
+            return redirect(homepage_url(flash="proconnect_only_available"))
         return redirect(homepage_url(flash="connected"))
 
 

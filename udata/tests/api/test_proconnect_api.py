@@ -469,6 +469,21 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.assert401(self.get(url_for("api.me")))
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_with_a_password_left_invites_to_switch_to_proconnect_only(self, proconnect):
+        UserFactory(email="jane@example.org", password="password")
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert "flash=proconnect_only_available" in response.location
+
+    def test_login_without_second_factor_does_not_invite_to_switch(self, proconnect):
+        UserFactory(email="jane@example.org", password="password")
+
+        response = self.sign_in(proconnect, "jane@example.org", second_factor=False)
+
+        assert "flash=connected" in response.location
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_switching_to_proconnect_only_signs_out_the_other_sessions(self, proconnect):
         user = UserFactory(
             email="jane@example.org", password="password", confirmed_at=datetime.now()
