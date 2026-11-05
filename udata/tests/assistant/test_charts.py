@@ -174,3 +174,16 @@ def test_output_series_do_not_share_filters():
     out = to_chart_output(config, "rid")
     out["series"][0]["filters"]["value"] = "changed"
     assert out["series"][1]["filters"]["value"] == "01"
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("x_axis", {"column_x": "dep", "type": "discrete"}),
+        ("series", [{"column_y": "n_cum_dose1"}]),
+        ("filters", {"column": "dep", "condition": "exact", "value": "1"}),
+    ],
+)
+def test_update_refuses_structural_fields(field, value):
+    with pytest.raises(ValidationError):
+        UpdateChartInput(**{field: value})

@@ -3,7 +3,7 @@
 import copy
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from udata.core.assistant.data_query import Aggregate, GenericFilter, filter_columns
 
@@ -11,11 +11,20 @@ NUMERIC_TYPES = frozenset({"int", "float"})
 
 
 class XAxisInput(BaseModel):
-    column_x: str
-    type: Literal["discrete", "continuous"]
-    sort_x_by: Literal["axis_x", "axis_y"] = "axis_x"
-    sort_x_direction: Literal["asc", "desc"] = "asc"
-    limit: int | None = Field(None, ge=1, le=50)
+    column_x: str = Field(description="Colonne de l'axe X")
+    type: Literal["discrete", "continuous"] = Field(
+        description="discrete pour des catégories, continuous pour des dates ou nombres ordonnés"
+    )
+    sort_x_by: Literal["axis_x", "axis_y"] = Field(
+        "axis_x", description="axis_x : trier par X ; axis_y : trier par la valeur Y"
+    )
+    sort_x_direction: Literal["asc", "desc"] = Field("asc", description="Sens du tri")
+    limit: int | None = Field(
+        None,
+        ge=1,
+        le=50,
+        description="Nombre de valeurs affichées après le tri (1 à 50)",
+    )
 
 
 class SeriesInput(BaseModel):
@@ -24,11 +33,11 @@ class SeriesInput(BaseModel):
 
 
 class YAxisInput(BaseModel):
-    label: str | None = None
-    unit: str | None = Field(None, max_length=20)
-    unit_position: Literal["prefix", "suffix"] | None = None
-    min: float | None = None
-    max: float | None = None
+    label: str | None = Field(None, description="Libellé de l'axe Y")
+    unit: str | None = Field(None, max_length=20, description="Unité des valeurs")
+    unit_position: Literal["prefix", "suffix"] | None = Field(None, description="prefix ou suffix")
+    min: float | None = Field(None, description="Borne minimale de l'axe Y")
+    max: float | None = Field(None, description="Borne maximale de l'axe Y")
 
 
 class CreateChartInput(BaseModel):
@@ -42,6 +51,8 @@ class CreateChartInput(BaseModel):
 
 
 class UpdateChartInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str | None = Field(None, min_length=1)
     description: str | None = None
     type: Literal["line", "histogram"] | None = None
