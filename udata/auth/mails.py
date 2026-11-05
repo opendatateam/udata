@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 from flask import current_app
 
+from udata.i18n import lazy_gettext as _
 from udata.mail import MailCTA, MailMessage
 
 if TYPE_CHECKING:
@@ -69,8 +70,6 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
 
 
 def welcome(confirmation_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
@@ -82,8 +81,6 @@ def welcome(confirmation_link: str, **kwargs) -> MailMessage:
 
 
 def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Your email address is already associated with an account"),
         paragraphs=[
@@ -98,8 +95,6 @@ def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
 
 
 def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
@@ -122,7 +117,6 @@ def security_mail_subject(template: str, subject: str, user: User | None) -> str
 
 
 def proconnect_only_reset_instructions() -> MailMessage:
-    from udata.i18n import lazy_gettext as _
     from udata.uris import cdata_url
 
     return MailMessage(
@@ -140,7 +134,6 @@ def proconnect_only_reset_instructions() -> MailMessage:
 
 
 def reset_instructions(reset_token: str, user: User, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
     from udata.uris import cdata_url
 
     if user.signs_in_with_proconnect_only:
@@ -162,8 +155,6 @@ def reset_instructions(reset_token: str, user: User, **kwargs) -> MailMessage:
 
 
 def reset_notice(**kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Your password has been reset"),
         paragraphs=[
@@ -173,7 +164,6 @@ def reset_notice(**kwargs) -> MailMessage:
 
 
 def change_notice(**kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
     from udata.uris import cdata_url
 
     return MailMessage(
@@ -190,8 +180,6 @@ def change_notice(**kwargs) -> MailMessage:
 
 
 def two_factor_rescue(user, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("User can't access mail account"),
         paragraphs=[
@@ -200,28 +188,7 @@ def two_factor_rescue(user, **kwargs) -> MailMessage:
     )
 
 
-def proconnect_identity_trusted() -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
-    return MailMessage(
-        subject=_("Your ProConnect two-factor authentication protects your account"),
-        paragraphs=[
-            _(
-                "Your %(site)s account now trusts the two-factor authentication of the ProConnect "
-                "identity you just signed in with: it stands for the one of %(site)s.",
-                site=current_app.config["SITE_TITLE"],
-            ),
-            _(
-                "If this wasn't you, someone else holds a ProConnect identity with your email "
-                "address: contact us right away."
-            ),
-        ],
-    )
-
-
 def signs_in_with_proconnect_only() -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Your account now signs in with ProConnect only"),
         paragraphs=[
