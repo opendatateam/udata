@@ -13,11 +13,17 @@ specifying our `template` folder for templates and the system is not intelligent
 our folder before fallbacking to the templates inside the `flask_security` package.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from flask import current_app
 
 from udata.mail import MailCTA, MailMessage
+
+if TYPE_CHECKING:
+    from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
 
@@ -103,25 +109,44 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def reset_instructions(reset_token: str, user, **kwargs) -> MailMessage:
+def security_mail_subject(template: str, subject: str, user: User | None) -> str:
+    """The subject of a flask-security mail, which takes it from its configuration rather than
+    from the message: the ProConnect reply to a password reset needs its own."""
+    if (
+        template == "security/email/reset_instructions"
+        and user is not None
+        and user.signs_in_with_proconnect_only
+    ):
+        return str(proconnect_only_reset_instructions().subject)
+    return subject
+
+
+def proconnect_only_reset_instructions() -> MailMessage:
     from udata.i18n import lazy_gettext as _
     from udata.uris import cdata_url
 
-    if not user.password:
+    return MailMessage(
+        subject=_("Your account signs in with ProConnect"),
+        paragraphs=[
+            _(
+                "Someone requested a password reset for your %(site)s account.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("Your account has no password: it signs in with ProConnect only."),
+            _("If this wasn't you, please ignore this email."),
+            MailCTA(_("Sign in with ProConnect"), cdata_url("/login")),
+        ],
+    )
+
+
+def reset_instructions(reset_token: str, user: User, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+    from udata.uris import cdata_url
+
+    if user.signs_in_with_proconnect_only:
         # The page answers as for any account, so as not to tell whether it has a password:
         # the mail does, to its owner. `ExtendedResetPasswordForm` refuses the token anyway.
-        return MailMessage(
-            subject=_("Your account signs in with ProConnect"),
-            paragraphs=[
-                _(
-                    "Someone requested a password reset for your %(site)s account.",
-                    site=current_app.config["SITE_TITLE"],
-                ),
-                _("Your account has no password: it signs in with ProConnect only."),
-                _("If this wasn't you, please ignore this email."),
-                MailCTA(_("Sign in with ProConnect"), cdata_url("/login")),
-            ],
-        )
+        return proconnect_only_reset_instructions()
 
     return MailMessage(
         subject=_("Reset your password"),
@@ -171,5 +196,40 @@ def two_factor_rescue(user, **kwargs) -> MailMessage:
         subject=_("User can't access mail account"),
         paragraphs=[
             _("%(email)s can not access mail account", email=user.email),
+        ],
+    )
+
+
+def proconnect_identity_trusted() -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
+    return MailMessage(
+        subject=_("Your ProConnect two-factor authentication protects your account"),
+        paragraphs=[
+            _(
+                "Your %(site)s account now trusts the two-factor authentication of the ProConnect "
+                "identity you just signed in with: it stands for the one of %(site)s.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _(
+                "If this wasn't you, someone else holds a ProConnect identity with your email "
+                "address: contact us right away."
+            ),
+        ],
+    )
+
+
+def signs_in_with_proconnect_only() -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
+    return MailMessage(
+        subject=_("Your account now signs in with ProConnect only"),
+        paragraphs=[
+            _(
+                "Your password and your two-factor authentication of %(site)s have been removed: "
+                "your account signs in with ProConnect and its two-factor authentication only.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If this wasn't you, contact us right away."),
         ],
     )

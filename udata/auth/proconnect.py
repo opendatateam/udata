@@ -14,7 +14,9 @@ from flask_security.utils import check_and_update_authn_fresh
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.auth import current_user, login_user
+from udata.api.oauth2 import OAuth2Token
+from udata.auth import current_user, login_user, mails
+from udata.core.api_token.models import ApiToken
 from udata.core.user.models import ProConnectIdentity, User, datastore
 from udata.uris import cdata_url, homepage_url
 
@@ -278,11 +280,25 @@ class ProconnectAuthAPI(API):
         # ignores the grace period a previous user of this browser may have left.
         session.pop("fs_paa", None)
 
-        if user.password and login.presents_trusted_second_factor(user):
+        if user.password and can_switch_to_proconnect_only(user):
             # The password is a way in without the ProConnect second factor: cdata invites
-            # the agent to drop it, which `ProconnectOnlyAPI` accepts from this very session.
+            # the agent to drop it.
             return redirect(homepage_url(flash="proconnect_only_available"))
         return redirect(homepage_url(flash="connected"))
+
+
+def can_switch_to_proconnect_only(user: User) -> bool:
+    """Whether this session may drop the password and the udata 2FA of `user`, its ProConnect
+    second factor becoming the only one: the session must have presented it.
+
+    Only once ProConnect asks every login for the second factor: a login of the account without
+    it is then sent back to ProConnect, which wouldn't ask an agent with an authenticator app for
+    it otherwise, and would never let them in.
+    """
+    if not current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
+        return False
+    login = session_login(LOGIN_KEY)
+    return login is not None and login.presents_trusted_second_factor(user)
 
 
 @ns.route("/only/", endpoint="proconnect_only")
@@ -300,18 +316,20 @@ class ProconnectOnlyAPI(API):
             return security._reauthn_handler(within, grace)
 
         user = current_user._get_current_object()
-        login = session_login(LOGIN_KEY)
-        # The second factor at ProConnect becomes the only one: it must be the one trusted
-        # as the account holder's, presented by whoever drops the others.
-        if login is None or not login.presents_trusted_second_factor(user):
+        if not can_switch_to_proconnect_only(user):
             api.abort(403, "Sign in with ProConnect and its second factor first")
 
-        # Also signs out every other session, including any opened with the password.
+        # Every other way in goes: the sessions, including any opened with the password, and
+        # the tokens, which an API key or a password grant got without the second factor.
         datastore.reset_user_access(user)
+        ApiToken.objects(user=user, revoked_at=None).update(set__revoked_at=datetime.now(UTC))
+        OAuth2Token.objects(user=user, revoked=False).update(set__revoked=True)
         user.password = None
         datastore.put(user)
         login_user(user)
+        login = session_login(LOGIN_KEY)
         session[LOGIN_KEY] = asdict(replace(login, fs_uniquifier=user.fs_uniquifier))
+        mails.signs_in_with_proconnect_only().send(user)
         return "", 204
 
 
@@ -343,6 +361,8 @@ def record_login(user: User, login: ProConnectLogin, udata_second_factor: bool) 
         and (udata_second_factor or trusts_first_second_factor(user))
     ):
         identity.verified_at = datetime.now(UTC)
+        # Its holder learns it from their mailbox, should the identity be someone else's.
+        mails.proconnect_identity_trusted().send(user)
     user.proconnect = identity
     datastore.put(user)
 
