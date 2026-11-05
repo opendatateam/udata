@@ -176,8 +176,9 @@ def signs_in_with_proconnect_only() -> MailMessage:
         subject=_("Your account now signs in with ProConnect only"),
         paragraphs=[
             _(
-                "Your password and your two-factor authentication of %(site)s have been removed: "
-                "your account signs in with ProConnect and its two-factor authentication only.",
+                "Your %(site)s account now signs in with ProConnect and its two-factor "
+                "authentication only: its password and its %(site)s two-factor authentication, "
+                "if it had any, have been removed.",
                 site=current_app.config["SITE_TITLE"],
             ),
             _("If this wasn't you, contact us right away."),
