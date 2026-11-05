@@ -54,40 +54,41 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         )
         self.assertStatus(response, 200)
 
-    @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None, CDATA_BASE_URL="http://cdata.test")
     def test_ask_for_reset(self):
-        # We cannot test for mail sending since they are sent with Flask
-        # directly and not with our system but if the sending is working
-        # we test the rendering of the mail.
+        UserFactory(email="jane@example.org", confirmed_at=datetime.now())
 
-        UserFactory(email="jane@example.org", password="Forgotten123", confirmed_at=datetime.now())
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("security.forgot_password"), {"email": "jane@example.org", "submit": True}
+            )
 
-        response = self.post(
-            url_for("security.forgot_password"), {"email": "jane@example.org", "submit": True}
-        )
         self.assertStatus(response, 200)
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        assert "http://cdata.test/reset/" in mails[0].body
 
-    @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None, CDATA_BASE_URL="http://cdata.test")
     def test_change_notice_mail(self):
-        # We cannot test for mail sending since they are sent with Flask
-        # directly and not with our system but if the sending is working
-        # we test the rendering of the mail.
-
         user = UserFactory(
             email="jane@example.org", password="password", confirmed_at=datetime.now()
         )
         self.login(user)
 
-        response = self.post(
-            url_for("security.change_password"),
-            {
-                "password": "password",
-                "new_password": "New_password123",
-                "new_password_confirm": "New_password123",
-                "submit": True,
-            },
-        )
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("security.change_password"),
+                {
+                    "password": "password",
+                    "new_password": "New_password123",
+                    "new_password_confirm": "New_password123",
+                    "submit": True,
+                },
+            )
+
         self.assertStatus(response, 200)
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        # The notice points to the reset, should the change not be the account holder's.
+        assert "http://cdata.test/reset" in mails[0].body
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
     def test_change_email_confirmation(self):
@@ -208,9 +209,7 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
     def test_reset_password(self):
-        user = UserFactory(
-            email="jane@example.org", password="Forgotten123", confirmed_at=datetime.now()
-        )
+        user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())
         token = generate_reset_password_token(user)
 
         response = self.post(

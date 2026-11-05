@@ -4,7 +4,6 @@ import pytest
 from flask import current_app, url_for
 from flask_security.recoverable import generate_reset_password_token
 
-from udata.auth import NoopMailUtil
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
@@ -480,12 +479,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert [mail.recipients for mail in mails] == [["jane@example.org"]]
         self.assert_logged_in_as(user)
         # The session can set up a udata 2FA again, its login being the account's anew.
-        response = self.post(
-            url_for("security.two_factor_setup"),
-            {"setup": "authenticator"},
-            headers={"Accept": "application/json"},
-        )
-        self.assert200(response)
+        self.assert200(self.set_up_two_factor("authenticator"))
         self.get(url_for("security.logout"))
         self.post(url_for("security.login"), {"email": user.email, "password": "password"})
         self.assert401(self.get(url_for("api.me")))
@@ -592,12 +586,9 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org")
         self.enter_totp(secret)
         self.get(url_for("security.logout"))
-        proconnect.agent_has_session("jane@example.org", second_factor=False)
-        response = self.get(url_for("api.proconnect_login"))
-        callback = proconnect.authorize(
-            proconnect.tamper(response.location, require_second_factor=False)
+        self.sign_in(
+            proconnect, "jane@example.org", second_factor=False, require_second_factor=False
         )
-        self.get(url_for("api.proconnect_auth", **callback))
         self.enter_totp(secret)
         self.reauthenticate(proconnect)
 
@@ -637,30 +628,22 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True, CAPTCHETAT_BASE_URL=None)
     def test_reset_mail_of_an_account_that_signs_in_with_proconnect_only_sends_to_it(
-        self, proconnect, monkeypatch
+        self, proconnect
     ):
         user = self.proconnect_only_user(proconnect)
-        # The flask-security mails as they would be sent.
-        sent = []
-        monkeypatch.setattr(
-            NoopMailUtil,
-            "send_mail",
-            lambda self, template, subject, recipient, sender, body, html, **kwargs: sent.append(
-                {"recipient": recipient, "body": body}
-            ),
-        )
 
-        response = self.post(
-            url_for("security.forgot_password"),
-            {"email": user.email},
-            headers={"Accept": "application/json"},
-        )
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("security.forgot_password"),
+                {"email": user.email},
+                headers={"Accept": "application/json"},
+            )
 
         self.assert200(response)
-        assert [mail["recipient"] for mail in sent] == ["jane@example.org"]
-        assert "it signs in with ProConnect only" in sent[0]["body"]
-        assert f"{CDATA}/login" in sent[0]["body"]
-        assert "/reset/" not in sent[0]["body"]
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        assert "it signs in with ProConnect only" in mails[0].body
+        assert f"{CDATA}/login" in mails[0].body
+        assert "/reset/" not in mails[0].body
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_change_password_cannot_give_a_password_to_an_account_that_signs_in_with_proconnect_only(

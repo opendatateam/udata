@@ -22,6 +22,7 @@ from flask import current_app
 
 from udata.i18n import lazy_gettext as _
 from udata.mail import MailCTA, MailMessage
+from udata.uris import cdata_url
 
 if TYPE_CHECKING:
     from udata.core.user.models import User
@@ -105,8 +106,6 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
 
 
 def proconnect_only_reset_instructions() -> MailMessage:
-    from udata.uris import cdata_url
-
     return MailMessage(
         subject=_("Your account signs in with ProConnect"),
         paragraphs=[
@@ -122,8 +121,6 @@ def proconnect_only_reset_instructions() -> MailMessage:
 
 
 def reset_instructions(reset_token: str, user: User, **kwargs) -> MailMessage:
-    from udata.uris import cdata_url
-
     if user.signs_in_with_proconnect_only:
         # The page answers as for any account, so as not to tell whether it has a password:
         # the mail does, to its owner. `ExtendedResetPasswordForm` refuses the token anyway.
@@ -152,8 +149,6 @@ def reset_notice(**kwargs) -> MailMessage:
 
 
 def change_notice(**kwargs) -> MailMessage:
-    from udata.uris import cdata_url
-
     return MailMessage(
         subject=_("Your password has been changed"),
         paragraphs=[
