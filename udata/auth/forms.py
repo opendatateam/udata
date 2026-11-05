@@ -2,7 +2,7 @@ import logging
 from datetime import UTC, datetime
 
 import requests
-from flask import current_app
+from flask import current_app, session
 from flask_login import current_user
 from flask_security.forms import (
     ForgotPasswordForm,
@@ -10,9 +10,11 @@ from flask_security.forms import (
     LoginForm,
     RegisterFormV2,
     ResetPasswordForm,
+    TwoFactorSetupForm,
     VerifyForm,
 )
 
+from udata.auth.proconnect import LOGIN_KEY, PENDING_LOGIN_KEY, session_login
 from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
 from udata.i18n import lazy_gettext as _
@@ -69,6 +71,10 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
 
 class ExtendedLoginForm(LoginForm):
     def validate(self, **kwargs):
+        # A password login: a ProConnect login left in this browser, waiting for its udata
+        # 2FA or not, says nothing of this one.
+        session.pop(PENDING_LOGIN_KEY, None)
+        session.pop(LOGIN_KEY, None)
         if not super().validate(**kwargs):
             return False
 
@@ -101,6 +107,35 @@ class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
             return False
 
         return True
+
+
+class ExtendedTwoFactorSetupForm(TwoFactorSetupForm):
+    def validate(self, **kwargs):
+        if not super().validate(**kwargs):
+            return False
+        if self.setup.data == "disable" or self.user.tf_primary_method:
+            return True
+
+        identity = self.user.proconnect
+        if identity is None or identity.verified_at is None:
+            return True
+        # The ProConnect identity is the account's second factor: whoever sets up the
+        # udata one must present it, or a stolen password would take the account over.
+        login = session_login(LOGIN_KEY)
+        if (
+            login is not None
+            and login.is_of(self.user)
+            and login.sub == identity.sub
+            and login.second_factor
+        ):
+            return True
+        self.setup.errors.append(
+            _(
+                "Your account is protected by the two-factor authentication of ProConnect: "
+                "sign in with ProConnect to set up another one."
+            )
+        )
+        return False
 
 
 class ExtendedVerifyForm(VerifyForm):
