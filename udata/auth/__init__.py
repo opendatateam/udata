@@ -2,6 +2,7 @@ import logging
 import typing as t
 
 from flask import render_template
+from flask_mail import Message
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
 from flask_principal import RoleNeed as RoleNeed
@@ -12,6 +13,8 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
+
+from udata.mail import mail_sent
 
 from . import mails
 
@@ -49,8 +52,8 @@ class NoopMailUtil(mail_util.MailUtil):
         log.debug(f"Sending mail {subject} to {recipient}")
         log.debug(body)
         log.debug(html)
-
-        return None
+        # As `udata.mail.send_mail` does when sending is disabled :DisableMail
+        mail_sent.send(Message(subject=subject, body=body, html=html, recipients=[recipient]))
 
 
 def init_app(app):
