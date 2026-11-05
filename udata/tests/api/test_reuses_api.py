@@ -44,6 +44,22 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert len(response.json["data"]) == len(reuses)
 
+    def test_reuse_api_list_embeds_lightweight_datasets(self):
+        """A dataset with thousands of resources must not be serialized whole in each reuse"""
+        dataset = DatasetFactory(nb_resources=3)
+        ReuseFactory(datasets=[dataset])
+
+        response = self.get(url_for("api.reuses"))
+        assert200(response)
+
+        [embedded] = response.json["data"][0]["datasets"]
+        assert embedded == {
+            "id": str(dataset.id),
+            "title": dataset.title,
+            "uri": dataset.self_api_url(),
+            "page": dataset.self_web_url(),
+        }
+
     def test_reuse_image_upload(self):
         """The reuse owner should upload an image into the images storage"""
         user = self.login()
