@@ -18,6 +18,7 @@ from udata.core.auditable import Auditable
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.spatial.models import SpatialCoverage
+from udata.core.topic import TOPIC_ELEMENT_CLASSES
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
@@ -67,9 +68,7 @@ class TopicElement(Auditable, Document):
     tags = field(ListField(StringField()))
     extras = field(ExtrasField())
     element = field(
-        # If modifying choices list below , also look at core/topic/parsers.py's
-        # parse_filters for filtering support
-        GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]),
+        GenericReferenceField(choices=list(TOPIC_ELEMENT_CLASSES)),
         nested_fields=api.model_reference,
         allow_null=True,
         checks=[check_title_or_element_required],
