@@ -66,6 +66,7 @@ def init_app(app):
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
+        ExtendedTwoFactorSetupForm,
         ExtendedVerifyForm,
     )
     from .password_validation import UdataPasswordUtil
@@ -98,6 +99,7 @@ def init_app(app):
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,
         verify_form=ExtendedVerifyForm,
+        two_factor_setup_form=ExtendedTwoFactorSetupForm,
         password_util_cls=UdataPasswordUtil,
         mail_util_cls=mail_util_cls,
     )
