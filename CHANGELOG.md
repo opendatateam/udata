@@ -1,5 +1,14 @@
 # Changelog
 
+## 17.23.0 (2026-11-05)
+
+- chore: update flask-storage ([#4070](https://github.com/opendatateam/udata/pull/4070))
+- feat: allow markdown files as resources ([#4067](https://github.com/opendatateam/udata/pull/4067))
+- feat(auth): let ProConnect require a second factor instead of the udata 2FA ([#4065](https://github.com/opendatateam/udata/pull/4065))
+- fix: keep the previous owner through a nested save, whatever the change of owner ([#4058](https://github.com/opendatateam/udata/pull/4058))
+- fix: refuse an object owned by both a user and an organization ([#4060](https://github.com/opendatateam/udata/pull/4060))
+
+
 ## 17.22.0 (2026-11-03)
 
 - feat(auth): let accounts without password reauthenticate through ProConnect ([#4062](https://github.com/opendatateam/udata/pull/4062))
