@@ -237,10 +237,6 @@ def register_tools(agent: Agent) -> None:
         """
         if refusal := _consume_tool_budget(ctx):
             return refusal
-        try:
-            resource_id, known = _active_columns(ctx)
-        except _ToolRefusal as refusal:
-            return str(refusal)
         if bool(aggregate_column) != bool(aggregate):
             return "Requête invalide : aggregate_column et aggregate vont ensemble."
         if groupby and not aggregate:
@@ -253,6 +249,10 @@ def register_tools(agent: Agent) -> None:
                 "le service ne trie pas sur une valeur agrégée. "
                 "Trie côté graphique avec sort_x_by=axis_y."
             )
+        try:
+            resource_id, known = _active_columns(ctx)
+        except _ToolRefusal as refusal:
+            return str(refusal)
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
         unknown = list(dict.fromkeys(name for name in used if name and name not in known))
         if unknown:

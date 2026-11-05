@@ -344,6 +344,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def test_query_data_refuses_columns_with_an_aggregate(self, mocker):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        get_profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call(
             "query_data",
             deps,
@@ -356,6 +357,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "Requête invalide : columns ne peut pas être combiné avec un agrégat ; retire columns."
         )
         get_data.assert_not_called()
+        get_profile.assert_not_called()
+        assert deps.tool_count == 1
         assert deps.query_count == 0
         self.call("query_data", deps)
         assert deps.query_count == 1
@@ -364,6 +367,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
         mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
+        get_profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call(
             "query_data",
             deps,
@@ -376,7 +380,10 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "le tri n'est possible que sur la colonne groupby" in result
         assert "sort_x_by=axis_y" in result
         get_data.assert_not_called()
+        get_profile.assert_not_called()
+        assert deps.tool_count == 1
         assert deps.query_count == 0
+        get_profile.side_effect = lambda *a, **k: self.PROFILE
         ok = self.call(
             "query_data",
             deps,
@@ -388,6 +395,22 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "invalide" not in ok
         get_data.assert_called_once()
         assert deps.query_count == 1
+
+    def test_query_data_refuses_a_global_aggregate_with_a_sort(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        get_profile = mocker.patch.object(deps.tabular, "get_profile")
+        result = self.call(
+            "query_data",
+            deps,
+            aggregate_column="n_cum_dose1",
+            aggregate="sum",
+            sort_column="dep",
+        )
+        assert "le tri n'est possible que sur la colonne groupby" in result
+        get_data.assert_not_called()
+        get_profile.assert_not_called()
+        assert deps.query_count == 0
 
     def test_query_data_rejects_an_unknown_column(self, mocker):
         deps, _ = self.active(mocker)
