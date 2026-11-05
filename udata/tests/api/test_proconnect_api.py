@@ -500,6 +500,35 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert not User.objects.get(id=user.id).password
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_account_that_already_signs_in_with_proconnect_only_cannot_switch_again(
+        self, proconnect
+    ):
+        self.proconnect_only_user(proconnect)
+        self.sign_in(proconnect, "jane@example.org")
+        self.reauthenticate(proconnect)
+        assert self.get(url_for("api.me")).json["can_switch_to_proconnect_only"] is False
+
+        with capture_mails() as mails:
+            response = self.switch_to_proconnect_only()
+
+        self.assert400(response)
+        assert mails == []
+        self.assert_logged_in_as(User.objects.get(email="jane@example.org"))
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_account_without_password_switches_to_drop_its_udata_2fa(self, proconnect):
+        # A udata 2FA set up from a trusted ProConnect login, on an account created by it.
+        user = self.proconnect_only_user(proconnect)
+        user.update(tf_primary_method="authenticator", tf_totp_secret="secret")
+        self.sign_in(proconnect, "jane@example.org")
+        self.reauthenticate(proconnect)
+        assert self.get(url_for("api.me")).json["can_switch_to_proconnect_only"] is True
+
+        self.assertStatus(self.switch_to_proconnect_only(), 204)
+
+        assert not User.objects.get(id=user.id).tf_primary_method
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_switching_to_proconnect_only_keeps_the_api_keys(self, proconnect):
         # Scripts depend on them.
         user = UserFactory(email="jane@example.org", password="password")

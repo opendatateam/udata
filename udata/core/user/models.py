@@ -358,7 +358,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
         if not current_user_is_admin_or_self():
             return None
-        return bool(self.password) and can_switch_to_proconnect_only(self)
+        return not self.signs_in_with_proconnect_only and can_switch_to_proconnect_only(self)
 
     @field(description="Whether the account can sign in with a password", allow_null=True)
     def has_password(self) -> bool:
