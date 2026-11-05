@@ -185,16 +185,60 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         assert identity.verified_at
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=False)
-    def test_first_second_factor_is_not_trusted_unless_proconnect_requires_it(self, proconnect):
-        # The account would rely on it, while ProConnect wouldn't ask an authenticator app.
+    def test_first_second_factor_is_trusted_even_when_proconnect_does_not_require_it(
+        self, proconnect
+    ):
         user = UserFactory(email="jane@example.org")
-
         self.sign_in(proconnect, "jane@example.org")
+        assert self.identity_of(user).verified_at
+        self.get(url_for("security.logout"))
+
+        # ProConnect doesn't ask an agent with an authenticator app for it unless required.
+        response = self.sign_in(proconnect, "jane@example.org", second_factor=False)
+
+        self.assert401(self.get(url_for("api.me")))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
+        assert proconnect.second_factors == 1
+        self.assert_logged_in_as(user)
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_sent_back_for_the_second_factor_is_refused_if_it_comes_back_without(
+        self, proconnect
+    ):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        # Her identity provider now only sends her a code by email, whatever is required.
+        response = self.sign_in(proconnect, "jane@example.org", amr=["pwd", "mail", "mfa"])
+        callback = proconnect.authorize(response.location)
+
+        response = self.get(url_for("api.proconnect_auth", **callback))
+
+        assert response.location.endswith("flash=proconnect_second_factor_required")
+        self.assert401(self.get(url_for("api.me")))
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_sent_back_for_the_second_factor_and_abandoned_does_not_refuse_the_next(
+        self, proconnect
+    ):
+        user = UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        # Sent back to ProConnect for her key, she closes the tab.
+        self.sign_in(proconnect, "jane@example.org", amr=["pwd", "mail", "mfa"])
+
+        # She signs in again, and this time presents her key once sent back for it.
+        proconnect.agent_has_session("jane@example.org", second_factor=False)
+        response = self.get(url_for("api.proconnect_login"))
+        callback = proconnect.authorize(
+            proconnect.tamper(response.location, require_second_factor=False)
+        )
+        response = self.get(url_for("api.proconnect_auth", **callback))
+        callback = proconnect.authorize(response.location)
+        self.get(url_for("api.proconnect_auth", **callback))
 
         self.assert_logged_in_as(user)
-        identity = self.identity_of(user)
-        assert identity.second_factor
-        assert identity.verified_at is None
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_login_without_the_second_factor_proconnect_holds_is_sent_back_for_it(self, proconnect):
@@ -538,6 +582,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
         self.sign_in(proconnect, "jane@example.org")
         response = self.start_reauthentication(proconnect)
         proconnect.agent = "john@example.org"
+        proconnect.agent_sub = "sub-of-john@example.org"
 
         callback = proconnect.authorize(response.location)
         response = self.get(url_for("api.proconnect_auth", **callback))

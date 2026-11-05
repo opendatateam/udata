@@ -35,6 +35,8 @@ HELD_SECOND_FACTOR_AMR = {"otp", "pop", "hwk", "swk"}
 PENDING_LOGIN_KEY = "proconnect_pending_login"
 # The ProConnect login this session was opened with.
 LOGIN_KEY = "proconnect_login"
+# Set when a login is sent back to ProConnect for the second factor the account relies on.
+SECOND_FACTOR_ASKED_KEY = "proconnect_second_factor_asked"
 
 
 def init_app(app):
@@ -162,6 +164,7 @@ class ProconnectLoginAPI(API):
             # aborted 2FA attempt.
             tf_clean_session()
         session.pop(PENDING_LOGIN_KEY, None)
+        session.pop(SECOND_FACTOR_ASKED_KEY, None)
 
         return authorize_redirect()
 
@@ -197,6 +200,7 @@ class ProconnectAuthAPI(API):
         if reauth_state and reauth_state == request.args.get("state"):
             return reauthenticate()
 
+        second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
         authentication = authenticate()
         proconnect_user = authentication.userinfo
         user = datastore.find_user(email=proconnect_user["email"])
@@ -223,6 +227,11 @@ class ProconnectAuthAPI(API):
             # ProConnect only asks for it when required, and the request we send goes through
             # the agent's browser: send them back with it required.
             if not login.second_factor:
+                # Once only: an identity provider may answer with no method we count as a
+                # second factor (a code by email), every time.
+                if second_factor_asked:
+                    return redirect(homepage_url(flash="proconnect_second_factor_required"))
+                session[SECOND_FACTOR_ASKED_KEY] = True
                 return authorize_redirect(require_second_factor=True)
 
         # A second factor presented to ProConnect stands for the udata one, as the identity
@@ -266,13 +275,12 @@ class ProconnectAuthAPI(API):
 
 def trusts_first_second_factor(user: User) -> bool:
     """Whether a ProConnect identity presenting a second factor becomes trusted as the holder's of
-    `user`, an account without a udata 2FA: whoever sets up its first second factor owns it.
+    `user`: whoever sets up the first second factor of an account without a udata 2FA owns it.
 
-    Only once ProConnect asks every login for the second factor. The account then relies on it
-    (`User.second_factor_at_proconnect_only`), and a login without it is sent back to ProConnect:
-    one that wouldn't ask an agent with an authenticator app for it would never let them in.
+    The account then relies on it (`User.second_factor_at_proconnect_only`): a login without it
+    is sent back to ProConnect with it required.
     """
-    return not user.tf_primary_method and current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]
+    return not user.tf_primary_method
 
 
 def record_login(user: User, login: ProConnectLogin, udata_second_factor: bool) -> None:
