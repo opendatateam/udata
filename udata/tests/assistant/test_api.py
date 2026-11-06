@@ -63,6 +63,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
     def test_chat_disabled_by_default(self):
         """AI_BASE_URL unset is the disabled state: 503."""
+        self.app.config["AI_BASE_URL"] = None
         self.login()
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 503
@@ -153,6 +154,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
 
     def test_chat_error_paths_return_503(self, mocker):
         """401/503 responses must not build the agent."""
+        self.app.config["AI_BASE_URL"] = None
+        self.app.config["AI_API_KEY"] = None
         agent = mocker.patch("udata.core.assistant.api.get_agent")
         assert self.post(url_for("api.assistant_chat"), data=PAYLOAD).status_code == 401
         self.login()
