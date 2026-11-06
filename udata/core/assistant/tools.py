@@ -33,7 +33,7 @@ from udata.core.assistant.data_query import (
     with_page,
 )
 from udata.core.assistant.tabular import TabularClient, TabularError, TabularRequestRefused
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import Dataset, get_dataset_by_resource_id
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
 
 def _dataset_for_resource(resource_id: str) -> Dataset | None:
     """Owner dataset of a resource, readable by the requesting user, else None."""
-    dataset = Dataset.objects(resources__id=resource_id).first()
+    dataset = get_dataset_by_resource_id(resource_id, exclude_resources=True)
     if dataset is not None and dataset.permissions["read"].can():
         return dataset
     return None

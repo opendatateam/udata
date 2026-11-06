@@ -292,6 +292,25 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "untrusted_active_context" not in str(model.seen)
         profile.assert_not_called()
 
+    def test_chat_resource_shared_by_several_datasets_gets_no_context(self, mocker):
+        """An ambiguous resource id resolves to no dataset rather than an arbitrary one."""
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        shared_id = uuid4()
+        DatasetFactory(title="Premier dataset", resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(title="Second dataset", resources=[ResourceFactory(id=shared_id)])
+        profile = mocker.patch.object(TabularClient, "get_profile")
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        response = self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": str(shared_id)}
+        )
+        assert response.status_code == 200
+        response.get_data()
+        assert "untrusted_active_context" not in str(model.seen)
+        profile.assert_not_called()
+
     def test_chat_deleted_dataset_resource_gets_no_context(self, mocker):
         """A resource owned by a deleted dataset is invisible: no context, no profile fetch."""
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"

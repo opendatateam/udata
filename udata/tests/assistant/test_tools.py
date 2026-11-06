@@ -7,6 +7,7 @@ permissions are checked against the identity of the request context.
 import json
 from contextlib import contextmanager
 from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 from pydantic_ai import Agent
@@ -162,6 +163,16 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps = self.make_deps()
         profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call("inspect_schema", deps, resource_id=str(ResourceFactory().id))
+        assert "introuvable" in result
+        profile.assert_not_called()
+
+    def test_inspect_schema_refuses_a_resource_id_shared_by_several_datasets(self, mocker):
+        shared_id = uuid4()
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        DatasetFactory(resources=[ResourceFactory(id=shared_id)])
+        deps = self.make_deps()
+        profile = mocker.patch.object(deps.tabular, "get_profile")
+        result = self.call("inspect_schema", deps, resource_id=str(shared_id))
         assert "introuvable" in result
         profile.assert_not_called()
 

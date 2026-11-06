@@ -31,7 +31,7 @@ from udata.core.assistant.tools import (
     _render_profile,
     serialize_dataset_metadata,
 )
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import get_dataset_by_resource_id
 from udata.i18n import gettext as _
 
 log = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ def _build_resource_instructions(resource_id: str, tabular: TabularClient) -> st
     user can read the owning dataset. A profile fetch failure degrades to
     dataset metadata only. Returns None when the resource is not visible.
     """
-    dataset = Dataset.objects(resources__id=resource_id).first()
+    dataset = get_dataset_by_resource_id(resource_id)
     if dataset is None or not dataset.permissions["read"].can():
         return None
     profile = None
