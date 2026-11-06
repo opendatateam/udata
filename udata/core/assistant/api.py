@@ -46,6 +46,45 @@ AI_TURN_TIMEOUT = 120
 # Upper bound on the serialized chart state a client may send.
 MAX_VISUALIZATION_BYTES = 20_000
 
+# Guards against scripted or tampered clients, far above any real conversation.
+MAX_REQUEST_BYTES = 512 * 1024
+MAX_USER_MESSAGE_CHARS = 4_000
+
+
+def _read_bounded_body() -> bytes:
+    """Read the request body, aborting with a 413 beyond ``MAX_REQUEST_BYTES``.
+
+    At most one byte past the limit is read, so a chunked body or a missing
+    ``Content-Length`` cannot make the worker buffer an unbounded payload.
+    """
+    too_large = _("The conversation is too large.")
+    if (request.content_length or 0) > MAX_REQUEST_BYTES:
+        api.abort(413, too_large)
+    body = bytearray()
+    while len(body) <= MAX_REQUEST_BYTES:
+        chunk = request.stream.read(MAX_REQUEST_BYTES + 1 - len(body))
+        if not chunk:
+            break
+        body += chunk
+    if len(body) > MAX_REQUEST_BYTES:
+        api.abort(413, too_large)
+    return bytes(body)
+
+
+def _check_user_message_lengths(messages) -> None:
+    for message in messages:
+        if message.role != "user":
+            continue
+        length = sum(len(part.text) for part in message.parts if isinstance(part, TextUIPart))
+        if length > MAX_USER_MESSAGE_CHARS:
+            api.abort(
+                413,
+                _(
+                    "Your message is too long (%(max)s characters maximum).",
+                    max=MAX_USER_MESSAGE_CHARS,
+                ),
+            )
+
 
 def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
     """Extract and validate the optional ``resource_id`` and ``visualization`` fields.
@@ -179,12 +218,13 @@ class AssistantChatAPI(API):
 
         # Strip client-submitted system messages: the server owns the prompt.
         # Validate before building the agent so a bad body never reaches it.
-        body = request.get_data()
+        body = _read_bounded_body()
         resource_id, visualization = _extract_context(body)
         try:
             run_input = VercelAIAdapter.build_run_input(body)
         except ValidationError:
             api.abort(400, _("Invalid request body."))
+        _check_user_message_lengths(run_input.messages)
         run_input.messages = [m for m in run_input.messages if m.role != "system"]
 
         # Drop empty assistant messages (no content, no tool calls): providers

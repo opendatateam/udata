@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-05 10:47+0100\n"
+"POT-Creation-Date: 2026-11-06 10:52+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
@@ -390,29 +390,38 @@ msgstr ""
 msgid "You can only set one condition for a given access audience role"
 msgstr ""
 
-#: udata/core/assistant/api.py:63 udata/core/assistant/api.py:67
+#: udata/core/assistant/api.py:60
+msgid "The conversation is too large."
+msgstr ""
+
+#: udata/core/assistant/api.py:83
+#, python-format
+msgid "Your message is too long (%(max)s characters maximum)."
+msgstr ""
+
+#: udata/core/assistant/api.py:107 udata/core/assistant/api.py:111
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""
 
-#: udata/core/assistant/api.py:75
+#: udata/core/assistant/api.py:119
 msgid "Invalid visualization context."
 msgstr ""
 
-#: udata/core/assistant/api.py:146 udata/core/assistant/api.py:256
+#: udata/core/assistant/api.py:190 udata/core/assistant/api.py:300
 msgid "An error occurred while generating the response."
 msgstr ""
 
-#: udata/core/assistant/api.py:160
+#: udata/core/assistant/api.py:204
 msgid "Assistant is not configured (AI_BASE_URL is not set)."
 msgstr ""
 
-#: udata/core/assistant/api.py:168
+#: udata/core/assistant/api.py:212
 msgid ""
 "Assistant is enabled but the Albert API key (AI_API_KEY) is not "
 "configured."
 msgstr ""
 
-#: udata/core/assistant/api.py:182
+#: udata/core/assistant/api.py:226
 msgid "Invalid request body."
 msgstr ""
 

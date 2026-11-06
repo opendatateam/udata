@@ -2,11 +2,15 @@ import json
 from datetime import UTC, datetime
 from uuid import uuid4
 
+import pytest
 from flask import url_for
+from flask.testing import EnvironBuilder
 from pydantic_ai.models.function import DeltaToolCall, FunctionModel
 from pydantic_ai.models.test import TestModel
+from werkzeug.wrappers import Request
 
 from udata.core.assistant.agent import get_agent
+from udata.core.assistant.api import MAX_REQUEST_BYTES, MAX_USER_MESSAGE_CHARS
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.assistant.tools import MODEL_REQUEST_LIMIT
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -707,3 +711,143 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         seen = self._chat_through_metadata_tool(mocker, dataset, UserFactory())
         assert "introuvable" in seen
         assert "Brouillon du propriétaire" not in seen
+
+
+class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
+    @pytest.fixture(autouse=True)
+    def enable_assistant(self, app):
+        app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        app.config["AI_API_KEY"] = "test-key"
+
+    def _raw_chat(self, body, content_length=True):
+        """POST raw bytes; without content_length, mimic a chunked upload."""
+        environ = EnvironBuilder(
+            self.app,
+            path=url_for("api.assistant_chat"),
+            method="POST",
+            data=body,
+            headers={"Content-Type": "application/json"},
+        ).get_environ()
+        if not content_length:
+            del environ["CONTENT_LENGTH"]
+            environ["HTTP_TRANSFER_ENCODING"] = "chunked"
+            environ["wsgi.input_terminated"] = True
+        # A Request keeps the environ as is; a dict would be rebuilt with a length.
+        return self.client.open(Request(environ))
+
+    def _payload_of_size(self, size):
+        """A valid chat payload whose JSON encoding is exactly ``size`` bytes."""
+        filler = {"id": "msg-0", "role": "assistant", "parts": [{"type": "text", "text": ""}]}
+        payload = {**PAYLOAD, "messages": [filler, *PAYLOAD["messages"]]}
+        filler["parts"][0]["text"] = "x" * (size - len(json.dumps(payload)))
+        body = json.dumps(payload).encode()
+        assert len(body) == size
+        return body
+
+    def _mock_backends(self, mocker):
+        return (
+            mocker.patch("udata.core.assistant.api.get_agent"),
+            mocker.patch("udata.core.assistant.api.TabularClient"),
+        )
+
+    def test_oversized_body_is_rejected_before_any_backend_call(self, mocker):
+        self.login()
+        agent, tabular = self._mock_backends(mocker)
+        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
+        assert response.status_code == 413
+        agent.assert_not_called()
+        tabular.assert_not_called()
+
+    def test_oversized_chunked_body_without_content_length_is_rejected(self, mocker):
+        self.login()
+        agent, tabular = self._mock_backends(mocker)
+        response = self._raw_chat(
+            self._payload_of_size(MAX_REQUEST_BYTES + 1), content_length=False
+        )
+        assert response.status_code == 413
+        agent.assert_not_called()
+        tabular.assert_not_called()
+
+    def test_oversized_content_length_header_is_rejected(self, mocker):
+        self.login()
+        agent, _tabular = self._mock_backends(mocker)
+        environ = EnvironBuilder(
+            self.app,
+            path=url_for("api.assistant_chat"),
+            method="POST",
+            data=json.dumps(PAYLOAD),
+            headers={"Content-Type": "application/json"},
+        ).get_environ()
+        environ["CONTENT_LENGTH"] = str(MAX_REQUEST_BYTES + 1)
+        assert self.client.open(Request(environ)).status_code == 413
+        agent.assert_not_called()
+
+    def test_body_at_the_size_limit_is_accepted(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES))
+        assert response.status_code == 200
+        response.get_data()
+
+    def test_chunked_body_at_the_size_limit_is_accepted(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES), content_length=False)
+        assert response.status_code == 200
+        response.get_data()
+
+    def _chat_with_user_text(self, text):
+        message = {"id": "msg-1", "role": "user", "parts": [{"type": "text", "text": text}]}
+        return self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
+
+    def test_too_long_user_message_is_rejected_before_any_backend_call(self, mocker):
+        self.login()
+        agent, tabular = self._mock_backends(mocker)
+        response = self._chat_with_user_text("a" * (MAX_USER_MESSAGE_CHARS + 1))
+        assert response.status_code == 413
+        assert "4000" in response.json["message"]
+        agent.assert_not_called()
+        tabular.assert_not_called()
+
+    def test_user_message_split_in_parts_counts_all_its_text(self, mocker):
+        self.login()
+        agent, _tabular = self._mock_backends(mocker)
+        half = {"type": "text", "text": "a" * (MAX_USER_MESSAGE_CHARS // 2 + 1)}
+        message = {"id": "msg-1", "role": "user", "parts": [half, half]}
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
+        assert response.status_code == 413
+        agent.assert_not_called()
+
+    def test_long_assistant_message_is_not_limited(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        assistant = {
+            "id": "msg-a",
+            "role": "assistant",
+            "parts": [{"type": "text", "text": "a" * (MAX_USER_MESSAGE_CHARS + 1)}],
+        }
+        messages = [*PAYLOAD["messages"], assistant, *PAYLOAD["messages"]]
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
+        assert response.status_code == 200
+        response.get_data()
+
+    def test_user_message_at_the_length_limit_is_accepted(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._chat_with_user_text("é" * MAX_USER_MESSAGE_CHARS)
+        assert response.status_code == 200
+        response.get_data()
+
+    def test_auth_is_checked_before_the_size_limit(self, mocker):
+        agent, _tabular = self._mock_backends(mocker)
+        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
+        assert response.status_code == 401
+        agent.assert_not_called()
+
+    def test_disabled_assistant_is_checked_before_the_size_limit(self, mocker):
+        self.app.config["AI_BASE_URL"] = None
+        self.login()
+        agent, _tabular = self._mock_backends(mocker)
+        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
+        assert response.status_code == 503
+        agent.assert_not_called()
