@@ -14,6 +14,11 @@ from pydantic import ValidationError
 from pydantic_ai import CancellationToken
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
+from pydantic_ai.ui.vercel_ai.request_types import (
+    DynamicToolUIPart,
+    TextUIPart,
+    ToolUIPart,
+)
 from pydantic_ai.ui.vercel_ai.response_types import ErrorChunk
 from pydantic_ai.usage import UsageLimits
 
@@ -186,10 +191,9 @@ class AssistantChatAPI(API):
         # reject them, which would lock the conversation.
         def _has_substance(message) -> bool:
             for part in message.parts:
-                part_type = getattr(part, "type", "")
-                if part_type.startswith("tool-"):
+                if isinstance(part, ToolUIPart | DynamicToolUIPart):
                     return True
-                if part_type == "text" and getattr(part, "text", "").strip():
+                if isinstance(part, TextUIPart) and part.text.strip():
                     return True
             return False
 

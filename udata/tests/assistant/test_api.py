@@ -130,6 +130,38 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "Et ensuite ?" in seen
         assert '"role": "assistant"' not in seen.replace("'", '"') or seen.count("assistant") == 0
 
+    def _history_seen_by_model(self, mocker, assistant_parts):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        messages = [
+            PAYLOAD["messages"][0],
+            {"id": "msg-a", "role": "assistant", "parts": assistant_parts},
+            {"id": "msg-u2", "role": "user", "parts": [{"type": "text", "text": "Et ensuite ?"}]},
+        ]
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
+        assert response.status_code == 200
+        response.get_data()  # consume the stream so the run executes
+        return str(model.seen)
+
+    def test_chat_keeps_assistant_messages_with_only_a_dynamic_tool_call(self, mocker):
+        seen = self._history_seen_by_model(
+            mocker,
+            [
+                {
+                    "type": "dynamic-tool",
+                    "toolName": "get_dataset_metadata",
+                    "toolCallId": "call-dynamic-1",
+                    "state": "output-available",
+                    "input": {"dataset_id": "x"},
+                    "output": "Fiche du jeu de données",
+                }
+            ],
+        )
+        assert "call-dynamic-1" in seen
+
     def test_chat_missing_api_key(self):
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = None
