@@ -781,6 +781,9 @@ class Testing(object):
     DATASET_HIDDEN_BADGES = []
     ELASTICSEARCH_URL = None
     ELASTICSEARCH_INDEX_BASENAME = "udata-test"
+    AI_BASE_URL = None
+    AI_API_KEY = None
+    TABULAR_API_URL = None
 
 
 class Debug(Defaults):
