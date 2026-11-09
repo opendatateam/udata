@@ -193,8 +193,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
     def generic_choices_fields(wrapper) -> dict:
         # `choices` may name classes not registered yet at decoration time (a model
-        # declared early, such as `Activity`, referencing one declared later, or mutually
-        # recursive embedded documents like AndFilters/OrFilters), so they are resolved
+        # declared early, such as `Activity`, referencing one declared later, or
+        # mutually recursive embedded documents), so they are resolved
         # lazily, on first marshalling. Each choice is converted as its own plain field,
         # e.g. `ReferenceField(Organization)` instead of the generic one.
         return {

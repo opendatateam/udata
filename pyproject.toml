@@ -70,6 +70,7 @@ dependencies = [
     "mongoengine>=0.29.1,<1.0.0",
     "netaddr>=1.3.0,<2.0.0",
     "pillow>=11.0.0,<13.0.0",
+    "pydantic-ai-slim[openai,ui]>=2.0,<3.0.0",
     "pydenticon>=0.3.1,<1.0.0",
     "pymongo>=4.11.3,<5.0.0",
     "python-dateutil>=2.9.0.post0,<3.0.0",
@@ -93,6 +94,7 @@ dependencies = [
     "beautifulsoup4>=4.14.3,<5.0.0",
     "markdown>=3.10,<4.0",
     "pyproj>=3.7.2",
+    "sqlglot>=26,<27",
 ]
 
 [project.urls]
