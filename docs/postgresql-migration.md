@@ -240,7 +240,7 @@ Each environment goes through the same four states, set by one setting (for exam
 | State | Writes | Reads | Rollback |
 |---|---|---|---|
 | *Mongo* | Mongo | Mongo | — |
-| *Shadow* | Both, after a backfill | Mongo, with PostgreSQL reads compared in the background | Stop writing to PostgreSQL |
+| *Shadow* | Both, then a [backfill](#backfill) | Mongo, with PostgreSQL reads compared in the background | Stop writing to PostgreSQL |
 | *PostgreSQL primary* | Both | PostgreSQL | Switch the setting back to *Shadow* |
 | *PostgreSQL only* | PostgreSQL | PostgreSQL | Restore from backup |
 
@@ -251,6 +251,26 @@ Each environment goes through the same four states, set by one setting (for exam
   switched module by module as a precaution, without cross-store references. This is an
   option, not a requirement.
 - An environment moves to the next state only when its exit criteria are met.
+
+### Backfill
+
+A script (for example `udata db backfill`) copies the existing Mongo data into PostgreSQL when
+an environment enters *Shadow*:
+
+- **Order**: writes to both stores are enabled first, then the backfill runs. A row written by
+  the application during the backfill is not overwritten by an older copy (comparison on
+  `last_modified`), and the reconciliation job catches what remains.
+- **Transformation**: ObjectIds kept as `CHAR(24)`, resource and message UUIDs kept; embedded
+  lists flattened into child tables with their `position`; tags into association tables;
+  generic references into `(subject_type, subject_id)`; free-form dictionaries into `JSONB`.
+- **Loading**: reads Mongo with pymongo directly (faster than MongoEngine), loads with `COPY`,
+  tables in dependency order so foreign keys hold.
+- **Legacy data**: documents that no longer match the models (written before a validation
+  rule existed) are reported in a rejects file, never dropped silently. They are fixed in Mongo,
+  then the backfill runs again.
+- **Restartable**: it can run again on a table without duplicating rows.
+- **Afterwards**: counts and checksums compared per collection, Elasticsearch reindexed with
+  `udata search index`.
 
 ### Stage 0: foundations, on `main`, still on Mongo
 
@@ -274,7 +294,7 @@ Exit: no `.objects(...)` call outside the persistence layer, search served by El
   `Linkable`), signals as session events, `generate_fields` in `udata/api_fields.py`, the
   forms, the Flask-Security datastore, the Authlib models and the Celery scheduler.
 - Generate the initial Alembic revision and review it by hand.
-- Build the migration tooling: backfill (`COPY` through psycopg 3), writes to both stores,
+- Build the migration tooling: [backfill](#backfill), writes to both stores,
   background read comparison, reconciliation job.
 - The code reaches `main` behind `DATABASE_MODE`, with *Mongo* as the default.
 
