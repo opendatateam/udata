@@ -69,6 +69,7 @@ from udata.utils import hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DCAT_EXTRAS_KEY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     INSPIRE,
@@ -431,7 +432,7 @@ class ResourceMixin(object):
         # rendered but resolves which resource the export job overwrites, so a forged
         # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
         # writable, hence their URL type above.
-        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", DCAT_EXTRAS_KEY),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     geopf = EmbeddedDocumentField(GeopfResourceMetadata)
@@ -647,7 +648,7 @@ class Dataset(
     extras = field(
         ExtrasField(
             {"datafairOrigin": URLField, "transport:url": URLField},
-            reserved=("transport:*", "recommendations*", "dcat"),
+            reserved=("transport:*", "recommendations*", DCAT_EXTRAS_KEY),
         ),
         auditable=False,
     )

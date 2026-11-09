@@ -38,7 +38,7 @@ class HarvestableFactoryMixin(_ModelFactoryBase):
 
     @factory.post_generation
     def remote_id(obj, create, extracted, **kwargs):
-        """Sets the obj.remote_id attribute. In-memory only, not saved in the mongo document.
+        """Sets `obj.remote_id`. In-memory only.
 
         If remote_id parameter passed to the factory is:
         - falsy => attribute not set
@@ -52,3 +52,9 @@ class HarvestableFactoryMixin(_ModelFactoryBase):
             extracted = extracted(next(HarvestableFactoryMixin._ids))
         if extracted:
             obj.remote_id = extracted
+
+    @factory.post_generation
+    def record_id(obj, create, extracted, **kwargs):
+        """Sets `obj.record_id`. In-memory only."""
+        if extracted:
+            obj.record_id = extracted
