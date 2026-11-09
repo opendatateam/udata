@@ -13,7 +13,7 @@ is written against MongoEngine and its embedded documents.
 - **One source of truth with the crawler.** The resources crawler (Hydra) already runs on
   PostgreSQL. Today it keeps its own copy of the resources, fed by udata over HTTP, and writes
   its results back through the udata API. Sharing one PostgreSQL database removes that
-  duplication. This is phase 2 (see [Phase 2: sharing the database with the crawler](#phase-2-sharing-the-database-with-the-crawler)).
+  duplication. This is a later phase (see [Phase 2](#phase-2-sharing-the-database-with-hydra)).
 - **Less operations work.** A single database engine to run, back up, monitor and upgrade,
   instead of both MongoDB and PostgreSQL.
 - **Industry standard.** PostgreSQL is community-governed, under a permissive open source
@@ -49,10 +49,13 @@ External constraints:
 
 - **Stack**: SQLAlchemy 2 + Flask-SQLAlchemy, Alembic, psycopg 3 (see [Stack](#stack)).
 - **Rewrite the models.** No compatibility layer that mimics `Dataset.objects(...)`.
-- **No Mongo migration history.** The 76 scripts in `udata/migrations/` are dropped. The data
-  migration starts from an up-to-date Mongo database (`udata db status` shows nothing pending).
+- **Migrate everything at once, roll out environment by environment.** All the code moves to
+  PostgreSQL together. MongoDB and PostgreSQL then coexist in time, in each environment (dev,
+  demo, production), rather than collection by collection (see [Migration timeline](#migration-timeline)).
+- **No Mongo migration history in PostgreSQL.** The data is copied from an up-to-date Mongo
+  database. `udata/migrations/` keeps running while Mongo is written, and is removed with it.
   Alembic starts from a single initial revision, and `udata db migrate` / `udata db status`
-  wrap Alembic.
+  run both while they coexist.
 - **Search is delegated to Elasticsearch wherever possible** (see below). Private or
   permission-bound searches stay in PostgreSQL, and the Elasticsearch index stays fully public.
 
@@ -77,7 +80,7 @@ constraints, partial indexes and `INSERT … ON CONFLICT`. The 2.0 style (`Mappe
 `mapped_column`) gives typed models that pyright and mypy can check. Relationship loading is
 configurable (`selectinload`, `joinedload`) to avoid N+1 queries, and SQLAlchemy Core (SQL
 built in Python, without ORM objects) serves the hot paths: metrics, bulk operations and the
-ETL.
+backfill.
 
 **Alembic** is maintained by the SQLAlchemy authors. It autogenerates schema migrations from
 the models (reviewed by hand), checks for drift (`alembic check`) and supports branches.
@@ -86,8 +89,7 @@ scripts rather than Alembic revisions, so they do not block deployments.
 
 **psycopg 3** is the current PostgreSQL driver from the psycopg maintainers, psycopg2 being in
 maintenance mode. It supports server-side parameter binding, `COPY` for fast bulk loading (the
-ETL), a connection pool (`psycopg_pool`) and `LISTEN/NOTIFY`, which phase 2 needs for the
-outbox notifications.
+backfill), a connection pool (`psycopg_pool`) and `LISTEN/NOTIFY`.
 
 The validation of `JSONB` columns and `extras` is ported from `udata/mongo/`. The API layer
 stays on Flask-RESTX.
@@ -216,78 +218,117 @@ Target:
   the existing 7 adapters only index public content (`is_indexable`). This covers the user
   dashboard, organization members, admin user search by email and the resource filter.
 - Indexing hooks (`search/__init__.py`) move to after-commit events. `udata search index`
-  rebuilds the index after the data migration.
+  rebuilds the index when an environment switches its reads to PostgreSQL.
 
-## Phase 2: sharing the database with the crawler
+## Migration timeline
 
-Phase 1 (everything above and the [Approach](#approach)) moves udata to PostgreSQL and leaves the
-Hydra integration as it is: same HTTP calls in both directions, same reserved extras. Phase 2
-starts once udata runs on PostgreSQL in production.
+All the code moves to PostgreSQL at once, then the switch is rolled out environment by
+environment: dev, demo, production. MongoDB is decommissioned in the same order. Both databases
+coexist in time in each environment, with tests at every step. The timeline is given as stages
+with exit criteria, not dates.
 
-Today (`udata/core/dataset/events.py`, `udata/core/dataset/models.py`):
-- **udata → Hydra**: on `on_resource_added` / `on_resource_updated` / `on_resource_removed`, a
-  Celery task sends the serialized resource to `RESOURCES_ANALYSER_URI/api/resources/`
-  (POST/PUT/DELETE) when `PUBLISH_ON_RESOURCE_EVENTS` is enabled.
-- **Hydra → udata**: Hydra writes its results into the reserved resource extras (`check:*`,
-  `analysis:*`) through the udata API. `Dataset.update_resource_extras` exists only because this
-  path rewrites the whole dataset document on datasets with 15k+ resources.
+Moving collection by collection was considered and left out: during the transition, part of
+the data would live in Mongo and part in PostgreSQL. References would have to be resolved
+across both stores in Python, foreign keys postponed, and every combination of migrated
+collections tested.
 
-Phase 2 target, in one PostgreSQL database:
-- **One schema per application** (`udata`, `hydra`) and one role per application. udata owns
-  `dataset_resource` and the rest of the catalog; Hydra gets read-only access to the tables it
-  needs. Hydra owns its result tables (checks, analysis); udata gets read-only access to them.
-  Each application keeps its own migrations for its own schema.
-- **No more duplicated resource list in Hydra**: it reads `udata.dataset_resource` directly.
-- **Results stay in Hydra's tables** instead of being copied into resource extras. udata reads
-  them with a join (or a view) and keeps exposing them as `check:*` / `analysis:*` extras in
-  the API, so the API contract does not change. The `update_resource_extras` hot path goes away.
-- **Notifications through the database** with a transactional outbox: each application inserts
-  an event row (`resource.created`, `resource.modified`, `resource.deleted`,
-  `check.completed`…) in the same transaction as the change, and sends a `pg_notify` to wake up
-  the other side. The outbox table is the durable record: a listener that was down catches up
-  from it, since `LISTEN/NOTIFY` alone loses messages sent while nobody listens. This replaces
-  the HTTP calls and the Celery `publish` task in both directions.- **udata reacts to Hydra events** to do what the API callback did: reindex the dataset in
-  Elasticsearch and invalidate caches.
+### States of an environment
 
-Points of attention:
-- Never let both applications write the same table: writes from Hydra would bypass udata's
-  validation, signals and search indexing.
-- Cross-schema foreign keys (`hydra.check.resource_id` → `udata.dataset_resource.id`) give
-  integrity but couple the two applications' schema changes; agree on which tables are a
-  shared contract.
-- The crawler's write load lands on the same server as the web application: size the
-  instance, use a connection pooler (PgBouncer) and watch for long transactions.
+Each environment goes through the same four states, set by one setting (for example
+`DATABASE_MODE`):
 
-## Approach
+| State | Writes | Reads | Rollback |
+|---|---|---|---|
+| *Mongo* | Mongo | Mongo | — |
+| *Shadow* | Both, after a backfill | Mongo, with PostgreSQL reads compared in the background | Stop writing to PostgreSQL |
+| *PostgreSQL primary* | Both | PostgreSQL | Switch the setting back to *Shadow* |
+| *PostgreSQL only* | PostgreSQL | PostgreSQL | Restore from backup |
 
-Phase 1, udata only. The Hydra integration is left unchanged: `udata/core/dataset/events.py`
-keeps sending resource events over HTTP, and Hydra keeps writing its results through the API,
-so `update_resource_extras` is ported as a targeted `UPDATE` on `dataset_resource`.
+- At any time, all reads come from a single store, so there are no references across stores
+  and the PostgreSQL schema has its foreign keys from the start.
+- Writes to both stores are not atomic: a reconciliation job compares them and repairs drift.
+- Since both stores hold all the data in *Shadow* and *PostgreSQL primary*, reads can be
+  switched module by module as a precaution, without cross-store references. This is an
+  option, not a requirement.
+- An environment moves to the next state only when its exit criteria are met.
 
-1. **Inventory**: fields, embedded documents, indexes and queries per collection, then a
-   target schema reviewed by the team.
-2. **Isolate persistence while still on Mongo**: move the 316 `.objects(...)` calls behind
-   per-module functions, shipped and tested step by step. This is the bulk of the work and
-   de-risks the rest.
-3. **Rewrite the models in SQLAlchemy 2**: port `udata/mongo/` fields, mixins (`Owned`,
-   `WithMetrics`, `Auditable`, `SpamMixin`, `Linkable`), signals (session events) and
-   `api_fields.py`. Autogenerate the initial Alembic revision and review it by hand.
-4. **Switch module by module** behind the layer from step 2, from leaves (licenses, geo
-   zones, posts, contact points) to the core (user, organization, dataset). Replace the
-   Flask-Security datastore and adapt the Celery scheduler.
-5. **Migrate the data** with an ETL script: keep the ObjectIds, flatten the embedded
-   documents, wire the references. Run it locally, then on a production copy.
-6. **Production cutover** during a short `READ_ONLY_MODE` window (the flag exists),
-   or with temporary dual writes if no downtime is acceptable.
+### Stage 0: foundations, on `main`, still on Mongo
 
-Redis and file storage are not affected.
+Shipped continuously, to avoid a long-lived branch that conflicts with ongoing work:
 
-Phase 2, with Hydra (see [Phase 2](#phase-2-sharing-the-database-with-the-crawler)):
+- Isolate persistence: move the 316 `.objects(...)` calls behind per-module functions. This is
+  the bulk of the work, and it needs no PostgreSQL.
+- Delegate search to Elasticsearch (see [Search](#search)), which removes the dependency on
+  Mongo text indexes.
+- Add PostgreSQL to `docker-compose.yml`, CI and every environment; set up SQLAlchemy 2,
+  Alembic and psycopg 3 next to MongoEngine.
+- Write the target schema from the inventory (fields, embedded documents, indexes, queries per
+  collection), reviewed by the team.
 
-1. Create the `hydra` schema and the per-application roles.
-2. Point Hydra at `udata.dataset_resource` and drop its own copy of the resources.
-3. Move Hydra's results to its own tables, read by udata and exposed as the same extras.
-4. Replace the HTTP calls and the Celery `publish` task with the outbox, in both directions.
+Exit: no `.objects(...)` call outside the persistence layer, search served by Elasticsearch.
+
+### Stage 1: rewrite
+
+- Rewrite all models in SQLAlchemy 2 and the persistence layer on top of them. Port
+  `udata/mongo/` fields, mixins (`Owned`, `WithMetrics`, `Auditable`, `SpamMixin`,
+  `Linkable`), signals as session events, `generate_fields` in `udata/api_fields.py`, the
+  forms, the Flask-Security datastore, the Authlib models and the Celery scheduler.
+- Generate the initial Alembic revision and review it by hand.
+- Build the migration tooling: backfill (`COPY` through psycopg 3), writes to both stores,
+  background read comparison, reconciliation job.
+- The code reaches `main` behind `DATABASE_MODE`, with *Mongo* as the default.
+
+Exit: the test suite passes in every state, locally and in CI.
+
+### Stage 2: dev
+
+- Backfill, then *Shadow*, then *PostgreSQL primary*.
+- Run cdata end to end and the API response comparison.
+- Rehearse the rollback from *PostgreSQL primary* to *Shadow*.
+
+Exit: no differences reported, rollback works.
+
+### Stage 3: demo
+
+Same steps as dev. If demo does not have production's data volume, also backfill a
+production copy to measure the backfill time and query performance.
+
+Exit: no differences reported, rollback works, acceptable backfill time.
+
+### Stage 4: production
+
+1. **Backfill, then *Shadow*: testing in production without user impact.** Mongo still serves
+   every request. Real writes go to both stores and real reads are compared in the background,
+   which also measures PostgreSQL under real load.
+   Exit: no differences over an agreed period, acceptable query times.
+2. ***PostgreSQL primary*.** Users are served by PostgreSQL, Mongo is still written, and rollback
+   is a setting change. Reads can be switched gradually first: admin and internal requests,
+   then a share of the traffic, or module by module.
+   Exit: no differences and no incident over an agreed period.
+
+### Stage 5: decommission MongoDB
+
+In dev, then demo, then production, testing after each one:
+
+1. Switch to *PostgreSQL only* after a final Mongo backup, kept archived.
+2. Once all environments are *PostgreSQL only*, remove MongoEngine, pymongo, `udata/mongo/`,
+   `udata/flask_mongoengine/`, `udata/migrations/` and the migration tooling from the code.
+3. Remove MongoDB from `docker-compose.yml`, CI and each environment.
+
+## Phase 2: sharing the database with Hydra
+
+Out of scope of this plan. During phase 1, the integration with the crawler stays as it is,
+in both directions:
+- udata notifies Hydra of every resource change over HTTP (Celery task in
+  `udata/core/dataset/events.py`);
+- Hydra writes its results back into the resource extras (`check:*`, `analysis:*`) through the
+  udata API, so `Dataset.update_resource_extras` is ported as a targeted `UPDATE`.
+
+Once an environment is *PostgreSQL primary*, phase 2 can start. It will have its own plan, and
+mostly changes the Hydra codebase:
+- Hydra reads the catalog directly from the shared PostgreSQL database instead of keeping its
+  own copy, so udata stops notifying Hydra of resource changes;
+- Hydra stops sending its results to udata through the API.
 
 ## Performance
 
@@ -307,7 +348,11 @@ endpoints. The main gains are data integrity, easier analysis and simpler aggreg
 - The full pytest suite passes on PostgreSQL with `SQLAlchemyModelFactory` factories.
 - `alembic upgrade head` on an empty database, then `alembic check`: no drift between models
   and schema.
-- Row count per table matches the document count per collection after the ETL.
-- JSON responses from a sample of `/api/1` and `/api/2` URLs are identical on both backends
-  loaded with the same data. `?q=` result ordering may differ slightly.
-- cdata runs end to end against the PostgreSQL instance.
+- The test suite passes in each state (*Mongo*, *Shadow*, *PostgreSQL primary*, *PostgreSQL only*).
+- In each environment, before each state change: row count per table matches the document
+  count per collection, and the background read comparison and the reconciliation job report
+  no differences.
+- JSON responses from a sample of `/api/1` and `/api/2` URLs are identical whichever store
+  serves the reads. `?q=` result ordering may differ slightly.
+- The rollback from *PostgreSQL primary* to *Shadow* is rehearsed in dev and demo.
+- cdata runs end to end in each environment.
