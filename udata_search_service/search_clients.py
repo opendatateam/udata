@@ -694,7 +694,6 @@ class ElasticClient:
             "other": [],
         }
 
-        # geozone filters also match the zones detected from `spatial.geom`
         geozone_fields = ["geozones"]
         if filters.get("include_detected_geozones"):
             geozone_fields.append("geozones_detected")

@@ -6,6 +6,7 @@ from mongoengine.connection import get_db
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
+from udata.core.dataset.models import Dataset
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization import constants as org_constants
@@ -14,6 +15,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
+from udata.core.spatial.models import SpatialCoverage
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
@@ -844,9 +846,12 @@ class SearchIntegrationTest(APITestCase):
         assert "DS autre" not in titles
 
     def test_dataset_geozone_filters_include_detected_zones_only_on_demand(self):
-        """A dataset with only detected zones is found through them with the flag, not without."""
-        parent = GeoZoneFactory(id="fr:departement:05", level="fr:departement")
-        child = GeoZoneFactory(id="fr:commune:05061", level="fr:commune", ancestors=[parent.id])
+        """Detected zones are matched in addition to declared ones, only with the flag."""
+        parent = GeoZoneFactory(id="fr:departement:05")
+        child = GeoZoneFactory(id="fr:commune:05061", ancestors=[parent.id])
+        declared = DatasetFactory(
+            title="Declared on the departement", spatial=SpatialCoverageFactory(zones=[parent])
+        )
         detected = DatasetFactory(
             title="Detected on the departement", extras={"analysis:spatial:zones": [parent.id]}
         )
@@ -859,11 +864,35 @@ class SearchIntegrationTest(APITestCase):
         ):
             off = self.get(f"/api/2/datasets/search/?{params}")
             self.assert200(off)
-            assert off.json["total"] == 0
+            assert {d["id"] for d in off.json["data"]} == {str(declared.id)}
 
             on = self.get(f"/api/2/datasets/search/?{params}&include_detected_geozones=true")
             self.assert200(on)
-            assert [d["id"] for d in on.json["data"]] == [str(detected.id)]
+            assert {d["id"] for d in on.json["data"]} == {str(declared.id), str(detected.id)}
+
+    def test_detect_zones_command_makes_datasets_searchable_by_detected_zone(self):
+        zone = GeoZoneFactory(id="fr:departement:05", bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory()
+        # bypass signals to mimic a dataset created before detection existed
+        Dataset.objects(id=dataset.id).update(
+            set__spatial=SpatialCoverage(
+                geom={
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [[[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0], [0.0, 0.0]]]
+                    ],
+                }
+            )
+        )
+
+        self.cli("spatial detect-zones")
+        self.refresh_index()
+
+        response = self.get(
+            f"/api/2/datasets/search/?geozone={zone.id}&include_detected_geozones=true"
+        )
+        self.assert200(response)
+        assert [d["id"] for d in response.json["data"]] == [str(dataset.id)]
 
     def test_dataservice_filter_by_tags(self):
         DataserviceFactory(title="DS tagged", tags=["transport"])

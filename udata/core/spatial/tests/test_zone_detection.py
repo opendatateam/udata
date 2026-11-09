@@ -48,10 +48,6 @@ class DetectZoneTest:
         }
         assert detect_zone([0, 0, 10, 10], zones) == ["exact"]
 
-    def test_custom_threshold(self):
-        zones = {"a": [0, 0, 10, 10]}
-        assert detect_zone([5, 5, 15, 15], zones, threshold=0.1) == ["a"]
-
     def test_exact_tie_returns_all_matching_zones(self):
         # e.g. a region and a department sharing identical geometry (DOM-TOM)
         zones = {

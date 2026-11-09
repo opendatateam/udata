@@ -69,7 +69,6 @@ class DetectZoneOnSpatialChangeTest(DBTestCase):
         dataset.save()
 
         dataset.reload()
-        # no write on first pass, to avoid noise for datasets that never match
         self.assertNotIn("analysis:spatial:zones", dataset.extras)
 
     def test_no_match_clears_stale_match(self):
@@ -112,48 +111,38 @@ class DetectZoneOnSpatialChangeTest(DBTestCase):
         dataset.reload()
         self.assertNotIn("analysis:spatial:zones", dataset.extras)
 
-    def test_dataset_with_explicit_zones_is_left_untouched(self):
-        zone = GeoZoneFactory()
-        dataset = DatasetFactory(spatial=SpatialCoverage(zones=[zone]))
-
-        # trigger another (non-spatial) change; on_update fires but spatial
-        # itself didn't change, and zones+geom are mutually exclusive anyway
-        dataset.title = "updated title"
-        dataset.save()
-
-        dataset.reload()
-        self.assertNotIn("analysis:spatial:zones", dataset.extras)
-
 
 class ReindexAfterDetectionTest(DBTestCase):
     def test_reindexes_when_detected_zones_change(self):
         GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
         dataset = DatasetFactory()
 
-        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+        with mock.patch("udata.core.spatial.tasks.reindex_model_on_save") as reindex:
             dataset.spatial = SpatialCoverage(geom=RECTANGLE_GEOM)
             dataset.save()
 
-        reindex.delay.assert_called_once_with("Dataset", str(dataset.id))
+        reindex.assert_called_once()
+        self.assertEqual(reindex.call_args.args[1].id, dataset.id)
 
     def test_does_not_reindex_when_detected_zones_are_unchanged(self):
         GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
         dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
 
-        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+        with mock.patch("udata.core.spatial.tasks.reindex_model_on_save") as reindex:
             detect_and_write_zone(str(dataset.id))
 
-        reindex.delay.assert_not_called()
+        reindex.assert_not_called()
 
     def test_reindexes_when_stale_match_is_cleared(self):
         GeoZoneFactory(bbox=[0.0, 0.0, 10.0, 10.0])
         dataset = DatasetFactory(spatial=SpatialCoverage(geom=RECTANGLE_GEOM))
 
-        with mock.patch("udata.core.spatial.tasks.reindex") as reindex:
+        with mock.patch("udata.core.spatial.tasks.reindex_model_on_save") as reindex:
             dataset.spatial = SpatialCoverage()
             dataset.save()
 
-        reindex.delay.assert_called_once_with("Dataset", str(dataset.id))
+        reindex.assert_called_once()
+        self.assertEqual(reindex.call_args.args[1].id, dataset.id)
 
 
 class SerializeDetectedZonesTest(APITestCase):

@@ -1,5 +1,6 @@
 from xml.sax.saxutils import escape
 
+from udata.core.spatial.zone_detection import geom_to_bbox
 from udata.rdf import escape_xml_illegal_chars
 
 XML_NS = {
@@ -167,12 +168,9 @@ def _bbox(dataset) -> tuple[float, float, float, float] | None:
     Zone-based coverage has no stored geometry and is not supported.
     """
     if dataset.spatial and dataset.spatial.geom:
-        geom = dataset.spatial.geom
-        coords = [coord for polygon in geom["coordinates"] for ring in polygon for coord in ring]
-        if coords:
-            lons = [c[0] for c in coords]
-            lats = [c[1] for c in coords]
-            return min(lons), min(lats), max(lons), max(lats)
+        bbox = geom_to_bbox(dataset.spatial.geom)
+        if bbox:
+            return tuple(bbox)
     return None
 
 

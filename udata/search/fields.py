@@ -40,9 +40,7 @@ class BoolFilter(Filter):
         self.help = help
 
     def as_request_parser_kwargs(self):
-        if self.help:
-            return {"type": inputs.boolean, "help": self.help}
-        return {"type": inputs.boolean}
+        return {"type": inputs.boolean, "help": self.help}
 
 
 class ModelTermsFilter(Filter):

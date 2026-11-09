@@ -5,6 +5,8 @@ Matches a dataset's spatial geometry against zone bounding boxes using
 Intersection over Union (IoU) scoring. Pure Python, no geospatial dependencies.
 """
 
+from geojson.utils import coords
+
 IOU_THRESHOLD = 0.8
 
 
@@ -24,7 +26,7 @@ def iou(bbox, zone_bbox):
     return intersection / union if union > 0 else 0.0
 
 
-def detect_zone(bbox, zones, threshold=IOU_THRESHOLD):
+def detect_zone(bbox, zones):
     """
     Return the ids of the best-matching zone(s) for `bbox`, or None.
 
@@ -43,27 +45,16 @@ def detect_zone(bbox, zones, threshold=IOU_THRESHOLD):
     if not scores:
         return None
     best_score = max(scores.values())
-    if best_score < threshold:
+    if best_score < IOU_THRESHOLD:
         return None
     return sorted(zone_id for zone_id, score in scores.items() if score == best_score)
 
 
 def geom_to_bbox(geom):
     """Compute the [minx, miny, maxx, maxy] envelope of a GeoJSON geometry dict."""
-    xs = []
-    ys = []
-
-    def walk(coords):
-        if not coords:
-            return
-        if isinstance(coords[0], (int, float)):
-            xs.append(coords[0])
-            ys.append(coords[1])
-        else:
-            for c in coords:
-                walk(c)
-
-    walk(geom.get("coordinates", []))
-    if not xs:
+    points = list(coords(geom))
+    if not points:
         return None
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
     return [min(xs), min(ys), max(xs), max(ys)]

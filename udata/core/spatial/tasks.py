@@ -2,9 +2,9 @@ from celery.utils.log import get_task_logger
 
 from udata.core.dataset.models import Dataset
 from udata.core.spatial.constants import DETECTED_ZONES_KEY
-from udata.core.spatial.models import GeoZone, zone_bboxes
+from udata.core.spatial.models import GeoZone, get_zone_bboxes
 from udata.core.spatial.zone_detection import detect_zone, geom_to_bbox
-from udata.search import reindex
+from udata.search import reindex_model_on_save
 from udata.tasks import job, task
 
 log = get_task_logger(__name__)
@@ -24,24 +24,24 @@ def detect_and_write_zone(dataset_id, zones=None):
         return
 
     zone_ids = None
-    if dataset.spatial and dataset.spatial.geom and not dataset.spatial.zones:
+    if dataset.spatial and dataset.spatial.geom:
         bbox = geom_to_bbox(dataset.spatial.geom)
         if bbox is not None:
-            zone_ids = detect_zone(bbox, zone_bboxes if zones is None else zones)
+            zone_ids = detect_zone(bbox, get_zone_bboxes() if zones is None else zones)
 
-    previous = dataset.extras.get(DETECTED_ZONES_KEY)
+    if zone_ids == dataset.extras.get(DETECTED_ZONES_KEY):
+        return zone_ids
+
     if zone_ids:
         log.info("Detected zone(s) %s for dataset %s", zone_ids, dataset_id)
         Dataset.objects(id=dataset_id).update(**{f"set__extras__{DETECTED_ZONES_KEY}": zone_ids})
     else:
         # Covers "no match" as well as "no longer applicable" (geom cleared, zones set explicitly, etc.)
-        # No-op (and harmless) if the key was never set.
         log.debug("No zone match for dataset %s", dataset_id)
         Dataset.objects(id=dataset_id).update(**{f"unset__extras__{DETECTED_ZONES_KEY}": 1})
 
-    # `.update()` fires no post_save, so reindex explicitly when the detected zones changed
-    if (zone_ids or None) != previous:
-        reindex.delay("Dataset", str(dataset_id))
+    # `.update()` fires no post_save, so reindex explicitly
+    reindex_model_on_save(Dataset, dataset)
 
     return zone_ids
 
