@@ -50,6 +50,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
+        ("harvest.record_id", lambda r: r.harvest and r.harvest.record_id),
         ("harvest.remote_id", lambda r: r.harvest and r.harvest.remote_id),
         ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
         ("harvest.uri", lambda r: r.harvest and r.harvest.uri),

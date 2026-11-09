@@ -17,6 +17,7 @@ from udata.rdf import (
     default_lang_value,
     namespace_manager,
     rdf_value,
+    record_id_from_rdf,
     remote_url_from_rdf,
     set_harvested_date,
     themes_from_rdf,
@@ -106,10 +107,9 @@ def dataservice_from_rdf(
         dataservice.license = License.guess(license)
 
     dataservice.set_harvested()
+    dataservice.harvest.record_id = record_id_from_rdf(d)
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    dataservice.harvest.remote_url = remote_url_from_rdf(
-        d, graph, remote_url_prefix=remote_url_prefix
-    )
+    dataservice.harvest.remote_url = remote_url_from_rdf(d, remote_url_prefix=remote_url_prefix)
     dataservice.harvest.created_at = rdf_value(d, DCT.created)
     dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.harvest.modified_at = rdf_value(d, DCT.modified)

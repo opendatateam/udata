@@ -1,5 +1,19 @@
 # Changelog
 
+## 17.24.0 (2026-11-09)
+
+- chore(deps): update dependency certifi to v2026.10.18 [security] ([#4078](https://github.com/opendatateam/udata/pull/4078))
+- chore(deps): update dependency dnspython to v2.9.0 [security] ([#4079](https://github.com/opendatateam/udata/pull/4079))
+- chore(deps): update dependency filelock to v4 [security] ([#4082](https://github.com/opendatateam/udata/pull/4082))
+- chore(deps): update dependency joserfc to v1.7.6 [security] ([#4077](https://github.com/opendatateam/udata/pull/4077))
+- chore(deps): update dependency pip to v26.2 [security] ([#4080](https://github.com/opendatateam/udata/pull/4080))
+- chore(deps): update dependency setuptools to v84 [security] ([#4083](https://github.com/opendatateam/udata/pull/4083))
+- chore(deps): update redis:alpine docker digest to 71885d8 ([#4074](https://github.com/opendatateam/udata/pull/4074))
+- feat(auth): let an account drop its password and udata 2FA to sign in with ProConnect only ([#4072](https://github.com/opendatateam/udata/pull/4072))
+- feat(auth): skip the udata 2FA only for a ProConnect identity verified as the account holder's ([#4071](https://github.com/opendatateam/udata/pull/4071))
+- perf: index the public dataset listing sorted by title ([#4075](https://github.com/opendatateam/udata/pull/4075))
+
+
 ## 17.23.0 (2026-11-05)
 
 - chore: update flask-storage ([#4070](https://github.com/opendatateam/udata/pull/4070))

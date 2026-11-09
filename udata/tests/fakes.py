@@ -7,7 +7,7 @@ instead of being handed a canned response per test.
 import json
 import time
 from dataclasses import dataclass
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from uuid import uuid4
 
 from joserfc import jwt
@@ -17,8 +17,10 @@ from joserfc.jwk import RSAKey
 @dataclass
 class ProConnectGrant:
     email: str
+    sub: str
     nonce: str
     acr: str
+    amr: list[str] | None
 
 
 class ProConnectFake:
@@ -31,8 +33,10 @@ class ProConnectFake:
     with the id_token of a session already closed, even expired, comes back all the same.
     An `acr` required at a second factor level is the exception: a session opened
     without one makes the agent authenticate again, with a second factor this time.
-    The id_token doesn't carry the email: it comes from the userinfo endpoint, as a
-    signed jwt.
+    The `amr` tells how the session was opened (`pop` for a security key, `pwd` alone
+    for a password), and only comes back when the `claims` ask for it. Each identity has
+    its own `sub`, whatever its email. The id_token doesn't carry the email: it comes from
+    the userinfo endpoint, as a signed jwt.
     """
 
     SECOND_FACTOR_ACR_VALUES = {"eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"}
@@ -45,6 +49,8 @@ class ProConnectFake:
         self.key = RSAKey.generate_key(2048, parameters={"kid": "test"}, private=True)
         # The ProConnect account of whoever is at the keyboard.
         self.agent: str | None = None
+        self.agent_sub: str | None = None
+        self.agent_amr: list[str] | None = None
         self.session_open = False
         self.session_second_factor = False
         self.authentications = 0
@@ -58,16 +64,41 @@ class ProConnectFake:
         rmock.post(f"{self.ISSUER}/token", json=self._handle_token)
         rmock.get(f"{self.ISSUER}/userinfo", content=self._handle_userinfo)
 
-    def agent_has_session(self, email: str, second_factor: bool = True) -> None:
-        """Put `email` at the keyboard, with a ProConnect session already open."""
+    def agent_has_session(
+        self,
+        email: str,
+        second_factor: bool = True,
+        sub: str | None = None,
+        amr: list[str] | None = None,
+    ) -> None:
+        """Put the ProConnect identity of `email` at the keyboard, with a session already
+        open. Another identity with the same email, such as one an attacker created, gets
+        its own `sub`. `amr` is how the identity provider authenticates the agent, when it
+        isn't a security key: a one-time code by email for one without a second factor."""
         self.agent = email
+        self.agent_sub = sub or f"sub-of-{email}"
+        self.agent_amr = amr
         self.session_open = True
         self.session_second_factor = second_factor
+
+    def tamper(self, authorize_url: str, require_second_factor: bool) -> str:
+        """What the agent's browser can do to the redirection to ProConnect before following
+        it: require a second factor we don't, or drop the one we do."""
+        params = self._params(authorize_url)
+        if require_second_factor:
+            params.pop("acr_values", None)
+            claims = {"acr": {"essential": True, "values": ["eidas0-mfa"]}, "amr": None}
+        else:
+            params["acr_values"] = "eidas1"
+            claims = {"amr": None}
+        params["claims"] = json.dumps({"id_token": claims})
+        return urlunparse(urlparse(authorize_url)._replace(query=urlencode(params)))
 
     def authorize(self, authorize_url: str) -> dict:
         """Play the browser round-trip and return the callback query parameters."""
         params = self._params(authorize_url)
-        acr = json.loads(params.get("claims", "{}")).get("id_token", {}).get("acr", {})
+        id_token_claims = json.loads(params.get("claims", "{}")).get("id_token", {})
+        acr = id_token_claims.get("acr") or {}
         second_factor_required = acr.get("essential", False) and set(acr["values"]) <= (
             self.SECOND_FACTOR_ACR_VALUES
         )
@@ -81,8 +112,11 @@ class ProConnectFake:
         # The `acr` is the level asked for, not the one reached: only a required one tells
         # that the agent presented a second factor.
         acr = "eidas0-mfa" if second_factor_required else "eidas1"
+        amr = None
+        if "amr" in id_token_claims:
+            amr = self.agent_amr or (["pop", "mfa"] if self.session_second_factor else ["pwd"])
         code = uuid4().hex
-        self._grants[code] = ProConnectGrant(self.agent, params["nonce"], acr)
+        self._grants[code] = ProConnectGrant(self.agent, self.agent_sub, params["nonce"], acr, amr)
         return {"code": code, "state": params["state"]}
 
     def deny(self, authorize_url: str) -> dict:
@@ -130,14 +164,21 @@ class ProConnectFake:
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": 3600,
-            "id_token": self._sign({"acr": grant.acr, "nonce": grant.nonce}),
+            "id_token": self._sign(
+                {
+                    "sub": grant.sub,
+                    "acr": grant.acr,
+                    "nonce": grant.nonce,
+                    **({"amr": grant.amr} if grant.amr is not None else {}),
+                }
+            ),
         }
 
     def _handle_userinfo(self, request, context) -> bytes:
         grant = self._access_tokens[request.headers["Authorization"].removeprefix("Bearer ")]
         context.headers["Content-Type"] = "application/jwt"
         return self._sign(
-            {"email": grant.email, "given_name": "Jane", "usual_name": "Doe"}
+            {"sub": grant.sub, "email": grant.email, "given_name": "Jane", "usual_name": "Doe"}
         ).encode()
 
 
