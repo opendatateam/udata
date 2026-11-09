@@ -587,6 +587,11 @@ class Defaults(object):
     ##################
     TRANSPORT_DATASETS_URL = None
 
+    # Ecologie extras
+    #################
+    # Datasets in this topic get the ecologie:universe extra
+    ECOLOGIE_TOPIC_ID = None
+
     # Schemas parameters
     ####################
     SCHEMA_CATALOG_URL = None

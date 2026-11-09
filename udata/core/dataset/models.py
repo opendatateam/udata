@@ -642,13 +642,13 @@ class Dataset(
     # anchor by the frontend just like the analysis URLs, so it gets the same
     # model-level scheme check rather than relying on its producer.
     # See Resource.extras for the rationale.
-    # The reserved patterns differ from the resource ones: transport, the
+    # The reserved patterns differ from the resource ones: transport, ecologie, the
     # recommendations job and the DCAT harvester write on the dataset, while hydra
     # and validata write on its resources.
     extras = field(
         ExtrasField(
             {"datafairOrigin": URLField, "transport:url": URLField},
-            reserved=("transport:*", "recommendations*", DCAT_EXTRAS_KEY),
+            reserved=("transport:*", "ecologie:*", "recommendations*", DCAT_EXTRAS_KEY),
         ),
         auditable=False,
     )
