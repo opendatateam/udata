@@ -50,8 +50,8 @@ External constraints:
 - **Stack**: SQLAlchemy 2 + Flask-SQLAlchemy, Alembic, psycopg 3 (see [Stack](#stack)).
 - **Rewrite the models.** No compatibility layer that mimics `Dataset.objects(...)`.
 - **Migrate everything at once, roll out environment by environment.** All the code moves to
-  PostgreSQL together. MongoDB and PostgreSQL then coexist in time, in each environment (dev,
-  demo, production), rather than collection by collection (see [Migration timeline](#migration-timeline)).
+  PostgreSQL together. MongoDB and PostgreSQL then coexist in time in dev, demo and
+  production (see [Migration timeline](#migration-timeline)).
 - **No Mongo migration history in PostgreSQL.** The data is copied from an up-to-date Mongo
   database. `udata/migrations/` keeps running while Mongo is written, and is removed with it.
   Alembic starts from a single initial revision, and `udata db migrate` / `udata db status`
@@ -224,13 +224,7 @@ Target:
 
 All the code moves to PostgreSQL at once, then the switch is rolled out environment by
 environment: dev, demo, production. MongoDB is decommissioned in the same order. Both databases
-coexist in time in each environment, with tests at every step. The timeline is given as stages
-with exit criteria, not dates.
-
-Moving collection by collection was considered and left out: during the transition, part of
-the data would live in Mongo and part in PostgreSQL. References would have to be resolved
-across both stores in Python, foreign keys postponed, and every combination of migrated
-collections tested.
+coexist in time in each environment, with tests at every step.
 
 ### States of an environment
 
