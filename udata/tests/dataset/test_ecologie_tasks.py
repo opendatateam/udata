@@ -35,18 +35,20 @@ class EcologieTasksTest(PytestOnlyDBTestCase):
 
     @pytest.mark.options(ECOLOGIE_TOPIC_ID=TOPIC_ID)
     def test_map_ecologie_datasets_unknown_topic(self):
-        """A missing topic should not erase existing flags"""
-        flagged = DatasetFactory(extras={"ecologie:universe": True})
+        """A deleted or misconfigured topic unflags everything"""
+        flagged = DatasetFactory(extras={"ecologie:universe": True, "other": "kept"})
 
         map_ecologie_datasets()
 
         flagged.reload()
-        assert flagged.extras["ecologie:universe"] is True
+        assert "ecologie:universe" not in flagged.extras
+        assert flagged.extras["other"] == "kept"
 
     def test_map_ecologie_datasets_no_config(self):
+        """Unsetting the topic disables the feature"""
         flagged = DatasetFactory(extras={"ecologie:universe": True})
 
         map_ecologie_datasets()
 
         flagged.reload()
-        assert flagged.extras["ecologie:universe"] is True
+        assert "ecologie:universe" not in flagged.extras
