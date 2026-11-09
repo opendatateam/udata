@@ -2,17 +2,20 @@ import logging
 from datetime import UTC, datetime
 
 import requests
-from flask import current_app
+from flask import current_app, session
 from flask_login import current_user
 from flask_security.forms import (
+    ChangePasswordForm,
     ForgotPasswordForm,
     Form,
     LoginForm,
     RegisterFormV2,
     ResetPasswordForm,
+    TwoFactorSetupForm,
     VerifyForm,
 )
 
+from udata.auth.proconnect import LOGIN_KEY, PENDING_LOGIN_KEY, session_login
 from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
 from udata.i18n import lazy_gettext as _
@@ -67,8 +70,17 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
         return True
 
 
+# Giving a password to an account that signs in with ProConnect only, through a reset that only
+# takes reading the mailbox, would open a second way in without its ProConnect second factor.
+PROCONNECT_ONLY = _("This account signs in with ProConnect only.")
+
+
 class ExtendedLoginForm(LoginForm):
     def validate(self, **kwargs):
+        # A password login: a ProConnect login left in this browser, waiting for its udata
+        # 2FA or not, says nothing of this one.
+        session.pop(PENDING_LOGIN_KEY, None)
+        session.pop(LOGIN_KEY, None)
         if not super().validate(**kwargs):
             return False
 
@@ -84,12 +96,26 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         if not super().validate(**kwargs):
             return False
 
+        if self.user.signs_in_with_proconnect_only:
+            self.password.errors.append(PROCONNECT_ONLY)
+            return False
+
         if self.user.password_rotation_demanded:
             self.user.password_rotation_demanded = None
             self.user.password_rotation_performed = datetime.now(UTC)
             self.user.save()
 
         return True
+
+
+class ExtendedChangePasswordForm(ChangePasswordForm):
+    def validate(self, **kwargs):
+        # flask-security lets an account without a password set one with a fresh session.
+        if current_user.signs_in_with_proconnect_only:
+            self.new_password.errors = [PROCONNECT_ONLY]
+            return False
+
+        return super().validate(**kwargs)
 
 
 class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
@@ -101,6 +127,26 @@ class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
             return False
 
         return True
+
+
+class ExtendedTwoFactorSetupForm(TwoFactorSetupForm):
+    def validate(self, **kwargs):
+        if not super().validate(**kwargs):
+            return False
+        if self.setup.data == "disable" or not self.user.second_factor_at_proconnect_only:
+            return True
+        # The ProConnect identity is the account's second factor: whoever sets up the
+        # udata one must present it, or a stolen password would take the account over.
+        login = session_login(LOGIN_KEY)
+        if login is not None and login.presents_trusted_second_factor(self.user):
+            return True
+        self.setup.errors.append(
+            _(
+                "Your account is protected by the two-factor authentication of ProConnect: "
+                "sign in with ProConnect to set up another one."
+            )
+        )
+        return False
 
 
 class ExtendedVerifyForm(VerifyForm):

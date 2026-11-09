@@ -69,6 +69,7 @@ from udata.utils import hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DCAT_EXTRAS_KEY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     INSPIRE,
@@ -368,7 +369,7 @@ class License(Document):
 
 class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, deleted=None, archived=None)
+        return self(private=False, deleted=None, archived=None)
 
     def hidden(self):
         return self(Q(private=True) | Q(deleted__ne=None) | Q(archived__ne=None))
@@ -431,7 +432,7 @@ class ResourceMixin(object):
         # rendered but resolves which resource the export job overwrites, so a forged
         # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
         # writable, hence their URL type above.
-        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", DCAT_EXTRAS_KEY),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     geopf = EmbeddedDocumentField(GeopfResourceMetadata)
@@ -641,13 +642,19 @@ class Dataset(
     # anchor by the frontend just like the analysis URLs, so it gets the same
     # model-level scheme check rather than relying on its producer.
     # See Resource.extras for the rationale.
-    # The reserved patterns differ from the resource ones: transport, the
+    # The reserved patterns differ from the resource ones: transport, ecologie, the
     # recommendations job, the zone detection (`analysis:spatial:*`) and the DCAT
     # harvester write on the dataset, while hydra and validata write on its resources.
     extras = field(
         ExtrasField(
             {"datafairOrigin": URLField, "transport:url": URLField},
-            reserved=("analysis:spatial:*", "transport:*", "recommendations*", "dcat"),
+            reserved=(
+                "analysis:spatial:*",
+                "transport:*",
+                "ecologie:*",
+                "recommendations*",
+                DCAT_EXTRAS_KEY,
+            ),
         ),
         auditable=False,
     )
@@ -726,6 +733,10 @@ class Dataset(
             "slug",
             "resources.id",
             "resources.urlhash",
+            # Serves the public listing sorted by title, and its count, without scanning
+            # the collection. Only works with `private=False`: `private__ne=True` is a
+            # range, and a range before the sort key prevents using the index to sort.
+            ("deleted", "archived", "private", "title"),
         ]
         + Owned.meta["indexes"],
         "ordering": ["-created_at_internal"],

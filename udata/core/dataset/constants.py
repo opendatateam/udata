@@ -7,6 +7,9 @@ from flask_babel import LazyString
 
 from udata.i18n import lazy_gettext as _
 
+# Key of the `extras` entry holding DCAT-related metadata, reserved on datasets.
+DCAT_EXTRAS_KEY = "dcat"
+
 
 class UpdateFrequency(StrEnum):
     """

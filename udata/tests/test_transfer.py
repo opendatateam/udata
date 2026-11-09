@@ -49,7 +49,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -111,7 +111,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         comment = faker.sentence()
 
         login_user(user)
@@ -396,16 +396,19 @@ class TransferRequestNotificationTest(DBTestCase):
             assert notification.details.transfer_subject == dataset
             assert_equal_dates(notification.created_at, transfer.created)
 
-    def test_no_duplicate_notifications(self):
-        """Duplicate notifications are not created for same transfer"""
+    def test_a_second_pending_transfer_is_refused(self):
+        """As the front offers a single pending transfer per object, so does the API"""
         owner = UserFactory()
         recipient = UserFactory()
         dataset = DatasetFactory(owner=owner)
 
         login_user(owner)
         request_transfer(dataset, recipient, faker.sentence())
-        request_transfer(dataset, recipient, faker.sentence())
+        for other_recipient in (recipient, UserFactory()):
+            with pytest.raises(ValueError):
+                request_transfer(dataset, other_recipient, faker.sentence())
 
+        assert Transfer.objects(subject=dataset).count() == 1
         assert Notification.objects.count() == 1
 
     def test_multiple_transfers_create_separate_notifications(self):
@@ -425,24 +428,6 @@ class TransferRequestNotificationTest(DBTestCase):
         subjects = [notif.details.transfer_subject for notif in notifications]
         self.assertIn(dataset1, subjects)
         self.assertIn(dataset2, subjects)
-
-    def test_notification_not_created_if_previous_exists(self):
-        """Notification is created when transferring from org to user"""
-        admin = UserFactory()
-        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
-        dataset = DatasetFactory(organization=org)
-        recipient = UserFactory()
-
-        login_user(admin)
-        request_transfer(dataset, recipient, faker.sentence())
-
-        notifications = Notification.objects.all()
-        assert len(notifications) == 1
-
-        request_transfer(dataset, recipient, faker.sentence())
-
-        notifications = Notification.objects.all()
-        assert len(notifications) == 1
 
     def test_notification_created_if_previous_handled(self):
         """Notification is created when transferring from org to user"""
