@@ -65,7 +65,6 @@ External constraints:
 | Schema migrations | Alembic | `udata/migrations/` and `udata db migrate` |
 | Driver | psycopg 3 | pymongo |
 | Forms | wtforms-sqlalchemy | `udata/flask_mongoengine/model_form.py`, `ModelSelectField` |
-| Validation of `JSONB` contents | Pydantic | `EmbeddedDocument` validation |
 
 **SQLAlchemy 2** is the reference ORM in Python and the only one that fits udata's existing
 dependencies:
@@ -90,11 +89,8 @@ maintenance mode. It supports server-side parameter binding, `COPY` for fast bul
 ETL), a connection pool (`psycopg_pool`) and `LISTEN/NOTIFY`, which phase 2 needs for the
 outbox notifications.
 
-**Pydantic** validates the contents of the `JSONB` columns (`checksum`, `schema`, `spatial`,
-`harvest`…) through a small SQLAlchemy `TypeDecorator`. PostgreSQL accepts any JSON in these
-columns, so without it the validation `EmbeddedDocument` provides today would be lost. In
-phase 2, it also defines the event payloads shared with Hydra. The API layer stays on
-Flask-RESTX during the migration; moving it to Pydantic would be a separate project.
+The validation of `JSONB` columns and `extras` is ported from `udata/mongo/`. The API layer
+stays on Flask-RESTX.
 
 Alternatives considered:
 - **ORM**: the Django ORM is tied to Django. Peewee and Pony have smaller ecosystems and
@@ -250,8 +246,7 @@ Phase 2 target, in one PostgreSQL database:
   `check.completed`…) in the same transaction as the change, and sends a `pg_notify` to wake up
   the other side. The outbox table is the durable record: a listener that was down catches up
   from it, since `LISTEN/NOTIFY` alone loses messages sent while nobody listens. This replaces
-  the HTTP calls and the Celery `publish` task in both directions.
-- **udata reacts to Hydra events** to do what the API callback did: reindex the dataset in
+  the HTTP calls and the Celery `publish` task in both directions.- **udata reacts to Hydra events** to do what the API callback did: reindex the dataset in
   Elasticsearch and invalidate caches.
 
 Points of attention:
