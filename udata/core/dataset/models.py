@@ -369,7 +369,7 @@ class License(Document):
 
 class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, deleted=None, archived=None)
+        return self(private=False, deleted=None, archived=None)
 
     def hidden(self):
         return self(Q(private=True) | Q(deleted__ne=None) | Q(archived__ne=None))
@@ -727,6 +727,10 @@ class Dataset(
             "slug",
             "resources.id",
             "resources.urlhash",
+            # Serves the public listing sorted by title, and its count, without scanning
+            # the collection. Only works with `private=False`: `private__ne=True` is a
+            # range, and a range before the sort key prevents using the index to sort.
+            ("deleted", "archived", "private", "title"),
         ]
         + Owned.meta["indexes"],
         "ordering": ["-created_at_internal"],

@@ -49,7 +49,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -111,7 +111,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         comment = faker.sentence()
 
         login_user(user)
