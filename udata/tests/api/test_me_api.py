@@ -733,6 +733,22 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
                 session.pop("fs_gexp", None)
         return user
 
+    def test_a_fresh_session_passes_the_freshness_check(self):
+        self.sign_in()
+
+        self.assertStatus(self.get(url_for("api.my_session_freshness")), 204)
+
+    def test_a_stale_session_fails_the_freshness_check(self):
+        self.sign_in(signed_in_ago=timedelta(days=2))
+
+        # As cdata asks: without it, flask-security redirects to its verify view.
+        response = self.get(
+            url_for("api.my_session_freshness"), headers={"Accept": "application/json"}
+        )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+
     def test_creating_a_token_mails_the_account_holder(self):
         user = self.sign_in()
 

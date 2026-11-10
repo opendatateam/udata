@@ -225,6 +225,20 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
+@me.route("/fresh/", endpoint="my_session_freshness")
+class SessionFreshnessAPI(API):
+    @api.secure
+    @fresh_session_required
+    @api.doc("check_session_freshness")
+    @api.response(204, "The session is fresh")
+    @api.response(401, "The session must be reauthenticated")
+    def get(self):
+        """Check that the session may perform a sensitive operation, before asking for it.
+
+        A form can then send the user to reauthenticate before they fill it in."""
+        return "", 204
+
+
 @me.route("/api_tokens/", endpoint="my_api_tokens")
 class ApiTokenListAPI(API):
     @api.secure
