@@ -148,7 +148,7 @@ msgstr "Vous devez accepter les CGU pour continuer."
 
 #: udata/auth/forms.py:75
 msgid "This account signs in with ProConnect only."
-msgstr ""
+msgstr "Ce compte se connecte uniquement avec ProConnect."
 
 #: udata/auth/forms.py:88 udata/tests/forms/test_current_user_field.py:194
 msgid "Password must be changed for security reasons"
@@ -161,10 +161,12 @@ msgid ""
 "Your account is protected by the two-factor authentication of ProConnect:"
 " sign in with ProConnect to set up another one."
 msgstr ""
+"Votre compte est protégé par l'authentification à deux facteurs de "
+"ProConnect : connectez-vous avec ProConnect pour en configurer une autre."
 
 #: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
 msgid "This account has no password."
-msgstr ""
+msgstr "Ce compte n'a pas de mot de passe."
 
 #: udata/auth/forms.py:163
 msgid "New email"
@@ -219,7 +221,7 @@ msgstr "Réinitialisez votre mot de passe"
 
 #: udata/auth/mails.py:110
 msgid "Your account signs in with ProConnect"
-msgstr ""
+msgstr "Votre compte se connecte avec ProConnect"
 
 #: udata/auth/mails.py:113 udata/auth/mails.py:133
 #, python-format
@@ -231,6 +233,8 @@ msgstr ""
 #: udata/auth/mails.py:116
 msgid "Your account has no password: it signs in with ProConnect only."
 msgstr ""
+"Votre compte n'a pas de mot de passe : il se connecte uniquement avec "
+"ProConnect."
 
 #: udata/auth/mails.py:117 udata/auth/mails.py:136
 msgid "If this wasn't you, please ignore this email."
@@ -238,7 +242,7 @@ msgstr "Si ce n'était pas vous, veuillez ignorer cet e-mail."
 
 #: udata/auth/mails.py:118
 msgid "Sign in with ProConnect"
-msgstr ""
+msgstr "Se connecter avec ProConnect"
 
 #: udata/auth/mails.py:146
 msgid "Your data.gouv.fr password has been reset."
@@ -264,7 +268,7 @@ msgstr "%(email)s ne peut pas accéder à son compte mail"
 
 #: udata/auth/mails.py:176
 msgid "Your account now signs in with ProConnect only"
-msgstr ""
+msgstr "Votre compte se connecte désormais uniquement avec ProConnect"
 
 #: udata/auth/mails.py:179
 #, python-format
@@ -273,10 +277,13 @@ msgid ""
 "authentication only: its password and its %(site)s two-factor "
 "authentication, if it had any, have been removed."
 msgstr ""
+"Votre compte %(site)s se connecte désormais uniquement avec ProConnect et "
+"son authentification à deux facteurs : son mot de passe et, le cas "
+"échéant, son authentification à deux facteurs %(site)s ont été supprimés."
 
 #: udata/auth/mails.py:184
 msgid "If this wasn't you, contact us right away."
-msgstr ""
+msgstr "Si ce n'était pas vous, contactez-nous immédiatement."
 
 #: udata/auth/password_validation.py:26
 #, python-brace-format
@@ -321,7 +328,7 @@ msgstr "Votre instance udata est prête !"
 
 #: udata/core/checks.py:33
 msgid "Invalid email address"
-msgstr ""
+msgstr "Adresse e-mail invalide"
 
 #: udata/core/owned.py:66 udata/forms/fields.py:681
 #: udata/tests/api/test_dataservices_api.py:603
@@ -340,6 +347,8 @@ msgstr "Permission refusée pour cette organisation"
 #: udata/core/owned.py:125
 msgid "An object belongs either to a user or to an organization, not both"
 msgstr ""
+"Un objet appartient soit à un utilisateur, soit à une organisation, pas "
+"aux deux"
 
 #: udata/core/access_type/constants.py:46
 msgid "Confidentiality of public authorities proceedings"
@@ -521,6 +530,8 @@ msgstr "Utilisateur"
 #: udata/tests/api/test_contact_points.py:154
 msgid "A contact point requires a name, an email or a contact form"
 msgstr ""
+"Un point de contact nécessite un nom, un e-mail ou un formulaire de "
+"contact"
 
 #: udata/core/contact_point/models.py:68
 #: udata/tests/api/test_contact_points.py:137
@@ -531,13 +542,14 @@ msgstr ""
 
 #: udata/core/contact_point/models.py:76
 msgid "A contact point cannot change owner."
-msgstr ""
+msgstr "Un point de contact ne peut pas changer de propriétaire."
 
 #: udata/core/contact_point/models.py:114
 #: udata/tests/api/test_datasets_api.py:1455
 #, python-brace-format
 msgid "Contact point {id} does not belong to the owner of this object"
 msgstr ""
+"Le point de contact {id} n'appartient pas au propriétaire de cet objet"
 
 #: udata/core/dataservices/activities.py:24
 msgid "created a dataservice"
@@ -1031,10 +1043,12 @@ msgstr "jeu de données"
 #: udata/core/dataset/models.py:817
 msgid "A dataset with a DOI cannot be deleted, it can only be archived"
 msgstr ""
+"Un jeu de données avec un DOI ne peut pas être supprimé, il peut seulement "
+"être archivé"
 
 #: udata/core/dataset/models.py:822
 msgid "A dataset with a DOI cannot be made private"
-msgstr ""
+msgstr "Un jeu de données avec un DOI ne peut pas être rendu privé"
 
 #: udata/core/dataset/rdf.py:757 udata/tests/dataset/test_dataset_rdf.py:973
 #: udata/tests/dataset/test_dataset_rdf.py:990
@@ -1515,6 +1529,7 @@ msgstr "Derniers articles"
 #: udata/core/post/api.py:127
 msgid "This page has sub-pages: move or delete them first"
 msgstr ""
+"Cette page a des sous-pages : déplacez-les ou supprimez-les d'abord"
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
@@ -1538,11 +1553,11 @@ msgstr "Page"
 
 #: udata/core/post/models.py:44
 msgid "The slug must contain letters or digits"
-msgstr ""
+msgstr "Le slug doit contenir des lettres ou des chiffres"
 
 #: udata/core/post/models.py:48
 msgid "This slug is already used by another post"
-msgstr ""
+msgstr "Ce slug est déjà utilisé par un autre article"
 
 #: udata/core/post/models.py:177
 msgid "post"
@@ -1550,7 +1565,7 @@ msgstr "article"
 
 #: udata/core/reports/constants.py:24
 msgid "Auto-detected spam"
-msgstr ""
+msgstr "Spam détecté automatiquement"
 
 #: udata/core/reports/constants.py:25
 msgid "Explicit content"
@@ -1825,7 +1840,7 @@ msgstr "Un élément de thématique doit avoir un titre ou un élément."
 
 #: udata/core/topic/models.py:125
 msgid "collection"
-msgstr ""
+msgstr "collection"
 
 #: udata/core/user/activities.py:36
 msgid "followed a user"
@@ -1936,7 +1951,7 @@ msgstr "Moderateur"
 
 #: udata/core/visualizations/models.py:226
 msgid "chart"
-msgstr ""
+msgstr "graphique"
 
 #: udata/features/notifications/events.py:325
 #, python-format
@@ -2046,7 +2061,7 @@ msgstr "N'est pas un UUID"
 
 #: udata/forms/fields.py:227
 msgid "Not a valid URL"
-msgstr ""
+msgstr "URL invalide"
 
 #: udata/forms/fields.py:326 udata/mongo/taglist_field.py:38
 #, python-format
@@ -2085,7 +2100,7 @@ msgstr "Identifiants inconnus : {identifiers}"
 
 #: udata/forms/fields.py:630 udata/forms/fields.py:633
 msgid "Date must be a string"
-msgstr ""
+msgstr "La date doit être une chaîne de caractères"
 
 #: udata/forms/fields.py:642
 msgid "Unable to parse date range"
@@ -2214,37 +2229,41 @@ msgstr "Retour à la page d'accueil"
 #: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s souhaite accéder à votre compte %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:33
 msgid "This site request the following rights:"
-msgstr ""
+msgstr "Ce site demande les droits suivants :"
 
 #: udata/templates/api/oauth_authorize.html:35
 msgid "Access your profile"
-msgstr ""
+msgstr "Accéder à votre profil"
 
 #: udata/templates/api/oauth_authorize.html:36
 msgid ""
 "Read your profile, your email address, the organization you belong to, "
 "your publications"
 msgstr ""
+"Lire votre profil, votre adresse e-mail, les organisations dont vous êtes "
+"membre, vos publications"
 
 #: udata/templates/api/oauth_authorize.html:37
 msgid "Publish data"
-msgstr ""
+msgstr "Publier des données"
 
 #: udata/templates/api/oauth_authorize.html:38
 msgid "Publish datasets, reuses, follow or unfollow"
 msgstr ""
+"Publier des jeux de données et des réutilisations, suivre ou ne plus "
+"suivre"
 
 #: udata/templates/api/oauth_authorize.html:49
 msgid "Refuse"
-msgstr ""
+msgstr "Refuser"
 
 #: udata/templates/api/oauth_authorize.html:56
 msgid "Accept"
-msgstr ""
+msgstr "Accepter"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid ""
@@ -2442,7 +2461,7 @@ msgstr "Du texte :"
 
 #: udata/tests/api/test_activities_api.py:28
 msgid "did something to a dataset"
-msgstr ""
+msgstr "a fait quelque chose sur un jeu de données"
 
 #: udata/tests/forms/test_model_field.py:164
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
