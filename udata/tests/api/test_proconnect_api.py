@@ -7,6 +7,7 @@ from flask_security.recoverable import generate_reset_password_token
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.i18n import gettext as _
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import capture_mails
 
@@ -58,8 +59,10 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
     def assert_two_factor_setup_refused(self, response):
         self.assert400(response)
         assert response.json["response"]["field_errors"]["setup"] == [
-            "Your account is protected by the two-factor authentication of ProConnect: "
-            "sign in with ProConnect to set up another one."
+            _(
+                "Your account is protected by the two-factor authentication of ProConnect: "
+                "sign in with ProConnect to set up another one."
+            )
         ]
 
     def enter_totp(self, secret):
@@ -670,7 +673,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
         self.assert200(response)
         assert [mail.recipients for mail in mails] == [["jane@example.org"]]
-        assert "it signs in with ProConnect only" in mails[0].body
+        assert _("Your account has no password: it signs in with ProConnect only.") in mails[0].body
         assert f"{CDATA}/login" in mails[0].body
         assert "/reset/" not in mails[0].body
 
