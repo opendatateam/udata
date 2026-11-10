@@ -1,5 +1,4 @@
 import logging
-from importlib import import_module
 
 from flask import current_app
 from mongoengine.signals import post_delete, post_save
@@ -112,15 +111,12 @@ def query(model, **params):
 
 
 def init_app(app):
-    # Importing a module registers its search adapter or event handlers
-    for module in (
-        "udata.core.dataservices.search",
-        "udata.core.dataset.search",
-        "udata.core.discussions.search",
-        "udata.core.organization.search",
-        "udata.core.post.search",
-        "udata.core.reuse.search",
-        "udata.core.topic.search",
-        "udata.event",
-    ):
-        import_module(module)
+    # Side-effect imports to register event handlers and search adapters
+    import udata.core.dataservices.search
+    import udata.core.dataset.search
+    import udata.core.discussions.search
+    import udata.core.organization.search
+    import udata.core.post.search
+    import udata.core.reuse.search
+    import udata.core.topic.search
+    import udata.event  # noqa

@@ -20,6 +20,10 @@ from udata.tests.helpers import assert_emit
 
 
 class OrganizationModelTest(DBTestCase):
+    # Load metrics
+    import udata.core.organization.metrics  # noqa
+    import udata.core.followers.metrics
+
     def test_organization_metrics(self):
         # We need to init metrics module
         metrics.init_app(current_app)
