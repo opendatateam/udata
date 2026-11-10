@@ -1,5 +1,7 @@
+import re
 from datetime import timedelta
 from unittest import mock
+from urllib.parse import urlparse
 
 from flask import current_app, url_for
 from flask_security.utils import hash_data
@@ -11,6 +13,7 @@ from udata.core.organization.factories import (
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
+from udata.tests.helpers import capture_mails
 
 
 class AuthTest(APITestCase):
@@ -19,6 +22,45 @@ class AuthTest(APITestCase):
         data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
         token = security.confirm_serializer.dumps(data)
         return url_for("security.confirm_change_email", token=token)
+
+    def follow_expired_change_email_link(self, link):
+        """Open an expired link, and return the path of the new link it sends."""
+        with capture_mails() as mails:
+            # A negative validity makes any freshly signed token already expired
+            with mock.patch.dict(
+                current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
+            ):
+                response = self.get(link)
+
+        assert response.status_code == 302
+        assert "change_email_expired" in response.location
+        [mail] = mails
+        assert mail.recipients == ["new@example.com"]
+        [new_link] = re.findall(r"https?://\S+/confirm-change-email/[^\s\"<]+", mail.body)
+        return urlparse(new_link).path
+
+    def test_change_mail_expired_link_resends_the_link_of_its_owner(self):
+        """Whoever opens the expired link, the new one changes the email of the link owner."""
+        owner = UserFactory(email="owner@example.com")
+        visitor = self.login(UserFactory(email="visitor@example.com"))
+
+        new_link = self.follow_expired_change_email_link(
+            self.change_email_link(owner, "new@example.com")
+        )
+        self.get(new_link)
+
+        assert owner.reload().email == "new@example.com"
+        assert visitor.reload().email == "visitor@example.com"
+
+    def test_change_mail_expired_link_opened_anonymously(self):
+        owner = UserFactory(email="owner@example.com")
+
+        new_link = self.follow_expired_change_email_link(
+            self.change_email_link(owner, "new@example.com")
+        )
+        self.get(new_link)
+
+        assert owner.reload().email == "new@example.com"
 
     def test_change_mail_links_pending_email_invitations(self):
         """An unlinked invitation is invisible to the user, who could only ask to join."""

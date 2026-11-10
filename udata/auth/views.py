@@ -47,7 +47,7 @@ def slash_url_suffix(url, suffix):
 
 
 def send_change_email_confirmation_instructions(user, new_email):
-    data = [str(current_user.fs_uniquifier), hash_data(current_user.email), new_email]
+    data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
     token = _security.confirm_serializer.dumps(data)
 
     mails.confirmation_instructions(
