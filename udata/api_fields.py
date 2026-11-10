@@ -680,14 +680,6 @@ def generate_fields(**kwargs) -> Callable:
             if additional_field_info is None:
                 continue
 
-            def make_lambda(method):
-                """
-                Factory function to create a lambda with the correct scope.
-                If we don't have this factory function, the `method` will be the
-                last method assigned in this loop?
-                """
-                return lambda o: method(o)
-
             nested_fields: dict | None = additional_field_info.get("nested_fields")
             if nested_fields is None:
                 return_type = typing.get_type_hints(method).get("return")
@@ -702,7 +694,8 @@ def generate_fields(**kwargs) -> Callable:
             api_method_key = additional_field_info.get("rename") or method_name
 
             visible_if = additional_field_info.get("visible_if")
-            attribute = visible_only_if(method, visible_if) if visible_if else make_lambda(method)
+            # flask-restx calls a callable `attribute` with the object being serialized.
+            attribute = visible_only_if(method, visible_if) if visible_if else method
             read_fields[api_method_key] = field_constructor(
                 attribute=attribute, **{"readonly": True, **additional_field_info}
             )

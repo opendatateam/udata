@@ -448,6 +448,19 @@ class ActivityAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 0
 
+    def test_activity_api_list_with_a_token_whose_user_is_gone(self) -> None:
+        """It should not crash when the user of a token actor has been hard-deleted."""
+        owner = UserFactory()
+        token, _plaintext = ApiToken.generate(owner)
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        # Simulate a manual hard-delete of the user, which leaves the token behind.
+        User._get_collection().delete_one({"_id": owner.id})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
     def test_activity_api_list_with_dangling_actor(self) -> None:
         """It should not crash when an activity actor has been hard-deleted."""
         actor = UserFactory()
