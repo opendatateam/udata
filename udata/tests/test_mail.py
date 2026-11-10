@@ -3,7 +3,7 @@ import pytest
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import lazy_gettext as _
-from udata.mail import LabelledContent, MailMessage, ParagraphWithLinks, send_mail
+from udata.mail import LabelledContent, MailCTA, MailMessage, ParagraphWithLinks, send_mail
 from udata.tests.api import APITestCase
 from udata.tests.helpers import capture_mails
 
@@ -138,6 +138,32 @@ class MailGenerationTest(APITestCase):
 
         assert len(mails) == 1
         assert "<script>" not in mails[0].html
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_escape_user_content_interpolated_in_paragraphs_and_labels(self):
+        # A translated string marks itself as safe HTML (`LazyString.__html__`): what it
+        # interpolates would be rendered as is.
+        name = '<a href="https://evil.example">x</a>'
+
+        with capture_mails() as mails:
+            send_mail(
+                UserFactory(email="jane@example.org", first_name=name),
+                MailMessage(
+                    _("Unknown"),
+                    paragraphs=[
+                        _("Some text %(name)s", name=name),
+                        MailCTA(_("Some text %(name)s", name=name), "https://example.org"),
+                        LabelledContent(_("Some text %(name)s", name=name), "Some content"),
+                        LabelledContent(
+                            _("Some text %(name)s", name=name), "Some content", inline=True
+                        ),
+                    ],
+                ),
+            )
+
+        # The greeting, then the paragraph, the call to action and the two labels.
+        assert mails[0].html.count("&lt;a href=&#34;https://evil.example&#34;&gt;") == 5
+        assert '<a href="https://evil.example">' not in mails[0].html
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_escape_user_content_in_object_label(self):
