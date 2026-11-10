@@ -10,11 +10,10 @@ from flask import abort, current_app, redirect, request, session, url_for
 from flask_login import user_logged_out
 from flask_security.signals import tf_code_confirmed
 from flask_security.tf_plugin import tf_clean_session
-from flask_security.utils import check_and_update_authn_fresh
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.auth import current_user, login_user, mails
+from udata.auth import current_user, fresh_session_required, login_user, mails
 from udata.core.user.models import ProConnectIdentity, User, datastore
 from udata.uris import cdata_url, homepage_url
 
@@ -295,17 +294,13 @@ def can_switch_to_proconnect_only(user: User) -> bool:
 @ns.route("/only/", endpoint="proconnect_only")
 class ProconnectOnlyAPI(API):
     @api.secure
+    @fresh_session_required
     @api.doc("proconnect_only")
     @api.response(204, "The account signs in with ProConnect only")
     @api.response(400, "The account already signs in with ProConnect only")
     @api.response(403, "This session wasn't opened by the trusted ProConnect identity")
     def post(self):
         """Drop the password and the udata 2FA: the account signs in with ProConnect only."""
-        security = current_app.extensions["security"]
-        within = current_app.config["SECURITY_FRESHNESS"]
-        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
-        if not check_and_update_authn_fresh(within, grace):
-            return security._reauthn_handler(within, grace)
 
         user = current_user._get_current_object()
         if not can_switch_to_proconnect_only(user):

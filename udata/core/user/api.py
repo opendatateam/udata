@@ -7,7 +7,7 @@ from slugify import slugify
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
-from udata.auth import admin_permission
+from udata.auth import admin_permission, fresh_session_required, mails
 from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
@@ -235,9 +235,13 @@ class ApiTokenListAPI(API):
         return list(ApiToken.objects(user=current_user.id, revoked_at=None))
 
     @api.secure
+    # A key outlives the session that creates it: whoever got hold of one would keep the
+    # account once it is closed. A key, never fresh, can't create another one either.
+    @fresh_session_required
     @api.doc("create_api_token")
     @api.expect(ApiToken.__write_fields__)
     @api.marshal_with(apitoken_created_fields, code=201)
+    @api.response(401, "The session must be reauthenticated")
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
         data = api.json_payload()
@@ -250,6 +254,7 @@ class ApiTokenListAPI(API):
             scopes=data.get("scopes"),
         )
         token._plaintext = plaintext
+        mails.api_token_created(token).send(user)
         return token, 201
 
 

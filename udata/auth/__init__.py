@@ -1,7 +1,8 @@
 import logging
 import typing as t
+from functools import wraps
 
-from flask import render_template
+from flask import current_app, render_template
 from flask_mail import Message
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
@@ -13,6 +14,7 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
+from flask_security.utils import check_and_update_authn_fresh
 
 from udata.mail import mail_sent
 
@@ -36,6 +38,23 @@ class Permission(BasePermission):
 
 
 admin_permission = Permission()
+
+
+def fresh_session_required(func):
+    """Answer with flask-security's reauthentication request unless the user authenticated
+    recently: `api.secure` must come first, this only checks how long ago.
+
+    A request authenticated by an API key is never fresh: a key can't stand for a login."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        within = current_app.config["SECURITY_FRESHNESS"]
+        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
+        if not check_and_update_authn_fresh(within, grace):
+            return current_app.extensions["security"]._reauthn_handler(within, grace)
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 class NoopMailUtil(mail_util.MailUtil):

@@ -1,4 +1,5 @@
 import struct
+import time
 import zlib
 from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
@@ -7,6 +8,7 @@ import pytest
 from flask import url_for
 
 from udata.core import storages
+from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -19,7 +21,7 @@ from udata.models import Discussion, Follow, Member, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase, SessionCookieMixin
 
 
 class MeAPITest(APITestCase):
@@ -711,3 +713,70 @@ class MeAPITest(APITestCase):
         # Second revocation returns 410
         response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert410(response)
+
+
+@pytest.mark.options(
+    CAPTCHETAT_BASE_URL=None,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN=None,
+    CDATA_BASE_URL="http://cdata.test",
+)
+class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
+    def sign_in(self, signed_in_ago: timedelta = timedelta(0)) -> User:
+        user = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        if signed_in_ago:
+            with self.client.session_transaction() as session:
+                session["fs_paa"] = time.time() - signed_in_ago.total_seconds()
+                session.pop("fs_gexp", None)
+        return user
+
+    def test_creating_a_token_mails_the_account_holder(self):
+        user = self.sign_in()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert201(response)
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        assert "My CI token" in mails[0].body
+        # The mail leads to the revocation, should the key not be the account holder's.
+        assert "http://cdata.test/admin/me/profile" in mails[0].body
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_creating_a_token_requires_a_fresh_session(self):
+        user = self.sign_in(signed_in_ago=timedelta(days=2))
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 0
+
+    def test_creating_a_token_after_reauthentication(self):
+        user = self.sign_in(signed_in_ago=timedelta(days=2))
+        self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
+
+        self.assert201(self.post(url_for("api.my_api_tokens"), {"name": "My CI token"}))
+
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_an_api_key_cannot_create_another_one(self):
+        user = UserFactory()
+        plaintext = ApiToken.generate(user)[1]
+
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("api.my_api_tokens"),
+                {"name": "Another key"},
+                headers={"X-API-KEY": plaintext},
+            )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 1

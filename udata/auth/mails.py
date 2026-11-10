@@ -25,6 +25,7 @@ from udata.mail import MailCTA, MailMessage
 from udata.uris import cdata_url
 
 if TYPE_CHECKING:
+    from udata.core.api_token.models import ApiToken
     from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
@@ -167,6 +168,22 @@ def two_factor_rescue(user, **kwargs) -> MailMessage:
         subject=_("User can't access mail account"),
         paragraphs=[
             _("%(email)s can not access mail account", email=user.email),
+        ],
+    )
+
+
+def api_token_created(token: ApiToken) -> MailMessage:
+    return MailMessage(
+        subject=_("A new API key was created on your account"),
+        paragraphs=[
+            _(
+                "A new API key, %(name)s, was created on your %(site)s account. It acts "
+                "on your behalf until it is revoked.",
+                name=token.name or token.token_prefix,
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If this wasn't you, revoke it right away and contact us."),
+            MailCTA(_("Manage your API keys"), cdata_url("/admin/me/profile")),
         ],
     )
 
