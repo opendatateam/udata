@@ -14,7 +14,6 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
-from flask_security.utils import set_request_attr
 
 from udata.mail import mail_sent
 
@@ -41,7 +40,7 @@ admin_permission = Permission()
 
 
 def authenticate_request(user) -> bool:
-    """Authenticate `user` for this request only, as flask-security does for HTTP basic auth.
+    """Authenticate `user` for this request only.
 
     An API key or an OAuth2 token stands for its holder on the request it comes with. Unlike
     `login_user`, nothing goes in the session: its cookie would let whoever sent the
@@ -52,7 +51,6 @@ def authenticate_request(user) -> bool:
     if not user.active:
         return False
     current_app.extensions["security"].login_manager._update_request_context_with_user(user)
-    set_request_attr("fs_authn_via", "token")
     identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
     return True
 
