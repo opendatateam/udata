@@ -4,12 +4,21 @@ from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
-from udata.tasks import job
+from udata.auth import mails as auth_mails
+from udata.tasks import job, task
 
 from . import mails
 from .models import User
 
 log = logging.getLogger(__name__)
+
+
+@task(route="high.mail")
+def notify_email_changed(user_id: str, previous_email: str, new_email: str):
+    # Addressed to the user, for their name and language, but at the address they left.
+    recipient = copy(User.objects.get(pk=user_id))
+    recipient.email = previous_email
+    auth_mails.email_changed(new_email).send(recipient)
 
 
 @job("notify-inactive-users")

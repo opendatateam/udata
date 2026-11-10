@@ -24,13 +24,15 @@ class AuthTest(APITestCase):
     def test_change_mail_notifies_the_previous_address(self):
         # Whoever got hold of the account would otherwise move it away unnoticed: the new
         # address confirms the change, so only the previous one can tell its holder.
-        user = self.login(UserFactory(email="old@example.com"))
+        user = self.login(UserFactory(email="old@example.com", first_name="Jane"))
 
         with capture_mails() as mails:
             self.get(self.change_email_link(user, "new@example.com"))
 
         assert [mail.recipients for mail in mails] == [["old@example.com"]]
         assert "new@example.com" in mails[0].body
+        assert "Jane" in mails[0].body
+        assert user.reload().email == "new@example.com"
 
     def test_change_mail_links_pending_email_invitations(self):
         """An unlinked invitation is invisible to the user, who could only ask to join."""

@@ -245,7 +245,8 @@ class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyDBTestCase):
 
 
 class SessionCookieMixin:
-    """Each request reads the session from the cookie, as in production.
+    """Each request going through `perform` reads the session from the cookie, as in
+    production. `json=False` requests call the client directly and don't.
 
     pytest-flask keeps one app context, hence one `g`, for the whole test, and flask-login
     caches the user there: the session cookie, which carries the freshness, would never be

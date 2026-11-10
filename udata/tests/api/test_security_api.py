@@ -145,7 +145,10 @@ class SecurityAPITest(PytestOnlyAPITestCase):
 
 
 @pytest.mark.options(
-    CAPTCHETAT_BASE_URL=None, SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None
+    CAPTCHETAT_BASE_URL=None,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN=None,
+    SECURITY_FRESHNESS=timedelta(hours=24),
 )
 class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
     def sign_in_two_days_ago(self):
@@ -155,7 +158,6 @@ class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self.post(url_for("security.login"), {"email": user.email, "password": "password"})
         with self.client.session_transaction() as session:
             session["fs_paa"] = time.time() - timedelta(days=2).total_seconds()
-            session.pop("fs_gexp", None)
 
     def change_email(self, new_email: str):
         return self.post(
@@ -172,6 +174,17 @@ class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self.assert401(response)
         assert response.json["response"]["reauth_required"]
         assert mails == []
+
+    def test_change_email_form_requires_a_fresh_session(self):
+        # cdata loads the form to know whether to send the user to /verify first.
+        self.sign_in_two_days_ago()
+
+        response = self.get(
+            url_for("security.change_email"), headers={"Accept": "application/json"}
+        )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
 
     def test_change_email_after_reauthentication(self):
         self.sign_in_two_days_ago()
