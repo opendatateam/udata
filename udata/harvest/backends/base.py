@@ -18,7 +18,6 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
 from udata.core.organization.models import Organization
-from udata.core.user.models import User
 from udata.http import ssrf_session
 from udata.utils import raise_if_redirect, safe_unicode
 
@@ -212,17 +211,8 @@ class BaseBackend(ABC):
         self.remote_ids = set()
 
         before_harvest_job.send(self)
-        # Set harvest_activity_user on global context during the run
-        if current_app.config["HARVEST_ACTIVITY_USER_ID"]:
-            try:
-                # Try to fetch the existing harvest activity user
-                g.harvest_activity_user = User.objects.get(
-                    id=current_app.config["HARVEST_ACTIVITY_USER_ID"]
-                )
-            except User.DoesNotExist:
-                log.exception(
-                    "HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
-                )
+        # What is done during the run is attributed to the source.
+        g.harvest_source = self.source
 
         try:
             try:
@@ -429,9 +419,8 @@ class BaseBackend(ABC):
         self.job.ended = datetime.now(UTC)
         self.save_job()
         after_harvest_job.send(self)
-        # Clean harvest_activity_user on global context
-        if hasattr(g, "harvest_activity_user"):
-            delattr(g, "harvest_activity_user")
+        if hasattr(g, "harvest_source"):
+            delattr(g, "harvest_source")
 
     def update_harvested_organizations(self):
         if self.dryrun:

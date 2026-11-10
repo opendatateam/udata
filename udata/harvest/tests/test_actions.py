@@ -4,7 +4,6 @@ from datetime import UTC, datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import pytest
-from flask import current_app
 from mock import patch
 
 from udata.core.activity.models import new_activity
@@ -626,18 +625,16 @@ class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):
         self.action(source)
         assert len(Dataset.objects) == 5
 
-    @pytest.mark.options(HARVEST_ACTIVITY_USER_ID="68b860182728e27218dd7c72")
     def test_harvest_emit_activity(self):
         # We need to init dataset activities module
         import udata.core.dataset.activities  # noqa
 
-        user = UserFactory(id=current_app.config["HARVEST_ACTIVITY_USER_ID"])
         source = HarvestSourceFactory(backend="factory")
         with assert_emit(Dataset.on_create, new_activity):
             self.action(source)
 
-        # We have an activity for each dataset created by the source action
-        activities = UserCreatedDataset.objects(actor=user)
+        # We have an activity for each dataset created by the source action, done by it
+        activities = UserCreatedDataset.objects(actor=source)
         assert activities.count() == Dataset.objects().count()
 
         # On a second run, we don't expect any signal sent (no creation, update or deletion)

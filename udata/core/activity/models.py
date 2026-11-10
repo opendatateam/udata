@@ -225,9 +225,8 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
-        if hasattr(g, "harvest_activity_user"):
-            # We're in the context of a harvest action with a harvest activity user to use as actor
-            actor = g.harvest_activity_user
+        if hasattr(g, "harvest_source"):
+            actor = g.harvest_source
         elif hasattr(g, "api_token"):
             # The token acts on behalf of its owner, who stays reachable as `ApiToken.user`.
             actor = g.api_token

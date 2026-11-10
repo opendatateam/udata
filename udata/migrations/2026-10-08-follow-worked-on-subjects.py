@@ -74,8 +74,10 @@ def migrate(db):
 
     log.info("Collecting who edited what from the activities...")
     edits = {"_cls": {"$in": list(model_by_cls)}, "actor._cls": "User"}
-    # Harvesting is attributed to this account, and harvesting follows nothing.
-    if harvester := current_app.config["HARVEST_ACTIVITY_USER_ID"]:
+    # Harvesting was attributed to this account, and harvesting follows nothing. The
+    # setting is gone since harvesting is attributed to its source: only an instance
+    # that still declares it has activities to leave out.
+    if harvester := current_app.config.get("HARVEST_ACTIVITY_USER_ID"):
         edits["actor._ref"] = {"$ne": DBRef("user", ObjectId(harvester))}
     for row in Activity._get_collection().aggregate(
         [

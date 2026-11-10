@@ -819,7 +819,9 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         item = source.get_last_job().items[0]
         assert item.status == "done"
         assert item.dataset.harvest.doi is None
-        assert [(entry.level, entry.message) for entry in item.logs] == [
+        # Tasks run inline in tests: the debug line of the activity the harvest emits lands
+        # in the item logs, which a worker keeps out of them in production.
+        assert [(entry.level, entry.message) for entry in item.logs if entry.level != "DEBUG"] == [
             (
                 "WARNING",
                 "Several DOIs identify this dataset, none is kept: "
