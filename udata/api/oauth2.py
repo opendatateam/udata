@@ -159,7 +159,7 @@ class OAuth2Token(Document):
     meta = {"collection": "oauth2_token"}
 
     def __str__(self):
-        return "<OAuth2Token({0.client.name})>".format(self)
+        return f"<OAuth2Token({self.client.name})>"
 
     def check_client(self, client):
         return self.client == client
@@ -208,7 +208,7 @@ class OAuth2Code(Document):
     meta = {"collection": "oauth2_code"}
 
     def __str__(self):
-        return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
+        return f"<OAuth2Code({self.client.name}, {self.user.fullname})>"
 
     def is_expired(self):
         # MongoEngine returns naive datetimes, so compare with naive datetime

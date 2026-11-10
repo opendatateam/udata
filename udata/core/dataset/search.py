@@ -117,9 +117,7 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         organization = None
 
-        topic_ids = list(
-            set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
-        )
+        topic_ids = list({te.topic.id for te in TopicElement.objects(element=dataset) if te.topic})
 
         if dataset.organization:
             organization = {

@@ -6,14 +6,14 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Dataset
 
 __all__ = (
-    "UserCreatedDataset",
-    "UserUpdatedDataset",
-    "UserDeletedDataset",
     "DatasetRelatedActivity",
+    "UserCreatedDataset",
+    "UserDeletedDataset",
+    "UserUpdatedDataset",
 )
 
 
-class DatasetRelatedActivity(object):
+class DatasetRelatedActivity:
     template = "activity/dataset.html"
     related_to = ReferenceField("Dataset")
 

@@ -70,7 +70,7 @@ class ReuseSearch(ModelSearchAdapter):
         organization = None
 
         topic_object_ids = list(
-            set(te.topic.id for te in TopicElement.objects(element=reuse) if te.topic)
+            {te.topic.id for te in TopicElement.objects(element=reuse) if te.topic}
         )
 
         if reuse.organization:

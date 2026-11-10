@@ -136,7 +136,7 @@ class DatasetRecommendationsTest(PytestOnlyDBTestCase):
 
         # Recommendations have been merged, new source has been added
         ds2.reload()
-        assert set(ds2.extras["recommendations:sources"]) == set(["existing", "fake_source"])
+        assert set(ds2.extras["recommendations:sources"]) == {"existing", "fake_source"}
         assert ds2.extras["recommendations"] == [
             {"id": str(ds4.id), "source": "existing", "score": 50},
             {"id": str(ds1.id), "source": "fake_source", "score": 2},

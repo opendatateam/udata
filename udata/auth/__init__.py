@@ -32,7 +32,7 @@ def render_security_template(template_name_or_list, **kwargs):
 class Permission(BasePermission):
     def __init__(self, *needs):
         """Let administrator bypass all permissions"""
-        super(Permission, self).__init__(RoleNeed("admin"), *needs)
+        super().__init__(RoleNeed("admin"), *needs)
 
 
 admin_permission = Permission()
@@ -44,9 +44,9 @@ class NoopMailUtil(mail_util.MailUtil):
         template: str,
         subject: str,
         recipient: str,
-        sender: t.Union[str, tuple],
+        sender: str | tuple,
         body: str,
-        html: t.Optional[str],
+        html: str | None,
         **kwargs: t.Any,
     ) -> None:
         log.debug(f"Sending mail {subject} to {recipient}")

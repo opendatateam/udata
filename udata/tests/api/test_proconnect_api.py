@@ -342,7 +342,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
     ):
         # Jane's identity is trusted, but this login didn't present its second factor: the
         # udata code stood for it. Then she drops the udata 2FA, ProConnect's being the only.
-        user, secret = self.totp_user(email="jane@example.org")
+        _user, secret = self.totp_user(email="jane@example.org")
         self.sign_in(proconnect, "jane@example.org")
         self.enter_totp(secret)
         self.get(url_for("security.logout"))

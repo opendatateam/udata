@@ -338,8 +338,11 @@ class DateFieldTest(PytestOnlyDBTestCase):
         obj.reload()
         assert obj.a_date == the_date
 
-    def test_not_valid(self):
-        obj = DateTester(a_date="invalid")
+    # Each value makes the date parsing raise a different exception: `ValueError`,
+    # `TypeError` and `OverflowError`, all left for the validation to report.
+    @pytest.mark.parametrize("value", ["invalid", 42, "99999999999999999999"])
+    def test_not_valid(self, value):
+        obj = DateTester(a_date=value)
         with pytest.raises(ValidationError):
             obj.save()
 
@@ -700,7 +703,7 @@ class MongoConfigTest(PytestOnlyDBTestCase):
 
     def test_build_test_config_without_MONGODB_HOST_TEST(self):
         config = {"MONGODB_HOST": Defaults.MONGODB_HOST}
-        expected = "{0}-test".format(Defaults.MONGODB_HOST)
+        expected = f"{Defaults.MONGODB_HOST}-test"
         build_test_config(config)
         assert config["MONGODB_HOST"] == expected
 

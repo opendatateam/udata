@@ -57,8 +57,9 @@ class FiltersTest:
             assert filters.empty_none(value) == value
 
     def test_strip(self):
-        assert filters.strip("  hello   ") == "hello"
-        assert filters.strip("    ") is None
+        # `filters.strip` is the harvest filter, not `str.strip` (B005 mistakes one for the other).
+        assert filters.strip("  hello   ") == "hello"  # noqa: B005
+        assert filters.strip("    ") is None  # noqa: B005
 
     def test_line_endings(self):
         result = filters.line_endings("hello\r\nworld!\r ")

@@ -12,21 +12,21 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Dataset, Organization, Reuse, User
 
 __all__ = (
-    "UserFollowedDataset",
-    "UserFollowedReuse",
-    "UserFollowedOrganization",
-    "UserFollowedUser",
     "UserDiscussedDataset",
     "UserDiscussedReuse",
+    "UserFollowedDataset",
+    "UserFollowedOrganization",
+    "UserFollowedReuse",
+    "UserFollowedUser",
 )
 
 
-class FollowActivity(object):
+class FollowActivity:
     icon = "fa fa-eye"
     badge_type = "warning"
 
 
-class DiscussActivity(object):
+class DiscussActivity:
     icon = "fa fa-comments"
     badge_type = "warning"
 

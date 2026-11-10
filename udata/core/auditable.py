@@ -6,7 +6,7 @@ from udata.utils import filter_changed_fields, get_field_value_from_path
 __all__ = ("Auditable",)
 
 
-class Auditable(object):
+class Auditable:
     """Emit create/update/delete signals carrying the fields that actually changed.
 
     Lives here rather than next to the `Activity` document it feeds: recording an
@@ -23,7 +23,7 @@ class Auditable(object):
             try:
                 # `only` does not support having nested list as expressed in changed fields, ex resources.0.title
                 # thus we only strip to direct attributes for simplicity
-                direct_attributes = set(field.split(".")[0] for field in changed_fields)
+                direct_attributes = {field.split(".")[0] for field in changed_fields}
                 old_document = self.__class__.objects.only(*direct_attributes).get(pk=self.pk)
                 self._previous_changed_fields = {}
                 for field_path in changed_fields:
@@ -38,7 +38,7 @@ class Auditable(object):
             auditable_fields = [
                 key for key, field, info in get_fields(cls) if info.get("auditable", True)
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001
             # for backward compatibility, all fields are treated as auditable for classes not using field() function
             auditable_fields = document._get_changed_fields()
         changed_fields = [

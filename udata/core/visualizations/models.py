@@ -234,7 +234,7 @@ class Chart(Datetimed, Auditable, WithMetrics, Linkable, Owned, UDataDocument[Ch
             storage = images
             storage.delete(document.image.filename)
             storage.delete(document.image.original)
-            for key, value in document.image.thumbnails.items():
+            for value in document.image.thumbnails.values():
                 storage.delete(value)
 
 

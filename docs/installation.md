@@ -359,40 +359,40 @@ Edit your `udata.cfg` configuration with these parameters:
 ```python
 DEBUG = False
 
-SITE_ID = 'data.example.com'  # Used to store metrics and portal configuration
-SITE_TITLE = 'My awesome open data portal'
+SITE_ID = "data.example.com"  # Used to store metrics and portal configuration
+SITE_TITLE = "My awesome open data portal"
 
-SERVER_NAME = 'data.example.com'
+SERVER_NAME = "data.example.com"
 
-SECRET_KEY = 'put-some-unique-and-secret-key-here-for-security'
+SECRET_KEY = "put-some-unique-and-secret-key-here-for-security"
 
-MONGODB_HOST = 'mongodb://localhost:27017/udata'
+MONGODB_HOST = "mongodb://localhost:27017/udata"
 
-BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TASK_RESULT_EXPIRES = 86400
 
 # We use Redis as caching backend but in a separate collection
-CACHE_TYPE = 'flask_caching.backends.RedisCache'
-CACHE_REDIS_URL = 'redis://localhost:6379/2'
+CACHE_TYPE = "flask_caching.backends.RedisCache"
+CACHE_REDIS_URL = "redis://localhost:6379/2"
 
 # The identity used to send mails
-MAIL_DEFAULT_SENDER = ('Open Data Portal', 'portal@data.example.com')
+MAIL_DEFAULT_SENDER = ("Open Data Portal", "portal@data.example.com")
 
 # Set you available languages
 LANGUAGES = {
-    'fr': 'Français',
-    'en': 'English',
+    "fr": "Français",
+    "en": "English",
 }
 # Here is you default language
-DEFAULT_LANGUAGE = 'fr'
+DEFAULT_LANGUAGE = "fr"
 
 # The frontend origin, allowed to make credentialed calls to this API
-CDATA_BASE_URL = 'https://www.data.example.com'
+CDATA_BASE_URL = "https://www.data.example.com"
 
 # Define where resources are stored and exposed
-FS_ROOT = '/srv/udata/fs'
-FS_PREFIX = '/s'
+FS_ROOT = "/srv/udata/fs"
+FS_PREFIX = "/s"
 ```
 
 Alright, everything is ready to run udata so logout from the `udata` account and restart nginx and uWSGI:

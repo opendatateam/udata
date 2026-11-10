@@ -1,6 +1,4 @@
-import collections
 import gzip
-import os
 from datetime import UTC, date, datetime
 from tempfile import NamedTemporaryFile
 
@@ -20,23 +18,12 @@ from udata.core.organization.models import Organization
 from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer
-from udata.mongo.document import UDataDocument as Document
 from udata.storage.s3 import store_bytes
 from udata.tasks import job
 
 from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
-
-
-def flatten(iterable):
-    for el in iterable:
-        if isinstance(el, collections.Iterable) and not (
-            isinstance(el, str) or isinstance(el, Document)
-        ):
-            yield from flatten(el)
-        else:
-            yield el
 
 
 @job("purge-datasets")
@@ -92,7 +79,7 @@ def purge_datasets(self):
 def get_queryset(model_cls):
     # special case for resources
     if model_cls.__name__ == "Resource":
-        model_cls = getattr(udata_models, "Dataset")
+        model_cls = udata_models.Dataset
     params = {}
     attrs = ("private", "deleted", "deleted_at")
     for attr in attrs:
@@ -121,8 +108,8 @@ def get_or_create_resource(r_info, model, dataset):
 
 def store_resource(csvfile, model, dataset):
     timestr = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
-    filename = "export-%s-%s.csv" % (model, timestr)
-    prefix = "/".join((dataset.slug, timestr))
+    filename = f"export-{model}-{timestr}.csv"
+    prefix = f"{dataset.slug}/{timestr}"
     storage = storages.resources
     with open(csvfile.name, "rb") as infile:
         r_info = storages.utils.save_upload(storage, infile, filename, prefix=prefix)
@@ -136,7 +123,7 @@ def store_resource(csvfile, model, dataset):
 def export_csv_for_model(model, dataset, replace: bool = False):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
-        log.error("Unknow model %s" % model)
+        log.error(f"Unknow model {model}")
         return
 
     fs_filename_to_remove = None
@@ -146,14 +133,13 @@ def export_csv_for_model(model, dataset, replace: bool = False):
     queryset = get_queryset(model_cls)
     adapter = csv.get_adapter(model_cls)
     if not adapter:
-        log.error("No adapter found for %s" % model)
+        log.error(f"No adapter found for {model}")
         return
     adapter = adapter(queryset)
 
-    log.info("Exporting CSV for %s..." % model)
+    log.info(f"Exporting CSV for {model}...")
 
-    csvfile = NamedTemporaryFile(mode="w", encoding="utf8", delete=False)
-    try:
+    with NamedTemporaryFile(mode="w", encoding="utf8") as csvfile:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
         writer.writerow(adapter.header())
@@ -177,9 +163,6 @@ def export_csv_for_model(model, dataset, replace: bool = False):
                     f"File not found while deleting resource #{resource.id} ({fs_filename_to_remove}) in export_csv_for_model cleanup"
                 )
         return resource
-    finally:
-        csvfile.close()
-        os.unlink(csvfile.name)
 
 
 @job("export-csv")
@@ -191,7 +174,7 @@ def export_csv(self, model=None):
     DATASET_ID = current_app.config.get("EXPORT_CSV_DATASET_ID")
 
     if model and model not in ALLOWED_MODELS:
-        log.error("Unknown or unallowed model: %s" % model)
+        log.error(f"Unknown or unallowed model: {model}")
         return
 
     if not DATASET_ID:
@@ -203,9 +186,8 @@ def export_csv(self, model=None):
         log.error("EXPORT_CSV_DATASET_ID points to a non existent dataset")
         return
 
-    models = (model,) if model else ALLOWED_MODELS
-    for model in models:
-        resource = export_csv_for_model(model, dataset, replace=True)
+    for model_name in (model,) if model else ALLOWED_MODELS:
+        resource = export_csv_for_model(model_name, dataset, replace=True)
 
         # If we are the first day of the month, archive today catalogs
         if (
@@ -214,7 +196,7 @@ def export_csv(self, model=None):
             and date.today().day == 1
         ):
             log.info(
-                f"Archiving {model} csv catalog on {current_app.config['EXPORT_CSV_ARCHIVE_S3_BUCKET']} bucket"
+                f"Archiving {model_name} csv catalog on {current_app.config['EXPORT_CSV_ARCHIVE_S3_BUCKET']} bucket"
             )
             with storages.resources.open(resource.fs_filename, "rb") as f:
                 store_bytes(

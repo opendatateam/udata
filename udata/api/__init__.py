@@ -61,7 +61,7 @@ class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
         decorators = kwargs.pop("decorators", []) or []
         kwargs["decorators"] = [self.authentify] + decorators
-        super(UDataApi, self).__init__(app, **kwargs)
+        super().__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
 
     def secure(self, func):
@@ -175,7 +175,7 @@ class UDataApi(Api):
         class_name = reference.get("class")
         if class_name not in allowed_classes:
             expected = ", ".join(allowed_classes)
-            self.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+            self.abort(400, errors={field_name: f"`class` must be one of: {expected}"})
 
         object_id = reference.get("id")
         if not ObjectId.is_valid(object_id):
@@ -185,9 +185,7 @@ class UDataApi(Api):
         try:
             return model.objects.get(id=object_id)
         except model.DoesNotExist:
-            self.abort(
-                400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
-            )
+            self.abort(400, errors={field_name: f'Unknown {field_name} id "{object_id}"'})
 
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
@@ -207,7 +205,7 @@ class UDataApi(Api):
     def unauthorized(self, response):
         """Override to change the WWW-Authenticate challenge"""
         realm = current_app.config.get("HTTP_OAUTH_REALM", "uData")
-        challenge = 'Bearer realm="{0}"'.format(realm)
+        challenge = f'Bearer realm="{realm}"'
 
         response.headers["WWW-Authenticate"] = challenge
         return response
@@ -306,9 +304,7 @@ def handle_value_error(error):
 def handle_unauthorized_file_type(error):
     """Error occuring when the user try to upload a non-allowed file type"""
     url = url_for("api.allowed_extensions", _external=True)
-    msg = ("This file type is not allowed.The allowed file type list is available at {url}").format(
-        url=url
-    )
+    msg = f"This file type is not allowed.The allowed file type list is available at {url}"
     return {"message": msg}, 400
 
 

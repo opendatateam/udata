@@ -64,18 +64,18 @@ class CkanBackend(BaseBackend):
     schema = ckan_schema
 
     def get_headers(self):
-        headers = super(CkanBackend, self).get_headers()
+        headers = super().get_headers()
         headers["content-type"] = "application/json"
         if self.config.get("apikey"):
             headers["Authorization"] = self.config["apikey"]
         return headers
 
     def action_url(self, endpoint):
-        path = "/".join(["api/3/action", endpoint])
+        path = f"api/3/action/{endpoint}"
         return urljoin(self.source.url, path)
 
     def dataset_url(self, name):
-        path = "/".join(["dataset", name])
+        path = f"dataset/{name}"
         return urljoin(self.source.url, path)
 
     def get_action(self, endpoint, fix=False, **kwargs):
@@ -109,7 +109,7 @@ class CkanBackend(BaseBackend):
                 raise HarvestException(msg)
 
         elif mime_type == "text/html":  # Standard html error page
-            raise HarvestException("Unknown Error: {} returned HTML".format(url))
+            raise HarvestException(f"Unknown Error: {url} returned HTML")
         else:
             # If it's not HTML, CKAN respond with raw quoted text
             msg = response.text.strip('"')

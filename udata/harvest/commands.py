@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 @cli.group("harvest")
 def grp():
     """Remote repositories harvesting operations"""
-    pass
 
 
 @grp.command()
@@ -37,14 +36,14 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
         organization=Organization.get(org) if org else None,
     )
     log.info(
-        """Created a new Harvest source:
-    name: {0.name},
-    slug: {0.slug},
-    url: {0.url},
-    backend: {0.backend},
-    frequency: {0.frequency},
-    owner: {0.owner},
-    organization: {0.organization}""".format(source)
+        f"""Created a new Harvest source:
+    name: {source.name},
+    slug: {source.slug},
+    url: {source.url},
+    backend: {source.backend},
+    frequency: {source.frequency},
+    owner: {source.owner},
+    organization: {source.organization}"""
     )
 
 
@@ -101,7 +100,7 @@ def backends():
     print("Available backends:")
     for backend in get_all_backends().values():
         status = green(OK) if is_backend_enabled(backend) else red(KO)
-        click.echo("{0} {1} ({2})".format(status, backend.display_name, backend.name))
+        click.echo(f"{status} {backend.display_name} ({backend.name})")
 
 
 @grp.command()

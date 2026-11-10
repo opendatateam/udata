@@ -19,7 +19,7 @@ BADGES = {
 
 
 def validate_badge(value):
-    if value not in Fake.__badges__.keys():
+    if value not in Fake.__badges__:
         raise ValidationError("Unknown badge type")
 
 

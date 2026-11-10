@@ -16,11 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def recommendations_clean():
-    nb_datasets = Dataset.objects.filter(
-        **{
-            "extras__recommendations__exists": True,
-        }
-    ).update(
+    nb_datasets = Dataset.objects.filter(extras__recommendations__exists=True).update(
         **{
             "unset__extras__recommendations": True,
             "unset__extras__recommendations-reuses": True,

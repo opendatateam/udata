@@ -19,6 +19,6 @@ MODULES = (
 
 def init_app(app):
     for module in MODULES:
-        module = import_module("udata.core.{0}".format(module))
+        module = import_module(f"udata.core.{module}")
         if hasattr(module, "init_app"):
             module.init_app(app)

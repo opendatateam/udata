@@ -44,7 +44,7 @@ class DiscussionAuthorPermission(Permission):
         else:
             needs = [UserNeed(discussion.user.fs_uniquifier)]
 
-        super(DiscussionAuthorPermission, self).__init__(*needs)
+        super().__init__(*needs)
 
 
 class DiscussionMessagePermission(Permission):
@@ -57,4 +57,4 @@ class DiscussionMessagePermission(Permission):
         else:
             needs = [UserNeed(message.posted_by.fs_uniquifier)]
 
-        super(DiscussionMessagePermission, self).__init__(*needs)
+        super().__init__(*needs)

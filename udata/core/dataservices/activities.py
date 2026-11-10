@@ -6,14 +6,14 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Dataservice
 
 __all__ = (
-    "UserCreatedDataservice",
-    "UserUpdatedDataservice",
-    "UserDeletedDataservice",
     "DataserviceRelatedActivity",
+    "UserCreatedDataservice",
+    "UserDeletedDataservice",
+    "UserUpdatedDataservice",
 )
 
 
-class DataserviceRelatedActivity(object):
+class DataserviceRelatedActivity:
     related_to = ReferenceField("Dataservice")
 
 

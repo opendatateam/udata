@@ -59,7 +59,7 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
         assert task.crontab.month_of_year == "3"
         assert task.crontab.day_of_week == "sunday"
         assert task.enabled
-        assert task.name == "Job {0}".format(JOB_NAME)
+        assert task.name == f"Job {JOB_NAME}"
 
     def test_schedule_job_with_parameters(self):
         self.cli('job schedule "0 1 2 3 sunday" fake-job arg0 arg1 key1=value1 key0=value0')
@@ -155,7 +155,7 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
             enabled=True,
             crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
         )
-        self.cli("job unschedule {0}".format(JOB_NAME))
+        self.cli(f"job unschedule {JOB_NAME}")
 
         assert len(PeriodicTask.objects(task=JOB_NAME)) == 0
 
@@ -169,7 +169,7 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
             kwargs={"key": "value"},
             crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
         )
-        self.cli("job unschedule {0} arg key=value".format(JOB_NAME))
+        self.cli(f"job unschedule {JOB_NAME} arg key=value")
 
         assert len(PeriodicTask.objects(task=JOB_NAME)) == 0
 
@@ -181,14 +181,14 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
             enabled=True,
             crontab=PeriodicTask.Crontab.parse("0 0 0 0 0"),
         )
-        result = self.cli("job unschedule {0} arg".format(JOB_NAME), expect_error=True)
+        result = self.cli(f"job unschedule {JOB_NAME} arg", expect_error=True)
 
         assert result.exit_code != 0
         assert len(PeriodicTask.objects(task=JOB_NAME)) == 1
 
     def test_reschedule_job(self):
-        self.cli('job schedule "0 1 2 3 sunday" {0}'.format(JOB_NAME))
-        self.cli('job schedule "1 0 0 0 *" {0}'.format(JOB_NAME))
+        self.cli(f'job schedule "0 1 2 3 sunday" {JOB_NAME}')
+        self.cli(f'job schedule "1 0 0 0 *" {JOB_NAME}')
 
         tasks = PeriodicTask.objects(task=JOB_NAME)
         assert len(tasks) == 1
@@ -202,4 +202,4 @@ class JobsCommandsTest(PytestOnlyDBTestCase):
         assert task.crontab.month_of_year == "0"
         assert task.crontab.day_of_week == "*"
         assert task.enabled
-        assert task.name == "Job {0}".format(JOB_NAME)
+        assert task.name == f"Job {JOB_NAME}"

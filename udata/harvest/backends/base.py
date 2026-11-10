@@ -13,7 +13,7 @@ from flask import current_app, g
 from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
-import udata.uris as uris
+from udata import uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
@@ -42,7 +42,7 @@ log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
 
 
-class HarvestFilter(object):
+class HarvestFilter:
     TYPES = {
         str: "string",
         bytes: "string",
@@ -55,7 +55,7 @@ class HarvestFilter(object):
 
     def __init__(self, label, key, type, description=None):
         if type not in self.TYPES:
-            raise TypeError("Unsupported type {0}".format(type))
+            raise TypeError(f"Unsupported type {type}")
         self.label = label
         self.key = key
         self.type = type
@@ -74,7 +74,7 @@ class HarvestExtraConfig(HarvestFilter):
     pass
 
 
-class HarvestFeature(object):
+class HarvestFeature:
     def __init__(self, key, label, description=None, default=False):
         self.key = key
         self.label = label
@@ -117,16 +117,16 @@ class BaseBackend(ABC):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     # Filters are public, don't store sensitive information
-    filters = tuple()
+    filters = ()
 
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFeature]
-    features = tuple()
+    features = ()
 
     # Define some allowed extras config variables on the backend
     # This a Sequence[HarvestExtraConfig]
     # Extra configs are public, don't store sensitive information
-    extra_configs = tuple()
+    extra_configs = ()
 
     def __init__(self, source_or_job, dryrun=False, max_items=None):
         if isinstance(source_or_job, HarvestJob):
@@ -176,14 +176,14 @@ class BaseBackend(ABC):
     def get_headers(self):
         return {
             # TODO: extract site title and version
-            "User-Agent": "uData/0.1 {0.name}".format(self),
+            "User-Agent": f"uData/0.1 {self.name}",
         }
 
     def has_feature(self, key):
         try:
             feature = next(f for f in self.features if f.key == key)
         except StopIteration:
-            raise HarvestException("Unknown feature {}".format(key))
+            raise HarvestException(f"Unknown feature {key}")
         return self.config.get("features", {}).get(key, feature.default)
 
     def get_filters(self):
@@ -558,19 +558,16 @@ class BaseBackend(ABC):
                             if isinstance(value, (list, tuple)):
                                 attr = int(attr)
                             value = value[attr]
-                        except Exception:
+                        except Exception:  # noqa: BLE001 (only used to enrich the message)
                             value = None
 
                     txt = safe_unicode(error).replace("for dictionary value", "")
                     txt = txt.strip()
-                    if isinstance(error, RequiredFieldInvalid):
-                        msg = "[{0}] {1}"
-                    else:
-                        msg = "[{0}] {1}: {2}"
-                    try:
-                        msg = msg.format(field, txt, str(value))
-                    except Exception:
-                        msg = "[{0}] {1}".format(field, txt)
+                    msg = (
+                        f"[{field}] {txt}"
+                        if isinstance(error, RequiredFieldInvalid)
+                        else f"[{field}] {txt}: {value}"
+                    )
 
                 else:
                     msg = str(error)

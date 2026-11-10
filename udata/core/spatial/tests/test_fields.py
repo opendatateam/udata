@@ -129,7 +129,7 @@ class SpatialCoverageFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertEqual(len(fake.spatial.zones), len(zones))
-        expected_zones = dict((z.id, z) for z in zones)
+        expected_zones = {z.id: z for z in zones}
         for zone in fake.spatial.zones:
             self.assertIn(zone.id, expected_zones)
             self.assertEqual(zone, expected_zones[zone.id])
@@ -154,7 +154,7 @@ class SpatialCoverageFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertEqual(len(fake.spatial.zones), len(zones))
-        expected_zones = dict((z.id, z) for z in zones)
+        expected_zones = {z.id: z for z in zones}
         for zone in fake.spatial.zones:
             self.assertIn(zone.id, expected_zones)
             self.assertEqual(zone, expected_zones[zone.id])
@@ -188,7 +188,7 @@ class SpatialCoverageFieldTest(TestCase):
         assert_json_equal(fake.spatial.geom, geom)
 
     def test_with_invalid_geom_from_json(self):
-        Fake, FakeForm = self.factory()
+        _Fake, FakeForm = self.factory()
         geom = {"type": "InvalidGeoJSON", "coordinates": []}
 
         form = FakeForm.from_json(
@@ -207,7 +207,7 @@ class SpatialCoverageFieldTest(TestCase):
         self.assertEqual(len(form.errors["spatial"]["geom"]), 1)
 
     def test_with_invalid_data(self):
-        Fake, FakeForm = self.factory()
+        _Fake, FakeForm = self.factory()
 
         form = FakeForm(MultiDict({"spatial-zones": "wrong-data", "spatial-granularity": "wrong"}))
 
@@ -302,7 +302,7 @@ class SpatialCoverageFieldTest(TestCase):
         for i in range(3):
             GeoZoneFactory(code=zone.code)
 
-        geoid = "{0.level}:{0.code}".format(zone)
+        geoid = f"{zone.level}:{zone.code}"
 
         fake = Fake()
         form = FakeForm.from_json(
@@ -318,7 +318,7 @@ class SpatialCoverageFieldTest(TestCase):
         self.assertEqual(fake.spatial.zones[0], zone)
 
     def test_resolve_zones_from_json_failure(self):
-        Fake, FakeForm = self.factory()
+        _Fake, FakeForm = self.factory()
         GeoZoneFactory.create_batch(3)
         form = FakeForm.from_json(
             {

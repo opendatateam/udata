@@ -530,7 +530,7 @@ class FollowUserAPI(FollowAPI):
         """Follow a user given its ID"""
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
-        return super(FollowUserAPI, self).post(id)
+        return super().post(id)
 
 
 suggest_parser = api.parser()

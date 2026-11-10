@@ -31,7 +31,7 @@ class BadgeCommandTest(PytestOnlyDBTestCase):
         orgs = [OrganizationFactory() for _ in range(2)]
 
         with NamedTemporaryFile(mode="w") as temp:
-            temp.write("\n".join((str(org.id) for org in orgs)))
+            temp.write("\n".join(str(org.id) for org in orgs))
             temp.flush()
 
             self.cli("badges", "toggle", temp.name, PUBLIC_SERVICE)

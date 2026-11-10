@@ -63,7 +63,7 @@ class UrlFieldTest(TestCase):
         self.assertEqual(fake.url, url)
 
     def test_with_invalid_url(self):
-        Fake, FakeForm = self.factory()
+        _Fake, FakeForm = self.factory()
 
         form = FakeForm(MultiDict({"url": "this-is-not-an-url"}))
 

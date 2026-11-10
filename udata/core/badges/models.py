@@ -30,7 +30,7 @@ class Badge(EmbeddedDocument):
 
 class BadgesList(EmbeddedDocumentListField):
     def __init__(self, badge_model, *args, **kwargs):
-        return super(BadgesList, self).__init__(badge_model, *args, **kwargs)
+        super().__init__(badge_model, *args, **kwargs)
 
 
 DEFAULT_BADGES_LIST_PARAMS = {

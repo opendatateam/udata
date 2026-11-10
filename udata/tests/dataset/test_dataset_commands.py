@@ -17,7 +17,7 @@ class DatasetCommandTest(PytestOnlyDBTestCase):
         datasets = [DatasetFactory() for _ in range(2)]
 
         with NamedTemporaryFile(mode="w", encoding="utf8") as temp:
-            temp.write("\n".join((str(d.id) for d in datasets)))
+            temp.write("\n".join(str(d.id) for d in datasets))
             temp.flush()
 
             self.cli("dataset", "archive", temp.name)

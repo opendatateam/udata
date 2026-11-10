@@ -31,7 +31,7 @@ def purge_reuses(self) -> None:
             storage = storages.images
             storage.delete(reuse.image.filename)
             storage.delete(reuse.image.original)
-            for key, value in reuse.image.thumbnails.items():
+            for value in reuse.image.thumbnails.values():
                 storage.delete(value)
         reuse.delete()
 

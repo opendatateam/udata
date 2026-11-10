@@ -50,9 +50,9 @@ def get_by(lst, **fields: Any) -> Any | None:
 
 def multi_to_dict(multi):
     """Transform a Werkzeug multidictionnary into a flat dictionnary"""
-    return dict(
-        (key, value[0] if len(value) == 1 else value) for key, value in multi.to_dict(False).items()
-    )
+    return {
+        key: value[0] if len(value) == 1 else value for key, value in multi.to_dict(False).items()
+    }
 
 
 def get_field_value_from_path(document, field_path: str):
@@ -117,7 +117,7 @@ def camel_to_lodash(name):
     return ALL_CAP_RE.sub(r"\1_\2", s1).lower()
 
 
-class Paginable(object):
+class Paginable:
     """
     A simple helper mixin for pagination
     """
@@ -129,7 +129,7 @@ class Paginable(object):
     @property
     def pages(self):
         if self.page_size:
-            return int(ceil(self.total / float(self.page_size)))
+            return ceil(self.total / self.page_size)
         else:
             return 1
 
@@ -281,7 +281,7 @@ def to_iso_date(dt: date | datetime | None) -> str | None:
     Support dates before 1900.
     """
     if dt:
-        return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
+        return f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"
 
 
 @overload
@@ -303,11 +303,11 @@ def to_iso_datetime(dt: date | datetime | None) -> str | None:
     if dt:
         date_str = to_iso_date(dt)
         time_str = (
-            "{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}".format(dt=dt)
+            f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}"
             if isinstance(dt, datetime)
             else "00:00:00"
         )
-        return "T".join((date_str, time_str))
+        return f"{date_str}T{time_str}"
 
 
 def to_bool(value: bool | str | int) -> bool:
@@ -369,7 +369,7 @@ def recursive_get(obj: Any, key: Any):
 def unique_string(length: int = UUID_LENGTH) -> str:
     """Generate a unique string"""
     # We need a string at least as long as length
-    string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
+    string = str(uuid4()) * math.ceil(length / UUID_LENGTH)
     return string[:length] if length else string
 
 

@@ -72,7 +72,7 @@ class FactoryBackend(BaseBackend):
         return item
 
 
-class MockBackendsMixin(object):
+class MockBackendsMixin:
     """A mixin mocking the harvest backend"""
 
     @pytest.fixture(autouse=True)

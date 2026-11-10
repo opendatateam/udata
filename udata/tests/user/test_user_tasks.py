@@ -30,7 +30,7 @@ class UserTasksTest(APITestCase):
 
         # Assert (only one) mail has been sent
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([inactive_user.email]))
+        self.assertEqual(mails[0].send_to, {inactive_user.email})
         self.assertEqual(
             mails[0].subject,
             _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
@@ -102,7 +102,7 @@ class UserTasksTest(APITestCase):
 
         # Assert (only one) mail has been sent
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([inactive_user_to_delete.email]))
+        self.assertEqual(mails[0].send_to, {inactive_user_to_delete.email})
         self.assertEqual(
             mails[0].subject,
             _("Deletion of your inactive {site} account").format(

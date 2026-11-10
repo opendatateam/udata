@@ -26,7 +26,7 @@ class TasksRoutingTest(PytestOnlyTestCase):
 
             # Celery instanciate only one task by name so we need unique names
             suffix = unique_string().replace("-", "_")
-            fake_task.__name__ = "task_{0}".format(suffix)
+            fake_task.__name__ = f"task_{suffix}"
             t = decorator(fake_task)
 
             options = t._get_exec_options()

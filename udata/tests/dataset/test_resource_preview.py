@@ -12,7 +12,7 @@ MAX_SIZE = 50000
 
 class ResourcePreviewTest(PytestOnlyAPITestCase):
     def expected_url(self, rid):
-        return "http://preview.me/resources/{0}".format(rid)
+        return f"http://preview.me/resources/{rid}"
 
     @pytest.mark.options(TABULAR_EXPLORE_URL="http://preview.me")
     def test_display_preview_for_tabular_resources(self):

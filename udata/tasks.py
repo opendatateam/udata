@@ -17,7 +17,7 @@ class ContextTask(Task):
 
     def __call__(self, *args, **kwargs):
         with self.current_app.app_context():
-            return super(ContextTask, self).__call__(*args, **kwargs)
+            return super().__call__(*args, **kwargs)
 
 
 class JobTask(ContextTask):
@@ -48,7 +48,7 @@ def router(name, args, kwargs, options, task=None, **kw):
     # queue parameter, routing_key computed if not present
     if task.default_queue:
         key = task.default_routing_key
-        key = key or "{0.default_queue}.{0.name}".format(task)
+        key = key or f"{task.default_queue}.{task.name}"
         return {"queue": task.default_queue, "routing_key": key}
     # only routing_key, queue should not be returned to fallback on default
     elif task.default_routing_key:
@@ -58,7 +58,7 @@ def router(name, args, kwargs, options, task=None, **kw):
 def task(*args, **kwargs):
     for arg in "queue", "routing_key":
         if arg in kwargs:
-            kwargs["default_{0}".format(arg)] = kwargs.pop(arg)
+            kwargs[f"default_{arg}"] = kwargs.pop(arg)
     return celery.task(*args, **kwargs)
 
 
@@ -110,13 +110,13 @@ def queue_test(self, raises=False):
     """
     self.log.info("Just a test task")
     if raises:
-        raise Exception("Test task processing")
+        raise RuntimeError("Test task processing")
 
 
 @job("test-error")
 def error_test(self):
     self.log.info("There should be an error soon")
-    raise Exception("There is an error")
+    raise RuntimeError("There is an error")
 
 
 def schedulables():
@@ -127,11 +127,11 @@ def init_app(app):
     celery.main = app.import_name
 
     celery.conf.update(
-        **dict(
-            (k.replace("CELERY_", "").lower(), v)
+        **{
+            k.replace("CELERY_", "").lower(): v
             for k, v in app.config.items()
             if k.startswith("CELERY_")
-        )
+        }
     )
 
     ContextTask.current_app = app

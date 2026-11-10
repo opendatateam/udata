@@ -21,7 +21,7 @@ def grp():
 
 def json_to_file(data, filename, pretty=False):
     """Dump JSON data to a file"""
-    kwargs = dict(indent=4) if pretty else {}
+    kwargs = {"indent": 4} if pretty else {}
     dirname = os.path.dirname(filename)
     if not os.path.exists(dirname):
         os.makedirs(dirname)

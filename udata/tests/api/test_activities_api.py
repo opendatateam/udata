@@ -132,13 +132,13 @@ class ActivityAPITest(APITestCase):
 
         response: TestResponse = self.get(url_for("api.activity", related_to=dataset1.id))
         assert200(response)
-        len(response.json["data"]) == 2
+        assert len(response.json["data"]) == 2
         assert response.json["data"][0]["related_to"] == dataset1.title
         assert response.json["data"][1]["related_to"] == dataset1.title
 
         response: TestResponse = self.get(url_for("api.activity", related_to=reuse.id))
         assert200(response)
-        len(response.json["data"]) == 1
+        assert len(response.json["data"]) == 1
         assert response.json["data"][0]["related_to"] == reuse.title
 
     def test_activity_api_list_filtered_by_user(self) -> None:

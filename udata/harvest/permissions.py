@@ -8,8 +8,6 @@ class HarvestSourcePermission(OwnablePermission):
     Allows organization admins, editors, or owner.
     """
 
-    pass
-
 
 class HarvestSourceAdminPermission(Permission):
     """Permission for sensitive harvest source operations (edit, delete, run)
@@ -24,4 +22,4 @@ class HarvestSourceAdminPermission(Permission):
         elif source.owner:
             needs.append(UserNeed(source.owner.fs_uniquifier))
 
-        super(HarvestSourceAdminPermission, self).__init__(*needs)
+        super().__init__(*needs)

@@ -33,9 +33,11 @@ class GeopfTokenTest(PytestOnlyDBTestCase):
         create_geopf_token(user, access_token="plain-access", refresh_token="plain-refresh")
 
         other_key = Fernet.generate_key().decode()
-        with pytest.raises(RuntimeError, match="GEOPF_TOKEN_ENCRYPTION_KEY"):
-            with patch.dict(current_app.config, GEOPF_TOKEN_ENCRYPTION_KEY=other_key):
-                GeopfToken.objects(user=user).first()
+        with (
+            pytest.raises(RuntimeError, match="GEOPF_TOKEN_ENCRYPTION_KEY"),
+            patch.dict(current_app.config, GEOPF_TOKEN_ENCRYPTION_KEY=other_key),
+        ):
+            GeopfToken.objects(user=user).first()
 
     def test_is_expired_true_in_the_past(self):
         user = UserFactory()

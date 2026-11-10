@@ -1,37 +1,39 @@
 import io
 import sqlite3
 import tempfile
+from contextlib import contextmanager
 
 from pyproj import CRS
 
 from udata.geopf.srs import detect_srs
 
 
+@contextmanager
 def _make_gpkg(epsg: int | None):
-    """Create a minimal GPKG SQLite file with one geometry column. Returns an open temp file."""
-    tmp = tempfile.NamedTemporaryFile(suffix=".gpkg")
-    with sqlite3.connect(tmp.name) as conn:
-        conn.execute(
-            "CREATE TABLE gpkg_spatial_ref_sys "
-            "(srs_id INTEGER PRIMARY KEY, organization TEXT, "
-            "organization_coordsys_id INTEGER, definition TEXT)"
-        )
-        conn.execute(
-            "CREATE TABLE gpkg_geometry_columns "
-            "(table_name TEXT, column_name TEXT, geometry_type_name TEXT, srs_id INTEGER)"
-        )
-        if epsg is not None:
-            wkt = CRS.from_epsg(epsg).to_wkt()
+    """Create a minimal GPKG SQLite file with one geometry column. Yields the open temp file."""
+    with tempfile.NamedTemporaryFile(suffix=".gpkg") as tmp:
+        with sqlite3.connect(tmp.name) as conn:
             conn.execute(
-                "INSERT INTO gpkg_spatial_ref_sys VALUES (?, ?, ?, ?)",
-                (epsg, "EPSG", epsg, wkt),
+                "CREATE TABLE gpkg_spatial_ref_sys "
+                "(srs_id INTEGER PRIMARY KEY, organization TEXT, "
+                "organization_coordsys_id INTEGER, definition TEXT)"
             )
             conn.execute(
-                "INSERT INTO gpkg_geometry_columns VALUES (?, ?, ?, ?)",
-                ("my_layer", "geom", "POINT", epsg),
+                "CREATE TABLE gpkg_geometry_columns "
+                "(table_name TEXT, column_name TEXT, geometry_type_name TEXT, srs_id INTEGER)"
             )
-    tmp.seek(0)
-    return tmp
+            if epsg is not None:
+                wkt = CRS.from_epsg(epsg).to_wkt()
+                conn.execute(
+                    "INSERT INTO gpkg_spatial_ref_sys VALUES (?, ?, ?, ?)",
+                    (epsg, "EPSG", epsg, wkt),
+                )
+                conn.execute(
+                    "INSERT INTO gpkg_geometry_columns VALUES (?, ?, ?, ?)",
+                    ("my_layer", "geom", "POINT", epsg),
+                )
+        tmp.seek(0)
+        yield tmp
 
 
 class DetectSrsGpkgTest:

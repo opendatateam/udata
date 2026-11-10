@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 @cli.group("organizations")
 def grp():
     """Organizations related operations"""
-    pass
 
 
 @grp.command()
@@ -25,11 +24,7 @@ def attach_zone(geoid, organization_id_or_slug):
     geozone = GeoZone.objects.get(id=geoid)
     if not geozone:
         log.error("No geozone found for %s", geoid)
-    log.info(
-        "Attaching {organization} with {geozone.name}".format(
-            organization=organization, geozone=geozone
-        )
-    )
+    log.info(f"Attaching {organization} with {geozone.name}")
     organization.zone = geozone.id
     organization.save()
     log.info("Done")
@@ -41,8 +36,8 @@ def detach_zone(organization_id_or_slug):
     """Detach the zone of a given <organization>."""
     organization = Organization.objects.get_by_id_or_slug(organization_id_or_slug)
     if not organization:
-        exit_with_error("No organization found for {0}".format(organization_id_or_slug))
-    log.info("Detaching {organization} from {organization.zone}".format(organization=organization))
+        exit_with_error(f"No organization found for {organization_id_or_slug}")
+    log.info(f"Detaching {organization} from {organization.zone}")
     organization.zone = None
     organization.save()
     log.info("Done")

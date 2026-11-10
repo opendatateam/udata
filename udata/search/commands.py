@@ -3,6 +3,7 @@ import sys
 from datetime import UTC, datetime
 
 import click
+from elasticsearch.exceptions import NotFoundError
 from flask import current_app
 
 from udata.commands import cli
@@ -15,7 +16,6 @@ log = logging.getLogger(__name__)
 @cli.group("search")
 def grp():
     """Search/Indexation related operations"""
-    pass
 
 
 TIMESTAMP_FORMAT = "%Y-%m-%d-%H-%M"
@@ -58,7 +58,7 @@ def iter_qs(qs, adapter):
             yield indexable, doc
         except Exception as e:
             model = adapter.model.__name__
-            log.error('Unable to index %s "%s": %s', model, str(obj.id), str(e), exc_info=True)
+            log.exception('Unable to index %s "%s": %s', model, str(obj.id), str(e))
 
 
 def index_model(adapter, start, reindex=False, from_datetime=None):
@@ -92,9 +92,7 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
                 elif not reindex:
                     service.delete_one(doc["id"])
             except Exception as e:
-                log.error(
-                    'Unable to index %s "%s": %s', model, str(doc["id"]), str(e), exc_info=True
-                )
+                log.exception('Unable to index %s "%s": %s', model, str(doc["id"]), str(e))
 
 
 def finalize_reindex(models, start):
@@ -114,7 +112,8 @@ def finalize_reindex(models, start):
                 previous_indices = list(es.indices.get_alias(name=alias).keys())
                 for old_index in previous_indices:
                     actions.append({"remove": {"index": old_index, "alias": alias}})
-            except Exception:
+            except NotFoundError:
+                # First indexation: the alias does not exist yet.
                 pass
             actions.append({"add": {"index": new_index, "alias": alias}})
             es.indices.update_aliases(body={"actions": actions})
@@ -207,7 +206,7 @@ def index(models=None, reindex=True, from_datetime=None):
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 
-    doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
+    doc_types_names = [m.__name__.lower() for m in adapter_catalog]
     models = [model.lower().rstrip("s") for model in (models or [])]
     for model in models:
         if model not in doc_types_names:

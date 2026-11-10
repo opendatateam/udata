@@ -59,6 +59,7 @@ class AutoAssignWithoutRequestContextTest(DBTestCase):
             env = {**os.environ, "UDATA_SETTINGS": cfg.name}
             result = subprocess.run(
                 ["uv", "run", "udata", "import-fixtures", f.name],
+                check=False,
                 capture_output=True,
                 text=True,
                 env=env,
@@ -261,7 +262,7 @@ class PartialEditorDatasetAPITest(APITestCase):
 
         for payload in (
             # Double-encoded JSON: iterating the string yields characters
-            '[{"class": "Dataset", "id": "%s"}]' % self.dataset_assigned.id,
+            f'[{{"class": "Dataset", "id": "{self.dataset_assigned.id}"}}]',
             # A single object instead of a list: iterating a dict yields keys
             {"class": "Dataset", "id": str(self.dataset_assigned.id)},
             # A list of ids instead of a list of objects

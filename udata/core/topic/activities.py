@@ -7,16 +7,16 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Topic
 
 __all__ = (
-    "UserCreatedTopic",
-    "UserUpdatedTopic",
-    "UserCreatedTopicElement",
-    "UserUpdatedTopicElement",
-    "UserDeletedTopicElement",
     "TopicRelatedActivity",
+    "UserCreatedTopic",
+    "UserCreatedTopicElement",
+    "UserDeletedTopicElement",
+    "UserUpdatedTopic",
+    "UserUpdatedTopicElement",
 )
 
 
-class TopicRelatedActivity(object):
+class TopicRelatedActivity:
     related_to = ReferenceField("Topic")
 
 
