@@ -1,8 +1,9 @@
+import time
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
 import pytest
-from flask import json
+from flask import current_app, json
 from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.api_token.models import ApiToken
@@ -60,6 +61,8 @@ class APITestCaseMixin:
 
         login_user(self.user)
         set_request_attr("fs_authn_via", "session")
+        # Signed in just now: the session is fresh, as after a login.
+        set_request_attr("fs_paa", time.time())
 
         return self.user
 
@@ -239,3 +242,17 @@ class APITestCase(APITestCaseMixin, DBTestCase):
 
 class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyDBTestCase):
     pass
+
+
+class SessionCookieMixin:
+    """Each request reads the session from the cookie, as in production.
+
+    pytest-flask keeps one app context, hence one `g`, for the whole test, and flask-login
+    caches the user there: the session cookie, which carries the freshness, would never be
+    read again. A context per request reads it. `login()` doesn't set that cookie: sign in
+    through the login views instead.
+    """
+
+    def perform(self, verb, url, **kwargs):
+        with current_app.app_context():
+            return super().perform(verb, url, **kwargs)

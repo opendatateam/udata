@@ -1,5 +1,6 @@
 from flask import current_app, jsonify, redirect, request, url_for
-from flask_login import current_user, login_required
+from flask_login import current_user
+from flask_security.decorators import auth_required
 from flask_security.utils import (
     check_and_get_token_status,
     hash_data,
@@ -111,7 +112,13 @@ def get_csrf():
     return jsonify({"response": {"csrf_token": generate_csrf()}})
 
 
-@login_required
+# Stands in for the flask-security view, with its freshness check: whoever got hold of a
+# session would otherwise move the account to an address of theirs, then reset its password.
+@auth_required(
+    lambda: current_app.config["SECURITY_API_ENABLED_METHODS"],
+    within=lambda: current_app.config["SECURITY_FRESHNESS"],
+    grace=lambda: current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"],
+)
 def change_email():
     """Change email page."""
 
