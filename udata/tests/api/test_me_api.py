@@ -7,6 +7,7 @@ import pytest
 from flask import url_for
 
 from udata.core import storages
+from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -19,7 +20,7 @@ from udata.models import Discussion, Follow, Member, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase, SessionCookieMixin
 
 
 class MeAPITest(APITestCase):
@@ -711,3 +712,85 @@ class MeAPITest(APITestCase):
         # Second revocation returns 410
         response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert410(response)
+
+
+@pytest.mark.options(
+    CAPTCHETAT_BASE_URL=None,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN=None,
+    CDATA_BASE_URL="http://cdata.test",
+    SECURITY_FRESHNESS=timedelta(hours=24),
+)
+class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
+    def test_a_fresh_session_passes_the_freshness_check(self):
+        self.sign_in_with_password()
+
+        self.assertStatus(self.get(url_for("api.my_session_freshness")), 204)
+
+    def test_a_stale_session_fails_the_freshness_check(self):
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        # As cdata asks: without it, flask-security redirects to its verify view.
+        response = self.get(
+            url_for("api.my_session_freshness"), headers={"Accept": "application/json"}
+        )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+
+    def test_creating_a_token_mails_the_account_holder(self):
+        user = self.sign_in_with_password()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert201(response)
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        assert "My CI token" in mails[0].body
+        # The mail leads to the revocation, should the key not be the account holder's.
+        assert "http://cdata.test/admin/me/profile" in mails[0].body
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_the_mail_names_an_unnamed_token_by_its_prefix(self):
+        self.sign_in_with_password()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {})
+
+        self.assert201(response)
+        assert response.json["token_prefix"] in mails[0].body
+
+    def test_creating_a_token_requires_a_fresh_session(self):
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 0
+
+    def test_creating_a_token_after_reauthentication(self):
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+        self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
+
+        self.assert201(self.post(url_for("api.my_api_tokens"), {"name": "My CI token"}))
+
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_an_api_key_cannot_create_another_one(self):
+        user = UserFactory()
+        plaintext = ApiToken.generate(user)[1]
+
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("api.my_api_tokens"),
+                {"name": "Another key"},
+                headers={"X-API-KEY": plaintext},
+            )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 1

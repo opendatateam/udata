@@ -4,12 +4,20 @@ from datetime import UTC, datetime, timedelta
 
 from flask import current_app
 
-from udata.tasks import job
+from udata.auth import mails as auth_mails
+from udata.core.api_token.models import ApiToken
+from udata.tasks import job, task
 
 from . import mails
 from .models import User
 
 log = logging.getLogger(__name__)
+
+
+@task(route="high.mail")
+def notify_api_token_created(token_id: str):
+    token = ApiToken.objects.get(pk=token_id)
+    auth_mails.api_token_created(token).send(token.user)
 
 
 @job("notify-inactive-users")
