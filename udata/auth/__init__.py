@@ -1,8 +1,9 @@
 import logging
 import typing as t
 
-from flask import render_template
+from flask import current_app, render_template
 from flask_mail import Message
+from flask_principal import Identity, identity_changed
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
 from flask_principal import RoleNeed as RoleNeed
@@ -13,6 +14,7 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
+from flask_security.utils import set_request_attr
 
 from udata.mail import mail_sent
 
@@ -36,6 +38,23 @@ class Permission(BasePermission):
 
 
 admin_permission = Permission()
+
+
+def authenticate_request(user) -> bool:
+    """Authenticate `user` for this request only, as flask-security does for HTTP basic auth.
+
+    An API key or an OAuth2 token stands for its holder on the request it comes with. Unlike
+    `login_user`, nothing goes in the session: its cookie would let whoever sent the
+    credential in without it, after its revocation and fresh for the sensitive operations.
+    Nor is it a login: `current_login_at` stays the date of the last one, the token records
+    its own use.
+    """
+    if not user.active:
+        return False
+    current_app.extensions["security"].login_manager._update_request_context_with_user(user)
+    set_request_attr("fs_authn_via", "token")
+    identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
+    return True
 
 
 class NoopMailUtil(mail_util.MailUtil):

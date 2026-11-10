@@ -20,7 +20,7 @@ from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata.app import csrf
-from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
+from udata.auth import Permission, PermissionDenied, RoleNeed, authenticate_request, current_user
 from udata.i18n import get_locale
 from udata.mongo import db
 
@@ -134,12 +134,11 @@ class UDataApi(Api):
                         self.abort(401, "Expired API token")
                     self.abort(401, "Invalid API token")
 
-                if not login_user(api_token.user, False):
+                if not authenticate_request(api_token.user):
                     self.abort(401, "Inactive user")
                 api_token.update_usage(request.headers.get("User-Agent"))
-                g.authenticated_by_header = True
-            elif check_credentials():
-                g.authenticated_by_header = True
+            else:
+                check_credentials()
             return func(*args, **kwargs)
 
         return wrapper

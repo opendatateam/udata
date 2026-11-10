@@ -2,14 +2,25 @@ import logging
 from copy import copy
 from datetime import UTC, datetime, timedelta
 
+from bson import ObjectId
 from flask import current_app
 
+from udata.api.oauth2 import OAuth2Token
+from udata.core.api_token.models import ApiToken
 from udata.tasks import job
 
 from . import mails
 from .models import User
 
 log = logging.getLogger(__name__)
+
+
+def users_acting_through_tokens_since(date: datetime) -> set[ObjectId]:
+    """The users an API key or an OAuth2 token acted for since `date`: those requests aren't
+    logins, `current_login_at` doesn't tell of them."""
+    api_keys = ApiToken.objects(last_used_at__gt=date).no_dereference().distinct("user")
+    oauth_tokens = OAuth2Token.objects(last_used_at__gt=date).no_dereference().distinct("user")
+    return {*api_keys, *oauth_tokens}
 
 
 @job("notify-inactive-users")
@@ -29,6 +40,7 @@ def notify_inactive_users(self):
         deleted=None,
         inactive_deletion_notified_at=None,
         current_login_at__lte=notification_comparison_date,
+        id__nin=users_acting_through_tokens_since(notification_comparison_date),
     )
     for i, user in enumerate(users_to_notify):
         if i >= current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
@@ -52,9 +64,12 @@ def delete_inactive_users(self):
         )
         return
 
-    # Clear inactive_deletion_notified_at field if user has logged in since notification
+    # Clear inactive_deletion_notified_at field if user has been active since notification
     for user in User.objects(deleted=None, inactive_deletion_notified_at__exists=True):
-        if user.current_login_at > user.inactive_deletion_notified_at:
+        notification = user.inactive_deletion_notified_at
+        if user.current_login_at > notification or user.id in users_acting_through_tokens_since(
+            notification
+        ):
             user.inactive_deletion_notified_at = None
             user.save()
 

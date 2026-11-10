@@ -19,7 +19,6 @@ from flask import (
     send_from_directory,
 )
 from flask.json.provider import DefaultJSONProvider
-from flask.sessions import SecureCookieSessionInterface
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from mongoengine import EmbeddedDocument
@@ -46,25 +45,8 @@ def send_static(directory, filename, cache_timeout):
     return response
 
 
-class HeaderAuthSessionInterface(SecureCookieSessionInterface):
-    """Doesn't save the session of a request authenticated by a header (API key, OAuth2
-    token, see `API.authentify`).
-
-    `login_user` stores the user in the session, as for a login form: its cookie would let
-    whoever sent the credential in without it, after its revocation and with a fresh
-    session. `login_user` stays for the rest it does: it dates the user's last login, which
-    keeps an account used by scripts only from being deleted as inactive.
-    """
-
-    def save_session(self, app, session, response):
-        if g.get("authenticated_by_header"):
-            return
-        return super().save_session(app, session, response)
-
-
 class UDataApp(Flask):
     debug_log_format = "[%(levelname)s][%(name)s:%(lineno)d] %(message)s"
-    session_interface = HeaderAuthSessionInterface()
 
     # Keep track of static dirs given as register_blueprint argument
     static_prefixes = {}
