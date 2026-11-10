@@ -70,13 +70,19 @@ class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
 
 
 def filter_by_user(base_query, value):
-    """Keep the activities of one actor, designated by user id.
+    """Keep the activities of one user, designated by user id: their own, and those of
+    their API tokens, revoked ones included, which acted on their behalf.
 
     `actor` is a generic reference, matched on the whole `{_cls, _ref}` sub-document
     mongoengine builds from a document: an id alone does not say which collection it
-    points at. An unknown id resolves to no actor, which matches no activity.
+    points at.
     """
-    return base_query.filter(actor=User.objects(id=value).first())
+    from udata.core.api_token.models import ApiToken
+
+    user = User.objects(id=value).first()
+    if user is None:
+        return base_query.none()
+    return base_query.filter(actor__in=[user, *ApiToken.objects(user=user)])
 
 
 def filter_by_organization(base_query, value):
@@ -222,6 +228,9 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
         if hasattr(g, "harvest_activity_user"):
             # We're in the context of a harvest action with a harvest activity user to use as actor
             actor = g.harvest_activity_user
+        elif hasattr(g, "api_token"):
+            # The token acts on behalf of its owner, who stays reachable as `ApiToken.user`.
+            actor = g.api_token
         else:
             actor = current_user._get_current_object()
         new_activity.send(

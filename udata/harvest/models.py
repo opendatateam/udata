@@ -261,6 +261,7 @@ check_config_matches_backend.always_run = True
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
     name = field(
         StringField(max_length=255, required=True),
+        show_as_ref=True,
         description="The source display name",
     )
     slug = field(

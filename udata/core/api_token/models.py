@@ -7,6 +7,7 @@ from flask import current_app
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
+from udata.auth import current_user
 from udata.models import db
 
 TOKEN_BYTE_LENGTH = 48
@@ -28,6 +29,20 @@ def parse_future_datetime(value):
     return dt
 
 
+def _owner_or_admin(name: str):
+    """An `attribute` giving the field `name` only to the token owner or a sysadmin,
+    `None` otherwise."""
+
+    def visible(token):
+        if current_user.is_anonymous:
+            return None
+        if current_user.sysadmin or token.user.id == current_user.id:
+            return getattr(token, name)
+        return None
+
+    return visible
+
+
 def _hash_token(plaintext):
     key = current_app.config["API_TOKEN_SECRET"].encode()
     return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
@@ -41,10 +56,22 @@ class ApiToken(db.Document):
         readonly=True,
         description="First characters of the token for identification",
     )
-    user = db.ReferenceField("User", required=True, reverse_delete_rule=db.CASCADE)
+    # Exposed as `owner` rather than `user`: the API does not promise that a token
+    # always belongs to a person.
+    user = field(
+        db.ReferenceField("User", required=True, reverse_delete_rule=db.CASCADE),
+        readonly=True,
+        show_as_ref=True,
+        rename="owner",
+        description="On whose behalf the token acts",
+    )
     name = field(
         db.StringField(max_length=255),
-        description="User-given label for this token",
+        # The reference is public, as an activity actor, while the label is the owner's
+        # own wording, e.g. which machine or script the token is for.
+        attribute=_owner_or_admin("name"),
+        show_as_ref=True,
+        description="User-given label for this token, only visible to its owner and sysadmins",
     )
     scopes = field(
         db.ListField(db.StringField(choices=["admin"]), default=lambda: ["admin"]),

@@ -6,6 +6,8 @@ from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
 from udata.core.activity.models import Activity
+from udata.core.api_token.models import ApiToken
+from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.activities import UserCreatedOrganization
@@ -163,7 +165,100 @@ class ActivityAPITest(APITestCase):
         assert response.json["data"][0]["actor"] == {
             "id": str(source.id),
             "class": "HarvestSource",
+            "name": source.name,
         }
+
+    def test_an_edit_through_an_api_token_is_attributed_to_the_token(self) -> None:
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        with self.api_user(owner):
+            assert200(self.put(url_for("api.dataset", dataset=dataset), {"title": "New title"}))
+
+        token = ApiToken.objects.get(user=owner)
+        assert [activity.actor for activity in UserUpdatedDataset.objects(related_to=dataset)] == [
+            token
+        ]
+
+    def test_an_api_token_actor_shows_its_owner_but_hides_its_name_from_the_public(self) -> None:
+        owner = UserFactory()
+        token, _plaintext = ApiToken.generate(owner, name="CI prod")
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"] == {
+            "id": str(token.id),
+            "class": "ApiToken",
+            "name": None,
+            "owner": {
+                "id": str(owner.id),
+                "class": "User",
+                "slug": owner.slug,
+                "first_name": owner.first_name,
+                "last_name": owner.last_name,
+                "avatar": None,
+                "avatar_thumbnail": None,
+                "deleted": None,
+                "page": owner.self_web_url(),
+                "uri": owner.self_api_url(),
+            },
+        }
+
+    def test_an_api_token_name_is_hidden_from_another_user(self) -> None:
+        token, _plaintext = ApiToken.generate(UserFactory(), name="CI prod")
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        self.login()
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"]["name"] is None
+
+    def test_an_api_token_name_is_shown_to_its_owner(self) -> None:
+        owner = UserFactory()
+        token, _plaintext = ApiToken.generate(owner, name="CI prod")
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        self.login(owner)
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"]["name"] == "CI prod"
+
+    def test_an_api_token_name_is_shown_to_a_sysadmin(self) -> None:
+        token, _plaintext = ApiToken.generate(UserFactory(), name="CI prod")
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        self.login(AdminFactory())
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"]["name"] == "CI prod"
+
+    def test_activity_api_list_filtered_by_user_includes_their_api_tokens(self) -> None:
+        """What a token did on someone's behalf belongs to their activity, revoked or not."""
+        owner = UserFactory()
+        token, _plaintext = ApiToken.generate(owner)
+        revoked, _plaintext = ApiToken.generate(owner)
+        revoked.revoke()
+        someone_elses, _plaintext = ApiToken.generate(UserFactory())
+        by_hand = FakeDatasetActivity.objects.create(actor=owner, related_to=DatasetFactory())
+        by_token = FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        by_revoked = FakeDatasetActivity.objects.create(actor=revoked, related_to=DatasetFactory())
+        FakeDatasetActivity.objects.create(actor=someone_elses, related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity", user=owner.id))
+        assert200(response)
+        assert {activity["id"] for activity in response.json["data"]} == {
+            str(by_hand.id),
+            str(by_token.id),
+            str(by_revoked.id),
+        }
+
+    def test_activity_api_list_filtered_by_an_unknown_user(self) -> None:
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity", user=ObjectId()))
+        assert200(response)
+        assert response.json["data"] == []
 
     def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
         """An actor still stored in the pre-generic-reference format is read as a user.
