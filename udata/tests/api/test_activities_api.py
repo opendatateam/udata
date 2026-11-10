@@ -253,6 +253,30 @@ class ActivityAPITest(APITestCase):
             str(by_revoked.id),
         }
 
+    def test_activity_api_list_filtered_by_actor_kind(self) -> None:
+        """Lists what harvesting did, e.g. to see what a deployment changed in it."""
+        by_harvest = FakeDatasetActivity.objects.create(
+            actor=HarvestSourceFactory(), related_to=DatasetFactory()
+        )
+        token, _plaintext = ApiToken.generate(UserFactory())
+        by_token = FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity", actor_kind="HarvestSource"))
+        assert200(response)
+        assert [activity["id"] for activity in response.json["data"]] == [str(by_harvest.id)]
+
+        response = self.get(url_for("api.activity", actor_kind=["HarvestSource", "ApiToken"]))
+        assert200(response)
+        assert {activity["id"] for activity in response.json["data"]} == {
+            str(by_harvest.id),
+            str(by_token.id),
+        }
+
+    def test_activity_api_list_filtered_by_an_unknown_actor_kind(self) -> None:
+        response: TestResponse = self.get(url_for("api.activity", actor_kind="Dataset"))
+        assert400(response)
+
     def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
         """An actor still stored in the pre-generic-reference format is read as a user.
 

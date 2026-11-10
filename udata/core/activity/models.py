@@ -104,6 +104,11 @@ def filter_by_keys(base_query, values):
     return base_query.filter(_cls__in=[_registered_activities[key]._class_name for key in values])
 
 
+def filter_by_actor_kinds(base_query, values):
+    """Keep what some kinds of actor did, e.g. everything harvesting did."""
+    return base_query.filter(__raw__={"actor._cls": {"$in": values}})
+
+
 @generate_fields(
     default_sort="-created_at",
     standalone_filters=[
@@ -127,6 +132,14 @@ def filter_by_keys(base_query, values):
             "is_list": True,
             "query": filter_by_keys,
             "help": "Filter activities on those keys (ex : dataset:updated). Repeatable.",
+        },
+        {
+            "key": "actor_kind",
+            "type": str,
+            "is_list": True,
+            "choices": ACTOR_TYPES,
+            "query": filter_by_actor_kinds,
+            "help": "Filter activities on the kind of their actor (ex : HarvestSource). Repeatable.",
         },
     ],
 )
@@ -182,6 +195,8 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
             ("actor", "-created_at"),
             ("organization", "-created_at"),
             ("related_to", "-created_at"),
+            # `actor_kind` reads `actor._cls`, indexed by the 2026-11-10 migration:
+            # mongoengine refuses to index a subfield of a generic reference.
         ],
         "allow_inheritance": True,
     }
