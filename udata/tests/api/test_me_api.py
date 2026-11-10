@@ -1,5 +1,4 @@
 import struct
-import time
 import zlib
 from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
@@ -723,23 +722,13 @@ class MeAPITest(APITestCase):
     SECURITY_FRESHNESS=timedelta(hours=24),
 )
 class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
-    def sign_in(self, signed_in_ago: timedelta = timedelta(0)) -> User:
-        user = UserFactory(
-            email="jane@example.org", password="password", confirmed_at=datetime.now()
-        )
-        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
-        if signed_in_ago:
-            with self.client.session_transaction() as session:
-                session["fs_paa"] = time.time() - signed_in_ago.total_seconds()
-        return user
-
     def test_a_fresh_session_passes_the_freshness_check(self):
-        self.sign_in()
+        self.sign_in_with_password()
 
         self.assertStatus(self.get(url_for("api.my_session_freshness")), 204)
 
     def test_a_stale_session_fails_the_freshness_check(self):
-        self.sign_in(signed_in_ago=timedelta(days=2))
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
 
         # As cdata asks: without it, flask-security redirects to its verify view.
         response = self.get(
@@ -750,7 +739,7 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert response.json["response"]["reauth_required"]
 
     def test_creating_a_token_mails_the_account_holder(self):
-        user = self.sign_in()
+        user = self.sign_in_with_password()
 
         with capture_mails() as mails:
             response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
@@ -763,7 +752,7 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert ApiToken.objects(user=user).count() == 1
 
     def test_the_mail_names_an_unnamed_token_by_its_prefix(self):
-        self.sign_in()
+        self.sign_in_with_password()
 
         with capture_mails() as mails:
             response = self.post(url_for("api.my_api_tokens"), {})
@@ -772,7 +761,7 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert response.json["token_prefix"] in mails[0].body
 
     def test_creating_a_token_requires_a_fresh_session(self):
-        user = self.sign_in(signed_in_ago=timedelta(days=2))
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
 
         with capture_mails() as mails:
             response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
@@ -783,7 +772,7 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert ApiToken.objects(user=user).count() == 0
 
     def test_creating_a_token_after_reauthentication(self):
-        user = self.sign_in(signed_in_ago=timedelta(days=2))
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
         self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
 
         self.assert201(self.post(url_for("api.my_api_tokens"), {"name": "My CI token"}))

@@ -42,7 +42,8 @@ admin_permission = Permission()
 
 def fresh_session_required(func):
     """Answer with flask-security's reauthentication request unless the user authenticated
-    recently: `api.secure` must come first, this only checks how long ago.
+    recently: the user must already be authenticated (`login_required` / `api.secure` first),
+    this only checks how long ago.
 
     A request authenticated by an API key is never fresh: a key can't stand for a login."""
 
