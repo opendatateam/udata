@@ -176,7 +176,8 @@ class OAuth2Token(Document):
     scope = StringField(default="")
     revoked = BooleanField(default=False)
 
-    meta = {"collection": "oauth2_token"}
+    # `user`: the activities of a user include those of their tokens.
+    meta = {"collection": "oauth2_token", "indexes": ["user"]}
 
     def __str__(self):
         return "<OAuth2Token({0.client.name})>".format(self)

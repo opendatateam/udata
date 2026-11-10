@@ -17,6 +17,7 @@ from mongoengine.fields import (
 from mongoengine.signals import post_save
 
 from udata.api import api
+from udata.api.oauth2 import OAuth2Token
 from udata.api_fields import field, generate_fields
 from udata.auth import current_user
 from udata.core.organization.models import Organization
@@ -35,9 +36,8 @@ log = logging.getLogger(__name__)
 _registered_activities = {}
 
 # Who an activity can be attributed to. Declared by class name rather than by class:
-# `HarvestSource`, `ApiToken` and `OAuth2Token` live in modules that import the activity
-# machinery back, and a `GenericReferenceField` resolves the names from the document
-# registry.
+# `HarvestSource` and `ApiToken` live in modules that import the activity machinery
+# back, and a `GenericReferenceField` resolves the names from the document registry.
 ACTOR_TYPES = ("User", "HarvestSource", "ApiToken", "OAuth2Token")
 
 
@@ -78,7 +78,6 @@ def filter_by_user(base_query, value):
     mongoengine builds from a document: an id alone does not say which collection it
     points at.
     """
-    from udata.api.oauth2 import OAuth2Token
     from udata.core.api_token.models import ApiToken
 
     user = User.objects(id=value).first()
