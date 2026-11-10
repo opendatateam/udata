@@ -131,7 +131,8 @@ def paginate_embedded_list(
     ``(items, total)`` tuple where ``items`` are rebuilt ``embedded_cls``
     instances and ``total`` is the count after filtering.
     """
-    source = f"${field}"
+    # A document stored without the field has no items rather than failing `$size`.
+    source = {"$ifNull": [f"${field}", []]}
     filtered = (
         {"$filter": {"input": source, "as": "item", "cond": condition}} if condition else source
     )
