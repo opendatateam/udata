@@ -1951,7 +1951,7 @@ msgstr "Moderateur"
 
 #: udata/core/visualizations/models.py:226
 msgid "chart"
-msgstr "graphique"
+msgstr "visualisation"
 
 #: udata/features/notifications/events.py:325
 #, python-format
