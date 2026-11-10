@@ -151,7 +151,9 @@ def filter_by_actor_kinds(base_query, values):
             "is_list": True,
             "choices": ACTOR_TYPES,
             "query": filter_by_actor_kinds,
-            "help": "Filter activities on the kind of their actor (ex : HarvestSource). Repeatable.",
+            "help": (
+                "Filter activities on the kind of their actor (ex : HarvestSource). Repeatable."
+            ),
         },
     ],
 )
