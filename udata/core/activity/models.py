@@ -35,9 +35,10 @@ log = logging.getLogger(__name__)
 _registered_activities = {}
 
 # Who an activity can be attributed to. Declared by class name rather than by class:
-# `HarvestSource` and `ApiToken` live in modules that import the activity machinery
-# back, and a `GenericReferenceField` resolves the names from the document registry.
-ACTOR_TYPES = ("User", "HarvestSource", "ApiToken")
+# `HarvestSource`, `ApiToken` and `OAuth2Token` live in modules that import the activity
+# machinery back, and a `GenericReferenceField` resolves the names from the document
+# registry.
+ACTOR_TYPES = ("User", "HarvestSource", "ApiToken", "OAuth2Token")
 
 
 class ActorField(GenericReferenceField):
@@ -71,18 +72,25 @@ class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
 
 def filter_by_user(base_query, value):
     """Keep the activities of one user, designated by user id: their own, and those of
-    their API tokens, revoked ones included, which acted on their behalf.
+    their API keys and OAuth2 tokens, revoked ones included, which acted on their behalf.
 
     `actor` is a generic reference, matched on the whole `{_cls, _ref}` sub-document
     mongoengine builds from a document: an id alone does not say which collection it
     points at.
     """
+    from udata.api.oauth2 import OAuth2Token
     from udata.core.api_token.models import ApiToken
 
     user = User.objects(id=value).first()
     if user is None:
         return base_query.none()
-    return base_query.filter(actor__in=[user, *ApiToken.objects(user=user).only("id")])
+    return base_query.filter(
+        actor__in=[
+            user,
+            *ApiToken.objects(user=user).only("id"),
+            *OAuth2Token.objects(user=user).only("id"),
+        ]
+    )
 
 
 def filter_by_organization(base_query, value):
@@ -228,9 +236,10 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
         if hasattr(g, "harvest_activity_user"):
             # We're in the context of a harvest action with a harvest activity user to use as actor
             actor = g.harvest_activity_user
-        elif hasattr(g, "api_token"):
-            # The token acts on behalf of its owner, who stays reachable as `ApiToken.user`.
-            actor = g.api_token
+        elif hasattr(g, "api_credential"):
+            # An API key or an OAuth2 token acts on behalf of its owner, who stays
+            # reachable as its `user`.
+            actor = g.api_credential
         else:
             actor = current_user._get_current_object()
         new_activity.send(

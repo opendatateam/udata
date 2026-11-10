@@ -5,6 +5,7 @@ from flask import url_for
 from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
+from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.core.activity.models import Activity
 from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserUpdatedDataset
@@ -39,6 +40,22 @@ class FakeReuseActivity(Activity):
 class FakeTopicActivity(Activity):
     key = "fakeTopic"
     related_to = ReferenceField(Topic, required=True)
+
+
+def oauth2_token(user: User) -> OAuth2Token:
+    """A token an application was given to act on behalf of `user`."""
+    client = OAuth2Client.objects.create(
+        name="an application",
+        owner=UserFactory(),
+        redirect_uris=["https://app.example.org/callback"],
+        secret="s3cr3t",
+    )
+    return OAuth2Token.objects.create(
+        client=client,
+        user=user,
+        access_token=str(ObjectId()),
+        refresh_token=str(ObjectId()),
+    )
 
 
 class ActivityAPITest(APITestCase):
@@ -252,6 +269,65 @@ class ActivityAPITest(APITestCase):
             str(by_token.id),
             str(by_revoked.id),
         }
+
+    def test_an_edit_through_an_oauth2_token_is_attributed_to_the_token(self) -> None:
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        token = oauth2_token(owner)
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {"title": "New title"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
+        )
+
+        assert200(response)
+        assert [activity.actor for activity in UserUpdatedDataset.objects(related_to=dataset)] == [
+            token
+        ]
+
+    def test_an_oauth2_token_actor_shows_its_owner_and_its_application_only(self) -> None:
+        """Neither the access and refresh tokens nor the client secret are exposed."""
+        owner = UserFactory()
+        token = oauth2_token(owner)
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"] == {
+            "id": str(token.id),
+            "class": "OAuth2Token",
+            "client": {
+                "id": str(token.client.id),
+                "class": "OAuth2Client",
+                "name": token.client.name,
+            },
+            "owner": {
+                "id": str(owner.id),
+                "class": "User",
+                "slug": owner.slug,
+                "first_name": owner.first_name,
+                "last_name": owner.last_name,
+                "avatar": None,
+                "avatar_thumbnail": None,
+                "deleted": None,
+                "page": owner.self_web_url(),
+                "uri": owner.self_api_url(),
+            },
+        }
+
+    def test_activity_api_list_filtered_by_user_includes_their_oauth2_tokens(self) -> None:
+        owner = UserFactory()
+        by_token = FakeDatasetActivity.objects.create(
+            actor=oauth2_token(owner), related_to=DatasetFactory()
+        )
+        FakeDatasetActivity.objects.create(
+            actor=oauth2_token(UserFactory()), related_to=DatasetFactory()
+        )
+
+        response: TestResponse = self.get(url_for("api.activity", user=owner.id))
+        assert200(response)
+        assert [activity["id"] for activity in response.json["data"]] == [str(by_token.id)]
 
     def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
         """An actor still stored in the pre-generic-reference format is read as a user.
