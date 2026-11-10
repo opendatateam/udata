@@ -1,21 +1,31 @@
+import asyncio
+import gc
 import json
+import logging
+import threading
+import time
 from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
 from flask import url_for
 from flask.testing import EnvironBuilder
+from pydantic_ai.exceptions import ModelHTTPError
 from pydantic_ai.models.function import DeltaToolCall, FunctionModel
 from pydantic_ai.models.test import TestModel
 from werkzeug.wrappers import Request
 
+from udata.api.oauth2 import OAuth2Client, OAuth2Token
+from udata.core.api_token.models import ApiToken
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.api import MAX_REQUEST_BYTES, MAX_USER_MESSAGE_CHARS
 from udata.core.assistant.tabular import TabularClient, TabularError
-from udata.core.assistant.tools import MODEL_REQUEST_LIMIT
+from udata.core.assistant.tools import MAX_SERIALIZED_RESOURCES, MODEL_REQUEST_LIMIT
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import PytestOnlyAPITestCase
+
+TIMEOUT_REASON = "La réponse a pris trop de temps et a été interrompue."
 
 PAYLOAD = {
     "id": "chat-test",
@@ -171,6 +181,10 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         self.login()
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 503
+        assert response.json["error"] == (
+            "L'assistant est activé mais la clé d'API du fournisseur d'IA (AI_API_KEY) "
+            "n'est pas configurée."
+        )
 
     def test_chat_missing_base_url(self):
         self.app.config["AI_BASE_URL"] = None
@@ -227,6 +241,42 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "Subventions 2025" in seen
         assert f"Ressource active (resource_id à utiliser avec les outils) : {resource.id}" in seen
         assert "nom_commune" in seen
+
+    def test_chat_malformed_profile_still_streams(self, mocker):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+        mocker.patch.object(TabularClient, "get_profile", return_value=["not", "a", "dict"])
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        payload = {**PAYLOAD, "resource_id": str(resource.id)}
+        response = self.post(url_for("api.assistant_chat"), data=payload)
+        assert response.status_code == 200
+        response.get_data()
+        assert "Aucune information de colonne disponible." in str(model.seen)
+
+    def test_chat_resource_context_caps_the_listed_resources(self, mocker):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        extra = 5
+        resources = ResourceFactory.build_batch(MAX_SERIALIZED_RESOURCES + extra)
+        active = resources[-1]
+        DatasetFactory(title="Aides aux communes", resources=resources)
+        mocker.patch.object(TabularClient, "get_profile", side_effect=TabularError("down"))
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        self.login()
+        payload = {**PAYLOAD, "resource_id": str(active.id)}
+        response = self.post(url_for("api.assistant_chat"), data=payload)
+        assert response.status_code == 200
+        response.get_data()
+        seen = str(model.seen)
+        assert f"Ressource active (resource_id à utiliser avec les outils) : {active.id}" in seen
+        assert f"… et {extra} autres" in seen
+        assert str(resources[MAX_SERIALIZED_RESOURCES - 1].id) in seen
+        assert str(resources[MAX_SERIALIZED_RESOURCES].id) not in seen
 
     def test_chat_without_resource_id_has_no_active_context(self, mocker):
         """Without resource_id the instructions stay unchanged."""
@@ -467,6 +517,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         mocker.patch.object(TabularClient, "has_more_groups", return_value=False)
         config = {
             "title": "Doses",
+            "description": "Doses par département",
             "type": "line",
             "x_axis": {"column_x": "dep", "type": "discrete"},
             "series": [{"column_y": "n_cum_dose1", "aggregate_y": "max"}],
@@ -603,33 +654,73 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
             if record.levelname == "ERROR"
         )
 
-    def test_chat_provider_error_chunk_is_sanitized(self, mocker, caplog):
-        """Error events generated inside the adapter (model connection
-        failures, API errors) are replaced by the generic French message;
+    def test_chat_provider_error_is_sanitized(self, mocker, caplog):
+        """Model failures reach the client as the generic French message only;
         the original detail is logged."""
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = "test-key"
         self.login()
-        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
 
-        async def erroring_stream(**kwargs):
-            yield 'data: {"type":"error","errorText":"Connection error."}\n\n'
+        async def failing_model(messages, info):
+            raise RuntimeError("Connection error to 10.0.0.1")
+            yield  # an async generator, as stream_function expects
 
-        mocker.patch(
-            "udata.core.assistant.api.VercelAIAdapter.encode_stream",
-            side_effect=lambda stream, **kwargs: stream,
-        )
-        mocker.patch(
-            "udata.core.assistant.api.VercelAIAdapter.run_stream",
-            side_effect=lambda **kwargs: erroring_stream(**kwargs),
-        )
+        model = FunctionModel(stream_function=failing_model)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 200
         body = response.get_data(as_text=True)
         assert '"type":"error"' in body
         assert "Une erreur est survenue" in body
-        assert "Connection error" not in body
-        assert any("Connection error" in record.getMessage() for record in caplog.records)
+        assert "10.0.0.1" not in body
+        assert any("10.0.0.1" in record.getMessage() for record in caplog.records)
+
+    def run_with_failing_model(self, mocker, error):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+
+        async def failing_model(messages, info):
+            raise error
+            yield  # an async generator, as stream_function expects
+
+        model = FunctionModel(stream_function=failing_model)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        return self.post(url_for("api.assistant_chat"), data=PAYLOAD).get_data(as_text=True)
+
+    def test_chat_programming_error_is_logged_as_error_with_traceback(self, mocker, caplog):
+        error = KeyError("missing")
+        body = self.run_with_failing_model(mocker, error)
+        assert "Une erreur est survenue" in body
+        [record] = [r for r in caplog.records if r.name == "udata.core.assistant.api"]
+        assert record.levelno == logging.ERROR
+        assert record.exc_info[1] is error
+
+    def test_chat_provider_http_error_is_logged_as_warning_with_traceback(self, mocker, caplog):
+        error = ModelHTTPError(502, "albert-large", body="bad gateway")
+        body = self.run_with_failing_model(mocker, error)
+        assert "Une erreur est survenue" in body
+        [record] = [r for r in caplog.records if r.name == "udata.core.assistant.api"]
+        assert record.levelno == logging.WARNING
+        assert record.exc_info[1] is error
+
+    def test_chat_timeout_abort_is_localized(self, mocker):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+        mocker.patch("udata.core.assistant.api.AI_TURN_TIMEOUT", 0.05)
+
+        async def slow_model(messages, info):
+            await asyncio.sleep(5)
+            yield "trop tard"
+
+        model = FunctionModel(stream_function=slow_model)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        body = response.get_data(as_text=True)
+        assert '"type":"abort"' in body
+        assert "timed out" not in body
+        assert TIMEOUT_REASON in body
 
     def test_chat_client_disconnect_closes_async_iterator(self, mocker):
         """GeneratorExit cancels the run and closes the async iterator before
@@ -848,3 +939,248 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
         response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
         assert response.status_code == 503
         agent.assert_not_called()
+
+
+class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
+    """Flask-Security reads JSON bodies of sessionless requests before the view."""
+
+    @pytest.fixture(autouse=True)
+    def enable_assistant(self, app):
+        app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        app.config["AI_API_KEY"] = "test-key"
+
+    def _raw_chat(self, body, headers, content_length=True):
+        environ = EnvironBuilder(
+            self.app,
+            path=url_for("api.assistant_chat"),
+            method="POST",
+            data=body,
+            headers={"Content-Type": "application/json", **headers},
+        ).get_environ()
+        if not content_length:
+            del environ["CONTENT_LENGTH"]
+            environ["HTTP_TRANSFER_ENCODING"] = "chunked"
+            environ["wsgi.input_terminated"] = True
+        return self.client.open(Request(environ))
+
+    def _api_key_headers(self):
+        _token, plaintext = ApiToken.generate(UserFactory())
+        return {"X-API-KEY": plaintext}
+
+    def test_api_key_chat_streams(self, mocker):
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._raw_chat(json.dumps(PAYLOAD), self._api_key_headers())
+        assert response.status_code == 200
+        assert "data: " in response.get_data(as_text=True)
+
+    def test_oauth_token_chat_streams(self, mocker):
+        client = OAuth2Client.objects.create(
+            name="test-client",
+            owner=UserFactory(),
+            redirect_uris=["https://test.org/callback"],
+            secret="suchs3cr3t",
+        )
+        token = OAuth2Token.objects.create(
+            client=client,
+            user=UserFactory(),
+            access_token="access-token",
+            refresh_token="refresh-token",
+        )
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        headers = {"Authorization": f"Bearer {token.access_token}"}
+        response = self._raw_chat(json.dumps(PAYLOAD), headers)
+        assert response.status_code == 200
+        assert "data: " in response.get_data(as_text=True)
+
+    def test_session_chat_streams(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._raw_chat(json.dumps(PAYLOAD), {})
+        assert response.status_code == 200
+        assert "data: " in response.get_data(as_text=True)
+
+    def _oversized_body(self):
+        return json.dumps({**PAYLOAD, "pad": "x" * MAX_REQUEST_BYTES}).encode()
+
+    def test_api_key_oversized_body_is_rejected(self, mocker):
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._raw_chat(self._oversized_body(), self._api_key_headers())
+        assert response.status_code == 413
+        agent.assert_not_called()
+
+    def test_api_key_oversized_chunked_body_is_rejected(self, mocker):
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._raw_chat(
+            self._oversized_body(), self._api_key_headers(), content_length=False
+        )
+        assert response.status_code == 413
+        agent.assert_not_called()
+
+    def test_api_key_chunked_chat_streams(self, mocker):
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._raw_chat(
+            json.dumps(PAYLOAD), self._api_key_headers(), content_length=False
+        )
+        assert response.status_code == 200
+        response.get_data()
+
+
+class AssistantChatUserPartsTest(PytestOnlyAPITestCase):
+    @pytest.fixture(autouse=True)
+    def enable_assistant(self, app):
+        app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        app.config["AI_API_KEY"] = "test-key"
+
+    def _chat_with_user_parts(self, parts):
+        message = {"id": "msg-1", "role": "user", "parts": parts}
+        return self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
+
+    @pytest.mark.parametrize(
+        "part",
+        [
+            {"type": "file", "mediaType": "text/csv", "url": "https://example.org/huge.csv"},
+            {"type": "source-url", "sourceId": "s1", "url": "https://example.org/page"},
+            {"type": "data-chart", "data": {"x": 1}},
+            {"type": "reasoning", "text": "pense"},
+        ],
+    )
+    def test_user_message_with_a_non_text_part_is_rejected(self, mocker, part):
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._chat_with_user_parts([{"type": "text", "text": "Regarde"}, part])
+        assert response.status_code == 400
+        assert response.json["message"] == "Seuls les messages texte sont acceptés."
+        agent.assert_not_called()
+
+    def test_user_message_with_text_parts_only_is_accepted(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        response = self._chat_with_user_parts([{"type": "text", "text": "Bonjour"}])
+        assert response.status_code == 200
+        response.get_data()
+
+    def test_user_message_without_parts_is_rejected(self, mocker):
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._chat_with_user_parts([])
+        assert response.status_code == 400
+        assert response.json["message"] == "Un message utilisateur ne peut pas être vide."
+        agent.assert_not_called()
+
+    def _chat_with_assistant_parts(self, parts):
+        assistant = {"id": "msg-a", "role": "assistant", "parts": parts}
+        messages = [*PAYLOAD["messages"], assistant, *PAYLOAD["messages"]]
+        return self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
+
+    @pytest.mark.parametrize(
+        "part",
+        [
+            {"type": "file", "mediaType": "image/png", "url": "data:image/png;base64,iVBORw0KGgo="},
+            {"type": "file", "mediaType": "text/csv", "url": "https://example.org/huge.csv"},
+            {"type": "source-url", "sourceId": "s1", "url": "https://example.org/page"},
+            {"type": "source-document", "sourceId": "s1", "mediaType": "text/plain", "title": "t"},
+            {
+                "type": "data-enqueued-messages",
+                "data": [{"id": "m", "role": "user", "parts": [{"type": "text", "text": "x"}]}],
+            },
+        ],
+    )
+    def test_assistant_message_with_a_forged_part_is_rejected(self, mocker, part):
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._chat_with_assistant_parts([{"type": "text", "text": "Voici"}, part])
+        assert response.status_code == 400
+        assert response.json["message"] == "Seuls les messages texte sont acceptés."
+        agent.assert_not_called()
+
+    def test_assistant_message_with_the_parts_the_stream_emits_is_accepted(self, mocker):
+        self.login()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        parts = [
+            {"type": "step-start"},
+            {"type": "reasoning", "text": "Je regarde le schéma.", "state": "done"},
+            {
+                "type": "tool-inspect_schema",
+                "toolCallId": "call-1",
+                "state": "output-available",
+                "input": {"resource_id": "r"},
+                "output": "Colonnes : dep",
+            },
+            {
+                "type": "dynamic-tool",
+                "toolName": "query_data",
+                "toolCallId": "call-2",
+                "state": "output-available",
+                "input": {},
+                "output": "ok",
+            },
+            {"type": "text", "text": "Voici le graphique.", "state": "done"},
+        ]
+        response = self._chat_with_assistant_parts(parts)
+        assert response.status_code == 200
+        response.get_data()
+
+
+class AssistantChatDisconnectTest(PytestOnlyAPITestCase):
+    @pytest.fixture(autouse=True)
+    def enable_assistant(self, app):
+        app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        app.config["AI_API_KEY"] = "test-key"
+
+    def test_client_disconnect_mid_stream_closes_the_model_stream_quietly(self, mocker, caplog):
+        model_stream_closed = threading.Event()
+
+        async def endless_text(messages, info):
+            try:
+                while True:
+                    yield "mot "
+                    await asyncio.sleep(0.01)
+            finally:
+                model_stream_closed.set()
+
+        agent = agent_with_model(FunctionModel(stream_function=endless_text))
+        exit_ = mocker.spy(agent, "__aexit__")
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent)
+        self.login()
+        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        assert response.status_code == 200
+        chunks = response.response
+        received = b""
+        while b"mot" not in received:
+            received += next(chunks)
+        with caplog.at_level(logging.DEBUG):
+            chunks.close()
+            gc.collect()
+        assert model_stream_closed.wait(timeout=5)
+        assert exit_.call_count == 1
+        assert [r.getMessage() for r in caplog.records if r.levelno >= logging.ERROR] == []
+
+    def test_client_disconnect_does_not_wait_for_a_stuck_thread(self, mocker, caplog):
+        # A synchronous api-tabular call blocks the run's loop: cancellation cannot reach it.
+        release = threading.Event()
+
+        async def stuck_stream(**kwargs):
+            yield b"data: one\n\n"
+            release.wait(timeout=3)
+            yield b"data: two\n\n"
+
+        mocker.patch(
+            "udata.core.assistant.api.VercelAIAdapter.encode_stream",
+            side_effect=lambda stream, **kwargs: stream,
+        )
+        mocker.patch(
+            "udata.core.assistant.api.VercelAIAdapter.run_stream",
+            side_effect=lambda **kwargs: stuck_stream(**kwargs),
+        )
+        mocker.patch("udata.core.assistant.api.STREAM_JOIN_TIMEOUT", 0.1, create=True)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+        self.login()
+        chunks = self.post(url_for("api.assistant_chat"), data=PAYLOAD).response
+        next(chunks)
+        started = time.monotonic()
+        with caplog.at_level(logging.WARNING):
+            chunks.close()
+        elapsed = time.monotonic() - started
+        release.set()
+        assert elapsed < 1
+        assert any("still running" in r.getMessage() for r in caplog.records)

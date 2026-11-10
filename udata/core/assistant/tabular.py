@@ -19,10 +19,7 @@ log = logging.getLogger(__name__)
 PROFILE_ROUTE = "/api/resources/{rid}/profile/"
 DATA_ROUTE = "/api/resources/{rid}/data/"
 
-# Hard bound: this client feeds an LLM agent tool call, so a hanging request
-# must not stall indefinitely when ``requests`` is given ``timeout=None``.
-DEFAULT_TIMEOUT = 30
-# Default timeout (seconds) for api-tabular calls; overridable per client.
+# Seconds; a hanging api-tabular call must not stall the agent's tool call.
 TABULAR_TIMEOUT = 30
 
 
@@ -77,15 +74,7 @@ def _validate_resource_id(resource_id: str) -> str:
 class TabularClient:
     def __init__(self, base_url: str | None = None, timeout: int | None = None):
         self.base_url = base_url if base_url is not None else current_app.config["TABULAR_API_URL"]
-        self.timeout = self._resolve_timeout(timeout)
-
-    @staticmethod
-    def _resolve_timeout(timeout: int | None) -> int:
-        if timeout is None:
-            timeout = TABULAR_TIMEOUT
-        if not timeout or timeout <= 0:
-            return DEFAULT_TIMEOUT
-        return timeout
+        self.timeout = timeout if timeout and timeout > 0 else TABULAR_TIMEOUT
 
     def get_profile(self, resource_id: str) -> dict:
         return self._request("GET", PROFILE_ROUTE.format(rid=_validate_resource_id(resource_id)))

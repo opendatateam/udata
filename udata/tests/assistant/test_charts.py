@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from udata.core.assistant.charts import (
+    EMPTY_TEXT_ERRORS,
     CreateChartInput,
     UpdateChartInput,
     profile_columns,
@@ -17,6 +18,7 @@ COLUMNS = {"dep": "string", "n_cum_dose1": "int", "jour": "date"}
 def make(**overrides):
     data = {
         "title": "Doses",
+        "description": "Doses par département",
         "type": "line",
         "x_axis": {"column_x": "dep", "type": "discrete"},
         "series": [{"column_y": "n_cum_dose1", "aggregate_y": "max"}],
@@ -60,6 +62,14 @@ def test_sum_on_text_column_is_refused():
     config = make(series=[{"column_y": "dep", "aggregate_y": "sum"}])
     assert validate_create(config, COLUMNS) == [
         "L'agrégat sum demande une colonne numérique : dep est de type string."
+    ]
+
+
+@pytest.mark.parametrize("aggregate", ["min", "max"])
+def test_min_max_on_text_column_is_refused_on_a_chart_y_axis(aggregate):
+    config = make(series=[{"column_y": "dep", "aggregate_y": aggregate}])
+    assert validate_create(config, COLUMNS) == [
+        f"L'agrégat {aggregate} demande une colonne numérique : dep est de type string."
     ]
 
 
@@ -187,3 +197,38 @@ def test_output_series_do_not_share_filters():
 def test_update_refuses_structural_fields(field, value):
     with pytest.raises(ValidationError):
         UpdateChartInput(**{field: value})
+
+
+def test_filter_without_value_is_refused():
+    config = make(filters={"column": "dep", "condition": "exact", "value": None})
+    assert validate_create(config, COLUMNS) == ["Le filtre exact sur dep demande une valeur."]
+
+
+@pytest.mark.parametrize("field", ["title", "description"])
+def test_blank_title_or_description_is_refused(field):
+    errors = validate_create(make(**{field: "   "}), COLUMNS)
+    assert errors == [EMPTY_TEXT_ERRORS[field]]
+
+
+def test_description_is_required():
+    with pytest.raises(ValidationError):
+        CreateChartInput(
+            title="Doses",
+            type="line",
+            x_axis={"column_x": "dep", "type": "discrete"},
+            series=[{"column_y": "n_cum_dose1"}],
+        )
+
+
+def test_output_strips_title_and_description():
+    out = to_chart_output(make(title="  Doses ", description=" Par département "), "rid")
+    assert (out["title"], out["description"]) == ("Doses", "Par département")
+
+
+@pytest.mark.parametrize("field", ["title", "description"])
+def test_update_refuses_a_blank_title_or_description(field):
+    assert validate_update(UpdateChartInput(**{field: " "})) == [EMPTY_TEXT_ERRORS[field]]
+
+
+def test_update_output_strips_the_title():
+    assert to_update_output(UpdateChartInput(title=" Neuf ")) == {"title": "Neuf"}

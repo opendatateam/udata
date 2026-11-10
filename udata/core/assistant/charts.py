@@ -1,13 +1,26 @@
 """Declarative chart tool inputs, validation and conversion to the chart model."""
 
 import copy
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-from udata.core.assistant.data_query import Aggregate, GenericFilter, filter_columns
+from udata.core.assistant.data_query import (
+    Aggregate,
+    GenericFilter,
+    filter_columns,
+    filter_errors,
+)
 
 NUMERIC_TYPES = frozenset({"int", "float"})
+
+# A chart needs both to be saved (`Chart.title` and `Chart.description` are required).
+EMPTY_TEXT_ERRORS = {
+    "title": "Le titre est obligatoire et ne peut pas être vide.",
+    "description": "La description est obligatoire et ne peut pas être vide.",
+}
+
+StrippedText = Annotated[str, StringConstraints(strip_whitespace=True)]
 
 
 class XAxisInput(BaseModel):
@@ -41,8 +54,8 @@ class YAxisInput(BaseModel):
 
 
 class CreateChartInput(BaseModel):
-    title: str = Field(min_length=1)
-    description: str = ""
+    title: StrippedText = Field(description="Titre du graphique, non vide")
+    description: StrippedText = Field(description="Description du graphique, non vide")
     type: Literal["line", "histogram"]
     x_axis: XAxisInput
     series: list[SeriesInput] = Field(min_length=1, max_length=4)
@@ -53,8 +66,8 @@ class CreateChartInput(BaseModel):
 class UpdateChartInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    title: str | None = Field(None, min_length=1)
-    description: str | None = None
+    title: StrippedText | None = None
+    description: StrippedText | None = None
     type: Literal["line", "histogram"] | None = None
     y_axis: YAxisInput | None = None
 
@@ -71,14 +84,36 @@ def profile_columns(profile: dict) -> dict[str, str]:
     names = header if isinstance(header, list) else list(columns)
     result = {}
     for name in names:
+        if not isinstance(name, str):
+            continue
         column = columns.get(name)
         if isinstance(column, dict) and isinstance(column.get("python_type"), str):
             result[name] = column["python_type"]
     return result
 
 
+def aggregate_error(column: str, aggregate: Aggregate, column_type: str | None) -> str | None:
+    """Refusal of an aggregate other than count on a column the profile does not type as numeric."""
+    if aggregate == "count" or column_type is None or column_type in NUMERIC_TYPES:
+        return None
+    return (
+        f"L'agrégat {aggregate} demande une colonne numérique : {column} est de type {column_type}."
+    )
+
+
+def query_aggregate_error(column: str, aggregate: Aggregate, column_type: str | None) -> str | None:
+    """Like `aggregate_error`, but min and max order any type (e.g. the latest date)."""
+    if aggregate in ("min", "max"):
+        return None
+    return aggregate_error(column, aggregate, column_type)
+
+
+def _empty_text_errors(values: dict[str, str | None]) -> list[str]:
+    return [EMPTY_TEXT_ERRORS[name] for name, value in values.items() if value == ""]
+
+
 def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[str]:
-    errors: list[str] = []
+    errors = _empty_text_errors({"title": config.title, "description": config.description})
 
     def unknown(name: str) -> None:
         if name not in columns:
@@ -95,15 +130,15 @@ def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[s
             continue
         if series.aggregate_y is None:
             errors.append(f"La série {series.column_y} doit être numérique ou agrégée par count.")
-        elif series.aggregate_y != "count":
-            errors.append(
-                f"L'agrégat {series.aggregate_y} demande une colonne numérique : "
-                f"{series.column_y} est de type {column_type}."
-            )
+        elif error := aggregate_error(series.column_y, series.aggregate_y, column_type):
+            errors.append(error)
+    errors.extend(filter_errors(config.filters))
     return list(dict.fromkeys(errors))
 
 
 def validate_update(patch: UpdateChartInput) -> list[str]:
+    if errors := _empty_text_errors({"title": patch.title, "description": patch.description}):
+        return errors
     if not to_update_output(patch):
         return ["Au moins une modification est requise."]
     return []

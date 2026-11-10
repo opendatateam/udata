@@ -8,7 +8,8 @@ raised — an exception escaping a tool kills the whole agent run.
 
 import json
 import logging
-from dataclasses import dataclass
+import threading
+from dataclasses import dataclass, field
 from typing import Annotated, Literal
 
 from mongoengine.errors import DoesNotExist, ValidationError
@@ -19,6 +20,7 @@ from udata.core.assistant.charts import (
     CreateChartInput,
     UpdateChartInput,
     profile_columns,
+    query_aggregate_error,
     to_chart_output,
     to_update_output,
     validate_create,
@@ -30,19 +32,21 @@ from udata.core.assistant.data_query import (
     GenericFilter,
     build_data_query,
     filter_columns,
+    filter_errors,
     with_page,
 )
 from udata.core.assistant.tabular import TabularClient, TabularError, TabularRequestRefused
-from udata.core.dataset.models import Dataset, get_dataset_by_resource_id
+from udata.core.dataset.models import Dataset, Resource, get_dataset_by_resource_id
+from udata.mongo.queryset import paginate_embedded_list
 
 log = logging.getLogger(__name__)
 
-# Hard cap on rendered rows so huge results do not blow up the context window.
-MAX_RENDERED_ROWS = 50
 # Per-turn budgets. Exhausted tool budgets return a refusal the model can
 # explain; MODEL_REQUEST_LIMIT (passed as pydantic-ai usage limits) is the
 # hard stop for a model that keeps calling tools after a refusal.
 MAX_STEPS = 5
+# Resources listed in a dataset's metadata, so a huge dataset cannot flood the context.
+MAX_SERIALIZED_RESOURCES = 20
 MAX_QUERIES_PER_QUESTION = 3
 # One request per tool round, plus the refused round and the final answer.
 MODEL_REQUEST_LIMIT = MAX_STEPS + 2
@@ -61,6 +65,8 @@ class AssistantDeps:
     resource_id: str | None = None
     tool_count: int = 0
     query_count: int = 0
+    # Parallel tool calls run in separate threads: budgets are checked and spent atomically.
+    budget_lock: threading.Lock = field(default_factory=threading.Lock, repr=False, compare=False)
 
 
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
@@ -69,9 +75,24 @@ def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     Returns a French refusal message once the budget is exhausted, None
     otherwise, so the model can still explain the limit in its answer.
     """
-    if ctx.deps.tool_count >= MAX_STEPS:
-        return f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
-    ctx.deps.tool_count += 1
+    with ctx.deps.budget_lock:
+        if ctx.deps.tool_count >= MAX_STEPS:
+            return (
+                f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
+            )
+        ctx.deps.tool_count += 1
+    return None
+
+
+def _consume_query_budget(ctx: RunContext[AssistantDeps]) -> str | None:
+    """Enforce MAX_QUERIES_PER_QUESTION, returning a French refusal once it is exhausted."""
+    with ctx.deps.budget_lock:
+        if ctx.deps.query_count >= MAX_QUERIES_PER_QUESTION:
+            return (
+                f"Requête refusée : la limite de {MAX_QUERIES_PER_QUESTION} "
+                "requêtes par question est atteinte."
+            )
+        ctx.deps.query_count += 1
     return None
 
 
@@ -83,7 +104,7 @@ def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
     rule as the dataset API.
     """
     try:
-        dataset = Dataset.objects.get(id=dataset_id)
+        dataset = Dataset.objects.exclude("resources").get(id=dataset_id)
     except (DoesNotExist, ValidationError):
         return None
     if dataset.permissions["read"].can():
@@ -100,20 +121,14 @@ def _dataset_for_resource(resource_id: str) -> Dataset | None:
 
 
 def _render_profile(profile: dict) -> str:
-    """Render an api-tabular profile: {"profile": {"header", "columns", "total_lines"}}."""
-    details = profile.get("profile") if isinstance(profile.get("profile"), dict) else {}
-    columns = details.get("columns") if isinstance(details.get("columns"), dict) else {}
-    names = details.get("header") or list(columns)
-    lines = []
-    if names:
-        lines.append("Colonnes :")
-        for name in names:
-            column = columns.get(name) or {}
-            lines.append(f"- {name} ({column.get('python_type') or 'type inconnu'})")
-    else:
-        lines.append("Aucune information de colonne disponible.")
-    total_lines = details.get("total_lines")
-    if total_lines is not None:
+    """Render the columns and line count of an api-tabular profile, whatever its shape."""
+    columns = profile_columns(profile)
+    lines = ["Colonnes :", *(f"- {name} ({kind})" for name, kind in columns.items())]
+    if not columns:
+        lines = ["Aucune information de colonne disponible."]
+    details = profile.get("profile") if isinstance(profile, dict) else None
+    total_lines = details.get("total_lines") if isinstance(details, dict) else None
+    if isinstance(total_lines, int):
         lines.append(f"Nombre de lignes : {total_lines}")
     return "\n".join(lines)
 
@@ -126,12 +141,12 @@ def _render_result(result: dict) -> str:
         return "Requête exécutée avec succès, aucune ligne retournée."
     columns = list(rows[0])
     lines = [" | ".join(columns)]
-    for row in rows[:MAX_RENDERED_ROWS]:
+    for row in rows[:PAGE_SIZE]:
         lines.append(" | ".join(str(row.get(column)) for column in columns))
-    if len(rows) > MAX_RENDERED_ROWS:
+    if len(rows) > PAGE_SIZE:
         lines.append(
             f"Résultat tronqué : {len(rows)} lignes au total, "
-            f"{MAX_RENDERED_ROWS} premières lignes affichées."
+            f"{PAGE_SIZE} premières lignes affichées."
         )
     return "\n".join(lines)
 
@@ -174,8 +189,41 @@ def _has_more_groups(tabular: TabularClient, resource_id: str, query: str, rows:
     return tabular.has_more_groups(resource_id, query)
 
 
+def _chart_has_more_groups(
+    tabular: TabularClient, resource_id: str, config: CreateChartInput
+) -> bool:
+    """Whether the viewer truncates a series, probing each one with the query it sends.
+
+    A series without aggregate returns rows, not groups: it is probed first, as the
+    most likely to overflow. The probes stop at the first overflow or service failure.
+    """
+    x = config.x_axis.column_x
+    queries = [
+        build_data_query(
+            # Like the viewer: grouped with an aggregate, the two raw columns without.
+            columns=None if series.aggregate_y else [x, series.column_y],
+            groupby=x if series.aggregate_y else None,
+            aggregate=(series.column_y, series.aggregate_y) if series.aggregate_y else None,
+            filters=config.filters,
+            sort=(x, "asc"),
+        )
+        for series in sorted(config.series, key=lambda series: series.aggregate_y is not None)
+    ]
+    try:
+        return any(tabular.has_more_groups(resource_id, q) for q in dict.fromkeys(queries))
+    except TabularError:
+        log.warning("Could not check the group count of a chart", exc_info=True)
+        return False
+
+
 def serialize_dataset_metadata(dataset: Dataset) -> str:
-    """JSON serialization of a dataset's metadata, shared by the tool and the chat endpoint."""
+    """JSON metadata of a dataset loaded without its resources, listing the first ones only.
+
+    Shared by the tool and the chat endpoint.
+    """
+    resources, total = paginate_embedded_list(
+        Dataset, dataset.id, "resources", Resource, page=1, page_size=MAX_SERIALIZED_RESOURCES
+    )
     payload = {
         "id": str(dataset.id),
         "title": dataset.title,
@@ -183,9 +231,11 @@ def serialize_dataset_metadata(dataset: Dataset) -> str:
         "organization": dataset.organization.name if dataset.organization else None,
         "resources": [
             {"id": str(resource.id), "title": resource.title, "format": resource.format}
-            for resource in dataset.resources
+            for resource in resources
         ],
     }
+    if total > len(resources):
+        payload["more_resources"] = f"… et {total - len(resources)} autres"
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
@@ -257,12 +307,15 @@ def register_tools(agent: Agent) -> None:
         unknown = list(dict.fromkeys(name for name in used if name and name not in known))
         if unknown:
             return "\n".join(f"Colonne inconnue : {name}." for name in unknown)
-        if ctx.deps.query_count >= MAX_QUERIES_PER_QUESTION:
-            return (
-                f"Requête refusée : la limite de {MAX_QUERIES_PER_QUESTION} "
-                "requêtes par question est atteinte."
-            )
-        ctx.deps.query_count += 1
+        refusals = filter_errors(filters)
+        if aggregate and (
+            error := query_aggregate_error(aggregate_column, aggregate, known[aggregate_column])
+        ):
+            refusals.append(error)
+        if refusals:
+            return "\n".join(refusals)
+        if refusal := _consume_query_budget(ctx):
+            return refusal
         sort = (sort_column, sort_direction) if sort_column else None
         if sort is None and groupby:
             sort = (groupby, "asc")
@@ -302,22 +355,10 @@ def register_tools(agent: Agent) -> None:
             return {"status": "error", "errors": [str(refusal)]}
         if errors := validate_create(config, known):
             return {"status": "error", "errors": errors}
-        first = config.series[0]
-        query = build_data_query(
-            groupby=config.x_axis.column_x,
-            aggregate=(first.column_y, first.aggregate_y) if first.aggregate_y else None,
-            filters=config.filters,
-            sort=(config.x_axis.column_x, "asc"),
-        )
-        more_groups = False
-        try:
-            more_groups = ctx.deps.tabular.has_more_groups(resource_id, query)
-        except TabularError:
-            log.warning("Could not check the group count of a chart", exc_info=True)
         return {
             "status": "ok",
             "chart": to_chart_output(config, resource_id),
-            "more_groups": more_groups,
+            "more_groups": _chart_has_more_groups(ctx.deps.tabular, resource_id, config),
         }
 
     @agent.tool

@@ -2,7 +2,6 @@ import pytest
 import requests
 
 from udata.core.assistant.tabular import (
-    DEFAULT_TIMEOUT,
     TABULAR_TIMEOUT,
     TabularClient,
     TabularError,
@@ -170,7 +169,7 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         client = self.make_client(timeout=-1)
         assert client.get_profile(RESOURCE_ID) == {"ok": True}
-        assert requests_mock.request_history[0].timeout == DEFAULT_TIMEOUT
+        assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
 
     def test_get_data_returns_json(self, requests_mock):
         requests_mock.get(

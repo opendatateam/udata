@@ -7,6 +7,7 @@ from udata.core.assistant.data_query import (
     OrFilters,
     build_data_query,
     filter_columns,
+    filter_errors,
     with_page,
 )
 
@@ -125,3 +126,33 @@ def test_group_children_without_cls_parse_as_filters():
         {"_cls": "AndFilters", "filters": [{"column": "a", "condition": "is_null"}]}
     )
     assert isinstance(f.filters[0], Filter)
+
+
+def test_filter_errors_flags_every_condition_without_a_value():
+    f = OrFilters(
+        filters=[
+            Filter(column="a", condition="exact"),
+            AndFilters(
+                filters=[
+                    Filter(column="b", condition="greater", value=""),
+                    Filter(column="c", condition="is_null"),
+                    Filter(column="d", condition="less", value="0"),
+                ]
+            ),
+        ]
+    )
+    assert filter_errors(f) == [
+        "Le filtre exact sur a demande une valeur.",
+        "Le filtre greater sur b demande une valeur.",
+    ]
+
+
+def test_filter_errors_accepts_null_conditions_and_no_filter():
+    assert filter_errors(None) == []
+    assert filter_errors(Filter(column="a", condition="is_not_null")) == []
+
+
+def test_filter_errors_treats_a_blank_value_as_missing():
+    assert filter_errors(Filter(column="a", condition="exact", value="  \t")) == [
+        "Le filtre exact sur a demande une valeur."
+    ]

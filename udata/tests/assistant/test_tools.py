@@ -5,6 +5,9 @@ permissions are checked against the identity of the request context.
 """
 
 import json
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from types import SimpleNamespace
 from uuid import uuid4
@@ -17,17 +20,45 @@ from pydantic_ai.models.test import TestModel
 
 from udata.auth import login_user
 from udata.core.assistant.charts import CreateChartInput, UpdateChartInput
+from udata.core.assistant.data_query import PAGE_SIZE, Filter
 from udata.core.assistant.tabular import TabularClient, TabularError, TabularRequestRefused
 from udata.core.assistant.tools import (
     MAX_QUERIES_PER_QUESTION,
+    MAX_SERIALIZED_RESOURCES,
     MAX_STEPS,
     AssistantDeps,
+    _render_result,
     register_tools,
 )
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
+from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import PytestOnlyDBTestCase
+
+
+class SlowCountersDeps(AssistantDeps):
+    """Deps whose budget counters yield the thread on every read, widening any
+    gap between a budget check and its increment."""
+
+    @property
+    def tool_count(self):
+        time.sleep(0.005)
+        return self._tool_count
+
+    @tool_count.setter
+    def tool_count(self, value):
+        self._tool_count = value
+
+    @property
+    def query_count(self):
+        # Longer than the tool budget section, which already serializes the calls.
+        time.sleep(0.05)
+        return self._query_count
+
+    @query_count.setter
+    def query_count(self, value):
+        self._query_count = value
 
 
 class AssistantToolsTest(PytestOnlyDBTestCase):
@@ -96,6 +127,24 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "format": first.format,
         }
 
+    def test_get_dataset_metadata_caps_the_listed_resources(self):
+        resources = ResourceFactory.build_batch(MAX_SERIALIZED_RESOURCES + 3)
+        dataset = DatasetFactory(resources=resources)
+        result = self.call("get_dataset_metadata", self.make_deps(), dataset_id=str(dataset.id))
+        payload = json.loads(result)
+        listed = [resource["id"] for resource in payload["resources"]]
+        assert listed == [str(r.id) for r in resources[:MAX_SERIALIZED_RESOURCES]]
+        assert payload["more_resources"] == "… et 3 autres"
+
+    def test_get_dataset_metadata_of_a_dataset_stored_without_resources(self):
+        dataset = DatasetFactory(title="Sans ressources")
+        Dataset._get_collection().update_one({"_id": dataset.id}, {"$unset": {"resources": ""}})
+        result = self.call("get_dataset_metadata", self.make_deps(), dataset_id=str(dataset.id))
+        payload = json.loads(result)
+        assert payload["title"] == "Sans ressources"
+        assert payload["resources"] == []
+        assert "more_resources" not in payload
+
     def test_get_dataset_metadata_unknown_id_returns_french_error(self):
         result = self.call("get_dataset_metadata", self.make_deps(), dataset_id="0" * 24)
         assert "introuvable" in result
@@ -158,6 +207,23 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert "- col_a (int)\n- col_b (string)" in result
         assert "Nombre de lignes : 42" in result
+
+    @pytest.mark.parametrize(
+        "profile",
+        [
+            ["not", "a", "dict"],
+            {"profile": "x"},
+            {"profile": {"header": [["unhashable"]], "columns": {}}},
+            {"profile": {"header": "dep", "columns": []}},
+            {"profile": {"columns": {"dep": "string"}, "total_lines": {"n": 1}}},
+        ],
+    )
+    def test_inspect_schema_survives_a_malformed_profile(self, mocker, profile):
+        resource = self.owned_resource()
+        deps = self.make_deps()
+        mocker.patch.object(deps.tabular, "get_profile", return_value=profile)
+        result = self.call("inspect_schema", deps, resource_id=str(resource.id))
+        assert result == "Aucune information de colonne disponible."
 
     def test_inspect_schema_unknown_resource_returns_french_error(self, mocker):
         deps = self.make_deps()
@@ -231,6 +297,34 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "refusée" in result
         assert deps.tool_count == MAX_STEPS
 
+    def _race(self, name, deps, calls, **kwargs):
+        """Run ``calls`` concurrent calls of a tool, all released at once."""
+        barrier = threading.Barrier(calls)
+
+        def call():
+            barrier.wait()
+            return self.call(name, deps, **kwargs)
+
+        with ThreadPoolExecutor(max_workers=calls) as pool:
+            return list(pool.map(lambda _: call(), range(calls)))
+
+    def test_tool_budget_holds_under_parallel_calls(self):
+        deps = SlowCountersDeps(tabular=self.make_deps().tabular)
+        results = self._race(
+            "request_clarification", deps, 2 * MAX_STEPS, question="?", choices=["a", "b"]
+        )
+        assert sum("refusée" not in result for result in results) == MAX_STEPS
+
+    def test_query_budget_holds_under_parallel_calls(self, mocker):
+        resource = self.owned_resource()
+        deps = SlowCountersDeps(tabular=self.make_deps().tabular, resource_id=str(resource.id))
+        mocker.patch.object(deps.tabular, "get_profile", return_value=self.PROFILE)
+        mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr("udata.core.assistant.tools.MAX_STEPS", 100)
+            results = self._race("query_data", deps, 2 * MAX_QUERIES_PER_QUESTION)
+        assert sum("refusée" not in result for result in results) == MAX_QUERIES_PER_QUESTION
+
     def test_tool_budget_is_shared_across_tools(self, mocker):
         """Every tool call counts against the same per-run budget."""
         resource = self.owned_resource()
@@ -297,6 +391,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def chart_config(self, **kwargs):
         config = {
             "title": "Doses",
+            "description": "Doses par département",
             "type": "line",
             "x_axis": {"column_x": "dep", "type": "discrete"},
             "series": [{"column_y": "n_cum_dose1", "aggregate_y": "max"}],
@@ -477,6 +572,60 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert result == {"status": "error", "errors": ["Colonne inconnue : foo."]}
         get_data.assert_not_called()
 
+    def test_query_data_refuses_a_filter_without_value_without_using_a_query(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        flt = {"column": "dep", "condition": "exact", "value": ""}
+        result = self.call("query_data", deps, filters=Filter(**flt))
+        assert result == "Le filtre exact sur dep demande une valeur."
+        get_data.assert_not_called()
+        assert deps.query_count == 0
+
+    def test_query_data_refuses_a_numeric_aggregate_on_text_without_using_a_query(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        result = self.call(
+            "query_data", deps, groupby="dep", aggregate_column="label", aggregate="sum"
+        )
+        assert result == "L'agrégat sum demande une colonne numérique : label est de type string."
+        get_data.assert_not_called()
+        assert deps.query_count == 0
+
+    @pytest.mark.parametrize("aggregate", ["min", "max"])
+    def test_query_data_allows_min_max_on_a_text_column(self, mocker, aggregate):
+        # Exploring, e.g. the latest date of a column api-tabular types as string.
+        deps, resource = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        self.call("query_data", deps, aggregate_column="label", aggregate=aggregate)
+        get_data.assert_called_once_with(
+            str(resource.id), f"label__{aggregate}&page=1&page_size=50"
+        )
+
+    def test_query_data_refuses_avg_on_a_text_column(self, mocker):
+        deps, _ = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        result = self.call("query_data", deps, aggregate_column="label", aggregate="avg")
+        assert result == "L'agrégat avg demande une colonne numérique : label est de type string."
+        get_data.assert_not_called()
+
+    def test_query_data_counts_a_text_column(self, mocker):
+        deps, _ = self.active(mocker)
+        mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        result = self.call(
+            "query_data", deps, groupby="dep", aggregate_column="label", aggregate="count"
+        )
+        assert "numérique" not in result
+        assert deps.query_count == 1
+
+    def test_create_chart_refuses_a_filter_without_value(self, mocker):
+        deps, _ = self.active(mocker)
+        config = self.chart_config(filters={"column": "dep", "condition": "greater"})
+        result = self.call("create_chart", deps, config=config)
+        assert result == {
+            "status": "error",
+            "errors": ["Le filtre greater sur dep demande une valeur."],
+        }
+
     def test_create_chart_requires_an_active_resource(self):
         result = self.call("create_chart", self.make_deps(), config=self.chart_config())
         assert result["status"] == "error"
@@ -493,6 +642,49 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         more.assert_called_once_with(
             str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc"
         )
+
+    def test_create_chart_flags_more_groups_from_a_non_aggregated_series(self, mocker):
+        # 15 X values, but the raw series returns its 13 890 rows, truncated by the viewer.
+        deps, resource = self.active(mocker)
+
+        def get_data(resource_id, query):
+            aggregated = "__sum" in query
+            total = 15 if aggregated else 13_890
+            return {"data": [{"dep": "x"}] if "page=51&" in query and total > 50 else []}
+
+        get_data = mocker.patch.object(deps.tabular, "get_data", side_effect=get_data)
+        series = [{"column_y": "n_cum_dose1"}, {"column_y": "n_cum_dose1", "aggregate_y": "sum"}]
+        result = self.call("create_chart", deps, config=self.chart_config(series=series))
+        assert result["more_groups"] is True
+        get_data.assert_called_once_with(
+            str(resource.id),
+            "columns=dep,n_cum_dose1&dep__sort=asc&page=51&page_size=1",
+        )
+
+    def test_create_chart_probes_every_series_like_the_viewer(self, mocker):
+        deps, resource = self.active(mocker)
+        more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
+        series = [
+            {"column_y": "label", "aggregate_y": "count"},
+            {"column_y": "n_cum_dose1"},
+            {"column_y": "n_cum_dose1", "aggregate_y": "sum"},
+        ]
+        result = self.call("create_chart", deps, config=self.chart_config(series=series))
+        assert result["more_groups"] is False
+        rid = str(resource.id)
+        assert more.call_args_list == [
+            mocker.call(rid, "columns=dep,n_cum_dose1&dep__sort=asc"),
+            mocker.call(rid, "dep__groupby&label__count&dep__sort=asc"),
+            mocker.call(rid, "dep__groupby&n_cum_dose1__sum&dep__sort=asc"),
+        ]
+
+    def test_create_chart_stops_probing_once_the_service_fails(self, mocker):
+        deps, _ = self.active(mocker)
+        more = mocker.patch.object(deps.tabular, "has_more_groups", side_effect=TabularError("x"))
+        series = [{"column_y": "n_cum_dose1"}, {"column_y": "label", "aggregate_y": "count"}]
+        result = self.call("create_chart", deps, config=self.chart_config(series=series))
+        assert result["more_groups"] is False
+        more.assert_called_once()
 
     def test_create_chart_stays_valid_when_the_group_check_fails(self, mocker):
         deps, _ = self.active(mocker)
@@ -543,3 +735,13 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             result = agent.run_sync("compte", deps=deps)
         assert deps.query_count == 1
         assert result.output
+
+
+def test_render_result_shows_at_most_one_page_of_rows():
+    rows = [{"n": i} for i in range(PAGE_SIZE + 1)]
+    lines = _render_result({"data": rows}).split("\n")
+    assert lines[PAGE_SIZE] == str(PAGE_SIZE - 1)
+    assert (
+        lines[-1]
+        == f"Résultat tronqué : {PAGE_SIZE + 1} lignes au total, 50 premières lignes affichées."
+    )
