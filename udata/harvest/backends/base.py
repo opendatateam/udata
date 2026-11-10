@@ -419,8 +419,7 @@ class BaseBackend(ABC):
         self.job.ended = datetime.now(UTC)
         self.save_job()
         after_harvest_job.send(self)
-        if hasattr(g, "harvest_source"):
-            delattr(g, "harvest_source")
+        del g.harvest_source
 
     def update_harvested_organizations(self):
         if self.dryrun:

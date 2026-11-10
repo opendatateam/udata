@@ -11,7 +11,6 @@ builds, so a query merges one range per actor kind rather than one per activity 
 
 import logging
 
-from mongoengine.connection import get_db
 from pymongo import ASCENDING, DESCENDING
 
 log = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ INDEX_NAME = "actor_kind_created_at"
 
 def migrate(db):
     log.info("Indexing the activities on the kind of their actor...")
-    get_db().activity.create_index(
+    db.activity.create_index(
         [("actor._cls", ASCENDING), ("created_at", DESCENDING)], name=INDEX_NAME
     )
     log.info("Done")

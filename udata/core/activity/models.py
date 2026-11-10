@@ -6,7 +6,7 @@ from bson import DBRef, ObjectId
 from bson.son import SON
 from flask import g
 from mongoengine import Q
-from mongoengine.base import TopLevelDocumentMetaclass, get_document
+from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.errors import DoesNotExist
 from mongoengine.fields import (
     DateTimeField,
@@ -55,17 +55,15 @@ class ActorField(GenericReferenceField):
             return SON((("_cls", "User"), ("_ref", DBRef(User._get_collection_name(), value))))
         return value
 
-    def __get__(self, instance, owner):
+    def _lazy_load_ref(self, ref_cls, dbref):
         try:
-            return super().__get__(instance, owner)
+            return super()._lazy_load_ref(ref_cls, dbref)
         except DoesNotExist:
-            stored = instance._data[self.name]
             # Purging a source deletes it for good, while the datasets it harvested stay
             # archived with their history: the source is kept as its identifier alone.
-            if stored["_cls"] != "HarvestSource":
+            if ref_cls._class_name != "HarvestSource":
                 raise
-            instance._data[self.name] = get_document("HarvestSource")(id=stored["_ref"].id)
-            return instance._data[self.name]
+            return ref_cls(id=dbref.id)
 
 
 class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
