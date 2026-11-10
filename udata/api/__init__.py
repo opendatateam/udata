@@ -403,35 +403,35 @@ def marshal_page_with(func):
 def init_app(app):
     # Load all core APIs
     import udata.core.access_type.api  # noqa
-    import udata.core.activity.api
-    import udata.core.spatial.api
-    import udata.core.user.api
-    import udata.core.user.apiv2
-    import udata.core.dataset.api
-    import udata.core.dataset.apiv2
-    import udata.core.dataservices.api
-    import udata.core.dataservices.apiv2
-    import udata.core.visualizations.api
-    import udata.core.discussions.api
-    import udata.core.discussions.apiv2
-    import udata.core.reuse.api
-    import udata.core.reuse.apiv2
-    import udata.core.organization.api
-    import udata.core.organization.apiv2
-    import udata.core.followers.api
-    import udata.core.jobs.api
-    import udata.core.reports.api
-    import udata.core.site.api
-    import udata.core.tags.api
-    import udata.core.topic.apiv2
-    import udata.core.post.api
-    import udata.core.post.apiv2
-    import udata.core.storages.api
-    import udata.core.contact_point.api
-    import udata.features.transfer.api
-    import udata.features.notifications.api
-    import udata.core.avatars.api
-    import udata.geopf.api
+    import udata.core.activity.api  # noqa
+    import udata.core.spatial.api  # noqa
+    import udata.core.user.api  # noqa
+    import udata.core.user.apiv2  # noqa
+    import udata.core.dataset.api  # noqa
+    import udata.core.dataset.apiv2  # noqa
+    import udata.core.dataservices.api  # noqa
+    import udata.core.dataservices.apiv2  # noqa
+    import udata.core.visualizations.api  # noqa
+    import udata.core.discussions.api  # noqa
+    import udata.core.discussions.apiv2  # noqa
+    import udata.core.reuse.api  # noqa
+    import udata.core.reuse.apiv2  # noqa
+    import udata.core.organization.api  # noqa
+    import udata.core.organization.apiv2  # noqa
+    import udata.core.followers.api  # noqa
+    import udata.core.jobs.api  # noqa
+    import udata.core.reports.api  # noqa
+    import udata.core.site.api  # noqa
+    import udata.core.tags.api  # noqa
+    import udata.core.topic.apiv2  # noqa
+    import udata.core.post.api  # noqa
+    import udata.core.post.apiv2  # noqa
+    import udata.core.storages.api  # noqa
+    import udata.core.contact_point.api  # noqa
+    import udata.features.transfer.api  # noqa
+    import udata.features.notifications.api  # noqa
+    import udata.core.avatars.api  # noqa
+    import udata.geopf.api  # noqa
     import udata.harvest.api  # noqa
 
     # api.init_app(app)

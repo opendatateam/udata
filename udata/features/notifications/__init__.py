@@ -6,11 +6,11 @@ log = logging.getLogger(__name__)
 def init_app(app):
     # Load core notifications
     import udata.core.organization.notifications  # noqa
-    import udata.core.discussions.notifications
-    import udata.harvest.notifications
+    import udata.core.discussions.notifications  # noqa
+    import udata.harvest.notifications  # noqa
 
     # Load feature notifications
-    import udata.features.transfer.notifications
+    import udata.features.transfer.notifications  # noqa
 
     # Following what one works on
     import udata.features.notifications.follow  # noqa

@@ -138,27 +138,27 @@ def init_app(app):
 
     # Load core tasks
     import udata.core.metrics.tasks  # noqa
-    import udata.core.tags.tasks
-    import udata.core.activity.tasks
-    import udata.core.dataservices.tasks
-    import udata.core.dataset.doi
-    import udata.core.dataset.tasks
-    import udata.core.dataset.transport
-    import udata.core.dataset.ecologie
-    import udata.core.dataset.recommendations
-    import udata.core.spatial.tasks
-    import udata.core.topic.tasks
-    import udata.core.reuse.tasks
-    import udata.core.user.tasks
-    import udata.core.organization.tasks
-    import udata.core.discussions.tasks
-    import udata.core.badges.tasks
-    import udata.core.storages.tasks
-    import udata.core.sitemap.tasks
-    import udata.core.visualizations.tasks
-    import udata.features.notifications.tasks
-    import udata.notifications.tchap
-    import udata.harvest.tasks
+    import udata.core.tags.tasks  # noqa
+    import udata.core.activity.tasks  # noqa
+    import udata.core.dataservices.tasks  # noqa
+    import udata.core.dataset.doi  # noqa
+    import udata.core.dataset.tasks  # noqa
+    import udata.core.dataset.transport  # noqa
+    import udata.core.dataset.ecologie  # noqa
+    import udata.core.dataset.recommendations  # noqa
+    import udata.core.spatial.tasks  # noqa
+    import udata.core.topic.tasks  # noqa
+    import udata.core.reuse.tasks  # noqa
+    import udata.core.user.tasks  # noqa
+    import udata.core.organization.tasks  # noqa
+    import udata.core.discussions.tasks  # noqa
+    import udata.core.badges.tasks  # noqa
+    import udata.core.storages.tasks  # noqa
+    import udata.core.sitemap.tasks  # noqa
+    import udata.core.visualizations.tasks  # noqa
+    import udata.features.notifications.tasks  # noqa
+    import udata.notifications.tchap  # noqa
+    import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
 
     for ep in entry_points(group="udata.tasks"):

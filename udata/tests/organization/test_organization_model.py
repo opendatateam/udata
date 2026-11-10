@@ -22,7 +22,7 @@ from udata.tests.helpers import assert_emit
 class OrganizationModelTest(DBTestCase):
     # Load metrics
     import udata.core.organization.metrics  # noqa
-    import udata.core.followers.metrics
+    import udata.core.followers.metrics  # noqa
 
     def test_organization_metrics(self):
         # We need to init metrics module

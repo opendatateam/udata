@@ -209,6 +209,18 @@ ignore = [
 "udata/**/notifications.py" = ["BLE001"]
 # `from x import Y as Y` is the PEP 484 explicit re-export of the flask-restx fields.
 "udata/api/fields.py" = ["PLC0414"]
+# These files load modules for their side effects (`import udata.core.x.api  # noqa`).
+# All `import udata.…` of a block bind the same name `udata`, so ruff reports F401 on the
+# last one only, and RUF100 would strip the `# noqa` of every other line. Adding or
+# removing an import at the end of a block would then make `ruff check --fix` delete the
+# unprotected imports above it. Each line keeps its own `# noqa`.
+"udata/api/__init__.py" = ["RUF100"]
+"udata/tasks.py" = ["RUF100"]
+"udata/search/__init__.py" = ["RUF100"]
+"udata/core/metrics/__init__.py" = ["RUF100"]
+"udata/core/activity/__init__.py" = ["RUF100"]
+"udata/features/notifications/__init__.py" = ["RUF100"]
+"udata/tests/organization/test_organization_model.py" = ["RUF100"]
 
 [tool.setuptools]
 packages = ["udata", "udata_search_service"]
