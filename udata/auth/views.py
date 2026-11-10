@@ -26,7 +26,9 @@ from flask_security.views import (
 from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
 
+from udata.auth import fresh_session_required
 from udata.auth.proconnect import get_logout_url
+from udata.core.user.tasks import notify_email_changed
 from udata.uris import homepage_url
 from udata.utils import wants_json
 
@@ -77,8 +79,9 @@ def confirm_change_email(token):
     expired, invalid, user, new_email = confirm_change_email_token_status(token)
 
     flash = None
+    # No new link for an expired one: it would go to the very address whose consent is in
+    # question, so the owner asks again from their profile, with a fresh session.
     if expired:
-        send_change_email_confirmation_instructions(user, new_email)
         flash = "change_email_expired"
     elif not user or invalid:
         flash = "change_email_invalid"
@@ -95,8 +98,12 @@ def confirm_change_email(token):
         logout_user()
         login_user(user)
 
+    previous_email = user.email
     user.email = new_email
     _datastore.put(user)
+    # The new address confirmed the change: only the previous one can tell its holder, should
+    # someone else have moved the account away.
+    notify_email_changed.delay(str(user.id), previous_email, new_email)
 
     return redirect(homepage_url(flash="change_email_confirmed"))
 
@@ -111,7 +118,10 @@ def get_csrf():
     return jsonify({"response": {"csrf_token": generate_csrf()}})
 
 
+# Whoever got hold of a session would otherwise move the account to an address of theirs,
+# then reset its password.
 @login_required
+@fresh_session_required
 def change_email():
     """Change email page."""
 
