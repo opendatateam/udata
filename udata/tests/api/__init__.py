@@ -1,13 +1,15 @@
 import time
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
-from flask import current_app, json
+from flask import current_app, json, url_for
 from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
 
@@ -257,3 +259,13 @@ class SessionCookieMixin:
     def perform(self, verb, url, **kwargs):
         with current_app.app_context():
             return super().perform(verb, url, **kwargs)
+
+    def sign_in_with_password(self, signed_in_ago: timedelta = timedelta(0)) -> User:
+        user = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        if signed_in_ago:
+            with self.client.session_transaction() as session:
+                session["fs_paa"] = time.time() - signed_in_ago.total_seconds()
+        return user

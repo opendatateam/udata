@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 @task(route="high.mail")
 def notify_email_changed(user_id: str, previous_email: str, new_email: str):
     # Addressed to the user, for their name and language, but at the address they left.
-    recipient = copy(User.objects.get(pk=user_id))
+    recipient = User.objects.get(pk=user_id)
     recipient.email = previous_email
     auth_mails.email_changed(new_email).send(recipient)
 

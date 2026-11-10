@@ -133,13 +133,16 @@ class AuthTest(APITestCase):
         confirmation_link = self.change_email_link(user, new_email)
 
         # A negative validity makes any freshly signed token already expired
-        with mock.patch.dict(
-            current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
-        ):
-            resp = self.get(confirmation_link)
+        with capture_mails() as mails:
+            with mock.patch.dict(
+                current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
+            ):
+                resp = self.get(confirmation_link)
 
         assert resp.status_code == 302
         assert "change_email_expired" in resp.location
+        # Only the new confirmation: the previous address isn't told of a change not made.
+        assert [mail.recipients for mail in mails] == [[new_email]]
 
         user.reload()
         assert user.email == original_email
@@ -153,9 +156,11 @@ class AuthTest(APITestCase):
         existing_user = UserFactory(email="taken@example.com")
         new_email = existing_user.email
 
-        resp = self.get(self.change_email_link(user, new_email))
+        with capture_mails() as mails:
+            resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
         assert "change_email_already_taken" in resp.location
+        assert mails == []
 
         # Email should not have changed
         user.reload()

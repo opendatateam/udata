@@ -1,4 +1,3 @@
-import time
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -151,14 +150,6 @@ class SecurityAPITest(PytestOnlyAPITestCase):
     SECURITY_FRESHNESS=timedelta(hours=24),
 )
 class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
-    def sign_in_two_days_ago(self):
-        user = UserFactory(
-            email="jane@example.org", password="password", confirmed_at=datetime.now()
-        )
-        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
-        with self.client.session_transaction() as session:
-            session["fs_paa"] = time.time() - timedelta(days=2).total_seconds()
-
     def change_email(self, new_email: str):
         return self.post(
             url_for("security.change_email"),
@@ -166,7 +157,7 @@ class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
         )
 
     def test_change_email_requires_a_fresh_session(self):
-        self.sign_in_two_days_ago()
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
 
         with capture_mails() as mails:
             response = self.change_email("jane2@example.org")
@@ -177,7 +168,7 @@ class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
     def test_change_email_form_requires_a_fresh_session(self):
         # cdata loads the form to know whether to send the user to /verify first.
-        self.sign_in_two_days_ago()
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
 
         response = self.get(
             url_for("security.change_email"), headers={"Accept": "application/json"}
@@ -187,7 +178,7 @@ class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert response.json["response"]["reauth_required"]
 
     def test_change_email_after_reauthentication(self):
-        self.sign_in_two_days_ago()
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
         self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
 
         with capture_mails() as mails:
