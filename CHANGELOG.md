@@ -1,5 +1,12 @@
 # Changelog
 
+## 17.25.0 (2026-11-10)
+
+- chore: update translations ([#4086](https://github.com/opendatateam/udata/pull/4086))
+- feat(ecologie): add ecologie:universe extra job ([#4084](https://github.com/opendatateam/udata/pull/4084))
+- feat(harvest): add support for record_id and adhoc ISO-19139 parent identifier ([#4068](https://github.com/opendatateam/udata/pull/4068))
+
+
 ## 17.24.0 (2026-11-09)
 
 - chore(deps): update dependency certifi to v2026.10.18 [security] ([#4078](https://github.com/opendatateam/udata/pull/4078))
