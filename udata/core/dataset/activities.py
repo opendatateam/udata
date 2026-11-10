@@ -1,7 +1,5 @@
-from flask import g
 from mongoengine.fields import ReferenceField
 
-from udata.auth import current_user
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Dataset
 
@@ -67,52 +65,44 @@ def resource_extras(resource_id, resource_title):
 
 @Dataset.on_resource_added.connect
 def on_user_added_resource_to_dataset(sender, document, **kwargs):
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserAddedResourceToDataset.emit(
-            document,
-            document.organization,
-            None,
-            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
-        )
+    UserAddedResourceToDataset.emit(
+        document,
+        document.organization,
+        None,
+        resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
+    )
 
 
 @Dataset.on_resource_updated.connect
 def on_user_updated_resource(sender, document, **kwargs):
-    changed_fields = kwargs.get("changed_fields", [])
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserUpdatedResource.emit(
-            document,
-            document.organization,
-            changed_fields,
-            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
-        )
+    UserUpdatedResource.emit(
+        document,
+        document.organization,
+        kwargs.get("changed_fields", []),
+        resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
+    )
 
 
 @Dataset.on_resource_removed.connect
 def on_user_removed_resource_from_dataset(sender, document, **kwargs):
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserRemovedResourceFromDataset.emit(
-            document,
-            document.organization,
-            None,
-            resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
-        )
+    UserRemovedResourceFromDataset.emit(
+        document,
+        document.organization,
+        None,
+        resource_extras(kwargs["resource_id"], kwargs["resource_title"]),
+    )
 
 
 @Dataset.on_create.connect
 def on_user_created_dataset(dataset, **kwargs):
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserCreatedDataset.emit(dataset, dataset.organization)
+    UserCreatedDataset.emit(dataset, dataset.organization)
 
 
 @Dataset.on_update.connect
 def on_user_updated_dataset(dataset, **kwargs):
-    changed_fields = kwargs.get("changed_fields", [])
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserUpdatedDataset.emit(dataset, dataset.organization, changed_fields)
+    UserUpdatedDataset.emit(dataset, dataset.organization, kwargs.get("changed_fields", []))
 
 
 @Dataset.on_delete.connect
 def on_user_deleted_dataset(dataset, **kwargs):
-    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_source"):
-        UserDeletedDataset.emit(dataset, dataset.organization)
+    UserDeletedDataset.emit(dataset, dataset.organization)

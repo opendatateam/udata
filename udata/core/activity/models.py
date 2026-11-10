@@ -257,8 +257,11 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
         elif hasattr(g, "api_token"):
             # The token acts on behalf of its owner, who stays reachable as `ApiToken.user`.
             actor = g.api_token
-        else:
+        elif current_user and current_user.is_authenticated:
             actor = current_user._get_current_object()
+        else:
+            # Nobody to attribute it to, e.g. a command or a task changing an object.
+            return
         new_activity.send(
             cls,
             related_to=related_to,
