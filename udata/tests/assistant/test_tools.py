@@ -429,6 +429,32 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert result.endswith("\nPlus de 50 groupes : seuls les 50 premiers sont pris en compte.")
         more.assert_called_once()
 
+    def test_query_data_reports_the_total_of_truncated_rows(self, mocker):
+        deps, _ = self.active(mocker)
+        rows = [{"dep": str(i)} for i in range(PAGE_SIZE)]
+        mocker.patch.object(
+            deps.tabular, "get_data", return_value={"data": rows, "meta": {"total": 926}}
+        )
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        count = mocker.patch.object(deps.tabular, "row_count")
+        result = self.call("query_data", deps, columns=["dep"])
+        assert result.endswith(
+            "\nRésultat tronqué : 926 lignes au total, 50 premières lignes affichées."
+        )
+        more.assert_not_called()
+        count.assert_not_called()
+
+    def test_query_data_does_not_probe_a_partial_page_of_groups(self, mocker):
+        deps, _ = self.active(mocker)
+        rows = [{"dep": str(i), "n_cum_dose1__max": i} for i in range(15)]
+        mocker.patch.object(deps.tabular, "get_data", return_value={"data": rows})
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        result = self.call(
+            "query_data", deps, groupby="dep", aggregate_column="n_cum_dose1", aggregate="max"
+        )
+        assert "Plus de" not in result
+        more.assert_not_called()
+
     def test_query_data_allows_a_global_aggregate(self, mocker):
         deps, resource = self.active(mocker)
         get_data = mocker.patch.object(
@@ -633,8 +659,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
     def test_create_chart_flags_more_groups(self, mocker):
         deps, resource = self.active(mocker)
-        rows = [{"dep": str(i)} for i in range(50)]
-        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": rows})
+        get_data = mocker.patch.object(deps.tabular, "get_data")
         more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=True)
         result = self.call("create_chart", deps, config=self.chart_config())
         assert result["more_groups"] is True
@@ -643,48 +668,112 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc"
         )
 
+    def profile_with_distinct_x(self, nb_distinct, nb_missing_values=0):
+        """PROFILE whose X column `dep` has these csv-detective statistics."""
+        stats = {"dep": {"nb_distinct": nb_distinct, "nb_missing_values": nb_missing_values}}
+        return {"profile": {**self.PROFILE["profile"], "profile": stats}}
+
+    @pytest.mark.parametrize(
+        "nb_distinct,nb_missing_values,expected",
+        [(926, 0, True), (51, 0, True), (50, 0, False), (50, 2, True), (49, 1, False)],
+    )
+    def test_create_chart_counts_unfiltered_groups_from_the_profile(
+        self, mocker, nb_distinct, nb_missing_values, expected
+    ):
+        # One group per distinct X value, plus one for the missing values.
+        deps, _ = self.active(mocker)
+        deps.tabular.get_profile.return_value = self.profile_with_distinct_x(
+            nb_distinct, nb_missing_values
+        )
+        get_data = mocker.patch.object(deps.tabular, "get_data")
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        count = mocker.patch.object(deps.tabular, "row_count")
+        result = self.call("create_chart", deps, config=self.chart_config())
+        assert result["more_groups"] is expected
+        get_data.assert_not_called()
+        more.assert_not_called()
+        count.assert_not_called()
+
+    def test_create_chart_probes_filtered_groups_despite_the_profile(self, mocker):
+        # The profile counts the whole table, not the filtered rows.
+        deps, resource = self.active(mocker)
+        deps.tabular.get_profile.return_value = self.profile_with_distinct_x(926)
+        more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
+        config = self.chart_config(filters={"column": "dep", "condition": "less", "value": "15"})
+        result = self.call("create_chart", deps, config=config)
+        assert result["more_groups"] is False
+        more.assert_called_once_with(
+            str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc&dep__less=15"
+        )
+
+    def test_create_chart_ignores_a_filter_that_sends_no_condition(self, mocker):
+        deps, _ = self.active(mocker)
+        deps.tabular.get_profile.return_value = self.profile_with_distinct_x(926)
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        config = self.chart_config(filters={"_cls": "AndFilters", "filters": []})
+        result = self.call("create_chart", deps, config=config)
+        assert result["more_groups"] is True
+        more.assert_not_called()
+
+    @pytest.mark.parametrize("total,expected", [(926, True), (51, True), (50, False), (14, False)])
+    def test_create_chart_counts_the_rows_of_a_non_aggregated_series(self, mocker, total, expected):
+        deps, resource = self.active(mocker)
+        count = mocker.patch.object(deps.tabular, "row_count", return_value=total)
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
+        config = self.chart_config(series=[{"column_y": "n_cum_dose1"}])
+        result = self.call("create_chart", deps, config=config)
+        assert result["more_groups"] is expected
+        count.assert_called_once_with(str(resource.id), "columns=dep,n_cum_dose1&dep__sort=asc")
+        more.assert_not_called()
+
+    def test_create_chart_probes_a_non_aggregated_series_without_a_total(self, mocker):
+        deps, resource = self.active(mocker)
+        mocker.patch.object(deps.tabular, "row_count", return_value=None)
+        more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=True)
+        config = self.chart_config(series=[{"column_y": "n_cum_dose1"}])
+        result = self.call("create_chart", deps, config=config)
+        assert result["more_groups"] is True
+        more.assert_called_once_with(str(resource.id), "columns=dep,n_cum_dose1&dep__sort=asc")
+
     def test_create_chart_flags_more_groups_from_a_non_aggregated_series(self, mocker):
         # 15 X values, but the raw series returns its 13 890 rows, truncated by the viewer.
         deps, resource = self.active(mocker)
-
-        def get_data(resource_id, query):
-            aggregated = "__sum" in query
-            total = 15 if aggregated else 13_890
-            return {"data": [{"dep": "x"}] if "page=51&" in query and total > 50 else []}
-
-        get_data = mocker.patch.object(deps.tabular, "get_data", side_effect=get_data)
+        count = mocker.patch.object(deps.tabular, "row_count", return_value=13_890)
+        more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
         series = [{"column_y": "n_cum_dose1"}, {"column_y": "n_cum_dose1", "aggregate_y": "sum"}]
         result = self.call("create_chart", deps, config=self.chart_config(series=series))
         assert result["more_groups"] is True
-        get_data.assert_called_once_with(
-            str(resource.id),
-            "columns=dep,n_cum_dose1&dep__sort=asc&page=51&page_size=1",
-        )
+        count.assert_called_once_with(str(resource.id), "columns=dep,n_cum_dose1&dep__sort=asc")
+        more.assert_not_called()
 
     def test_create_chart_probes_every_series_like_the_viewer(self, mocker):
         deps, resource = self.active(mocker)
+        count = mocker.patch.object(deps.tabular, "row_count", return_value=10)
         more = mocker.patch.object(deps.tabular, "has_more_groups", return_value=False)
         series = [
             {"column_y": "label", "aggregate_y": "count"},
             {"column_y": "n_cum_dose1"},
             {"column_y": "n_cum_dose1", "aggregate_y": "sum"},
+            {"column_y": "n_cum_dose1", "aggregate_y": "sum"},
         ]
         result = self.call("create_chart", deps, config=self.chart_config(series=series))
         assert result["more_groups"] is False
         rid = str(resource.id)
+        count.assert_called_once_with(rid, "columns=dep,n_cum_dose1&dep__sort=asc")
         assert more.call_args_list == [
-            mocker.call(rid, "columns=dep,n_cum_dose1&dep__sort=asc"),
             mocker.call(rid, "dep__groupby&label__count&dep__sort=asc"),
             mocker.call(rid, "dep__groupby&n_cum_dose1__sum&dep__sort=asc"),
         ]
 
     def test_create_chart_stops_probing_once_the_service_fails(self, mocker):
         deps, _ = self.active(mocker)
-        more = mocker.patch.object(deps.tabular, "has_more_groups", side_effect=TabularError("x"))
+        count = mocker.patch.object(deps.tabular, "row_count", side_effect=TabularError("x"))
+        more = mocker.patch.object(deps.tabular, "has_more_groups")
         series = [{"column_y": "n_cum_dose1"}, {"column_y": "label", "aggregate_y": "count"}]
         result = self.call("create_chart", deps, config=self.chart_config(series=series))
         assert result["more_groups"] is False
-        more.assert_called_once()
+        count.assert_called_once()
+        more.assert_not_called()
 
     def test_create_chart_stays_valid_when_the_group_check_fails(self, mocker):
         deps, _ = self.active(mocker)

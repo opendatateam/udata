@@ -9,6 +9,7 @@ are sanitized: internal URLs and upstream details are logged server-side.
 """
 
 import logging
+import re
 import uuid
 
 import requests
@@ -32,10 +33,10 @@ class TabularError(RuntimeError):
 
 
 class TabularRequestRefused(TabularError):
-    """api-tabular refused the request (400), with the part at fault in ``detail``.
+    """api-tabular refused the query, with the part at fault in ``detail``.
 
-    The detail only quotes the query the agent wrote, so it is fed back to
-    the agent to let it fix the query.
+    The detail only quotes the query the agent wrote, or the database error
+    it caused, so it is fed back to the agent to let it fix the query.
     """
 
     def __init__(self, detail: str):
@@ -46,15 +47,37 @@ class TabularRequestRefused(TabularError):
 # Bound on the refusal detail fed back to the agent.
 MAX_DETAIL_LENGTH = 300
 
+FORBIDDEN_AGGREGATION = "agrégation non autorisée sur cette ressource"
+# The resource's table is gone: the resource is not available, not the query wrong.
+MISSING_TABLE_CODES = {"42P01", "PGRST205"}
+# PostgreSQL qualifies a column with the resource's internal table name.
+INTERNAL_TABLE_NAME = re.compile(r'"?\b[0-9a-f]{32}\b"?\.')
+
 
 def _refusal_detail(response: requests.Response) -> str | None:
-    """First ``errors[].detail`` of an api-tabular 400 body, if any."""
+    """What the agent can fix in a refused query, from api-tabular's ``errors[0]``.
+
+    A 400 of api-tabular's own parser carries a text detail; a "Database error"
+    (400 or 404) relays PostgREST's error object, whose ``message`` is kept.
+    A plain-text 404 is api-tabular not knowing the resource: no detail.
+    """
     try:
-        errors = response.json().get("errors")
-        detail = errors[0].get("detail")
+        error = response.json()["errors"][0]
+        title, detail = error.get("title"), error.get("detail")
     except (ValueError, AttributeError, IndexError, KeyError, TypeError):
         return None
-    return detail if isinstance(detail, str) and detail else None
+    status = response.status_code
+    if status == 403:
+        return FORBIDDEN_AGGREGATION if title == "Unauthorized parameters" else None
+    if isinstance(detail, dict) and status in (400, 404):
+        if detail.get("code") in MISSING_TABLE_CODES:
+            return None
+        detail = detail.get("message")
+    elif status != 400:
+        return None
+    if not isinstance(detail, str) or not detail:
+        return None
+    return INTERNAL_TABLE_NAME.sub("", detail)
 
 
 def _validate_resource_id(resource_id: str) -> str:
@@ -89,24 +112,47 @@ class TabularClient:
         return self._request("GET", f"{route}?{query}")
 
     def has_more_groups(self, resource_id: str, query_without_page: str) -> bool:
-        """Whether a 51st page of one group exists, i.e. more than 50 groups."""
-        page = "page=51&page_size=1"
-        query = f"{query_without_page}&{page}" if query_without_page else page
-        payload = self.get_data(resource_id, query)
+        """Whether an aggregated query has a 51st group, i.e. more than 50 groups.
+
+        Aggregated responses have no total: page 51 is probed. PostgREST answers
+        416 when the offset exceeds the filtered rows, so fewer than 51 groups.
+        """
+        payload = self._request(
+            "GET",
+            self._data_route(resource_id, query_without_page, "page=51&page_size=1"),
+            out_of_range={},
+        )
         return bool(payload.get("data")) if isinstance(payload, dict) else False
 
-    def _request(self, method: str, route: str, **kwargs) -> dict:
+    def row_count(self, resource_id: str, query_without_page: str) -> int | None:
+        """Exact row count of a query without aggregate (api-tabular's ``meta.total``)."""
+        payload = self._request(
+            "GET", self._data_route(resource_id, query_without_page, "page=1&page_size=1")
+        )
+        meta = payload.get("meta") if isinstance(payload, dict) else None
+        total = meta.get("total") if isinstance(meta, dict) else None
+        return total if isinstance(total, int) else None
+
+    @staticmethod
+    def _data_route(resource_id: str, query: str, page: str) -> str:
+        route = DATA_ROUTE.format(rid=_validate_resource_id(resource_id))
+        return f"{route}?{query}&{page}" if query else f"{route}?{page}"
+
+    def _request(self, method: str, route: str, out_of_range: dict | None = None) -> dict:
+        """JSON of an api-tabular call; ``out_of_range``, if given, is returned on a 416."""
         if not self.base_url:
             raise TabularError("api-tabular is not configured (TABULAR_API_URL is not set)")
         url = f"{self.base_url}{route}"
         try:
-            response = requests.request(method, url, timeout=self.timeout, **kwargs)
+            response = requests.request(method, url, timeout=self.timeout)
+            if out_of_range is not None and response.status_code == 416:
+                return out_of_range
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as error:
             log.warning("api-tabular request failed: %s %s: %s", method, url, error)
             status = error.response.status_code if error.response is not None else None
-            if status == 400 and (detail := _refusal_detail(error.response)):
+            if error.response is not None and (detail := _refusal_detail(error.response)):
                 raise TabularRequestRefused(detail) from error
             if status == 404:
                 raise TabularError(

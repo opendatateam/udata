@@ -70,10 +70,31 @@ def _encode(value: str) -> str:
     return quote(value, safe="-_.!~*'()")
 
 
+def _encode_value(value: str) -> str:
+    # api-tabular decodes the query string, then PostgREST decodes the value
+    # again: a single-encoded `#` would cut the upstream URL short.
+    return quote(_encode(value), safe="")
+
+
 def _encode_condition_value(value: str) -> str:
-    # The value is percent-decoded twice (query string, then the or()/and()
-    # parser): grammar-significant characters must be double-encoded.
-    return _encode(value).replace(".", "%252E").replace("(", "%2528").replace(")", "%2529")
+    """A value of an or()/and() condition, quoted for PostgREST.
+
+    Only what survives the first decoding intact may stay single-encoded:
+    `,` `(` `)` split the or()/and() conditions, `.` separates PostgREST's
+    operator from the value, `#` and `%` break the upstream URL. `"` and `\\`
+    are backslash-escaped inside the quotes.
+    """
+    encoded = _encode(value).replace("%25", "%2525")
+    encoded = encoded.replace("%5C", "%5C%5C").replace("%22", "%5C%2522")
+    for single, double in (
+        ("%2C", "%252C"),
+        ("(", "%2528"),
+        (")", "%2529"),
+        (".", "%252E"),
+        ("%23", "%2523"),
+    ):
+        encoded = encoded.replace(single, double)
+    return f"%22{encoded}%22"
 
 
 def _null_condition(f: Filter) -> str | None:
@@ -89,7 +110,7 @@ def _param(f: Filter) -> str | None:
         return null
     if not f.value:
         return None
-    return f"{_encode(f.column)}__{_encode(f.condition)}={_encode(f.value)}"
+    return f"{_encode(f.column)}__{_encode(f.condition)}={_encode_value(f.value)}"
 
 
 def _condition(f: Filter) -> str | None:

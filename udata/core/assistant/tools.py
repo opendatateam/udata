@@ -134,19 +134,25 @@ def _render_profile(profile: dict) -> str:
 
 
 def _render_result(result: dict) -> str:
-    """Render the `data` rows of an api-tabular response as a pipe-separated table."""
+    """Render the `data` rows of an api-tabular response as a pipe-separated table.
+
+    A query without aggregate has an exact `meta.total`, which tells whether rows are cut.
+    """
     rows = result.get("data") if isinstance(result, dict) else None
     rows = [row for row in rows or [] if isinstance(row, dict)]
     if not rows:
         return "Requête exécutée avec succès, aucune ligne retournée."
+    meta = result.get("meta")
+    total = meta.get("total") if isinstance(meta, dict) else None
+    if not isinstance(total, int):
+        total = len(rows)
     columns = list(rows[0])
     lines = [" | ".join(columns)]
     for row in rows[:PAGE_SIZE]:
         lines.append(" | ".join(str(row.get(column)) for column in columns))
-    if len(rows) > PAGE_SIZE:
+    if total > min(len(rows), PAGE_SIZE):
         lines.append(
-            f"Résultat tronqué : {len(rows)} lignes au total, "
-            f"{PAGE_SIZE} premières lignes affichées."
+            f"Résultat tronqué : {total} lignes au total, {PAGE_SIZE} premières lignes affichées."
         )
     return "\n".join(lines)
 
@@ -165,8 +171,8 @@ def _tabular_error_message(error: TabularError) -> str:
     return TABULAR_UNAVAILABLE
 
 
-def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]]:
-    """Active resource id and its profile columns, or raise `_ToolRefusal` with the message."""
+def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str], dict]:
+    """Active resource id, its profile columns and profile, or raise `_ToolRefusal`."""
     resource_id = ctx.deps.resource_id
     if not resource_id:
         raise _ToolRefusal(NO_ACTIVE_RESOURCE)
@@ -176,7 +182,7 @@ def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]
         profile = ctx.deps.tabular.get_profile(resource_id)
     except TabularError as error:
         raise _ToolRefusal(_tabular_error_message(error)) from error
-    return resource_id, profile_columns(profile)
+    return resource_id, profile_columns(profile), profile
 
 
 class _ToolRefusal(Exception):
@@ -189,31 +195,61 @@ def _has_more_groups(tabular: TabularClient, resource_id: str, query: str, rows:
     return tabular.has_more_groups(resource_id, query)
 
 
-def _chart_has_more_groups(
-    tabular: TabularClient, resource_id: str, config: CreateChartInput
-) -> bool:
-    """Whether the viewer truncates a series, probing each one with the query it sends.
+def _distinct_groups(profile: dict, column: str) -> int | None:
+    """Groups of the whole table grouped by `column`, from the profile statistics.
 
-    A series without aggregate returns rows, not groups: it is probed first, as the
-    most likely to overflow. The probes stop at the first overflow or service failure.
+    One group per distinct value, plus one for the missing values.
+    """
+    details = profile.get("profile") if isinstance(profile, dict) else None
+    stats = details.get("profile") if isinstance(details, dict) else None
+    column_stats = stats.get(column) if isinstance(stats, dict) else None
+    if not isinstance(column_stats, dict):
+        return None
+    distinct = column_stats.get("nb_distinct")
+    if not isinstance(distinct, int):
+        return None
+    missing = column_stats.get("nb_missing_values")
+    return distinct + (1 if isinstance(missing, int) and missing > 0 else 0)
+
+
+def _chart_has_more_groups(
+    tabular: TabularClient, resource_id: str, config: CreateChartInput, profile: dict
+) -> bool:
+    """Whether the viewer truncates a series to its first PAGE_SIZE rows.
+
+    A series without aggregate returns rows, not groups: it is checked first, as
+    the most likely to overflow, from its exact row count. An aggregated series
+    has no total: without filter the profile counts its groups, otherwise page
+    51 is probed. The checks stop at the first overflow or service failure.
     """
     x = config.x_axis.column_x
-    queries = [
-        build_data_query(
-            # Like the viewer: grouped with an aggregate, the two raw columns without.
-            columns=None if series.aggregate_y else [x, series.column_y],
-            groupby=x if series.aggregate_y else None,
-            aggregate=(series.column_y, series.aggregate_y) if series.aggregate_y else None,
-            filters=config.filters,
-            sort=(x, "asc"),
-        )
-        for series in sorted(config.series, key=lambda series: series.aggregate_y is not None)
-    ]
+    unfiltered = not build_data_query(filters=config.filters)
+    checked = set()
     try:
-        return any(tabular.has_more_groups(resource_id, q) for q in dict.fromkeys(queries))
+        for series in sorted(config.series, key=lambda series: series.aggregate_y is not None):
+            aggregated = series.aggregate_y is not None
+            query = build_data_query(
+                # Like the viewer: grouped with an aggregate, the two raw columns without.
+                columns=None if aggregated else [x, series.column_y],
+                groupby=x if aggregated else None,
+                aggregate=(series.column_y, series.aggregate_y) if aggregated else None,
+                filters=config.filters,
+                sort=(x, "asc"),
+            )
+            if query in checked:
+                continue
+            checked.add(query)
+            if aggregated and unfiltered and (groups := _distinct_groups(profile, x)) is not None:
+                overflow = groups > PAGE_SIZE
+            elif not aggregated and (total := tabular.row_count(resource_id, query)) is not None:
+                overflow = total > PAGE_SIZE
+            else:
+                overflow = tabular.has_more_groups(resource_id, query)
+            if overflow:
+                return True
     except TabularError:
         log.warning("Could not check the group count of a chart", exc_info=True)
-        return False
+    return False
 
 
 def serialize_dataset_metadata(dataset: Dataset) -> str:
@@ -300,7 +336,7 @@ def register_tools(agent: Agent) -> None:
                 "Trie côté graphique avec sort_x_by=axis_y."
             )
         try:
-            resource_id, known = _active_columns(ctx)
+            resource_id, known, _ = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return str(refusal)
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
@@ -350,7 +386,7 @@ def register_tools(agent: Agent) -> None:
         if refusal := _consume_tool_budget(ctx):
             return {"status": "error", "errors": [refusal]}
         try:
-            resource_id, known = _active_columns(ctx)
+            resource_id, known, profile = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return {"status": "error", "errors": [str(refusal)]}
         if errors := validate_create(config, known):
@@ -358,7 +394,7 @@ def register_tools(agent: Agent) -> None:
         return {
             "status": "ok",
             "chart": to_chart_output(config, resource_id),
-            "more_groups": _chart_has_more_groups(ctx.deps.tabular, resource_id, config),
+            "more_groups": _chart_has_more_groups(ctx.deps.tabular, resource_id, config, profile),
         }
 
     @agent.tool

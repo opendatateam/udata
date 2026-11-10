@@ -1,3 +1,4 @@
+import pytest
 from pydantic import TypeAdapter
 
 from udata.core.assistant.data_query import (
@@ -52,7 +53,9 @@ def test_or_group_with_nested_and():
             ),
         ]
     )
-    assert build_data_query(filters=f) == "or=(a__exact.1,and(b__greater.2%252E5,c__isnotnull))"
+    assert build_data_query(filters=f) == (
+        "or=(a__exact.%221%22,and(b__greater.%222%252E5%22,c__isnotnull))"
+    )
 
 
 def test_or_child_of_root_and():
@@ -67,7 +70,9 @@ def test_or_child_of_root_and():
             ),
         ]
     )
-    assert build_data_query(filters=f) == "x__exact=1&or=(a__exact.%25281%2529,b__less.2)"
+    assert build_data_query(filters=f) == (
+        "x__exact=1&or=(a__exact.%22%25281%2529%22,b__less.%222%22)"
+    )
 
 
 def test_empty_values_are_dropped():
@@ -77,8 +82,56 @@ def test_empty_values_are_dropped():
 
 def test_special_characters_are_encoded():
     f = Filter(column="Nom de l'élu", condition="exact", value="a&b")
-    # encodeURIComponent leaves the apostrophe untouched
-    assert build_data_query(filters=f) == "Nom%20de%20l'%C3%A9lu__exact=a%26b"
+    # encodeURIComponent leaves the apostrophe of the column untouched
+    assert build_data_query(filters=f) == "Nom%20de%20l'%C3%A9lu__exact=a%2526b"
+
+
+@pytest.mark.parametrize(
+    "value,encoded",
+    [
+        ("75", "75"),
+        ("2.5", "2.5"),
+        ("2021-01-01", "2021-01-01"),
+        # api-tabular decodes the query string twice: a single-encoded # cuts
+        # the request short and a literal %XX is decoded into another character.
+        ("x#y", "x%2523y"),
+        ("50%", "50%2525"),
+        ("%C3%A9", "%2525C3%2525A9"),
+        ("a+b", "a%252Bb"),
+        (
+            "Côte d'Azur (n°1), a;b.",
+            "C%25C3%25B4te%2520d%27Azur%2520%28n%25C2%25B01%29%252C%2520a%253Bb.",
+        ),
+    ],
+)
+def test_simple_filter_values_are_double_encoded(value, encoded):
+    assert build_data_query(filters=Filter(column="c", condition="exact", value=value)) == (
+        f"c__exact={encoded}"
+    )
+
+
+@pytest.mark.parametrize(
+    "value,encoded",
+    [
+        ("1", "1"),
+        ("2.5", "2%252E5"),
+        ("2021-01-01", "2021-01-01"),
+        ("Île-de-France", "%C3%8Ele-de-France"),
+        # or()/and() split on , ( ) and PostgREST's grammar on . — double-encoded
+        ("a,b", "a%252Cb"),
+        ("(1)", "%25281%2529"),
+        # escaped inside the quoted value
+        ('a"b', "a%5C%2522b"),
+        ("a\\b", "a%5C%5Cb"),
+        # decoded twice, like the simple filters
+        ("x#y", "x%2523y"),
+        ("50%", "50%2525"),
+        ("&#8209;", "%26%25238209%3B"),
+    ],
+)
+def test_group_values_are_quoted_and_escaped(value, encoded):
+    group = OrFilters(filters=[Filter(column="c", condition="exact", value=value)])
+    assert build_data_query(filters=group) == f"or=(c__exact.%22{encoded}%22)"
 
 
 def test_filters_parse_from_the_cls_alias():
@@ -108,7 +161,7 @@ def test_numeric_filter_value_is_coerced_to_a_string():
     )
     assert f.value == "2.5"
     group = OrFilters(filters=[f])
-    assert build_data_query(filters=group) == "or=(b__greater.2%252E5)"
+    assert build_data_query(filters=group) == "or=(b__greater.%222%252E5%22)"
 
 
 def test_filter_without_cls_parses_as_a_filter():
