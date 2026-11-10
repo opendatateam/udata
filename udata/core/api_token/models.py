@@ -29,18 +29,10 @@ def parse_future_datetime(value):
     return dt
 
 
-def _owner_or_admin(name: str):
-    """An `attribute` giving the field `name` only to the token owner or a sysadmin,
-    `None` otherwise."""
-
-    def visible(token):
-        if current_user.is_anonymous:
-            return None
-        if current_user.sysadmin or token.user.id == current_user.id:
-            return getattr(token, name)
-        return None
-
-    return visible
+def _owner_or_admin(token) -> bool:
+    if current_user.is_anonymous:
+        return False
+    return current_user.sysadmin or token.user.id == current_user.id
 
 
 def _hash_token(plaintext):
@@ -69,7 +61,7 @@ class ApiToken(db.Document):
         db.StringField(max_length=255),
         # The reference is public, as an activity actor, while the label is the owner's
         # own wording, e.g. which machine or script the token is for.
-        attribute=_owner_or_admin("name"),
+        visible_if=_owner_or_admin,
         show_as_ref=True,
         description="User-given label for this token, only visible to its owner and sysadmins",
     )

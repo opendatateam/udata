@@ -91,7 +91,7 @@ class HarvestError(EmbeddedDocument):
     details = field(
         StringField(),
         readonly=True,
-        attribute=lambda o: o.details if admin_permission.can() else None,
+        visible_if=lambda _error: admin_permission.can(),
         description="Optional details (only for super-admins)",
     )
 
