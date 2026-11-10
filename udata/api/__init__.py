@@ -137,8 +137,9 @@ class UDataApi(Api):
                 if not login_user(api_token.user, False):
                     self.abort(401, "Inactive user")
                 api_token.update_usage(request.headers.get("User-Agent"))
-            else:
-                check_credentials()
+                g.authenticated_by_header = True
+            elif check_credentials():
+                g.authenticated_by_header = True
             return func(*args, **kwargs)
 
         return wrapper
