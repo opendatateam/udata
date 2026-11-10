@@ -7,7 +7,7 @@ from slugify import slugify
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.api_fields import patch, patch_and_save
-from udata.auth import admin_permission, fresh_session_required, mails
+from udata.auth import admin_permission, fresh_session_required
 from udata.core.api_token.api import apitoken_created_fields
 from udata.core.api_token.models import ApiToken, parse_future_datetime
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
@@ -24,6 +24,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.models import Role, datastore
+from udata.core.user.tasks import notify_api_token_created
 from udata.models import CommunityResource, Dataset, MembershipRequest, Organization, Reuse, User
 from udata.mongo.errors import FieldValidationError
 
@@ -268,7 +269,8 @@ class ApiTokenListAPI(API):
             scopes=data.get("scopes"),
         )
         token._plaintext = plaintext
-        mails.api_token_created(token).send(user)
+        # Queued: should SMTP fail, the plaintext, returned only once, would be lost.
+        notify_api_token_created.delay(str(token.id))
         return token, 201
 
 

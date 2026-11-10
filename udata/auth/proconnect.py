@@ -299,9 +299,9 @@ class ProconnectOnlyAPI(API):
     @api.response(204, "The account signs in with ProConnect only")
     @api.response(400, "The account already signs in with ProConnect only")
     @api.response(403, "This session wasn't opened by the trusted ProConnect identity")
+    @api.response(401, "The session must be reauthenticated")
     def post(self):
         """Drop the password and the udata 2FA: the account signs in with ProConnect only."""
-
         user = current_user._get_current_object()
         if not can_switch_to_proconnect_only(user):
             api.abort(403, "Sign in with ProConnect and its second factor first")

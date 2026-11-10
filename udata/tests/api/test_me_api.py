@@ -720,6 +720,7 @@ class MeAPITest(APITestCase):
     SESSION_COOKIE_SECURE=False,
     SESSION_COOKIE_DOMAIN=None,
     CDATA_BASE_URL="http://cdata.test",
+    SECURITY_FRESHNESS=timedelta(hours=24),
 )
 class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
     def sign_in(self, signed_in_ago: timedelta = timedelta(0)) -> User:
@@ -730,7 +731,6 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         if signed_in_ago:
             with self.client.session_transaction() as session:
                 session["fs_paa"] = time.time() - signed_in_ago.total_seconds()
-                session.pop("fs_gexp", None)
         return user
 
     def test_a_fresh_session_passes_the_freshness_check(self):
@@ -761,6 +761,15 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
         # The mail leads to the revocation, should the key not be the account holder's.
         assert "http://cdata.test/admin/me/profile" in mails[0].body
         assert ApiToken.objects(user=user).count() == 1
+
+    def test_the_mail_names_an_unnamed_token_by_its_prefix(self):
+        self.sign_in()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {})
+
+        self.assert201(response)
+        assert response.json["token_prefix"] in mails[0].body
 
     def test_creating_a_token_requires_a_fresh_session(self):
         user = self.sign_in(signed_in_ago=timedelta(days=2))
