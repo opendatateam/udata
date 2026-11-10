@@ -6,6 +6,7 @@ from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
 from udata.api.factories import OAuth2TokenFactory
+from udata.api.oauth2 import OAuth2Client
 from udata.core.activity.models import Activity
 from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserUpdatedDataset
@@ -523,6 +524,17 @@ class ActivityAPITest(APITestCase):
 
         # Simulate a manual hard-delete of the user, which leaves the token behind.
         User._get_collection().delete_one({"_id": owner.id})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+    def test_activity_api_list_with_an_oauth2_token_whose_client_is_gone(self) -> None:
+        """It should not crash when the application of a token actor has been hard-deleted."""
+        token = OAuth2TokenFactory()
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        OAuth2Client._get_collection().delete_one({"_id": token.client.id})
 
         response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
